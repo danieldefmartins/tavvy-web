@@ -51,7 +51,7 @@ export default function SettingsScreen() {
         <meta name="description" content="TavvY app settings" />
       </Head>
 
-      <AppLayout hideTabBar>
+      <AppLayout hideTabBar requiredAccess="authenticated">
         <div className="settings-screen" style={{ backgroundColor: theme.background }}>
           {/* Header */}
           <header className="settings-header">

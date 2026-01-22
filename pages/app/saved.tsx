@@ -134,7 +134,7 @@ export default function SavedScreen() {
         <meta name="description" content="Your saved places on TavvY" />
       </Head>
 
-      <AppLayout>
+      <AppLayout requiredAccess="authenticated">
         <div className="saved-screen" style={{ backgroundColor: theme.background }}>
           {/* Header */}
           <header className="saved-header">

@@ -105,7 +105,7 @@ export default function AccountScreen() {
         <meta name="description" content="Manage your TavvY account" />
       </Head>
 
-      <AppLayout>
+      <AppLayout requiredAccess="authenticated">
         <div className="account-screen" style={{ backgroundColor: theme.background }}>
           {/* Header */}
           <header className="account-header">

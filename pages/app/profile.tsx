@@ -136,7 +136,7 @@ export default function ProfileScreen() {
         <meta name="description" content="Your TavvY profile" />
       </Head>
 
-      <AppLayout>
+      <AppLayout requiredAccess="authenticated">
         <div className="profile-screen" style={{ backgroundColor: theme.background }}>
           {/* Header */}
           <header className="profile-header">

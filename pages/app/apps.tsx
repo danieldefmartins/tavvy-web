@@ -157,7 +157,7 @@ export default function AppsScreen() {
         <meta name="description" content="TavvY apps and tools" />
       </Head>
 
-      <AppLayout>
+      <AppLayout requiredAccess="authenticated">
         <div className="apps-screen" style={{ backgroundColor: theme.background }}>
           {/* Header */}
           <header className="apps-header">
