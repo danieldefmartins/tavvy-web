@@ -4,6 +4,11 @@ import { fetchUserRoles, UserRole, UserRoleData, checkAccess, AccessLevel } from
 
 /**
  * Hook to get and manage user roles
+ * 
+ * Architecture (aligned with security audit):
+ * - Regular Users: Just authenticated (no role row needed)
+ * - Pro Users: Status from pro_subscriptions table (Stripe webhook sets this)
+ * - Super Admins: Stored in user_roles table (manual assignment only)
  */
 export function useRoles(): UserRoleData {
   const { user, loading: authLoading } = useAuth();

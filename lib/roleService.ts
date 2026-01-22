@@ -1,5 +1,19 @@
 import { supabase } from './supabaseClient';
 
+/**
+ * Role-Based Access Control Service
+ * 
+ * Architecture (aligned with security audit):
+ * - Regular Users: Just authenticated (no role row needed)
+ * - Pro Users: Status from pro_subscriptions table (Stripe webhook sets this)
+ * - Super Admins: Stored in user_roles table (manual assignment only)
+ * 
+ * This ensures:
+ * - No hardcoded admin emails
+ * - Pro status tied to actual Stripe subscription
+ * - Clear separation of concerns
+ */
+
 export type UserRole = 'super_admin' | 'pro' | 'user';
 
 export interface UserRoleData {
@@ -11,40 +25,112 @@ export interface UserRoleData {
 }
 
 /**
- * Fetch the current user's roles from the database
+ * Fetch the current user's super_admin status from user_roles table
+ * Only super_admin roles are stored in user_roles
  */
-export async function fetchUserRoles(): Promise<UserRole[]> {
+export async function fetchSuperAdminStatus(): Promise<boolean> {
   try {
-    const { data, error } = await supabase.rpc('get_my_roles');
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'super_admin')
+      .maybeSingle();
     
     if (error) {
-      console.error('Error fetching user roles:', error);
-      return [];
+      console.error('Error fetching super admin status:', error);
+      return false;
     }
     
-    return (data as UserRole[]) || [];
+    return data !== null;
   } catch (error) {
-    console.error('Error in fetchUserRoles:', error);
-    return [];
+    console.error('Error in fetchSuperAdminStatus:', error);
+    return false;
   }
+}
+
+/**
+ * Fetch the current user's Pro status from pro_subscriptions table
+ * Pro status is determined by having an active subscription
+ * 
+ * Flow: User -> pro_providers (user_id) -> pro_subscriptions (provider_id, status='active')
+ */
+export async function fetchProStatus(): Promise<boolean> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    // First get the provider_id for this user
+    const { data: provider, error: providerError } = await supabase
+      .from('pro_providers')
+      .select('id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    
+    if (providerError || !provider) {
+      // User is not a provider
+      return false;
+    }
+
+    // Check if the provider has an active subscription
+    const { data: subscription, error: subError } = await supabase
+      .from('pro_subscriptions')
+      .select('status')
+      .eq('provider_id', provider.id)
+      .eq('status', 'active')
+      .maybeSingle();
+    
+    if (subError) {
+      console.error('Error fetching pro subscription:', subError);
+      return false;
+    }
+    
+    return subscription !== null;
+  } catch (error) {
+    console.error('Error in fetchProStatus:', error);
+    return false;
+  }
+}
+
+/**
+ * Fetch all user role data (combines super_admin and pro checks)
+ */
+export async function fetchUserRoles(): Promise<UserRole[]> {
+  const roles: UserRole[] = [];
+  
+  const [isSuperAdmin, isPro] = await Promise.all([
+    fetchSuperAdminStatus(),
+    fetchProStatus()
+  ]);
+  
+  if (isSuperAdmin) {
+    roles.push('super_admin');
+  }
+  
+  if (isPro) {
+    roles.push('pro');
+  }
+  
+  return roles;
 }
 
 /**
  * Check if the current user has a specific role
  */
 export async function hasRole(role: UserRole): Promise<boolean> {
-  try {
-    const { data, error } = await supabase.rpc('has_role', { check_role: role });
-    
-    if (error) {
-      console.error('Error checking role:', error);
+  switch (role) {
+    case 'super_admin':
+      return fetchSuperAdminStatus();
+    case 'pro':
+      return fetchProStatus();
+    case 'user':
+      const { data: { user } } = await supabase.auth.getUser();
+      return user !== null;
+    default:
       return false;
-    }
-    
-    return data === true;
-  } catch (error) {
-    console.error('Error in hasRole:', error);
-    return false;
   }
 }
 
@@ -52,14 +138,14 @@ export async function hasRole(role: UserRole): Promise<boolean> {
  * Check if user is a super admin
  */
 export async function isSuperAdmin(): Promise<boolean> {
-  return hasRole('super_admin');
+  return fetchSuperAdminStatus();
 }
 
 /**
- * Check if user is a pro
+ * Check if user is a pro (has active subscription)
  */
 export async function isPro(): Promise<boolean> {
-  return hasRole('pro');
+  return fetchProStatus();
 }
 
 /**
@@ -81,6 +167,7 @@ export function checkAccess(
     case 'authenticated':
       return isAuthenticated;
     case 'pro':
+      // Pro access: either has pro role (active subscription) or is super_admin
       return userRoles.includes('pro') || userRoles.includes('super_admin');
     case 'super_admin':
       return userRoles.includes('super_admin');
@@ -123,15 +210,15 @@ export const routeAccessConfig: Record<string, AccessLevel> = {
   '/app/settings': 'authenticated',
   '/app/apps': 'authenticated',
   
-  // Pro-only routes
+  // Pro-only routes (requires active Stripe subscription)
   '/app/pros/dashboard': 'pro',
   '/app/pros/messages': 'pro',
   '/app/pros/leads': 'pro',
   '/app/pros/settings': 'pro',
   '/app/pros/billing': 'pro',
-  '/app/pros/register': 'authenticated', // Anyone can request to become a pro
+  '/app/pros/register': 'authenticated', // Anyone authenticated can start registration
   
-  // Super Admin routes
+  // Super Admin routes (manual assignment only)
   '/app/admin': 'super_admin',
   '/app/admin/users': 'super_admin',
   '/app/admin/places': 'super_admin',
