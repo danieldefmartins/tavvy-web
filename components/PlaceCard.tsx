@@ -24,13 +24,15 @@ interface PlaceCardProps {
   place: {
     id: string;
     name: string;
-    address_line1: string;
+    address_line1?: string;
+    address?: string;
     city?: string;
     state_region?: string;
-    category: string;
+    category?: string;
     current_status?: string;
     signals?: Signal[];
     photos?: string[];
+    photo_url?: string;
     distance?: number;
     phone?: string;
     website?: string;
@@ -40,6 +42,7 @@ interface PlaceCardProps {
   };
   onPress?: () => void;
   showQuickActions?: boolean;
+  compact?: boolean;
 }
 
 // Determine signal type based on bucket name
@@ -124,17 +127,20 @@ const getSignalEmoji = (type: 'positive' | 'neutral' | 'negative') => {
   }
 };
 
-export default function PlaceCard({ place, onPress, showQuickActions = true }: PlaceCardProps) {
+export default function PlaceCard({ place, onPress, showQuickActions = true, compact = false }: PlaceCardProps) {
   const { theme, isDark } = useThemeContext();
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   
   const fullAddress = place.city && place.state_region
-    ? `${place.category} • ${place.city}`
-    : place.category;
+    ? `${place.category || 'Place'} • ${place.city}`
+    : place.category || 'Place';
   
+  // Handle both photos array and single photo_url
   const displayPhotos = place.photos && place.photos.length > 0 
     ? place.photos.slice(0, 5) 
-    : [null];
+    : place.photo_url 
+      ? [place.photo_url]
+      : [null];
   
   const sortedSignals = place.signals ? sortSignalsForDisplay(place.signals) : [];
   

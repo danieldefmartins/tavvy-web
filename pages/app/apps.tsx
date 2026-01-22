@@ -89,7 +89,7 @@ const APP_TILES = [
     name: 'Happening Now',
     icon: FiZap,
     gradientColors: ['#F472B6', '#EC4899'],
-    href: '/app/happening',
+    href: '/app/happening-now',
   },
   // Row 4+: Quick Finds, Saved, Account
   {

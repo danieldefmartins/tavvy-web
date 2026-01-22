@@ -1,0 +1,389 @@
+/**
+ * Search Screen
+ * Search for places with filters
+ */
+
+import React, { useState, useEffect } from 'react';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
+import { useThemeContext } from '../../contexts/ThemeContext';
+import AppLayout from '../../components/AppLayout';
+import { supabase } from '../../lib/supabaseClient';
+import { spacing, borderRadius } from '../../constants/Colors';
+import PlaceCard from '../../components/PlaceCard';
+import { FiSearch, FiX, FiFilter, FiMapPin } from 'react-icons/fi';
+
+interface Place {
+  id: string;
+  name: string;
+  slug?: string;
+  category?: string;
+  address?: string;
+  city?: string;
+  photo_url?: string;
+  rating?: number;
+}
+
+const POPULAR_SEARCHES = [
+  'Restaurants', 'Coffee', 'Bars', 'Pizza', 'Sushi', 
+  'Mexican', 'Italian', 'Brunch', 'Breakfast', 'Lunch'
+];
+
+export default function SearchScreen() {
+  const router = useRouter();
+  const { q, category } = router.query;
+  const { theme } = useThemeContext();
+
+  const [searchQuery, setSearchQuery] = useState((q as string) || '');
+  const [results, setResults] = useState<Place[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+
+  useEffect(() => {
+    if (q || category) {
+      setSearchQuery((q as string) || (category as string) || '');
+      performSearch((q as string) || (category as string) || '');
+    }
+  }, [q, category]);
+
+  const performSearch = async (query: string) => {
+    if (!query.trim()) return;
+    
+    setLoading(true);
+    setHasSearched(true);
+
+    try {
+      const { data, error } = await supabase
+        .from('places')
+        .select('*')
+        .or(`name.ilike.%${query}%,category.ilike.%${query}%,city.ilike.%${query}%`)
+        .limit(50);
+
+      if (!error) {
+        setResults(data || []);
+      }
+    } catch (error) {
+      console.error('Error searching:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/app/search?q=${encodeURIComponent(searchQuery)}`, undefined, { shallow: true });
+      performSearch(searchQuery);
+    }
+  };
+
+  const handleClear = () => {
+    setSearchQuery('');
+    setResults([]);
+    setHasSearched(false);
+    router.push('/app/search', undefined, { shallow: true });
+  };
+
+  const handlePopularSearch = (term: string) => {
+    setSearchQuery(term);
+    router.push(`/app/search?q=${encodeURIComponent(term)}`, undefined, { shallow: true });
+    performSearch(term);
+  };
+
+  return (
+    <>
+      <Head>
+        <title>{searchQuery ? `${searchQuery} - Search` : 'Search'} | TavvY</title>
+        <meta name="description" content="Search for places on TavvY" />
+      </Head>
+
+      <AppLayout>
+        <div className="search-screen" style={{ backgroundColor: theme.background }}>
+          {/* Search Header */}
+          <header className="search-header">
+            <form onSubmit={handleSearch} className="search-form">
+              <div className="search-input-container" style={{ backgroundColor: theme.surface }}>
+                <FiSearch size={20} color={theme.textSecondary} />
+                <input
+                  type="text"
+                  placeholder="Search places, categories, cities..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{ color: theme.text }}
+                  autoFocus
+                />
+                {searchQuery && (
+                  <button type="button" className="clear-button" onClick={handleClear}>
+                    <FiX size={18} color={theme.textSecondary} />
+                  </button>
+                )}
+              </div>
+              <button type="submit" className="search-button" style={{ backgroundColor: theme.primary }}>
+                Search
+              </button>
+            </form>
+          </header>
+
+          {/* Content */}
+          <div className="search-content">
+            {!hasSearched ? (
+              <>
+                {/* Popular Searches */}
+                <section className="popular-section">
+                  <h2 style={{ color: theme.text }}>Popular Searches</h2>
+                  <div className="popular-tags">
+                    {POPULAR_SEARCHES.map((term) => (
+                      <button
+                        key={term}
+                        className="popular-tag"
+                        onClick={() => handlePopularSearch(term)}
+                        style={{ backgroundColor: theme.surface, color: theme.text }}
+                      >
+                        {term}
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                {/* Browse Categories */}
+                <section className="browse-section">
+                  <h2 style={{ color: theme.text }}>Browse by Category</h2>
+                  <div className="category-list">
+                    {[
+                      { name: 'Restaurants', icon: '🍽️' },
+                      { name: 'Coffee & Tea', icon: '☕' },
+                      { name: 'Bars & Nightlife', icon: '🍺' },
+                      { name: 'Shopping', icon: '🛍️' },
+                      { name: 'Hotels', icon: '🏨' },
+                      { name: 'Attractions', icon: '🎡' },
+                      { name: 'Services', icon: '🔧' },
+                      { name: 'Health & Medical', icon: '🏥' },
+                    ].map((cat) => (
+                      <button
+                        key={cat.name}
+                        className="category-item"
+                        onClick={() => handlePopularSearch(cat.name)}
+                        style={{ backgroundColor: theme.cardBackground }}
+                      >
+                        <span className="category-icon">{cat.icon}</span>
+                        <span style={{ color: theme.text }}>{cat.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+              </>
+            ) : loading ? (
+              <div className="loading-container">
+                <div className="loading-spinner" />
+                <p style={{ color: theme.textSecondary }}>Searching...</p>
+              </div>
+            ) : results.length === 0 ? (
+              <div className="empty-state">
+                <FiSearch size={48} color={theme.textTertiary} />
+                <h3 style={{ color: theme.text }}>No results found</h3>
+                <p style={{ color: theme.textSecondary }}>
+                  Try a different search term or browse categories
+                </p>
+                <button 
+                  className="browse-button"
+                  onClick={handleClear}
+                  style={{ color: theme.primary }}
+                >
+                  Browse Categories
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="results-header">
+                  <p style={{ color: theme.textSecondary }}>
+                    {results.length} result{results.length !== 1 ? 's' : ''} for "{searchQuery}"
+                  </p>
+                </div>
+                <div className="results-list">
+                  {results.map((place) => (
+                    <Link 
+                      key={place.id}
+                      href={`/place/${place.slug || place.id}`}
+                      className="result-item"
+                    >
+                      <PlaceCard place={place} compact />
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        <style jsx>{`
+          .search-screen {
+            min-height: 100vh;
+            padding-bottom: 100px;
+          }
+          
+          .search-header {
+            padding: ${spacing.lg}px;
+            padding-top: max(${spacing.lg}px, env(safe-area-inset-top));
+            position: sticky;
+            top: 0;
+            background: ${theme.background};
+            z-index: 10;
+          }
+          
+          .search-form {
+            display: flex;
+            gap: ${spacing.sm}px;
+          }
+          
+          .search-input-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: ${spacing.sm}px;
+            padding: 12px 16px;
+            border-radius: ${borderRadius.md}px;
+          }
+          
+          .search-input-container input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            outline: none;
+          }
+          
+          .clear-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+          }
+          
+          .search-button {
+            padding: 12px 20px;
+            border-radius: ${borderRadius.md}px;
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+          }
+          
+          .search-content {
+            padding: 0 ${spacing.lg}px;
+          }
+          
+          .popular-section,
+          .browse-section {
+            margin-bottom: ${spacing.xl}px;
+          }
+          
+          .popular-section h2,
+          .browse-section h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 ${spacing.md}px;
+          }
+          
+          .popular-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: ${spacing.sm}px;
+          }
+          
+          .popular-tag {
+            padding: 8px 16px;
+            border-radius: ${borderRadius.full}px;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+          }
+          
+          .category-list {
+            display: flex;
+            flex-direction: column;
+            gap: ${spacing.sm}px;
+          }
+          
+          .category-item {
+            display: flex;
+            align-items: center;
+            gap: ${spacing.md}px;
+            padding: ${spacing.md}px;
+            border-radius: ${borderRadius.md}px;
+            border: none;
+            cursor: pointer;
+            text-align: left;
+          }
+          
+          .category-icon {
+            font-size: 24px;
+          }
+          
+          .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 60px;
+          }
+          
+          .loading-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid ${theme.surface};
+            border-top-color: ${theme.primary};
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: ${spacing.md}px;
+          }
+          
+          @keyframes spin { to { transform: rotate(360deg); } }
+          
+          .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+          }
+          
+          .empty-state h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin: ${spacing.lg}px 0 ${spacing.sm}px;
+          }
+          
+          .empty-state p {
+            font-size: 14px;
+            margin: 0 0 ${spacing.lg}px;
+          }
+          
+          .browse-button {
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+          }
+          
+          .results-header {
+            padding: ${spacing.sm}px 0 ${spacing.md}px;
+          }
+          
+          .results-header p {
+            font-size: 14px;
+            margin: 0;
+          }
+          
+          .results-list {
+            display: flex;
+            flex-direction: column;
+            gap: ${spacing.md}px;
+          }
+          
+          .result-item {
+            text-decoration: none;
+          }
+        `}</style>
+      </AppLayout>
+    </>
+  );
+}
