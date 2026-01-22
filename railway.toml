@@ -1,13 +1,10 @@
 [build]
-# Extend build timeout to 30 minutes (1800 seconds)
-buildCommand = "npm run build"
+# Use Dockerfile for building
+dockerfilePath = "Dockerfile"
 
 [deploy]
-# Use the start command from package.json
-startCommand = "npm run start"
 # Health check configuration
 healthcheckPath = "/"
 healthcheckTimeout = 300
-# Restart policy
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
