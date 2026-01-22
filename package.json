@@ -1,7 +1,7 @@
 {
   "name": "tavvy-web",
   "version": "1.0.0",
-  "description": "TavvY Web App - Signal-based community review platform",
+  "description": "Tavvy Web App - Signal-based community review platform",
   "private": true,
   "scripts": {
     "dev": "next dev",

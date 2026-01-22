@@ -5,9 +5,9 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>TavvY - Signal-Based Community Reviews</title>
-        <meta name="description" content="TavvY is a community-powered, signal-based location review platform. Replace star ratings with structured, tap-based signals." />
-        <meta property="og:title" content="TavvY - Signal-Based Community Reviews" />
+        <title>Tavvy - Signal-Based Community Reviews</title>
+        <meta name="description" content="Tavvy is a community-powered, signal-based location review platform. Replace star ratings with structured, tap-based signals." />
+        <meta property="og:title" content="Tavvy - Signal-Based Community Reviews" />
         <meta property="og:description" content="Discover what places are good for, how they feel, and what to watch out for — using tap-based signals." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://tavvy.com" />
@@ -15,10 +15,10 @@ export default function Home() {
 
       <div className="landing-page">
         <header className="landing-hero">
-          <img src="/logo-white.png" alt="TavvY" className="landing-logo" />
+          <img src="/logo-white.png" alt="Tavvy" className="landing-logo" />
           <h1>Reviews, Reimagined</h1>
           <p>
-            TavvY replaces star ratings and long reviews with structured, tap-based signals. 
+            Tavvy replaces star ratings and long reviews with structured, tap-based signals. 
             Discover what places are good for, how they feel, and what to watch out for.
           </p>
           <div className="landing-cta">
@@ -83,7 +83,7 @@ export default function Home() {
             </div>
             <div className="feature-card">
               <div className="feature-icon">🏢</div>
-              <h3>TavvY Pros</h3>
+              <h3>Tavvy Pros</h3>
               <p>
                 For business owners and service professionals. Connect with customers, 
                 manage your presence, and grow your business.
@@ -94,11 +94,12 @@ export default function Home() {
 
         <footer className="landing-footer">
           <div className="landing-footer-links">
+            <Link href="/about-us">About Us</Link>
             <Link href="/privacy">Privacy Policy</Link>
             <Link href="/terms">Terms of Service</Link>
             <a href="mailto:support@tavvy.com">Contact</a>
           </div>
-          <p>© 2026 TavvY, Inc. All rights reserved.</p>
+          <p>© 2026 Tavvy, Inc. All rights reserved.</p>
         </footer>
       </div>
     </>
