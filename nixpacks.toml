@@ -2,10 +2,11 @@
 nixPkgs = ["nodejs_20"]
 
 [phases.install]
-cmds = ["npm ci --prefer-offline"]
+cmds = ["npm ci"]
 
 [phases.build]
-cmds = ["NODE_OPTIONS='--max-old-space-size=4096' npm run build"]
+# Increase memory and disable telemetry for faster builds
+cmds = ["NEXT_TELEMETRY_DISABLED=1 NODE_OPTIONS='--max-old-space-size=8192' npm run build"]
 
 [start]
 cmd = "npm run start"
