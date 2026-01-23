@@ -392,11 +392,16 @@ export default function MapScreen() {
     }
   };
 
-  // Format distance for display
-  const formatDistance = (distance?: number) => {
-    if (!distance) return '';
-    if (distance < 0.1) return `${Math.round(distance * 5280)} ft`;
-    return `${distance.toFixed(1)} mi`;
+  // Format distance for display (distance is in meters from API)
+  const formatDistance = (distanceMeters?: number) => {
+    if (!distanceMeters) return '';
+    // Convert meters to miles (1 mile = 1609.34 meters)
+    const distanceMiles = distanceMeters / 1609.34;
+    if (distanceMiles < 0.1) {
+      // Show in feet for very close places (1 mile = 5280 feet)
+      return `${Math.round(distanceMiles * 5280)} ft`;
+    }
+    return `${distanceMiles.toFixed(1)} mi`;
   };
 
   const bgColor = isDark ? BG_DARK : BG_LIGHT;
