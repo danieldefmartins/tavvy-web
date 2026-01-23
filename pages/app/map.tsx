@@ -44,10 +44,13 @@ const Circle = dynamic(
   () => import('react-leaflet').then((mod) => mod.Circle),
   { ssr: false }
 );
-const useMap = dynamic(
-  () => import('react-leaflet').then((mod) => mod.useMap),
-  { ssr: false }
-) as any;
+// useMap hook for MapUpdater component
+let useMapHook: any = null;
+if (typeof window !== 'undefined') {
+  import('react-leaflet').then((mod) => {
+    useMapHook = mod.useMap;
+  });
+}
 
 // Theme colors
 const BG_LIGHT = '#F9F7F2';
@@ -86,11 +89,55 @@ const cuisineOptions = [
 // Default location (San Francisco)
 const DEFAULT_LOCATION: [number, number] = [37.7749, -122.4194];
 
-// Map location updater component
-function MapUpdater({ center }: { center: [number, number] }) {
-  // This will be implemented client-side
+// Map location updater component - dynamically updates map center
+function MapUpdater({ center, zoom }: { center: [number, number]; zoom?: number }) {
+  const [mounted, setMounted] = useState(false);
+  const mapRef = useRef<any>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && typeof window !== 'undefined') {
+      // Get the map instance from the parent MapContainer
+      const mapElement = document.querySelector('.leaflet-container');
+      if (mapElement && (mapElement as any)._leaflet_map) {
+        const map = (mapElement as any)._leaflet_map;
+        map.flyTo(center, zoom || map.getZoom(), {
+          animate: true,
+          duration: 1
+        });
+      }
+    }
+  }, [center, zoom, mounted]);
+
   return null;
 }
+
+// Inner component that uses useMap hook - created as a separate file-like component
+const MapCenterUpdater = dynamic(
+  () => import('react-leaflet').then((mod) => {
+    const { useMap } = mod;
+    return {
+      default: function InnerMapUpdater({ center, zoom }: { center: [number, number]; zoom?: number }) {
+        const map = useMap();
+        
+        React.useEffect(() => {
+          if (map && center) {
+            map.flyTo(center, zoom || map.getZoom(), {
+              animate: true,
+              duration: 1
+            });
+          }
+        }, [map, center, zoom]);
+        
+        return null;
+      }
+    };
+  }),
+  { ssr: false }
+);
 
 export default function MapScreen() {
   const router = useRouter();
@@ -242,9 +289,30 @@ export default function MapScreen() {
     }
   };
 
-  // Center on user location
+  // Center on user location - request fresh geolocation
   const centerOnUser = () => {
-    setMapCenter(userLocation);
+    if (typeof navigator !== 'undefined' && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const loc: [number, number] = [position.coords.latitude, position.coords.longitude];
+          setUserLocation(loc);
+          setMapCenter(loc);
+        },
+        (error) => {
+          console.log('Location error:', error);
+          // Fall back to cached location
+          setMapCenter(userLocation);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0 // Force fresh location
+        }
+      );
+    } else {
+      // Fall back to cached location if geolocation not available
+      setMapCenter(userLocation);
+    }
   };
 
   // Handle back navigation
@@ -432,6 +500,8 @@ export default function MapScreen() {
                   weight: 1,
                 }}
               />
+              {/* Map center updater - responds to mapCenter state changes */}
+              <MapCenterUpdater center={mapCenter} zoom={mapZoom} />
             </MapContainer>
           )}
 
