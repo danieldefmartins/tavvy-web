@@ -75,6 +75,7 @@ interface CardData {
   gradientColor1: string;
   gradientColor2: string;
   profilePhotoUrl: string | null;
+  profilePhotoSize: 'small' | 'medium' | 'large' | 'xlarge';
   // Social links
   socialInstagram: string;
   socialFacebook: string;
@@ -653,34 +654,61 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           {/* Profile Section */}
           <div style={styles.profileSection}>
             {/* Profile Photo */}
-            <div style={styles.photoWrapper}>
-              <div style={styles.photoRing}>
-                {cardData.profilePhotoUrl ? (
-                  <img 
-                    src={cardData.profilePhotoUrl} 
-                    alt={cardData.fullName}
-                    style={styles.profilePhoto}
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      const parent = target.parentElement;
-                      if (parent) {
-                        const placeholder = document.createElement('div');
-                        placeholder.style.cssText = 'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 700; color: white; background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%);';
-                        placeholder.textContent = cardData.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-                        parent.appendChild(placeholder);
-                      }
-                    }}
-                  />
-                ) : (
-                  <div style={styles.photoPlaceholder}>
-                    <span style={styles.photoInitials}>
-                      {cardData.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-                    </span>
+            {(() => {
+              // Photo size configurations
+              const photoSizes = {
+                small: { ring: 100, photo: 92, initials: 28, borderRadius: 50 },
+                medium: { ring: 140, photo: 132, initials: 42, borderRadius: 70 },
+                large: { ring: 180, photo: 172, initials: 52, borderRadius: 90 },
+                xlarge: { ring: 220, photo: 212, initials: 62, borderRadius: 110 },
+              };
+              const sizeConfig = photoSizes[cardData.profilePhotoSize] || photoSizes.medium;
+              
+              return (
+                <div style={styles.photoWrapper}>
+                  <div style={{
+                    ...styles.photoRing,
+                    width: `${sizeConfig.ring}px`,
+                    height: `${sizeConfig.ring}px`,
+                    borderRadius: `${sizeConfig.borderRadius}px`,
+                  }}>
+                    {cardData.profilePhotoUrl ? (
+                      <img 
+                        src={cardData.profilePhotoUrl} 
+                        alt={cardData.fullName}
+                        style={{
+                          ...styles.profilePhoto,
+                          borderRadius: `${sizeConfig.borderRadius - 4}px`,
+                        }}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          const parent = target.parentElement;
+                          if (parent) {
+                            const placeholder = document.createElement('div');
+                            placeholder.style.cssText = `width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: ${sizeConfig.initials}px; font-weight: 700; color: white; background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%); border-radius: ${sizeConfig.borderRadius - 4}px;`;
+                            placeholder.textContent = cardData.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                            parent.appendChild(placeholder);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <div style={{
+                        ...styles.photoPlaceholder,
+                        borderRadius: `${sizeConfig.borderRadius - 4}px`,
+                      }}>
+                        <span style={{
+                          ...styles.photoInitials,
+                          fontSize: `${sizeConfig.initials}px`,
+                        }}>
+                          {cardData.fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            </div>
+                </div>
+              );
+            })()}
 
             {/* Name & Info */}
             <h1 style={{...styles.name, color: templateStyles.textColor}}>{cardData.fullName}</h1>
@@ -2261,6 +2289,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       gradientColor1: data.gradient_color_1 || '#1E90FF',
       gradientColor2: data.gradient_color_2 || '#00BFFF',
       profilePhotoUrl: data.profile_photo_url,
+      profilePhotoSize: data.profile_photo_size || 'medium',
       // Social links
       socialInstagram: data.social_instagram || '',
       socialFacebook: data.social_facebook || '',
