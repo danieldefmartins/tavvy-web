@@ -241,7 +241,7 @@ export default function HomeScreen() {
 
   // Switch to map mode
   const switchToMapMode = () => {
-    router.push('/app/search');
+    router.push('/app/map');
   };
 
   const bgColor = isDark ? BG_DARK : BG_LIGHT;
