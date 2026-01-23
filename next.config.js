@@ -29,6 +29,22 @@ const nextConfig = {
     optimizePackageImports: ['react-icons', 'lucide-react', '@supabase/supabase-js'],
   },
   
+  // Redirect old /card/ URLs to new format
+  async redirects() {
+    return [
+      {
+        source: '/card/:slug',
+        destination: '/:slug',
+        permanent: true,
+      },
+      {
+        source: '/c/:slug',
+        destination: '/:slug',
+        permanent: true,
+      },
+    ];
+  },
+  
   // Runtime configuration - these are available at runtime, not just build time
   // This allows Docker builds to work without env vars, and runtime to use actual values
   publicRuntimeConfig: {
