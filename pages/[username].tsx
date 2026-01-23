@@ -61,6 +61,9 @@ interface CardData {
   socialWhatsapp: string;
   // Featured socials (array of platform IDs to show in icon row)
   featuredSocials: string[];
+  // YouTube video block
+  youtubeVideoId: string;
+  youtubeTitle: string;
   links: CardLink[];
   tapCount: number;
 }
@@ -811,6 +814,40 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             </button>
           )}
 
+          {/* YouTube Video Block */}
+          {cardData.youtubeVideoId && (
+            <div style={styles.youtubeBlock}>
+              {cardData.youtubeTitle && (
+                <h3 style={styles.youtubeTitle}>{cardData.youtubeTitle}</h3>
+              )}
+              <a 
+                href={`https://youtube.com/watch?v=${cardData.youtubeVideoId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={styles.youtubeThumbnailContainer}
+              >
+                <img 
+                  src={`https://img.youtube.com/vi/${cardData.youtubeVideoId}/maxresdefault.jpg`}
+                  alt="YouTube Video"
+                  style={styles.youtubeThumbnail}
+                />
+                <div style={styles.youtubePlayOverlay}>
+                  <div style={styles.youtubePlayButton}>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  </div>
+                </div>
+                <div style={styles.youtubeBadge}>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="#FF0000">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/>
+                  </svg>
+                  <span style={styles.youtubeBadgeText}>YouTube</span>
+                </div>
+              </a>
+            </div>
+          )}
+
           {/* Links Section */}
           {hasLinks && showMore && (
             <div style={styles.linksSection}>
@@ -1141,6 +1178,71 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: '600',
     letterSpacing: '0.3px',
   },
+  youtubeBlock: {
+    width: '100%',
+    maxWidth: '360px',
+    marginBottom: '24px',
+  },
+  youtubeTitle: {
+    fontSize: '16px',
+    fontWeight: '600',
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: '12px',
+    margin: '0 0 12px 0',
+  },
+  youtubeThumbnailContainer: {
+    display: 'block',
+    width: '100%',
+    aspectRatio: '16 / 9',
+    borderRadius: '16px',
+    overflow: 'hidden',
+    position: 'relative',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+  },
+  youtubeThumbnail: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+  },
+  youtubePlayOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'rgba(0,0,0,0.25)',
+  },
+  youtubePlayButton: {
+    width: '56px',
+    height: '56px',
+    borderRadius: '28px',
+    background: '#FF0000',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingLeft: '3px',
+    boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+  },
+  youtubeBadge: {
+    position: 'absolute',
+    bottom: '10px',
+    right: '10px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    background: 'rgba(255,255,255,0.95)',
+    padding: '5px 10px',
+    borderRadius: '6px',
+  },
+  youtubeBadgeText: {
+    fontSize: '12px',
+    fontWeight: '600',
+    color: '#333',
+  },
   linksSection: {
     width: '100%',
     maxWidth: '360px',
@@ -1470,6 +1572,9 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       featuredSocials: data.featured_socials ? 
         (typeof data.featured_socials === 'string' ? JSON.parse(data.featured_socials) : data.featured_socials) 
         : [],
+      // YouTube video block
+      youtubeVideoId: data.youtube_video_id || '',
+      youtubeTitle: data.youtube_title || '',
       tapCount: data.tap_count || 0,
       links: linksData?.map(l => ({
         id: l.id,
