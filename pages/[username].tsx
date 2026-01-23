@@ -27,6 +27,32 @@ interface CardLink {
   clicks: number;
 }
 
+interface FormField {
+  id: string;
+  type: 'text' | 'email' | 'phone' | 'textarea' | 'select' | 'checkbox';
+  label: string;
+  placeholder?: string;
+  required: boolean;
+  options?: string[];
+}
+
+interface FormBlockData {
+  formType: 'native' | 'gohighlevel' | 'typeform' | 'jotform' | 'googleforms' | 'calendly' | 'webhook';
+  title: string;
+  description?: string;
+  buttonText: string;
+  fields?: FormField[];
+  successMessage?: string;
+  ghlFormId?: string;
+  ghlLocationId?: string;
+  ghlWebhookUrl?: string;
+  ghlEmbedCode?: string;
+  embedUrl?: string;
+  embedCode?: string;
+  webhookUrl?: string;
+  webhookMethod?: 'POST' | 'GET';
+}
+
 interface CardData {
   id: string;
   slug: string;
@@ -70,6 +96,8 @@ interface CardData {
   // Testimonials block
   testimonials: { id: string; customerName: string; reviewText: string; rating: number; customerPhoto?: string; date?: string; source?: string }[];
   testimonialsTitle: string;
+  // Form block
+  formBlock: FormBlockData | null;
   links: CardLink[];
   tapCount: number;
 }
@@ -157,12 +185,25 @@ const LocationIcon = () => (
   </svg>
 );
 
+// Default form fields
+const DEFAULT_FORM_FIELDS: FormField[] = [
+  { id: '1', type: 'text', label: 'Name', placeholder: 'Your name', required: true },
+  { id: '2', type: 'email', label: 'Email', placeholder: 'your@email.com', required: true },
+  { id: '3', type: 'phone', label: 'Phone', placeholder: '(555) 123-4567', required: false },
+  { id: '4', type: 'textarea', label: 'Message', placeholder: 'How can I help you?', required: false },
+];
+
 export default function PublicCardPage({ cardData: initialCardData, error: initialError }: PageProps) {
   const [cardData, setCardData] = useState<CardData | null>(initialCardData);
   const [error] = useState<string | null>(initialError);
   const [showMore, setShowMore] = useState(false);
   const [hasTapped, setHasTapped] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  // Form state
+  const [formData, setFormData] = useState<Record<string, string>>({});
+  const [isSubmittingForm, setIsSubmittingForm] = useState(false);
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [showFormEmbed, setShowFormEmbed] = useState(false);
 
   const generateVCard = () => {
     if (!cardData) return '';
@@ -281,6 +322,86 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
       }
     } catch (err) {
       console.error('Error tracking click:', err);
+    }
+  };
+
+  // Form submission handler
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!cardData?.formBlock) return;
+
+    const fields = cardData.formBlock.fields || DEFAULT_FORM_FIELDS;
+    
+    // Validate required fields
+    const missingFields = fields
+      .filter(f => f.required && !formData[f.id])
+      .map(f => f.label);
+    
+    if (missingFields.length > 0) {
+      alert(`Please fill in: ${missingFields.join(', ')}`);
+      return;
+    }
+
+    setIsSubmittingForm(true);
+
+    try {
+      // Prepare form data with field labels
+      const submitData: Record<string, any> = {};
+      fields.forEach(field => {
+        submitData[field.label.toLowerCase().replace(/\s+/g, '_')] = formData[field.id] || '';
+      });
+      submitData.source = 'tavvy_card';
+      submitData.cardSlug = cardData.slug;
+      submitData.cardOwnerName = cardData.fullName;
+      submitData.submittedAt = new Date().toISOString();
+
+      // Determine where to send
+      let webhookUrl = cardData.formBlock.webhookUrl;
+      if (cardData.formBlock.formType === 'gohighlevel' && cardData.formBlock.ghlWebhookUrl) {
+        webhookUrl = cardData.formBlock.ghlWebhookUrl;
+      }
+
+      if (webhookUrl) {
+        const method = cardData.formBlock.webhookMethod || 'POST';
+        
+        if (method === 'POST') {
+          await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(submitData),
+            mode: 'no-cors', // Allow cross-origin requests
+          });
+        } else {
+          const params = new URLSearchParams(submitData as any).toString();
+          await fetch(`${webhookUrl}?${params}`, { mode: 'no-cors' });
+        }
+      }
+
+      // Also save to Supabase for tracking
+      try {
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+        const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+        if (supabaseUrl && supabaseKey) {
+          const supabase = createClient(supabaseUrl, supabaseKey);
+          await supabase
+            .from('form_submissions')
+            .insert({
+              card_id: cardData.id,
+              form_data: submitData,
+              submitted_at: new Date().toISOString(),
+            });
+        }
+      } catch (dbErr) {
+        console.error('Error saving form submission:', dbErr);
+      }
+
+      setFormSubmitted(true);
+    } catch (error) {
+      console.error('Form submission error:', error);
+      // Still show success since we used no-cors mode
+      setFormSubmitted(true);
+    } finally {
+      setIsSubmittingForm(false);
     }
   };
 
@@ -944,6 +1065,166 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 </svg>
                 <span>{cardData.testimonials.length} reviews</span>
               </div>
+            </div>
+          )}
+
+          {/* Form Block */}
+          {cardData.formBlock && (
+            <div style={styles.formBlock}>
+              {/* Form Title */}
+              {cardData.formBlock.title && (
+                <h3 style={styles.formTitle}>{cardData.formBlock.title}</h3>
+              )}
+              {cardData.formBlock.description && (
+                <p style={styles.formDescription}>{cardData.formBlock.description}</p>
+              )}
+
+              {/* Show success message if submitted */}
+              {formSubmitted ? (
+                <div style={styles.formSuccess}>
+                  <div style={styles.formSuccessIcon}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                  <h4 style={styles.formSuccessTitle}>Thank You!</h4>
+                  <p style={styles.formSuccessMessage}>
+                    {cardData.formBlock.successMessage || "We'll be in touch soon."}
+                  </p>
+                  <button
+                    style={styles.formResetButton}
+                    onClick={() => {
+                      setFormSubmitted(false);
+                      setFormData({});
+                    }}
+                  >
+                    Submit Another
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {/* External form embed button (Typeform, JotForm, Google Forms, Calendly) */}
+                  {['typeform', 'jotform', 'googleforms', 'calendly'].includes(cardData.formBlock.formType) && cardData.formBlock.embedUrl ? (
+                    <>
+                      {showFormEmbed ? (
+                        <div style={styles.formEmbedContainer}>
+                          <button
+                            style={styles.formEmbedClose}
+                            onClick={() => setShowFormEmbed(false)}
+                          >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                              <line x1="18" y1="6" x2="6" y2="18"/>
+                              <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                          </button>
+                          <iframe
+                            src={cardData.formBlock.embedUrl}
+                            style={styles.formEmbed}
+                            title="Form"
+                            frameBorder="0"
+                          />
+                        </div>
+                      ) : (
+                        <button
+                          style={styles.formExternalButton}
+                          onClick={() => setShowFormEmbed(true)}
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                            {cardData.formBlock.formType === 'calendly' ? (
+                              <><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></>
+                            ) : (
+                              <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></>
+                            )}
+                          </svg>
+                          <span>
+                            {cardData.formBlock.formType === 'calendly' ? 'Book Appointment' : cardData.formBlock.buttonText || 'Open Form'}
+                          </span>
+                        </button>
+                      )}
+                    </>
+                  ) : cardData.formBlock.formType === 'gohighlevel' && cardData.formBlock.ghlEmbedCode && !cardData.formBlock.ghlWebhookUrl ? (
+                    /* GHL Embed Form */
+                    <>
+                      {showFormEmbed ? (
+                        <div style={styles.formEmbedContainer}>
+                          <button
+                            style={styles.formEmbedClose}
+                            onClick={() => setShowFormEmbed(false)}
+                          >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                              <line x1="18" y1="6" x2="6" y2="18"/>
+                              <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                          </button>
+                          <div
+                            style={styles.formEmbed}
+                            dangerouslySetInnerHTML={{ __html: cardData.formBlock.ghlEmbedCode }}
+                          />
+                        </div>
+                      ) : (
+                        <button
+                          style={styles.formExternalButton}
+                          onClick={() => setShowFormEmbed(true)}
+                        >
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                          </svg>
+                          <span>{cardData.formBlock.buttonText || 'Open Form'}</span>
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    /* Native form or webhook form */
+                    <form onSubmit={handleFormSubmit} style={styles.formContainer}>
+                      {(cardData.formBlock.fields || DEFAULT_FORM_FIELDS).map((field) => (
+                        <div key={field.id} style={styles.formFieldContainer}>
+                          <label style={styles.formFieldLabel}>
+                            {field.label}
+                            {field.required && <span style={styles.formRequired}> *</span>}
+                          </label>
+                          {field.type === 'textarea' ? (
+                            <textarea
+                              style={{ ...styles.formInput, ...styles.formTextarea }}
+                              value={formData[field.id] || ''}
+                              onChange={(e) => setFormData({ ...formData, [field.id]: e.target.value })}
+                              placeholder={field.placeholder}
+                              rows={4}
+                            />
+                          ) : (
+                            <input
+                              type={field.type === 'email' ? 'email' : field.type === 'phone' ? 'tel' : 'text'}
+                              style={styles.formInput}
+                              value={formData[field.id] || ''}
+                              onChange={(e) => setFormData({ ...formData, [field.id]: e.target.value })}
+                              placeholder={field.placeholder}
+                            />
+                          )}
+                        </div>
+                      ))}
+                      <button
+                        type="submit"
+                        style={styles.formSubmitButton}
+                        disabled={isSubmittingForm}
+                      >
+                        {isSubmittingForm ? (
+                          <span>Sending...</span>
+                        ) : (
+                          <>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                              <line x1="22" y1="2" x2="11" y2="13"/>
+                              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                            </svg>
+                            <span>{cardData.formBlock.buttonText || 'Send Message'}</span>
+                          </>
+                        )}
+                      </button>
+                    </form>
+                  )}
+                </>
+              )}
             </div>
           )}
 
@@ -1719,6 +2000,167 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: 'rgba(255, 255, 255, 0.6)',
     margin: '0 0 24px 0',
   },
+  // Form Block Styles
+  formBlock: {
+    width: '100%',
+    maxWidth: '360px',
+    marginBottom: '24px',
+    background: 'rgba(255, 255, 255, 0.1)',
+    backdropFilter: 'blur(20px)',
+    borderRadius: '20px',
+    padding: '24px',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
+  },
+  formTitle: {
+    fontSize: '18px',
+    fontWeight: '700',
+    color: 'white',
+    textAlign: 'center',
+    margin: '0 0 8px 0',
+  },
+  formDescription: {
+    fontSize: '14px',
+    color: 'rgba(255, 255, 255, 0.7)',
+    textAlign: 'center',
+    margin: '0 0 20px 0',
+    lineHeight: '1.5',
+  },
+  formContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+  },
+  formFieldContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
+  },
+  formFieldLabel: {
+    fontSize: '14px',
+    fontWeight: '600',
+    color: 'rgba(255, 255, 255, 0.9)',
+  },
+  formRequired: {
+    color: '#ef4444',
+  },
+  formInput: {
+    background: 'rgba(255, 255, 255, 0.1)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    borderRadius: '12px',
+    padding: '14px 16px',
+    fontSize: '15px',
+    color: 'white',
+    outline: 'none',
+    transition: 'all 0.2s ease',
+    width: '100%',
+    boxSizing: 'border-box',
+  },
+  formTextarea: {
+    minHeight: '100px',
+    resize: 'vertical',
+    fontFamily: 'inherit',
+  },
+  formSubmitButton: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '10px',
+    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+    border: 'none',
+    borderRadius: '12px',
+    padding: '16px',
+    fontSize: '16px',
+    fontWeight: '600',
+    color: 'white',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    marginTop: '8px',
+  },
+  formExternalButton: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '10px',
+    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+    border: 'none',
+    borderRadius: '12px',
+    padding: '16px',
+    fontSize: '16px',
+    fontWeight: '600',
+    color: 'white',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    width: '100%',
+  },
+  formEmbedContainer: {
+    position: 'relative',
+    width: '100%',
+    minHeight: '400px',
+    borderRadius: '12px',
+    overflow: 'hidden',
+    background: 'white',
+  },
+  formEmbedClose: {
+    position: 'absolute',
+    top: '10px',
+    right: '10px',
+    zIndex: 10,
+    background: 'rgba(0, 0, 0, 0.5)',
+    border: 'none',
+    borderRadius: '50%',
+    width: '36px',
+    height: '36px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+  },
+  formEmbed: {
+    width: '100%',
+    minHeight: '400px',
+    border: 'none',
+  },
+  formSuccess: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    padding: '20px',
+  },
+  formSuccessIcon: {
+    width: '64px',
+    height: '64px',
+    borderRadius: '32px',
+    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: '16px',
+  },
+  formSuccessTitle: {
+    fontSize: '20px',
+    fontWeight: '700',
+    color: 'white',
+    margin: '0 0 8px 0',
+  },
+  formSuccessMessage: {
+    fontSize: '14px',
+    color: 'rgba(255, 255, 255, 0.7)',
+    textAlign: 'center',
+    margin: '0',
+    lineHeight: '1.5',
+  },
+  formResetButton: {
+    marginTop: '20px',
+    background: 'rgba(255, 255, 255, 0.1)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    borderRadius: '10px',
+    padding: '12px 24px',
+    fontSize: '14px',
+    fontWeight: '600',
+    color: 'white',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+  },
 };
 
 // Server-side data fetching
@@ -1846,6 +2288,10 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
         (typeof data.testimonials === 'string' ? JSON.parse(data.testimonials) : data.testimonials) 
         : [],
       testimonialsTitle: data.testimonials_title || '',
+      // Form block
+      formBlock: data.form_block ? 
+        (typeof data.form_block === 'string' ? JSON.parse(data.form_block) : data.form_block) 
+        : null,
       tapCount: data.tap_count || 0,
       links: linksData?.map(l => ({
         id: l.id,
