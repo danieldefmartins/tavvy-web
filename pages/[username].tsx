@@ -67,6 +67,9 @@ interface CardData {
   // Gallery block
   galleryImages: { id: string; uri: string; caption?: string }[];
   galleryTitle: string;
+  // Testimonials block
+  testimonials: { id: string; customerName: string; reviewText: string; rating: number; customerPhoto?: string; date?: string; source?: string }[];
+  testimonialsTitle: string;
   links: CardLink[];
   tapCount: number;
 }
@@ -884,6 +887,66 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             </div>
           )}
 
+          {/* Testimonials Block */}
+          {cardData.testimonials && cardData.testimonials.length > 0 && (
+            <div style={styles.testimonialsBlock}>
+              {cardData.testimonialsTitle && (
+                <h3 style={styles.testimonialsTitle}>{cardData.testimonialsTitle}</h3>
+              )}
+              <div style={styles.testimonialsQuoteIcon}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)">
+                  <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
+                </svg>
+              </div>
+              <div style={styles.testimonialsCarousel}>
+                {cardData.testimonials.map((testimonial, index) => (
+                  <div key={testimonial.id || index} style={styles.testimonialCard}>
+                    <div style={styles.testimonialHeader}>
+                      {testimonial.customerPhoto ? (
+                        <img 
+                          src={testimonial.customerPhoto} 
+                          alt={testimonial.customerName}
+                          style={styles.testimonialPhoto}
+                        />
+                      ) : (
+                        <div style={styles.testimonialPhotoPlaceholder}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                          </svg>
+                        </div>
+                      )}
+                      <div style={styles.testimonialInfo}>
+                        <span style={styles.testimonialName}>{testimonial.customerName}</span>
+                        <div style={styles.testimonialStars}>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <svg key={star} width="14" height="14" viewBox="0 0 24 24" fill={star <= testimonial.rating ? '#FFD700' : 'rgba(255,255,255,0.3)'}>
+                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                          ))}
+                        </div>
+                      </div>
+                      {testimonial.source && (
+                        <div style={styles.testimonialSourceBadge}>
+                          <span style={styles.testimonialSourceText}>{testimonial.source}</span>
+                        </div>
+                      )}
+                    </div>
+                    <p style={styles.testimonialText}>"{testimonial.reviewText}"</p>
+                    {testimonial.date && (
+                      <span style={styles.testimonialDate}>{testimonial.date}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div style={styles.testimonialsCountBadge}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span>{cardData.testimonials.length} reviews</span>
+              </div>
+            </div>
+          )}
+
           {/* Links Section */}
           {hasLinks && showMore && (
             <div style={styles.linksSection}>
@@ -1340,6 +1403,107 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '13px',
     fontWeight: '600',
   },
+  // Testimonials Block Styles
+  testimonialsBlock: {
+    width: '100%',
+    maxWidth: '360px',
+    marginBottom: '24px',
+  },
+  testimonialsTitle: {
+    fontSize: '16px',
+    fontWeight: '600',
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: '12px',
+    margin: '0 0 12px 0',
+  },
+  testimonialsQuoteIcon: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '12px',
+  },
+  testimonialsCarousel: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+  },
+  testimonialCard: {
+    background: 'rgba(255, 255, 255, 0.12)',
+    borderRadius: '16px',
+    padding: '16px',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
+  },
+  testimonialHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: '12px',
+    gap: '12px',
+  },
+  testimonialPhoto: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '24px',
+    objectFit: 'cover',
+    border: '2px solid rgba(255,255,255,0.3)',
+  },
+  testimonialPhotoPlaceholder: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '24px',
+    background: 'rgba(255,255,255,0.15)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    border: '2px solid rgba(255,255,255,0.2)',
+  },
+  testimonialInfo: {
+    flex: 1,
+  },
+  testimonialName: {
+    display: 'block',
+    fontSize: '15px',
+    fontWeight: '600',
+    color: 'white',
+    marginBottom: '4px',
+  },
+  testimonialStars: {
+    display: 'flex',
+    gap: '2px',
+  },
+  testimonialSourceBadge: {
+    background: 'rgba(255,255,255,0.2)',
+    padding: '4px 10px',
+    borderRadius: '12px',
+  },
+  testimonialSourceText: {
+    fontSize: '11px',
+    fontWeight: '600',
+    color: 'white',
+  },
+  testimonialText: {
+    fontSize: '14px',
+    color: 'rgba(255,255,255,0.9)',
+    lineHeight: '1.5',
+    fontStyle: 'italic',
+    margin: '0 0 8px 0',
+  },
+  testimonialDate: {
+    fontSize: '12px',
+    color: 'rgba(255,255,255,0.5)',
+  },
+  testimonialsCountBadge: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '6px',
+    padding: '8px 16px',
+    background: 'rgba(255,255,255,0.15)',
+    borderRadius: '20px',
+    marginTop: '12px',
+    color: 'white',
+    fontSize: '13px',
+    fontWeight: '600',
+  },
   linksSection: {
     width: '100%',
     maxWidth: '360px',
@@ -1677,6 +1841,11 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
         (typeof data.gallery_images === 'string' ? JSON.parse(data.gallery_images) : data.gallery_images) 
         : [],
       galleryTitle: data.gallery_title || '',
+      // Testimonials block
+      testimonials: data.testimonials ? 
+        (typeof data.testimonials === 'string' ? JSON.parse(data.testimonials) : data.testimonials) 
+        : [],
+      testimonialsTitle: data.testimonials_title || '',
       tapCount: data.tap_count || 0,
       links: linksData?.map(l => ({
         id: l.id,
