@@ -3,10 +3,11 @@
  * Pixel-perfect port from tavvy-mobile/screens/AppsScreen.tsx
  * 
  * Features:
- * - Large gradient tiles with white icons
- * - Correct app order: Pros, Realtors, Cities, Atlas, RV & Camping, Universes, Rides, Experiences, Happening Now, then others
- * - Dark/Light mode toggle
- * - User profile section
+ * - Navy header with Tavvy logo
+ * - Light/Dark mode toggle
+ * - Personal Login / Pro Login buttons
+ * - App icon grid with colored backgrounds
+ * - "More tools coming soon" footer
  */
 
 import React, { useState } from 'react';
@@ -20,108 +21,128 @@ import { spacing, borderRadius } from '../../constants/Colors';
 import { 
   FiTool, FiHome, FiMap, FiBook, FiSun, FiMoon, 
   FiGlobe, FiTruck, FiStar, FiZap, FiHeart, FiUser, 
-  FiPlus, FiSettings, FiLogOut, FiLogIn, FiHelpCircle
+  FiPlus, FiSettings, FiLogOut, FiLogIn, FiHelpCircle,
+  FiBriefcase, FiMenu
 } from 'react-icons/fi';
+import { 
+  IoConstruct, IoHome, IoBusinessOutline, IoBook, IoCar,
+  IoPlanet, IoTrain, IoLeaf, IoSparkles, IoWallet, IoFlash,
+  IoHeart, IoPersonOutline, IoAddCircle
+} from 'react-icons/io5';
 
-// App tiles configuration matching mobile app
+// Theme colors
+const ACCENT = '#0F1233';
+const BG_LIGHT = '#F9F7F2';
+const BG_DARK = '#0F172A';
+
+// App tiles configuration matching mobile app exactly
 const APP_TILES = [
   // Row 1: Pros, Realtors, Cities
   {
     id: 'pros',
     name: 'Pros',
-    icon: FiTool,
-    gradientColors: ['#3B82F6', '#1D4ED8'],
+    icon: IoConstruct,
+    color: '#3B82F6',
     href: '/app/pros',
   },
   {
     id: 'realtors',
     name: 'Realtors',
-    icon: FiHome,
-    gradientColors: ['#14B8A6', '#0D9488'],
+    icon: IoHome,
+    color: '#10B981',
     href: '/app/realtors',
   },
   {
     id: 'cities',
     name: 'Cities',
-    icon: FiMap,
-    gradientColors: ['#60A5FA', '#3B82F6'],
+    icon: IoBusinessOutline,
+    color: '#60A5FA',
     href: '/app/cities',
   },
   // Row 2: Atlas, RV & Camping, Universes
   {
     id: 'atlas',
     name: 'Atlas',
-    icon: FiBook,
-    gradientColors: ['#818CF8', '#6366F1'],
+    icon: IoBook,
+    color: '#818CF8',
     href: '/app/atlas',
   },
   {
     id: 'rv-camping',
     name: 'RV & Camping',
-    icon: FiTruck,
-    gradientColors: ['#FB923C', '#EA580C'],
+    icon: IoCar,
+    color: '#F97316',
     href: '/app/rv-camping',
   },
   {
     id: 'universes',
     name: 'Universes',
-    icon: FiGlobe,
-    gradientColors: ['#2DD4BF', '#14B8A6'],
+    icon: IoPlanet,
+    color: '#14B8A6',
     href: '/app/explore',
   },
   // Row 3: Rides, Experiences, Happening Now
   {
     id: 'rides',
     name: 'Rides',
-    icon: FiTruck,
-    gradientColors: ['#F87171', '#EF4444'],
+    icon: IoTrain,
+    color: '#EF4444',
     href: '/app/rides',
   },
   {
     id: 'experiences',
     name: 'Experiences',
-    icon: FiStar,
-    gradientColors: ['#A78BFA', '#8B5CF6'],
+    icon: IoLeaf,
+    color: '#A78BFA',
     href: '/app/experiences',
   },
   {
     id: 'happening',
     name: 'Happening Now',
-    icon: FiZap,
-    gradientColors: ['#F472B6', '#EC4899'],
+    icon: IoSparkles,
+    color: '#EC4899',
     href: '/app/happening-now',
   },
-  // Row 4+: Quick Finds, Saved, Account
+  // Row 4: Wallet, Quick Finds, Saved
+  {
+    id: 'wallet',
+    name: 'Wallet',
+    icon: IoWallet,
+    color: '#818CF8',
+    href: '/app/wallet',
+  },
   {
     id: 'quick-finds',
     name: 'Quick Finds',
-    icon: FiZap,
-    gradientColors: ['#FBBF24', '#F59E0B'],
+    icon: IoFlash,
+    color: '#FBBF24',
     href: '/app/quick-finds',
   },
   {
     id: 'saved',
     name: 'Saved',
-    icon: FiHeart,
-    gradientColors: ['#FB7185', '#F43F5E'],
+    icon: IoHeart,
+    color: '#FB7185',
     href: '/app/saved',
     requiresAuth: true,
   },
+  // Row 5: Account, (empty), Create
   {
     id: 'account',
     name: 'Account',
-    icon: FiUser,
-    gradientColors: ['#94A3B8', '#64748B'],
+    icon: IoPersonOutline,
+    color: '#94A3B8',
     href: '/app/profile',
     requiresAuth: true,
   },
-];
-
-const settingsItems = [
-  { id: 'settings', title: 'Settings', icon: FiSettings, href: '/app/settings' },
-  { id: 'help', title: 'Help & Support', icon: FiHelpCircle, href: '/app/help' },
-  { id: 'privacy', title: 'Privacy Policy', icon: FiBook, href: '/privacy' },
-  { id: 'terms', title: 'Terms of Service', icon: FiBook, href: '/terms' },
+  {
+    id: 'create',
+    name: 'Create',
+    icon: IoAddCircle,
+    color: '#10B981',
+    href: '/app/create',
+    requiresAuth: true,
+  },
 ];
 
 export default function AppsScreen() {
@@ -150,6 +171,8 @@ export default function AppsScreen() {
     }
   };
 
+  const bgColor = isDark ? BG_DARK : BG_LIGHT;
+
   return (
     <>
       <Head>
@@ -157,73 +180,78 @@ export default function AppsScreen() {
         <meta name="description" content="TavvY apps and tools" />
       </Head>
 
-      <AppLayout requiredAccess="authenticated">
-        <div className="apps-screen" style={{ backgroundColor: theme.background }}>
-          {/* Header */}
-          <header className="apps-header">
-            <h1 style={{ color: theme.text }}>Apps</h1>
-            
-            {/* Theme Toggle */}
-            <button 
-              className="theme-toggle"
-              onClick={() => setThemeMode(isDark ? 'light' : 'dark')}
-              style={{ backgroundColor: theme.surface }}
-            >
-              {isDark ? (
-                <FiSun size={20} color={theme.text} />
-              ) : (
-                <FiMoon size={20} color={theme.text} />
-              )}
-            </button>
+      <AppLayout>
+        <div className="apps-screen">
+          {/* Navy Header */}
+          <header className="nav-header">
+            <div className="nav-content">
+              <img 
+                src="/brand/tavvy-logo-white.png" 
+                alt="Tavvy" 
+                className="nav-logo"
+              />
+              <button className="menu-btn">
+                <FiMenu size={24} color="#fff" />
+              </button>
+            </div>
           </header>
 
-          {/* User Section */}
-          <section className="user-section">
-            {user ? (
-              <div className="user-card" style={{ backgroundColor: theme.cardBackground }}>
-                <div className="user-avatar" style={{ backgroundColor: theme.primary }}>
-                  {user.email?.charAt(0).toUpperCase()}
-                </div>
-                <div className="user-info">
-                  <p className="user-name" style={{ color: theme.text }}>
-                    {user.user_metadata?.display_name || user.email?.split('@')[0]}
-                  </p>
-                  <p className="user-email" style={{ color: theme.textSecondary }}>
-                    {user.email}
-                  </p>
-                </div>
-                <button 
-                  className="sign-out-btn"
-                  onClick={handleSignOut}
-                  disabled={loggingOut}
+          {/* Main Content */}
+          <main className="main-content">
+            {/* Theme Toggle */}
+            <div className="theme-toggle-wrap">
+              <div className="theme-toggle">
+                <button
+                  className={`theme-btn ${!isDark ? 'active' : ''}`}
+                  onClick={() => setThemeMode('light')}
                 >
-                  <FiLogOut size={20} color={theme.error} />
+                  Light
+                </button>
+                <button
+                  className={`theme-btn ${isDark ? 'active' : ''}`}
+                  onClick={() => setThemeMode('dark')}
+                >
+                  Dark
                 </button>
               </div>
-            ) : (
-              <div className="auth-buttons">
-                <Link 
-                  href="/app/login"
-                  className="auth-btn primary"
-                  style={{ backgroundColor: theme.primary }}
-                >
-                  <FiLogIn size={20} />
-                  <span>Sign In</span>
-                </Link>
-                <Link 
-                  href="/app/signup"
-                  className="auth-btn secondary"
-                  style={{ backgroundColor: theme.surface, color: theme.text }}
-                >
-                  <FiUser size={20} />
-                  <span>Create Account</span>
-                </Link>
-              </div>
-            )}
-          </section>
+            </div>
 
-          {/* App Tiles Grid */}
-          <section className="tiles-section">
+            {/* Apps Title */}
+            <div className="apps-header">
+              <h1>Apps</h1>
+              <p>Tools & shortcuts</p>
+            </div>
+
+            {/* Login Buttons */}
+            <div className="login-buttons">
+              {user ? (
+                <div className="user-info-row">
+                  <div className="user-avatar">
+                    {user.email?.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="user-details">
+                    <span className="user-name">{user.user_metadata?.display_name || user.email?.split('@')[0]}</span>
+                    <span className="user-email">{user.email}</span>
+                  </div>
+                  <button className="logout-btn" onClick={handleSignOut}>
+                    <FiLogOut size={20} />
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <Link href="/app/login" className="login-btn personal">
+                    <FiUser size={18} />
+                    <span>Personal Login</span>
+                  </Link>
+                  <Link href="/app/pros/login" className="login-btn pro">
+                    <FiBriefcase size={18} />
+                    <span>Pro Login</span>
+                  </Link>
+                </>
+              )}
+            </div>
+
+            {/* App Tiles Grid */}
             <div className="tiles-grid">
               {APP_TILES.map((tile) => {
                 const Icon = tile.icon;
@@ -232,297 +260,261 @@ export default function AppsScreen() {
                     key={tile.id}
                     className="app-tile"
                     onClick={() => handleTilePress(tile)}
-                    style={{
-                      background: `linear-gradient(135deg, ${tile.gradientColors[0]}, ${tile.gradientColors[1]})`,
-                    }}
                   >
-                    <Icon size={32} color="white" />
+                    <div 
+                      className="tile-icon"
+                      style={{ backgroundColor: tile.color }}
+                    >
+                      <Icon size={28} color="#fff" />
+                    </div>
                     <span className="tile-name">{tile.name}</span>
                   </button>
                 );
               })}
             </div>
-          </section>
 
-          {/* Theme Options */}
-          <section className="theme-section">
-            <h3 className="section-title" style={{ color: theme.textSecondary }}>
-              Appearance
-            </h3>
-            <div className="theme-options" style={{ backgroundColor: theme.cardBackground }}>
-              {(['light', 'dark', 'system'] as const).map((mode) => (
-                <button
-                  key={mode}
-                  className={`theme-option ${themeMode === mode ? 'active' : ''}`}
-                  onClick={() => setThemeMode(mode)}
-                  style={{
-                    backgroundColor: themeMode === mode ? theme.primary : 'transparent',
-                    color: themeMode === mode ? '#FFFFFF' : theme.text,
-                  }}
-                >
-                  {mode === 'light' && <FiSun size={16} />}
-                  {mode === 'dark' && <FiMoon size={16} />}
-                  {mode === 'system' && '📱'}
-                  <span>{mode.charAt(0).toUpperCase() + mode.slice(1)}</span>
-                </button>
-              ))}
-            </div>
-          </section>
+            {/* Coming Soon */}
+            <p className="coming-soon">More tools coming soon</p>
+          </main>
 
-          {/* Settings Section */}
-          <section className="settings-section">
-            <h3 className="section-title" style={{ color: theme.textSecondary }}>
-              Settings
-            </h3>
-            <div className="settings-list" style={{ backgroundColor: theme.cardBackground }}>
-              {settingsItems.map((item, index) => {
-                const Icon = item.icon;
-                return (
-                  <Link 
-                    key={item.id}
-                    href={item.href} 
-                    className="settings-item"
-                    style={{ 
-                      borderBottomColor: index < settingsItems.length - 1 ? theme.border : 'transparent',
-                    }}
-                  >
-                    <Icon size={20} color={theme.text} />
-                    <span style={{ color: theme.text }}>{item.title}</span>
-                    <span className="arrow" style={{ color: theme.textTertiary }}>›</span>
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* Version Info */}
-          <footer className="version-info">
-            <p style={{ color: theme.textSecondary }}>TavvY Web App v1.0.0</p>
-          </footer>
+          {/* Bottom Spacing */}
+          <div className="bottom-spacing" />
         </div>
 
         <style jsx>{`
           .apps-screen {
             min-height: 100vh;
-            padding: ${spacing.lg}px;
-            padding-top: max(${spacing.lg}px, env(safe-area-inset-top));
-            padding-bottom: 100px;
+            background-color: ${bgColor};
           }
-          
-          .apps-header {
+
+          /* Navy Header */
+          .nav-header {
+            background-color: ${ACCENT};
+            padding: 16px 20px;
+            padding-top: max(16px, env(safe-area-inset-top));
+          }
+
+          .nav-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: ${spacing.xl}px;
           }
-          
+
+          .nav-logo {
+            height: 32px;
+            width: auto;
+          }
+
+          .menu-btn {
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+          }
+
+          /* Main Content */
+          .main-content {
+            padding: 0 20px;
+          }
+
+          /* Theme Toggle */
+          .theme-toggle-wrap {
+            display: flex;
+            justify-content: center;
+            padding: 16px 0;
+          }
+
+          .theme-toggle {
+            display: flex;
+            background: ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.65)'};
+            border: 1px solid ${isDark ? 'rgba(255,255,255,0.14)' : 'rgba(15,18,51,0.12)'};
+            border-radius: 12px;
+            padding: 4px;
+          }
+
+          .theme-btn {
+            padding: 10px 24px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: ${isDark ? 'rgba(255,255,255,0.6)' : '#6B6B6B'};
+            cursor: pointer;
+            transition: all 0.2s;
+          }
+
+          .theme-btn.active {
+            background: ${ACCENT};
+            color: #fff;
+          }
+
+          /* Apps Header */
+          .apps-header {
+            margin-bottom: 20px;
+          }
+
           .apps-header h1 {
             font-size: 28px;
             font-weight: 700;
+            color: ${isDark ? '#fff' : '#111'};
+            margin: 0 0 4px;
+          }
+
+          .apps-header p {
+            font-size: 14px;
+            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#666'};
             margin: 0;
           }
-          
-          .theme-toggle {
+
+          /* Login Buttons */
+          .login-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+          }
+
+          .login-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+          }
+
+          .login-btn.personal {
+            background: transparent;
+            border: 2px solid ${isDark ? 'rgba(16, 185, 129, 0.5)' : '#10B981'};
+            color: #10B981;
+          }
+
+          .login-btn.pro {
+            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#fff'};
+            border: 1px solid ${isDark ? 'rgba(255,255,255,0.14)' : '#ddd'};
+            color: ${isDark ? 'rgba(255,255,255,0.7)' : '#666'};
+          }
+
+          .login-btn:hover {
+            transform: scale(1.02);
+          }
+
+          /* User Info Row */
+          .user-info-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 12px 16px;
+            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#fff'};
+            border-radius: 12px;
+          }
+
+          .user-avatar {
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            border: none;
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            transition: transform 0.2s;
-          }
-          
-          .theme-toggle:hover {
-            transform: scale(1.05);
-          }
-          
-          .user-section {
-            margin-bottom: ${spacing.xl}px;
-          }
-          
-          .user-card {
-            display: flex;
-            align-items: center;
-            padding: ${spacing.lg}px;
-            border-radius: ${borderRadius.lg}px;
-            gap: ${spacing.md}px;
-          }
-          
-          .user-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
+            color: #fff;
+            font-size: 18px;
             font-weight: 600;
           }
-          
-          .user-info {
+
+          .user-details {
             flex: 1;
+            display: flex;
+            flex-direction: column;
           }
-          
+
           .user-name {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
-            margin: 0;
+            color: ${isDark ? '#fff' : '#111'};
           }
-          
+
           .user-email {
-            font-size: 14px;
-            margin: 4px 0 0;
+            font-size: 13px;
+            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#666'};
           }
-          
-          .sign-out-btn {
+
+          .logout-btn {
             background: none;
             border: none;
-            padding: ${spacing.sm}px;
+            padding: 8px;
             cursor: pointer;
+            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#999'};
           }
-          
-          .auth-buttons {
-            display: flex;
-            gap: ${spacing.md}px;
-          }
-          
-          .auth-btn {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: ${spacing.sm}px;
-            padding: ${spacing.lg}px;
-            border-radius: ${borderRadius.lg}px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: transform 0.2s;
-          }
-          
-          .auth-btn:hover {
-            transform: scale(1.02);
-          }
-          
-          .auth-btn.primary {
-            color: white;
-          }
-          
-          .tiles-section {
-            margin-bottom: ${spacing.xl}px;
-          }
-          
+
+          /* Tiles Grid */
           .tiles-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: ${spacing.md}px;
+            gap: 16px;
+            margin-bottom: 24px;
           }
-          
+
           .app-tile {
-            aspect-ratio: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            gap: ${spacing.sm}px;
-            border-radius: ${borderRadius.lg}px;
+            gap: 10px;
+            background: none;
             border: none;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            padding: 8px;
           }
-          
-          .app-tile:hover {
-            transform: scale(1.03);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+
+          .tile-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
           }
-          
+
+          .app-tile:hover .tile-icon {
+            transform: scale(1.05);
+          }
+
           .tile-name {
-            color: white;
             font-size: 12px;
-            font-weight: 600;
-            text-align: center;
-          }
-          
-          .theme-section,
-          .settings-section {
-            margin-bottom: ${spacing.xl}px;
-          }
-          
-          .section-title {
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin: 0 0 ${spacing.sm}px;
-          }
-          
-          .theme-options {
-            display: flex;
-            border-radius: ${borderRadius.lg}px;
-            overflow: hidden;
-          }
-          
-          .theme-option {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 12px;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
             font-weight: 500;
-            transition: all 0.2s;
-          }
-          
-          .settings-list {
-            border-radius: ${borderRadius.lg}px;
-            overflow: hidden;
-          }
-          
-          .settings-item {
-            display: flex;
-            align-items: center;
-            gap: ${spacing.md}px;
-            padding: ${spacing.lg}px;
-            text-decoration: none;
-            border-bottom-width: 1px;
-            border-bottom-style: solid;
-            transition: background-color 0.2s;
-          }
-          
-          .settings-item:hover {
-            background-color: ${theme.primaryLight};
-          }
-          
-          .settings-item span {
-            flex: 1;
-          }
-          
-          .arrow {
-            font-size: 20px;
-          }
-          
-          .version-info {
+            color: ${isDark ? 'rgba(255,255,255,0.7)' : '#666'};
             text-align: center;
-            padding: ${spacing.xl}px;
           }
-          
-          .version-info p {
-            font-size: 12px;
-            margin: 0;
+
+          /* Coming Soon */
+          .coming-soon {
+            text-align: center;
+            font-size: 14px;
+            color: ${isDark ? 'rgba(255,255,255,0.3)' : '#999'};
+            margin: 32px 0;
           }
-          
-          @media (max-width: 480px) {
+
+          /* Bottom Spacing */
+          .bottom-spacing {
+            height: 100px;
+          }
+
+          /* Responsive */
+          @media (min-width: 768px) {
             .tiles-grid {
-              gap: ${spacing.sm}px;
+              grid-template-columns: repeat(4, 1fr);
             }
-            
-            .tile-name {
-              font-size: 11px;
+
+            .tile-icon {
+              width: 80px;
+              height: 80px;
             }
           }
         `}</style>

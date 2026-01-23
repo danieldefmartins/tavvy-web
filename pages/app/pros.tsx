@@ -1,427 +1,554 @@
 /**
- * Pros Screen - Service Professionals Marketplace
- * Ported from tavvy-mobile/screens/ProsHomeScreen.tsx
+ * Pros Screen - Find Trusted Local Home Service Pros
+ * Pixel-perfect port from tavvy-mobile/screens/ProsHomeScreen.tsx
+ * 
+ * Features:
+ * - Green theme
+ * - "Tavvy Pros" header with Find Pros / I'm a Pro buttons
+ * - Pro signup banner
+ * - Search form (service + location)
+ * - Service category grid with icons
+ * - Start a Project CTA
  */
 
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../constants/Colors';
+import { 
+  IoSearch, IoLocationOutline, IoChevronForward, IoCheckmarkCircle,
+  IoStar, IoTime, IoHome, IoWater, IoFlash, IoBrush, IoLeaf, 
+  IoConstruct, IoColorPalette, IoSnow, IoHammer, IoCar
+} from 'react-icons/io5';
+import { FiPlus, FiChevronRight } from 'react-icons/fi';
 
-interface ServiceCategory {
-  id: string;
-  name: string;
-  slug: string;
-  icon?: string;
-  description?: string;
-}
+// Green theme colors
+const GREEN = '#10B981';
+const GREEN_DARK = '#059669';
+const GREEN_LIGHT = '#D1FAE5';
 
-interface FeaturedProvider {
-  id: string;
-  business_name: string;
-  slug: string;
-  profile_image_url?: string;
-  category_name?: string;
-  rating?: number;
-  review_count?: number;
-}
+// Service categories matching mobile app
+const serviceCategories = [
+  { id: 'home', name: 'Home', icon: IoHome, color: '#1F2937' },
+  { id: 'plumbing', name: 'Plumbing', icon: IoWater, color: '#1F2937' },
+  { id: 'electrical', name: 'Electrical', icon: IoFlash, color: '#1F2937' },
+  { id: 'cleaning', name: 'Cleaning', icon: IoBrush, color: '#1F2937' },
+  { id: 'landscaping', name: 'Landscaping', icon: IoLeaf, color: '#1F2937' },
+  { id: 'handyman', name: 'Handyman', icon: IoConstruct, color: '#1F2937' },
+  { id: 'painting', name: 'Painting', icon: IoColorPalette, color: '#1F2937' },
+  { id: 'hvac', name: 'HVAC', icon: IoSnow, color: '#1F2937' },
+  { id: 'roofing', name: 'Roofing', icon: IoHammer, color: '#1F2937' },
+  { id: 'auto', name: 'Auto', icon: IoCar, color: '#1F2937' },
+];
+
+// Trust badges
+const trustBadges = [
+  { icon: IoCheckmarkCircle, text: 'Verified Pros', color: GREEN },
+  { icon: IoStar, text: 'Community Reviews', color: '#F59E0B' },
+  { icon: IoTime, text: 'Fast Response', color: GREEN },
+];
 
 export default function ProsScreen() {
-  const { theme } = useThemeContext();
+  const { theme, isDark } = useThemeContext();
   const { user } = useAuth();
-  const [categories, setCategories] = useState<ServiceCategory[]>([]);
-  const [featuredProviders, setFeaturedProviders] = useState<FeaturedProvider[]>([]);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  
+  const [serviceQuery, setServiceQuery] = useState('');
+  const [locationQuery, setLocationQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<'find' | 'pro'>('find');
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      // Fetch service categories
-      const categoriesResult = await supabase
-        .from('pros_service_categories')
-        .select('*');
-      
-      // Handle the result - may be mock data
-      const categoriesData = categoriesResult?.data || [];
-
-      // Fetch featured providers
-      const providersResult = await supabase
-        .from('pros_providers')
-        .select('*');
-      
-      const providersData = providersResult?.data || [];
-
-      setCategories(categoriesData);
-      setFeaturedProviders(providersData.filter((p: any) => p?.is_featured).slice(0, 6));
-    } catch (error) {
-      console.error('Error fetching pros data:', error);
-      // Use defaults on error
-    } finally {
-      setLoading(false);
+  const handleSearch = () => {
+    if (serviceQuery.trim()) {
+      router.push(`/app/pros/search?service=${encodeURIComponent(serviceQuery)}&location=${encodeURIComponent(locationQuery)}`);
     }
   };
 
-  // Default categories if none from database
-  const defaultCategories: ServiceCategory[] = [
-    { id: '1', name: 'Home Services', slug: 'home-services', icon: '🏠' },
-    { id: '2', name: 'Plumbing', slug: 'plumbing', icon: '🔧' },
-    { id: '3', name: 'Electrical', slug: 'electrical', icon: '⚡' },
-    { id: '4', name: 'Cleaning', slug: 'cleaning', icon: '🧹' },
-    { id: '5', name: 'Landscaping', slug: 'landscaping', icon: '🌳' },
-    { id: '6', name: 'Moving', slug: 'moving', icon: '📦' },
-    { id: '7', name: 'Painting', slug: 'painting', icon: '🎨' },
-    { id: '8', name: 'HVAC', slug: 'hvac', icon: '❄️' },
-  ];
-
-  const displayCategories = categories.length > 0 ? categories : defaultCategories;
+  const bgColor = isDark ? '#0F172A' : '#F9F7F2';
 
   return (
     <>
       <Head>
         <title>Pros | TavvY</title>
-        <meta name="description" content="Find trusted service professionals on TavvY" />
+        <meta name="description" content="Find trusted local home service pros on TavvY" />
       </Head>
 
       <AppLayout>
-        <div className="pros-screen" style={{ backgroundColor: theme.background }}>
+        <div className="pros-screen">
           {/* Header */}
           <header className="pros-header">
-            <h1 className="title" style={{ color: theme.text }}>
-              🔧 TavvY Pros
-            </h1>
-            <p className="subtitle" style={{ color: theme.textSecondary }}>
-              Find trusted service professionals
-            </p>
+            <div className="header-content">
+              <h1 className="header-title">Tavvy Pros</h1>
+              <div className="header-tabs">
+                <button 
+                  className={`header-tab ${activeTab === 'find' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('find')}
+                >
+                  Find Pros
+                </button>
+                <button 
+                  className={`header-tab outline ${activeTab === 'pro' ? 'active' : ''}`}
+                  onClick={() => router.push('/app/pros/register')}
+                >
+                  I'm a Pro
+                </button>
+              </div>
+            </div>
           </header>
 
-          {/* Are You a Pro? Banner */}
-          <section className="pro-banner" style={{ backgroundColor: theme.primary }}>
-            <div className="banner-content">
-              <h2 className="banner-title">Are you a service professional?</h2>
-              <p className="banner-text">
-                Join TavvY Pros to connect with customers and grow your business
-              </p>
-              <Link href="/app/pros/register" className="banner-button">
-                Join as a Pro
-              </Link>
+          {/* Main Content */}
+          <main className="main-content">
+            {/* Pro Signup Banner */}
+            <div className="promo-banner">
+              <span className="promo-icon">✨</span>
+              <span className="promo-text">Are you a Pro? Save $400 · Only 487 spots left!</span>
             </div>
-          </section>
 
-          {/* Service Categories */}
-          <section className="categories-section">
-            <h2 className="section-title" style={{ color: theme.text }}>
-              Browse by Service
+            {/* Hero Title */}
+            <h2 className="hero-title">
+              Find Trusted Local<br />
+              <span className="hero-accent">Home Service Pros</span>
             </h2>
-            <div className="categories-grid">
-              {displayCategories.map((category) => (
-                <Link
-                  key={category.id}
-                  href={`/app/pros/category/${category.slug}`}
-                  className="category-card"
-                  style={{ backgroundColor: theme.cardBackground }}
-                >
-                  <span className="category-icon">{category.icon || '🔧'}</span>
-                  <span className="category-name" style={{ color: theme.text }}>
-                    {category.name}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </section>
+            <p className="hero-subtitle">
+              Connect with verified electricians, plumbers, cleaners, and more. Get quotes in minutes, not days.
+            </p>
 
-          {/* Featured Providers */}
-          {featuredProviders.length > 0 && (
-            <section className="featured-section">
-              <h2 className="section-title" style={{ color: theme.text }}>
-                Featured Pros
-              </h2>
-              <div className="providers-grid">
-                {featuredProviders.map((provider) => (
-                  <Link
-                    key={provider.id}
-                    href={`/app/pros/provider/${provider.slug || provider.id}`}
-                    className="provider-card"
-                    style={{ backgroundColor: theme.cardBackground }}
-                  >
-                    <div className="provider-image-container">
-                      {provider.profile_image_url ? (
-                        <img 
-                          src={provider.profile_image_url} 
-                          alt={provider.business_name}
-                          className="provider-image"
-                        />
-                      ) : (
-                        <div 
-                          className="provider-placeholder"
-                          style={{ backgroundColor: theme.primary }}
-                        >
-                          {provider.business_name.charAt(0)}
-                        </div>
-                      )}
-                    </div>
-                    <div className="provider-info">
-                      <h3 className="provider-name" style={{ color: theme.text }}>
-                        {provider.business_name}
-                      </h3>
-                      {provider.category_name && (
-                        <span className="provider-category" style={{ color: theme.textSecondary }}>
-                          {provider.category_name}
-                        </span>
-                      )}
-                      {provider.rating && (
-                        <div className="provider-rating">
-                          <span>⭐ {provider.rating.toFixed(1)}</span>
-                          {provider.review_count && (
-                            <span style={{ color: theme.textTertiary }}>
-                              ({provider.review_count})
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                ))}
+            {/* Search Form */}
+            <div className="search-form">
+              <div className="search-field">
+                <IoSearch size={18} className="field-icon" />
+                <input
+                  type="text"
+                  placeholder="What service do you need? (e.g. Plumber)"
+                  value={serviceQuery}
+                  onChange={(e) => setServiceQuery(e.target.value)}
+                />
+              </div>
+              <div className="search-field">
+                <IoLocationOutline size={18} className="field-icon" />
+                <input
+                  type="text"
+                  placeholder="City or ZIP code"
+                  value={locationQuery}
+                  onChange={(e) => setLocationQuery(e.target.value)}
+                />
+              </div>
+              <button className="search-btn" onClick={handleSearch}>
+                Search
+              </button>
+            </div>
+
+            {/* Trust Badges */}
+            <div className="trust-badges">
+              {trustBadges.map((badge, index) => {
+                const Icon = badge.icon;
+                return (
+                  <div key={index} className="trust-badge">
+                    <Icon size={16} color={badge.color} />
+                    <span>{badge.text}</span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Start a Project CTA */}
+            <Link href="/app/pros/new-project" className="project-cta">
+              <div className="cta-left">
+                <div className="cta-icon">
+                  <FiPlus size={20} color="#fff" />
+                </div>
+                <div className="cta-text">
+                  <h3>Start a Project</h3>
+                  <p>Get quotes from multiple pros in minutes</p>
+                </div>
+              </div>
+              <IoChevronForward size={24} color="#fff" />
+            </Link>
+
+            {/* Browse by Service */}
+            <section className="services-section">
+              <h3 className="section-title">Browse by Service</h3>
+              <div className="services-grid">
+                {serviceCategories.map((category) => {
+                  const Icon = category.icon;
+                  return (
+                    <Link
+                      key={category.id}
+                      href={`/app/pros/category/${category.id}`}
+                      className="service-card"
+                    >
+                      <div className="service-icon">
+                        <Icon size={28} color={category.color} />
+                      </div>
+                      <span className="service-name">{category.name}</span>
+                    </Link>
+                  );
+                })}
               </div>
             </section>
-          )}
 
-          {/* How It Works */}
-          <section className="how-it-works">
-            <h2 className="section-title" style={{ color: theme.text }}>
-              How TavvY Pros Works
-            </h2>
-            <div className="steps-container">
-              <div className="step" style={{ backgroundColor: theme.cardBackground }}>
-                <span className="step-number" style={{ backgroundColor: theme.primary }}>1</span>
-                <h3 style={{ color: theme.text }}>Describe Your Project</h3>
-                <p style={{ color: theme.textSecondary }}>
-                  Tell us what you need help with
-                </p>
+            {/* How It Works */}
+            <section className="how-section">
+              <h3 className="section-title">How It Works</h3>
+              <div className="steps-list">
+                <div className="step-item">
+                  <div className="step-number">1</div>
+                  <div className="step-content">
+                    <h4>Describe Your Project</h4>
+                    <p>Tell us what you need help with</p>
+                  </div>
+                </div>
+                <div className="step-item">
+                  <div className="step-number">2</div>
+                  <div className="step-content">
+                    <h4>Get Matched</h4>
+                    <p>We'll connect you with qualified pros</p>
+                  </div>
+                </div>
+                <div className="step-item">
+                  <div className="step-number">3</div>
+                  <div className="step-content">
+                    <h4>Compare & Hire</h4>
+                    <p>Review quotes and choose the best fit</p>
+                  </div>
+                </div>
               </div>
-              <div className="step" style={{ backgroundColor: theme.cardBackground }}>
-                <span className="step-number" style={{ backgroundColor: theme.primary }}>2</span>
-                <h3 style={{ color: theme.text }}>Get Matched</h3>
-                <p style={{ color: theme.textSecondary }}>
-                  We'll connect you with qualified pros
-                </p>
-              </div>
-              <div className="step" style={{ backgroundColor: theme.cardBackground }}>
-                <span className="step-number" style={{ backgroundColor: theme.primary }}>3</span>
-                <h3 style={{ color: theme.text }}>Compare & Hire</h3>
-                <p style={{ color: theme.textSecondary }}>
-                  Review quotes and choose the best fit
-                </p>
-              </div>
-            </div>
-          </section>
+            </section>
+          </main>
+
+          {/* Bottom Spacing */}
+          <div className="bottom-spacing" />
         </div>
 
         <style jsx>{`
           .pros-screen {
             min-height: 100vh;
-            padding-bottom: ${spacing.xxl}px;
+            background-color: ${bgColor};
           }
-          
+
+          /* Header */
           .pros-header {
-            padding: ${spacing.lg}px;
-            padding-top: max(${spacing.lg}px, env(safe-area-inset-top));
+            background: #fff;
+            padding: 16px 20px;
+            padding-top: max(16px, env(safe-area-inset-top));
+            border-bottom: 1px solid rgba(0,0,0,0.06);
           }
-          
-          .title {
-            font-size: 28px;
+
+          .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+
+          .header-title {
+            font-size: 22px;
             font-weight: 700;
-            margin: 0 0 4px;
-          }
-          
-          .subtitle {
-            font-size: 14px;
+            color: #111;
             margin: 0;
           }
-          
-          .pro-banner {
-            margin: 0 ${spacing.lg}px ${spacing.xxl}px;
-            border-radius: ${borderRadius.lg}px;
-            overflow: hidden;
+
+          .header-tabs {
+            display: flex;
+            gap: 8px;
           }
-          
-          .banner-content {
-            padding: ${spacing.xl}px;
-            text-align: center;
-          }
-          
-          .banner-title {
-            color: white;
-            font-size: 20px;
-            font-weight: 700;
-            margin: 0 0 8px;
-          }
-          
-          .banner-text {
-            color: rgba(255, 255, 255, 0.9);
+
+          .header-tab {
+            padding: 10px 20px;
+            border-radius: 24px;
             font-size: 14px;
-            margin: 0 0 16px;
-          }
-          
-          .banner-button {
-            display: inline-block;
-            background: white;
-            color: ${theme.primary};
-            padding: 12px 24px;
-            border-radius: ${borderRadius.md}px;
             font-weight: 600;
-            text-decoration: none;
-            transition: transform 0.2s;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: ${GREEN};
+            color: #fff;
           }
-          
-          .banner-button:hover {
+
+          .header-tab.outline {
+            background: transparent;
+            border: 1px solid #ddd;
+            color: #666;
+          }
+
+          .header-tab:hover {
             transform: scale(1.02);
           }
-          
-          .categories-section,
-          .featured-section,
-          .how-it-works {
-            padding: 0 ${spacing.lg}px;
-            margin-bottom: ${spacing.xxl}px;
+
+          /* Main Content */
+          .main-content {
+            padding: 20px;
           }
-          
-          .section-title {
-            font-size: 20px;
+
+          /* Promo Banner */
+          .promo-banner {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: ${GREEN_LIGHT};
+            padding: 8px 16px;
+            border-radius: 24px;
+            margin-bottom: 20px;
+          }
+
+          .promo-icon {
+            font-size: 14px;
+          }
+
+          .promo-text {
+            font-size: 13px;
+            font-weight: 500;
+            color: ${GREEN_DARK};
+          }
+
+          /* Hero */
+          .hero-title {
+            font-size: 28px;
             font-weight: 700;
-            margin: 0 0 ${spacing.md}px;
+            color: ${isDark ? '#fff' : '#111'};
+            line-height: 1.2;
+            margin: 0 0 12px;
           }
-          
-          .categories-grid {
+
+          .hero-accent {
+            color: ${GREEN};
+          }
+
+          .hero-subtitle {
+            font-size: 15px;
+            color: ${isDark ? 'rgba(255,255,255,0.7)' : '#666'};
+            line-height: 1.5;
+            margin: 0 0 24px;
+          }
+
+          /* Search Form */
+          .search-form {
+            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#fff'};
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: ${isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.06)'};
+          }
+
+          .search-field {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#f5f5f5'};
+            border-radius: 12px;
+            margin-bottom: 12px;
+          }
+
+          .field-icon {
+            color: ${isDark ? 'rgba(255,255,255,0.4)' : '#999'};
+          }
+
+          .search-field input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 15px;
+            color: ${isDark ? '#fff' : '#111'};
+            outline: none;
+          }
+
+          .search-field input::placeholder {
+            color: ${isDark ? 'rgba(255,255,255,0.4)' : '#999'};
+          }
+
+          .search-btn {
+            width: 100%;
+            padding: 16px;
+            background: ${GREEN};
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+          }
+
+          .search-btn:hover {
+            background: ${GREEN_DARK};
+          }
+
+          /* Trust Badges */
+          .trust-badges {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+          }
+
+          .trust-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: ${isDark ? 'rgba(255,255,255,0.7)' : '#666'};
+          }
+
+          /* Project CTA */
+          .project-cta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: ${GREEN};
+            padding: 16px 20px;
+            border-radius: 16px;
+            text-decoration: none;
+            margin-bottom: 32px;
+          }
+
+          .cta-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+          }
+
+          .cta-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .cta-text h3 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #fff;
+            margin: 0 0 4px;
+          }
+
+          .cta-text p {
+            font-size: 13px;
+            color: rgba(255,255,255,0.85);
+            margin: 0;
+          }
+
+          /* Services Section */
+          .services-section {
+            margin-bottom: 32px;
+          }
+
+          .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: ${isDark ? '#fff' : '#111'};
+            margin: 0 0 16px;
+          }
+
+          .services-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: ${spacing.md}px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
           }
-          
-          .category-card {
+
+          .service-card {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: ${spacing.lg}px ${spacing.md}px;
-            border-radius: ${borderRadius.lg}px;
+            gap: 8px;
+            padding: 16px 8px;
+            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#fff'};
+            border-radius: 16px;
             text-decoration: none;
             transition: transform 0.2s;
           }
-          
-          .category-card:hover {
-            transform: translateY(-2px);
+
+          .service-card:hover {
+            transform: scale(1.02);
           }
-          
-          .category-icon {
-            font-size: 32px;
-            margin-bottom: 8px;
+
+          .service-icon {
+            width: 56px;
+            height: 56px;
+            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#f5f5f5'};
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
           }
-          
-          .category-name {
-            font-size: 13px;
+
+          .service-name {
+            font-size: 12px;
             font-weight: 500;
+            color: ${isDark ? 'rgba(255,255,255,0.7)' : '#666'};
             text-align: center;
           }
-          
-          .providers-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: ${spacing.md}px;
+
+          /* How It Works */
+          .how-section {
+            margin-bottom: 32px;
           }
-          
-          .provider-card {
-            border-radius: ${borderRadius.lg}px;
-            overflow: hidden;
-            text-decoration: none;
-            transition: transform 0.2s;
-          }
-          
-          .provider-card:hover {
-            transform: translateY(-2px);
-          }
-          
-          .provider-image-container {
-            height: 100px;
-            overflow: hidden;
-          }
-          
-          .provider-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-          
-          .provider-placeholder {
-            width: 100%;
-            height: 100%;
+
+          .steps-list {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 32px;
-            font-weight: 700;
+            flex-direction: column;
+            gap: 16px;
           }
-          
-          .provider-info {
-            padding: ${spacing.md}px;
-          }
-          
-          .provider-name {
-            font-size: 14px;
-            font-weight: 600;
-            margin: 0 0 4px;
-          }
-          
-          .provider-category {
-            font-size: 12px;
-            display: block;
-            margin-bottom: 4px;
-          }
-          
-          .provider-rating {
-            font-size: 12px;
+
+          .step-item {
             display: flex;
-            gap: 4px;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px;
+            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#fff'};
+            border-radius: 16px;
           }
-          
-          .steps-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: ${spacing.md}px;
-          }
-          
-          .step {
-            padding: ${spacing.lg}px;
-            border-radius: ${borderRadius.lg}px;
-            text-align: center;
-          }
-          
+
           .step-number {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
             width: 32px;
             height: 32px;
+            background: ${GREEN};
+            color: #fff;
             border-radius: 50%;
-            color: white;
-            font-weight: 700;
-            margin-bottom: 12px;
-          }
-          
-          .step h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin: 0 0 8px;
-          }
-          
-          .step p {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 14px;
+            font-weight: 700;
+            flex-shrink: 0;
+          }
+
+          .step-content h4 {
+            font-size: 15px;
+            font-weight: 600;
+            color: ${isDark ? '#fff' : '#111'};
+            margin: 0 0 4px;
+          }
+
+          .step-content p {
+            font-size: 13px;
+            color: ${isDark ? 'rgba(255,255,255,0.6)' : '#666'};
             margin: 0;
+          }
+
+          /* Bottom Spacing */
+          .bottom-spacing {
+            height: 100px;
+          }
+
+          /* Responsive */
+          @media (max-width: 480px) {
+            .services-grid {
+              grid-template-columns: repeat(3, 1fr);
+            }
+          }
+
+          @media (min-width: 768px) {
+            .services-grid {
+              grid-template-columns: repeat(5, 1fr);
+            }
           }
         `}</style>
       </AppLayout>
