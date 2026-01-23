@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import getConfig from 'next/config';
 
 // Singleton instance - will be created on first use (at runtime, not build time)
 let supabaseInstance: SupabaseClient | null = null;
@@ -33,7 +34,7 @@ const createMockQueryBuilder = () => {
 
 // Create a mock client for build time when env vars aren't available
 const createMockClient = (): SupabaseClient => {
-  console.warn('[Supabase] Using mock client - env vars not available');
+  console.warn('[Supabase] Using mock client - credentials not available');
   return {
     auth: {
       getSession: async () => ({ data: { session: null }, error: null }),
@@ -46,6 +47,33 @@ const createMockClient = (): SupabaseClient => {
   } as unknown as SupabaseClient;
 };
 
+// Get Supabase credentials from runtime config or env vars
+const getSupabaseCredentials = (): { url: string; anonKey: string } => {
+  // Try to get from Next.js runtime config first (works at runtime in Docker)
+  try {
+    const { publicRuntimeConfig } = getConfig() || {};
+    if (publicRuntimeConfig?.supabaseUrl && publicRuntimeConfig?.supabaseAnonKey) {
+      console.log('[Supabase] Using credentials from publicRuntimeConfig');
+      return {
+        url: publicRuntimeConfig.supabaseUrl,
+        anonKey: publicRuntimeConfig.supabaseAnonKey,
+      };
+    }
+  } catch (e) {
+    // getConfig() might fail during SSR or build
+  }
+
+  // Fallback to NEXT_PUBLIC_ env vars (works when inlined at build time)
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  
+  if (url && anonKey) {
+    console.log('[Supabase] Using credentials from NEXT_PUBLIC_ env vars');
+  }
+  
+  return { url, anonKey };
+};
+
 // Get or create the Supabase client
 // This function is called at runtime, ensuring env vars are available
 const getSupabaseClient = (): SupabaseClient => {
@@ -54,18 +82,17 @@ const getSupabaseClient = (): SupabaseClient => {
     return supabaseInstance;
   }
 
-  // Get env vars at runtime
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  // Get credentials at runtime
+  const { url: supabaseUrl, anonKey: supabaseAnonKey } = getSupabaseCredentials();
 
-  // Check if we're in a browser environment and env vars are available
+  // Check if we're in a browser environment
   if (typeof window !== 'undefined') {
     console.log('[Supabase] Initializing client in browser...');
-    console.log('[Supabase] URL available:', !!supabaseUrl);
+    console.log('[Supabase] URL available:', !!supabaseUrl, supabaseUrl ? `(${supabaseUrl.substring(0, 30)}...)` : '');
     console.log('[Supabase] Key available:', !!supabaseAnonKey);
   }
 
-  // If env vars are not available, return mock client
+  // If credentials are not available, return mock client
   if (!supabaseUrl || !supabaseAnonKey) {
     // During SSR/build, return mock but don't cache it
     // This allows runtime to create a real client
@@ -73,13 +100,14 @@ const getSupabaseClient = (): SupabaseClient => {
       return createMockClient();
     }
     
-    // In browser without env vars - this is a problem
-    console.error('[Supabase] Environment variables not available in browser!');
+    // In browser without credentials - this is a problem
+    console.error('[Supabase] Credentials not available in browser!');
+    console.error('[Supabase] Please ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set');
     return createMockClient();
   }
 
   // Create the real client
-  console.log('[Supabase] Creating real client with URL:', supabaseUrl.substring(0, 30) + '...');
+  console.log('[Supabase] Creating real client');
   supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       autoRefreshToken: true,

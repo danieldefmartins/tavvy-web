@@ -28,6 +28,13 @@ const nextConfig = {
     // Optimize package imports to reduce bundle size
     optimizePackageImports: ['react-icons', 'lucide-react', '@supabase/supabase-js'],
   },
+  
+  // Runtime configuration - these are available at runtime, not just build time
+  // This allows Docker builds to work without env vars, and runtime to use actual values
+  publicRuntimeConfig: {
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+  },
 }
 
 module.exports = nextConfig
