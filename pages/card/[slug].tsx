@@ -47,6 +47,7 @@ interface CardData {
   socialTwitter: string;
   socialTiktok: string;
   links: CardLink[];
+  tapCount: number;
 }
 
 interface PageProps {
@@ -55,9 +56,11 @@ interface PageProps {
 }
 
 export default function PublicCardPage({ cardData: initialCardData, error: initialError }: PageProps) {
-  const [cardData] = useState<CardData | null>(initialCardData);
+  const [cardData, setCardData] = useState<CardData | null>(initialCardData);
   const [error] = useState<string | null>(initialError);
   const [showMore, setShowMore] = useState(false);
+  const [hasTapped, setHasTapped] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const generateVCard = () => {
     if (!cardData) return '';
@@ -119,6 +122,48 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
       alert('Link copied to clipboard!');
     }
   };
+
+  const handleTap = async () => {
+    if (!cardData || hasTapped) return;
+    
+    // Trigger animation
+    setIsAnimating(true);
+    setTimeout(() => setIsAnimating(false), 600);
+    
+    // Optimistic update
+    setCardData(prev => prev ? { ...prev, tapCount: prev.tapCount + 1 } : null);
+    setHasTapped(true);
+    
+    // Save to localStorage to prevent multiple taps
+    try {
+      localStorage.setItem(`tavvy_tapped_${cardData.id}`, 'true');
+    } catch (e) {}
+    
+    // Update database
+    try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+      const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+      if (supabaseUrl && supabaseKey) {
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        await supabase
+          .from('digital_cards')
+          .update({ tap_count: cardData.tapCount + 1 })
+          .eq('id', cardData.id);
+      }
+    } catch (err) {
+      console.error('Error updating tap count:', err);
+    }
+  };
+
+  // Check if user has already tapped this card
+  React.useEffect(() => {
+    if (cardData) {
+      try {
+        const tapped = localStorage.getItem(`tavvy_tapped_${cardData.id}`);
+        if (tapped) setHasTapped(true);
+      } catch (e) {}
+    }
+  }, [cardData]);
 
   const handleLinkClick = async (link: CardLink) => {
     // Track click (fire and forget)
@@ -273,11 +318,49 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             <h1 style={styles.name}>{cardData.fullName}</h1>
             {cardData.title && <p style={styles.title}>{cardData.title}</p>}
             {cardData.company && <p style={styles.company}>{cardData.company}</p>}
-            {location && (
-              <p style={styles.location}>
-                <span style={styles.locationIcon}>📍</span> {location}
-              </p>
-            )}
+            
+            {/* Location & Tap Counter Row */}
+            <div style={styles.badgeRow}>
+              {location && (
+                <p style={styles.location}>
+                  <span style={styles.locationIcon}>📍</span> {location}
+                </p>
+              )}
+              
+              {/* Crown/Endorsement Button */}
+              <button 
+                onClick={handleTap}
+                style={{
+                  ...styles.crownButton,
+                  ...(hasTapped ? styles.crownButtonTapped : {}),
+                  transform: isAnimating ? 'scale(1.1)' : 'scale(1)',
+                }}
+                disabled={hasTapped}
+              >
+                <svg 
+                  width="28" 
+                  height="28" 
+                  viewBox="0 0 24 24" 
+                  style={{
+                    transform: isAnimating ? 'scale(1.2) rotate(-10deg)' : 'scale(1)',
+                    transition: 'transform 0.3s ease',
+                  }}
+                >
+                  <defs>
+                    <linearGradient id="crownGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#FFD700" />
+                      <stop offset="50%" stopColor="#FFA500" />
+                      <stop offset="100%" stopColor="#FFD700" />
+                    </linearGradient>
+                  </defs>
+                  <path 
+                    d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" 
+                    fill="url(#crownGradient)"
+                  />
+                </svg>
+                <span style={styles.crownCount}>x{cardData.tapCount || 0}</span>
+              </button>
+            </div>
 
             {/* Action Buttons */}
             <div style={styles.actionButtons}>
@@ -581,10 +664,18 @@ const styles: { [key: string]: React.CSSProperties } = {
     margin: '0 0 12px 0',
     textAlign: 'center',
   },
+  badgeRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '12px',
+    marginBottom: '24px',
+    flexWrap: 'wrap',
+  },
   location: {
     fontSize: '14px',
     color: 'rgba(255, 255, 255, 0.8)',
-    margin: '0 0 24px 0',
+    margin: '0',
     display: 'flex',
     alignItems: 'center',
     gap: '4px',
@@ -594,6 +685,33 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   locationIcon: {
     fontSize: '14px',
+  },
+  crownButton: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '4px',
+    padding: '12px 16px 8px',
+    background: 'rgba(255, 215, 0, 0.12)',
+    border: '1px solid rgba(255, 215, 0, 0.25)',
+    borderRadius: '16px',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 2px 8px rgba(255, 215, 0, 0.15)',
+    minWidth: '60px',
+  },
+  crownButtonTapped: {
+    background: 'rgba(255, 215, 0, 0.25)',
+    borderColor: 'rgba(255, 215, 0, 0.4)',
+    boxShadow: '0 4px 16px rgba(255, 215, 0, 0.25)',
+  },
+  crownCount: {
+    fontSize: '13px',
+    fontWeight: '700',
+    color: '#FFD700',
+    textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+    letterSpacing: '0.5px',
   },
   actionButtons: {
     display: 'flex',
@@ -940,6 +1058,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       socialLinkedin: data.social_linkedin || '',
       socialTwitter: data.social_twitter || '',
       socialTiktok: data.social_tiktok || '',
+      tapCount: data.tap_count || 0,
       links: linksData?.map(l => ({
         id: l.id,
         title: l.title,
