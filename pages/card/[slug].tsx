@@ -16,6 +16,15 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabaseClient';
 
+interface CardLink {
+  id: string;
+  title: string;
+  url: string;
+  icon: string;
+  sort_order: number;
+  clicks: number;
+}
+
 interface CardData {
   id: string;
   slug: string;
@@ -35,6 +44,7 @@ interface CardData {
   socialLinkedin: string;
   socialTwitter: string;
   socialTiktok: string;
+  links: CardLink[];
 }
 
 export default function PublicCardPage() {
@@ -43,6 +53,7 @@ export default function PublicCardPage() {
   const [cardData, setCardData] = useState<CardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'card' | 'links'>('card');
 
   useEffect(() => {
     if (slug) {
@@ -67,6 +78,14 @@ export default function PublicCardPage() {
         return;
       }
 
+      // Also fetch links for this card
+      const { data: linksData } = await supabase
+        .from('card_links')
+        .select('*')
+        .eq('card_id', data.id)
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
+
       const card: CardData = {
         id: data.id,
         slug: data.slug,
@@ -86,6 +105,14 @@ export default function PublicCardPage() {
         socialLinkedin: data.social_linkedin || '',
         socialTwitter: data.social_twitter || '',
         socialTiktok: data.social_tiktok || '',
+        links: linksData?.map(l => ({
+          id: l.id,
+          title: l.title,
+          url: l.url,
+          icon: l.icon || 'link',
+          sort_order: l.sort_order,
+          clicks: l.clicks || 0,
+        })) || [],
       };
 
       setCardData(card);
@@ -446,6 +473,70 @@ export default function PublicCardPage() {
             </div>
           )}
         </div>
+
+        {/* Toggle Tabs - Card / Links (only show if there are links) */}
+        {cardData.links && cardData.links.length > 0 && (
+          <div style={styles.toggleContainer}>
+            <button
+              onClick={() => setActiveTab('card')}
+              style={{
+                ...styles.toggleTab,
+                ...(activeTab === 'card' ? styles.toggleTabActive : {}),
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zM6 10h2v2H6v-2zm0 4h8v2H6v-2zm10 0h2v2h-2v-2zm-6-4h8v2h-8v-2z"/>
+              </svg>
+              Card
+            </button>
+            <button
+              onClick={() => setActiveTab('links')}
+              style={{
+                ...styles.toggleTab,
+                ...(activeTab === 'links' ? styles.toggleTabActive : {}),
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+              </svg>
+              Links
+            </button>
+          </div>
+        )}
+
+        {/* Links Section */}
+        {activeTab === 'links' && cardData.links && cardData.links.length > 0 && (
+          <div style={styles.linksSection}>
+            {cardData.links.map((link, index) => (
+              <a
+                key={link.id || index}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  ...styles.linkButton,
+                  background: `linear-gradient(135deg, ${cardData.gradientColor1} 0%, ${cardData.gradientColor2} 100%)`,
+                }}
+                onClick={async (e) => {
+                  // Track click
+                  try {
+                    await supabase
+                      .from('card_links')
+                      .update({ clicks: link.clicks + 1 })
+                      .eq('id', link.id);
+                  } catch (err) {
+                    console.error('Error tracking click:', err);
+                  }
+                }}
+              >
+                <span style={styles.linkButtonText}>{link.title}</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="rgba(255,255,255,0.7)">
+                  <path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>
+                </svg>
+              </a>
+            ))}
+          </div>
+        )}
 
         {/* Save & Share Buttons */}
         <div style={styles.bottomActions}>
@@ -942,5 +1033,59 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: '600',
     border: '1px solid rgba(255, 255, 255, 0.2)',
     transition: 'background-color 0.2s',
+  },
+  // Toggle tabs styles
+  toggleContainer: {
+    display: 'flex',
+    width: '100%',
+    maxWidth: '420px',
+    marginTop: '20px',
+    background: 'rgba(30, 41, 59, 0.6)',
+    borderRadius: '16px',
+    padding: '6px',
+  },
+  toggleTab: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    padding: '14px',
+    borderRadius: '12px',
+    border: 'none',
+    background: 'transparent',
+    color: '#94A3B8',
+    fontSize: '15px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+  },
+  toggleTabActive: {
+    background: '#8B5CF6',
+    color: '#fff',
+  },
+  // Links section styles
+  linksSection: {
+    width: '100%',
+    maxWidth: '420px',
+    marginTop: '20px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+  },
+  linkButton: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '18px 24px',
+    borderRadius: '16px',
+    textDecoration: 'none',
+    transition: 'transform 0.2s, box-shadow 0.2s',
+    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+  },
+  linkButtonText: {
+    color: '#fff',
+    fontSize: '17px',
+    fontWeight: '600',
   },
 };
