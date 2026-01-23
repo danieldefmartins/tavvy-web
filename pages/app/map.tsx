@@ -17,7 +17,8 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
 import { useThemeContext } from '../../contexts/ThemeContext';
-import { fetchPlacesInBounds, searchSuggestions, PlaceCard as PlaceCardType, SearchResult } from '../../lib/placeService';
+// Using API routes instead of direct Supabase calls for runtime env var support
+import { PlaceCard as PlaceCardType, SearchResult } from '../../lib/placeService';
 import { 
   FiArrowLeft, FiSearch, FiX, FiInfo, FiLayers, FiNavigation,
   FiCloud, FiFilter, FiChevronDown, FiMapPin
@@ -208,13 +209,21 @@ export default function MapScreen() {
       setIsSearching(true);
       searchDebounceRef.current = setTimeout(async () => {
         try {
-          const suggestions = await searchSuggestions(
-            searchQuery,
-            8,
-            { latitude: userLocation[0], longitude: userLocation[1] }
-          );
-          setSearchSuggestionsList(suggestions);
-          setShowSuggestions(true);
+          // Use API route for search suggestions
+          const params = new URLSearchParams({
+            q: searchQuery,
+            userLat: userLocation[0].toString(),
+            userLng: userLocation[1].toString(),
+            limit: '8',
+          });
+          
+          const response = await fetch(`/api/search?${params}`);
+          const data = await response.json();
+          
+          if (data.suggestions) {
+            setSearchSuggestionsList(data.suggestions);
+            setShowSuggestions(true);
+          }
         } catch (error) {
           console.error('Error fetching suggestions:', error);
         } finally {
@@ -238,8 +247,6 @@ export default function MapScreen() {
     setLoading(true);
     try {
       // userLocation is [lat, lng] format
-      // Mobile app uses: location[0] = lng, location[1] = lat
-      // But our state stores [lat, lng], so:
       const centerLat = userLocation[0];
       const centerLng = userLocation[1];
       
@@ -247,26 +254,40 @@ export default function MapScreen() {
       const latDelta = 0.1;
       const lngDelta = 0.1;
       
-      const bounds = {
-        ne: [centerLng + lngDelta, centerLat + latDelta] as [number, number],
-        sw: [centerLng - lngDelta, centerLat - latDelta] as [number, number],
-      };
+      const minLat = centerLat - latDelta;
+      const maxLat = centerLat + latDelta;
+      const minLng = centerLng - lngDelta;
+      const maxLng = centerLng + lngDelta;
       
-      console.log(`[Map] Fetching places near [${centerLat}, ${centerLng}] with bounds:`, bounds);
+      console.log(`[Map] Fetching places via API near [${centerLat}, ${centerLng}]`);
       
       const categoryFilter = selectedCategory !== 'all' ? 
         categories.find(c => c.id === selectedCategory)?.name : undefined;
       
-      const fetchedPlaces = await fetchPlacesInBounds(
-        bounds,
-        [centerLng, centerLat], // Pass as [lng, lat] for distance calculation
-        categoryFilter
-      );
+      // Use API route instead of direct Supabase call
+      const params = new URLSearchParams({
+        minLat: minLat.toString(),
+        maxLat: maxLat.toString(),
+        minLng: minLng.toString(),
+        maxLng: maxLng.toString(),
+        userLat: centerLat.toString(),
+        userLng: centerLng.toString(),
+        ...(categoryFilter && { category: categoryFilter }),
+      });
       
-      console.log(`[Map] Fetched ${fetchedPlaces.length} places`);
-      setPlaces(fetchedPlaces);
+      const response = await fetch(`/api/places?${params}`);
+      const data = await response.json();
+      
+      if (data.error) {
+        console.error('[Map] API error:', data.error);
+        setPlaces([]);
+      } else {
+        console.log(`[Map] Fetched ${data.places?.length || 0} places via API`, data.metrics);
+        setPlaces(data.places || []);
+      }
     } catch (error) {
       console.error('Error fetching places:', error);
+      setPlaces([]);
     } finally {
       setLoading(false);
     }
