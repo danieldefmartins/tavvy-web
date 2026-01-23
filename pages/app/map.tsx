@@ -237,20 +237,33 @@ export default function MapScreen() {
   const fetchPlaces = async () => {
     setLoading(true);
     try {
+      // userLocation is [lat, lng] format
+      // Mobile app uses: location[0] = lng, location[1] = lat
+      // But our state stores [lat, lng], so:
+      const centerLat = userLocation[0];
+      const centerLng = userLocation[1];
+      
+      // Use same delta as mobile app (0.1 degrees)
+      const latDelta = 0.1;
+      const lngDelta = 0.1;
+      
       const bounds = {
-        ne: [userLocation[1] + 0.05, userLocation[0] + 0.05] as [number, number],
-        sw: [userLocation[1] - 0.05, userLocation[0] - 0.05] as [number, number],
+        ne: [centerLng + lngDelta, centerLat + latDelta] as [number, number],
+        sw: [centerLng - lngDelta, centerLat - latDelta] as [number, number],
       };
+      
+      console.log(`[Map] Fetching places near [${centerLat}, ${centerLng}] with bounds:`, bounds);
       
       const categoryFilter = selectedCategory !== 'all' ? 
         categories.find(c => c.id === selectedCategory)?.name : undefined;
       
       const fetchedPlaces = await fetchPlacesInBounds(
         bounds,
-        [userLocation[1], userLocation[0]],
+        [centerLng, centerLat], // Pass as [lng, lat] for distance calculation
         categoryFilter
       );
       
+      console.log(`[Map] Fetched ${fetchedPlaces.length} places`);
       setPlaces(fetchedPlaces);
     } catch (error) {
       console.error('Error fetching places:', error);
