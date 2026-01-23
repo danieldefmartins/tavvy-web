@@ -11,9 +11,10 @@
  * - "Powered by Tavvy" branding with app download CTA
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
+import { GetServerSideProps } from 'next';
+import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../../lib/supabaseClient';
 
 interface CardLink {
@@ -47,88 +48,15 @@ interface CardData {
   links: CardLink[];
 }
 
-export default function PublicCardPage() {
-  const router = useRouter();
-  const { slug } = router.query;
-  const [cardData, setCardData] = useState<CardData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+interface PageProps {
+  cardData: CardData | null;
+  error: string | null;
+}
+
+export default function PublicCardPage({ cardData: initialCardData, error: initialError }: PageProps) {
+  const [cardData] = useState<CardData | null>(initialCardData);
+  const [error] = useState<string | null>(initialError);
   const [activeTab, setActiveTab] = useState<'card' | 'links'>('card');
-
-  useEffect(() => {
-    if (slug) {
-      loadCardData(slug as string);
-    }
-  }, [slug]);
-
-  const loadCardData = async (cardSlug: string) => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const { data, error: fetchError } = await supabase
-        .from('digital_cards')
-        .select('*')
-        .eq('slug', cardSlug)
-        .single();
-
-      if (fetchError || !data) {
-        setError('Card not found');
-        setIsLoading(false);
-        return;
-      }
-
-      // Also fetch links for this card
-      const { data: linksData } = await supabase
-        .from('card_links')
-        .select('*')
-        .eq('card_id', data.id)
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true });
-
-      const card: CardData = {
-        id: data.id,
-        slug: data.slug,
-        fullName: data.full_name,
-        title: data.title || '',
-        company: data.company || '',
-        phone: data.phone || '',
-        email: data.email || '',
-        website: data.website || '',
-        city: data.city || '',
-        state: data.state || '',
-        gradientColor1: data.gradient_color_1 || '#8B5CF6',
-        gradientColor2: data.gradient_color_2 || '#4F46E5',
-        profilePhotoUrl: data.profile_photo_url,
-        socialInstagram: data.social_instagram || '',
-        socialFacebook: data.social_facebook || '',
-        socialLinkedin: data.social_linkedin || '',
-        socialTwitter: data.social_twitter || '',
-        socialTiktok: data.social_tiktok || '',
-        links: linksData?.map(l => ({
-          id: l.id,
-          title: l.title,
-          url: l.url,
-          icon: l.icon || 'link',
-          sort_order: l.sort_order,
-          clicks: l.clicks || 0,
-        })) || [],
-      };
-
-      setCardData(card);
-
-      // Increment view count
-      await supabase
-        .from('digital_cards')
-        .update({ view_count: (data.view_count || 0) + 1 })
-        .eq('id', data.id);
-    } catch (err) {
-      console.error('Error loading card:', err);
-      setError('Failed to load card');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const generateVCard = () => {
     if (!cardData) return '';
@@ -191,15 +119,6 @@ export default function PublicCardPage() {
       alert('Link copied to clipboard!');
     }
   };
-
-  if (isLoading) {
-    return (
-      <div style={styles.loadingContainer}>
-        <div style={styles.spinner}></div>
-        <p style={styles.loadingText}>Loading card...</p>
-      </div>
-    );
-  }
 
   if (error || !cardData) {
     return (
@@ -1088,4 +1007,111 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '17px',
     fontWeight: '600',
   },
+};
+
+
+// Server-side data fetching - this runs on the server where env vars are available
+export const getServerSideProps: GetServerSideProps<PageProps> = async (context) => {
+  const { slug } = context.params as { slug: string };
+  
+  // Get Supabase credentials from environment
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '';
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '';
+  
+  console.log('[Card SSR] Fetching card:', slug);
+  console.log('[Card SSR] Supabase URL available:', !!supabaseUrl);
+  console.log('[Card SSR] Supabase Key available:', !!supabaseKey);
+  
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('[Card SSR] Missing Supabase credentials');
+    return {
+      props: {
+        cardData: null,
+        error: 'Configuration error',
+      },
+    };
+  }
+  
+  try {
+    // Create a server-side Supabase client
+    const serverSupabase = createClient(supabaseUrl, supabaseKey);
+    
+    // Fetch the card
+    const { data, error: fetchError } = await serverSupabase
+      .from('digital_cards')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+    
+    if (fetchError || !data) {
+      console.log('[Card SSR] Card not found:', slug, fetchError?.message);
+      return {
+        props: {
+          cardData: null,
+          error: 'Card not found',
+        },
+      };
+    }
+    
+    console.log('[Card SSR] Card found:', data.full_name);
+    
+    // Fetch links for this card
+    const { data: linksData } = await serverSupabase
+      .from('card_links')
+      .select('*')
+      .eq('card_id', data.id)
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true });
+    
+    // Increment view count (fire and forget)
+    serverSupabase
+      .from('digital_cards')
+      .update({ view_count: (data.view_count || 0) + 1 })
+      .eq('id', data.id)
+      .then(() => {});
+    
+    const cardData: CardData = {
+      id: data.id,
+      slug: data.slug,
+      fullName: data.full_name,
+      title: data.title || '',
+      company: data.company || '',
+      phone: data.phone || '',
+      email: data.email || '',
+      website: data.website || '',
+      city: data.city || '',
+      state: data.state || '',
+      gradientColor1: data.gradient_color_1 || '#8B5CF6',
+      gradientColor2: data.gradient_color_2 || '#4F46E5',
+      profilePhotoUrl: data.profile_photo_url,
+      socialInstagram: data.social_instagram || '',
+      socialFacebook: data.social_facebook || '',
+      socialLinkedin: data.social_linkedin || '',
+      socialTwitter: data.social_twitter || '',
+      socialTiktok: data.social_tiktok || '',
+      links: linksData?.map(l => ({
+        id: l.id,
+        title: l.title,
+        url: l.url,
+        icon: l.icon || 'link',
+        sort_order: l.sort_order,
+        clicks: l.clicks || 0,
+      })) || [],
+    };
+    
+    return {
+      props: {
+        cardData,
+        error: null,
+      },
+    };
+  } catch (err) {
+    console.error('[Card SSR] Error:', err);
+    return {
+      props: {
+        cardData: null,
+        error: 'Failed to load card',
+      },
+    };
+  }
 };
