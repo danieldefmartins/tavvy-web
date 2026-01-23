@@ -30,6 +30,8 @@ interface CardLink {
 interface CardData {
   id: string;
   slug: string;
+  templateId: string;
+  colorSchemeId: string;
   fullName: string;
   title: string;
   company: string;
@@ -338,6 +340,82 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   const hasSocialLinks = cardData.socialInstagram || cardData.socialFacebook || cardData.socialLinkedin || cardData.socialTwitter || cardData.socialTiktok;
   const hasLinks = cardData.links && cardData.links.length > 0;
 
+  // Get template-specific styles based on templateId
+  const getTemplateStyles = () => {
+    const templateId = cardData.templateId || 'classic-blue';
+    
+    // Luxury templates (black/gold)
+    if (templateId === 'luxury-gold') {
+      return {
+        isLuxury: true,
+        isDark: true,
+        hasOrnate: true,
+        accentColor: '#d4af37',
+        textColor: '#d4af37',
+        buttonBg: 'rgba(212, 175, 55, 0.1)',
+        buttonBorder: 'rgba(212, 175, 55, 0.3)',
+        photoStyle: 'ornate',
+      };
+    }
+    
+    // Dark Pro templates
+    if (templateId === 'dark-pro') {
+      return {
+        isLuxury: false,
+        isDark: true,
+        hasOrnate: false,
+        accentColor: '#d4af37',
+        textColor: '#FFFFFF',
+        buttonBg: 'rgba(255, 255, 255, 0.1)',
+        buttonBorder: 'rgba(255, 255, 255, 0.15)',
+        photoStyle: 'circle',
+      };
+    }
+    
+    // Minimal templates (white card)
+    if (templateId === 'minimal-white') {
+      return {
+        isLuxury: false,
+        isDark: false,
+        hasOrnate: false,
+        accentColor: cardData.gradientColor1,
+        textColor: '#1f2937',
+        buttonBg: 'rgba(0, 0, 0, 0.05)',
+        buttonBorder: 'rgba(0, 0, 0, 0.1)',
+        photoStyle: 'circle',
+        hasWhiteCard: true,
+      };
+    }
+    
+    // Fun/Colorful templates
+    if (templateId === 'fun-colorful') {
+      return {
+        isLuxury: false,
+        isDark: false,
+        hasOrnate: false,
+        accentColor: '#fde047',
+        textColor: '#FFFFFF',
+        buttonBg: 'rgba(255, 255, 255, 0.2)',
+        buttonBorder: 'rgba(255, 255, 255, 0.2)',
+        photoStyle: 'circle',
+      };
+    }
+    
+    // Default (classic, creator, etc.)
+    return {
+      isLuxury: false,
+      isDark: false,
+      hasOrnate: false,
+      accentColor: 'rgba(255, 255, 255, 0.2)',
+      textColor: '#FFFFFF',
+      buttonBg: 'rgba(255, 255, 255, 0.12)',
+      buttonBorder: 'rgba(255, 255, 255, 0.15)',
+      photoStyle: 'circle',
+    };
+  };
+
+  const templateStyles = getTemplateStyles();
+
   return (
     <>
       <Head>
@@ -462,13 +540,18 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             </div>
 
             {/* Name & Info */}
-            <h1 style={styles.name}>{cardData.fullName}</h1>
-            {cardData.title && <p style={styles.title}>{cardData.title}</p>}
-            {cardData.company && <p style={styles.company}>{cardData.company}</p>}
+            <h1 style={{...styles.name, color: templateStyles.textColor}}>{cardData.fullName}</h1>
+            {cardData.title && <p style={{...styles.title, color: templateStyles.textColor, opacity: 0.9}}>{cardData.title}</p>}
+            {cardData.company && <p style={{...styles.company, color: templateStyles.textColor, opacity: 0.7}}>{cardData.company}</p>}
             
             {/* Location Badge */}
             {location && (
-              <div style={styles.locationBadge}>
+              <div style={{
+                ...styles.locationBadge,
+                background: templateStyles.buttonBg,
+                borderColor: templateStyles.buttonBorder,
+                color: templateStyles.textColor,
+              }}>
                 <LocationIcon />
                 <span>{location}</span>
               </div>
@@ -478,27 +561,42 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           {/* Action Buttons */}
           <div style={styles.actionButtons}>
             {cardData.phone && (
-              <a href={`tel:${cardData.phone}`} className="action-btn" style={styles.actionButton}>
+              <a href={`tel:${cardData.phone}`} className="action-btn" style={{
+                ...styles.actionButton,
+                background: templateStyles.buttonBg,
+                borderColor: templateStyles.buttonBorder,
+                color: templateStyles.textColor,
+              }}>
                 <div style={styles.actionIconWrapper}>
                   <PhoneIcon />
                 </div>
-                <span style={styles.actionText}>Call</span>
+                <span style={{...styles.actionText, color: templateStyles.textColor}}>Call</span>
               </a>
             )}
             {cardData.phone && (
-              <a href={`sms:${cardData.phone}`} className="action-btn" style={styles.actionButton}>
+              <a href={`sms:${cardData.phone}`} className="action-btn" style={{
+                ...styles.actionButton,
+                background: templateStyles.buttonBg,
+                borderColor: templateStyles.buttonBorder,
+                color: templateStyles.textColor,
+              }}>
                 <div style={styles.actionIconWrapper}>
                   <MessageIcon />
                 </div>
-                <span style={styles.actionText}>Text</span>
+                <span style={{...styles.actionText, color: templateStyles.textColor}}>Text</span>
               </a>
             )}
             {cardData.email && (
-              <a href={`mailto:${cardData.email}`} className="action-btn" style={styles.actionButton}>
+              <a href={`mailto:${cardData.email}`} className="action-btn" style={{
+                ...styles.actionButton,
+                background: templateStyles.buttonBg,
+                borderColor: templateStyles.buttonBorder,
+                color: templateStyles.textColor,
+              }}>
                 <div style={styles.actionIconWrapper}>
                   <EmailIcon />
                 </div>
-                <span style={styles.actionText}>Email</span>
+                <span style={{...styles.actionText, color: templateStyles.textColor}}>Email</span>
               </a>
             )}
             {cardData.website && (
@@ -507,12 +605,17 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="action-btn"
-                style={styles.actionButton}
+                style={{
+                  ...styles.actionButton,
+                  background: templateStyles.buttonBg,
+                  borderColor: templateStyles.buttonBorder,
+                  color: templateStyles.textColor,
+                }}
               >
                 <div style={styles.actionIconWrapper}>
                   <GlobeIcon />
                 </div>
-                <span style={styles.actionText}>Website</span>
+                <span style={{...styles.actionText, color: templateStyles.textColor}}>Website</span>
               </a>
             )}
           </div>
@@ -1179,6 +1282,8 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
     const cardData: CardData = {
       id: data.id,
       slug: data.slug,
+      templateId: data.template_id || 'classic-blue',
+      colorSchemeId: data.color_scheme_id || 'blue',
       fullName: data.full_name,
       title: data.title || '',
       company: data.company || '',
@@ -1187,8 +1292,8 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       website: data.website || '',
       city: data.city || '',
       state: data.state || '',
-      gradientColor1: data.gradient_color_1 || '#8B5CF6',
-      gradientColor2: data.gradient_color_2 || '#4F46E5',
+      gradientColor1: data.gradient_color_1 || '#1E90FF',
+      gradientColor2: data.gradient_color_2 || '#00BFFF',
       profilePhotoUrl: data.profile_photo_url,
       socialInstagram: data.social_instagram || '',
       socialFacebook: data.social_facebook || '',
