@@ -1,7 +1,7 @@
 /**
  * Public Digital Card Viewer - Premium Design
- * Path: pages/card/[slug].tsx
- * URL: tavvy.com/card/[slug]
+ * Path: pages/[slug].tsx
+ * URL: tavvy.com/[slug] (e.g., tavvy.com/danielmartins)
  *
  * Features:
  * - Premium, polished card design
@@ -35,19 +35,41 @@ interface CardData {
   fullName: string;
   title: string;
   company: string;
+  bio: string;
   phone: string;
   email: string;
   website: string;
+  // Address fields
+  address1: string;
+  address2: string;
   city: string;
   state: string;
+  zipCode: string;
+  country: string;
   gradientColor1: string;
   gradientColor2: string;
   profilePhotoUrl: string | null;
+  // Social links
   socialInstagram: string;
   socialFacebook: string;
   socialLinkedin: string;
   socialTwitter: string;
   socialTiktok: string;
+  socialYoutube: string;
+  socialSnapchat: string;
+  socialPinterest: string;
+  socialWhatsapp: string;
+  // Featured socials (array of platform IDs to show in icon row)
+  featuredSocials: string[];
+  // YouTube video block
+  youtubeVideoId: string;
+  youtubeTitle: string;
+  // Gallery block
+  galleryImages: { id: string; uri: string; caption?: string }[];
+  galleryTitle: string;
+  // Testimonials block
+  testimonials: { id: string; customerName: string; reviewText: string; rating: number; customerPhoto?: string; date?: string; source?: string }[];
+  testimonialsTitle: string;
   links: CardLink[];
   tapCount: number;
 }
@@ -544,8 +566,40 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             {cardData.title && <p style={{...styles.title, color: templateStyles.textColor, opacity: 0.9}}>{cardData.title}</p>}
             {cardData.company && <p style={{...styles.company, color: templateStyles.textColor, opacity: 0.7}}>{cardData.company}</p>}
             
-            {/* Location Badge */}
-            {location && (
+            {/* Bio */}
+            {cardData.bio && (
+              <p style={{
+                ...styles.bio,
+                color: templateStyles.textColor,
+              }}>
+                {cardData.bio}
+              </p>
+            )}
+            
+            {/* Address Display */}
+            {(cardData.address1 || cardData.city) && (
+              <div style={{
+                ...styles.addressBadge,
+                background: templateStyles.buttonBg,
+                borderColor: templateStyles.buttonBorder,
+                color: templateStyles.textColor,
+              }}>
+                <LocationIcon />
+                <div style={styles.addressText}>
+                  {cardData.address1 && <span>{cardData.address1}</span>}
+                  {cardData.address2 && <span> {cardData.address2}</span>}
+                  {(cardData.city || cardData.state || cardData.zipCode) && (
+                    <span style={styles.addressLine2}>
+                      {[cardData.city, cardData.state].filter(Boolean).join(', ')}
+                      {cardData.zipCode && ` ${cardData.zipCode}`}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {/* Simple Location Badge (fallback if no full address) */}
+            {!cardData.address1 && !cardData.city && location && (
               <div style={{
                 ...styles.locationBadge,
                 background: templateStyles.buttonBg,
@@ -693,6 +747,62 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   </svg>
                 </a>
               )}
+              {cardData.socialYoutube && (
+                <a 
+                  href={cardData.socialYoutube.startsWith('http') ? cardData.socialYoutube : `https://youtube.com/@${cardData.socialYoutube}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-btn"
+                  style={styles.socialButton}
+                  title="YouTube"
+                >
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                  </svg>
+                </a>
+              )}
+              {cardData.socialSnapchat && (
+                <a 
+                  href={`https://snapchat.com/add/${cardData.socialSnapchat}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-btn"
+                  style={styles.socialButton}
+                  title="Snapchat"
+                >
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                    <path d="M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.299 4.847l-.003.06c-.012.18-.022.345-.03.51.075.045.203.09.401.09.3-.016.659-.12 1.033-.301.165-.088.344-.104.464-.104.182 0 .359.029.509.09.45.149.734.479.734.838.015.449-.39.839-1.213 1.168-.089.029-.209.075-.344.119-.45.135-1.139.36-1.333.81-.09.224-.061.524.12.868l.015.015c.06.136 1.526 3.475 4.791 4.014.255.044.435.27.42.509 0 .075-.015.149-.045.225-.24.569-1.273.988-3.146 1.271-.059.091-.12.375-.164.57-.029.179-.074.36-.134.553-.076.271-.27.405-.555.405h-.03c-.135 0-.313-.031-.538-.074-.36-.075-.765-.135-1.273-.135-.3 0-.599.015-.913.074-.6.104-1.123.464-1.723.884-.853.599-1.826 1.288-3.294 1.288-.06 0-.119-.015-.18-.015h-.149c-1.468 0-2.427-.675-3.279-1.288-.599-.42-1.107-.779-1.707-.884-.314-.045-.629-.074-.928-.074-.54 0-.958.089-1.272.149-.211.043-.391.074-.54.074-.374 0-.523-.224-.583-.42-.061-.192-.09-.389-.135-.567-.046-.181-.105-.494-.166-.57-1.918-.222-2.95-.642-3.189-1.226-.031-.063-.052-.15-.055-.225-.015-.243.165-.465.42-.509 3.264-.54 4.73-3.879 4.791-4.02l.016-.029c.18-.345.224-.645.119-.869-.195-.434-.884-.658-1.332-.809-.121-.029-.24-.074-.346-.119-1.107-.435-1.257-.93-1.197-1.273.09-.479.674-.793 1.168-.793.146 0 .27.029.383.074.42.194.789.3 1.104.3.234 0 .384-.06.465-.105l-.046-.569c-.098-1.626-.225-3.651.307-4.837C7.392 1.077 10.739.807 11.727.807l.419-.015h.06z"/>
+                  </svg>
+                </a>
+              )}
+              {cardData.socialPinterest && (
+                <a 
+                  href={`https://pinterest.com/${cardData.socialPinterest}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-btn"
+                  style={styles.socialButton}
+                  title="Pinterest"
+                >
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                    <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/>
+                  </svg>
+                </a>
+              )}
+              {cardData.socialWhatsapp && (
+                <a 
+                  href={`https://wa.me/${cardData.socialWhatsapp.replace(/[^0-9]/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="social-btn"
+                  style={styles.socialButton}
+                  title="WhatsApp"
+                >
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                  </svg>
+                </a>
+              )}
             </div>
           )}
 
@@ -708,6 +818,133 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               <span style={styles.toggleText}>{showMore ? 'Hide Links' : 'View Links'}</span>
               <ChevronIcon rotated={showMore} />
             </button>
+          )}
+
+          {/* YouTube Video Block */}
+          {cardData.youtubeVideoId && (
+            <div style={styles.youtubeBlock}>
+              {cardData.youtubeTitle && (
+                <h3 style={styles.youtubeTitle}>{cardData.youtubeTitle}</h3>
+              )}
+              <a 
+                href={`https://youtube.com/watch?v=${cardData.youtubeVideoId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={styles.youtubeThumbnailContainer}
+              >
+                <img 
+                  src={`https://img.youtube.com/vi/${cardData.youtubeVideoId}/maxresdefault.jpg`}
+                  alt="YouTube Video"
+                  style={styles.youtubeThumbnail}
+                />
+                <div style={styles.youtubePlayOverlay}>
+                  <div style={styles.youtubePlayButton}>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                  </div>
+                </div>
+                <div style={styles.youtubeBadge}>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="#FF0000">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814z"/>
+                  </svg>
+                  <span style={styles.youtubeBadgeText}>YouTube</span>
+                </div>
+              </a>
+            </div>
+          )}
+
+          {/* Gallery Block */}
+          {cardData.galleryImages && cardData.galleryImages.length > 0 && (
+            <div style={styles.galleryBlock}>
+              {cardData.galleryTitle && (
+                <h3 style={styles.galleryTitle}>{cardData.galleryTitle}</h3>
+              )}
+              <div style={styles.galleryGrid}>
+                {cardData.galleryImages.slice(0, 9).map((image, index) => (
+                  <div key={image.id || index} style={styles.galleryImageContainer}>
+                    <img 
+                      src={image.uri} 
+                      alt={image.caption || `Gallery image ${index + 1}`}
+                      style={styles.galleryImage}
+                    />
+                    {index === 8 && cardData.galleryImages.length > 9 && (
+                      <div style={styles.galleryMoreOverlay}>
+                        <span style={styles.galleryMoreText}>+{cardData.galleryImages.length - 9}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div style={styles.galleryCountBadge}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <span>{cardData.galleryImages.length} photos</span>
+              </div>
+            </div>
+          )}
+
+          {/* Testimonials Block */}
+          {cardData.testimonials && cardData.testimonials.length > 0 && (
+            <div style={styles.testimonialsBlock}>
+              {cardData.testimonialsTitle && (
+                <h3 style={styles.testimonialsTitle}>{cardData.testimonialsTitle}</h3>
+              )}
+              <div style={styles.testimonialsQuoteIcon}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)">
+                  <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
+                </svg>
+              </div>
+              <div style={styles.testimonialsCarousel}>
+                {cardData.testimonials.map((testimonial, index) => (
+                  <div key={testimonial.id || index} style={styles.testimonialCard}>
+                    <div style={styles.testimonialHeader}>
+                      {testimonial.customerPhoto ? (
+                        <img 
+                          src={testimonial.customerPhoto} 
+                          alt={testimonial.customerName}
+                          style={styles.testimonialPhoto}
+                        />
+                      ) : (
+                        <div style={styles.testimonialPhotoPlaceholder}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                          </svg>
+                        </div>
+                      )}
+                      <div style={styles.testimonialInfo}>
+                        <span style={styles.testimonialName}>{testimonial.customerName}</span>
+                        <div style={styles.testimonialStars}>
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <svg key={star} width="14" height="14" viewBox="0 0 24 24" fill={star <= testimonial.rating ? '#FFD700' : 'rgba(255,255,255,0.3)'}>
+                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                          ))}
+                        </div>
+                      </div>
+                      {testimonial.source && (
+                        <div style={styles.testimonialSourceBadge}>
+                          <span style={styles.testimonialSourceText}>{testimonial.source}</span>
+                        </div>
+                      )}
+                    </div>
+                    <p style={styles.testimonialText}>"{testimonial.reviewText}"</p>
+                    {testimonial.date && (
+                      <span style={styles.testimonialDate}>{testimonial.date}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div style={styles.testimonialsCountBadge}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span>{cardData.testimonials.length} reviews</span>
+              </div>
+            </div>
           )}
 
           {/* Links Section */}
@@ -911,8 +1148,40 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '15px',
     fontWeight: '500',
     color: 'rgba(255, 255, 255, 0.7)',
+    margin: '0 0 8px 0',
+    textAlign: 'center',
+  },
+  bio: {
+    fontSize: '14px',
+    fontWeight: '400',
+    color: 'rgba(255, 255, 255, 0.75)',
     margin: '0 0 16px 0',
     textAlign: 'center',
+    lineHeight: '1.5',
+    maxWidth: '320px',
+    padding: '0 16px',
+  },
+  addressBadge: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '8px',
+    fontSize: '13px',
+    fontWeight: '500',
+    color: 'rgba(255, 255, 255, 0.8)',
+    background: 'rgba(255, 255, 255, 0.12)',
+    padding: '10px 16px',
+    borderRadius: '12px',
+    border: '1px solid rgba(255,255,255,0.1)',
+    marginBottom: '8px',
+  },
+  addressText: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+  },
+  addressLine2: {
+    display: 'block',
+    opacity: 0.85,
   },
   locationBadge: {
     display: 'flex',
@@ -1007,6 +1276,233 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '14px',
     fontWeight: '600',
     letterSpacing: '0.3px',
+  },
+  youtubeBlock: {
+    width: '100%',
+    maxWidth: '360px',
+    marginBottom: '24px',
+  },
+  youtubeTitle: {
+    fontSize: '16px',
+    fontWeight: '600',
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: '12px',
+    margin: '0 0 12px 0',
+  },
+  youtubeThumbnailContainer: {
+    display: 'block',
+    width: '100%',
+    aspectRatio: '16 / 9',
+    borderRadius: '16px',
+    overflow: 'hidden',
+    position: 'relative',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+  },
+  youtubeThumbnail: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+  },
+  youtubePlayOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'rgba(0,0,0,0.25)',
+  },
+  youtubePlayButton: {
+    width: '56px',
+    height: '56px',
+    borderRadius: '28px',
+    background: '#FF0000',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingLeft: '3px',
+    boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+  },
+  youtubeBadge: {
+    position: 'absolute',
+    bottom: '10px',
+    right: '10px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    background: 'rgba(255,255,255,0.95)',
+    padding: '5px 10px',
+    borderRadius: '6px',
+  },
+  youtubeBadgeText: {
+    fontSize: '12px',
+    fontWeight: '600',
+    color: '#333',
+  },
+  // Gallery Block Styles
+  galleryBlock: {
+    width: '100%',
+    maxWidth: '360px',
+    marginBottom: '24px',
+  },
+  galleryTitle: {
+    fontSize: '16px',
+    fontWeight: '600',
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: '12px',
+    margin: '0 0 12px 0',
+  },
+  galleryGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: '4px',
+    borderRadius: '16px',
+    overflow: 'hidden',
+  },
+  galleryImageContainer: {
+    position: 'relative',
+    aspectRatio: '1 / 1',
+    overflow: 'hidden',
+  },
+  galleryImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    transition: 'transform 0.3s ease',
+  },
+  galleryMoreOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(0,0,0,0.6)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  galleryMoreText: {
+    color: 'white',
+    fontSize: '20px',
+    fontWeight: '700',
+  },
+  galleryCountBadge: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '6px',
+    padding: '8px 16px',
+    background: 'rgba(255,255,255,0.15)',
+    borderRadius: '20px',
+    marginTop: '12px',
+    color: 'white',
+    fontSize: '13px',
+    fontWeight: '600',
+  },
+  // Testimonials Block Styles
+  testimonialsBlock: {
+    width: '100%',
+    maxWidth: '360px',
+    marginBottom: '24px',
+  },
+  testimonialsTitle: {
+    fontSize: '16px',
+    fontWeight: '600',
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: '12px',
+    margin: '0 0 12px 0',
+  },
+  testimonialsQuoteIcon: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '12px',
+  },
+  testimonialsCarousel: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '12px',
+  },
+  testimonialCard: {
+    background: 'rgba(255, 255, 255, 0.12)',
+    borderRadius: '16px',
+    padding: '16px',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
+  },
+  testimonialHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: '12px',
+    gap: '12px',
+  },
+  testimonialPhoto: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '24px',
+    objectFit: 'cover',
+    border: '2px solid rgba(255,255,255,0.3)',
+  },
+  testimonialPhotoPlaceholder: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '24px',
+    background: 'rgba(255,255,255,0.15)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    border: '2px solid rgba(255,255,255,0.2)',
+  },
+  testimonialInfo: {
+    flex: 1,
+  },
+  testimonialName: {
+    display: 'block',
+    fontSize: '15px',
+    fontWeight: '600',
+    color: 'white',
+    marginBottom: '4px',
+  },
+  testimonialStars: {
+    display: 'flex',
+    gap: '2px',
+  },
+  testimonialSourceBadge: {
+    background: 'rgba(255,255,255,0.2)',
+    padding: '4px 10px',
+    borderRadius: '12px',
+  },
+  testimonialSourceText: {
+    fontSize: '11px',
+    fontWeight: '600',
+    color: 'white',
+  },
+  testimonialText: {
+    fontSize: '14px',
+    color: 'rgba(255,255,255,0.9)',
+    lineHeight: '1.5',
+    fontStyle: 'italic',
+    margin: '0 0 8px 0',
+  },
+  testimonialDate: {
+    fontSize: '12px',
+    color: 'rgba(255,255,255,0.5)',
+  },
+  testimonialsCountBadge: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '6px',
+    padding: '8px 16px',
+    background: 'rgba(255,255,255,0.15)',
+    borderRadius: '20px',
+    marginTop: '12px',
+    color: 'white',
+    fontSize: '13px',
+    fontWeight: '600',
   },
   linksSection: {
     width: '100%',
@@ -1227,7 +1723,29 @@ const styles: { [key: string]: React.CSSProperties } = {
 
 // Server-side data fetching
 export const getServerSideProps: GetServerSideProps<PageProps> = async (context) => {
-  const { slug } = context.params as { slug: string };
+  const { username } = context.params as { username: string };
+  const slug = username; // For compatibility with existing code
+  
+  // Reserved usernames that should not be treated as card slugs
+  const RESERVED_ROUTES = [
+    'home', 'login', 'signup', 'register', 'logout', 'auth', 'api', 'admin', 'dashboard',
+    'pros', 'atlas', 'universe', 'universes', 'explore', 'discover', 'search', 'places',
+    'cities', 'rides', 'realtors', 'wallet', 'apps', 'menu', 'settings', 'profile', 'account',
+    'card', 'cards', 'ecard', 'ecards', 'c', 'create', 'edit', 'preview', 'templates', 'themes',
+    'shop', 'store', 'marketplace', 'events', 'tickets', 'booking', 'bookings', 'jobs', 'careers',
+    'blog', 'news', 'help', 'support', 'contact', 'about', 'about-us', 'terms', 'privacy', 'legal',
+    'faq', 'pricing', 'plans', 'premium', 'pro', 'business', 'enterprise',
+    'tavvy', 'tavvyapp', 'official', 'verified', 'team', 'staff', 'moderator', 'mod',
+    'www', 'mail', 'email', 'ftp', 'cdn', 'static', 'assets', 'images', 'img', 'files',
+    'uploads', 'download', 'downloads', 'place', 'app', '_next', 'favicon.ico'
+  ];
+  
+  // Check if this is a reserved route
+  if (RESERVED_ROUTES.includes(slug.toLowerCase())) {
+    return {
+      notFound: true,
+    };
+  }
   
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '';
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '';
@@ -1287,19 +1805,47 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       fullName: data.full_name,
       title: data.title || '',
       company: data.company || '',
+      bio: data.bio || '',
       phone: data.phone || '',
       email: data.email || '',
       website: data.website || '',
+      // Address fields
+      address1: data.address_1 || data.address1 || '',
+      address2: data.address_2 || data.address2 || '',
       city: data.city || '',
       state: data.state || '',
+      zipCode: data.zip_code || data.zipCode || '',
+      country: data.country || 'USA',
       gradientColor1: data.gradient_color_1 || '#1E90FF',
       gradientColor2: data.gradient_color_2 || '#00BFFF',
       profilePhotoUrl: data.profile_photo_url,
+      // Social links
       socialInstagram: data.social_instagram || '',
       socialFacebook: data.social_facebook || '',
       socialLinkedin: data.social_linkedin || '',
       socialTwitter: data.social_twitter || '',
       socialTiktok: data.social_tiktok || '',
+      socialYoutube: data.social_youtube || '',
+      socialSnapchat: data.social_snapchat || '',
+      socialPinterest: data.social_pinterest || '',
+      socialWhatsapp: data.social_whatsapp || '',
+      // Featured socials (parse JSON if stored as string)
+      featuredSocials: data.featured_socials ? 
+        (typeof data.featured_socials === 'string' ? JSON.parse(data.featured_socials) : data.featured_socials) 
+        : [],
+      // YouTube video block
+      youtubeVideoId: data.youtube_video_id || '',
+      youtubeTitle: data.youtube_title || '',
+      // Gallery block
+      galleryImages: data.gallery_images ? 
+        (typeof data.gallery_images === 'string' ? JSON.parse(data.gallery_images) : data.gallery_images) 
+        : [],
+      galleryTitle: data.gallery_title || '',
+      // Testimonials block
+      testimonials: data.testimonials ? 
+        (typeof data.testimonials === 'string' ? JSON.parse(data.testimonials) : data.testimonials) 
+        : [],
+      testimonialsTitle: data.testimonials_title || '',
       tapCount: data.tap_count || 0,
       links: linksData?.map(l => ({
         id: l.id,
