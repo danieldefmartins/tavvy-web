@@ -1,73 +1,101 @@
 /**
  * Happening Now Screen
  * Live events and activities happening nearby
+ * Fetches real events from Ticketmaster, PredictHQ, and Tavvy community
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
-import { supabase } from '../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../constants/Colors';
-import { FiMapPin, FiClock, FiUsers, FiCalendar, FiZap } from 'react-icons/fi';
-
-interface Event {
-  id: string;
-  title: string;
-  slug?: string;
-  description?: string;
-  cover_image_url?: string;
-  category?: string;
-  venue_name?: string;
-  location?: string;
-  start_time?: string;
-  end_time?: string;
-  is_free?: boolean;
-  price?: number;
-  attendee_count?: number;
-}
+import { FiMapPin, FiClock, FiCalendar, FiZap, FiExternalLink, FiRefreshCw } from 'react-icons/fi';
+import { getHappeningNowEvents, TavvyEvent } from '../../lib/eventsService';
 
 const EVENT_CATEGORIES = [
   { id: 'all', name: 'All', icon: '🎉' },
-  { id: 'music', name: 'Music', icon: '🎵' },
-  { id: 'food', name: 'Food & Drink', icon: '🍻' },
+  { id: 'concerts', name: 'Concerts', icon: '🎵' },
   { id: 'sports', name: 'Sports', icon: '⚽' },
+  { id: 'festivals', name: 'Festivals', icon: '🎪' },
   { id: 'arts', name: 'Arts', icon: '🎨' },
-  { id: 'networking', name: 'Networking', icon: '🤝' },
-  { id: 'community', name: 'Community', icon: '👥' },
+  { id: 'other', name: 'Other', icon: '✨' },
 ];
+
+const TIME_FILTERS = [
+  { id: 'all', name: 'All Time' },
+  { id: 'tonight', name: 'Tonight' },
+  { id: 'weekend', name: 'This Weekend' },
+  { id: 'week', name: 'This Week' },
+];
+
+const DEFAULT_EVENT_IMAGE = 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400&h=300&fit=crop';
 
 export default function HappeningNowScreen() {
   const { theme } = useThemeContext();
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<TavvyEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedTime, setSelectedTime] = useState('all');
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
+  // Get user location
   useEffect(() => {
-    fetchEvents();
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error('Location error:', error);
+          setLocationError('Location access denied. Using default location.');
+          // Default to Orlando, FL
+          setUserLocation({ lat: 28.5383, lng: -81.3792 });
+        }
+      );
+    } else {
+      setLocationError('Geolocation not supported. Using default location.');
+      setUserLocation({ lat: 28.5383, lng: -81.3792 });
+    }
   }, []);
 
-  const fetchEvents = async () => {
-    try {
-      const now = new Date().toISOString();
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .gte('end_time', now)
-        .order('start_time', { ascending: true })
-        .limit(50);
+  // Fetch events when location is available
+  const fetchEvents = useCallback(async (isRefresh = false) => {
+    if (!userLocation) return;
 
-      if (!error) {
-        setEvents(data || []);
-      }
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+
+    try {
+      const fetchedEvents = await getHappeningNowEvents(
+        userLocation.lat,
+        userLocation.lng,
+        50, // 50 mile radius
+        selectedTime === 'all' ? undefined : selectedTime
+      );
+      setEvents(fetchedEvents);
     } catch (error) {
       console.error('Error fetching events:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
-  };
+  }, [userLocation, selectedTime]);
 
+  useEffect(() => {
+    if (userLocation) {
+      fetchEvents();
+    }
+  }, [userLocation, selectedTime, fetchEvents]);
+
+  // Filter events by category
   const filteredEvents = events.filter(event => 
     selectedCategory === 'all' || event.category === selectedCategory
   );
@@ -93,10 +121,31 @@ export default function HappeningNowScreen() {
     return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   };
 
-  const isHappeningNow = (startTime?: string, endTime?: string) => {
-    if (!startTime || !endTime) return false;
-    const now = new Date();
-    return new Date(startTime) <= now && new Date(endTime) >= now;
+  const getSourceBadge = (source: string) => {
+    switch (source) {
+      case 'ticketmaster':
+        return { text: 'TM', color: '#026CDF' };
+      case 'predicthq':
+        return { text: 'PHQ', color: '#FF6B35' };
+      case 'tavvy':
+        return { text: 'Tavvy', color: '#0F8A8A' };
+      default:
+        return { text: source, color: '#666' };
+    }
+  };
+
+  const formatPrice = (event: TavvyEvent) => {
+    if (event.price_min === 0 || event.price_min === undefined) return 'Free';
+    if (event.price_max && event.price_max !== event.price_min) {
+      return `$${event.price_min} - $${event.price_max}`;
+    }
+    return `From $${event.price_min}`;
+  };
+
+  const handleEventClick = (event: TavvyEvent) => {
+    if (event.url) {
+      window.open(event.url, '_blank', 'noopener,noreferrer');
+    }
   };
 
   return (
@@ -110,12 +159,46 @@ export default function HappeningNowScreen() {
         <div className="happening-screen" style={{ backgroundColor: theme.background }}>
           {/* Header */}
           <header className="happening-header" style={{ background: 'linear-gradient(135deg, #F59E0B, #EF4444)' }}>
-            <div className="header-badge">
-              <FiZap size={16} /> LIVE
+            <div className="header-content">
+              <div className="header-badge">
+                <FiZap size={16} /> LIVE
+              </div>
+              <h1>🎉 Happening Now</h1>
+              <p>Real events from Ticketmaster, PredictHQ & more</p>
             </div>
-            <h1>🎉 Happening Now</h1>
-            <p>Events and activities near you</p>
+            <button 
+              className="refresh-btn"
+              onClick={() => fetchEvents(true)}
+              disabled={refreshing}
+            >
+              <FiRefreshCw size={20} className={refreshing ? 'spinning' : ''} />
+            </button>
           </header>
+
+          {locationError && (
+            <div className="location-notice" style={{ backgroundColor: theme.surface }}>
+              <FiMapPin size={14} />
+              <span style={{ color: theme.textSecondary }}>{locationError}</span>
+            </div>
+          )}
+
+          {/* Time Filter Pills */}
+          <div className="time-filters">
+            {TIME_FILTERS.map((filter) => (
+              <button
+                key={filter.id}
+                className={`time-pill ${selectedTime === filter.id ? 'active' : ''}`}
+                onClick={() => setSelectedTime(filter.id)}
+                style={{
+                  backgroundColor: selectedTime === filter.id ? theme.primary : 'transparent',
+                  color: selectedTime === filter.id ? 'white' : theme.text,
+                  borderColor: selectedTime === filter.id ? theme.primary : theme.border,
+                }}
+              >
+                {filter.name}
+              </button>
+            ))}
+          </div>
 
           {/* Category Pills */}
           <div className="categories-scroll">
@@ -139,40 +222,44 @@ export default function HappeningNowScreen() {
             {loading ? (
               <div className="loading-container">
                 <div className="loading-spinner" />
+                <p style={{ color: theme.textSecondary }}>Finding events near you...</p>
               </div>
             ) : filteredEvents.length === 0 ? (
               <div className="empty-state">
                 <span>🎉</span>
-                <h3 style={{ color: theme.text }}>No events happening now</h3>
+                <h3 style={{ color: theme.text }}>No events found</h3>
                 <p style={{ color: theme.textSecondary }}>
-                  Check back later for upcoming events
+                  {selectedCategory !== 'all' 
+                    ? `No ${selectedCategory} events found. Try a different category.`
+                    : 'Check back later for upcoming events in your area.'}
                 </p>
               </div>
             ) : (
-              <div className="events-list">
+              <div className="events-grid">
                 {filteredEvents.map((event) => {
-                  const happeningNow = isHappeningNow(event.start_time, event.end_time);
+                  const sourceBadge = getSourceBadge(event.source);
                   return (
-                    <Link
+                    <div
                       key={event.id}
-                      href={`/app/event/${event.slug || event.id}`}
                       className="event-card"
                       style={{ backgroundColor: theme.cardBackground }}
+                      onClick={() => handleEventClick(event)}
                     >
                       <div className="card-image">
-                        {event.cover_image_url ? (
-                          <img src={event.cover_image_url} alt={event.title} />
-                        ) : (
-                          <div className="image-placeholder" style={{ backgroundColor: theme.surface }}>
-                            🎉
-                          </div>
-                        )}
-                        {happeningNow && (
-                          <span className="live-badge">
-                            <FiZap size={12} /> LIVE NOW
-                          </span>
-                        )}
-                        {event.is_free && (
+                        <img 
+                          src={event.image_url || DEFAULT_EVENT_IMAGE} 
+                          alt={event.title}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = DEFAULT_EVENT_IMAGE;
+                          }}
+                        />
+                        <span 
+                          className="source-badge"
+                          style={{ backgroundColor: sourceBadge.color }}
+                        >
+                          {sourceBadge.text}
+                        </span>
+                        {event.price_min === 0 && (
                           <span className="free-badge">FREE</span>
                         )}
                       </div>
@@ -192,19 +279,17 @@ export default function HappeningNowScreen() {
                           </p>
                         )}
                         <div className="card-footer">
-                          {event.attendee_count !== undefined && event.attendee_count > 0 && (
-                            <span className="attendees" style={{ color: theme.textTertiary }}>
-                              <FiUsers size={12} /> {event.attendee_count} going
-                            </span>
-                          )}
-                          {!event.is_free && event.price !== undefined && (
-                            <span className="price" style={{ color: theme.text }}>
-                              ${event.price}
+                          <span className="price" style={{ color: theme.text }}>
+                            {formatPrice(event)}
+                          </span>
+                          {event.url && (
+                            <span className="external-link" style={{ color: theme.primary }}>
+                              <FiExternalLink size={14} />
                             </span>
                           )}
                         </div>
                       </div>
-                    </Link>
+                    </div>
                   );
                 })}
               </div>
@@ -222,7 +307,42 @@ export default function HappeningNowScreen() {
             padding: ${spacing.lg}px;
             padding-top: max(${spacing.lg}px, env(safe-area-inset-top));
             padding-bottom: ${spacing.xl}px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
           }
+          
+          .header-content {
+            flex: 1;
+          }
+          
+          .refresh-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: background 0.2s;
+          }
+          
+          .refresh-btn:hover {
+            background: rgba(255,255,255,0.3);
+          }
+          
+          .refresh-btn:disabled {
+            opacity: 0.6;
+          }
+          
+          .spinning {
+            animation: spin 1s linear infinite;
+          }
+          
+          @keyframes spin { to { transform: rotate(360deg); } }
           
           .header-badge {
             display: inline-flex;
@@ -250,10 +370,34 @@ export default function HappeningNowScreen() {
             margin: 0;
           }
           
+          .location-notice {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px ${spacing.lg}px;
+            font-size: 13px;
+          }
+          
+          .time-filters {
+            display: flex;
+            gap: ${spacing.sm}px;
+            padding: ${spacing.md}px ${spacing.lg}px;
+          }
+          
+          .time-pill {
+            padding: 6px 14px;
+            border-radius: ${borderRadius.full}px;
+            border: 1px solid;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+          }
+          
           .categories-scroll {
             display: flex;
             gap: ${spacing.sm}px;
-            padding: ${spacing.lg}px;
+            padding: 0 ${spacing.lg}px ${spacing.md}px;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
@@ -271,6 +415,7 @@ export default function HappeningNowScreen() {
             font-weight: 500;
             cursor: pointer;
             white-space: nowrap;
+            transition: all 0.2s;
           }
           
           .events-section {
@@ -279,8 +424,11 @@ export default function HappeningNowScreen() {
           
           .loading-container {
             display: flex;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
             padding: 60px;
+            gap: ${spacing.md}px;
           }
           
           .loading-spinner {
@@ -291,8 +439,6 @@ export default function HappeningNowScreen() {
             border-radius: 50%;
             animation: spin 1s linear infinite;
           }
-          
-          @keyframes spin { to { transform: rotate(360deg); } }
           
           .empty-state {
             text-align: center;
@@ -316,29 +462,28 @@ export default function HappeningNowScreen() {
             margin: 0;
           }
           
-          .events-list {
-            display: flex;
-            flex-direction: column;
+          .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: ${spacing.md}px;
           }
           
           .event-card {
-            display: flex;
             border-radius: ${borderRadius.lg}px;
             overflow: hidden;
-            text-decoration: none;
-            transition: transform 0.2s;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
           }
           
           .event-card:hover {
-            transform: translateX(4px);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
           }
           
           .card-image {
             position: relative;
-            width: 120px;
-            min-width: 120px;
-            height: 120px;
+            width: 100%;
+            height: 180px;
           }
           
           .card-image img {
@@ -347,42 +492,23 @@ export default function HappeningNowScreen() {
             object-fit: cover;
           }
           
-          .image-placeholder {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-          }
-          
-          .live-badge {
+          .source-badge {
             position: absolute;
             top: ${spacing.sm}px;
             left: ${spacing.sm}px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            background: #EF4444;
             padding: 4px 8px;
             border-radius: ${borderRadius.sm}px;
             color: white;
             font-size: 10px;
             font-weight: 700;
-            animation: pulse 2s infinite;
-          }
-          
-          @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
           }
           
           .free-badge {
             position: absolute;
-            bottom: ${spacing.sm}px;
-            left: ${spacing.sm}px;
+            top: ${spacing.sm}px;
+            right: ${spacing.sm}px;
             background: #10B981;
-            padding: 2px 8px;
+            padding: 4px 8px;
             border-radius: ${borderRadius.sm}px;
             color: white;
             font-size: 10px;
@@ -390,10 +516,7 @@ export default function HappeningNowScreen() {
           }
           
           .card-content {
-            flex: 1;
             padding: ${spacing.md}px;
-            display: flex;
-            flex-direction: column;
           }
           
           .time-info {
@@ -421,30 +544,34 @@ export default function HappeningNowScreen() {
           
           .venue {
             font-size: 13px;
-            margin: 0;
+            margin: 0 0 ${spacing.sm}px;
             display: flex;
             align-items: center;
             gap: 4px;
           }
           
           .card-footer {
-            margin-top: auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding-top: ${spacing.sm}px;
-          }
-          
-          .attendees {
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            border-top: 1px solid ${theme.border};
           }
           
           .price {
             font-size: 14px;
             font-weight: 600;
+          }
+          
+          .external-link {
+            display: flex;
+            align-items: center;
+          }
+          
+          @media (max-width: 640px) {
+            .events-grid {
+              grid-template-columns: 1fr;
+            }
           }
         `}</style>
       </AppLayout>
