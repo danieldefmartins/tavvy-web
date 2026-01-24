@@ -99,6 +99,12 @@ interface CardData {
   testimonialsTitle: string;
   // Form block
   formBlock: FormBlockData | null;
+  // Appearance settings
+  theme: string;
+  backgroundType: string;
+  backgroundImageUrl: string | null;
+  buttonStyle: string;
+  fontStyle: string;
   links: CardLink[];
   tapCount: number;
 }
@@ -560,6 +566,47 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
 
   const templateStyles = getTemplateStyles();
 
+  // Get button style based on cardData.buttonStyle
+  const getButtonStyleOverrides = () => {
+    const buttonStyle = cardData.buttonStyle || 'fill';
+    switch (buttonStyle) {
+      case 'outline':
+        return {
+          background: 'transparent',
+          border: `2px solid ${templateStyles.textColor || 'rgba(255,255,255,0.5)'}`,
+        };
+      case 'rounded':
+        return {
+          borderRadius: '50px',
+        };
+      case 'shadow':
+        return {
+          boxShadow: '0 8px 24px rgba(0,0,0,0.25)',
+        };
+      default: // 'fill'
+        return {};
+    }
+  };
+
+  const buttonStyleOverrides = getButtonStyleOverrides();
+
+  // Get font style based on cardData.fontStyle
+  const getFontStyleOverrides = () => {
+    const fontStyle = cardData.fontStyle || 'default';
+    switch (fontStyle) {
+      case 'modern':
+        return { fontWeight: '300', letterSpacing: '0.5px' };
+      case 'classic':
+        return { fontStyle: 'italic' };
+      case 'bold':
+        return { fontWeight: '900', letterSpacing: '-0.5px' };
+      default:
+        return {};
+    }
+  };
+
+  const fontStyleOverrides = getFontStyleOverrides();
+
   return (
     <>
       <Head>
@@ -608,11 +655,20 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
       </Head>
 
       <div style={styles.page}>
-        {/* Background Gradient */}
+        {/* Background - supports solid, gradient, and image */}
         <div 
           style={{
             ...styles.backgroundGradient,
-            background: `linear-gradient(165deg, ${cardData.gradientColor1} 0%, ${cardData.gradientColor2} 50%, #0a0f1e 100%)`,
+            ...(cardData.backgroundType === 'solid' 
+              ? { background: cardData.gradientColor1 }
+              : cardData.backgroundType === 'image' && cardData.backgroundImageUrl
+                ? { 
+                    backgroundImage: `url(${cardData.backgroundImageUrl})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }
+                : { background: `linear-gradient(165deg, ${cardData.gradientColor1} 0%, ${cardData.gradientColor2} 50%, #0a0f1e 100%)` }
+            ),
           }}
         />
 
@@ -711,9 +767,9 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             })()}
 
             {/* Name & Info */}
-            <h1 style={{...styles.name, color: templateStyles.textColor}}>{cardData.fullName}</h1>
-            {cardData.title && <p style={{...styles.title, color: templateStyles.textColor, opacity: 0.9}}>{cardData.title}</p>}
-            {cardData.company && <p style={{...styles.company, color: templateStyles.textColor, opacity: 0.7}}>{cardData.company}</p>}
+            <h1 style={{...styles.name, color: templateStyles.textColor, ...fontStyleOverrides}}>{cardData.fullName}</h1>
+            {cardData.title && <p style={{...styles.title, color: templateStyles.textColor, opacity: 0.9, ...fontStyleOverrides}}>{cardData.title}</p>}
+            {cardData.company && <p style={{...styles.company, color: templateStyles.textColor, opacity: 0.7, ...fontStyleOverrides}}>{cardData.company}</p>}
             
             {/* Bio */}
             {cardData.bio && (
@@ -769,6 +825,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 background: templateStyles.buttonBg,
                 borderColor: templateStyles.buttonBorder,
                 color: templateStyles.textColor,
+                ...buttonStyleOverrides,
               }}>
                 <div style={styles.actionIconWrapper}>
                   <PhoneIcon />
@@ -782,6 +839,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 background: templateStyles.buttonBg,
                 borderColor: templateStyles.buttonBorder,
                 color: templateStyles.textColor,
+                ...buttonStyleOverrides,
               }}>
                 <div style={styles.actionIconWrapper}>
                   <MessageIcon />
@@ -795,6 +853,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 background: templateStyles.buttonBg,
                 borderColor: templateStyles.buttonBorder,
                 color: templateStyles.textColor,
+                ...buttonStyleOverrides,
               }}>
                 <div style={styles.actionIconWrapper}>
                   <EmailIcon />
@@ -813,6 +872,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   background: templateStyles.buttonBg,
                   borderColor: templateStyles.buttonBorder,
                   color: templateStyles.textColor,
+                  ...buttonStyleOverrides,
                 }}
               >
                 <div style={styles.actionIconWrapper}>
@@ -2341,6 +2401,12 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       formBlock: data.form_block ? 
         (typeof data.form_block === 'string' ? JSON.parse(data.form_block) : data.form_block) 
         : null,
+      // Appearance settings
+      theme: data.theme || 'classic',
+      backgroundType: data.background_type || 'gradient',
+      backgroundImageUrl: data.background_image_url || null,
+      buttonStyle: data.button_style || 'fill',
+      fontStyle: data.font_style || 'default',
       tapCount: data.tap_count || 0,
       links: linksData?.map(l => ({
         id: l.id,
