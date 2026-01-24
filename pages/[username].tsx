@@ -2235,11 +2235,31 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
   try {
     const serverSupabase = createClient(supabaseUrl, supabaseKey);
     
-    const { data, error: fetchError } = await serverSupabase
+    // First try to find by slug
+    let { data, error: fetchError } = await serverSupabase
       .from('digital_cards')
       .select('*')
       .eq('slug', slug)
       .single();
+    
+    // If not found by slug, try custom domain (for when accessed via custom domain)
+    if (fetchError || !data) {
+      // Check if the host header contains a custom domain
+      const host = context.req.headers.host || '';
+      if (host && !host.includes('tavvy.com') && !host.includes('localhost')) {
+        const { data: domainData, error: domainError } = await serverSupabase
+          .from('digital_cards')
+          .select('*')
+          .eq('custom_domain', host)
+          .eq('custom_domain_verified', true)
+          .single();
+        
+        if (!domainError && domainData) {
+          data = domainData;
+          fetchError = null;
+        }
+      }
+    }
     
     if (fetchError || !data) {
       console.log('[Card SSR] Card not found:', slug);
