@@ -18,6 +18,7 @@ import {
   IoRocket, IoThumbsUp, IoSparkles, IoAlertCircle,
   IoFlame, IoTime, IoLocation
 } from 'react-icons/io5';
+import { UnifiedHeader } from '../../components/UnifiedHeader';
 
 // Signal colors matching PlaceCard
 const SIGNAL_COLORS = {
@@ -269,21 +270,13 @@ export default function RidesScreen() {
 
       <AppLayout>
         <div className="rides-screen" style={{ backgroundColor: isDark ? theme.background : '#F2F2F7' }}>
-          {/* Header */}
-          <header className="rides-header" style={{ backgroundColor: isDark ? theme.surface : '#fff' }}>
-            <button className="back-button" onClick={handleBack}>
-              <FiArrowLeft size={24} color={isDark ? theme.text : '#000'} />
-            </button>
-            <div className="header-title-container">
-              <h1 style={{ color: isDark ? theme.text : '#000' }}>🎢 Rides & Attractions</h1>
-              <p style={{ color: isDark ? theme.textSecondary : '#666' }}>
-                Theme park experiences reviewed by the community
-              </p>
-            </div>
-            <button className="refresh-button" onClick={onRefresh}>
-              <FiRefreshCw size={20} color={isDark ? theme.textSecondary : '#666'} className={refreshing ? 'spinning' : ''} />
-            </button>
-          </header>
+          {/* Unified Header */}
+          <UnifiedHeader
+            screenKey="rides"
+            title="Rides & Attractions"
+            searchPlaceholder="Search rides..."
+            showBackButton={true}
+          />
 
           {/* Sort Options */}
           <div className="sort-container" style={{ backgroundColor: isDark ? theme.surface : '#fff' }}>

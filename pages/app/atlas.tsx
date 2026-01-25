@@ -17,6 +17,7 @@ import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../constants/Colors';
 import { IoSearch, IoTimeOutline, IoEyeOutline } from 'react-icons/io5';
+import { UnifiedHeader } from '../../components/UnifiedHeader';
 
 // Theme colors
 const TEAL = '#14B8A6';
@@ -158,14 +159,14 @@ export default function AtlasScreen() {
 
       <AppLayout>
         <div className="atlas-screen">
-          {/* Header */}
-          <header className="atlas-header">
-            <button className="search-btn">
-              <IoSearch size={24} color={isDark ? '#fff' : '#111'} />
-            </button>
-            <h1>Atlas</h1>
-            <div className="header-spacer" />
-          </header>
+          {/* Unified Header */}
+          <UnifiedHeader
+            screenKey="atlas"
+            title="Atlas"
+            searchPlaceholder="Search articles..."
+            showBackButton={false}
+            onSearch={setSearchQuery}
+          />
 
           {/* Category Chips */}
           <div className="category-chips">

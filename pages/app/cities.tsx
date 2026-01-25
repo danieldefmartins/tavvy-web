@@ -11,6 +11,7 @@ import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../constants/Colors';
 import { FiSearch, FiMapPin, FiChevronRight } from 'react-icons/fi';
+import { UnifiedHeader } from '../../components/UnifiedHeader';
 
 interface City {
   id: string;
@@ -74,25 +75,14 @@ export default function CitiesBrowseScreen() {
 
       <AppLayout>
         <div className="cities-screen" style={{ backgroundColor: theme.background }}>
-          {/* Header */}
-          <header className="cities-header">
-            <div className="header-content">
-              <h1 style={{ color: theme.text }}>🏙️ Cities</h1>
-              <p style={{ color: theme.textSecondary }}>Explore and rate cities around the world</p>
-            </div>
-            
-            {/* Search */}
-            <div className="search-container" style={{ backgroundColor: theme.surface }}>
-              <FiSearch size={18} color={theme.textSecondary} />
-              <input
-                type="text"
-                placeholder="Search cities..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ color: theme.text }}
-              />
-            </div>
-          </header>
+          {/* Unified Header */}
+          <UnifiedHeader
+            screenKey="cities"
+            title="Cities"
+            searchPlaceholder="Search cities..."
+            showBackButton={false}
+            onSearch={setSearchQuery}
+          />
 
           {/* Featured Section */}
           {!searchQuery && (

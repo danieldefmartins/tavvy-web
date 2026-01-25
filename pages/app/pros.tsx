@@ -26,6 +26,7 @@ import {
   IoConstruct, IoColorPalette, IoSnow, IoHammer, IoCar
 } from 'react-icons/io5';
 import { FiPlus, FiChevronRight } from 'react-icons/fi';
+import { UnifiedHeader } from '../../components/UnifiedHeader';
 
 // Green theme colors
 const GREEN = '#10B981';
@@ -79,26 +80,14 @@ export default function ProsScreen() {
 
       <AppLayout>
         <div className="pros-screen">
-          {/* Header */}
-          <header className="pros-header">
-            <div className="header-content">
-              <h1 className="header-title">Tavvy Pros</h1>
-              <div className="header-tabs">
-                <button 
-                  className={`header-tab ${activeTab === 'find' ? 'active' : ''}`}
-                  onClick={() => setActiveTab('find')}
-                >
-                  Find Pros
-                </button>
-                <button 
-                  className={`header-tab outline ${activeTab === 'pro' ? 'active' : ''}`}
-                  onClick={() => router.push('/app/pros/register')}
-                >
-                  I'm a Pro
-                </button>
-              </div>
-            </div>
-          </header>
+          {/* Unified Header */}
+          <UnifiedHeader
+            screenKey="pros"
+            title="Pros"
+            searchPlaceholder="Search services..."
+            showBackButton={false}
+            onSearch={setServiceQuery}
+          />
 
           {/* Main Content */}
           <main className="main-content">

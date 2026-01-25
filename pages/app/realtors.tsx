@@ -11,6 +11,7 @@ import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../constants/Colors';
 import { FiSearch, FiMapPin, FiStar, FiPhone, FiMail, FiChevronRight } from 'react-icons/fi';
+import { UnifiedHeader } from '../../components/UnifiedHeader';
 
 interface Realtor {
   id: string;
@@ -84,22 +85,14 @@ export default function RealtorsHubScreen() {
 
       <AppLayout>
         <div className="realtors-screen" style={{ backgroundColor: theme.background }}>
-          {/* Header */}
-          <header className="realtors-header" style={{ background: 'linear-gradient(135deg, #14B8A6, #0D9488)' }}>
-            <h1>🏠 Realtors</h1>
-            <p>Find trusted real estate professionals</p>
-            
-            {/* Search */}
-            <div className="search-container">
-              <FiSearch size={18} color="rgba(255,255,255,0.7)" />
-              <input
-                type="text"
-                placeholder="Search realtors..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </header>
+          {/* Unified Header */}
+          <UnifiedHeader
+            screenKey="realtors"
+            title="Realtors"
+            searchPlaceholder="Search realtors..."
+            showBackButton={false}
+            onSearch={setSearchQuery}
+          />
 
           {/* Specialty Filter */}
           <div className="specialty-filter">

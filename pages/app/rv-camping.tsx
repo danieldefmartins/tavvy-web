@@ -12,6 +12,7 @@ import PlaceCard from '../../components/PlaceCard';
 import { supabase } from '../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../constants/Colors';
 import { FiSearch, FiMapPin, FiFilter } from 'react-icons/fi';
+import { UnifiedHeader } from '../../components/UnifiedHeader';
 
 interface Place {
   id: string;
@@ -80,22 +81,14 @@ export default function RVCampingScreen() {
 
       <AppLayout>
         <div className="rv-screen" style={{ backgroundColor: theme.background }}>
-          {/* Header */}
-          <header className="rv-header" style={{ background: 'linear-gradient(135deg, #FB923C, #EA580C)' }}>
-            <h1>🏕️ RV & Camping</h1>
-            <p>Find your next outdoor adventure</p>
-            
-            {/* Search */}
-            <div className="search-container">
-              <FiSearch size={18} color="rgba(255,255,255,0.7)" />
-              <input
-                type="text"
-                placeholder="Search campgrounds..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </header>
+          {/* Unified Header */}
+          <UnifiedHeader
+            screenKey="rvCamping"
+            title="RV & Camping"
+            searchPlaceholder="Search campgrounds..."
+            showBackButton={false}
+            onSearch={setSearchQuery}
+          />
 
           {/* Category Filter */}
           <div className="category-filter">
