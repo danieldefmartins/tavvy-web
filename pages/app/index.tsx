@@ -91,8 +91,7 @@ const mockHappeningNow = [
   { id: '3', title: 'Food Truck Festival', subtitle: 'All day today', image: 'https://images.unsplash.com/photo-1565123409695-7b5ef63a2efb?w=400&h=300&fit=crop', type: 'event' },
 ];
 
-// Default location (San Francisco)
-const DEFAULT_LOCATION: [number, number] = [-122.4194, 37.7749];
+// Location fallback is handled by IP geolocation - see getLocationFromIP()
 
 export default function HomeScreen() {
   const { theme, isDark } = useThemeContext();
@@ -133,24 +132,58 @@ export default function HomeScreen() {
     }
   }, []);
 
-  // Get user location with timeout fallback
+  // Get location from IP address as fallback
+  const getLocationFromIP = async (): Promise<{ coords: [number, number]; city: string } | null> => {
+    try {
+      // Using ip-api.com (free, no API key needed, 45 requests/minute limit)
+      const response = await fetch('http://ip-api.com/json/?fields=status,city,regionName,country,lat,lon');
+      const data = await response.json();
+      
+      if (data.status === 'success' && data.lat && data.lon) {
+        const locationName = data.city 
+          ? `${data.city}, ${data.regionName || data.country}`
+          : data.country || 'Unknown';
+        console.log('[Location] IP geolocation success:', locationName);
+        return {
+          coords: [data.lon, data.lat] as [number, number],
+          city: locationName
+        };
+      }
+    } catch (error) {
+      console.log('[Location] IP geolocation failed:', error);
+    }
+    return null;
+  };
+
+  // Get user location with IP-based fallback
   useEffect(() => {
     let locationTimeout: NodeJS.Timeout;
     let locationResolved = false;
 
-    const setDefaultLocation = () => {
+    const setLocationFromIP = async () => {
+      if (locationResolved) return;
+      
+      console.log('[Location] Trying IP-based geolocation...');
+      const ipLocation = await getLocationFromIP();
+      
       if (!locationResolved) {
         locationResolved = true;
-        console.log('[Location] Using default location (San Francisco)');
-        setUserLocation(DEFAULT_LOCATION);
-        setLocationName('San Francisco, CA');
+        if (ipLocation) {
+          setUserLocation(ipLocation.coords);
+          setLocationName(ipLocation.city);
+        } else {
+          // Ultimate fallback if IP geolocation also fails
+          console.log('[Location] All methods failed, using New York as fallback');
+          setUserLocation([-74.006, 40.7128]); // New York
+          setLocationName('New York, NY');
+        }
       }
     };
 
-    // Set a timeout - if geolocation takes too long, use default
+    // Set a timeout - if browser geolocation takes too long, try IP-based
     locationTimeout = setTimeout(() => {
-      console.log('[Location] Timeout - falling back to default');
-      setDefaultLocation();
+      console.log('[Location] Browser geolocation timeout - trying IP fallback');
+      setLocationFromIP();
     }, 5000); // 5 second timeout
 
     if (typeof navigator !== 'undefined' && navigator.geolocation) {
@@ -160,15 +193,15 @@ export default function HomeScreen() {
           if (!locationResolved) {
             locationResolved = true;
             const loc: [number, number] = [position.coords.longitude, position.coords.latitude];
-            console.log('[Location] Got user location:', loc);
+            console.log('[Location] Browser geolocation success:', loc);
             setUserLocation(loc);
             reverseGeocode(loc);
           }
         },
-        (error) => {
+        async (error) => {
           clearTimeout(locationTimeout);
-          console.log('[Location] Error:', error.message);
-          setDefaultLocation();
+          console.log('[Location] Browser geolocation error:', error.message);
+          await setLocationFromIP();
         },
         {
           enableHighAccuracy: false,
@@ -178,7 +211,7 @@ export default function HomeScreen() {
       );
     } else {
       clearTimeout(locationTimeout);
-      setDefaultLocation();
+      setLocationFromIP();
     }
 
     return () => {
