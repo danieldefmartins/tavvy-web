@@ -135,17 +135,17 @@ export default function HomeScreen() {
   // Get location from IP address as fallback
   const getLocationFromIP = async (): Promise<{ coords: [number, number]; city: string } | null> => {
     try {
-      // Using ip-api.com (free, no API key needed, 45 requests/minute limit)
-      const response = await fetch('http://ip-api.com/json/?fields=status,city,regionName,country,lat,lon');
+      // Using ipapi.co (HTTPS, free tier: 1000 requests/day)
+      const response = await fetch('https://ipapi.co/json/');
       const data = await response.json();
       
-      if (data.status === 'success' && data.lat && data.lon) {
+      if (data.latitude && data.longitude) {
         const locationName = data.city 
-          ? `${data.city}, ${data.regionName || data.country}`
-          : data.country || 'Unknown';
-        console.log('[Location] IP geolocation success:', locationName);
+          ? `${data.city}, ${data.region || data.country_name}`
+          : data.country_name || 'Unknown';
+        console.log('[Location] IP geolocation success:', locationName, data.latitude, data.longitude);
         return {
-          coords: [data.lon, data.lat] as [number, number],
+          coords: [data.longitude, data.latitude] as [number, number],
           city: locationName
         };
       }
