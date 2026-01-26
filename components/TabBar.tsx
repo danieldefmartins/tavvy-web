@@ -1,12 +1,12 @@
 /**
  * TabBar - Bottom navigation component
- * Pixel-perfect port from tavvy-mobile App.tsx tab configuration
+ * Updated to match new tavvy-mobile tab configuration
  * 
  * Tabs:
  * 1. Home (house icon)
  * 2. Universes (planet icon)
- * 3. Pros (construct icon)
- * 4. Atlas (book icon)
+ * 3. + Create (elevated center button)
+ * 4. Pros (construct icon)
  * 5. Apps (grid icon)
  */
 
@@ -19,8 +19,8 @@ import {
   FiHome, 
   FiGlobe, 
   FiTool, 
-  FiBook, 
-  FiGrid 
+  FiGrid,
+  FiPlus
 } from 'react-icons/fi';
 
 interface TabItem {
@@ -28,6 +28,7 @@ interface TabItem {
   href: string;
   icon: React.ReactNode;
   activeIcon: React.ReactNode;
+  isCenter?: boolean;
 }
 
 const tabs: TabItem[] = [
@@ -44,16 +45,17 @@ const tabs: TabItem[] = [
     activeIcon: <FiGlobe size={24} strokeWidth={2.5} />,
   },
   {
+    name: '',
+    href: '/app/add',
+    icon: <FiPlus size={28} color="#FFFFFF" />,
+    activeIcon: <FiPlus size={28} color="#FFFFFF" />,
+    isCenter: true,
+  },
+  {
     name: 'Pros',
     href: '/app/pros',
     icon: <FiTool size={24} />,
     activeIcon: <FiTool size={24} strokeWidth={2.5} />,
-  },
-  {
-    name: 'Atlas',
-    href: '/app/atlas',
-    icon: <FiBook size={24} />,
-    activeIcon: <FiBook size={24} strokeWidth={2.5} />,
   },
   {
     name: 'Apps',
@@ -84,6 +86,22 @@ export default function TabBar() {
     >
       {tabs.map((tab) => {
         const active = isActive(tab.href);
+        
+        // Render elevated center button differently
+        if (tab.isCenter) {
+          return (
+            <Link
+              key="add-button"
+              href={tab.href}
+              className="add-button-container"
+            >
+              <div className="add-button">
+                {tab.icon}
+              </div>
+            </Link>
+          );
+        }
+        
         return (
           <Link
             key={tab.name}
@@ -109,9 +127,9 @@ export default function TabBar() {
           right: 0;
           display: flex;
           justify-content: space-around;
-          align-items: center;
-          height: 80px;
-          padding-bottom: env(safe-area-inset-bottom, 0);
+          align-items: flex-end;
+          height: 85px;
+          padding-bottom: env(safe-area-inset-bottom, 20px);
           border-top-width: 1px;
           border-top-style: solid;
           backdrop-filter: blur(20px);
@@ -125,7 +143,7 @@ export default function TabBar() {
           align-items: center;
           justify-content: center;
           flex: 1;
-          height: 100%;
+          height: 60px;
           text-decoration: none;
           transition: color 0.2s, transform 0.2s;
           padding: ${spacing.sm}px;
@@ -156,13 +174,54 @@ export default function TabBar() {
           font-weight: 600;
         }
 
+        /* Elevated Center Add Button */
+        .add-button-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex: 1;
+          position: relative;
+          text-decoration: none;
+        }
+        
+        .add-button {
+          width: 56px;
+          height: 56px;
+          border-radius: 28px;
+          background-color: #0F8A8A;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          top: -15px;
+          box-shadow: 0 4px 12px rgba(15, 138, 138, 0.4);
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .add-button:hover {
+          transform: scale(1.1);
+          box-shadow: 0 6px 16px rgba(15, 138, 138, 0.5);
+        }
+        
+        .add-button:active {
+          transform: scale(0.95);
+        }
+
         @media (max-width: 480px) {
           .tab-bar {
-            height: 70px;
+            height: 75px;
+            padding-bottom: env(safe-area-inset-bottom, 15px);
           }
           
           .tab-label {
             font-size: 10px;
+          }
+          
+          .add-button {
+            width: 52px;
+            height: 52px;
+            border-radius: 26px;
+            top: -12px;
           }
         }
       `}</style>
