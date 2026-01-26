@@ -12,7 +12,7 @@
  * - Signal-based review buttons
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
@@ -178,8 +178,6 @@ export default function MapScreen() {
   // Bottom sheet states
   const [sheetHeight, setSheetHeight] = useState<'collapsed' | 'partial' | 'full'>('partial');
   const sheetRef = useRef<HTMLDivElement>(null);
-  const dragStartY = useRef(0);
-  const dragStartHeight = useRef(0);
 
   // Get user location on mount
   useEffect(() => {
@@ -358,59 +356,13 @@ export default function MapScreen() {
     router.push('/app');
   };
 
-  // Bottom sheet drag handlers
-  const [isDragging, setIsDragging] = useState(false);
-
-  const handleDragStart = (e: React.TouchEvent | React.MouseEvent) => {
-    e.preventDefault();
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    dragStartY.current = clientY;
-    dragStartHeight.current = sheetRef.current?.offsetHeight || 0;
-    setIsDragging(true);
-  };
-
-  const handleDrag = useCallback((e: TouchEvent | MouseEvent) => {
-    if (!isDragging || dragStartY.current === 0) return;
-    
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    const deltaY = dragStartY.current - clientY;
-    
-    if (deltaY > 50) {
-      setSheetHeight(prev => prev === 'collapsed' ? 'partial' : 'full');
-      dragStartY.current = clientY; // Reset to prevent repeated triggers
-    } else if (deltaY < -50) {
-      setSheetHeight(prev => prev === 'full' ? 'partial' : 'collapsed');
-      dragStartY.current = clientY; // Reset to prevent repeated triggers
-    }
-  }, [isDragging]);
-
-  const handleDragEnd = useCallback(() => {
-    dragStartY.current = 0;
-    setIsDragging(false);
-  }, []);
-
-  // Add global mouse/touch event listeners for dragging
-  useEffect(() => {
-    if (isDragging) {
-      window.addEventListener('mousemove', handleDrag);
-      window.addEventListener('mouseup', handleDragEnd);
-      window.addEventListener('touchmove', handleDrag);
-      window.addEventListener('touchend', handleDragEnd);
-    }
-    return () => {
-      window.removeEventListener('mousemove', handleDrag);
-      window.removeEventListener('mouseup', handleDragEnd);
-      window.removeEventListener('touchmove', handleDrag);
-      window.removeEventListener('touchend', handleDragEnd);
-    };
-  }, [isDragging, handleDrag, handleDragEnd]);
-
-  // Toggle sheet height on handle click
+  // Toggle sheet height on handle click - simple and reliable
   const handleToggleSheet = () => {
     setSheetHeight(prev => {
+      console.log('[Sheet] Toggle from:', prev);
       if (prev === 'collapsed') return 'partial';
       if (prev === 'partial') return 'full';
-      return 'collapsed';
+      return 'collapsed'; // from 'full' go back to collapsed
     });
   };
 
@@ -632,13 +584,13 @@ export default function MapScreen() {
           ref={sheetRef}
           style={getSheetStyle()}
         >
-          {/* Drag Handle - click to toggle, drag to resize */}
+          {/* Drag Handle - click to toggle */}
           <div 
             className="sheet-handle"
             onClick={handleToggleSheet}
-            onTouchStart={handleDragStart}
-            onMouseDown={handleDragStart}
-            style={{ cursor: 'pointer' }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && handleToggleSheet()}
           >
             <div className="handle-bar" />
             <span className="handle-hint">
