@@ -133,25 +133,57 @@ export default function HomeScreen() {
     }
   }, []);
 
-  // Get user location
+  // Get user location with timeout fallback
   useEffect(() => {
+    let locationTimeout: NodeJS.Timeout;
+    let locationResolved = false;
+
+    const setDefaultLocation = () => {
+      if (!locationResolved) {
+        locationResolved = true;
+        console.log('[Location] Using default location (San Francisco)');
+        setUserLocation(DEFAULT_LOCATION);
+        setLocationName('San Francisco, CA');
+      }
+    };
+
+    // Set a timeout - if geolocation takes too long, use default
+    locationTimeout = setTimeout(() => {
+      console.log('[Location] Timeout - falling back to default');
+      setDefaultLocation();
+    }, 5000); // 5 second timeout
+
     if (typeof navigator !== 'undefined' && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const loc: [number, number] = [position.coords.longitude, position.coords.latitude];
-          setUserLocation(loc);
-          reverseGeocode(loc);
+          clearTimeout(locationTimeout);
+          if (!locationResolved) {
+            locationResolved = true;
+            const loc: [number, number] = [position.coords.longitude, position.coords.latitude];
+            console.log('[Location] Got user location:', loc);
+            setUserLocation(loc);
+            reverseGeocode(loc);
+          }
         },
         (error) => {
-          console.log('Location error:', error);
-          setUserLocation(DEFAULT_LOCATION);
-          setLocationName('San Francisco, CA');
+          clearTimeout(locationTimeout);
+          console.log('[Location] Error:', error.message);
+          setDefaultLocation();
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 4000,
+          maximumAge: 300000 // 5 minutes cache
         }
       );
     } else {
-      setUserLocation(DEFAULT_LOCATION);
-      setLocationName('San Francisco, CA');
+      clearTimeout(locationTimeout);
+      setDefaultLocation();
     }
+
+    return () => {
+      clearTimeout(locationTimeout);
+    };
   }, []);
 
   // Reverse geocode to get location name
@@ -179,8 +211,12 @@ export default function HomeScreen() {
   }, [userLocation, selectedCategory]);
 
   const fetchNearbyPlaces = async () => {
-    if (!userLocation) return;
+    if (!userLocation) {
+      console.log('[Places] No user location yet, skipping fetch');
+      return;
+    }
     
+    console.log('[Places] Fetching places near:', userLocation);
     setLoading(true);
     try {
       const bounds = {
@@ -191,12 +227,15 @@ export default function HomeScreen() {
       const categoryFilter = selectedCategory ? 
         categories.find(c => c.id === selectedCategory)?.name : undefined;
       
+      console.log('[Places] Bounds:', bounds, 'Category:', categoryFilter);
+      
       const fetchedPlaces = await fetchPlacesInBounds(
         bounds,
         userLocation,
         categoryFilter
       );
       
+      console.log('[Places] Fetched', fetchedPlaces.length, 'places');
       setPlaces(fetchedPlaces);
       
       // Set trending places (first 6 with most signals)
@@ -204,8 +243,12 @@ export default function HomeScreen() {
         (b.signals?.length || 0) - (a.signals?.length || 0)
       );
       setTrendingPlaces(sorted.slice(0, 6));
+      console.log('[Places] Set', sorted.slice(0, 6).length, 'trending places');
     } catch (error) {
-      console.error('Error fetching places:', error);
+      console.error('[Places] Error fetching places:', error);
+      // Set empty arrays on error so we don't show loading forever
+      setPlaces([]);
+      setTrendingPlaces([]);
     } finally {
       setLoading(false);
     }
