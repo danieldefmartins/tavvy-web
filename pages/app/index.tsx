@@ -486,9 +486,7 @@ export default function HomeScreen() {
             <section className="section">
               <div className="section-header">
                 <h2>🏆 Top Contributors</h2>
-                <Link href="/app/profile" className="see-all">
-                  See All <IoChevronForward size={16} />
-                </Link>
+                {/* See All button removed - LeaderboardScreen not yet implemented */}
               </div>
               <p className="section-subtitle">Community members making a difference</p>
               <div className="leaderboard-card">
@@ -593,6 +591,7 @@ export default function HomeScreen() {
             color: ${isDark ? '#fff' : ACCENT};
             line-height: 1.2;
             margin: 8px 0 20px;
+            padding: 0;
           }
 
           /* Search Bar */
@@ -784,9 +783,10 @@ export default function HomeScreen() {
           }
 
           .section-header h2 {
-            font-size: 18px;
-            font-weight: 700;
-            color: ${isDark ? '#fff' : '#111'};
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            color: ${isDark ? '#fff' : '#000'};
             margin: 0;
           }
 
@@ -794,9 +794,9 @@ export default function HomeScreen() {
             display: flex;
             align-items: center;
             gap: 4px;
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
-            color: ${ACCENT};
+            color: #0F8A8A;
             text-decoration: none;
             background: none;
             border: none;
@@ -1061,6 +1061,7 @@ export default function HomeScreen() {
 
           .dyk-icon {
             font-size: 24px;
+            color: #FFD60A;
           }
 
           .dyk-content h3 {
@@ -1082,6 +1083,8 @@ export default function HomeScreen() {
             background: ${isDark ? '#1E293B' : '#fff'};
             border-radius: 16px;
             overflow: hidden;
+            padding: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
           }
 
           .leaderboard-row {
@@ -1104,13 +1107,15 @@ export default function HomeScreen() {
 
           .leaderboard-badge {
             font-size: 20px;
+            width: 28px;
+            text-align: center;
           }
 
           .leaderboard-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: linear-gradient(135deg, ${theme.primary}, #8B5CF6);
+            background: #E8F4FD;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1118,8 +1123,8 @@ export default function HomeScreen() {
 
           .leaderboard-avatar span {
             font-size: 16px;
-            font-weight: 600;
-            color: #fff;
+            font-weight: 700;
+            color: #0A84FF;
           }
 
           .leaderboard-info {
@@ -1130,12 +1135,12 @@ export default function HomeScreen() {
           .leaderboard-name {
             font-size: 15px;
             font-weight: 600;
-            color: ${isDark ? '#fff' : '#111'};
+            color: ${isDark ? '#fff' : '#000'};
           }
 
           .leaderboard-streak {
             font-size: 12px;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#666'};
+            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#888'};
           }
 
           .leaderboard-right {
@@ -1145,14 +1150,14 @@ export default function HomeScreen() {
           }
 
           .leaderboard-taps {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
-            color: ${isDark ? '#fff' : '#111'};
+            color: ${isDark ? '#fff' : '#000'};
           }
 
           .leaderboard-label {
             font-size: 11px;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#999'};
+            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#888'};
           }
 
           /* Bottom Spacing */
