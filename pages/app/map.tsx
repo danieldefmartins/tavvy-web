@@ -45,6 +45,10 @@ const Circle = dynamic(
   () => import('react-leaflet').then((mod) => mod.Circle),
   { ssr: false }
 );
+const Popup = dynamic(
+  () => import('react-leaflet').then((mod) => mod.Popup),
+  { ssr: false }
+);
 // useMap hook for MapUpdater component
 let useMapHook: any = null;
 if (typeof window !== 'undefined') {
@@ -355,27 +359,59 @@ export default function MapScreen() {
   };
 
   // Bottom sheet drag handlers
+  const [isDragging, setIsDragging] = useState(false);
+
   const handleDragStart = (e: React.TouchEvent | React.MouseEvent) => {
+    e.preventDefault();
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
     dragStartY.current = clientY;
     dragStartHeight.current = sheetRef.current?.offsetHeight || 0;
+    setIsDragging(true);
   };
 
-  const handleDrag = (e: React.TouchEvent | React.MouseEvent) => {
-    if (dragStartY.current === 0) return;
+  const handleDrag = useCallback((e: TouchEvent | MouseEvent) => {
+    if (!isDragging || dragStartY.current === 0) return;
     
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
     const deltaY = dragStartY.current - clientY;
     
     if (deltaY > 50) {
-      setSheetHeight(sheetHeight === 'collapsed' ? 'partial' : 'full');
+      setSheetHeight(prev => prev === 'collapsed' ? 'partial' : 'full');
+      dragStartY.current = clientY; // Reset to prevent repeated triggers
     } else if (deltaY < -50) {
-      setSheetHeight(sheetHeight === 'full' ? 'partial' : 'collapsed');
+      setSheetHeight(prev => prev === 'full' ? 'partial' : 'collapsed');
+      dragStartY.current = clientY; // Reset to prevent repeated triggers
     }
-  };
+  }, [isDragging]);
 
-  const handleDragEnd = () => {
+  const handleDragEnd = useCallback(() => {
     dragStartY.current = 0;
+    setIsDragging(false);
+  }, []);
+
+  // Add global mouse/touch event listeners for dragging
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleDrag);
+      window.addEventListener('mouseup', handleDragEnd);
+      window.addEventListener('touchmove', handleDrag);
+      window.addEventListener('touchend', handleDragEnd);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleDrag);
+      window.removeEventListener('mouseup', handleDragEnd);
+      window.removeEventListener('touchmove', handleDrag);
+      window.removeEventListener('touchend', handleDragEnd);
+    };
+  }, [isDragging, handleDrag, handleDragEnd]);
+
+  // Toggle sheet height on handle click
+  const handleToggleSheet = () => {
+    setSheetHeight(prev => {
+      if (prev === 'collapsed') return 'partial';
+      if (prev === 'partial') return 'full';
+      return 'collapsed';
+    });
   };
 
   // Get sheet height style
@@ -539,6 +575,33 @@ export default function MapScreen() {
                   weight: 1,
                 }}
               />
+              {/* Place markers */}
+              {places.map((place) => (
+                place.latitude && place.longitude && (
+                  <Marker
+                    key={place.id}
+                    position={[place.latitude, place.longitude]}
+                  >
+                    <Popup>
+                      <div style={{ minWidth: '150px' }}>
+                        <strong>{place.name}</strong>
+                        <br />
+                        <span style={{ fontSize: '12px', color: '#666' }}>
+                          {place.category || 'Place'}
+                        </span>
+                        {place.distance && (
+                          <>
+                            <br />
+                            <span style={{ fontSize: '11px', color: '#888' }}>
+                              {formatDistance(place.distance)}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </Popup>
+                  </Marker>
+                )
+              ))}
               {/* Map center updater - responds to mapCenter state changes */}
               <MapCenterUpdater center={mapCenter} zoom={mapZoom} />
             </MapContainer>
@@ -569,17 +632,18 @@ export default function MapScreen() {
           ref={sheetRef}
           style={getSheetStyle()}
         >
-          {/* Drag Handle */}
+          {/* Drag Handle - click to toggle, drag to resize */}
           <div 
             className="sheet-handle"
+            onClick={handleToggleSheet}
             onTouchStart={handleDragStart}
-            onTouchMove={handleDrag}
-            onTouchEnd={handleDragEnd}
             onMouseDown={handleDragStart}
-            onMouseMove={handleDrag}
-            onMouseUp={handleDragEnd}
+            style={{ cursor: 'pointer' }}
           >
             <div className="handle-bar" />
+            <span className="handle-hint">
+              {sheetHeight === 'collapsed' ? 'Tap to expand' : sheetHeight === 'partial' ? 'Tap to expand' : 'Tap to collapse'}
+            </span>
           </div>
 
           {/* Sheet Header */}
@@ -994,8 +1058,19 @@ export default function MapScreen() {
         .sheet-handle {
           padding: 12px;
           display: flex;
-          justify-content: center;
-          cursor: grab;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+          cursor: pointer;
+          user-select: none;
+        }
+
+        .sheet-handle:hover {
+          background: rgba(0,0,0,0.02);
+        }
+
+        .sheet-handle:active {
+          cursor: grabbing;
         }
 
         .handle-bar {
@@ -1003,6 +1078,13 @@ export default function MapScreen() {
           height: 4px;
           background: #D1D1D6;
           border-radius: 2px;
+        }
+
+        .handle-hint {
+          font-size: 11px;
+          color: #8E8E93;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
 
         .sheet-header {
