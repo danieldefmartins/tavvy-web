@@ -1,6 +1,7 @@
 /**
  * Article Detail Screen
- * View full article content
+ * View full article content with block-based rendering
+ * Updated to use ContentBlockRenderer for Atlas v2.0
  */
 
 import React, { useState, useEffect } from 'react';
@@ -12,17 +13,19 @@ import AppLayout from '../../../components/AppLayout';
 import { supabase } from '../../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../../constants/Colors';
 import { FiArrowLeft, FiShare2, FiBookmark, FiClock, FiUser } from 'react-icons/fi';
+import { ContentBlockRenderer, ContentBlock } from '../../../components/atlas/ContentBlockRenderer';
 
 interface Article {
   id: string;
   title: string;
   slug?: string;
   content?: string;
+  content_blocks?: ContentBlock[];
   excerpt?: string;
   cover_image_url?: string;
-  category?: string;
+  category_id?: string;
   author_name?: string;
-  author_image_url?: string;
+  author_avatar_url?: string;
   published_at?: string;
   read_time_minutes?: number;
   tags?: string[];
@@ -33,13 +36,13 @@ interface RelatedArticle {
   title: string;
   slug?: string;
   cover_image_url?: string;
-  category?: string;
+  category_id?: string;
 }
 
 export default function ArticleDetailScreen() {
   const router = useRouter();
   const { id } = router.query;
-  const { theme } = useThemeContext();
+  const { theme, isDark } = useThemeContext();
 
   const [article, setArticle] = useState<Article | null>(null);
   const [relatedArticles, setRelatedArticles] = useState<RelatedArticle[]>([]);
@@ -55,7 +58,7 @@ export default function ArticleDetailScreen() {
   const fetchArticle = async () => {
     setLoading(true);
     try {
-      // Fetch article
+      // Fetch article with content_blocks
       const { data: articleData, error: articleError } = await supabase
         .from('atlas_articles')
         .select('*')
@@ -65,16 +68,19 @@ export default function ArticleDetailScreen() {
       if (!articleError && articleData) {
         setArticle(articleData);
 
-        // Fetch related articles
-        const { data: relatedData } = await supabase
-          .from('atlas_articles')
-          .select('id, title, slug, cover_image_url, category')
-          .eq('category', articleData.category)
-          .neq('id', articleData.id)
-          .limit(3);
+        // Fetch related articles by category_id
+        if (articleData.category_id) {
+          const { data: relatedData } = await supabase
+            .from('atlas_articles')
+            .select('id, title, slug, cover_image_url, category_id')
+            .eq('category_id', articleData.category_id)
+            .neq('id', articleData.id)
+            .eq('status', 'published')
+            .limit(3);
 
-        if (relatedData) {
-          setRelatedArticles(relatedData);
+          if (relatedData) {
+            setRelatedArticles(relatedData);
+          }
         }
       }
     } catch (error) {
@@ -161,6 +167,9 @@ export default function ArticleDetailScreen() {
     );
   }
 
+  // Check if we have content_blocks (v2.0) or legacy content
+  const hasContentBlocks = article.content_blocks && Array.isArray(article.content_blocks) && article.content_blocks.length > 0;
+
   return (
     <>
       <Head>
@@ -194,11 +203,6 @@ export default function ArticleDetailScreen() {
                   </button>
                 </div>
               </div>
-              {article.category && (
-                <span className="category-badge" style={{ backgroundColor: theme.primary }}>
-                  {article.category}
-                </span>
-              )}
             </div>
           </header>
 
@@ -210,8 +214,8 @@ export default function ArticleDetailScreen() {
             <div className="article-meta">
               {article.author_name && (
                 <div className="author-info">
-                  {article.author_image_url ? (
-                    <img src={article.author_image_url} alt={article.author_name} className="author-image" />
+                  {article.author_avatar_url ? (
+                    <img src={article.author_avatar_url} alt={article.author_name} className="author-image" />
                   ) : (
                     <div className="author-placeholder" style={{ backgroundColor: theme.primary }}>
                       <FiUser size={16} color="white" />
@@ -239,8 +243,13 @@ export default function ArticleDetailScreen() {
               </p>
             )}
 
-            {/* Main Content */}
-            {article.content ? (
+            {/* Main Content - Use ContentBlockRenderer for v2.0, fallback to legacy */}
+            {hasContentBlocks ? (
+              <ContentBlockRenderer 
+                blocks={article.content_blocks!}
+                isDark={isDark}
+              />
+            ) : article.content ? (
               <div 
                 className="content-body"
                 style={{ color: theme.text }}
@@ -289,9 +298,6 @@ export default function ArticleDetailScreen() {
                       )}
                       <div className="related-info">
                         <h4 style={{ color: theme.text }}>{related.title}</h4>
-                        {related.category && (
-                          <span style={{ color: theme.textSecondary }}>{related.category}</span>
-                        )}
                       </div>
                     </Link>
                   ))}
@@ -352,15 +358,6 @@ export default function ArticleDetailScreen() {
             display: flex;
             align-items: center;
             justify-content: center;
-          }
-          
-          .category-badge {
-            align-self: flex-start;
-            padding: 6px 12px;
-            border-radius: ${borderRadius.full}px;
-            color: white;
-            font-size: 12px;
-            font-weight: 600;
           }
           
           .article-content {
