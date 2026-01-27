@@ -1,6 +1,12 @@
 /**
- * Universe Detail Screen
+ * Universe Landing Screen
  * Shows places within a specific universe
+ * Matches mobile app UniverseLandingScreen exactly
+ * 
+ * PREMIUM DARK MODE REDESIGN - January 2026
+ * - Hero section with universe image and info
+ * - Search and filter functionality
+ * - Places grid with signal badges
  */
 
 import React, { useState, useEffect } from 'react';
@@ -12,7 +18,8 @@ import AppLayout from '../../../components/AppLayout';
 import PlaceCard from '../../../components/PlaceCard';
 import { supabase } from '../../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../../constants/Colors';
-import { FiArrowLeft, FiSearch, FiFilter } from 'react-icons/fi';
+import { FiArrowLeft, FiSearch, FiFilter, FiX } from 'react-icons/fi';
+import { IoFlame, IoThumbsUp, IoSparkles, IoAlertCircle } from 'react-icons/io5';
 
 interface Universe {
   id: string;
