@@ -17,13 +17,15 @@ import { UnifiedHeader } from '../../components/UnifiedHeader';
 interface Place {
   id: string;
   name: string;
-  category?: string;
+  tavvy_category?: string;
+  tavvy_subcategory?: string;
   address_line1?: string;
   city?: string;
-  state_region?: string;
+  region?: string;
   photos?: string[];
   signals?: any[];
-  amenities?: string[];
+  latitude?: number;
+  longitude?: number;
 }
 
 const CATEGORIES = [
@@ -52,7 +54,7 @@ export default function RVCampingScreen() {
       let query = supabase
         .from('places')
         .select('*, signals(*)')
-        .or('category.ilike.%rv%,category.ilike.%camp%,category.ilike.%outdoor%')
+        .eq('tavvy_category', 'rv_camping')
         .limit(50);
 
       const { data, error } = await query;
