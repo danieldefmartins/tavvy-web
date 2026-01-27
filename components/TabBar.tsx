@@ -185,16 +185,15 @@ export default function TabBar() {
         }
         
         .add-button {
-          width: 56px;
-          height: 56px;
-          border-radius: 28px;
+          width: 48px;
+          height: 48px;
+          border-radius: 24px;
           background-color: #0F8A8A;
           display: flex;
           align-items: center;
           justify-content: center;
-          position: relative;
-          top: -15px;
-          box-shadow: 0 4px 12px rgba(15, 138, 138, 0.4);
+          /* Removed top offset - button now aligns with other tab icons */
+          box-shadow: 0 2px 8px rgba(15, 138, 138, 0.3);
           transition: transform 0.2s, box-shadow 0.2s;
         }
         
@@ -218,10 +217,9 @@ export default function TabBar() {
           }
           
           .add-button {
-            width: 52px;
-            height: 52px;
-            border-radius: 26px;
-            top: -12px;
+            width: 44px;
+            height: 44px;
+            border-radius: 22px;
           }
         }
       `}</style>
