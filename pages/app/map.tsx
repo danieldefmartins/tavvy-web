@@ -502,7 +502,7 @@ export default function MapScreen() {
                   className={`category-pill ${isSelected ? 'selected' : ''}`}
                   onClick={() => handleCategorySelect(cat.id)}
                   style={{
-                    background: isSelected ? ACCENT_CYAN : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'),
+                    background: isSelected ? ACCENT_CYAN : (isDark ? 'rgba(0,0,0,0.85)' : 'rgba(255,255,255,0.95)'),
                     color: isSelected ? '#000' : (isDark ? '#fff' : '#333'),
                   }}
                 >
@@ -1070,28 +1070,29 @@ export default function MapScreen() {
         .category-pill {
           display: flex;
           align-items: center;
-          padding: 6px 12px;
-          border-radius: 16px;
+          padding: 8px 14px;
+          border-radius: 18px;
           border: none;
-          background: rgba(255,255,255,0.9);
-          font-size: 12px;
+          background: rgba(0,0,0,0.85);
+          font-size: 13px;
           font-weight: 600;
-          color: #333;
+          color: #fff;
           cursor: pointer;
           white-space: nowrap;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
           transition: all 0.2s;
-          backdrop-filter: blur(8px);
+          backdrop-filter: blur(12px);
         }
 
         .category-pill.selected {
           background: ${ACCENT_CYAN};
           color: #000;
-          box-shadow: 0 2px 8px rgba(34, 211, 238, 0.3);
+          box-shadow: 0 2px 12px rgba(34, 211, 238, 0.4);
         }
 
         .category-pill:hover:not(.selected) {
-          background: rgba(34, 211, 238, 0.2);
+          background: rgba(34, 211, 238, 0.3);
+          color: #fff;
         }
 
         /* Map Container */
