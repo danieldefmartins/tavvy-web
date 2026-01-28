@@ -1,12 +1,12 @@
 /**
  * Universe Discovery Screen
  * Explore themed universes (theme parks, airports, campuses, etc.)
- * Matches mobile app UniverseDiscoveryScreen exactly
+ * Matches mockup design exactly
  * 
  * PREMIUM DARK MODE REDESIGN - January 2026
  * - Minimalist header with tagline
- * - Full-width featured universe hero
- * - Icon-driven category filters
+ * - Full-width featured universe hero with badge at top-left
+ * - Icon-driven category filters (square buttons)
  * - 2x2 popular universes grid with activity signals
  */
 
@@ -16,14 +16,10 @@ import { useRouter } from 'next/router';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
-import { spacing, borderRadius } from '../../constants/Colors';
+import { FiSearch, FiX } from 'react-icons/fi';
 import { 
-  FiArrowLeft, FiSearch, FiX
-} from 'react-icons/fi';
-import { 
-  IoRocket, IoAirplane, IoLeaf, IoBusiness, IoFlame
+  IoRocket, IoAirplane, IoLeaf, IoBusiness
 } from 'react-icons/io5';
-import { UnifiedHeader } from '../../components/UnifiedHeader';
 
 // Design System Colors
 const COLORS = {
@@ -35,12 +31,12 @@ const COLORS = {
 // Default placeholder image
 const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800';
 
-// Category icons for the filter buttons
+// Category icons for the filter buttons - matching mockup square icons
 const CATEGORY_ICONS: Record<string, { icon: React.ReactNode; label: string }> = {
-  'theme-parks': { icon: <IoRocket size={20} />, label: 'Theme Parks' },
-  'airports': { icon: <IoAirplane size={20} />, label: 'Airports' },
-  'national-parks': { icon: <IoLeaf size={20} />, label: 'Parks' },
-  'cities': { icon: <IoBusiness size={20} />, label: 'Cities' },
+  'theme-parks': { icon: <IoRocket size={24} />, label: 'Theme Parks' },
+  'airports': { icon: <IoAirplane size={24} />, label: 'Airports' },
+  'national-parks': { icon: <IoLeaf size={24} />, label: 'Parks' },
+  'cities': { icon: <IoBusiness size={24} />, label: 'Cities' },
 };
 
 interface Universe {
@@ -50,11 +46,14 @@ interface Universe {
   description?: string;
   icon?: string;
   cover_image_url?: string;
+  banner_image_url?: string;
+  thumbnail_image_url?: string;
   total_signals?: number;
   place_count?: number;
   category_id?: string;
   is_featured?: boolean;
   status?: string;
+  location?: string;
 }
 
 interface Category {
@@ -144,10 +143,10 @@ export default function UniverseDiscoveryScreen() {
 
   // Get activity level based on signals
   const getActivityLevel = (signals: number | undefined) => {
-    if (!signals) return { label: 'Active', color: COLORS.accent };
+    if (!signals) return { label: 'High Activity', color: COLORS.activityHigh };
     if (signals > 100) return { label: 'High Activity', color: COLORS.activityHigh };
     if (signals > 50) return { label: 'Moderate', color: COLORS.activityMedium };
-    return { label: 'Active', color: COLORS.accent };
+    return { label: 'High Activity', color: COLORS.activityHigh };
   };
 
   // Get category type from universe
@@ -161,13 +160,8 @@ export default function UniverseDiscoveryScreen() {
     router.push(`/app/universe/${universe.slug || universe.id}`);
   };
 
-  const handleBack = () => {
-    router.push('/app');
-  };
-
-  const backgroundColor = isDark ? '#0F0F0F' : '#FAFAFA';
-  const surfaceColor = isDark ? '#111827' : '#FFFFFF';
-  const glassyColor = isDark ? '#1A1A1A' : '#F3F4F6';
+  const backgroundColor = isDark ? '#000000' : '#FAFAFA';
+  const surfaceColor = isDark ? '#1A1A1A' : '#FFFFFF';
   const textColor = isDark ? '#FFFFFF' : '#111827';
   const secondaryTextColor = isDark ? '#9CA3AF' : '#6B7280';
 
@@ -179,33 +173,25 @@ export default function UniverseDiscoveryScreen() {
   return (
     <>
       <Head>
-        <title>Explore Universes | TavvY</title>
-        <meta name="description" content="Explore themed universes on TavvY" />
+        <title>Universes | TavvY</title>
+        <meta name="description" content="Explore curated worlds on TavvY" />
       </Head>
 
       <AppLayout>
         <div className="universes-screen" style={{ backgroundColor }}>
           {/* Header */}
-          <div className="header" style={{ backgroundColor: surfaceColor }}>
-            <button className="back-button" onClick={handleBack}>
-              <FiArrowLeft size={24} color={textColor} />
-            </button>
-            <div className="header-content">
-              <h1 style={{ color: textColor }}>Universes</h1>
-              <p style={{ color: COLORS.accent }}>Explore themed worlds.</p>
-            </div>
+          <div className="header">
+            <h1 style={{ color: textColor }}>Universes</h1>
+            <p style={{ color: COLORS.accent }}>Explore curated worlds.</p>
           </div>
 
           {/* Search Bar */}
-          <div className="search-section" style={{ backgroundColor: surfaceColor }}>
-            <div className="search-bar" style={{ 
-              backgroundColor: glassyColor,
-              borderColor: isDark ? 'transparent' : '#E5E7EB'
-            }}>
+          <div className="search-section">
+            <div className="search-bar" style={{ backgroundColor: surfaceColor }}>
               <FiSearch size={20} color={secondaryTextColor} />
               <input
                 type="text"
-                placeholder="Search universes..."
+                placeholder="Search parks, airports, cities..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{ color: textColor }}
@@ -218,36 +204,6 @@ export default function UniverseDiscoveryScreen() {
             </div>
           </div>
 
-          {/* Category Filters */}
-          <div className="category-filters">
-            <button
-              className={`category-pill ${activeCategory === 'All' ? 'active' : ''}`}
-              style={{ 
-                backgroundColor: activeCategory === 'All' ? COLORS.accent : glassyColor,
-              }}
-              onClick={() => setActiveCategory('All')}
-            >
-              <span style={{ color: activeCategory === 'All' ? '#fff' : secondaryTextColor }}>
-                All
-              </span>
-            </button>
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                className={`category-pill ${activeCategory === cat.name ? 'active' : ''}`}
-                style={{ 
-                  backgroundColor: activeCategory === cat.name ? COLORS.accent : glassyColor,
-                }}
-                onClick={() => setActiveCategory(cat.name)}
-              >
-                {CATEGORY_ICONS[cat.slug]?.icon}
-                <span style={{ color: activeCategory === cat.name ? '#fff' : secondaryTextColor }}>
-                  {CATEGORY_ICONS[cat.slug]?.label || cat.name}
-                </span>
-              </button>
-            ))}
-          </div>
-
           {/* Content */}
           <div className="content-area">
             {loading ? (
@@ -257,85 +213,90 @@ export default function UniverseDiscoveryScreen() {
               </div>
             ) : (
               <>
-                {/* Featured Universe Hero */}
+                {/* Featured Universe Hero - Matching Mockup */}
                 {featuredUniverse && (
-                  <div className="featured-section">
-                    <h2 className="section-title" style={{ color: textColor }}>Featured</h2>
-                    <div 
-                      className="featured-card"
-                      onClick={() => handleUniversePress(featuredUniverse)}
-                    >
-                      <img 
-                        src={featuredUniverse.cover_image_url || PLACEHOLDER_IMAGE} 
-                        alt={featuredUniverse.name}
-                        className="featured-image"
-                      />
-                      <div className="featured-gradient">
-                        {featuredUniverse.icon && (
-                          <span className="featured-icon">{featuredUniverse.icon}</span>
-                        )}
-                        <h3 className="featured-name">{featuredUniverse.name}</h3>
-                        <p className="featured-category">
-                          {getCategoryType(featuredUniverse.category_id)}
-                        </p>
-                        <div className="featured-stats">
-                          <span className="stat">
-                            {featuredUniverse.place_count || 0} places
-                          </span>
-                          <span 
-                            className="activity-badge"
-                            style={{ backgroundColor: getActivityLevel(featuredUniverse.total_signals).color }}
-                          >
-                            <IoFlame size={12} color="#fff" />
-                            {getActivityLevel(featuredUniverse.total_signals).label}
-                          </span>
+                  <div 
+                    className="featured-card"
+                    onClick={() => handleUniversePress(featuredUniverse)}
+                  >
+                    <img 
+                      src={featuredUniverse.banner_image_url || featuredUniverse.cover_image_url || PLACEHOLDER_IMAGE} 
+                      alt={featuredUniverse.name}
+                      className="featured-image"
+                    />
+                    {/* Featured Badge at top-left */}
+                    <div className="featured-badge">
+                      <span>FEATURED UNIVERSE</span>
+                    </div>
+                    {/* Bottom gradient with title and button */}
+                    <div className="featured-gradient">
+                      <div className="featured-bottom-row">
+                        <div className="featured-text-content">
+                          <h3 className="featured-name">{featuredUniverse.name}</h3>
+                          <p className="featured-meta">
+                            {getCategoryType(featuredUniverse.category_id)} • {featuredUniverse.location || 'Explore Now'}
+                          </p>
                         </div>
+                        <button className="explore-button">
+                          Explore Universe
+                        </button>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* Popular Universes Grid */}
+                {/* Filter by Category - Square Icon Buttons */}
+                <div className="filter-section">
+                  <h2 className="section-title" style={{ color: textColor }}>Filter by Category</h2>
+                  <div className="filter-grid">
+                    {Object.entries(CATEGORY_ICONS).map(([slug, { icon, label }]) => {
+                      const isActive = activeCategory === label;
+                      return (
+                        <button
+                          key={slug}
+                          className={`filter-button ${isActive ? 'active' : ''}`}
+                          style={{ backgroundColor: surfaceColor }}
+                          onClick={() => setActiveCategory(isActive ? 'All' : label)}
+                        >
+                          <span style={{ color: isActive ? COLORS.accent : secondaryTextColor }}>
+                            {icon}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Popular Universes Grid - 2x2 with activity badges */}
                 {filteredUniverses.length > 0 && (
                   <div className="popular-section">
                     <h2 className="section-title" style={{ color: textColor }}>Popular Universes</h2>
                     <div className="universes-grid">
-                      {filteredUniverses.map((universe) => (
-                        <div 
-                          key={universe.id}
-                          className="universe-card"
-                          onClick={() => handleUniversePress(universe)}
-                          style={{ backgroundColor: surfaceColor }}
-                        >
-                          <div className="universe-image-container">
+                      {filteredUniverses.slice(0, 4).map((universe) => {
+                        const activity = getActivityLevel(universe.total_signals);
+                        return (
+                          <div 
+                            key={universe.id}
+                            className="universe-card"
+                            onClick={() => handleUniversePress(universe)}
+                          >
                             <img 
-                              src={universe.cover_image_url || PLACEHOLDER_IMAGE} 
+                              src={universe.thumbnail_image_url || universe.cover_image_url || PLACEHOLDER_IMAGE} 
                               alt={universe.name}
                               className="universe-image"
                             />
-                            {universe.icon && (
-                              <span className="universe-icon">{universe.icon}</span>
-                            )}
-                          </div>
-                          <div className="universe-info">
-                            <h3 className="universe-name" style={{ color: textColor }}>
-                              {universe.name}
-                            </h3>
-                            <p className="universe-category" style={{ color: secondaryTextColor }}>
-                              {getCategoryType(universe.category_id)}
-                            </p>
-                            <div className="universe-stats">
-                              <span style={{ color: secondaryTextColor }}>
-                                {universe.place_count || 0} places
-                              </span>
-                              <span 
-                                className="activity-dot"
-                                style={{ backgroundColor: getActivityLevel(universe.total_signals).color }}
-                              />
+                            <div className="universe-info">
+                              <h3 className="universe-name" style={{ color: textColor }}>
+                                {universe.name}
+                              </h3>
+                              <div className="activity-badge">
+                                <span className="fire-icon">🔥</span>
+                                <span style={{ color: activity.color }}>{activity.label}</span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -361,50 +322,35 @@ export default function UniverseDiscoveryScreen() {
             padding-bottom: 100px;
           }
           
+          /* Header - Matching Mockup */
           .header {
-            display: flex;
-            align-items: center;
-            padding: 16px;
-            padding-top: max(16px, env(safe-area-inset-top));
-            gap: 12px;
+            padding: 20px;
+            padding-top: max(20px, env(safe-area-inset-top));
           }
           
-          .back-button {
-            padding: 8px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            border-radius: 8px;
-          }
-          
-          .header-content {
-            flex: 1;
-          }
-          
-          .header-content h1 {
-            font-size: 28px;
+          .header h1 {
+            font-size: 32px;
             font-weight: 700;
             margin: 0;
           }
           
-          .header-content p {
-            font-size: 14px;
+          .header p {
+            font-size: 16px;
             margin: 4px 0 0;
             font-weight: 500;
           }
           
           /* Search Section */
           .search-section {
-            padding: 0 16px 12px;
+            padding: 0 20px 20px;
           }
           
           .search-bar {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 1px solid;
+            padding: 14px 16px;
+            border-radius: 16px;
           }
           
           .search-bar input {
@@ -415,6 +361,10 @@ export default function UniverseDiscoveryScreen() {
             outline: none;
           }
           
+          .search-bar input::placeholder {
+            color: ${secondaryTextColor};
+          }
+          
           .clear-button {
             padding: 4px;
             background: none;
@@ -422,41 +372,9 @@ export default function UniverseDiscoveryScreen() {
             cursor: pointer;
           }
           
-          /* Category Filters */
-          .category-filters {
-            display: flex;
-            gap: 8px;
-            padding: 0 16px 16px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-          }
-          
-          .category-filters::-webkit-scrollbar {
-            display: none;
-          }
-          
-          .category-pill {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 10px 16px;
-            border-radius: 24px;
-            border: none;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s;
-          }
-          
-          .category-pill.active {
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-          }
-          
           /* Content Area */
           .content-area {
-            padding: 0 16px;
+            padding: 0 20px;
           }
           
           .loading-container {
@@ -470,7 +388,7 @@ export default function UniverseDiscoveryScreen() {
           .spinner {
             width: 40px;
             height: 40px;
-            border: 3px solid #E5E5EA;
+            border: 3px solid #333;
             border-top-color: ${COLORS.accent};
             border-radius: 50%;
             animation: spin 1s linear infinite;
@@ -481,33 +399,44 @@ export default function UniverseDiscoveryScreen() {
             to { transform: rotate(360deg); }
           }
           
-          /* Featured Section */
-          .featured-section {
-            margin-bottom: 24px;
-          }
-          
-          .section-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin: 0 0 12px;
-          }
-          
+          /* Featured Card - Matching Mockup Exactly */
           .featured-card {
             position: relative;
-            border-radius: 16px;
+            border-radius: 20px;
             overflow: hidden;
             cursor: pointer;
-            transition: transform 0.2s;
+            margin-bottom: 24px;
+            height: 220px;
           }
           
           .featured-card:hover {
-            transform: scale(1.02);
+            transform: scale(1.01);
+            transition: transform 0.2s;
           }
           
           .featured-image {
             width: 100%;
-            height: 220px;
+            height: 100%;
             object-fit: cover;
+          }
+          
+          .featured-badge {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            z-index: 10;
+          }
+          
+          .featured-badge span {
+            display: inline-block;
+            padding: 4px 10px;
+            border: 1.5px solid ${COLORS.accent};
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: ${COLORS.accent};
+            background: transparent;
           }
           
           .featured-gradient {
@@ -515,55 +444,88 @@ export default function UniverseDiscoveryScreen() {
             bottom: 0;
             left: 0;
             right: 0;
-            height: 140px;
-            background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
             padding: 16px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
+            padding-top: 50px;
+            background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
           }
           
-          .featured-icon {
-            font-size: 32px;
-            margin-bottom: 8px;
+          .featured-bottom-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+          }
+          
+          .featured-text-content {
+            flex: 1;
+            margin-right: 12px;
           }
           
           .featured-name {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
             color: #fff;
             margin: 0 0 4px;
           }
           
-          .featured-category {
-            font-size: 14px;
-            color: rgba(255,255,255,0.85);
-            margin: 0 0 8px;
+          .featured-meta {
+            font-size: 13px;
+            color: #D1D5DB;
+            margin: 0;
           }
           
-          .featured-stats {
+          .explore-button {
+            background: ${COLORS.accent};
+            color: #fff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+          }
+          
+          .explore-button:hover {
+            opacity: 0.9;
+          }
+          
+          /* Filter Section - Square Icon Buttons */
+          .filter-section {
+            margin-bottom: 24px;
+          }
+          
+          .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 12px;
+          }
+          
+          .filter-grid {
             display: flex;
-            align-items: center;
             gap: 12px;
           }
           
-          .stat {
-            font-size: 13px;
-            color: rgba(255,255,255,0.7);
-          }
-          
-          .activity-badge {
+          .filter-button {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            border: none;
             display: flex;
             align-items: center;
-            gap: 4px;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #fff;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
           }
           
-          /* Popular Section */
+          .filter-button:hover {
+            opacity: 0.8;
+          }
+          
+          .filter-button.active {
+            border: 2px solid ${COLORS.accent};
+          }
+          
+          /* Popular Section - 2x2 Grid */
           .popular-section {
             margin-bottom: 24px;
           }
@@ -571,88 +533,48 @@ export default function UniverseDiscoveryScreen() {
           .universes-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-          }
-          
-          @media (min-width: 768px) {
-            .universes-grid {
-              grid-template-columns: repeat(3, 1fr);
-            }
-          }
-          
-          @media (min-width: 1024px) {
-            .universes-grid {
-              grid-template-columns: repeat(4, 1fr);
-            }
+            gap: 16px;
           }
           
           .universe-card {
-            border-radius: 12px;
-            overflow: hidden;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
           }
           
-          .universe-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-          }
-          
-          .universe-image-container {
-            position: relative;
-            height: 120px;
+          .universe-card:hover .universe-image {
+            transform: scale(1.02);
           }
           
           .universe-image {
             width: 100%;
-            height: 100%;
+            height: 110px;
             object-fit: cover;
-          }
-          
-          .universe-icon {
-            position: absolute;
-            bottom: 8px;
-            left: 8px;
-            font-size: 24px;
-            background: rgba(0,0,0,0.5);
-            padding: 4px 8px;
-            border-radius: 8px;
+            border-radius: 14px;
+            transition: transform 0.2s;
           }
           
           .universe-info {
-            padding: 12px;
+            padding-top: 8px;
           }
           
           .universe-name {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
             margin: 0 0 4px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
           }
           
-          .universe-category {
-            font-size: 12px;
-            margin: 0 0 8px;
-          }
-          
-          .universe-stats {
+          .activity-badge {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 4px;
           }
           
-          .universe-stats span {
-            font-size: 11px;
+          .fire-icon {
+            font-size: 13px;
           }
           
-          .activity-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
+          .activity-badge span:last-child {
+            font-size: 13px;
+            font-weight: 500;
           }
           
           /* Empty State */
@@ -679,6 +601,13 @@ export default function UniverseDiscoveryScreen() {
           .empty-subtitle {
             font-size: 14px;
             margin: 0;
+          }
+          
+          /* Responsive - Keep 2x2 on mobile */
+          @media (min-width: 768px) {
+            .universes-grid {
+              grid-template-columns: repeat(2, 1fr);
+            }
           }
         `}</style>
       </AppLayout>
