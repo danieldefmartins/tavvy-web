@@ -417,9 +417,9 @@ export default function HomeScreen() {
               })}
             </div>
 
-            {/* Hint Text */}
-            <p className="hint-text">
-              Signals are Tavvy reviews — compare places in seconds
+            {/* Tagline */}
+            <p className="hint-text" style={{ color: '#22D3EE' }}>
+              Find your perfect spot in seconds. Not hours.
             </p>
 
             {/* Stories Row */}

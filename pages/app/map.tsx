@@ -57,11 +57,19 @@ if (typeof window !== 'undefined') {
   });
 }
 
-// Theme colors
+// Theme colors - Tavvy brand colors
 const BG_LIGHT = '#F9F7F2';
-const BG_DARK = '#0F172A';
-const ACCENT = '#0F1233';
+const BG_DARK = '#000000';  // Pure black
+const ACCENT_CYAN = '#22D3EE';  // Tavvy cyan/teal
+const ACCENT_GREEN = '#10B981';  // Tavvy green
+const ACCENT_GOLD = '#F59E0B';  // Tavvy gold
 const BLUE = '#007AFF';
+
+// Map tile styles
+const MAP_STYLES = {
+  light: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  dark: 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+};
 
 // Categories for filtering
 const categories = [
@@ -178,6 +186,13 @@ export default function MapScreen() {
   // Bottom sheet states
   const [sheetHeight, setSheetHeight] = useState<'collapsed' | 'partial' | 'full'>('partial');
   const sheetRef = useRef<HTMLDivElement>(null);
+  
+  // Popup states for map controls
+  const [showWeatherPopup, setShowWeatherPopup] = useState(false);
+  const [showLayersPopup, setShowLayersPopup] = useState(false);
+  const [showLegendPopup, setShowLegendPopup] = useState(false);
+  const [selectedMapStyle, setSelectedMapStyle] = useState<'light' | 'dark'>('light');
+  const [weatherData, setWeatherData] = useState<any>(null);
 
   // Get user location on mount
   useEffect(() => {
@@ -476,16 +491,22 @@ export default function MapScreen() {
             </div>
           )}
 
-          {/* Category Pills */}
-          <div className="category-pills">
+          {/* Category Pills - Hidden when bottom sheet is expanded */}
+          <div className={`category-pills ${sheetHeight === 'full' ? 'hidden' : ''}`}>
             {categories.map((cat) => {
               const isSelected = selectedCategory === cat.id;
+              const IconComponent = cat.icon;
               return (
                 <button
                   key={cat.id}
                   className={`category-pill ${isSelected ? 'selected' : ''}`}
                   onClick={() => handleCategorySelect(cat.id)}
+                  style={{
+                    background: isSelected ? ACCENT_CYAN : (isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'),
+                    color: isSelected ? '#000' : (isDark ? '#fff' : '#333'),
+                  }}
                 >
+                  {IconComponent && <IconComponent size={14} style={{ marginRight: 4 }} />}
                   {cat.name}
                 </button>
               );
@@ -503,8 +524,8 @@ export default function MapScreen() {
               zoomControl={false}
             >
               <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://stadiamaps.com/">Stadia Maps</a>'
+                url={isDark || selectedMapStyle === 'dark' ? MAP_STYLES.dark : MAP_STYLES.light}
               />
               {/* User location blue dot */}
               <Circle
@@ -559,12 +580,28 @@ export default function MapScreen() {
             </MapContainer>
           )}
 
-          {/* Map Controls - Right Side */}
-          <div className="map-controls-right">
-            <button className="map-control-btn" title="Weather">
+          {/* Map Controls - Bottom Right */}
+          <div className="map-controls-bottom">
+            <button 
+              className={`map-control-btn ${showWeatherPopup ? 'active' : ''}`} 
+              title="Weather"
+              onClick={() => {
+                setShowWeatherPopup(!showWeatherPopup);
+                setShowLayersPopup(false);
+                setShowLegendPopup(false);
+              }}
+            >
               <FiCloud size={20} />
             </button>
-            <button className="map-control-btn" title="Layers">
+            <button 
+              className={`map-control-btn ${showLayersPopup ? 'active' : ''}`} 
+              title="Layers"
+              onClick={() => {
+                setShowLayersPopup(!showLayersPopup);
+                setShowWeatherPopup(false);
+                setShowLegendPopup(false);
+              }}
+            >
               <FiLayers size={20} />
             </button>
             <button className="map-control-btn" onClick={centerOnUser} title="My Location">
@@ -572,10 +609,110 @@ export default function MapScreen() {
             </button>
           </div>
 
-          {/* Info Button - Left Side */}
-          <button className="info-btn" title="Info">
+          {/* Info/Legend Button - Bottom Left */}
+          <button 
+            className={`info-btn ${showLegendPopup ? 'active' : ''}`} 
+            title="Legend"
+            onClick={() => {
+              setShowLegendPopup(!showLegendPopup);
+              setShowWeatherPopup(false);
+              setShowLayersPopup(false);
+            }}
+          >
             <FiInfo size={20} />
           </button>
+
+          {/* Weather Popup */}
+          {showWeatherPopup && (
+            <div className="control-popup weather-popup">
+              <div className="popup-header">
+                <h3>Weather</h3>
+                <button className="popup-close" onClick={() => setShowWeatherPopup(false)}>
+                  <IoClose size={20} />
+                </button>
+              </div>
+              <div className="popup-content">
+                <div className="weather-info">
+                  <div className="weather-temp">72°F</div>
+                  <div className="weather-desc">Partly Cloudy</div>
+                  <div className="weather-details">
+                    <span>Humidity: 65%</span>
+                    <span>Wind: 8 mph</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Layers Popup */}
+          {showLayersPopup && (
+            <div className="control-popup layers-popup">
+              <div className="popup-header">
+                <h3>Map Style</h3>
+                <button className="popup-close" onClick={() => setShowLayersPopup(false)}>
+                  <IoClose size={20} />
+                </button>
+              </div>
+              <div className="popup-content">
+                <div className="layer-options">
+                  <button 
+                    className={`layer-option ${selectedMapStyle === 'light' ? 'selected' : ''}`}
+                    onClick={() => setSelectedMapStyle('light')}
+                  >
+                    <div className="layer-preview light-preview"></div>
+                    <span>Light</span>
+                  </button>
+                  <button 
+                    className={`layer-option ${selectedMapStyle === 'dark' ? 'selected' : ''}`}
+                    onClick={() => setSelectedMapStyle('dark')}
+                  >
+                    <div className="layer-preview dark-preview"></div>
+                    <span>Dark</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Legend Popup */}
+          {showLegendPopup && (
+            <div className="control-popup legend-popup">
+              <div className="popup-header">
+                <h3>Map Legend</h3>
+                <button className="popup-close" onClick={() => setShowLegendPopup(false)}>
+                  <IoClose size={20} />
+                </button>
+              </div>
+              <div className="popup-content">
+                <div className="legend-items">
+                  <div className="legend-item">
+                    <div className="legend-dot" style={{ background: '#22D3EE' }}></div>
+                    <span>Your Location</span>
+                  </div>
+                  <div className="legend-item">
+                    <div className="legend-dot" style={{ background: '#EF4444' }}></div>
+                    <span>Restaurants</span>
+                  </div>
+                  <div className="legend-item">
+                    <div className="legend-dot" style={{ background: '#8B5CF6' }}></div>
+                    <span>Cafes</span>
+                  </div>
+                  <div className="legend-item">
+                    <div className="legend-dot" style={{ background: '#F59E0B' }}></div>
+                    <span>Bars</span>
+                  </div>
+                  <div className="legend-item">
+                    <div className="legend-dot" style={{ background: '#3B82F6' }}></div>
+                    <span>Gas Stations</span>
+                  </div>
+                  <div className="legend-item">
+                    <div className="legend-dot" style={{ background: '#EC4899' }}></div>
+                    <span>Shopping</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Bottom Sheet */}
@@ -756,38 +893,46 @@ export default function MapScreen() {
           right: 0;
           z-index: 1000;
           padding: max(12px, env(safe-area-inset-top)) 16px 12px;
-          background: linear-gradient(to bottom, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 70%, transparent 100%);
+          background: ${isDark ? 'linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 70%, transparent 100%)' : 'linear-gradient(to bottom, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 70%, transparent 100%)'};
         }
 
         .search-row {
           display: flex;
           align-items: center;
           gap: 12px;
-          margin-bottom: 12px;
+          margin-bottom: 10px;
         }
 
         .back-btn {
-          width: 44px;
-          height: 44px;
+          width: 40px;
+          height: 40px;
           border-radius: 50%;
-          background: #fff;
+          background: ${isDark ? 'rgba(255,255,255,0.1)' : '#fff'};
           border: none;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+          color: ${isDark ? '#fff' : '#333'};
+          backdrop-filter: blur(8px);
+        }
+
+        .back-btn:hover {
+          background: ${ACCENT_CYAN};
+          color: #000;
         }
 
         .search-bar {
           flex: 1;
           display: flex;
           align-items: center;
-          background: #fff;
-          border-radius: 12px;
-          padding: 12px 16px;
+          background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.95)'};
+          border-radius: 10px;
+          padding: 10px 14px;
           gap: 10px;
           box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+          backdrop-filter: blur(8px);
         }
 
         .search-bar.focused {
@@ -795,20 +940,20 @@ export default function MapScreen() {
         }
 
         .search-icon {
-          color: #8A8A8A;
+          color: ${isDark ? '#888' : '#8A8A8A'};
         }
 
         .search-bar input {
           flex: 1;
           border: none;
           background: transparent;
-          font-size: 16px;
-          color: #111;
+          font-size: 15px;
+          color: ${isDark ? '#fff' : '#111'};
           outline: none;
         }
 
         .search-bar input::placeholder {
-          color: #A0A0A0;
+          color: ${isDark ? '#666' : '#A0A0A0'};
         }
 
         .clear-btn {
@@ -816,14 +961,14 @@ export default function MapScreen() {
           border: none;
           padding: 4px;
           cursor: pointer;
-          color: #8E8E93;
+          color: ${isDark ? '#888' : '#8E8E93'};
         }
 
         .search-spinner {
           width: 18px;
           height: 18px;
-          border: 2px solid #E5E5EA;
-          border-top-color: ${BLUE};
+          border: 2px solid ${isDark ? '#333' : '#E5E5EA'};
+          border-top-color: ${ACCENT_CYAN};
           border-radius: 50%;
           animation: spin 0.8s linear infinite;
         }
@@ -831,16 +976,17 @@ export default function MapScreen() {
         /* Autocomplete Suggestions */
         .suggestions-dropdown {
           position: absolute;
-          top: calc(max(12px, env(safe-area-inset-top)) + 56px);
-          left: 72px;
+          top: calc(max(12px, env(safe-area-inset-top)) + 52px);
+          left: 68px;
           right: 16px;
-          background: #fff;
+          background: ${isDark ? 'rgba(0,0,0,0.95)' : '#fff'};
           border-radius: 12px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+          box-shadow: 0 4px 20px rgba(0,0,0,0.25);
           z-index: 1002;
           overflow: hidden;
           max-height: 400px;
           overflow-y: auto;
+          backdrop-filter: blur(16px);
         }
 
         .suggestion-item {
@@ -857,18 +1003,18 @@ export default function MapScreen() {
         }
 
         .suggestion-item:hover {
-          background: #F5F5F7;
+          background: ${isDark ? 'rgba(255,255,255,0.1)' : '#F5F5F7'};
         }
 
         .suggestion-item:not(:last-child) {
-          border-bottom: 1px solid #F2F2F7;
+          border-bottom: 1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#F2F2F7'};
         }
 
         .suggestion-icon {
           width: 36px;
           height: 36px;
           border-radius: 50%;
-          background: #E8F4FF;
+          background: ${isDark ? 'rgba(34, 211, 238, 0.2)' : '#E8F4FF'};
           display: flex;
           align-items: center;
           justify-content: center;
@@ -882,9 +1028,9 @@ export default function MapScreen() {
 
         .suggestion-name {
           display: block;
-          font-size: 16px;
+          font-size: 15px;
           font-weight: 500;
-          color: #111;
+          color: ${isDark ? '#fff' : '#111'};
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -892,22 +1038,29 @@ export default function MapScreen() {
 
         .suggestion-detail {
           display: block;
-          font-size: 13px;
-          color: #666;
+          font-size: 12px;
+          color: ${isDark ? '#888' : '#666'};
           margin-top: 2px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
         }
 
-        /* Category Pills */
+        /* Category Pills - Compact filter bar */
         .category-pills {
           display: flex;
-          gap: 8px;
+          gap: 6px;
           overflow-x: auto;
           padding-bottom: 4px;
           -webkit-overflow-scrolling: touch;
           scrollbar-width: none;
+          transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .category-pills.hidden {
+          opacity: 0;
+          transform: translateY(-10px);
+          pointer-events: none;
         }
 
         .category-pills::-webkit-scrollbar {
@@ -915,22 +1068,30 @@ export default function MapScreen() {
         }
 
         .category-pill {
-          padding: 8px 16px;
-          border-radius: 20px;
+          display: flex;
+          align-items: center;
+          padding: 6px 12px;
+          border-radius: 16px;
           border: none;
-          background: #fff;
-          font-size: 14px;
-          font-weight: 500;
+          background: rgba(255,255,255,0.9);
+          font-size: 12px;
+          font-weight: 600;
           color: #333;
           cursor: pointer;
           white-space: nowrap;
           box-shadow: 0 1px 4px rgba(0,0,0,0.1);
           transition: all 0.2s;
+          backdrop-filter: blur(8px);
         }
 
         .category-pill.selected {
-          background: ${BLUE};
-          color: #fff;
+          background: ${ACCENT_CYAN};
+          color: #000;
+          box-shadow: 0 2px 8px rgba(34, 211, 238, 0.3);
+        }
+
+        .category-pill:hover:not(.selected) {
+          background: rgba(34, 211, 238, 0.2);
         }
 
         /* Map Container */
@@ -942,12 +1103,11 @@ export default function MapScreen() {
           bottom: 0;
         }
 
-        /* Map Controls - Right */
-        .map-controls-right {
+        /* Map Controls - Bottom Right */
+        .map-controls-bottom {
           position: absolute;
           right: 16px;
-          top: 50%;
-          transform: translateY(-50%);
+          bottom: 280px;
           z-index: 1000;
           display: flex;
           flex-direction: column;
@@ -955,41 +1115,205 @@ export default function MapScreen() {
         }
 
         .map-control-btn {
-          width: 44px;
-          height: 44px;
+          width: 40px;
+          height: 40px;
           border-radius: 50%;
-          background: #fff;
+          background: rgba(0, 0, 0, 0.8);
           border: none;
           display: flex;
+          color: #fff;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-          color: #333;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          backdrop-filter: blur(8px);
         }
 
         .map-control-btn:hover {
-          background: #f5f5f5;
+          background: rgba(34, 211, 238, 0.9);
+          color: #000;
         }
 
-        /* Info Button - Left */
+        .map-control-btn.active {
+          background: ${ACCENT_CYAN};
+          color: #000;
+        }
+
+        /* Info Button - Bottom Left */
         .info-btn {
           position: absolute;
           left: 16px;
-          top: 50%;
-          transform: translateY(-50%);
+          bottom: 280px;
           z-index: 1000;
-          width: 44px;
-          height: 44px;
+          width: 40px;
+          height: 40px;
           border-radius: 50%;
-          background: #fff;
+          background: rgba(0, 0, 0, 0.8);
           border: none;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-          color: #333;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          color: #fff;
+          backdrop-filter: blur(8px);
+        }
+
+        .info-btn:hover {
+          background: rgba(34, 211, 238, 0.9);
+          color: #000;
+        }
+
+        .info-btn.active {
+          background: ${ACCENT_CYAN};
+          color: #000;
+        }
+
+        /* Control Popups */
+        .control-popup {
+          position: absolute;
+          bottom: 340px;
+          z-index: 1002;
+          background: rgba(0, 0, 0, 0.9);
+          border-radius: 16px;
+          padding: 16px;
+          min-width: 200px;
+          backdrop-filter: blur(16px);
+          box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .weather-popup {
+          right: 70px;
+        }
+
+        .layers-popup {
+          right: 70px;
+        }
+
+        .legend-popup {
+          left: 70px;
+        }
+
+        .popup-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 12px;
+        }
+
+        .popup-header h3 {
+          margin: 0;
+          font-size: 16px;
+          font-weight: 600;
+          color: #fff;
+        }
+
+        .popup-close {
+          background: none;
+          border: none;
+          color: #888;
+          cursor: pointer;
+          padding: 4px;
+        }
+
+        .popup-close:hover {
+          color: #fff;
+        }
+
+        .popup-content {
+          color: #fff;
+        }
+
+        /* Weather Popup */
+        .weather-info {
+          text-align: center;
+        }
+
+        .weather-temp {
+          font-size: 36px;
+          font-weight: 700;
+          color: ${ACCENT_CYAN};
+        }
+
+        .weather-desc {
+          font-size: 14px;
+          color: #ccc;
+          margin-top: 4px;
+        }
+
+        .weather-details {
+          display: flex;
+          justify-content: center;
+          gap: 16px;
+          margin-top: 12px;
+          font-size: 12px;
+          color: #888;
+        }
+
+        /* Layers Popup */
+        .layer-options {
+          display: flex;
+          gap: 12px;
+        }
+
+        .layer-option {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+          padding: 8px;
+          border: 2px solid transparent;
+          border-radius: 12px;
+          background: none;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .layer-option.selected {
+          border-color: ${ACCENT_CYAN};
+        }
+
+        .layer-option span {
+          font-size: 12px;
+          color: #fff;
+        }
+
+        .layer-preview {
+          width: 60px;
+          height: 40px;
+          border-radius: 8px;
+        }
+
+        .light-preview {
+          background: linear-gradient(135deg, #e8e8e8 0%, #f5f5f5 100%);
+        }
+
+        .dark-preview {
+          background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        /* Legend Popup */
+        .legend-items {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .legend-item {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .legend-dot {
+          width: 12px;
+          height: 12px;
+          border-radius: 50%;
+        }
+
+        .legend-item span {
+          font-size: 13px;
+          color: #ccc;
         }
 
         /* Bottom Sheet */
