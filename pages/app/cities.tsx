@@ -46,9 +46,10 @@ export default function CitiesBrowseScreen() {
   const fetchCities = async () => {
     try {
       const { data, error } = await supabase
-        .from('cities')
+        .from('tavvy_cities')
         .select('*')
-        .order('name')
+        .eq('is_active', true)
+        .order('population', { ascending: false })
         .limit(50);
 
       if (!error && data && data.length > 0) {
