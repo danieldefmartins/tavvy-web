@@ -111,14 +111,40 @@ export default function UniverseDetailScreen() {
   const loadUniverseData = async () => {
     setLoading(true);
     try {
-      // Fetch the universe details
-      const { data: universeData, error: universeError } = await supabase
+      // Fetch the universe details - try by slug first, then by id
+      let universeData = null;
+      let universeError = null;
+
+      // First try to find by slug
+      const { data: bySlug, error: slugError } = await supabase
         .from('atlas_universes')
         .select('*')
-        .or(`slug.eq.${slug},id.eq.${slug}`)
-        .single();
+        .eq('slug', slug)
+        .maybeSingle();
+
+      if (bySlug) {
+        universeData = bySlug;
+      } else {
+        // If not found by slug, try by id
+        const { data: byId, error: idError } = await supabase
+          .from('atlas_universes')
+          .select('*')
+          .eq('id', slug)
+          .maybeSingle();
+        
+        universeData = byId;
+        universeError = idError;
+      }
 
       if (universeError) throw universeError;
+      
+      // If no universe found, stop here
+      if (!universeData) {
+        console.error('Universe not found for slug/id:', slug);
+        setLoading(false);
+        return;
+      }
+      
       setUniverse(universeData);
 
       // Fetch sub-universes (planets) for this universe
