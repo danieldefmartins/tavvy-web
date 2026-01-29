@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
+import { searchPlacesInBounds } from '../../lib/typesenseService';
 
 // Server-side Supabase client - has access to runtime env vars
 const getServerSupabase = () => {
@@ -165,7 +166,7 @@ export default async function handler(
       console.error('[API/places] Exception querying places table:', error);
     }
 
-    // Step 2: Check if fallback is needed
+    // Step 2: Try Typesense first (100x faster!)
     if (placesFromCanonical.length < fallbackThreshold) {
       fallbackTriggered = true;
       console.log(`[API/places] Fallback triggered: ${placesFromCanonical.length} < ${fallbackThreshold} threshold`);
@@ -176,7 +177,58 @@ export default async function handler(
           .map(p => p.source_id)
       );
 
+      // Try Typesense
       try {
+        const typesenseResults = await searchPlacesInBounds(
+          {
+            ne: [bounds.maxLng, bounds.maxLat],
+            sw: [bounds.minLng, bounds.minLat]
+          },
+          category && category !== 'All' ? category as string : undefined,
+          limitNum - placesFromCanonical.length
+        );
+
+        if (typesenseResults && typesenseResults.length > 0) {
+          const newTypesensePlaces = typesenseResults
+            .filter(p => {
+              const isTavvy = p.id.startsWith('tavvy:');
+              const sourceId = isTavvy ? p.id.replace('tavvy:', '') : p.fsq_place_id;
+              return !existingSourceIds.has(sourceId);
+            })
+            .map(p => {
+              const isTavvy = p.id.startsWith('tavvy:');
+              return {
+                id: p.id,
+                source: (isTavvy ? 'places' : 'fsq_raw') as 'places' | 'fsq_raw',
+                source_id: isTavvy ? p.id.replace('tavvy:', '') : p.fsq_place_id,
+                name: p.name,
+                latitude: p.latitude!,
+                longitude: p.longitude!,
+                address: p.address,
+                city: p.locality,
+                region: p.region,
+                country: p.country,
+                postcode: p.postcode,
+                category: p.category,
+                subcategory: p.subcategory,
+                phone: p.tel,
+                website: p.website,
+                cover_image_url: undefined,
+                photos: [],
+                status: 'active',
+              } as PlaceCard;
+            });
+          
+          placesFromFsqRaw = newTypesensePlaces;
+          console.log(`[API/places] ⚡ Typesense: ${placesFromFsqRaw.length} places in bounds`);
+        }
+      } catch (typesenseError) {
+        console.warn('[API/places] Typesense failed, falling back to Supabase:', typesenseError);
+      }
+
+      // Fallback to Supabase if Typesense failed
+      if (placesFromFsqRaw.length === 0) {
+        try {
         let query = supabase
           .from('fsq_places_raw')
           .select('fsq_id, name, latitude, longitude, address, city, region, country, postcode, category_name, subcategory_name, phone, website, cover_image_url, photos')
@@ -202,8 +254,9 @@ export default async function handler(
           placesFromFsqRaw = newFsqPlaces;
           console.log(`[API/places] Fetched ${placesFromFsqRaw.length} places from fsq_places_raw`);
         }
-      } catch (error) {
-        console.error('[API/places] Exception querying fsq_places_raw:', error);
+        } catch (error) {
+          console.error('[API/places] Exception querying fsq_places_raw:', error);
+        }
       }
     }
 
