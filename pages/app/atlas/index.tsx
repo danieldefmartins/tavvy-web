@@ -1,57 +1,75 @@
 /**
- * ATLAS INDEX PAGE
- * Browse all Atlas content - categories, universes, and recent articles
- * Acts as a hub for all Atlas content
+ * ATLAS HOME SCREEN - Web Version V2
+ * Port from iOS AtlasHomeScreen.tsx with V2 dark design system
+ * 
+ * Features:
+ * - Search bar that searches title, excerpt, content, and author
+ * - Category filter chips
+ * - Featured story hero
+ * - All articles displayed in grid
+ * - V2 design system matching Pros page
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import AppLayout from '../../../components/AppLayout';
 import { supabase } from '../../../lib/supabaseClient';
-import { IoSearch, IoChevronForward, IoCompassOutline, IoGlobeOutline, IoBookOutline } from 'react-icons/io5';
+import { getCoverImageUrl } from '../../../lib/imageUtils';
+import { IoSearch, IoCloseCircle, IoDocumentTextOutline } from 'react-icons/io5';
 
-const TEAL_PRIMARY = '#14b8a6';
-const ACCENT_COLOR = '#667EEA';
+// V2 Design System Colors
+const COLORS = {
+  primaryBlue: '#6B7FFF',
+  accentTeal: '#00CED1',
+  accent: '#667EEA',
+  successGreen: '#10B981',
+  warningAmber: '#F59E0B',
+  errorRed: '#EF4444',
+};
+
+// Default placeholder images
+const PLACEHOLDER_ARTICLE = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800';
+const PLACEHOLDER_AVATAR = 'https://ui-avatars.com/api/?name=T&background=667EEA&color=fff&size=100';
 
 interface Category {
   id: string;
   name: string;
   slug: string;
   icon?: string;
-  color?: string;
-  description?: string;
 }
 
-interface Universe {
-  id: string;
-  name: string;
-  slug: string;
-  location?: string;
-  banner_image_url?: string;
-  place_count?: number;
-  article_count?: number;
-}
-
-interface Article {
+interface AtlasArticle {
   id: string;
   title: string;
   slug: string;
+  excerpt?: string;
+  content?: string;
   cover_image_url?: string;
   author_name?: string;
+  author_avatar_url?: string;
   read_time_minutes?: number;
+  view_count?: number;
+  love_count?: number;
+  category_id?: string;
+  published_at?: string;
+  article_template_type?: string;
 }
 
-export default function AtlasIndexPage() {
+export default function AtlasHomeScreen() {
   const router = useRouter();
   const { theme, isDark } = useThemeContext();
-
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [universes, setUniverses] = useState<Universe[]>([]);
-  const [recentArticles, setRecentArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Search and filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // Data states
+  const [allArticles, setAllArticles] = useState<AtlasArticle[]>([]);
+  const [displayedArticles, setDisplayedArticles] = useState<AtlasArticle[]>([]);
 
   useEffect(() => {
     loadData();
@@ -60,29 +78,27 @@ export default function AtlasIndexPage() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [categoriesRes, universesRes, articlesRes] = await Promise.all([
-        supabase
-          .from('atlas_categories')
-          .select('*')
-          .order('display_order', { ascending: true }),
-        supabase
-          .from('atlas_universes')
-          .select('*')
-          .eq('status', 'published')
-          .eq('is_featured', true)
-          .order('published_at', { ascending: false })
-          .limit(6),
-        supabase
-          .from('atlas_articles')
-          .select('id, title, slug, cover_image_url, author_name, read_time_minutes')
-          .eq('status', 'published')
-          .order('published_at', { ascending: false })
-          .limit(10),
-      ]);
+      // Fetch categories
+      const { data: categoriesData } = await supabase
+        .from('atlas_categories')
+        .select('id, name, slug, icon')
+        .order('display_order', { ascending: true });
 
-      if (categoriesRes.data) setCategories(categoriesRes.data);
-      if (universesRes.data) setUniverses(universesRes.data);
-      if (articlesRes.data) setRecentArticles(articlesRes.data);
+      if (categoriesData) {
+        setCategories(categoriesData);
+      }
+
+      // Fetch all published articles
+      const { data: articles } = await supabase
+        .from('atlas_articles')
+        .select('id, title, slug, excerpt, content, cover_image_url, author_name, author_avatar_url, read_time_minutes, view_count, love_count, category_id, published_at, article_template_type')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false });
+
+      if (articles && articles.length > 0) {
+        setAllArticles(articles as AtlasArticle[]);
+        setDisplayedArticles(articles as AtlasArticle[]);
+      }
     } catch (error) {
       console.error('Error loading Atlas data:', error);
     } finally {
@@ -90,414 +106,515 @@ export default function AtlasIndexPage() {
     }
   };
 
-  const backgroundColor = theme.background;
-  const textColor = theme.text;
-  const secondaryTextColor = theme.textSecondary;
-  const surfaceColor = theme.surface;
+  // Filter and search articles
+  const filterArticles = useCallback((categoryId: string | null, query: string) => {
+    let filtered = allArticles;
+
+    // Filter by category
+    if (categoryId) {
+      filtered = filtered.filter(a => a.category_id === categoryId);
+    }
+
+    // Search in title, excerpt, content, and author name
+    if (query.trim()) {
+      const lowerQuery = query.toLowerCase();
+      filtered = filtered.filter(article => 
+        article.title.toLowerCase().includes(lowerQuery) ||
+        (article.excerpt && article.excerpt.toLowerCase().includes(lowerQuery)) ||
+        (article.content && article.content.toLowerCase().includes(lowerQuery)) ||
+        (article.author_name && article.author_name.toLowerCase().includes(lowerQuery))
+      );
+    }
+
+    setDisplayedArticles(filtered);
+  }, [allArticles]);
+
+  // Handle category selection
+  const handleCategorySelect = (categoryId: string | null) => {
+    setSelectedCategory(categoryId);
+    filterArticles(categoryId, searchQuery);
+  };
+
+  // Handle search
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    filterArticles(selectedCategory, query);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    filterArticles(selectedCategory, '');
+  };
+
+  const navigateToArticle = (article: AtlasArticle) => {
+    if (article.article_template_type === 'owner_spotlight') {
+      router.push(`/app/atlas/owner-spotlight/${article.slug}`);
+    } else {
+      router.push(`/app/article/${article.slug}`);
+    }
+  };
+
+  const bgColor = isDark ? '#121212' : '#FAFAFA';
+  const surfaceColor = isDark ? '#1E1E1E' : '#FFFFFF';
+  const surfaceAltColor = isDark ? '#2A2A2A' : '#F3F4F6';
+  const textColor = isDark ? '#FFFFFF' : '#111827';
+  const secondaryTextColor = isDark ? '#9CA3AF' : '#6B7280';
+  const borderColor = isDark ? '#333333' : '#E5E7EB';
+  const inputBgColor = isDark ? '#2C2C2E' : '#E5E5EA';
 
   if (loading) {
     return (
       <AppLayout>
-        <div className="loading-screen" style={{ backgroundColor }}>
-          <div className="loading-spinner" />
-          <style jsx>{`
-            .loading-screen {
-              min-height: 100vh;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
-            .loading-spinner {
-              width: 40px;
-              height: 40px;
-              border: 3px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#E5E7EB'};
-              border-top-color: ${TEAL_PRIMARY};
-              border-radius: 50%;
-              animation: spin 1s linear infinite;
-            }
-            @keyframes spin { to { transform: rotate(360deg); } }
-          `}</style>
+        <div style={{ backgroundColor: bgColor, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 14, color: secondaryTextColor }}>Loading articles...</div>
+          </div>
         </div>
       </AppLayout>
     );
   }
 
+  // Get featured article (first one) and rest for grid
+  const featuredArticle = displayedArticles.length > 0 ? displayedArticles[0] : null;
+  const gridArticles = displayedArticles.slice(1);
+
   return (
     <>
       <Head>
-        <title>Browse Atlas | TavvY</title>
-        <meta name="description" content="Browse all TavvY Atlas content - categories, universes, and articles" />
+        <title>Atlas | TavvY</title>
+        <meta name="description" content="Your guide to the exceptional." />
       </Head>
 
       <AppLayout>
-        <div className="atlas-index">
+        <div className="atlas-screen" style={{ backgroundColor: bgColor, minHeight: '100vh' }}>
           {/* Header */}
-          <header className="header">
-            <h1 className="title">Browse Atlas</h1>
-            <Link href="/app/atlas/search" className="search-button">
-              <IoSearch size={24} color={textColor} />
-            </Link>
-          </header>
+          <div className="header">
+            <h1 className="title">Atlas</h1>
+            <p className="tagline">Your guide to the exceptional.</p>
+          </div>
 
-          {/* Quick Links */}
-          <section className="quick-links">
-            <Link href="/app/atlas" className="quick-link">
-              <div className="quick-link-icon" style={{ backgroundColor: `${ACCENT_COLOR}20` }}>
-                <IoCompassOutline size={24} color={ACCENT_COLOR} />
-              </div>
-              <span>Featured</span>
-            </Link>
-            <Link href="/app/atlas/search" className="quick-link">
-              <div className="quick-link-icon" style={{ backgroundColor: `${TEAL_PRIMARY}20` }}>
-                <IoSearch size={24} color={TEAL_PRIMARY} />
-              </div>
-              <span>Search</span>
-            </Link>
-          </section>
-
-          {/* Categories */}
-          <section className="section">
-            <h2 className="section-title">
-              <IoBookOutline size={20} color={ACCENT_COLOR} />
-              Categories
-            </h2>
-            <div className="categories-grid">
-              {categories.map((category) => (
-                <Link
-                  key={category.id}
-                  href={`/app/atlas/category/${category.slug}`}
-                  className="category-card"
-                >
-                  <div 
-                    className="category-icon"
-                    style={{ backgroundColor: `${category.color || TEAL_PRIMARY}20` }}
-                  >
-                    <span>{category.icon || '📚'}</span>
-                  </div>
-                  <span className="category-name">{category.name}</span>
-                </Link>
-              ))}
+          {/* Search Bar */}
+          <div className="search-container">
+            <div className="search-input-wrapper" style={{ backgroundColor: inputBgColor }}>
+              <IoSearch size={20} color={secondaryTextColor} />
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search articles..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                style={{ color: textColor }}
+              />
+              {searchQuery.length > 0 && (
+                <button onClick={clearSearch} className="clear-button">
+                  <IoCloseCircle size={20} color={secondaryTextColor} />
+                </button>
+              )}
             </div>
-          </section>
+          </div>
 
-          {/* Featured Universes */}
-          {universes.length > 0 && (
-            <section className="section">
-              <h2 className="section-title">
-                <IoGlobeOutline size={20} color={ACCENT_COLOR} />
-                Featured Universes
-              </h2>
-              <div className="universes-grid">
-                {universes.map((universe) => (
-                  <Link
-                    key={universe.id}
-                    href={`/app/atlas/universe/${universe.slug}`}
-                    className="universe-card"
-                  >
-                    <img
-                      src={universe.banner_image_url || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'}
-                      alt={universe.name}
-                      className="universe-image"
-                    />
-                    <div className="universe-info">
-                      <span className="universe-name">{universe.name}</span>
-                      {universe.location && (
-                        <span className="universe-location">{universe.location}</span>
-                      )}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
+          {/* Category Filter Chips */}
+          <div className="filter-container">
+            {/* All chip */}
+            <button
+              className={`filter-chip ${selectedCategory === null ? 'active' : ''}`}
+              onClick={() => handleCategorySelect(null)}
+              style={{ backgroundColor: selectedCategory === null ? COLORS.accent : surfaceColor }}
+            >
+              <span className="chip-icon">📚</span>
+              <span className="chip-text">All</span>
+            </button>
+            
+            {/* Category chips */}
+            {categories.map((category) => (
+              <button
+                key={category.id}
+                className={`filter-chip ${selectedCategory === category.id ? 'active' : ''}`}
+                onClick={() => handleCategorySelect(category.id)}
+                style={{ backgroundColor: selectedCategory === category.id ? COLORS.accent : surfaceColor }}
+              >
+                {category.icon && <span className="chip-icon">{category.icon}</span>}
+                <span className="chip-text">{category.name}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Results Count */}
+          {searchQuery.length > 0 && (
+            <div className="results-count">
+              <p className="results-text" style={{ color: secondaryTextColor }}>
+                {displayedArticles.length} result{displayedArticles.length !== 1 ? 's' : ''} for "{searchQuery}"
+              </p>
+            </div>
           )}
 
-          {/* Recent Articles */}
-          {recentArticles.length > 0 && (
-            <section className="section">
-              <div className="section-header">
-                <h2 className="section-title">Recent Articles</h2>
-                <Link href="/app/atlas/search" className="see-all">
-                  See All <IoChevronForward size={16} />
-                </Link>
-              </div>
-              <div className="articles-list">
-                {recentArticles.map((article) => (
-                  <Link
-                    key={article.id}
-                    href={`/app/article/${article.slug || article.id}`}
-                    className="article-row"
-                  >
-                    <img
-                      src={article.cover_image_url || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200'}
-                      alt={article.title}
-                      className="article-thumb"
-                    />
-                    <div className="article-info">
-                      <span className="article-title">{article.title}</span>
-                      <span className="article-meta">
-                        {article.author_name || 'Tavvy Team'} • {article.read_time_minutes || 5} min
+          {/* No Results */}
+          {displayedArticles.length === 0 ? (
+            <div className="empty-state">
+              <IoDocumentTextOutline size={48} color={secondaryTextColor} />
+              <p className="empty-text" style={{ color: secondaryTextColor }}>
+                No articles found{searchQuery ? ` matching "${searchQuery}"` : ' in this category'}.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Featured Story Hero */}
+              {featuredArticle && (
+                <div
+                  className="featured-card"
+                  onClick={() => navigateToArticle(featuredArticle)}
+                >
+                  <img
+                    src={getCoverImageUrl(featuredArticle.cover_image_url) || PLACEHOLDER_ARTICLE}
+                    alt={featuredArticle.title}
+                    className="featured-image"
+                  />
+                  <div className="featured-gradient">
+                    <div className="featured-label">
+                      <span className="featured-label-text">FEATURED STORY</span>
+                    </div>
+                    <h2 className="featured-title">{featuredArticle.title}</h2>
+                    <div className="author-row">
+                      <img
+                        src={featuredArticle.author_avatar_url || PLACEHOLDER_AVATAR}
+                        alt={featuredArticle.author_name || 'Author'}
+                        className="author-avatar"
+                      />
+                      <span className="author-name">
+                        By {featuredArticle.author_name || 'Tavvy Team'}
                       </span>
                     </div>
-                    <IoChevronForward size={20} color={secondaryTextColor} />
-                  </Link>
-                ))}
-              </div>
-            </section>
+                    <button 
+                      className="read-button"
+                      onClick={() => navigateToArticle(featuredArticle)}
+                    >
+                      Read Article
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* All Articles Grid */}
+              {gridArticles.length > 0 && (
+                <div className="articles-section">
+                  <h2 className="section-title" style={{ color: textColor }}>
+                    {searchQuery ? 'Search Results' : 'All Articles'}
+                  </h2>
+                  <div className="articles-grid">
+                    {gridArticles.map((article) => (
+                      <div
+                        key={article.id}
+                        className="article-card"
+                        onClick={() => navigateToArticle(article)}
+                        style={{ backgroundColor: surfaceColor }}
+                      >
+                        <img
+                          src={getCoverImageUrl(article.cover_image_url) || PLACEHOLDER_ARTICLE}
+                          alt={article.title}
+                          className="article-image"
+                        />
+                        <div className="article-overlay">
+                          <h3 className="article-title">{article.title}</h3>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
-          <div className="bottom-spacing" />
+          {/* Bottom Spacing */}
+          <div style={{ height: 100 }} />
+
+          <style jsx>{`
+            .atlas-screen {
+              padding-bottom: 80px;
+            }
+
+            /* Header */
+            .header {
+              padding: 24px 20px;
+            }
+
+            .title {
+              font-size: 36px;
+              font-weight: 700;
+              font-style: italic;
+              color: ${textColor};
+              margin: 0;
+            }
+
+            .tagline {
+              font-size: 16px;
+              font-weight: 500;
+              color: ${COLORS.accent};
+              margin: 8px 0 0;
+            }
+
+            /* Search Bar */
+            .search-container {
+              padding: 0 20px 16px;
+            }
+
+            .search-input-wrapper {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              padding: 12px 16px;
+              border-radius: 12px;
+            }
+
+            .search-input {
+              flex: 1;
+              background: transparent;
+              border: none;
+              outline: none;
+              font-size: 15px;
+            }
+
+            .search-input::placeholder {
+              color: ${secondaryTextColor};
+            }
+
+            .clear-button {
+              background: none;
+              border: none;
+              padding: 0;
+              cursor: pointer;
+              display: flex;
+              align-items: center;
+            }
+
+            /* Filter Chips */
+            .filter-container {
+              display: flex;
+              gap: 8px;
+              padding: 0 20px 16px;
+              overflow-x: auto;
+              scrollbar-width: none;
+            }
+
+            .filter-container::-webkit-scrollbar {
+              display: none;
+            }
+
+            .filter-chip {
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              padding: 10px 16px;
+              border: none;
+              border-radius: 20px;
+              font-size: 14px;
+              font-weight: 500;
+              cursor: pointer;
+              white-space: nowrap;
+              transition: transform 0.2s;
+            }
+
+            .filter-chip:hover {
+              transform: scale(1.05);
+            }
+
+            .filter-chip.active .chip-text {
+              color: #FFFFFF;
+            }
+
+            .filter-chip:not(.active) .chip-text {
+              color: ${isDark ? '#E5E7EB' : '#374151'};
+            }
+
+            .chip-icon {
+              font-size: 16px;
+            }
+
+            .chip-text {
+              font-size: 14px;
+              font-weight: 500;
+            }
+
+            /* Results Count */
+            .results-count {
+              padding: 0 20px 16px;
+            }
+
+            .results-text {
+              font-size: 14px;
+              margin: 0;
+            }
+
+            /* Empty State */
+            .empty-state {
+              text-align: center;
+              padding: 60px 20px;
+            }
+
+            .empty-text {
+              font-size: 16px;
+              margin-top: 16px;
+            }
+
+            /* Featured Card */
+            .featured-card {
+              position: relative;
+              height: 500px;
+              margin: 0 20px 32px;
+              border-radius: 16px;
+              overflow: hidden;
+              cursor: pointer;
+              transition: transform 0.2s;
+            }
+
+            .featured-card:hover {
+              transform: translateY(-4px);
+            }
+
+            .featured-image {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+
+            .featured-gradient {
+              position: absolute;
+              bottom: 0;
+              left: 0;
+              right: 0;
+              padding: 32px 24px;
+              background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+            }
+
+            .featured-label {
+              display: inline-block;
+              background: rgba(102, 126, 234, 0.9);
+              padding: 6px 12px;
+              border-radius: 6px;
+              margin-bottom: 16px;
+            }
+
+            .featured-label-text {
+              font-size: 11px;
+              font-weight: 700;
+              color: #FFFFFF;
+              letter-spacing: 1px;
+            }
+
+            .featured-title {
+              font-size: 28px;
+              font-weight: 700;
+              color: #FFFFFF;
+              margin: 0 0 16px;
+              line-height: 1.3;
+            }
+
+            .author-row {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              margin-bottom: 20px;
+            }
+
+            .author-avatar {
+              width: 32px;
+              height: 32px;
+              border-radius: 50%;
+              object-fit: cover;
+            }
+
+            .author-name {
+              font-size: 14px;
+              color: rgba(255, 255, 255, 0.9);
+            }
+
+            .read-button {
+              background: ${COLORS.accent};
+              color: #FFFFFF;
+              border: none;
+              padding: 12px 24px;
+              border-radius: 8px;
+              font-size: 15px;
+              font-weight: 600;
+              cursor: pointer;
+              transition: background 0.2s;
+            }
+
+            .read-button:hover {
+              background: ${COLORS.primaryBlue};
+            }
+
+            /* Articles Section */
+            .articles-section {
+              padding: 0 20px;
+            }
+
+            .section-title {
+              font-size: 24px;
+              font-weight: 700;
+              margin: 0 0 20px;
+            }
+
+            .articles-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+              gap: 16px;
+            }
+
+            .article-card {
+              position: relative;
+              height: 200px;
+              border-radius: 12px;
+              overflow: hidden;
+              cursor: pointer;
+              transition: transform 0.2s;
+            }
+
+            .article-card:hover {
+              transform: translateY(-4px);
+            }
+
+            .article-image {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+
+            .article-overlay {
+              position: absolute;
+              bottom: 0;
+              left: 0;
+              right: 0;
+              padding: 20px;
+              background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            }
+
+            .article-title {
+              font-size: 16px;
+              font-weight: 600;
+              color: #FFFFFF;
+              margin: 0;
+              line-height: 1.4;
+              display: -webkit-box;
+              -webkit-line-clamp: 2;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+            }
+
+            @media (max-width: 768px) {
+              .articles-grid {
+                grid-template-columns: 1fr;
+              }
+
+              .featured-title {
+                font-size: 24px;
+              }
+
+              .featured-card {
+                height: 400px;
+              }
+            }
+          `}</style>
         </div>
-
-        <style jsx>{`
-          .atlas-index {
-            min-height: 100vh;
-            background-color: ${backgroundColor};
-            padding-bottom: 100px;
-          }
-
-          /* Header */
-          .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px;
-          }
-
-          .title {
-            font-size: 28px;
-            font-weight: 700;
-            color: ${textColor};
-            margin: 0;
-          }
-
-          .search-button {
-            padding: 10px;
-            background: ${surfaceColor};
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-
-          /* Quick Links */
-          .quick-links {
-            display: flex;
-            gap: 12px;
-            padding: 0 20px 24px;
-          }
-
-          .quick-link {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 16px;
-            background: ${surfaceColor};
-            border-radius: 16px;
-            text-decoration: none;
-            transition: transform 0.2s;
-          }
-
-          .quick-link:hover {
-            transform: scale(1.02);
-          }
-
-          .quick-link-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-
-          .quick-link span {
-            font-size: 15px;
-            font-weight: 600;
-            color: ${textColor};
-          }
-
-          /* Sections */
-          .section {
-            padding: 0 20px 32px;
-          }
-
-          .section-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
-          }
-
-          .section-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 18px;
-            font-weight: 700;
-            color: ${textColor};
-            margin: 0 0 16px;
-          }
-
-          .see-all {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 14px;
-            font-weight: 600;
-            color: ${ACCENT_COLOR};
-            text-decoration: none;
-          }
-
-          /* Categories Grid */
-          .categories-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-          }
-
-          .category-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            padding: 16px 8px;
-            text-decoration: none;
-            transition: transform 0.2s;
-          }
-
-          .category-card:hover {
-            transform: scale(1.05);
-          }
-
-          .category-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-
-          .category-icon span {
-            font-size: 28px;
-          }
-
-          .category-name {
-            font-size: 12px;
-            font-weight: 600;
-            color: ${textColor};
-            text-align: center;
-          }
-
-          /* Universes Grid */
-          .universes-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-          }
-
-          .universe-card {
-            border-radius: 16px;
-            overflow: hidden;
-            background: ${surfaceColor};
-            text-decoration: none;
-            transition: transform 0.2s;
-          }
-
-          .universe-card:hover {
-            transform: scale(1.02);
-          }
-
-          .universe-image {
-            width: 100%;
-            height: 100px;
-            object-fit: cover;
-          }
-
-          .universe-info {
-            padding: 12px;
-          }
-
-          .universe-name {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: ${textColor};
-            margin-bottom: 4px;
-          }
-
-          .universe-location {
-            font-size: 12px;
-            color: ${secondaryTextColor};
-          }
-
-          /* Articles List */
-          .articles-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-          }
-
-          .article-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: ${surfaceColor};
-            border-radius: 12px;
-            text-decoration: none;
-            transition: transform 0.2s;
-          }
-
-          .article-row:hover {
-            transform: scale(1.01);
-          }
-
-          .article-thumb {
-            width: 60px;
-            height: 60px;
-            border-radius: 8px;
-            object-fit: cover;
-            flex-shrink: 0;
-          }
-
-          .article-info {
-            flex: 1;
-            min-width: 0;
-          }
-
-          .article-title {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            color: ${textColor};
-            margin-bottom: 4px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
-
-          .article-meta {
-            font-size: 12px;
-            color: ${secondaryTextColor};
-          }
-
-          .bottom-spacing {
-            height: 40px;
-          }
-
-          /* Responsive */
-          @media (max-width: 480px) {
-            .categories-grid {
-              grid-template-columns: repeat(3, 1fr);
-            }
-
-            .universes-grid {
-              grid-template-columns: 1fr;
-            }
-          }
-        `}</style>
       </AppLayout>
     </>
   );
