@@ -267,7 +267,7 @@ export async function searchPlacesInBounds(
     ];
 
     if (category && category !== 'All') {
-      filters.push(`categories:=${category}`);
+      filters.push(`category:${category}`);
     }
 
     const searchResults = await typesenseClient
