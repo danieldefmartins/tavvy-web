@@ -16,7 +16,7 @@ import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import AppLayout from '../../../components/AppLayout';
 import { supabase } from '../../../lib/supabaseClient';
-import { getCoverImageUrl } from '../../../lib/imageUtils';
+// Image utils removed - using direct URLs
 import { IoSearch, IoCloseCircle, IoDocumentTextOutline } from 'react-icons/io5';
 
 // V2 Design System Colors
@@ -265,7 +265,7 @@ export default function AtlasHomeScreen() {
                   onClick={() => navigateToArticle(featuredArticle)}
                 >
                   <img
-                    src={getCoverImageUrl(featuredArticle.cover_image_url) || PLACEHOLDER_ARTICLE}
+                    src={featuredArticle.cover_image_url || PLACEHOLDER_ARTICLE}
                     alt={featuredArticle.title}
                     className="featured-image"
                   />
@@ -309,7 +309,7 @@ export default function AtlasHomeScreen() {
                         style={{ backgroundColor: surfaceColor }}
                       >
                         <img
-                          src={getCoverImageUrl(article.cover_image_url) || PLACEHOLDER_ARTICLE}
+                          src={article.cover_image_url || PLACEHOLDER_ARTICLE}
                           alt={article.title}
                           className="article-image"
                         />
