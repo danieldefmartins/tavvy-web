@@ -666,7 +666,7 @@ export default function HomeScreen() {
 
           /* Search Card - iOS Style */
           .search-card {
-            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#fff'};
+            background: ${isDark ? '#1C1C1E' : '#fff'};
             border-radius: 20px;
             padding: 20px;
             margin-bottom: 24px;
@@ -676,7 +676,7 @@ export default function HomeScreen() {
           .search-input-wrapper {
             display: flex;
             align-items: center;
-            background: ${isDark ? 'rgba(255,255,255,0.08)' : '#F5F5F5'};
+            background: ${isDark ? '#2C2C2E' : '#F5F5F5'};
             border-radius: 12px;
             padding: 14px 16px;
             margin-bottom: 16px;
@@ -722,7 +722,7 @@ export default function HomeScreen() {
             width: 56px;
             height: 56px;
             border-radius: 16px;
-            background: ${isDark ? 'rgba(255,255,255,0.08)' : '#F5F5F5'};
+            background: ${isDark ? '#2C2C2E' : '#F5F5F5'};
             display: flex;
             align-items: center;
             justify-content: center;

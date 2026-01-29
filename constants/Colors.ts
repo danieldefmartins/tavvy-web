@@ -82,8 +82,8 @@ export const darkTheme = {
   secondary: brand.orange,
   
   // Tab Bar
-  tabBarBackground: 'rgba(15, 18, 51, 0.95)',
-  tabBarActive: brand.blue,
+  tabBarBackground: '#000000',
+  tabBarActive: palette.white,
   tabBarInactive: brand.textSecondary,
   
   // Cards

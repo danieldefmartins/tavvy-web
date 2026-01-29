@@ -47,8 +47,8 @@ const tabs: TabItem[] = [
   {
     name: '',
     href: '/app/add',
-    icon: <FiPlus size={28} color="#FFFFFF" />,
-    activeIcon: <FiPlus size={28} color="#FFFFFF" />,
+    icon: <FiPlus size={28} color="#000000" />,
+    activeIcon: <FiPlus size={28} color="#000000" />,
     isCenter: true,
   },
   {
@@ -188,7 +188,7 @@ export default function TabBar() {
           width: 48px;
           height: 48px;
           border-radius: 24px;
-          background-color: #0F8A8A;
+          background-color: #FFFFFF;
           display: flex;
           align-items: center;
           justify-content: center;
