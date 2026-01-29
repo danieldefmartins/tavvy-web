@@ -605,9 +605,19 @@ export async function searchSuggestions(
  */
 export async function fetchPlaceById(placeId: string): Promise<Place | null> {
   try {
-    // Check if it's an FSQ ID
-    if (placeId.startsWith('fsq:')) {
+    if (DEBUG_PLACES) {
+      console.log('[fetchPlaceById] Looking up place:', placeId);
+    }
+
+    // Check if it's an FSQ ID (with or without prefix)
+    const isFsqId = placeId.startsWith('fsq:') || placeId.length === 24;
+    
+    if (isFsqId) {
       const fsqId = placeId.replace('fsq:', '');
+      if (DEBUG_PLACES) {
+        console.log('[fetchPlaceById] Detected FSQ ID:', fsqId);
+      }
+      
       const { data: fsqPlace, error } = await supabase
         .from('fsq_places_raw')
         .select('*')
@@ -619,10 +629,14 @@ export async function fetchPlaceById(placeId: string): Promise<Place | null> {
         return null;
       }
 
+      if (DEBUG_PLACES) {
+        console.log('[fetchPlaceById] Found FSQ place:', fsqPlace.name);
+      }
+
       return transformFsqRawPlace(fsqPlace) as any;
     }
 
-    // Regular place ID
+    // Try regular place ID from places table first
     const { data: place, error } = await supabase
       .from('places')
       .select('*')
@@ -630,8 +644,47 @@ export async function fetchPlaceById(placeId: string): Promise<Place | null> {
       .single();
 
     if (error || !place) {
-      console.error('Error fetching place:', error);
-      return null;
+      if (DEBUG_PLACES) {
+        console.log('[fetchPlaceById] Not found in places table, trying places_unified:', placeId);
+      }
+      
+      // Fallback: Try places_unified view
+      const { data: unifiedPlace, error: unifiedError } = await supabase
+        .from('places_unified')
+        .select('*')
+        .eq('id', placeId)
+        .single();
+      
+      if (unifiedError || !unifiedPlace) {
+        console.error('Error fetching place from places_unified:', unifiedError);
+        return null;
+      }
+      
+      if (DEBUG_PLACES) {
+        console.log('[fetchPlaceById] Found in places_unified:', unifiedPlace.name);
+      }
+      
+      // Transform unified place to expected format
+      return {
+        id: unifiedPlace.id,
+        name: unifiedPlace.name,
+        latitude: unifiedPlace.latitude || unifiedPlace.lat,
+        longitude: unifiedPlace.longitude || unifiedPlace.lng,
+        address: unifiedPlace.address || unifiedPlace.address_line1,
+        city: unifiedPlace.city || unifiedPlace.locality,
+        state_region: unifiedPlace.state_region || unifiedPlace.region,
+        country: unifiedPlace.country,
+        phone: unifiedPlace.phone || unifiedPlace.tel,
+        website: unifiedPlace.website,
+        category: unifiedPlace.category || unifiedPlace.primary_category,
+        cover_image_url: unifiedPlace.cover_image_url || unifiedPlace.photo_url,
+        signals: [],
+        photos: [],
+      } as any;
+    }
+
+    if (DEBUG_PLACES) {
+      console.log('[fetchPlaceById] Found in places table:', place.name);
     }
 
     // Fetch signals
