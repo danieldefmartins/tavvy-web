@@ -291,8 +291,17 @@ export default function MapScreen() {
       
       console.log(`[Map] Fetching places via API near [${centerLat}, ${centerLng}]`);
       
+      // Map category names to match Typesense data (singular form)
+      const categoryMap: Record<string, string> = {
+        'restaurants': 'Restaurant',
+        'cafes': 'Cafe',
+        'bars': 'Bar',
+        'gas': 'Gas Station',
+        'shopping': 'Shop'
+      };
+      
       const categoryFilter = selectedCategory !== 'all' ? 
-        categories.find(c => c.id === selectedCategory)?.name : undefined;
+        categoryMap[selectedCategory] : undefined;
       
       // Use API route instead of direct Supabase call
       const params = new URLSearchParams({
