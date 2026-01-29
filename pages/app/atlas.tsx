@@ -1,13 +1,7 @@
 /**
- * ATLAS HOME SCREEN - Premium Redesign
- * Pixel-perfect port from tavvy-mobile/screens/AtlasHomeScreen.tsx
- * 
- * Features:
- * - Clean, minimal magazine-style layout
- * - Large featured story hero with gradient overlay
- * - 2 trending guide cards
- * - Browse all articles button
- * - Dark/Light mode support
+ * ATLAS HOME SCREEN
+ * Shows all articles with search bar and category filters
+ * Search works on title, excerpt, content, and author name
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -17,24 +11,33 @@ import { useRouter } from 'next/router';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
-import { IoCompassOutline, IoChevronForward } from 'react-icons/io5';
+import { IoSearch, IoClose, IoChevronForward } from 'react-icons/io5';
 
-// Design System Colors (matching iOS)
+// Design System Colors
 const COLORS = {
   accent: '#667EEA',
   accentLight: '#818CF8',
 };
+
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  icon?: string;
+}
 
 interface Article {
   id: string;
   title: string;
   slug: string;
   excerpt?: string;
+  content?: string;
   cover_image_url?: string;
   author_name?: string;
   author_avatar_url?: string;
   read_time_minutes?: number;
   view_count?: number;
+  love_count?: number;
   category_id?: string;
   published_at?: string;
   status?: string;
@@ -49,50 +52,90 @@ export default function AtlasHomeScreen() {
   const router = useRouter();
   const { theme, isDark } = useThemeContext();
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+
+  // Search and filter states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // Data states
-  const [featuredArticle, setFeaturedArticle] = useState<Article | null>(null);
-  const [trendingArticles, setTrendingArticles] = useState<Article[]>([]);
+  const [allArticles, setAllArticles] = useState<Article[]>([]);
+  const [displayedArticles, setDisplayedArticles] = useState<Article[]>([]);
 
   useEffect(() => {
-    loadData();
+    loadInitialData();
   }, []);
 
-  const loadData = async () => {
+  // Load categories and articles on mount
+  const loadInitialData = async () => {
     setLoading(true);
     try {
-      // Fetch featured article (most recent or marked as featured)
-      const { data: featured } = await supabase
-        .from('atlas_articles')
-        .select('*')
-        .eq('status', 'published')
-        .order('published_at', { ascending: false })
-        .limit(1)
-        .single();
+      // Fetch categories
+      const { data: categoriesData } = await supabase
+        .from('atlas_categories')
+        .select('id, name, slug, icon')
+        .order('display_order', { ascending: true });
 
-      // Fetch trending articles (excluding featured)
-      const { data: articles } = await supabase
-        .from('atlas_articles')
-        .select('*')
-        .eq('status', 'published')
-        .order('view_count', { ascending: false })
-        .limit(5);
-
-      if (featured) {
-        setFeaturedArticle(featured);
+      if (categoriesData) {
+        setCategories(categoriesData);
       }
 
-      if (articles) {
-        // Get 2 articles that are not the featured one
-        const trending = articles.filter(a => a.id !== featured?.id).slice(0, 2);
-        setTrendingArticles(trending);
+      // Fetch all published articles with content for full-text search
+      const { data: articles } = await supabase
+        .from('atlas_articles')
+        .select('id, title, slug, excerpt, content, cover_image_url, author_name, author_avatar_url, read_time_minutes, view_count, love_count, category_id, published_at, article_template_type')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false });
+
+      if (articles && articles.length > 0) {
+        setAllArticles(articles);
+        setDisplayedArticles(articles);
       }
     } catch (error) {
       console.error('Error loading Atlas data:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Filter and search articles
+  const filterArticles = useCallback((categoryId: string | null, query: string) => {
+    let filtered = allArticles;
+
+    // Filter by category
+    if (categoryId) {
+      filtered = filtered.filter(a => a.category_id === categoryId);
+    }
+
+    // Search in title, excerpt, content, and author name
+    if (query.trim()) {
+      const lowerQuery = query.toLowerCase();
+      filtered = filtered.filter(article => 
+        article.title.toLowerCase().includes(lowerQuery) ||
+        (article.excerpt && article.excerpt.toLowerCase().includes(lowerQuery)) ||
+        (article.content && article.content.toLowerCase().includes(lowerQuery)) ||
+        (article.author_name && article.author_name.toLowerCase().includes(lowerQuery))
+      );
+    }
+
+    setDisplayedArticles(filtered);
+  }, [allArticles]);
+
+  // Handle category selection
+  const handleCategorySelect = (categoryId: string | null) => {
+    setSelectedCategory(categoryId);
+    filterArticles(categoryId, searchQuery);
+  };
+
+  // Handle search
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    filterArticles(selectedCategory, query);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery('');
+    filterArticles(selectedCategory, '');
   };
 
   const navigateToArticle = (article: Article) => {
@@ -104,9 +147,10 @@ export default function AtlasHomeScreen() {
   };
 
   const backgroundColor = theme.background;
-  const surfaceColor = theme.surface;
+  const cardColor = isDark ? '#1C1C1E' : '#FFFFFF';
   const textColor = theme.text;
   const secondaryTextColor = theme.textSecondary;
+  const inputBgColor = isDark ? '#2C2C2E' : '#E5E5EA';
 
   if (loading) {
     return (
@@ -148,6 +192,10 @@ export default function AtlasHomeScreen() {
     );
   }
 
+  // Get featured article (first one) and rest for grid
+  const featuredArticle = displayedArticles.length > 0 ? displayedArticles[0] : null;
+  const gridArticles = displayedArticles.slice(1);
+
   return (
     <>
       <Head>
@@ -163,70 +211,126 @@ export default function AtlasHomeScreen() {
             <p className="tagline">Your guide to the exceptional.</p>
           </header>
 
-          {/* Featured Story Hero */}
-          {featuredArticle && (
-            <div 
-              className="featured-card"
-              onClick={() => navigateToArticle(featuredArticle)}
-            >
-              <img 
-                src={featuredArticle.cover_image_url || PLACEHOLDER_ARTICLE}
-                alt={featuredArticle.title}
-                className="featured-image"
+          {/* Search Bar */}
+          <div className="search-container">
+            <div className="search-input-wrapper">
+              <IoSearch size={20} color={secondaryTextColor} />
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search articles..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
               />
-              <div className="featured-gradient">
-                <div className="featured-label">
-                  <span>FEATURED STORY</span>
-                </div>
-                <h2 className="featured-title">{featuredArticle.title}</h2>
-                <div className="author-row">
-                  <img 
-                    src={featuredArticle.author_avatar_url || PLACEHOLDER_AVATAR}
-                    alt={featuredArticle.author_name}
-                    className="author-avatar"
-                  />
-                  <span className="author-name">
-                    By {featuredArticle.author_name || 'Tavvy Team'}
-                  </span>
-                </div>
-                <button className="read-button">
-                  Read Article
+              {searchQuery && (
+                <button className="clear-button" onClick={clearSearch}>
+                  <IoClose size={20} color={secondaryTextColor} />
                 </button>
-              </div>
+              )}
+            </div>
+          </div>
+
+          {/* Category Filter Chips */}
+          <div className="filter-container">
+            <div className="filter-scroll">
+              {/* All chip */}
+              <button
+                className={`filter-chip ${selectedCategory === null ? 'active' : ''}`}
+                onClick={() => handleCategorySelect(null)}
+              >
+                <span className="chip-icon">📚</span>
+                <span className="chip-text">All</span>
+              </button>
+              
+              {/* Category chips */}
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  className={`filter-chip ${selectedCategory === category.id ? 'active' : ''}`}
+                  onClick={() => handleCategorySelect(category.id)}
+                >
+                  {category.icon && <span className="chip-icon">{category.icon}</span>}
+                  <span className="chip-text">{category.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Results Count */}
+          {searchQuery && (
+            <div className="results-count">
+              <p>{displayedArticles.length} result{displayedArticles.length !== 1 ? 's' : ''} for "{searchQuery}"</p>
             </div>
           )}
 
-          {/* Trending Guides */}
-          <section className="trending-section">
-            <h3 className="section-title">Trending Guides</h3>
-            <div className="trending-grid">
-              {trendingArticles.map((article) => (
-                <div
-                  key={article.id}
-                  className="trending-card"
-                  onClick={() => navigateToArticle(article)}
+          {/* No Results */}
+          {displayedArticles.length === 0 ? (
+            <div className="empty-state">
+              <p>No articles found{searchQuery ? ` matching "${searchQuery}"` : ' in this category'}.</p>
+            </div>
+          ) : (
+            <>
+              {/* Featured Story Hero */}
+              {featuredArticle && (
+                <div 
+                  className="featured-card"
+                  onClick={() => navigateToArticle(featuredArticle)}
                 >
-                  <img
-                    src={article.cover_image_url || PLACEHOLDER_ARTICLE}
-                    alt={article.title}
-                    className="trending-image"
+                  <img 
+                    src={featuredArticle.cover_image_url || PLACEHOLDER_ARTICLE}
+                    alt={featuredArticle.title}
+                    className="featured-image"
                   />
-                  <div className="trending-content">
-                    <h4 className="trending-title">{article.title}</h4>
+                  <div className="featured-gradient">
+                    <div className="featured-label">
+                      <span>FEATURED STORY</span>
+                    </div>
+                    <h2 className="featured-title">{featuredArticle.title}</h2>
+                    <div className="author-row">
+                      <img 
+                        src={featuredArticle.author_avatar_url || PLACEHOLDER_AVATAR}
+                        alt={featuredArticle.author_name}
+                        className="author-avatar"
+                      />
+                      <span className="author-name">
+                        By {featuredArticle.author_name || 'Tavvy Team'}
+                      </span>
+                    </div>
+                    <button className="read-button">
+                      Read Article
+                    </button>
                   </div>
                 </div>
-              ))}
-            </div>
-          </section>
+              )}
 
-          {/* Browse All Button */}
-          <section className="browse-section">
-            <Link href="/app/atlas/search" className="browse-button">
-              <IoCompassOutline size={24} color={COLORS.accent} />
-              <span className="browse-text">Browse All Articles</span>
-              <IoChevronForward size={20} color={secondaryTextColor} />
-            </Link>
-          </section>
+              {/* All Articles Grid */}
+              {gridArticles.length > 0 && (
+                <section className="articles-section">
+                  <h3 className="section-title">
+                    {searchQuery ? 'Search Results' : 'All Articles'}
+                  </h3>
+                  <div className="articles-grid">
+                    {gridArticles.map((article) => (
+                      <div
+                        key={article.id}
+                        className="article-card"
+                        onClick={() => navigateToArticle(article)}
+                      >
+                        <img
+                          src={article.cover_image_url || PLACEHOLDER_ARTICLE}
+                          alt={article.title}
+                          className="article-image"
+                        />
+                        <div className="article-overlay">
+                          <h4 className="article-title">{article.title}</h4>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </>
+          )}
 
           {/* Bottom Spacing */}
           <div className="bottom-spacing" />
@@ -241,7 +345,8 @@ export default function AtlasHomeScreen() {
 
           /* Header */
           .header {
-            padding: 20px 20px 24px;
+            padding: 20px 20px 16px;
+            text-align: center;
           }
 
           .title {
@@ -257,6 +362,116 @@ export default function AtlasHomeScreen() {
             font-weight: 500;
             color: ${COLORS.accent};
             margin: 4px 0 0;
+          }
+
+          /* Search Bar */
+          .search-container {
+            padding: 0 20px 16px;
+          }
+
+          .search-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: ${inputBgColor};
+            border-radius: 12px;
+            padding: 14px 16px;
+          }
+
+          .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 16px;
+            color: ${textColor};
+          }
+
+          .search-input::placeholder {
+            color: ${secondaryTextColor};
+          }
+
+          .clear-button {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          /* Filter Chips */
+          .filter-container {
+            padding: 0 20px 20px;
+            overflow: hidden;
+          }
+
+          .filter-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+          }
+
+          .filter-scroll::-webkit-scrollbar {
+            display: none;
+          }
+
+          .filter-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: ${cardColor};
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+          }
+
+          .filter-chip.active {
+            background: ${COLORS.accent};
+          }
+
+          .chip-icon {
+            font-size: 16px;
+          }
+
+          .chip-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: ${isDark ? '#E5E7EB' : '#374151'};
+          }
+
+          .filter-chip.active .chip-text {
+            color: white;
+          }
+
+          /* Results Count */
+          .results-count {
+            padding: 0 20px 12px;
+          }
+
+          .results-count p {
+            font-size: 14px;
+            color: ${secondaryTextColor};
+            margin: 0;
+          }
+
+          /* Empty State */
+          .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+          }
+
+          .empty-state p {
+            color: ${secondaryTextColor};
+            font-size: 16px;
           }
 
           /* Featured Card */
@@ -339,13 +554,13 @@ export default function AtlasHomeScreen() {
           }
 
           .read-button {
-            background: white;
+            background: ${COLORS.accent};
             border: none;
             padding: 12px 24px;
             border-radius: 12px;
             font-size: 14px;
             font-weight: 700;
-            color: #1F2937;
+            color: white;
             cursor: pointer;
             transition: transform 0.2s, opacity 0.2s;
           }
@@ -355,10 +570,9 @@ export default function AtlasHomeScreen() {
             opacity: 0.95;
           }
 
-          /* Trending Section */
-          .trending-section {
+          /* Articles Section */
+          .articles-section {
             padding: 0 20px;
-            margin-bottom: 32px;
           }
 
           .section-title {
@@ -368,39 +582,45 @@ export default function AtlasHomeScreen() {
             margin: 0 0 16px;
           }
 
-          .trending-grid {
+          .articles-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 16px;
           }
 
-          .trending-card {
-            background: ${surfaceColor};
+          .article-card {
+            background: ${cardColor};
             border-radius: 16px;
             overflow: hidden;
             cursor: pointer;
             transition: transform 0.2s;
-            box-shadow: ${isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.08)'};
+            position: relative;
+            height: 200px;
           }
 
-          .trending-card:hover {
+          .article-card:hover {
             transform: scale(1.02);
           }
 
-          .trending-image {
+          .article-image {
             width: 100%;
-            height: 140px;
+            height: 100%;
             object-fit: cover;
           }
 
-          .trending-content {
-            padding: 14px;
+          .article-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
           }
 
-          .trending-title {
+          .article-title {
             font-size: 15px;
             font-weight: 600;
-            color: ${isDark ? '#E5E7EB' : '#1F2937'};
+            color: white;
             margin: 0;
             line-height: 1.4;
             display: -webkit-box;
@@ -409,48 +629,22 @@ export default function AtlasHomeScreen() {
             overflow: hidden;
           }
 
-          /* Browse Section */
-          .browse-section {
-            padding: 0 20px;
-          }
-
-          .browse-button {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: ${isDark ? surfaceColor : '#FFFFFF'};
-            border: ${isDark ? 'none' : '1px solid #E5E7EB'};
-            border-radius: 16px;
-            padding: 18px 20px;
-            width: 100%;
-            cursor: pointer;
-            text-decoration: none;
-            transition: transform 0.2s;
-          }
-
-          .browse-button:hover {
-            transform: scale(1.01);
-          }
-
-          .browse-text {
-            flex: 1;
-            font-size: 16px;
-            font-weight: 600;
-            color: ${textColor};
-          }
-
           .bottom-spacing {
             height: 100px;
           }
 
           /* Responsive */
           @media (max-width: 480px) {
-            .trending-grid {
+            .articles-grid {
               grid-template-columns: 1fr;
             }
             
             .featured-card {
               height: 280px;
+            }
+
+            .article-card {
+              height: 180px;
             }
           }
         `}</style>
