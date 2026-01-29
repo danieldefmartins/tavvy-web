@@ -1,605 +1,925 @@
 /**
- * Pros Screen - Find Trusted Local Home Service Pros
- * Pixel-perfect port from tavvy-mobile/screens/ProsHomeScreen.tsx
+ * Pros Screen - Web Version
+ * Pixel-perfect port from tavvy-mobile-app/screens/ProsHomeScreen.tsx
  * 
- * Features:
- * - Green theme
- * - "Tavvy Pros" header with Find Pros / I'm a Pro buttons
- * - Pro signup banner
- * - Search form (service + location)
- * - Service category grid with icons
- * - Start a Project CTA
+ * V2 "The Tavvy Way" Design:
+ * - Match guarantee, Privacy protection, Expert guidance
+ * - Social proof (no star rating)
+ * - How It Works (3 steps)
+ * - Tavvy Shield (prominent card after How It Works)
+ * - Before You Hire (education)
+ * - Project Types (Quick/Medium/Major)
+ * - Popular Services
+ * - Best practices (Do's/Don'ts/What to Expect)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../contexts/ThemeContext';
-import { useAuth } from '../../contexts/AuthContext';
 import AppLayout from '../../components/AppLayout';
-import { supabase } from '../../lib/supabaseClient';
-import { spacing, borderRadius } from '../../constants/Colors';
 import { 
-  IoSearch, IoLocationOutline, IoChevronForward, IoCheckmarkCircle,
-  IoStar, IoTime, IoHome, IoWater, IoFlash, IoBrush, IoLeaf, 
-  IoConstruct, IoColorPalette, IoSnow, IoHammer, IoCar
+  IoAddCircleOutline, IoChevronForward, IoTimeOutline, IoCheckmark,
+  IoShieldCheckmark, IoHelpCircleOutline, IoCashOutline, IoFlagOutline,
+  IoScaleOutline, IoFlash, IoHammer, IoBusiness, IoHomeOutline,
+  IoCarOutline, IoBoatOutline, IoCameraOutline, IoBriefcaseOutline,
+  IoColorPaletteOutline, IoConstruct, IoLeafOutline, IoFlashOutline,
+  IoWaterOutline, IoCheckmarkCircle, IoCloseCircle, IoStar, IoStarOutline
 } from 'react-icons/io5';
-import { FiPlus, FiChevronRight } from 'react-icons/fi';
-import { UnifiedHeader } from '../../components/UnifiedHeader';
 
-// Green theme colors
-const GREEN = '#10B981';
-const GREEN_DARK = '#059669';
-const GREEN_LIGHT = '#D1FAE5';
+// V2 Design System Colors
+const COLORS = {
+  primaryBlue: '#6B7FFF',
+  accentTeal: '#00CED1',
+  successGreen: '#10B981',
+  warningAmber: '#F59E0B',
+  errorRed: '#EF4444',
+};
 
-// Service categories matching mobile app
-const serviceCategories = [
-  { id: 'home', name: 'Home', icon: IoHome, color: '#1F2937' },
-  { id: 'plumbing', name: 'Plumbing', icon: IoWater, color: '#1F2937' },
-  { id: 'electrical', name: 'Electrical', icon: IoFlash, color: '#1F2937' },
-  { id: 'cleaning', name: 'Cleaning', icon: IoBrush, color: '#1F2937' },
-  { id: 'landscaping', name: 'Landscaping', icon: IoLeaf, color: '#1F2937' },
-  { id: 'handyman', name: 'Handyman', icon: IoConstruct, color: '#1F2937' },
-  { id: 'painting', name: 'Painting', icon: IoColorPalette, color: '#1F2937' },
-  { id: 'hvac', name: 'HVAC', icon: IoSnow, color: '#1F2937' },
-  { id: 'roofing', name: 'Roofing', icon: IoHammer, color: '#1F2937' },
-  { id: 'auto', name: 'Auto', icon: IoCar, color: '#1F2937' },
+// Category configuration
+const CATEGORY_CONFIG = [
+  { slug: 'home', label: 'Home', icon: IoHomeOutline, color: '#6B7FFF' },
+  { slug: 'auto', label: 'Auto', icon: IoCarOutline, color: '#10B981' },
+  { slug: 'marine', label: 'Marine', icon: IoBoatOutline, color: '#00CED1' },
+  { slug: 'events', label: 'Events', icon: IoCameraOutline, color: '#F59E0B' },
+  { slug: 'business', label: 'Business', icon: IoBriefcaseOutline, color: '#8B5CF6' },
+  { slug: 'creative', label: 'Creative', icon: IoColorPaletteOutline, color: '#EC4899' },
 ];
 
-// Trust badges
-const trustBadges = [
-  { icon: IoCheckmarkCircle, text: 'Verified Pros', color: GREEN },
-  { icon: IoStar, text: 'Community Reviews', color: '#F59E0B' },
-  { icon: IoTime, text: 'Fast Response', color: GREEN },
+// Popular Services
+const POPULAR_SERVICES = [
+  { slug: 'auto-mechanic', label: 'Auto Mechanic', icon: IoConstruct, color: '#6B7FFF', desc: 'Car repairs' },
+  { slug: 'landscaping', label: 'Landscaping', icon: IoLeafOutline, color: '#10B981', desc: 'Lawn & garden' },
+  { slug: 'electrical', label: 'Electrician', icon: IoFlashOutline, color: '#F59E0B', desc: 'Electrical work' },
+  { slug: 'contractor', label: 'Contractor', icon: IoHammer, color: '#8B5CF6', desc: 'Remodeling' },
+  { slug: 'plumbing', label: 'Plumber', icon: IoWaterOutline, color: '#EF4444', desc: 'Plumbing' },
+  { slug: 'boat-mechanic', label: 'Boat Mechanic', icon: IoBoatOutline, color: '#00CED1', desc: 'Marine repairs' },
+];
+
+// Best Practices Content
+const BEST_PRACTICES = {
+  dos: [
+    'Get multiple quotes before deciding',
+    'Check licenses and insurance',
+    'Read reviews from verified customers',
+    'Get everything in writing',
+  ],
+  donts: [
+    'Pay full amount upfront',
+    'Hire without checking references',
+    'Skip the written contract',
+    'Rush into a decision',
+  ],
+  expect: [
+    'Clear communication and timelines',
+    'Professional behavior and respect',
+    'Quality workmanship',
+    'Fair and transparent pricing',
+  ],
+};
+
+// Before You Hire Education Content
+const EDUCATION_CONTENT = [
+  { icon: IoHelpCircleOutline, title: '5 Questions to Ask Every Contractor', subtitle: '2 min read' },
+  { icon: IoCashOutline, title: 'How Much Should It Cost?', subtitle: 'Price guide' },
+  { icon: IoFlagOutline, title: 'Red Flags to Watch For', subtitle: 'Stay safe' },
+  { icon: IoScaleOutline, title: 'Your Rights as a Homeowner', subtitle: 'FL laws' },
 ];
 
 export default function ProsScreen() {
   const { theme, isDark } = useThemeContext();
-  const { user } = useAuth();
   const router = useRouter();
-  
-  const [serviceQuery, setServiceQuery] = useState('');
-  const [locationQuery, setLocationQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'find' | 'pro'>('find');
+  const [viewMode, setViewMode] = useState<'user' | 'pro'>('user');
 
-  const handleSearch = () => {
-    if (serviceQuery.trim()) {
-      router.push(`/app/pros/search?service=${encodeURIComponent(serviceQuery)}&location=${encodeURIComponent(locationQuery)}`);
-    }
-  };
-
-  const bgColor = isDark ? '#0F172A' : '#F9F7F2';
+  const bgColor = isDark ? '#121212' : '#FAFAFA';
+  const surfaceColor = isDark ? '#1E1E1E' : '#FFFFFF';
+  const surfaceAltColor = isDark ? '#2A2A2A' : '#F3F4F6';
+  const textColor = isDark ? '#FFFFFF' : '#111827';
+  const secondaryTextColor = isDark ? '#9CA3AF' : '#6B7280';
+  const borderColor = isDark ? '#333333' : '#E5E7EB';
 
   return (
     <>
       <Head>
         <title>Pros | TavvY</title>
-        <meta name="description" content="Find trusted local home service pros on TavvY" />
+        <meta name="description" content="Connect with any professional. Any job. Any service. We'll match you." />
       </Head>
 
       <AppLayout>
-        <div className="pros-screen">
-          {/* Unified Header */}
-          <UnifiedHeader
-            screenKey="pros"
-            title="Pros"
-            searchPlaceholder="Search services..."
-            showBackButton={false}
-            onSearch={setServiceQuery}
-          />
-
-          {/* Main Content */}
-          <main className="main-content">
-            {/* Pro Signup Banner */}
-            <div className="promo-banner">
-              <span className="promo-icon">✨</span>
-              <span className="promo-text">Are you a Pro? Save $400 · Only 487 spots left!</span>
-            </div>
-
-            {/* Hero Title */}
-            <h2 className="hero-title">
-              Find Trusted Local<br />
-              <span className="hero-accent">Home Service Pros</span>
-            </h2>
-            <p className="hero-subtitle">
-              Connect with verified electricians, plumbers, cleaners, and more. Get quotes in minutes, not days.
+        <div className="pros-screen" style={{ backgroundColor: bgColor, minHeight: '100vh' }}>
+          {/* Header */}
+          <div className="header">
+            <h1 className="title">Pros</h1>
+            <p className="hero-tagline">
+              Connect with any professional.<br />
+              Any job. Any service. We'll match you.
             </p>
+          </div>
 
-            {/* Search Form */}
-            <div className="search-form">
-              <div className="search-field">
-                <IoSearch size={18} className="field-icon" />
-                <input
-                  type="text"
-                  placeholder="What service do you need? (e.g. Plumber)"
-                  value={serviceQuery}
-                  onChange={(e) => setServiceQuery(e.target.value)}
-                />
-              </div>
-              <div className="search-field">
-                <IoLocationOutline size={18} className="field-icon" />
-                <input
-                  type="text"
-                  placeholder="City or ZIP code"
-                  value={locationQuery}
-                  onChange={(e) => setLocationQuery(e.target.value)}
-                />
-              </div>
-              <button className="search-btn" onClick={handleSearch}>
-                Search
+          {/* Segmented Control */}
+          <div className="segmented-control-container">
+            <div className="segmented-control" style={{ backgroundColor: surfaceColor }}>
+              <button
+                className={`segment ${viewMode === 'user' ? 'active' : ''}`}
+                onClick={() => setViewMode('user')}
+              >
+                Find a Pro
+              </button>
+              <button
+                className={`segment ${viewMode === 'pro' ? 'active' : ''}`}
+                onClick={() => setViewMode('pro')}
+              >
+                I'm a Pro
               </button>
             </div>
+          </div>
 
-            {/* Trust Badges */}
-            <div className="trust-badges">
-              {trustBadges.map((badge, index) => {
-                const Icon = badge.icon;
-                return (
-                  <div key={index} className="trust-badge">
-                    <Icon size={16} color={badge.color} />
-                    <span>{badge.text}</span>
-                  </div>
-                );
-              })}
+          {/* Start a Project Card - Primary CTA */}
+          <Link href="/app/pros/new-project" className="start-project-card">
+            <div className="start-project-gradient">
+              <div className="start-project-icon">
+                <IoAddCircleOutline size={28} color="#FFFFFF" />
+              </div>
+              <div className="start-project-content">
+                <h3 className="start-project-title">Start a Project</h3>
+                <p className="start-project-subtitle">Tell us what you need, get matched with pros</p>
+              </div>
+              <IoChevronForward size={24} color="#FFFFFF" />
             </div>
+          </Link>
 
-            {/* Start a Project CTA */}
-            <Link href="/app/pros/new-project" className="project-cta">
-              <div className="cta-left">
-                <div className="cta-icon">
-                  <FiPlus size={20} color="#fff" />
-                </div>
-                <div className="cta-text">
-                  <h3>Start a Project</h3>
-                  <p>Get quotes from multiple pros in minutes</p>
+          {/* Social Proof - No star rating */}
+          <div className="social-proof" style={{ borderColor }}>
+            <div className="proof-item">
+              <div className="proof-number">12,450+</div>
+              <div className="proof-label">PROJECTS</div>
+            </div>
+            <div className="proof-divider" />
+            <div className="proof-item">
+              <div className="proof-number">$340</div>
+              <div className="proof-label">AVG SAVINGS</div>
+            </div>
+          </div>
+
+          {/* How It Works */}
+          <div className="section">
+            <h2 className="section-title">✨ How It Works</h2>
+            <div className="steps-container">
+              <div className="step-card" style={{ backgroundColor: surfaceColor, borderColor }}>
+                <div className="step-number">1</div>
+                <div className="step-content">
+                  <h3 className="step-title">Tell us what you need</h3>
+                  <p className="step-desc">From car repair to home renovation to event planning</p>
                 </div>
               </div>
-              <IoChevronForward size={24} color="#fff" />
-            </Link>
-
-            {/* Browse by Service */}
-            <section className="services-section">
-              <h3 className="section-title">Browse by Service</h3>
-              <div className="services-grid">
-                {serviceCategories.map((category) => {
-                  const Icon = category.icon;
-                  return (
-                    <Link
-                      key={category.id}
-                      href={`/app/pros/category/${category.id}`}
-                      className="service-card"
-                    >
-                      <div className="service-icon">
-                        <Icon size={28} color={category.color} />
-                      </div>
-                      <span className="service-name">{category.name}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </section>
-
-            {/* How It Works */}
-            <section className="how-section">
-              <h3 className="section-title">How It Works</h3>
-              <div className="steps-list">
-                <div className="step-item">
-                  <div className="step-number">1</div>
-                  <div className="step-content">
-                    <h4>Describe Your Project</h4>
-                    <p>Tell us what you need help with</p>
-                  </div>
-                </div>
-                <div className="step-item">
-                  <div className="step-number">2</div>
-                  <div className="step-content">
-                    <h4>Get Matched</h4>
-                    <p>We'll connect you with qualified pros</p>
-                  </div>
-                </div>
-                <div className="step-item">
-                  <div className="step-number">3</div>
-                  <div className="step-content">
-                    <h4>Compare & Hire</h4>
-                    <p>Review quotes and choose the best fit</p>
-                  </div>
+              <div className="step-card" style={{ backgroundColor: surfaceColor, borderColor }}>
+                <div className="step-number">2</div>
+                <div className="step-content">
+                  <h3 className="step-title">We match you with pros</h3>
+                  <p className="step-desc">Get quotes from vetted professionals in your area</p>
                 </div>
               </div>
-            </section>
+              <div className="step-card" style={{ backgroundColor: surfaceColor, borderColor }}>
+                <div className="step-number">3</div>
+                <div className="step-content">
+                  <h3 className="step-title">Chat & hire securely</h3>
+                  <p className="step-desc">Your contact info stays private until you're ready</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-            {/* Tavvy Shield CTA */}
-            <Link href="/app/pros/shield" className="shield-cta">
+          {/* Tavvy Shield - Prominent Card */}
+          <Link href="/app/pros/shield" className="tavvy-shield-card">
+            <div className="tavvy-shield-gradient">
               <div className="shield-icon-container">
-                <IoCheckmarkCircle size={32} color="#6B7FFF" />
+                <IoShieldCheckmark size={32} color={COLORS.primaryBlue} />
               </div>
               <div className="shield-content">
                 <h3 className="shield-title">Tavvy Shield</h3>
                 <p className="shield-desc">Want payment protection? Get covered with Tavvy Shield.</p>
               </div>
-              <IoChevronForward size={24} color="#6B7FFF" />
-            </Link>
-          </main>
+              <IoChevronForward size={20} color={COLORS.accentTeal} />
+            </div>
+          </Link>
 
-          {/* Bottom Spacing */}
-          <div className="bottom-spacing" />
-        </div>
+          {/* Before You Hire - Education */}
+          <div className="section">
+            <h2 className="section-title">📚 Before You Hire</h2>
+            <div className="edu-scroll">
+              {EDUCATION_CONTENT.map((item, index) => (
+                <div key={index} className="edu-card" style={{ backgroundColor: surfaceColor, borderColor }}>
+                  <item.icon size={28} color={COLORS.accentTeal} />
+                  <h3 className="edu-title">{item.title}</h3>
+                  <p className="edu-subtitle">{item.subtitle}</p>
+                </div>
+              ))}
+            </div>
+          </div>
 
-        <style jsx>{`
-          .pros-screen {
-            min-height: 100vh;
-            background-color: ${bgColor};
-          }
+          {/* Project Types */}
+          <div className="section">
+            <h2 className="section-title">📊 By Project Size</h2>
+            <div className="project-types-row">
+              <div className="project-type-card green" style={{ backgroundColor: surfaceColor, borderColor }}>
+                <IoFlash size={28} color={COLORS.successGreen} />
+                <h3 className="project-type-title">Quick Jobs</h3>
+                <p className="project-type-desc">Same day</p>
+              </div>
+              <div className="project-type-card amber" style={{ backgroundColor: surfaceColor, borderColor }}>
+                <IoHammer size={28} color={COLORS.warningAmber} />
+                <h3 className="project-type-title">Medium</h3>
+                <p className="project-type-desc">1-2 weeks</p>
+              </div>
+              <div className="project-type-card red" style={{ backgroundColor: surfaceColor, borderColor }}>
+                <IoBusiness size={28} color={COLORS.errorRed} />
+                <h3 className="project-type-title">Major</h3>
+                <p className="project-type-desc">1+ months</p>
+              </div>
+            </div>
+          </div>
 
-          /* Header */
-          .pros-header {
-            background: #fff;
-            padding: 16px 20px;
-            padding-top: max(16px, env(safe-area-inset-top));
-            border-bottom: 1px solid rgba(0,0,0,0.06);
-          }
+          {/* Browse by Category */}
+          <div className="section">
+            <h2 className="section-title">🔍 Browse by Category</h2>
+            <div className="category-scroll">
+              {CATEGORY_CONFIG.map((cat) => (
+                <button 
+                  key={cat.slug} 
+                  className="category-chip" 
+                  style={{ backgroundColor: surfaceColor, borderColor }}
+                >
+                  <cat.icon size={18} color={cat.color} />
+                  <span>{cat.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
 
-          .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          }
+          {/* Popular Services */}
+          <div className="section">
+            <h2 className="section-title">🔥 Popular Services</h2>
+            <div className="services-grid">
+              {POPULAR_SERVICES.map((service) => (
+                <button 
+                  key={service.slug} 
+                  className="service-card" 
+                  style={{ backgroundColor: surfaceColor, borderColor }}
+                >
+                  <div className="service-icon" style={{ backgroundColor: `${service.color}20` }}>
+                    <service.icon size={24} color={service.color} />
+                  </div>
+                  <div className="service-label">{service.label}</div>
+                  <div className="service-desc">{service.desc}</div>
+                </button>
+              ))}
+            </div>
+          </div>
 
-          .header-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #111;
-            margin: 0;
-          }
+          {/* The Tavvy Promise */}
+          <div className="section">
+            <div className="promise-card">
+              <div className="promise-gradient" style={{ backgroundColor: surfaceColor, borderColor }}>
+                <h3 className="promise-title">🛡️ The Tavvy Promise</h3>
+                <div className="promise-list">
+                  <div className="promise-item">
+                    <div className="promise-check">
+                      <IoCheckmark size={14} color="#FFFFFF" />
+                    </div>
+                    <p className="promise-text">
+                      <strong>Privacy protected</strong> - Contact info stays private until you hire
+                    </p>
+                  </div>
+                  <div className="promise-item">
+                    <div className="promise-check">
+                      <IoCheckmark size={14} color="#FFFFFF" />
+                    </div>
+                    <p className="promise-text">
+                      <strong>Vetted pros</strong> - We verify licenses and reviews
+                    </p>
+                  </div>
+                  <div className="promise-item">
+                    <div className="promise-check">
+                      <IoCheckmark size={14} color="#FFFFFF" />
+                    </div>
+                    <p className="promise-text">
+                      <strong>Match guarantee</strong> - We'll find the right pro for you
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-          .header-tabs {
-            display: flex;
-            gap: 8px;
-          }
+          {/* Expert Guidance - Do's/Don'ts */}
+          <div className="section">
+            <h2 className="section-title">💡 Expert Guidance</h2>
+            
+            {/* Do's */}
+            <div className="practice-card" style={{ backgroundColor: surfaceColor, borderColor }}>
+              <div className="practice-header">
+                <div className="practice-icon-bg green">
+                  <IoCheckmarkCircle size={20} color={COLORS.successGreen} />
+                </div>
+                <h3 className="practice-title green">Do's</h3>
+              </div>
+              {BEST_PRACTICES.dos.map((item, index) => (
+                <div key={index} className="practice-item">
+                  <IoCheckmark size={16} color={COLORS.successGreen} />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
 
-          .header-tab {
-            padding: 10px 20px;
-            border-radius: 24px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            background: ${GREEN};
-            color: #fff;
-          }
+            {/* Don'ts */}
+            <div className="practice-card" style={{ backgroundColor: surfaceColor, borderColor }}>
+              <div className="practice-header">
+                <div className="practice-icon-bg red">
+                  <IoCloseCircle size={20} color={COLORS.errorRed} />
+                </div>
+                <h3 className="practice-title red">Don'ts</h3>
+              </div>
+              {BEST_PRACTICES.donts.map((item, index) => (
+                <div key={index} className="practice-item">
+                  <IoCheckmark size={16} color={COLORS.errorRed} />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
 
-          .header-tab.outline {
-            background: transparent;
-            border: 1px solid #ddd;
-            color: #666;
-          }
+            {/* What to Expect */}
+            <div className="practice-card" style={{ backgroundColor: surfaceColor, borderColor }}>
+              <div className="practice-header">
+                <div className="practice-icon-bg blue">
+                  <IoStar size={20} color={COLORS.primaryBlue} />
+                </div>
+                <h3 className="practice-title blue">What to Expect</h3>
+              </div>
+              {BEST_PRACTICES.expect.map((item, index) => (
+                <div key={index} className="practice-item">
+                  <IoStarOutline size={16} color={COLORS.primaryBlue} />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
 
-          .header-tab:hover {
-            transform: scale(1.02);
-          }
+          <div style={{ height: 100 }} />
 
-          /* Main Content */
-          .main-content {
-            padding: 20px;
-          }
+          <style jsx>{`
+            .pros-screen {
+              padding-bottom: 80px;
+            }
 
-          /* Promo Banner */
-          .promo-banner {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: ${GREEN_LIGHT};
-            padding: 8px 16px;
-            border-radius: 24px;
-            margin-bottom: 20px;
-          }
+            /* Header */
+            .header {
+              padding: 24px 20px;
+            }
 
-          .promo-icon {
-            font-size: 14px;
-          }
+            .title {
+              font-size: 34px;
+              font-weight: 800;
+              color: ${textColor};
+              margin: 0;
+            }
 
-          .promo-text {
-            font-size: 13px;
-            font-weight: 500;
-            color: ${GREEN_DARK};
-          }
+            .hero-tagline {
+              font-size: 17px;
+              font-weight: 500;
+              color: ${COLORS.accentTeal};
+              margin: 8px 0 0;
+              line-height: 1.5;
+            }
 
-          /* Hero */
-          .hero-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: ${isDark ? '#fff' : '#111'};
-            line-height: 1.2;
-            margin: 0 0 12px;
-          }
+            /* Segmented Control */
+            .segmented-control-container {
+              padding: 0 20px 20px;
+            }
 
-          .hero-accent {
-            color: ${GREEN};
-          }
+            .segmented-control {
+              display: flex;
+              border-radius: 12px;
+              padding: 4px;
+              gap: 4px;
+            }
 
-          .hero-subtitle {
-            font-size: 15px;
-            color: ${isDark ? 'rgba(255,255,255,0.7)' : '#666'};
-            line-height: 1.5;
-            margin: 0 0 24px;
-          }
+            .segment {
+              flex: 1;
+              padding: 12px;
+              border: none;
+              border-radius: 8px;
+              font-size: 15px;
+              font-weight: 600;
+              cursor: pointer;
+              transition: all 0.2s;
+              background: transparent;
+              color: ${secondaryTextColor};
+            }
 
-          /* Search Form */
-          .search-form {
-            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#fff'};
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: ${isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.06)'};
-          }
+            .segment.active {
+              background: ${COLORS.primaryBlue};
+              color: #FFFFFF;
+            }
 
-          .search-field {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 16px;
-            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#f5f5f5'};
-            border-radius: 12px;
-            margin-bottom: 12px;
-          }
+            /* Start Project Card */
+            .start-project-card {
+              display: block;
+              margin: 0 20px 20px;
+              text-decoration: none;
+              border-radius: 16px;
+              overflow: hidden;
+              transition: transform 0.2s;
+            }
 
-          .field-icon {
-            color: ${isDark ? 'rgba(255,255,255,0.4)' : '#999'};
-          }
+            .start-project-card:hover {
+              transform: translateY(-2px);
+            }
 
-          .search-field input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            font-size: 15px;
-            color: ${isDark ? '#fff' : '#111'};
-            outline: none;
-          }
+            .start-project-gradient {
+              background: linear-gradient(90deg, #6B7FFF 0%, #5563E8 100%);
+              padding: 20px;
+              display: flex;
+              align-items: center;
+              gap: 16px;
+            }
 
-          .search-field input::placeholder {
-            color: ${isDark ? 'rgba(255,255,255,0.4)' : '#999'};
-          }
+            .start-project-icon {
+              width: 48px;
+              height: 48px;
+              background: rgba(255, 255, 255, 0.2);
+              border-radius: 12px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              flex-shrink: 0;
+            }
 
-          .search-btn {
-            width: 100%;
-            padding: 16px;
-            background: ${GREEN};
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-          }
+            .start-project-content {
+              flex: 1;
+            }
 
-          .search-btn:hover {
-            background: ${GREEN_DARK};
-          }
+            .start-project-title {
+              font-size: 18px;
+              font-weight: 700;
+              color: #FFFFFF;
+              margin: 0 0 4px;
+            }
 
-          /* Trust Badges */
-          .trust-badges {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-          }
+            .start-project-subtitle {
+              font-size: 14px;
+              color: rgba(255, 255, 255, 0.9);
+              margin: 0;
+            }
 
-          .trust-badge {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            color: ${isDark ? 'rgba(255,255,255,0.7)' : '#666'};
-          }
+            /* Social Proof */
+            .social-proof {
+              display: flex;
+              margin: 0 20px 24px;
+              padding: 20px;
+              background: ${surfaceColor};
+              border: 1px solid;
+              border-radius: 12px;
+              gap: 24px;
+            }
 
-          /* Project CTA */
-          .project-cta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: ${GREEN};
-            padding: 16px 20px;
-            border-radius: 16px;
-            text-decoration: none;
-            margin-bottom: 32px;
-          }
+            .proof-item {
+              flex: 1;
+              text-align: center;
+            }
 
-          .cta-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-          }
+            .proof-number {
+              font-size: 28px;
+              font-weight: 700;
+              color: ${COLORS.successGreen};
+              margin-bottom: 4px;
+            }
 
-          .cta-icon {
-            width: 48px;
-            height: 48px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
+            .proof-label {
+              font-size: 11px;
+              font-weight: 600;
+              color: ${secondaryTextColor};
+              letter-spacing: 0.5px;
+            }
 
-          .cta-text h3 {
-            font-size: 17px;
-            font-weight: 600;
-            color: #fff;
-            margin: 0 0 4px;
-          }
+            .proof-divider {
+              width: 1px;
+              background: ${borderColor};
+            }
 
-          .cta-text p {
-            font-size: 13px;
-            color: rgba(255,255,255,0.85);
-            margin: 0;
-          }
+            /* Section */
+            .section {
+              padding: 0 20px 32px;
+            }
 
-          /* Services Section */
-          .services-section {
-            margin-bottom: 32px;
-          }
+            .section-title {
+              font-size: 20px;
+              font-weight: 700;
+              color: ${textColor};
+              margin: 0 0 16px;
+            }
 
-          .section-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: ${isDark ? '#fff' : '#111'};
-            margin: 0 0 16px;
-          }
+            /* Steps */
+            .steps-container {
+              display: flex;
+              flex-direction: column;
+              gap: 12px;
+            }
 
-          .services-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-          }
+            .step-card {
+              display: flex;
+              align-items: flex-start;
+              gap: 16px;
+              padding: 16px;
+              border: 1px solid;
+              border-radius: 12px;
+            }
 
-          .service-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            padding: 16px 8px;
-            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#fff'};
-            border-radius: 16px;
-            text-decoration: none;
-            transition: transform 0.2s;
-          }
+            .step-number {
+              width: 32px;
+              height: 32px;
+              background: ${COLORS.primaryBlue};
+              color: #FFFFFF;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 14px;
+              font-weight: 700;
+              flex-shrink: 0;
+            }
 
-          .service-card:hover {
-            transform: scale(1.02);
-          }
+            .step-content {
+              flex: 1;
+            }
 
-          .service-icon {
-            width: 56px;
-            height: 56px;
-            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#f5f5f5'};
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
+            .step-title {
+              font-size: 16px;
+              font-weight: 600;
+              color: ${textColor};
+              margin: 0 0 4px;
+            }
 
-          .service-name {
-            font-size: 12px;
-            font-weight: 500;
-            color: ${isDark ? 'rgba(255,255,255,0.7)' : '#666'};
-            text-align: center;
-          }
+            .step-desc {
+              font-size: 14px;
+              color: ${secondaryTextColor};
+              margin: 0;
+            }
 
-          /* How It Works */
-          .how-section {
-            margin-bottom: 32px;
-          }
+            /* Tavvy Shield */
+            .tavvy-shield-card {
+              display: block;
+              margin: 0 20px 24px;
+              text-decoration: none;
+              border-radius: 16px;
+              overflow: hidden;
+              transition: transform 0.2s;
+            }
 
-          .steps-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-          }
+            .tavvy-shield-card:hover {
+              transform: translateY(-2px);
+            }
 
-          .step-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 16px;
-            padding: 16px;
-            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#fff'};
-            border-radius: 16px;
-          }
+            .tavvy-shield-gradient {
+              background: linear-gradient(90deg, rgba(107, 127, 255, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+              border: 1px solid rgba(107, 127, 255, 0.3);
+              padding: 20px;
+              display: flex;
+              align-items: center;
+              gap: 16px;
+            }
 
-          .step-number {
-            width: 32px;
-            height: 32px;
-            background: ${GREEN};
-            color: #fff;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 700;
-            flex-shrink: 0;
-          }
+            .shield-icon-container {
+              width: 56px;
+              height: 56px;
+              background: rgba(107, 127, 255, 0.1);
+              border-radius: 14px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              flex-shrink: 0;
+            }
 
-          .step-content h4 {
-            font-size: 15px;
-            font-weight: 600;
-            color: ${isDark ? '#fff' : '#111'};
-            margin: 0 0 4px;
-          }
+            .shield-content {
+              flex: 1;
+            }
 
-          .step-content p {
-            font-size: 13px;
-            color: ${isDark ? 'rgba(255,255,255,0.6)' : '#666'};
-            margin: 0;
-          }
+            .shield-title {
+              font-size: 17px;
+              font-weight: 700;
+              color: ${textColor};
+              margin: 0 0 4px;
+            }
 
-          /* Tavvy Shield CTA */
-          .shield-cta {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 20px;
-            background: linear-gradient(135deg, rgba(107, 127, 255, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
-            border: 1px solid rgba(107, 127, 255, 0.3);
-            border-radius: 16px;
-            text-decoration: none;
-            margin-bottom: 32px;
-            transition: transform 0.2s, box-shadow 0.2s;
-          }
+            .shield-desc {
+              font-size: 14px;
+              color: ${secondaryTextColor};
+              margin: 0;
+              line-height: 1.4;
+            }
 
-          .shield-cta:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(107, 127, 255, 0.2);
-          }
+            /* Education Cards */
+            .edu-scroll {
+              display: flex;
+              gap: 12px;
+              overflow-x: auto;
+              padding-bottom: 8px;
+              scrollbar-width: none;
+            }
 
-          .shield-icon-container {
-            width: 56px;
-            height: 56px;
-            background: rgba(107, 127, 255, 0.1);
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-          }
+            .edu-scroll::-webkit-scrollbar {
+              display: none;
+            }
 
-          .shield-content {
-            flex: 1;
-          }
+            .edu-card {
+              min-width: 200px;
+              padding: 20px;
+              border: 1px solid;
+              border-radius: 12px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              text-align: center;
+              gap: 8px;
+              cursor: pointer;
+              transition: transform 0.2s;
+            }
 
-          .shield-title {
-            font-size: 17px;
-            font-weight: 700;
-            color: ${isDark ? '#fff' : '#111'};
-            margin: 0 0 4px;
-          }
+            .edu-card:hover {
+              transform: translateY(-2px);
+            }
 
-          .shield-desc {
-            font-size: 14px;
-            color: ${isDark ? 'rgba(255,255,255,0.7)' : '#666'};
-            margin: 0;
-            line-height: 1.4;
-          }
+            .edu-title {
+              font-size: 14px;
+              font-weight: 600;
+              color: ${textColor};
+              margin: 0;
+            }
 
-          /* Bottom Spacing */
-          .bottom-spacing {
-            height: 100px;
-          }
+            .edu-subtitle {
+              font-size: 12px;
+              color: ${secondaryTextColor};
+              margin: 0;
+            }
 
-          /* Responsive */
-          @media (max-width: 480px) {
-            .services-grid {
+            /* Project Types */
+            .project-types-row {
+              display: grid;
               grid-template-columns: repeat(3, 1fr);
+              gap: 12px;
             }
-          }
 
-          @media (min-width: 768px) {
-            .services-grid {
-              grid-template-columns: repeat(5, 1fr);
+            .project-type-card {
+              padding: 20px;
+              border: 1px solid;
+              border-radius: 12px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              text-align: center;
+              gap: 8px;
+              cursor: pointer;
+              transition: transform 0.2s;
             }
-          }
-        `}</style>
+
+            .project-type-card.green {
+              border-top: 3px solid ${COLORS.successGreen};
+            }
+
+            .project-type-card.amber {
+              border-top: 3px solid ${COLORS.warningAmber};
+            }
+
+            .project-type-card.red {
+              border-top: 3px solid ${COLORS.errorRed};
+            }
+
+            .project-type-card:hover {
+              transform: translateY(-2px);
+            }
+
+            .project-type-title {
+              font-size: 16px;
+              font-weight: 600;
+              color: ${textColor};
+              margin: 0;
+            }
+
+            .project-type-desc {
+              font-size: 13px;
+              color: ${secondaryTextColor};
+              margin: 0;
+            }
+
+            /* Categories */
+            .category-scroll {
+              display: flex;
+              gap: 8px;
+              overflow-x: auto;
+              padding-bottom: 8px;
+              scrollbar-width: none;
+            }
+
+            .category-scroll::-webkit-scrollbar {
+              display: none;
+            }
+
+            .category-chip {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              padding: 10px 16px;
+              border: 1px solid;
+              border-radius: 20px;
+              font-size: 14px;
+              font-weight: 500;
+              color: ${textColor};
+              cursor: pointer;
+              white-space: nowrap;
+              transition: transform 0.2s;
+            }
+
+            .category-chip:hover {
+              transform: scale(1.05);
+            }
+
+            /* Services Grid */
+            .services-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+              gap: 12px;
+            }
+
+            .service-card {
+              padding: 16px;
+              border: 1px solid;
+              border-radius: 12px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              text-align: center;
+              gap: 8px;
+              cursor: pointer;
+              transition: transform 0.2s;
+            }
+
+            .service-card:hover {
+              transform: translateY(-2px);
+            }
+
+            .service-icon {
+              width: 48px;
+              height: 48px;
+              border-radius: 12px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+
+            .service-label {
+              font-size: 14px;
+              font-weight: 600;
+              color: ${textColor};
+            }
+
+            .service-desc {
+              font-size: 12px;
+              color: ${secondaryTextColor};
+            }
+
+            /* Promise Card */
+            .promise-card {
+              margin-bottom: 24px;
+            }
+
+            .promise-gradient {
+              padding: 24px;
+              border: 1px solid;
+              border-radius: 16px;
+            }
+
+            .promise-title {
+              font-size: 20px;
+              font-weight: 700;
+              color: ${textColor};
+              margin: 0 0 16px;
+            }
+
+            .promise-list {
+              display: flex;
+              flex-direction: column;
+              gap: 12px;
+            }
+
+            .promise-item {
+              display: flex;
+              align-items: flex-start;
+              gap: 12px;
+            }
+
+            .promise-check {
+              width: 20px;
+              height: 20px;
+              background: ${COLORS.successGreen};
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              flex-shrink: 0;
+              margin-top: 2px;
+            }
+
+            .promise-text {
+              flex: 1;
+              font-size: 14px;
+              color: ${secondaryTextColor};
+              margin: 0;
+              line-height: 1.5;
+            }
+
+            .promise-text strong {
+              color: ${textColor};
+              font-weight: 600;
+            }
+
+            /* Practice Cards */
+            .practice-card {
+              padding: 20px;
+              border: 1px solid;
+              border-radius: 12px;
+              margin-bottom: 16px;
+            }
+
+            .practice-header {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              margin-bottom: 16px;
+            }
+
+            .practice-icon-bg {
+              width: 36px;
+              height: 36px;
+              border-radius: 8px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+
+            .practice-icon-bg.green {
+              background: rgba(16, 185, 129, 0.15);
+            }
+
+            .practice-icon-bg.red {
+              background: rgba(239, 68, 68, 0.15);
+            }
+
+            .practice-icon-bg.blue {
+              background: rgba(107, 127, 255, 0.15);
+            }
+
+            .practice-title {
+              font-size: 18px;
+              font-weight: 700;
+              margin: 0;
+            }
+
+            .practice-title.green {
+              color: ${COLORS.successGreen};
+            }
+
+            .practice-title.red {
+              color: ${COLORS.errorRed};
+            }
+
+            .practice-title.blue {
+              color: ${COLORS.primaryBlue};
+            }
+
+            .practice-item {
+              display: flex;
+              align-items: flex-start;
+              gap: 12px;
+              margin-bottom: 12px;
+              font-size: 14px;
+              color: ${textColor};
+            }
+
+            .practice-item:last-child {
+              margin-bottom: 0;
+            }
+
+            @media (max-width: 768px) {
+              .services-grid {
+                grid-template-columns: repeat(2, 1fr);
+              }
+
+              .project-types-row {
+                grid-template-columns: 1fr;
+              }
+            }
+          `}</style>
+        </div>
       </AppLayout>
     </>
   );
