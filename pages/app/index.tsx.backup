@@ -331,22 +331,49 @@ export default function HomeScreen() {
 
       <AppLayout>
         <div className="home-screen">
+          {/* Navy Header */}
+          <header className="nav-header">
+            <div className="nav-content">
+              <img 
+                src="/brand/tavvy-logo-white.png" 
+                alt="Tavvy" 
+                className="nav-logo"
+              />
+              <button className="menu-btn">
+                <FiMenu size={24} color="#fff" />
+              </button>
+            </div>
+          </header>
+
           {/* Main Content */}
           <main className="main-content">
-            {/* Greeting Section - iOS Style */}
-            <div className="greeting-section">
-              <div className="greeting-text">{greeting}</div>
-              <h1 className="greeting-name">there 👋</h1>
-              <div className="tagline">
-                <span className="tagline-dot">•</span>
-                <span className="tagline-text">Find your perfect spot in seconds. Not hours.</span>
+            {/* View Mode Toggle */}
+            <div className="segment-wrap">
+              <div className="segment">
+                <button
+                  className={`segment-item ${viewMode === 'standard' ? 'active' : ''}`}
+                  onClick={() => setViewMode('standard')}
+                >
+                  Standard
+                </button>
+                <button
+                  className={`segment-item ${viewMode === 'map' ? 'active' : ''}`}
+                  onClick={switchToMapMode}
+                >
+                  Map
+                </button>
               </div>
             </div>
 
-            {/* Search Card - iOS Style */}
-            <div className="search-card">
-              <div className="search-input-wrapper">
-                <IoSearch size={20} className="search-icon" />
+            {/* Title */}
+            <h1 className="main-title">
+              Find a place that fits<br />your moment
+            </h1>
+
+            {/* Search Bar */}
+            <div className="search-wrapper">
+              <div className={`search-bar ${isSearchFocused ? 'focused' : ''}`}>
+                <IoSearch size={18} className="search-icon" />
                 <input
                   type="text"
                   placeholder="What are you in the mood for?"
@@ -355,73 +382,70 @@ export default function HomeScreen() {
                   onFocus={() => setIsSearchFocused(true)}
                   onBlur={() => setIsSearchFocused(false)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  className="search-input"
                 />
-              </div>
-              
-              {/* Quick Action Buttons */}
-              <div className="quick-actions">
-                <button className="quick-action-btn">
-                  <div className="quick-action-icon">
-                    <IoLocationSharp size={24} />
-                  </div>
-                  <span>Near Me</span>
-                </button>
-                <button className="quick-action-btn" onClick={switchToMapMode}>
-                  <div className="quick-action-icon">
-                    <FiMapPin size={24} />
-                  </div>
-                  <span>Map</span>
-                </button>
-                <button className="quick-action-btn">
-                  <div className="quick-action-icon">
-                    <IoSparkles size={24} />
-                  </div>
-                  <span>Surprise</span>
-                </button>
-                <button className="quick-action-btn">
-                  <div className="quick-action-icon">
-                    ⭐
-                  </div>
-                  <span>Saved</span>
-                </button>
+                {searchQuery && (
+                  <button className="clear-btn" onClick={() => setSearchQuery('')}>
+                    <FiX size={18} />
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* Mood Cards Section - iOS Style */}
-            <div className="mood-section">
-              <h2 className="section-title">WHAT'S YOUR MOOD?</h2>
-              <div className="mood-cards">
-                <button className="mood-card mood-card-hungry">
-                  <div className="mood-badge">
-                    <span className="mood-icon">🔥</span>
-                    <span className="mood-label">Popular</span>
-                  </div>
-                  <div className="mood-content">
-                    <h3 className="mood-title">Hungry</h3>
-                    <p className="mood-subtitle">Restaurants & Food</p>
-                  </div>
-                  <div className="mood-emoji">🍕</div>
-                </button>
-                
-                <button className="mood-card mood-card-thirsty">
-                  <div className="mood-badge">
-                    <span className="mood-icon">📈</span>
-                    <span className="mood-label">Trending</span>
-                  </div>
-                  <div className="mood-content">
-                    <h3 className="mood-title">Thirsty</h3>
-                    <p className="mood-subtitle">Bars & Cafes</p>
-                  </div>
-                  <div className="mood-emoji">🍸</div>
-                </button>
+            {/* Category Icon Row */}
+            <div className="category-row">
+              {categories.map((cat) => {
+                const IconComponent = cat.icon;
+                const isSelected = selectedCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    className={`category-item ${isSelected ? 'selected' : ''}`}
+                    onClick={() => handleCategorySelect(cat.id)}
+                  >
+                    <div 
+                      className="category-icon-wrap"
+                      style={{ backgroundColor: isSelected ? cat.color : `${cat.color}20` }}
+                    >
+                      <IconComponent 
+                        size={24} 
+                        color={isSelected ? '#fff' : cat.color} 
+                      />
+                    </div>
+                    <span className="category-name">{cat.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Tagline */}
+            <p className="hint-text" style={{ color: '#22D3EE' }}>
+              Find your perfect spot in seconds. Not hours.
+            </p>
+
+            {/* Stories Row */}
+            <div className="stories-section">
+              <div className="stories-row">
+                {mockStories.map((story) => (
+                  <button key={story.id} className="story-item">
+                    <div className={`story-avatar ${story.hasNew ? 'has-new' : ''} ${story.isUser ? 'is-user' : ''}`}>
+                      {story.image ? (
+                        <img src={story.image} alt={story.name} />
+                      ) : (
+                        <div className="story-add">
+                          <span>+</span>
+                        </div>
+                      )}
+                    </div>
+                    <span className="story-name">{story.name}</span>
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Live Now - iOS Style */}
+            {/* What's Happening Now */}
             <section className="section">
               <div className="section-header">
-                <h2><span className="live-dot">•</span> Live Now</h2>
+                <h2>What's Happening Now</h2>
                 <Link href="/app/happening-now" className="see-all">
                   See All <IoChevronForward size={16} />
                 </Link>
@@ -488,19 +512,8 @@ export default function HomeScreen() {
               </div>
             </section>
 
-            {/* Explore Something New - iOS Style */}
-            <div className="explore-new-card">
-              <div className="explore-new-header">
-                <span className="explore-sparkles">✨</span>
-                <span className="explore-count">3 experiences nearby</span>
-              </div>
-              <h3 className="explore-new-title">Explore Something New</h3>
-              <p className="explore-new-subtitle">Events, activities & hidden gems</p>
-              <div className="explore-new-icon">🌟</div>
-            </div>
-
             {/* Explore Tavvy */}
-            <section className="section explore-section" style={{ display: 'none' }}>
+            <section className="section explore-section">
               <div className="section-header">
                 <h2>Explore Tavvy</h2>
                 <Link href="/app/explore" className="see-all">
@@ -583,323 +596,6 @@ export default function HomeScreen() {
           .home-screen {
             min-height: 100vh;
             background-color: ${bgColor};
-          }
-
-          /* Greeting Section - iOS Style */
-          .greeting-section {
-            padding: 32px 0 24px;
-          }
-
-          .greeting-text {
-            font-size: 14px;
-            font-weight: 500;
-            color: ${isDark ? 'rgba(255,255,255,0.6)' : '#666'};
-            margin-bottom: 2px;
-          }
-
-          .greeting-name {
-            font-size: 32px;
-            font-weight: 600;
-            color: ${isDark ? '#fff' : ACCENT};
-            margin: 0 0 12px;
-          }
-
-          .tagline {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          }
-
-          .tagline-dot {
-            color: ${TEAL};
-            font-size: 12px;
-            font-weight: 700;
-            line-height: 1;
-          }
-
-          .tagline-text {
-            color: ${TEAL};
-            font-size: 12px;
-            font-weight: 500;
-          }
-
-          /* Search Card - iOS Style */
-          .search-card {
-            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#fff'};
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 24px;
-            box-shadow: ${isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.04)'};
-          }
-
-          .search-input-wrapper {
-            display: flex;
-            align-items: center;
-            background: ${isDark ? 'rgba(255,255,255,0.08)' : '#F5F5F5'};
-            border-radius: 12px;
-            padding: 14px 16px;
-            margin-bottom: 16px;
-          }
-
-          .search-input-wrapper .search-icon {
-            color: ${isDark ? 'rgba(255,255,255,0.4)' : '#999'};
-            margin-right: 12px;
-          }
-
-          .search-input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            font-size: 16px;
-            color: ${isDark ? '#fff' : '#000'};
-            outline: none;
-          }
-
-          .search-input::placeholder {
-            color: ${isDark ? 'rgba(255,255,255,0.4)' : '#999'};
-          }
-
-          /* Quick Actions - iOS Style */
-          .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-          }
-
-          .quick-action-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 8px;
-          }
-
-          .quick-action-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 16px;
-            background: ${isDark ? 'rgba(255,255,255,0.08)' : '#F5F5F5'};
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: ${isDark ? '#fff' : ACCENT};
-            transition: all 0.2s;
-          }
-
-          .quick-action-btn:hover .quick-action-icon {
-            background: ${isDark ? 'rgba(255,255,255,0.12)' : '#E5E5E5'};
-            transform: scale(1.05);
-          }
-
-          .quick-action-btn span {
-            font-size: 12px;
-            font-weight: 500;
-            color: ${isDark ? 'rgba(255,255,255,0.7)' : '#666'};
-          }
-
-          /* Mood Section - iOS Style */
-          .mood-section {
-            margin-bottom: 32px;
-          }
-
-          .section-title {
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#999'};
-            margin-bottom: 14px;
-          }
-
-          .mood-cards {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-          }
-
-          .mood-card {
-            position: relative;
-            min-height: 120px;
-            border-radius: 20px;
-            border: none;
-            cursor: pointer;
-            overflow: hidden;
-            transition: transform 0.2s;
-            padding: 20px;
-          }
-
-          .mood-card:active {
-            transform: scale(0.98);
-          }
-
-          .mood-card-hungry {
-            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
-          }
-
-          .mood-card-thirsty {
-            background: linear-gradient(135deg, #4FACFE 0%, #00F2FE 100%);
-          }
-
-          .mood-badge {
-            position: absolute;
-            top: 16px;
-            left: 16px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            background: rgba(255,255,255,0.25);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 4px 10px;
-          }
-
-          .mood-icon {
-            font-size: 12px;
-          }
-
-          .mood-label {
-            font-size: 10px;
-            font-weight: 500;
-            color: rgba(255,255,255,0.9);
-          }
-
-          .mood-content {
-            position: absolute;
-            bottom: 12px;
-            left: 12px;
-            right: 12px;
-          }
-
-          .mood-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #fff;
-            margin: 0 0 4px;
-          }
-
-          .mood-subtitle {
-            font-size: 12px;
-            color: rgba(255,255,255,0.7);
-            margin: 0;
-          }
-
-          .mood-emoji {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            font-size: 36px;
-            opacity: 0.9;
-          }
-
-          /* Live Now Section - iOS Style */
-          .section {
-            margin-bottom: 32px;
-          }
-
-          .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-          }
-
-          .section-header h2 {
-            font-size: 16px;
-            font-weight: 700;
-            color: ${isDark ? '#fff' : ACCENT};
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          }
-
-          .live-dot {
-            color: #FF3B30;
-            font-size: 24px;
-            line-height: 0;
-            animation: pulse 2s ease-in-out infinite;
-          }
-
-          @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-          }
-
-          .see-all {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 14px;
-            font-weight: 600;
-            color: ${TEAL};
-            background: none;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-          }
-
-          .happening-scroll {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding-bottom: 8px;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-          }
-
-          .happening-scroll::-webkit-scrollbar {
-            display: none;
-          }
-
-          .happening-card {
-            position: relative;
-            min-width: 280px;
-            height: 180px;
-            border-radius: 20px;
-            overflow: hidden;
-            cursor: pointer;
-          }
-
-          .happening-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-
-          .happening-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 16px;
-            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
-          }
-
-          .happening-badge {
-            display: inline-block;
-            background: rgba(255,59,48,0.9);
-            color: #fff;
-            font-size: 12px;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 12px;
-            margin-bottom: 8px;
-          }
-
-          .happening-overlay h3 {
-            font-size: 18px;
-            font-weight: 700;
-            color: #fff;
-            margin: 0 0 4px;
-          }
-
-          .happening-overlay p {
-            font-size: 13px;
-            color: rgba(255,255,255,0.8);
-            margin: 0;
           }
 
           /* Navy Header */
