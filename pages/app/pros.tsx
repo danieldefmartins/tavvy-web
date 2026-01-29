@@ -207,6 +207,18 @@ export default function ProsScreen() {
                 </div>
               </div>
             </section>
+
+            {/* Tavvy Shield CTA */}
+            <Link href="/app/pros/shield" className="shield-cta">
+              <div className="shield-icon-container">
+                <IoCheckmarkCircle size={32} color="#6B7FFF" />
+              </div>
+              <div className="shield-content">
+                <h3 className="shield-title">Tavvy Shield</h3>
+                <p className="shield-desc">Want payment protection? Get covered with Tavvy Shield.</p>
+              </div>
+              <IoChevronForward size={24} color="#6B7FFF" />
+            </Link>
           </main>
 
           {/* Bottom Spacing */}
@@ -520,6 +532,54 @@ export default function ProsScreen() {
             font-size: 13px;
             color: ${isDark ? 'rgba(255,255,255,0.6)' : '#666'};
             margin: 0;
+          }
+
+          /* Tavvy Shield CTA */
+          .shield-cta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(107, 127, 255, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+            border: 1px solid rgba(107, 127, 255, 0.3);
+            border-radius: 16px;
+            text-decoration: none;
+            margin-bottom: 32px;
+            transition: transform 0.2s, box-shadow 0.2s;
+          }
+
+          .shield-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(107, 127, 255, 0.2);
+          }
+
+          .shield-icon-container {
+            width: 56px;
+            height: 56px;
+            background: rgba(107, 127, 255, 0.1);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+
+          .shield-content {
+            flex: 1;
+          }
+
+          .shield-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: ${isDark ? '#fff' : '#111'};
+            margin: 0 0 4px;
+          }
+
+          .shield-desc {
+            font-size: 14px;
+            color: ${isDark ? 'rgba(255,255,255,0.7)' : '#666'};
+            margin: 0;
+            line-height: 1.4;
           }
 
           /* Bottom Spacing */
