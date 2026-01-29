@@ -266,20 +266,27 @@ export async function searchPlacesInBounds(
       `longitude:<=${maxLng}`,
     ];
 
+    // If category specified, search by category text; otherwise just filter by bounds
+    const searchParams: any = {
+      filter_by: filters.join(' && '),
+      sort_by: 'popularity:desc',
+      per_page: limit,
+    };
+
     if (category && category !== 'All') {
-      filters.push(`categories:${category}`);
+      // Use text search on categories field to find matches
+      searchParams.q = category;
+      searchParams.query_by = 'name,categories';
+    } else {
+      // No category filter, just return all places in bounds
+      searchParams.q = '*';
+      searchParams.query_by = 'name';
     }
 
     const searchResults = await typesenseClient
       .collections('places')
       .documents()
-      .search({
-        q: '*',
-        query_by: 'name',
-        filter_by: filters.join(' && '),
-        sort_by: 'popularity:desc',
-        per_page: limit,
-      });
+      .search(searchParams);
 
     return (searchResults.hits || []).map((hit: any) => 
       transformTypesensePlace(hit.document as TypesensePlace)
