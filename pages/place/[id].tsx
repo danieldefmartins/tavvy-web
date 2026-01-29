@@ -50,10 +50,15 @@ export default function PlaceDetailsScreen() {
   const loadPlace = async (placeId: string) => {
     setLoading(true);
     try {
+      console.log('[PlaceDetailsScreen] Loading place with ID:', placeId);
       const data = await fetchPlaceById(placeId);
+      if (!data) {
+        console.error('[PlaceDetailsScreen] Place not found:', placeId);
+      }
       setPlace(data);
     } catch (error) {
-      console.error('Error loading place:', error);
+      console.error('[PlaceDetailsScreen] Error loading place:', error);
+      setPlace(null);
     } finally {
       setLoading(false);
     }
@@ -91,6 +96,7 @@ export default function PlaceDetailsScreen() {
     return (
       <div className="loading-screen" style={{ backgroundColor: theme.background }}>
         <div className="loading-spinner" style={{ borderColor: theme.primary }} />
+        <p style={{ color: theme.textSecondary, marginTop: 16 }}>Loading place...</p>
         <style jsx>{`
           .loading-screen {
             min-height: 100vh;

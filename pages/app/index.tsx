@@ -407,7 +407,12 @@ export default function HomeScreen() {
         // Navigate to place details
         const place = suggestion.data;
         if (place.fsq_place_id) {
-          router.push(`/place/${place.fsq_place_id}`);
+          // Use fsq: prefix for consistency
+          console.log('[HomeScreen] Navigating to place:', place.fsq_place_id);
+          router.push(`/place/fsq:${place.fsq_place_id}`);
+        } else if (place.id) {
+          console.log('[HomeScreen] Navigating to place by ID:', place.id);
+          router.push(`/place/${place.id}`);
         }
         break;
       case 'category':

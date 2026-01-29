@@ -349,7 +349,8 @@ export default function MapScreen() {
     if (suggestion.latitude && suggestion.longitude) {
       setMapCenter([suggestion.latitude, suggestion.longitude]);
       // Navigate to place detail
-      router.push(`/app/place/${suggestion.slug || suggestion.id}`);
+      console.log('[MapScreen] Navigating to place:', suggestion.id);
+      router.push(`/place/${suggestion.id}`);
     }
   };
 
@@ -833,7 +834,10 @@ export default function MapScreen() {
               </div>
             ) : (
               places.map((place) => (
-                <div key={place.id} className="place-card" onClick={() => router.push(`/app/place/${place.slug || place.id}`)}>
+                <div key={place.id} className="place-card" onClick={() => {
+                  console.log('[MapScreen] Place card clicked:', place.id);
+                  router.push(`/place/${place.id}`);
+                }}>
                   <div className="place-image">
                     <img 
                       src={place.cover_image_url || place.photo_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop'} 
