@@ -103,15 +103,17 @@ const sortSignalsForDisplay = (signals: Signal[]): Signal[] => {
   return result.slice(0, 4);
 };
 
-// Signal colors matching the mobile app
-const getSignalBackgroundColor = (type: 'positive' | 'neutral' | 'negative') => {
-  switch (type) {
-    case 'positive':
-      return Colors.positive.primary; // Blue
-    case 'neutral':
-      return Colors.vibe.primary; // Purple
-    case 'negative':
-      return Colors.negative.primary; // Orange
+// Signal colors based on POSITION in grid (not signal type)
+// Row 1 (positions 0, 1): Blue (The Good)
+// Row 2 left (position 2): Purple (The Vibe)
+// Row 2 right (position 3): Orange (Heads Up)
+const getSignalBackgroundColorByPosition = (index: number) => {
+  if (index === 0 || index === 1) {
+    return Colors.positive.primary; // Blue - The Good
+  } else if (index === 2) {
+    return Colors.vibe.primary; // Purple - The Vibe
+  } else {
+    return Colors.negative.primary; // Orange - Heads Up
   }
 };
 
@@ -303,20 +305,20 @@ export default function PlaceCard({ place, onPress, showQuickActions = true, com
       {/* Signal Bars - 2x2 Grid */}
       <div className="signals-container">
         {displaySignals.map((signal, index) => {
-          const signalType = signal.tap_total > 0 ? getSignalType(signal.bucket) : 
-            index < 2 ? 'positive' : index === 2 ? 'neutral' : 'negative';
           const hasSignal = signal.tap_total > 0;
+          // Emoji based on position
+          const emoji = index < 2 ? '👍' : index === 2 ? '✨' : '⚠️';
           
           return (
             <button
               key={index}
               className="signal-badge"
               style={{ 
-                backgroundColor: getSignalBackgroundColor(signalType),
+                backgroundColor: getSignalBackgroundColorByPosition(index),
                 opacity: hasSignal ? 1 : 0.85,
               }}
             >
-              <span className="signal-emoji">{hasSignal ? getSignalEmoji(signalType) : '👆'}</span>
+              <span className="signal-emoji">{hasSignal ? emoji : '👆'}</span>
               <span className="signal-text">
                 {hasSignal ? `${signal.bucket}` : 'Be the first to tap!'}
               </span>

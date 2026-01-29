@@ -196,8 +196,8 @@ export default function MapScreen() {
   const [places, setPlaces] = useState<PlaceCardType[]>([]);
   const [loading, setLoading] = useState(true);
   
-  // Bottom sheet states
-  const [sheetHeight, setSheetHeight] = useState<'collapsed' | 'partial' | 'full'>('partial');
+  // Bottom sheet states - always partial, no expand/collapse
+  const [sheetHeight] = useState<'partial'>('partial');
   const sheetRef = useRef<HTMLDivElement>(null);
   
   // Popup states for map controls
@@ -393,28 +393,11 @@ export default function MapScreen() {
     router.push('/app');
   };
 
-  // Toggle sheet height on handle click - simple and reliable
-  const handleToggleSheet = () => {
-    setSheetHeight(prev => {
-      console.log('[Sheet] Toggle from:', prev);
-      if (prev === 'collapsed') return 'partial';
-      if (prev === 'partial') return 'full';
-      return 'collapsed'; // from 'full' go back to collapsed
-    });
-  };
+  // No toggle needed - sheet is always at partial height with scrollable content
 
-  // Get sheet height style
+  // Fixed sheet height - always partial with scrollable content
   const getSheetStyle = () => {
-    switch (sheetHeight) {
-      case 'collapsed':
-        return { height: '120px' };
-      case 'partial':
-        return { height: '45vh' };
-      case 'full':
-        return { height: 'calc(100vh - 180px)' };
-      default:
-        return { height: '45vh' };
-    }
+    return { height: '50vh' }; // Fixed at 50% viewport height
   };
 
   // Format distance for display (distance is in meters from API)
@@ -513,8 +496,8 @@ export default function MapScreen() {
             </div>
           )}
 
-          {/* Category Pills - Hidden when bottom sheet is expanded */}
-          <div className={`category-pills ${sheetHeight === 'full' ? 'hidden' : ''}`}>
+          {/* Category Pills */}
+          <div className="category-pills">
             {categories.map((cat) => {
               const isSelected = selectedCategory === cat.id;
               const IconComponent = cat.icon;
@@ -750,18 +733,9 @@ export default function MapScreen() {
           ref={sheetRef}
           style={getSheetStyle()}
         >
-          {/* Drag Handle - click to toggle */}
-          <div 
-            className="sheet-handle"
-            onClick={handleToggleSheet}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && handleToggleSheet()}
-          >
+          {/* Visual Handle - no click action, just visual indicator */}
+          <div className="sheet-handle">
             <div className="handle-bar" />
-            <span className="handle-hint">
-              {sheetHeight === 'collapsed' ? 'Tap to expand' : sheetHeight === 'partial' ? 'Tap to expand' : 'Tap to collapse'}
-            </span>
           </div>
 
           {/* Sheet Header */}
