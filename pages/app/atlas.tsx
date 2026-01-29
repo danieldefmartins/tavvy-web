@@ -13,10 +13,14 @@ import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
 import { IoSearch, IoClose, IoChevronForward } from 'react-icons/io5';
 
-// Design System Colors
+// V2 Design System Colors
 const COLORS = {
+  primaryBlue: '#6B7FFF',
+  accentTeal: '#00CED1',
   accent: '#667EEA',
-  accentLight: '#818CF8',
+  successGreen: '#10B981',
+  warningAmber: '#F59E0B',
+  errorRed: '#EF4444',
 };
 
 interface Category {
@@ -146,10 +150,10 @@ export default function AtlasHomeScreen() {
     }
   };
 
-  const backgroundColor = theme.background;
-  const cardColor = isDark ? '#1C1C1E' : '#FFFFFF';
-  const textColor = theme.text;
-  const secondaryTextColor = theme.textSecondary;
+  const backgroundColor = isDark ? '#121212' : '#FAFAFA';
+  const cardColor = isDark ? '#1E1E1E' : '#FFFFFF';
+  const textColor = isDark ? '#FFFFFF' : '#111827';
+  const secondaryTextColor = isDark ? '#9CA3AF' : '#6B7280';
   const inputBgColor = isDark ? '#2C2C2E' : '#E5E5EA';
 
   if (loading) {
