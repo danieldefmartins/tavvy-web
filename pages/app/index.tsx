@@ -6,7 +6,7 @@
  * - Navy header with Tavvy logo
  * - Standard/Map view toggle
  * - "Find a place that fits your moment" title
- * - Search bar
+ * - Search bar with autocomplete
  * - Category icon row
  * - Stories row
  * - What's Happening Now carousel
@@ -26,6 +26,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import AppLayout from '../../components/AppLayout';
 import PlaceCard from '../../components/PlaceCard';
 import { fetchPlacesInBounds, searchPlaces, PlaceCard as PlaceCardType } from '../../lib/placeService';
+import { searchPlaces as typesenseSearchPlaces, getAutocompleteSuggestions } from '../../lib/typesenseService';
 import { spacing, borderRadius, Colors } from '../../constants/Colors';
 import { 
   FiSearch, FiX, FiMapPin, FiUser, FiChevronRight, FiMenu,
@@ -57,6 +58,18 @@ const categories = [
   { id: 'shopping', name: 'Shopping', icon: IoStorefront, color: '#EC4899' },
   { id: 'hotels', name: 'Hotels', icon: IoBed, color: '#6366F1' },
   { id: 'rv-camping', name: 'RV & Camping', icon: IoBonfire, color: '#F97316' },
+];
+
+// Searchable categories for autocomplete
+const SEARCHABLE_CATEGORIES = [
+  { name: 'Restaurants', icon: 'restaurant', type: 'category' },
+  { name: 'Cafes', icon: 'cafe', type: 'category' },
+  { name: 'Coffee Shops', icon: 'cafe', type: 'category' },
+  { name: 'Bars', icon: 'beer', type: 'category' },
+  { name: 'Gas Stations', icon: 'car', type: 'category' },
+  { name: 'Shopping', icon: 'shopping', type: 'category' },
+  { name: 'Hotels', icon: 'bed', type: 'category' },
+  { name: 'RV & Camping', icon: 'bonfire', type: 'category' },
 ];
 
 // Explore Tavvy items (Universes preview)
@@ -91,6 +104,16 @@ const mockHappeningNow = [
   { id: '3', title: 'Food Truck Festival', subtitle: 'All day today', image: 'https://images.unsplash.com/photo-1565123409695-7b5ef63a2efb?w=400&h=300&fit=crop', type: 'event' },
 ];
 
+// Search suggestion interface
+interface SearchSuggestion {
+  id: string;
+  type: 'place' | 'category' | 'recent';
+  title: string;
+  subtitle: string;
+  icon: string;
+  data?: any;
+}
+
 // Location fallback is handled by IP geolocation - see getLocationFromIP()
 
 export default function HomeScreen() {
@@ -109,7 +132,9 @@ export default function HomeScreen() {
   // Search states
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [searchSuggestions, setSearchSuggestions] = useState<SearchSuggestion[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
   
   // Location states
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
@@ -268,26 +293,83 @@ export default function HomeScreen() {
         categoryFilter
       );
       
-      console.log('[Places] Fetched', fetchedPlaces.length, 'places');
+      console.log('[Places] Fetched places:', fetchedPlaces.length);
       setPlaces(fetchedPlaces);
-      
-      // Set trending places (first 6 with most signals)
-      const sorted = [...fetchedPlaces].sort((a, b) => 
-        (b.signals?.length || 0) - (a.signals?.length || 0)
-      );
-      setTrendingPlaces(sorted.slice(0, 6));
-      console.log('[Places] Set', sorted.slice(0, 6).length, 'trending places');
+      setTrendingPlaces(fetchedPlaces.slice(0, 10));
     } catch (error) {
       console.error('[Places] Error fetching places:', error);
-      // Set empty arrays on error so we don't show loading forever
-      setPlaces([]);
-      setTrendingPlaces([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle search
+  // Handle search with debouncing and autocomplete
+  useEffect(() => {
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
+
+    if (!searchQuery.trim()) {
+      setSearchSuggestions([]);
+      return;
+    }
+
+    // Debounce search by 300ms
+    searchDebounceRef.current = setTimeout(async () => {
+      const suggestions: SearchSuggestion[] = [];
+      const query = searchQuery.toLowerCase();
+
+      // Search for matching categories
+      const matchingCategories = SEARCHABLE_CATEGORIES
+        .filter(c => c.name.toLowerCase().includes(query))
+        .slice(0, 2);
+      
+      matchingCategories.forEach(cat => {
+        suggestions.push({
+          id: `category-${cat.name}`,
+          type: 'category',
+          title: cat.name,
+          subtitle: 'Category',
+          icon: cat.icon,
+          data: cat,
+        });
+      });
+
+      // Search for matching places using Typesense
+      try {
+        const typesenseResults = await typesenseSearchPlaces({
+          query: searchQuery,
+          latitude: userLocation?.[1],
+          longitude: userLocation?.[0],
+          radiusKm: 50,
+          limit: 5,
+        });
+
+        typesenseResults.places.forEach(place => {
+          suggestions.push({
+            id: `place-${place.fsq_place_id}`,
+            type: 'place',
+            title: place.name,
+            subtitle: `${place.category || 'Place'} • ${place.locality || 'Nearby'}`,
+            icon: 'location',
+            data: place,
+          });
+        });
+      } catch (error) {
+        console.error('[Search] Typesense search error:', error);
+      }
+
+      setSearchSuggestions(suggestions);
+    }, 300);
+
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
+    };
+  }, [searchQuery, userLocation]);
+
+  // Handle search submission
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
       fetchNearbyPlaces();
@@ -315,26 +397,51 @@ export default function HomeScreen() {
     setSearchQuery('');
   };
 
+  // Handle suggestion selection
+  const handleSuggestionSelect = (suggestion: SearchSuggestion) => {
+    setIsSearchFocused(false);
+    setSearchSuggestions([]);
+    
+    switch (suggestion.type) {
+      case 'place':
+        // Navigate to place details
+        const place = suggestion.data;
+        if (place.fsq_place_id) {
+          router.push(`/place/${place.fsq_place_id}`);
+        }
+        break;
+      case 'category':
+        // Navigate to map with category filter
+        const categoryName = suggestion.data.name;
+        router.push(`/app/map?category=${encodeURIComponent(categoryName)}`);
+        break;
+      case 'recent':
+        setSearchQuery(suggestion.title);
+        handleSearch();
+        break;
+    }
+  };
+
   // Switch to map mode
   const switchToMapMode = () => {
     router.push('/app/map');
   };
 
+  // Render
   const bgColor = isDark ? BG_DARK : BG_LIGHT;
+  const textColor = isDark ? '#fff' : ACCENT;
 
   return (
-    <>
+    <AppLayout>
       <Head>
-        <title>Home | TavvY</title>
-        <meta name="description" content="Discover places with TavvY's signal-based reviews" />
+        <title>Tavvy - Find Your Perfect Spot</title>
       </Head>
 
-      <AppLayout>
-        <div className="home-screen">
-          {/* Main Content */}
+      <div className="home-screen">
+        <div className="container">
           <main className="main-content">
             {/* Greeting Section - iOS Style */}
-            <div className="greeting-section">
+            <section className="greeting-section">
               <div className="greeting-row">
                 <div>
                   <div className="greeting-text">{greeting}</div>
@@ -343,16 +450,15 @@ export default function HomeScreen() {
                 <button 
                   className="theme-toggle-btn"
                   onClick={() => setThemeMode(isDark ? 'light' : 'dark')}
-                  aria-label="Toggle theme"
                 >
-                  {isDark ? '☀️' : '🌙'}
+                  {isDark ? '🌙' : '🌞'}
                 </button>
               </div>
               <div className="tagline">
                 <span className="tagline-dot">•</span>
                 <span className="tagline-text">Find your perfect spot in seconds. Not hours.</span>
               </div>
-            </div>
+            </section>
 
             {/* Search Card - iOS Style */}
             <div className="search-card">
@@ -364,11 +470,53 @@ export default function HomeScreen() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchFocused(true)}
-                  onBlur={() => setIsSearchFocused(false)}
+                  onBlur={() => {
+                    // Delay to allow click on suggestions
+                    setTimeout(() => setIsSearchFocused(false), 200);
+                  }}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   className="search-input"
                 />
+                {searchQuery && (
+                  <button 
+                    className="clear-btn"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSearchSuggestions([]);
+                    }}
+                  >
+                    <FiX size={18} />
+                  </button>
+                )}
               </div>
+              
+              {/* Autocomplete Suggestions */}
+              {isSearchFocused && searchSuggestions.length > 0 && (
+                <div className="autocomplete-dropdown">
+                  {searchSuggestions.map((suggestion) => (
+                    <button
+                      key={suggestion.id}
+                      className="suggestion-item"
+                      onClick={() => handleSuggestionSelect(suggestion)}
+                    >
+                      <div className="suggestion-icon">
+                        {suggestion.icon === 'location' && <IoLocationSharp size={20} />}
+                        {suggestion.icon === 'restaurant' && <IoRestaurant size={20} />}
+                        {suggestion.icon === 'cafe' && <IoCafe size={20} />}
+                        {suggestion.icon === 'beer' && <IoBeer size={20} />}
+                        {suggestion.icon === 'car' && <IoCarSport size={20} />}
+                        {suggestion.icon === 'shopping' && <IoStorefront size={20} />}
+                        {suggestion.icon === 'bed' && <IoBed size={20} />}
+                        {suggestion.icon === 'bonfire' && <IoBonfire size={20} />}
+                      </div>
+                      <div className="suggestion-content">
+                        <div className="suggestion-title">{suggestion.title}</div>
+                        <div className="suggestion-subtitle">{suggestion.subtitle}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
               
               {/* Quick Action Buttons */}
               <div className="quick-actions">
@@ -399,103 +547,62 @@ export default function HomeScreen() {
               </div>
             </div>
 
-            {/* Mood Cards Section - iOS Style */}
-            <div className="mood-section">
+            {/* Mood Section - iOS Style */}
+            <section className="mood-section">
               <h2 className="section-title">WHAT'S YOUR MOOD?</h2>
               <div className="mood-cards">
-                <button className="mood-card mood-card-hungry">
+                <button 
+                  className="mood-card mood-card-hungry"
+                  onClick={() => router.push('/app/map?category=Restaurants')}
+                >
                   <div className="mood-badge">
-                    <span className="mood-icon">🔥</span>
-                    <span className="mood-label">Popular</span>
+                    <span className="mood-badge-icon">🔥</span>
+                    <span className="mood-badge-text">Popular</span>
                   </div>
+                  <div className="mood-emoji">🍕</div>
                   <div className="mood-content">
                     <h3 className="mood-title">Hungry</h3>
                     <p className="mood-subtitle">Restaurants & Food</p>
                   </div>
-                  <div className="mood-emoji">🍕</div>
                 </button>
-                
-                <button className="mood-card mood-card-thirsty">
+                <button 
+                  className="mood-card mood-card-thirsty"
+                  onClick={() => router.push('/app/map?category=Bars')}
+                >
                   <div className="mood-badge">
-                    <span className="mood-icon">📈</span>
-                    <span className="mood-label">Trending</span>
+                    <span className="mood-badge-icon">📈</span>
+                    <span className="mood-badge-text">Trending</span>
                   </div>
+                  <div className="mood-emoji">🍸</div>
                   <div className="mood-content">
                     <h3 className="mood-title">Thirsty</h3>
                     <p className="mood-subtitle">Bars & Cafes</p>
                   </div>
-                  <div className="mood-emoji">🍸</div>
                 </button>
               </div>
-            </div>
+            </section>
 
-            {/* Live Now - iOS Style */}
+            {/* Live Now Section */}
             <section className="section">
               <div className="section-header">
-                <h2><span className="live-dot">•</span> Live Now</h2>
-                <Link href="/app/happening-now" className="see-all">
+                <h2>🔴 Live Now</h2>
+                <Link href="/app/explore" className="see-all">
                   See All <IoChevronForward size={16} />
                 </Link>
               </div>
               <div className="happening-scroll">
                 {mockHappeningNow.map((item) => (
                   <div key={item.id} className="happening-card">
-                    <img src={item.image} alt={item.title} />
-                    <div className="happening-overlay">
-                      <span className="happening-badge">🔥 Live</span>
+                    <div 
+                      className="happening-image"
+                      style={{ backgroundImage: `url(${item.image})` }}
+                    />
+                    <div className="happening-content">
                       <h3>{item.title}</h3>
                       <p>{item.subtitle}</p>
                     </div>
                   </div>
                 ))}
-              </div>
-            </section>
-
-            {/* Trending Near You */}
-            <section className="section">
-              <div className="section-header">
-                <h2>Trending Near You</h2>
-                <button className="see-all" onClick={switchToMapMode}>
-                  See All <IoChevronForward size={16} />
-                </button>
-              </div>
-              <div className="trending-scroll">
-                {loading ? (
-                  <div className="loading-card">
-                    <div className="loading-spinner" />
-                    <p>Discovering places...</p>
-                  </div>
-                ) : trendingPlaces.length === 0 ? (
-                  <div className="empty-card">
-                    <IoLocationSharp size={32} />
-                    <p>No places found nearby</p>
-                    <span>Pull down to refresh</span>
-                  </div>
-                ) : (
-                  trendingPlaces.map((place, index) => (
-                    <Link 
-                      key={place.id} 
-                      href={`/place/${place.id}`}
-                      className="trending-card"
-                    >
-                      <div className="trending-image">
-                        <img 
-                          src={place.cover_image_url || `https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop`} 
-                          alt={place.name}
-                        />
-                        <div className="trending-gradient" />
-                        <div className="trending-badge">
-                          {place.category === 'Restaurant' ? '🍽️' : 
-                           place.category === 'Cafe' ? '☕' : '📍'}
-                        </div>
-                        <div className="trending-content">
-                          <h3>{place.name}</h3>
-                          <p>{place.category} • {place.city || 'Nearby'}</p>
-                        </div>
-                      </div>
-                    </Link>
-                  ))
-                )}
               </div>
             </section>
 
@@ -671,6 +778,7 @@ export default function HomeScreen() {
             padding: 20px;
             margin-bottom: 24px;
             box-shadow: ${isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.04)'};
+            position: relative;
           }
 
           .search-input-wrapper {
@@ -698,6 +806,81 @@ export default function HomeScreen() {
 
           .search-input::placeholder {
             color: ${isDark ? 'rgba(255,255,255,0.4)' : '#999'};
+          }
+
+          .clear-btn {
+            background: none;
+            border: none;
+            color: ${isDark ? 'rgba(255,255,255,0.4)' : '#999'};
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .clear-btn:hover {
+            color: ${isDark ? 'rgba(255,255,255,0.6)' : '#666'};
+          }
+
+          /* Autocomplete Dropdown */
+          .autocomplete-dropdown {
+            position: absolute;
+            top: 76px;
+            left: 20px;
+            right: 20px;
+            background: ${isDark ? '#2C2C2E' : '#fff'};
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            overflow: hidden;
+            z-index: 1000;
+            max-height: 400px;
+            overflow-y: auto;
+          }
+
+          .suggestion-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            border-bottom: 1px solid ${isDark ? 'rgba(255,255,255,0.06)' : '#E5E7EB'};
+            transition: background 0.2s;
+          }
+
+          .suggestion-item:last-child {
+            border-bottom: none;
+          }
+
+          .suggestion-item:hover {
+            background: ${isDark ? 'rgba(255,255,255,0.05)' : '#F9FAFB'};
+          }
+
+          .suggestion-icon {
+            color: ${TEAL};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .suggestion-content {
+            flex: 1;
+          }
+
+          .suggestion-title {
+            font-size: 15px;
+            font-weight: 500;
+            color: ${isDark ? '#fff' : '#000'};
+            margin-bottom: 2px;
+          }
+
+          .suggestion-subtitle {
+            font-size: 13px;
+            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#666'};
           }
 
           /* Quick Actions - iOS Style */
@@ -797,398 +980,41 @@ export default function HomeScreen() {
             padding: 4px 10px;
           }
 
-          .mood-icon {
+          .mood-badge-icon {
             font-size: 12px;
           }
 
-          .mood-label {
-            font-size: 10px;
-            font-weight: 500;
-            color: rgba(255,255,255,0.9);
+          .mood-badge-text {
+            font-size: 11px;
+            font-weight: 600;
+            color: #fff;
+          }
+
+          .mood-emoji {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            font-size: 48px;
+            opacity: 0.9;
           }
 
           .mood-content {
-            position: absolute;
-            bottom: 12px;
-            left: 12px;
-            right: 12px;
+            position: relative;
+            z-index: 1;
           }
 
           .mood-title {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             color: #fff;
             margin: 0 0 4px;
           }
 
           .mood-subtitle {
-            font-size: 12px;
-            color: rgba(255,255,255,0.7);
-            margin: 0;
-          }
-
-          .mood-emoji {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            font-size: 36px;
-            opacity: 0.9;
-          }
-
-          /* Live Now Section - iOS Style */
-          .section {
-            margin-bottom: 32px;
-          }
-
-          .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-          }
-
-          .section-header h2 {
-            font-size: 16px;
-            font-weight: 700;
-            color: ${isDark ? '#fff' : ACCENT};
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          }
-
-          .live-dot {
-            color: #FF3B30;
-            font-size: 24px;
-            line-height: 0;
-            animation: pulse 2s ease-in-out infinite;
-          }
-
-          @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-          }
-
-          .see-all {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 14px;
-            font-weight: 600;
-            color: ${TEAL};
-            background: none;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-          }
-
-          .happening-scroll {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding-bottom: 8px;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-          }
-
-          .happening-scroll::-webkit-scrollbar {
-            display: none;
-          }
-
-          .happening-card {
-            position: relative;
-            min-width: 280px;
-            height: 180px;
-            border-radius: 20px;
-            overflow: hidden;
-            cursor: pointer;
-          }
-
-          .happening-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-
-          .happening-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 16px;
-            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
-          }
-
-          .happening-badge {
-            display: inline-block;
-            background: rgba(255,59,48,0.9);
-            color: #fff;
-            font-size: 12px;
-            font-weight: 600;
-            padding: 4px 10px;
-            border-radius: 12px;
-            margin-bottom: 8px;
-          }
-
-          .happening-overlay h3 {
-            font-size: 18px;
-            font-weight: 700;
-            color: #fff;
-            margin: 0 0 4px;
-          }
-
-          .happening-overlay p {
             font-size: 13px;
-            color: rgba(255,255,255,0.8);
-            margin: 0;
-          }
-
-          /* Navy Header */
-          .nav-header {
-            background-color: ${ACCENT};
-            padding: 16px 20px;
-            padding-top: max(16px, env(safe-area-inset-top));
-          }
-
-          .nav-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          }
-
-          .nav-logo {
-            height: 32px;
-            width: auto;
-          }
-
-          .menu-btn {
-            background: none;
-            border: none;
-            padding: 8px;
-            cursor: pointer;
-          }
-
-          /* Main Content */
-          .main-content {
-            padding: 0 20px;
-          }
-
-          /* Segment Control */
-          .segment-wrap {
-            display: flex;
-            justify-content: center;
-            padding: 16px 0;
-          }
-
-          .segment {
-            display: flex;
-            background: ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.65)'};
-            border: 1px solid ${isDark ? 'rgba(255,255,255,0.14)' : 'rgba(15,18,51,0.12)'};
-            border-radius: 12px;
-            padding: 4px;
-          }
-
-          .segment-item {
-            padding: 10px 24px;
-            border: none;
-            background: transparent;
-            border-radius: 8px;
-            font-size: 14px;
             font-weight: 500;
-            color: ${isDark ? 'rgba(255,255,255,0.6)' : '#6B6B6B'};
-            cursor: pointer;
-            transition: all 0.2s;
-          }
-
-          .segment-item.active {
-            background: ${ACCENT};
-            color: #fff;
-          }
-
-          /* Title */
-          .main-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: ${isDark ? '#fff' : ACCENT};
-            line-height: 1.2;
-            margin: 8px 0 20px;
-            padding: 0;
-          }
-
-          /* Search Bar */
-          .search-wrapper {
-            margin-bottom: 20px;
-          }
-
-          .search-bar {
-            display: flex;
-            align-items: center;
-            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#fff'};
-            border: 1px solid ${isDark ? 'rgba(255,255,255,0.14)' : 'rgba(15,18,51,0.14)'};
-            border-radius: 16px;
-            padding: 14px 16px;
-            gap: 10px;
-            transition: border-color 0.2s;
-          }
-
-          .search-bar.focused {
-            border-color: ${theme.primary};
-          }
-
-          .search-icon {
-            color: ${isDark ? 'rgba(255,255,255,0.35)' : '#8A8A8A'};
-          }
-
-          .search-bar input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            font-size: 16px;
-            color: ${isDark ? '#fff' : '#111'};
-            outline: none;
-          }
-
-          .search-bar input::placeholder {
-            color: ${isDark ? 'rgba(255,255,255,0.35)' : '#A0A0A0'};
-          }
-
-          .clear-btn {
-            background: none;
-            border: none;
-            padding: 4px;
-            cursor: pointer;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#8E8E93'};
-          }
-
-          /* Category Row */
-          .category-row {
-            display: flex;
-            gap: 16px;
-            overflow-x: auto;
-            padding-bottom: 8px;
-            margin-bottom: 12px;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-          }
-
-          .category-row::-webkit-scrollbar {
-            display: none;
-          }
-
-          .category-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            min-width: 64px;
-          }
-
-          .category-icon-wrap {
-            width: 56px;
-            height: 56px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-          }
-
-          .category-name {
-            font-size: 11px;
-            color: ${isDark ? 'rgba(255,255,255,0.7)' : '#666'};
-            white-space: nowrap;
-          }
-
-          .category-item.selected .category-name {
-            color: ${isDark ? '#fff' : '#111'};
-            font-weight: 600;
-          }
-
-          /* Hint Text */
-          .hint-text {
-            font-size: 13px;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#666'};
-            margin-bottom: 20px;
-          }
-
-          /* Stories */
-          .stories-section {
-            margin-bottom: 24px;
-          }
-
-          .stories-row {
-            display: flex;
-            gap: 16px;
-            overflow-x: auto;
-            padding-bottom: 8px;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-          }
-
-          .stories-row::-webkit-scrollbar {
-            display: none;
-          }
-
-          .story-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            background: none;
-            border: none;
-            cursor: pointer;
-          }
-
-          .story-avatar {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            padding: 3px;
-            background: ${isDark ? '#333' : '#e5e5e5'};
-          }
-
-          .story-avatar.has-new {
-            background: linear-gradient(135deg, #F97316, #EC4899, #8B5CF6);
-          }
-
-          .story-avatar.is-user {
-            background: ${isDark ? '#333' : '#e5e5e5'};
-          }
-
-          .story-avatar img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid ${bgColor};
-          }
-
-          .story-add {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: ${isDark ? '#1E293B' : '#f5f5f5'};
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 3px solid ${bgColor};
-          }
-
-          .story-add span {
-            font-size: 24px;
-            color: ${theme.primary};
-          }
-
-          .story-name {
-            font-size: 11px;
-            color: ${isDark ? 'rgba(255,255,255,0.7)' : '#666'};
-            max-width: 64px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            color: rgba(255,255,255,0.9);
+            margin: 0;
           }
 
           /* Sections */
@@ -1204,10 +1030,9 @@ export default function HomeScreen() {
           }
 
           .section-header h2 {
-            font-size: 22px;
-            font-weight: 800;
-            letter-spacing: -0.3px;
-            color: ${isDark ? '#fff' : '#000'};
+            font-size: 20px;
+            font-weight: 700;
+            color: ${isDark ? '#fff' : ACCENT};
             margin: 0;
           }
 
@@ -1215,19 +1040,21 @@ export default function HomeScreen() {
             display: flex;
             align-items: center;
             gap: 4px;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 600;
-            color: #0F8A8A;
+            color: ${TEAL};
             text-decoration: none;
-            background: none;
-            border: none;
-            cursor: pointer;
+            transition: opacity 0.2s;
+          }
+
+          .see-all:hover {
+            opacity: 0.8;
           }
 
           .section-subtitle {
             font-size: 14px;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#666'};
-            margin: -8px 0 16px;
+            color: ${isDark ? 'rgba(255,255,255,0.6)' : '#666'};
+            margin: 0 0 16px;
           }
 
           /* Happening Now */
@@ -1235,7 +1062,7 @@ export default function HomeScreen() {
             display: flex;
             gap: 12px;
             overflow-x: auto;
-            padding-bottom: 8px;
+            scroll-snap-type: x mandatory;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
           }
@@ -1245,275 +1072,129 @@ export default function HomeScreen() {
           }
 
           .happening-card {
-            position: relative;
-            min-width: 70%;
-            max-width: 70%;
-            height: 180px;
+            flex: 0 0 280px;
+            scroll-snap-align: start;
             border-radius: 16px;
             overflow: hidden;
+            background: ${isDark ? '#1C1C1E' : '#fff'};
+            box-shadow: ${isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.08)'};
           }
 
-          .happening-card img {
+          .happening-image {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            height: 160px;
+            background-size: cover;
+            background-position: center;
           }
 
-          .happening-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 16px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
-          }
-
-          .happening-badge {
-            display: inline-block;
-            background: rgba(255,255,255,0.2);
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            color: #fff;
-            margin-bottom: 8px;
-          }
-
-          .happening-overlay h3 {
-            font-size: 16px;
-            font-weight: 600;
-            color: #fff;
-            margin: 0 0 4px;
-          }
-
-          .happening-overlay p {
-            font-size: 13px;
-            color: rgba(255,255,255,0.8);
-            margin: 0;
-          }
-
-          /* Trending */
-          .trending-scroll {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding-bottom: 8px;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-          }
-
-          .trending-scroll::-webkit-scrollbar {
-            display: none;
-          }
-
-          .trending-card {
-            min-width: 70%;
-            max-width: 70%;
-            text-decoration: none;
-          }
-
-          .trending-image {
-            position: relative;
-            height: 180px;
-            border-radius: 16px;
-            overflow: hidden;
-            background: ${isDark ? '#1E293B' : '#1F2937'};
-          }
-
-          .trending-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-
-          .trending-gradient {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 60%;
-            background: linear-gradient(transparent, rgba(0,0,0,0.85));
-          }
-
-          .trending-badge {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            background: rgba(0,0,0,0.5);
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-          }
-
-          .trending-content {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
+          .happening-content {
             padding: 16px;
           }
 
-          .trending-content h3 {
+          .happening-content h3 {
             font-size: 16px;
             font-weight: 600;
-            color: #fff;
+            color: ${isDark ? '#fff' : ACCENT};
             margin: 0 0 4px;
           }
 
-          .trending-content p {
-            font-size: 13px;
-            color: rgba(255,255,255,0.7);
-            margin: 0;
-          }
-
-          .loading-card, .empty-card {
-            min-width: 70%;
-            height: 180px;
-            border-radius: 16px;
-            background: ${isDark ? '#1E293B' : '#f5f5f5'};
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-          }
-
-          .loading-spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid ${isDark ? '#333' : '#ddd'};
-            border-top-color: ${ACCENT};
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-          }
-
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-
-          .loading-card p, .empty-card p {
+          .happening-content p {
             font-size: 14px;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#666'};
+            color: ${isDark ? 'rgba(255,255,255,0.6)' : '#666'};
             margin: 0;
           }
 
-          .empty-card span {
-            font-size: 12px;
-            color: ${isDark ? 'rgba(255,255,255,0.3)' : '#999'};
-          }
-
-          .empty-card svg {
-            color: ${isDark ? 'rgba(255,255,255,0.3)' : '#999'};
-          }
-
-          /* Explore Tavvy */
-          .explore-scroll {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding-bottom: 8px;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-          }
-
-          .explore-scroll::-webkit-scrollbar {
-            display: none;
-          }
-
-          .explore-card {
-            min-width: 70%;
-            max-width: 70%;
-            border-radius: 16px;
+          /* Explore New Card */
+          .explore-new-card {
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 24px;
+            margin-bottom: 32px;
             overflow: hidden;
-            background: ${isDark ? '#1E293B' : '#111827'};
-            text-decoration: none;
           }
 
-          .explore-image {
-            height: 100px;
+          .explore-new-header {
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 8px;
+            margin-bottom: 12px;
           }
 
-          .explore-emoji {
-            font-size: 48px;
-          }
-
-          .explore-content {
-            padding: 12px 16px;
-          }
-
-          .explore-content h3 {
+          .explore-sparkles {
             font-size: 16px;
+          }
+
+          .explore-count {
+            font-size: 12px;
             font-weight: 600;
-            color: #E5E7EB;
+            color: rgba(255,255,255,0.9);
+          }
+
+          .explore-new-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
             margin: 0 0 8px;
           }
 
-          .explore-meta {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+          .explore-new-subtitle {
+            font-size: 14px;
+            color: rgba(255,255,255,0.9);
+            margin: 0;
           }
 
-          .explore-badge {
-            width: 24px;
-            height: 24px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-          }
-
-          .explore-meta span:last-child {
-            font-size: 13px;
-            color: #9CA3AF;
+          .explore-new-icon {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 64px;
+            opacity: 0.3;
           }
 
           /* Did You Know */
           .did-you-know-card {
             display: flex;
             gap: 16px;
-            padding: 16px;
-            background: ${isDark ? '#1E293B' : '#FFF9E6'};
+            background: ${isDark ? '#1C1C1E' : '#fff'};
             border-radius: 16px;
+            padding: 20px;
+            box-shadow: ${isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.04)'};
           }
 
           .dyk-icon {
-            font-size: 24px;
-            color: #FFD60A;
+            font-size: 32px;
+            flex-shrink: 0;
           }
 
           .dyk-content h3 {
             font-size: 16px;
             font-weight: 600;
-            color: ${isDark ? '#fff' : '#000'};
-            margin: 0 0 4px;
+            color: ${isDark ? '#fff' : ACCENT};
+            margin: 0 0 8px;
           }
 
           .dyk-content p {
             font-size: 14px;
             color: ${isDark ? 'rgba(255,255,255,0.7)' : '#666'};
             margin: 0;
-            line-height: 1.4;
+            line-height: 1.5;
           }
 
           /* Leaderboard */
           .leaderboard-card {
-            background: ${isDark ? '#1E293B' : '#fff'};
+            background: ${isDark ? '#1C1C1E' : '#fff'};
             border-radius: 16px;
             overflow: hidden;
-            padding: 4px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            box-shadow: ${isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.04)'};
           }
 
           .leaderboard-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 16px;
-            border-bottom: 1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#f0f0f0'};
+            padding: 16px;
+            border-bottom: 1px solid ${isDark ? 'rgba(255,255,255,0.06)' : '#E5E7EB'};
           }
 
           .leaderboard-row:last-child {
@@ -1528,79 +1209,73 @@ export default function HomeScreen() {
 
           .leaderboard-badge {
             font-size: 20px;
-            width: 28px;
-            text-align: center;
           }
 
           .leaderboard-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: #E8F4FD;
+            background: ${TEAL};
             display: flex;
             align-items: center;
             justify-content: center;
-          }
-
-          .leaderboard-avatar span {
+            color: #fff;
+            font-weight: 600;
             font-size: 16px;
-            font-weight: 700;
-            color: #0A84FF;
           }
 
           .leaderboard-info {
             display: flex;
             flex-direction: column;
+            gap: 2px;
           }
 
           .leaderboard-name {
             font-size: 15px;
             font-weight: 600;
-            color: ${isDark ? '#fff' : '#000'};
+            color: ${isDark ? '#fff' : ACCENT};
           }
 
           .leaderboard-streak {
             font-size: 12px;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#888'};
+            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#666'};
           }
 
           .leaderboard-right {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
+            gap: 2px;
           }
 
           .leaderboard-taps {
             font-size: 18px;
             font-weight: 700;
-            color: ${isDark ? '#fff' : '#000'};
+            color: ${TEAL};
           }
 
           .leaderboard-label {
             font-size: 11px;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#888'};
+            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#999'};
+            text-transform: uppercase;
           }
 
-          /* Bottom Spacing */
+          /* Container */
+          .container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 0 20px;
+          }
+
+          .main-content {
+            padding-bottom: 100px;
+          }
+
           .bottom-spacing {
-            height: 100px;
-          }
-
-          /* Responsive */
-          @media (min-width: 768px) {
-            .happening-card,
-            .trending-card,
-            .explore-card {
-              min-width: 320px;
-              max-width: 320px;
-            }
-
-            .main-title {
-              font-size: 32px;
-            }
+            height: 40px;
           }
         `}</style>
-      </AppLayout>
-    </>
+      </div>
+    </AppLayout>
   );
 }
