@@ -349,9 +349,15 @@ a:hover {
   color: white;
 }
 
-/* Smooth Scrolling */
+/* Smooth Scrolling with Momentum (iOS-style) */
 html {
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; /* Enable momentum scrolling on iOS */
+}
+
+body {
+  -webkit-overflow-scrolling: touch; /* Enable momentum scrolling on iOS */
+  overscroll-behavior-y: contain; /* Prevent pull-to-refresh and bounce */
 }
 
 /* Safe Area Insets for Mobile */

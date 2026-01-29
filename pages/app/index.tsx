@@ -43,7 +43,7 @@ import {
 
 // Theme colors matching mobile app
 const BG_LIGHT = '#F9F7F2';
-const BG_DARK = '#0F172A';
+const BG_DARK = '#000000'; // Pure black for dark mode
 const ACCENT = '#0F1233';
 const TEAL = '#14B8A6';
 const GREEN = '#10B981';
@@ -94,7 +94,7 @@ const mockHappeningNow = [
 // Location fallback is handled by IP geolocation - see getLocationFromIP()
 
 export default function HomeScreen() {
-  const { theme, isDark } = useThemeContext();
+  const { theme, isDark, setThemeMode } = useThemeContext();
   const { user } = useAuth();
   const router = useRouter();
   
@@ -335,8 +335,19 @@ export default function HomeScreen() {
           <main className="main-content">
             {/* Greeting Section - iOS Style */}
             <div className="greeting-section">
-              <div className="greeting-text">{greeting}</div>
-              <h1 className="greeting-name">there 👋</h1>
+              <div className="greeting-row">
+                <div>
+                  <div className="greeting-text">{greeting}</div>
+                  <h1 className="greeting-name">there 👋</h1>
+                </div>
+                <button 
+                  className="theme-toggle-btn"
+                  onClick={() => setThemeMode(isDark ? 'light' : 'dark')}
+                  aria-label="Toggle theme"
+                >
+                  {isDark ? '☀️' : '🌙'}
+                </button>
+              </div>
               <div className="tagline">
                 <span className="tagline-dot">•</span>
                 <span className="tagline-text">Find your perfect spot in seconds. Not hours.</span>
@@ -588,6 +599,36 @@ export default function HomeScreen() {
           /* Greeting Section - iOS Style */
           .greeting-section {
             padding: 32px 0 24px;
+          }
+
+          .greeting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+          }
+
+          .theme-toggle-btn {
+            background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'};
+            border: none;
+            border-radius: 12px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+          }
+
+          .theme-toggle-btn:hover {
+            background: ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'};
+            transform: scale(1.05);
+          }
+
+          .theme-toggle-btn:active {
+            transform: scale(0.95);
           }
 
           .greeting-text {

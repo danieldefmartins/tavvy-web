@@ -65,10 +65,23 @@ const ACCENT_GREEN = '#10B981';  // Tavvy green
 const ACCENT_GOLD = '#F59E0B';  // Tavvy gold
 const BLUE = '#007AFF';
 
-// Map tile styles
+// Map tile styles - matching iOS app
 const MAP_STYLES = {
-  light: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  dark: 'https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png',
+  light: {
+    name: 'Standard',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '© OpenStreetMap contributors'
+  },
+  dark: {
+    name: 'Dark',
+    url: 'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
+    attribution: '© CARTO'
+  },
+  satellite: {
+    name: 'Satellite',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: '© Esri'
+  },
 };
 
 // Categories for filtering
@@ -191,7 +204,7 @@ export default function MapScreen() {
   const [showWeatherPopup, setShowWeatherPopup] = useState(false);
   const [showLayersPopup, setShowLayersPopup] = useState(false);
   const [showLegendPopup, setShowLegendPopup] = useState(false);
-  const [selectedMapStyle, setSelectedMapStyle] = useState<'light' | 'dark'>('light');
+  const [selectedMapStyle, setSelectedMapStyle] = useState<'light' | 'dark' | 'satellite'>('light');
   const [weatherData, setWeatherData] = useState<any>(null);
 
   // Get user location on mount
@@ -524,8 +537,8 @@ export default function MapScreen() {
               zoomControl={false}
             >
               <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://stadiamaps.com/">Stadia Maps</a>'
-                url={isDark || selectedMapStyle === 'dark' ? MAP_STYLES.dark : MAP_STYLES.light}
+                attribution={MAP_STYLES[selectedMapStyle].attribution}
+                url={MAP_STYLES[selectedMapStyle].url}
               />
               {/* User location blue dot */}
               <Circle
@@ -668,6 +681,13 @@ export default function MapScreen() {
                   >
                     <div className="layer-preview dark-preview"></div>
                     <span>Dark</span>
+                  </button>
+                  <button 
+                    className={`layer-option ${selectedMapStyle === 'satellite' ? 'selected' : ''}`}
+                    onClick={() => setSelectedMapStyle('satellite')}
+                  >
+                    <div className="layer-preview satellite-preview"></div>
+                    <span>Satellite</span>
                   </button>
                 </div>
               </div>
@@ -1291,6 +1311,11 @@ export default function MapScreen() {
 
         .dark-preview {
           background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .satellite-preview {
+          background: linear-gradient(135deg, #2d5016 0%, #4a7c59 50%, #1a4d2e 100%);
+          position: relative;
         }
 
         /* Legend Popup */
