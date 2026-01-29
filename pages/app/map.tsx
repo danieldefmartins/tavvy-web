@@ -68,7 +68,7 @@ const BLUE = '#007AFF';
 // Map tile styles
 const MAP_STYLES = {
   light: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  dark: 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+  dark: 'https://cartodb-basemaps-a.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png',
 };
 
 // Categories for filtering
@@ -267,9 +267,9 @@ export default function MapScreen() {
       const centerLat = userLocation[0];
       const centerLng = userLocation[1];
       
-      // Use same delta as mobile app (0.1 degrees)
-      const latDelta = 0.1;
-      const lngDelta = 0.1;
+      // Optimized radius for better performance (0.15 degrees = ~10 miles)
+      const latDelta = 0.15;
+      const lngDelta = 0.15;
       
       const minLat = centerLat - latDelta;
       const maxLat = centerLat + latDelta;

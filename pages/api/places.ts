@@ -184,7 +184,8 @@ export default async function handler(
           .lte('latitude', bounds.maxLat)
           .gte('longitude', bounds.minLng)
           .lte('longitude', bounds.maxLng)
-          .limit(limitNum - placesFromCanonical.length);
+          .is('date_closed', null)
+          .limit(Math.min(200, limitNum - placesFromCanonical.length)); // Optimized limit
 
         if (category && category !== 'All') {
           query = query.ilike('category_name', `%${category}%`);
