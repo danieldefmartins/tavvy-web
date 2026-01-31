@@ -14,9 +14,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useThemeContext } from '../../../contexts/ThemeContext';
-import AppLayout from '../../../components/AppLayout';
-import { supabase } from '../../../lib/supabaseClient';
+import { useThemeContext } from '../../contexts/ThemeContext';
+import AppLayout from '../../components/AppLayout';
+import { supabase } from '../../lib/supabaseClient';
 import {
   IoLocationOutline, IoTimeOutline, IoCallOutline, IoChevronDown,
   IoChevronUp, IoFastFoodOutline, IoCafeOutline, IoGridOutline,
