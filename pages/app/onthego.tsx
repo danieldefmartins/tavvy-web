@@ -1,14 +1,16 @@
 /**
- * OnTheGo Screen - Web Version
- * Pixel-perfect port from iOS OnTheGoScreen.tsx
+ * OnTheGo Screen - Web Version V2
+ * Updated to match mobile V2 design system
  * 
  * Features:
+ * - V2 Pure Black Design (#0A0A0F background, #1A1A24 surfaces)
  * - Full-screen map showing live mobile businesses
- * - Floating translucent UI elements
- * - Filter pills for categories
- * - Pulsing live markers
- * - Collapsible "Live Now" tray
- * - Dark mode design with glassy effects
+ * - V2 Header with back arrow and login icon
+ * - Map layer switcher (Standard, Dark, Satellite)
+ * - Updated filter categories: All, Live Now, Food, Pet Grooming, Hair Dresser, Coffee, Services
+ * - Enhanced GPS blue dot with glowing effect
+ * - Collapsible "Live Now" bottom sheet
+ * - White text on dark backgrounds for readability
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -20,33 +22,46 @@ import { supabase } from '../../lib/supabaseClient';
 import {
   IoLocationOutline, IoTimeOutline, IoCallOutline, IoChevronDown,
   IoChevronUp, IoFastFoodOutline, IoCafeOutline, IoGridOutline,
-  IoRadioOutline
+  IoRadioOutline, IoPawOutline, IoCutOutline, IoConstructOutline,
+  IoArrowBack, IoPersonCircleOutline, IoMapOutline, IoMoonOutline,
+  IoImageOutline, IoRestaurantOutline
 } from 'react-icons/io5';
 
-// Design System Colors matching iOS
+// V2 Design System Colors - matching mobile
 const COLORS = {
-  background: '#000000',
+  background: '#0A0A0F',  // V2 Pure black
   backgroundLight: '#FAFAFA',
-  surface: '#1A1A1A',
+  surface: '#1A1A24',  // V2 Card background
   surfaceLight: '#FFFFFF',
-  glassy: 'rgba(26, 26, 26, 0.85)',
+  glassy: 'rgba(26, 26, 36, 0.85)',  // V2 Glassy dark
   glassyLight: 'rgba(255, 255, 255, 0.9)',
-  accent: '#22D3EE',
+  accent: '#6B7FFF',  // V2 Blue
+  accentEnd: '#5563E8',  // V2 Blue gradient end
   accentGreen: '#10B981',
   accentGold: '#F59E0B',
   textPrimary: '#FFFFFF',
-  textSecondary: '#9CA3AF',
+  textSecondary: 'rgba(255, 255, 255, 0.6)',  // V2 Secondary text
   textMuted: '#6B7280',
   live: '#EF4444',
   success: '#10B981',
 };
 
-// Filter categories matching iOS
+// Filter categories matching mobile V2
 const FILTER_CATEGORIES = [
   { id: 'all', name: 'All', icon: IoGridOutline },
   { id: 'live', name: 'Live Now', icon: IoRadioOutline },
-  { id: 'food-trucks', name: 'Food', icon: IoFastFoodOutline },
+  { id: 'food', name: 'Food', icon: IoRestaurantOutline },
+  { id: 'pet-grooming', name: 'Pet Grooming', icon: IoPawOutline },
+  { id: 'hair-dresser', name: 'Hair Dresser', icon: IoCutOutline },
   { id: 'coffee', name: 'Coffee', icon: IoCafeOutline },
+  { id: 'mobile-services', name: 'Services', icon: IoConstructOutline },
+];
+
+// Map layer options
+const MAP_LAYERS = [
+  { id: 'standard', name: 'Standard', icon: IoMapOutline },
+  { id: 'dark', name: 'Dark', icon: IoMoonOutline },
+  { id: 'satellite', name: 'Satellite', icon: IoImageOutline },
 ];
 
 interface LiveSession {
@@ -74,6 +89,8 @@ export default function OnTheGoScreen() {
   
   const [loading, setLoading] = useState(true);
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [selectedMapLayer, setSelectedMapLayer] = useState('standard');
+  const [showMapLayerPicker, setShowMapLayerPicker] = useState(false);
   const [trayExpanded, setTrayExpanded] = useState(true);
   const [liveSessions, setLiveSessions] = useState<LiveSession[]>([]);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -127,16 +144,20 @@ export default function OnTheGoScreen() {
   const filteredSessions = liveSessions.filter(session => {
     if (selectedFilter === 'all') return true;
     if (selectedFilter === 'live') return session.is_live;
-    if (selectedFilter === 'food-trucks') return session.category?.toLowerCase().includes('food');
+    if (selectedFilter === 'food') return session.category?.toLowerCase().includes('food');
+    if (selectedFilter === 'pet-grooming') return session.category?.toLowerCase().includes('pet') || session.category?.toLowerCase().includes('grooming');
+    if (selectedFilter === 'hair-dresser') return session.category?.toLowerCase().includes('hair') || session.category?.toLowerCase().includes('salon');
     if (selectedFilter === 'coffee') return session.category?.toLowerCase().includes('coffee');
+    if (selectedFilter === 'mobile-services') return session.category?.toLowerCase().includes('service');
     return true;
   });
 
+  // Always use V2 dark colors
   const colors = {
-    background: isDark ? COLORS.background : COLORS.backgroundLight,
-    surface: isDark ? COLORS.surface : COLORS.surfaceLight,
-    glassy: isDark ? COLORS.glassy : COLORS.glassyLight,
-    text: isDark ? COLORS.textPrimary : '#111827',
+    background: COLORS.background,
+    surface: COLORS.surface,
+    glassy: COLORS.glassy,
+    text: COLORS.textPrimary,
     textSecondary: COLORS.textSecondary,
   };
 
@@ -154,14 +175,79 @@ export default function OnTheGoScreen() {
           backgroundColor: colors.background,
           overflow: 'hidden'
         }}>
-          {/* Map Container */}
+          {/* V2 Header */}
           <div style={{
             position: 'absolute',
             top: 0,
             left: 0,
             right: 0,
+            height: '60px',
+            backgroundColor: colors.background,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0 16px',
+            zIndex: 100,
+            borderBottom: `1px solid ${colors.surface}`
+          }}>
+            <button
+              onClick={() => router.back()}
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '20px',
+                backgroundColor: colors.surface,
+                border: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'opacity 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+            >
+              <IoArrowBack size={20} color={colors.text} />
+            </button>
+
+            <h1 style={{
+              fontSize: '18px',
+              fontWeight: '700',
+              color: colors.text,
+              margin: 0
+            }}>
+              On The Go
+            </h1>
+
+            <button
+              onClick={() => router.push('/app/profile')}
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '20px',
+                backgroundColor: colors.surface,
+                border: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'opacity 0.2s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.opacity = '0.8'}
+              onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+            >
+              <IoPersonCircleOutline size={24} color={colors.text} />
+            </button>
+          </div>
+
+          {/* Map Container */}
+          <div style={{
+            position: 'absolute',
+            top: '60px',
+            left: 0,
+            right: 0,
             bottom: 0,
-            backgroundColor: '#1A1A1A'
+            backgroundColor: colors.surface
           }}>
             {/* Placeholder for map - would integrate MapLibre GL JS here */}
             <div style={{
@@ -171,34 +257,71 @@ export default function OnTheGoScreen() {
               alignItems: 'center',
               justifyContent: 'center',
               flexDirection: 'column',
-              color: colors.textSecondary
+              color: colors.textSecondary,
+              backgroundColor: selectedMapLayer === 'dark' ? '#1A1A1A' : selectedMapLayer === 'satellite' ? '#2A2A2A' : '#F5F5F5'
             }}>
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>🗺️</div>
-              <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>
+              <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', color: colors.text }}>
                 Map Loading...
               </div>
-              <div style={{ fontSize: '14px' }}>
+              <div style={{ fontSize: '14px', color: colors.textSecondary }}>
                 {userLocation ? 
                   `Centered at ${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` :
                   'Getting your location...'
                 }
               </div>
-              <div style={{ fontSize: '12px', marginTop: '16px', opacity: 0.6 }}>
+              <div style={{ fontSize: '12px', marginTop: '16px', color: colors.textSecondary }}>
                 {filteredSessions.length} mobile businesses nearby
               </div>
+              <div style={{ fontSize: '12px', marginTop: '8px', color: colors.textSecondary }}>
+                Map Layer: {MAP_LAYERS.find(l => l.id === selectedMapLayer)?.name || 'Standard'}
+              </div>
+              
+              {/* GPS Blue Dot Indicator */}
+              {userLocation && (
+                <div style={{
+                  marginTop: '24px',
+                  position: 'relative',
+                  width: '48px',
+                  height: '48px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  {/* Glowing circle */}
+                  <div style={{
+                    position: 'absolute',
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(107, 127, 255, 0.2)',
+                    boxShadow: '0 0 20px rgba(107, 127, 255, 0.4)',
+                  }} />
+                  {/* Blue dot */}
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    backgroundColor: COLORS.accent,
+                    border: '3px solid white',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                  }} />
+                </div>
+              )}
             </div>
           </div>
 
           {/* Floating Filter Pills */}
           <div style={{
             position: 'absolute',
-            top: '60px',
+            top: '75px',
             left: '16px',
             right: '16px',
             display: 'flex',
             gap: '8px',
             overflowX: 'auto',
-            paddingBottom: '8px'
+            paddingBottom: '8px',
+            zIndex: 50
           }}>
             {FILTER_CATEGORIES.map((filter) => {
               const Icon = filter.icon;
@@ -211,17 +334,27 @@ export default function OnTheGoScreen() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
-                    padding: '8px 16px',
+                    padding: '10px 16px',
                     backgroundColor: isActive ? COLORS.accent : colors.glassy,
                     backdropFilter: 'blur(10px)',
                     border: 'none',
                     borderRadius: '20px',
-                    color: isActive ? '#000' : colors.text,
+                    color: isActive ? '#FFFFFF' : colors.text,
                     fontSize: '13px',
                     fontWeight: '600',
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
                     transition: 'all 0.2s'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = 'rgba(26, 26, 36, 0.95)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = colors.glassy;
+                    }
                   }}
                 >
                   <Icon size={16} />
@@ -231,18 +364,117 @@ export default function OnTheGoScreen() {
             })}
           </div>
 
+          {/* Map Layer Switcher Button */}
+          <div style={{
+            position: 'absolute',
+            top: '135px',
+            right: '16px',
+            zIndex: 50
+          }}>
+            <button
+              onClick={() => setShowMapLayerPicker(!showMapLayerPicker)}
+              style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '22px',
+                backgroundColor: colors.glassy,
+                backdropFilter: 'blur(10px)',
+                border: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(26, 26, 36, 0.95)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = colors.glassy}
+            >
+              <IoMapOutline size={22} color={colors.text} />
+            </button>
+
+            {/* Map Layer Picker Popup */}
+            {showMapLayerPicker && (
+              <div style={{
+                position: 'absolute',
+                top: '52px',
+                right: 0,
+                backgroundColor: colors.surface,
+                borderRadius: '12px',
+                padding: '8px',
+                minWidth: '140px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                zIndex: 100
+              }}>
+                <div style={{
+                  fontSize: '12px',
+                  fontWeight: '700',
+                  color: colors.text,
+                  padding: '8px 12px',
+                  marginBottom: '4px'
+                }}>
+                  Map Type
+                </div>
+                {MAP_LAYERS.map((layer) => {
+                  const Icon = layer.icon;
+                  const isActive = selectedMapLayer === layer.id;
+                  return (
+                    <button
+                      key={layer.id}
+                      onClick={() => {
+                        setSelectedMapLayer(layer.id);
+                        setShowMapLayerPicker(false);
+                      }}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '10px 12px',
+                        backgroundColor: isActive ? 'rgba(107, 127, 255, 0.2)' : 'transparent',
+                        border: 'none',
+                        borderRadius: '8px',
+                        color: colors.text,
+                        fontSize: '14px',
+                        fontWeight: isActive ? '600' : '400',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        textAlign: 'left'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                        }
+                      }}
+                    >
+                      <Icon size={18} />
+                      {layer.name}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           {/* Live Count Badge */}
           <div style={{
             position: 'absolute',
-            top: '120px',
-            right: '16px',
-            padding: '8px 12px',
+            top: '135px',
+            left: '16px',
+            padding: '10px 14px',
             backgroundColor: colors.glassy,
             backdropFilter: 'blur(10px)',
             borderRadius: '12px',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px'
+            gap: '8px',
+            zIndex: 50,
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
           }}>
             <div style={{
               width: '8px',
@@ -253,33 +485,34 @@ export default function OnTheGoScreen() {
             }} />
             <span style={{
               color: colors.text,
-              fontSize: '13px',
+              fontSize: '14px',
               fontWeight: '600'
             }}>
               {filteredSessions.filter(s => s.is_live).length} Live
             </span>
           </div>
 
-          {/* Collapsible Live Now Tray */}
+          {/* Collapsible Live Now Bottom Sheet */}
           <div style={{
             position: 'absolute',
             bottom: 0,
             left: 0,
             right: 0,
-            backgroundColor: colors.glassy,
-            backdropFilter: 'blur(20px)',
+            backgroundColor: colors.surface,
             borderTopLeftRadius: '20px',
             borderTopRightRadius: '20px',
-            maxHeight: trayExpanded ? '60vh' : '60px',
+            maxHeight: trayExpanded ? '60vh' : '70px',
             transition: 'max-height 0.3s ease',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.3)',
+            zIndex: 60
           }}>
             {/* Tray Header */}
             <button
               onClick={() => setTrayExpanded(!trayExpanded)}
               style={{
                 width: '100%',
-                padding: '16px',
+                padding: '20px 16px',
                 backgroundColor: 'transparent',
                 border: 'none',
                 display: 'flex',
@@ -288,20 +521,14 @@ export default function OnTheGoScreen() {
                 cursor: 'pointer'
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <IoRadioOutline size={20} color={COLORS.live} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <IoRadioOutline size={22} color={COLORS.live} />
                 <span style={{
                   color: colors.text,
-                  fontSize: '16px',
+                  fontSize: '17px',
                   fontWeight: '700'
                 }}>
-                  Live Now
-                </span>
-                <span style={{
-                  color: colors.textSecondary,
-                  fontSize: '14px'
-                }}>
-                  ({filteredSessions.filter(s => s.is_live).length})
+                  {filteredSessions.filter(s => s.is_live).length} Live Now
                 </span>
               </div>
               {trayExpanded ? 
@@ -313,8 +540,8 @@ export default function OnTheGoScreen() {
             {/* Tray Content */}
             {trayExpanded && (
               <div style={{
-                padding: '0 16px 16px',
-                maxHeight: 'calc(60vh - 60px)',
+                padding: '0 16px 24px',
+                maxHeight: 'calc(60vh - 70px)',
                 overflowY: 'auto'
               }}>
                 {loading ? (
@@ -332,7 +559,7 @@ export default function OnTheGoScreen() {
                     color: colors.textSecondary
                   }}>
                     <div style={{ fontSize: '48px', marginBottom: '16px' }}>🚚</div>
-                    <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>
+                    <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px', color: colors.text }}>
                       No businesses live right now
                     </div>
                     <div style={{ fontSize: '14px' }}>
@@ -348,8 +575,8 @@ export default function OnTheGoScreen() {
                         style={{
                           display: 'flex',
                           gap: '12px',
-                          padding: '12px',
-                          backgroundColor: colors.surface,
+                          padding: '14px',
+                          backgroundColor: colors.glassy,
                           borderRadius: '12px',
                           cursor: 'pointer',
                           transition: 'transform 0.2s',
@@ -364,16 +591,16 @@ export default function OnTheGoScreen() {
                           style={{
                             width: '80px',
                             height: '80px',
-                            borderRadius: '8px',
+                            borderRadius: '10px',
                             objectFit: 'cover'
                           }}
                         />
                         
                         {/* Content */}
                         <div style={{ flex: 1 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                             <h3 style={{
-                              fontSize: '15px',
+                              fontSize: '16px',
                               fontWeight: '600',
                               color: colors.text,
                               margin: 0
@@ -382,9 +609,9 @@ export default function OnTheGoScreen() {
                             </h3>
                             {session.is_live && (
                               <span style={{
-                                padding: '2px 8px',
+                                padding: '3px 8px',
                                 backgroundColor: COLORS.live,
-                                color: '#fff',
+                                color: '#FFFFFF',
                                 fontSize: '10px',
                                 fontWeight: '700',
                                 borderRadius: '6px',
@@ -396,7 +623,7 @@ export default function OnTheGoScreen() {
                           </div>
                           
                           <div style={{
-                            fontSize: '12px',
+                            fontSize: '13px',
                             color: colors.textSecondary,
                             marginBottom: '6px'
                           }}>
@@ -412,16 +639,17 @@ export default function OnTheGoScreen() {
                               color: colors.textSecondary,
                               marginBottom: '4px'
                             }}>
-                              <IoLocationOutline size={12} />
+                              <IoLocationOutline size={14} />
                               {session.session_address}
                             </div>
                           )}
 
                           {session.today_note && (
                             <div style={{
-                              fontSize: '11px',
+                              fontSize: '12px',
                               color: COLORS.accentGreen,
-                              fontStyle: 'italic'
+                              fontStyle: 'italic',
+                              marginTop: '4px'
                             }}>
                               {session.today_note}
                             </div>
