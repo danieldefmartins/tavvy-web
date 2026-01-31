@@ -87,7 +87,7 @@ export default function RealtorsHubScreen() {
   });
 
   const featuredRealtor = filteredRealtors.find(r => r.is_verified && r.rating && r.rating >= 4.8);
-  const popularRealtors = filteredRealtors.filter(r => r.id !== featuredRealtor?.id).slice(0, 6);
+  const popularRealtors = filteredRealtors.filter(r => r.id !== featuredRealtor?.id).slice(0, 4);
 
   return (
     <>
