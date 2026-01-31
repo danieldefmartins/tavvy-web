@@ -1,66 +1,40 @@
 /**
- * Universe Detail Screen - Web Version V2
- * Port from iOS UniverseLandingScreen.tsx with V2 dark design system
+ * Universe Landing Screen - iOS Match
+ * Pixel-perfect port from iOS UniverseLandingScreen.tsx
  * 
- * Features:
- * - Hero image with universe name and location
- * - Stats bar (Places, Signals, Parks, Entrances)
- * - Tab navigation (Places, Map, Signals, Info)
- * - Search and zone filters
- * - Sub-universes (planets) horizontal scroll
- * - Quick actions (Entrances, Dining, Restrooms, Parking)
- * - Places list with cards
- * - V2 design system matching Pros page
+ * Design System:
+ * - Primary: #06B6D4 (Cyan)
+ * - Background: #FFFFFF (Light) / #000000 (Dark)
+ * - Text: #1F2937 (Light) / #FFFFFF (Dark)
+ * - Secondary Text: #6B7280 / #9CA3AF
  */
 
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import AppLayout from '../../../components/AppLayout';
 import { supabase } from '../../../lib/supabaseClient';
 import {
   IoArrowBack, IoHeartOutline, IoShareOutline, IoLocation,
   IoSearch, IoExitOutline, IoRestaurantOutline, IoWaterOutline,
-  IoCarOutline, IoLocationOutline, IoSparkles
+  IoCarOutline, IoSparkles
 } from 'react-icons/io5';
 
-// V2 Design System Colors
-const COLORS = {
-  primaryBlue: '#6B7FFF',
-  accentTeal: '#00CED1',
-  successGreen: '#10B981',
-  warningAmber: '#F59E0B',
-  errorRed: '#EF4444',
-};
-
-// Default placeholder image
 const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800';
 
-// Get category-based fallback image
 const getCategoryFallbackImage = (category: string): string => {
   const lowerCategory = (category || '').toLowerCase();
   const imageMap: Record<string, string> = {
     'restaurant': 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800',
     'ride': 'https://images.unsplash.com/photo-1560713781-d00f6c18f388?w=800',
     'attraction': 'https://images.unsplash.com/photo-1560713781-d00f6c18f388?w=800',
-    'theme park': 'https://images.unsplash.com/photo-1560713781-d00f6c18f388?w=800',
-    'family': 'https://images.unsplash.com/photo-1560713781-d00f6c18f388?w=800',
-    'themed': 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800',
-    'unique': 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800',
     'default': 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800',
   };
   for (const [key, url] of Object.entries(imageMap)) {
     if (lowerCategory.includes(key)) return url;
   }
   return imageMap.default;
-};
-
-const formatNumber = (num: number): string => {
-  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-  if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
-  return String(num);
 };
 
 interface Universe {
@@ -84,12 +58,13 @@ interface Place {
   tavvy_subcategory?: string;
   total_signals?: number;
   thumbnail_url?: string;
+  is_open?: boolean;
 }
 
-export default function UniverseDetailScreen() {
+export default function UniverseLandingScreen() {
   const router = useRouter();
   const { slug } = router.query;
-  const { theme, isDark } = useThemeContext();
+  const { isDark } = useThemeContext();
 
   const [loading, setLoading] = useState(true);
   const [universe, setUniverse] = useState<Universe | null>(null);
@@ -108,7 +83,7 @@ export default function UniverseDetailScreen() {
   const loadUniverseData = async () => {
     setLoading(true);
     try {
-      // Fetch the universe details - try by slug first, then by id
+      // Fetch universe by slug or id
       let universeData = null;
       
       const { data: bySlug } = await supabase
@@ -135,7 +110,7 @@ export default function UniverseDetailScreen() {
       
       setUniverse(universeData);
 
-      // Fetch sub-universes (planets)
+      // Fetch sub-universes
       const { data: subUniversesData } = await supabase
         .from('atlas_universes')
         .select('*')
@@ -147,72 +122,82 @@ export default function UniverseDetailScreen() {
         setSubUniverses(subUniversesData);
       }
 
-      // Fetch places linked to this universe
+      // Fetch places
       const { data: placesData } = await supabase
         .from('atlas_universe_places')
         .select(`
-          place:places(
+          place_id,
+          places (
             id,
             name,
             tavvy_category,
             tavvy_subcategory,
             total_signals,
-            thumbnail_url
+            thumbnail_url,
+            is_open
           )
         `)
         .eq('universe_id', universeData.id)
-        .order('display_order', { ascending: true });
+        .limit(50);
 
       if (placesData) {
         const extractedPlaces = placesData
-          .map((item: any) => item.place)
-          .filter(Boolean);
+          .map(item => item.places)
+          .filter(Boolean) as Place[];
         setPlaces(extractedPlaces);
       }
 
     } catch (error) {
-      console.error('Error loading universe data:', error);
+      console.error('Error loading universe:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const bgColor = isDark ? '#121212' : '#FAFAFA';
-  const surfaceColor = isDark ? '#1E1E1E' : '#FFFFFF';
-  const surfaceAltColor = isDark ? '#2A2A2A' : '#F3F4F6';
-  const textColor = isDark ? '#FFFFFF' : '#111827';
-  const secondaryTextColor = isDark ? '#9CA3AF' : '#6B7280';
-  const borderColor = isDark ? '#333333' : '#E5E7EB';
+  // Theme colors matching iOS exactly
+  const colors = {
+    primary: '#06B6D4',
+    background: isDark ? '#000000' : '#FFFFFF',
+    surface: isDark ? '#1A1A1A' : '#FFFFFF',
+    text: isDark ? '#FFFFFF' : '#1F2937',
+    textSecondary: isDark ? '#9CA3AF' : '#6B7280',
+    textTertiary: '#9CA3AF',
+    border: '#F3F4F6',
+    inputBg: '#F3F4F6',
+  };
 
-  // Build stats
   const stats = [
-    { val: String(universe?.place_count || places.length || 0), label: "Places" },
-    { val: formatNumber(universe?.total_signals || 0), label: "Signals" },
-    { val: String(universe?.sub_universe_count || subUniverses.length || 0), label: "Parks" },
-    { val: "—", label: "Entrances" }
+    { val: universe?.place_count || 0, label: 'Places' },
+    { val: universe?.total_signals || 0, label: 'Signals' },
+    { val: subUniverses.length, label: 'Parks' },
+    { val: '4', label: 'Entrances' },
   ];
 
-  // Build zones
-  const zones = [
-    "All Zones",
-    ...subUniverses.map(su => su.name)
-  ];
+  const zones = ['All Zones', ...subUniverses.map(s => s.name)];
 
-  // Quick actions
-  const quickActions = [
-    { icon: IoExitOutline, label: "Entrances" },
-    { icon: IoRestaurantOutline, label: "Dining" },
-    { icon: IoWaterOutline, label: "Restrooms" },
-    { icon: IoCarOutline, label: "Parking" }
-  ];
+  const filteredPlaces = places.filter(p => {
+    if (searchQuery && !p.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false;
+    }
+    if (activeZone !== 'All Zones') {
+      // Filter by zone logic here
+    }
+    return true;
+  });
 
   if (loading) {
     return (
       <AppLayout>
-        <div style={{ backgroundColor: bgColor, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 14, color: secondaryTextColor }}>Loading universe...</div>
-          </div>
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          minHeight: '60vh',
+          color: colors.textSecondary 
+        }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🌌</div>
+          <div>Loading universe...</div>
         </div>
       </AppLayout>
     );
@@ -221,14 +206,31 @@ export default function UniverseDetailScreen() {
   if (!universe) {
     return (
       <AppLayout>
-        <div style={{ backgroundColor: bgColor, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ textAlign: 'center' }}>
-            <IoLocationOutline size={48} color={secondaryTextColor} />
-            <div style={{ fontSize: 16, color: textColor, marginTop: 16 }}>Universe not found</div>
-            <button onClick={() => router.back()} style={{ marginTop: 16, padding: '8px 16px', background: COLORS.primaryBlue, color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
-              Go Back
-            </button>
-          </div>
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column',
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          minHeight: '60vh',
+          color: colors.textSecondary 
+        }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🌌</div>
+          <div>Universe not found</div>
+          <button 
+            onClick={() => router.back()}
+            style={{
+              marginTop: '16px',
+              padding: '10px 20px',
+              backgroundColor: colors.primary,
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              fontWeight: '600',
+              cursor: 'pointer'
+            }}
+          >
+            Go Back
+          </button>
         </div>
       </AppLayout>
     );
@@ -237,67 +239,185 @@ export default function UniverseDetailScreen() {
   return (
     <>
       <Head>
-        <title>{universe.name} | TavvY Universe</title>
+        <title>{universe.name} | TavvY</title>
         <meta name="description" content={universe.description || `Explore ${universe.name}`} />
       </Head>
 
       <AppLayout>
-        <div className="universe-detail" style={{ backgroundColor: bgColor, minHeight: '100vh' }}>
+        <div style={{ backgroundColor: colors.background, minHeight: '100vh' }}>
           {/* Hero Section */}
-          <div className="hero-container">
+          <div style={{ position: 'relative', height: '300px' }}>
             <img 
-              src={universe.banner_image_url || PLACEHOLDER_IMAGE} 
+              src={universe.banner_image_url || PLACEHOLDER_IMAGE}
               alt={universe.name}
-              className="hero-image"
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
             />
-            <div className="hero-overlay" />
+            {/* Overlay */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.3)'
+            }} />
             
             {/* Hero Nav */}
-            <div className="hero-nav">
-              <button className="nav-button" onClick={() => router.back()}>
-                <IoArrowBack size={24} />
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              display: 'flex',
+              justifyContent: 'space-between',
+              padding: '16px',
+              paddingTop: '40px'
+            }}>
+              <button
+                onClick={() => router.back()}
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  backgroundColor: 'rgba(255,255,255,0.9)',
+                  border: 'none',
+                  borderRadius: '18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer'
+                }}
+              >
+                <IoArrowBack size={24} color="#1F2937" />
               </button>
-              <div className="nav-actions">
-                <button className="nav-button">
-                  <IoHeartOutline size={24} />
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button style={{
+                  width: '36px',
+                  height: '36px',
+                  backgroundColor: 'rgba(255,255,255,0.9)',
+                  border: 'none',
+                  borderRadius: '18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer'
+                }}>
+                  <IoHeartOutline size={24} color="#1F2937" />
                 </button>
-                <button className="nav-button">
-                  <IoShareOutline size={24} />
+                <button style={{
+                  width: '36px',
+                  height: '36px',
+                  backgroundColor: 'rgba(255,255,255,0.9)',
+                  border: 'none',
+                  borderRadius: '18px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer'
+                }}>
+                  <IoShareOutline size={24} color="#1F2937" />
                 </button>
               </div>
             </div>
 
             {/* Hero Content */}
-            <div className="hero-content">
-              <div className="universe-badge">
-                <span className="universe-badge-icon">🌌</span>
-                <span className="universe-badge-text">UNIVERSE</span>
+            <div style={{
+              position: 'absolute',
+              bottom: '20px',
+              left: '20px',
+              right: '20px'
+            }}>
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                backgroundColor: 'rgba(6, 182, 212, 0.9)',
+                paddingLeft: '10px',
+                paddingRight: '10px',
+                paddingTop: '4px',
+                paddingBottom: '4px',
+                borderRadius: '12px',
+                marginBottom: '10px'
+              }}>
+                <span style={{ fontSize: '12px', marginRight: '4px' }}>🌌</span>
+                <span style={{ 
+                  color: '#fff', 
+                  fontSize: '10px', 
+                  fontWeight: '700',
+                  letterSpacing: '0.5px'
+                }}>
+                  UNIVERSE
+                </span>
               </div>
-              <h1 className="hero-title">{universe.name}</h1>
-              <div className="hero-meta">
-                <IoLocation size={14} color="#fff" />
-                <span>{universe.location || 'Location TBD'}</span>
+              <h1 style={{
+                fontSize: '28px',
+                fontWeight: 'bold',
+                color: '#fff',
+                marginBottom: '6px',
+                textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+              }}>
+                {universe.name}
+              </h1>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <IoLocation size={14} color="#fff" style={{ marginRight: '4px' }} />
+                <span style={{ color: '#fff', fontSize: '14px', fontWeight: '500' }}>
+                  {universe.location || 'Location TBD'}
+                </span>
               </div>
             </div>
           </div>
 
           {/* Stats Bar */}
-          <div className="stats-container" style={{ backgroundColor: surfaceColor, borderColor }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-around',
+            padding: '16px 0',
+            backgroundColor: colors.surface,
+            borderBottom: `1px solid ${colors.border}`
+          }}>
             {stats.map((stat, i) => (
-              <div key={i} className="stat-item">
-                <div className="stat-value">{stat.val}</div>
-                <div className="stat-label">{stat.label}</div>
+              <div key={i} style={{ textAlign: 'center' }}>
+                <div style={{
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  color: colors.primary
+                }}>
+                  {stat.val}
+                </div>
+                <div style={{
+                  fontSize: '11px',
+                  color: colors.textTertiary,
+                  marginTop: '2px'
+                }}>
+                  {stat.label}
+                </div>
               </div>
             ))}
           </div>
 
           {/* Tab Navigation */}
-          <div className="tabs-container" style={{ borderColor }}>
+          <div style={{
+            display: 'flex',
+            backgroundColor: colors.surface,
+            borderBottom: `1px solid ${colors.border}`
+          }}>
             {["Places", "Map", "Signals", "Info"].map((tab) => (
-              <button 
-                key={tab} 
-                className={`tab-item ${activeTab === tab ? 'active' : ''}`}
+              <button
+                key={tab}
                 onClick={() => setActiveTab(tab)}
+                style={{
+                  flex: 1,
+                  padding: '14px 0',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  borderBottom: `2px solid ${activeTab === tab ? colors.primary : 'transparent'}`,
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  color: activeTab === tab ? colors.primary : colors.textTertiary,
+                  cursor: 'pointer'
+                }}
               >
                 {tab}
               </button>
@@ -305,26 +425,54 @@ export default function UniverseDetailScreen() {
           </div>
 
           {/* Search & Filter */}
-          <div className="filter-section">
-            <div className="search-bar" style={{ backgroundColor: surfaceAltColor }}>
-              <IoSearch size={16} color={secondaryTextColor} />
-              <input 
-                type="text" 
+          <div style={{
+            padding: '16px',
+            backgroundColor: colors.surface,
+            marginBottom: '8px'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              backgroundColor: colors.inputBg,
+              padding: '10px',
+              borderRadius: '12px',
+              marginBottom: '12px'
+            }}>
+              <IoSearch size={16} color={colors.textTertiary} />
+              <input
+                type="text"
                 placeholder="Search in this universe..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ background: 'transparent', border: 'none', outline: 'none', flex: 1, color: textColor, fontSize: 14 }}
+                style={{
+                  marginLeft: '8px',
+                  flex: 1,
+                  border: 'none',
+                  background: 'transparent',
+                  outline: 'none',
+                  color: colors.text,
+                  fontSize: '13px'
+                }}
               />
             </div>
             
             {zones.length > 1 && (
-              <div className="zones-container">
+              <div style={{ display: 'flex', gap: '8px', overflowX: 'auto' }}>
                 {zones.map((zone) => (
-                  <button 
+                  <button
                     key={zone}
-                    className={`zone-chip ${activeZone === zone ? 'active' : ''}`}
                     onClick={() => setActiveZone(zone)}
-                    style={{ backgroundColor: activeZone === zone ? COLORS.primaryBlue : surfaceColor, borderColor }}
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: '20px',
+                      backgroundColor: activeZone === zone ? colors.primary : colors.inputBg,
+                      border: 'none',
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      color: activeZone === zone ? '#fff' : '#4B5563',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap'
+                    }}
                   >
                     {zone}
                   </button>
@@ -333,519 +481,215 @@ export default function UniverseDetailScreen() {
             )}
           </div>
 
-          {/* Sub-Universes (Planets) Section */}
+          {/* Sub-Universes Section */}
           {subUniverses.length > 0 && (
-            <div className="section">
-              <h2 className="section-title">Parks & Areas</h2>
-              <div className="sub-universes-scroll">
+            <div style={{
+              padding: '16px 0',
+              backgroundColor: colors.surface,
+              marginBottom: '8px'
+            }}>
+              <h2 style={{
+                fontSize: '16px',
+                fontWeight: '700',
+                color: colors.text,
+                paddingLeft: '16px',
+                marginBottom: '12px'
+              }}>
+                Parks & Areas
+              </h2>
+              <div style={{ 
+                display: 'flex', 
+                gap: '12px', 
+                overflowX: 'auto',
+                paddingLeft: '16px',
+                paddingRight: '16px'
+              }}>
                 {subUniverses.map((subUniverse) => (
-                  <Link 
-                    key={subUniverse.id} 
-                    href={`/app/universe/${subUniverse.slug || subUniverse.id}`}
-                    className="sub-universe-card"
-                    style={{ backgroundColor: surfaceColor, borderColor }}
+                  <div
+                    key={subUniverse.id}
+                    onClick={() => router.push(`/app/universe/${subUniverse.slug || subUniverse.id}`)}
+                    style={{
+                      minWidth: '140px',
+                      borderRadius: '12px',
+                      overflow: 'hidden',
+                      backgroundColor: colors.inputBg,
+                      cursor: 'pointer'
+                    }}
                   >
-                    <img 
-                      src={subUniverse.thumbnail_image_url || PLACEHOLDER_IMAGE} 
+                    <img
+                      src={subUniverse.thumbnail_image_url || PLACEHOLDER_IMAGE}
                       alt={subUniverse.name}
-                      className="sub-universe-image"
+                      style={{
+                        width: '100%',
+                        height: '100px',
+                        objectFit: 'cover'
+                      }}
                     />
-                    <div className="sub-universe-content">
-                      <div className="sub-universe-name">{subUniverse.name}</div>
-                      <div className="sub-universe-count">{subUniverse.place_count || 0} places</div>
+                    <div style={{ padding: '8px' }}>
+                      <div style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: colors.text,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis'
+                      }}>
+                        {subUniverse.name}
+                      </div>
+                      <div style={{
+                        fontSize: '11px',
+                        color: colors.textSecondary,
+                        marginTop: '2px'
+                      }}>
+                        {subUniverse.place_count || 0} places
+                      </div>
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Map Preview */}
-          <button className="map-preview" style={{ backgroundColor: surfaceColor, borderColor }}>
-            <span className="map-icon">🗺️</span>
-            <span className="map-text">View Universe Map →</span>
-          </button>
-
           {/* Quick Actions */}
-          <div className="quick-actions">
-            {quickActions.map((action, i) => (
-              <button key={i} className="action-button" style={{ backgroundColor: surfaceColor, borderColor }}>
-                <action.icon size={24} color={COLORS.primaryBlue} />
-                <span className="action-label">{action.label}</span>
-              </button>
-            ))}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '12px',
+            padding: '16px',
+            backgroundColor: colors.surface,
+            marginBottom: '8px'
+          }}>
+            {[
+              { icon: IoExitOutline, label: "Entrances" },
+              { icon: IoRestaurantOutline, label: "Dining" },
+              { icon: IoWaterOutline, label: "Restrooms" },
+              { icon: IoCarOutline, label: "Parking" }
+            ].map((action, i) => {
+              const Icon = action.icon;
+              return (
+                <button
+                  key={i}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    padding: '12px',
+                    backgroundColor: colors.inputBg,
+                    border: 'none',
+                    borderRadius: '12px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Icon size={24} color="#374151" />
+                  <span style={{
+                    fontSize: '11px',
+                    color: colors.textSecondary,
+                    marginTop: '6px',
+                    textAlign: 'center'
+                  }}>
+                    {action.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Places List */}
-          <div className="section">
-            <div className="places-header">
-              <h2 className="places-title">Places in this Universe</h2>
-              <span className="places-count">{places.length} places</span>
+          <div style={{
+            padding: '16px',
+            backgroundColor: colors.surface
+          }}>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '16px'
+            }}>
+              <h2 style={{
+                fontSize: '16px',
+                fontWeight: '700',
+                color: colors.text
+              }}>
+                Places in this Universe
+              </h2>
+              <span style={{
+                fontSize: '13px',
+                color: colors.textSecondary
+              }}>
+                {filteredPlaces.length} places
+              </span>
             </div>
 
-            {places.length > 0 ? (
-              <div className="places-list">
-                {places.map((place) => (
-                  <Link 
-                    key={place.id} 
-                    href={`/place/${place.id}`}
-                    className="place-card"
-                    style={{ backgroundColor: surfaceColor, borderColor }}
-                  >
-                    <img 
-                      src={place.thumbnail_url || getCategoryFallbackImage(place.tavvy_category || '')} 
-                      alt={place.name}
-                      className="place-image"
-                    />
-                    <div className="place-content">
-                      <div className="place-name">{place.name}</div>
-                      <div className="place-category">{place.tavvy_category || 'Attraction'}</div>
-                      <div className="place-tags">
-                        <div className="place-tag">
-                          <IoSparkles size={12} color={COLORS.accentTeal} />
-                          <span>{place.total_signals || 0} signals</span>
-                        </div>
-                      </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {filteredPlaces.map((place) => (
+                <div
+                  key={place.id}
+                  onClick={() => router.push(`/app/place/${place.id}`)}
+                  style={{
+                    display: 'flex',
+                    gap: '12px',
+                    padding: '12px',
+                    backgroundColor: colors.background,
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: '12px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <img
+                    src={place.thumbnail_url || getCategoryFallbackImage(place.tavvy_category || '')}
+                    alt={place.name}
+                    style={{
+                      width: '80px',
+                      height: '80px',
+                      borderRadius: '8px',
+                      objectFit: 'cover'
+                    }}
+                  />
+                  <div style={{ flex: 1 }}>
+                    <h3 style={{
+                      fontSize: '15px',
+                      fontWeight: '600',
+                      color: colors.text,
+                      marginBottom: '4px'
+                    }}>
+                      {place.name}
+                    </h3>
+                    <div style={{
+                      fontSize: '12px',
+                      color: colors.textSecondary,
+                      marginBottom: '6px'
+                    }}>
+                      {place.tavvy_category || 'Place'}
                     </div>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="empty-state">
-                <IoLocationOutline size={48} color={secondaryTextColor} />
-                <div className="empty-text">No places added yet</div>
-              </div>
-            )}
+                    {place.total_signals && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <IoSparkles size={12} color={colors.primary} />
+                        <span style={{
+                          fontSize: '11px',
+                          color: colors.textSecondary
+                        }}>
+                          {place.total_signals} signals
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  {place.is_open !== undefined && (
+                    <div style={{
+                      padding: '4px 8px',
+                      borderRadius: '6px',
+                      backgroundColor: place.is_open ? '#D1FAE5' : '#FEE2E2',
+                      fontSize: '10px',
+                      fontWeight: '600',
+                      color: place.is_open ? '#065F46' : '#991B1B',
+                      height: 'fit-content'
+                    }}>
+                      {place.is_open ? 'Open' : 'Closed'}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-
-          <div style={{ height: 100 }} />
-
-          <style jsx>{`
-            .universe-detail {
-              padding-bottom: 80px;
-            }
-
-            /* Hero Section */
-            .hero-container {
-              position: relative;
-              height: 400px;
-              overflow: hidden;
-            }
-
-            .hero-image {
-              width: 100%;
-              height: 100%;
-              object-fit: cover;
-            }
-
-            .hero-overlay {
-              position: absolute;
-              top: 0;
-              left: 0;
-              right: 0;
-              bottom: 0;
-              background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7));
-            }
-
-            .hero-nav {
-              position: absolute;
-              top: 20px;
-              left: 20px;
-              right: 20px;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              z-index: 10;
-            }
-
-            .nav-button {
-              width: 40px;
-              height: 40px;
-              background: rgba(255, 255, 255, 0.9);
-              border: none;
-              border-radius: 50%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              cursor: pointer;
-              transition: transform 0.2s;
-            }
-
-            .nav-button:hover {
-              transform: scale(1.1);
-            }
-
-            .nav-actions {
-              display: flex;
-              gap: 8px;
-            }
-
-            .hero-content {
-              position: absolute;
-              bottom: 24px;
-              left: 20px;
-              right: 20px;
-              z-index: 10;
-            }
-
-            .universe-badge {
-              display: inline-flex;
-              align-items: center;
-              gap: 6px;
-              background: rgba(255, 255, 255, 0.2);
-              backdrop-filter: blur(10px);
-              padding: 6px 12px;
-              border-radius: 20px;
-              margin-bottom: 12px;
-            }
-
-            .universe-badge-icon {
-              font-size: 16px;
-            }
-
-            .universe-badge-text {
-              font-size: 11px;
-              font-weight: 700;
-              color: #FFFFFF;
-              letter-spacing: 1px;
-            }
-
-            .hero-title {
-              font-size: 36px;
-              font-weight: 800;
-              color: #FFFFFF;
-              margin: 0 0 8px;
-              text-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            }
-
-            .hero-meta {
-              display: flex;
-              align-items: center;
-              gap: 4px;
-              font-size: 14px;
-              color: #FFFFFF;
-              opacity: 0.9;
-            }
-
-            /* Stats Bar */
-            .stats-container {
-              display: flex;
-              padding: 20px;
-              border-bottom: 1px solid;
-              gap: 20px;
-            }
-
-            .stat-item {
-              flex: 1;
-              text-align: center;
-            }
-
-            .stat-value {
-              font-size: 24px;
-              font-weight: 700;
-              color: ${COLORS.successGreen};
-              margin-bottom: 4px;
-            }
-
-            .stat-label {
-              font-size: 12px;
-              font-weight: 600;
-              color: ${secondaryTextColor};
-              text-transform: uppercase;
-              letter-spacing: 0.5px;
-            }
-
-            /* Tabs */
-            .tabs-container {
-              display: flex;
-              padding: 0 20px;
-              border-bottom: 1px solid;
-              gap: 24px;
-            }
-
-            .tab-item {
-              padding: 16px 0;
-              font-size: 15px;
-              font-weight: 600;
-              color: ${secondaryTextColor};
-              background: none;
-              border: none;
-              border-bottom: 2px solid transparent;
-              cursor: pointer;
-              transition: all 0.2s;
-            }
-
-            .tab-item.active {
-              color: ${COLORS.primaryBlue};
-              border-bottom-color: ${COLORS.primaryBlue};
-            }
-
-            /* Filter Section */
-            .filter-section {
-              padding: 20px;
-            }
-
-            .search-bar {
-              display: flex;
-              align-items: center;
-              gap: 12px;
-              padding: 12px 16px;
-              border-radius: 12px;
-              margin-bottom: 12px;
-            }
-
-            .zones-container {
-              display: flex;
-              gap: 8px;
-              overflow-x: auto;
-              padding-bottom: 8px;
-              scrollbar-width: none;
-            }
-
-            .zones-container::-webkit-scrollbar {
-              display: none;
-            }
-
-            .zone-chip {
-              padding: 8px 16px;
-              border: 1px solid;
-              border-radius: 20px;
-              font-size: 14px;
-              font-weight: 500;
-              color: ${textColor};
-              cursor: pointer;
-              white-space: nowrap;
-              transition: all 0.2s;
-            }
-
-            .zone-chip.active {
-              color: #FFFFFF;
-            }
-
-            /* Section */
-            .section {
-              padding: 0 20px 24px;
-            }
-
-            .section-title {
-              font-size: 20px;
-              font-weight: 700;
-              color: ${textColor};
-              margin: 0 0 16px;
-            }
-
-            /* Sub-Universes */
-            .sub-universes-scroll {
-              display: flex;
-              gap: 12px;
-              overflow-x: auto;
-              padding-bottom: 8px;
-              scrollbar-width: none;
-            }
-
-            .sub-universes-scroll::-webkit-scrollbar {
-              display: none;
-            }
-
-            .sub-universe-card {
-              min-width: 200px;
-              border: 1px solid;
-              border-radius: 12px;
-              overflow: hidden;
-              text-decoration: none;
-              transition: transform 0.2s;
-            }
-
-            .sub-universe-card:hover {
-              transform: translateY(-2px);
-            }
-
-            .sub-universe-image {
-              width: 100%;
-              height: 120px;
-              object-fit: cover;
-            }
-
-            .sub-universe-content {
-              padding: 12px;
-            }
-
-            .sub-universe-name {
-              font-size: 14px;
-              font-weight: 600;
-              color: ${textColor};
-              margin-bottom: 4px;
-            }
-
-            .sub-universe-count {
-              font-size: 12px;
-              color: ${secondaryTextColor};
-            }
-
-            /* Map Preview */
-            .map-preview {
-              margin: 0 20px 24px;
-              padding: 16px;
-              border: 1px solid;
-              border-radius: 12px;
-              display: flex;
-              align-items: center;
-              gap: 12px;
-              cursor: pointer;
-              transition: transform 0.2s;
-            }
-
-            .map-preview:hover {
-              transform: translateY(-2px);
-            }
-
-            .map-icon {
-              font-size: 24px;
-            }
-
-            .map-text {
-              font-size: 15px;
-              font-weight: 600;
-              color: ${textColor};
-            }
-
-            /* Quick Actions */
-            .quick-actions {
-              display: grid;
-              grid-template-columns: repeat(4, 1fr);
-              gap: 12px;
-              padding: 0 20px 24px;
-            }
-
-            .action-button {
-              padding: 16px;
-              border: 1px solid;
-              border-radius: 12px;
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              gap: 8px;
-              cursor: pointer;
-              transition: transform 0.2s;
-            }
-
-            .action-button:hover {
-              transform: translateY(-2px);
-            }
-
-            .action-label {
-              font-size: 12px;
-              font-weight: 500;
-              color: ${textColor};
-              text-align: center;
-            }
-
-            /* Places */
-            .places-header {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              margin-bottom: 16px;
-            }
-
-            .places-title {
-              font-size: 20px;
-              font-weight: 700;
-              color: ${textColor};
-              margin: 0;
-            }
-
-            .places-count {
-              font-size: 14px;
-              color: ${secondaryTextColor};
-            }
-
-            .places-list {
-              display: flex;
-              flex-direction: column;
-              gap: 12px;
-            }
-
-            .place-card {
-              display: flex;
-              gap: 16px;
-              padding: 12px;
-              border: 1px solid;
-              border-radius: 12px;
-              text-decoration: none;
-              transition: transform 0.2s;
-            }
-
-            .place-card:hover {
-              transform: translateY(-2px);
-            }
-
-            .place-image {
-              width: 80px;
-              height: 80px;
-              border-radius: 8px;
-              object-fit: cover;
-              flex-shrink: 0;
-            }
-
-            .place-content {
-              flex: 1;
-              display: flex;
-              flex-direction: column;
-              justify-content: center;
-            }
-
-            .place-name {
-              font-size: 16px;
-              font-weight: 600;
-              color: ${textColor};
-              margin-bottom: 4px;
-            }
-
-            .place-category {
-              font-size: 13px;
-              color: ${secondaryTextColor};
-              margin-bottom: 8px;
-            }
-
-            .place-tags {
-              display: flex;
-              gap: 8px;
-            }
-
-            .place-tag {
-              display: flex;
-              align-items: center;
-              gap: 4px;
-              padding: 4px 8px;
-              background: rgba(0, 206, 209, 0.1);
-              border-radius: 6px;
-              font-size: 12px;
-              color: ${COLORS.accentTeal};
-            }
-
-            /* Empty State */
-            .empty-state {
-              text-align: center;
-              padding: 60px 20px;
-            }
-
-            .empty-text {
-              font-size: 16px;
-              color: ${secondaryTextColor};
-              margin-top: 16px;
-            }
-
-            @media (max-width: 768px) {
-              .quick-actions {
-                grid-template-columns: repeat(2, 1fr);
-              }
-
-              .hero-title {
-                font-size: 28px;
-              }
-            }
-          `}</style>
         </div>
       </AppLayout>
     </>
