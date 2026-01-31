@@ -62,6 +62,7 @@ export default function ExploreScreen() {
   }, [activeCategory]);
 
   const fetchUniverses = async () => {
+    console.log('[Explore] Starting fetchUniverses...');
     setLoading(true);
     try {
       let featuredQuery = supabase
@@ -81,15 +82,24 @@ export default function ExploreScreen() {
         universesQuery.limit(4),
       ]);
 
+      console.log('[Explore] Featured result:', featuredResult);
+      console.log('[Explore] Universes result:', universesResult);
+
       if (featuredResult.data && featuredResult.data.length > 0) {
+        console.log('[Explore] Setting featured universe:', featuredResult.data[0].name);
         setFeaturedUniverse(featuredResult.data[0]);
+      } else {
+        console.log('[Explore] No featured universe found');
       }
 
-      if (universesResult.data) {
+      if (universesResult.data && universesResult.data.length > 0) {
+        console.log('[Explore] Setting popular universes:', universesResult.data.length);
         setPopularUniverses(universesResult.data);
+      } else {
+        console.log('[Explore] No popular universes found');
       }
     } catch (error) {
-      console.error('Error fetching universes:', error);
+      console.error('[Explore] Error fetching universes:', error);
     } finally {
       setLoading(false);
     }
