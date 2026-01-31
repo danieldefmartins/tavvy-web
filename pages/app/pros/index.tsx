@@ -17,8 +17,8 @@ import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useThemeContext } from '../../contexts/ThemeContext';
-import AppLayout from '../../components/AppLayout';
+import { useThemeContext } from '../../../contexts/ThemeContext';
+import AppLayout from '../../../components/AppLayout';
 import { 
   IoAddCircleOutline, IoChevronForward, IoTimeOutline, IoCheckmark,
   IoShieldCheckmark, IoHelpCircleOutline, IoCashOutline, IoFlagOutline,
