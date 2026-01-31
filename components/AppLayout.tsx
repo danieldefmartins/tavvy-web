@@ -5,6 +5,7 @@
 import React, { ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../contexts/ThemeContext';
+import { lightTheme, darkTheme } from '../constants/Colors';
 import { useRoles } from '../hooks/useRoles';
 import { getRouteAccessLevel, checkAccess, AccessLevel } from '../lib/roleService';
 import TabBar from './TabBar';
@@ -13,14 +14,17 @@ interface AppLayoutProps {
   children: ReactNode;
   hideTabBar?: boolean;
   requiredAccess?: AccessLevel; // Optional override for route access level
+  forceTheme?: 'light' | 'dark';
 }
 
 export default function AppLayout({ 
   children, 
   hideTabBar = false,
-  requiredAccess 
+  requiredAccess,
+  forceTheme
 }: AppLayoutProps) {
-  const { theme } = useThemeContext();
+  const { theme: contextTheme } = useThemeContext();
+  const theme = forceTheme === 'dark' ? darkTheme : forceTheme === 'light' ? lightTheme : contextTheme;
   const router = useRouter();
   const { roles, isAuthenticated, loading } = useRoles();
 
