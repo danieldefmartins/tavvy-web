@@ -1,5 +1,4 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import getConfig from 'next/config';
 
 // Singleton instance - will be created on first use (at runtime, not build time)
 let supabaseInstance: SupabaseClient | null = null;
@@ -47,23 +46,9 @@ const createMockClient = (): SupabaseClient => {
   } as unknown as SupabaseClient;
 };
 
-// Get Supabase credentials from runtime config or env vars
+// Get Supabase credentials from NEXT_PUBLIC_ env vars
+// These are automatically inlined by Next.js at build time
 const getSupabaseCredentials = (): { url: string; anonKey: string } => {
-  // Try to get from Next.js runtime config first (works at runtime in Docker)
-  try {
-    const { publicRuntimeConfig } = getConfig() || {};
-    if (publicRuntimeConfig?.supabaseUrl && publicRuntimeConfig?.supabaseAnonKey) {
-      console.log('[Supabase] Using credentials from publicRuntimeConfig');
-      return {
-        url: publicRuntimeConfig.supabaseUrl,
-        anonKey: publicRuntimeConfig.supabaseAnonKey,
-      };
-    }
-  } catch (e) {
-    // getConfig() might fail during SSR or build
-  }
-
-  // Fallback to NEXT_PUBLIC_ env vars (works when inlined at build time)
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
   
