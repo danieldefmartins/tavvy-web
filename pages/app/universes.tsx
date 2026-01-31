@@ -89,10 +89,11 @@ export default function UniversesScreen() {
     }
   };
 
+  // Force dark mode to match iOS V2 design
   const colors = {
-    bg: isDark ? COLORS.bgDark : COLORS.bgLight,
-    surface: isDark ? COLORS.surfaceDark : COLORS.surfaceLight,
-    text: isDark ? COLORS.textPrimaryDark : COLORS.textPrimaryLight,
+    bg: COLORS.bgDark,
+    surface: COLORS.surfaceDark,
+    text: COLORS.textPrimaryDark,
     textSecondary: COLORS.textSecondaryDark,
   };
 
