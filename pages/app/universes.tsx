@@ -17,26 +17,7 @@ import {
   IoSearchOutline, IoRocketOutline, IoAirplaneOutline,
   IoLeafOutline, IoBusinessOutline, IoFlameOutline
 } from 'react-icons/io5';
-
-// Tavvy V2 Design System
-const COLORS = {
-  // Dark mode (primary)
-  bgDark: '#000000',
-  surfaceDark: '#1A1A1A',
-  textPrimaryDark: '#FFFFFF',
-  textSecondaryDark: '#667EEA', // Blue accent
-  
-  // Light mode
-  bgLight: '#FFFFFF',
-  surfaceLight: '#F5F5F5',
-  textPrimaryLight: '#000000',
-  textSecondaryLight: '#667EEA',
-  
-  // Shared
-  accent: '#667EEA',
-  accentHover: '#5568D3',
-  active: '#EF4444',
-};
+import { tavvyTheme, getThemeColors, getBrandColor } from '../../styles/tavvyTheme';
 
 interface Universe {
   id: string;
@@ -90,12 +71,8 @@ export default function UniversesScreen() {
   };
 
   // Force dark mode to match iOS V2 design
-  const colors = {
-    bg: COLORS.bgDark,
-    surface: COLORS.surfaceDark,
-    text: COLORS.textPrimaryDark,
-    textSecondary: COLORS.textSecondaryDark,
-  };
+  const colors = getThemeColors(true);
+  const brandColor = getBrandColor('universes');
 
   return (
     <>
@@ -246,7 +223,7 @@ export default function UniversesScreen() {
                     )}
                     <button style={{
                       padding: '12px 24px',
-                      backgroundColor: COLORS.accent,
+                      backgroundColor: brandColor,
                       color: '#fff',
                       border: 'none',
                       borderRadius: '12px',
@@ -255,8 +232,8 @@ export default function UniversesScreen() {
                       cursor: 'pointer',
                       transition: 'all 0.2s'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = COLORS.accentHover}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = COLORS.accent}>
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = brandColorHover}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = brandColor}>
                       Explore Universe
                     </button>
                   </div>
@@ -296,7 +273,7 @@ export default function UniversesScreen() {
                       gap: '8px',
                       padding: '16px',
                       minWidth: '80px',
-                      backgroundColor: isSelected ? COLORS.accent : colors.surface,
+                      backgroundColor: isSelected ? brandColor : colors.surface,
                       border: 'none',
                       borderRadius: '12px',
                       cursor: 'pointer',
@@ -373,11 +350,11 @@ export default function UniversesScreen() {
                           alignItems: 'center',
                           gap: '4px'
                         }}>
-                          <IoFlameOutline size={14} color={COLORS.active} />
+                          <IoFlameOutline size={14} color={tavvyTheme.colors.status.active} />
                           <span style={{
                             fontSize: '13px',
                             fontWeight: '600',
-                            color: COLORS.active
+                            color: tavvyTheme.colors.status.active
                           }}>
                             Active
                           </span>
