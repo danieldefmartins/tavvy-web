@@ -1,14 +1,12 @@
 /**
- * Universes Screen - Explore worlds with many places inside
+ * Universes Screen - Explore curated worlds
  * Pixel-perfect port from tavvy-mobile/screens/UniverseDiscoveryScreen.tsx
  * 
- * Features:
- * - Teal gradient header
- * - Search bar
- * - Category filter chips (All, Airports, Theme Parks, National Parks, etc.)
- * - Featured Universe hero card
- * - Nearby Universes section
- * - Popular Destinations section
+ * PREMIUM DARK MODE DESIGN - January 2026
+ * - Minimalist black header with blue tagline
+ * - Full-width featured universe hero
+ * - Icon-driven category filters
+ * - 2x2 popular universes grid with activity signals
  */
 
 import React, { useState, useEffect } from 'react';
@@ -18,22 +16,20 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
-import { spacing, borderRadius } from '../../constants/Colors';
-import { IoSearch, IoPersonCircleOutline, IoLocationSharp, IoChevronForward } from 'react-icons/io5';
-import { FiChevronRight } from 'react-icons/fi';
+import { IoSearch, IoRocketOutline, IoAirplaneOutline, IoLeafOutline, IoBusinessOutline } from 'react-icons/io5';
 
-// Teal theme colors
-const TEAL = '#14B8A6';
-const TEAL_DARK = '#0D9488';
-const TEAL_GRADIENT = 'linear-gradient(135deg, #14B8A6, #0891B2)';
+// Design System Colors
+const COLORS = {
+  accent: '#667EEA',
+  activityHigh: '#EF4444',
+};
 
 interface Universe {
   id: string;
   name: string;
   slug: string;
   description?: string;
-  icon?: string;
-  cover_image_url?: string;
+  banner_image_url?: string;
   thumbnail_image_url?: string;
   place_count?: number;
   total_signals?: number;
@@ -42,68 +38,24 @@ interface Universe {
   location?: string;
 }
 
-// Category chips matching mobile app
-const CATEGORY_CHIPS = [
-  { id: 'all', name: 'All', icon: null },
-  { id: 'airports', name: 'Airports', icon: '✈️' },
-  { id: 'theme-parks', name: 'Theme Parks', icon: '🎢' },
-  { id: 'national-parks', name: 'National Parks', icon: '🏞️' },
-  { id: 'stadiums', name: 'Stadiums', icon: '🏟️' },
-  { id: 'malls', name: 'Malls', icon: '🛍️' },
+// Category filters matching iOS
+const CATEGORY_FILTERS = [
+  { id: 'theme-parks', icon: IoRocketOutline, label: 'Theme Parks' },
+  { id: 'airports', icon: IoAirplaneOutline, label: 'Airports' },
+  { id: 'national-parks', icon: IoLeafOutline, label: 'Parks' },
+  { id: 'cities', icon: IoBusinessOutline, label: 'Cities' },
 ];
 
-// Mock nearby universes
-const mockNearbyUniverses = [
-  { 
-    id: '1', 
-    name: 'Jacob K. Javits Convention Center', 
-    slug: 'javits-center',
-    cover_image_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
-    place_count: 0,
-    total_signals: 0,
-    location: 'New York, NY'
-  },
-  { 
-    id: '2', 
-    name: 'McCormick Place', 
-    slug: 'mccormick-place',
-    cover_image_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
-    place_count: 0,
-    total_signals: 0,
-    location: 'Chicago, IL'
-  },
-  { 
-    id: '3', 
-    name: 'Orange County Convention Center', 
-    slug: 'orange-county-cc',
-    cover_image_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop',
-    place_count: 0,
-    total_signals: 0,
-    location: 'Orlando, FL'
-  },
-];
-
-// Mock featured universe
-const mockFeaturedUniverse = {
-  id: 'featured-1',
-  name: 'U.S. Bank Stadium',
-  slug: 'us-bank-stadium',
-  cover_image_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop',
-  place_count: 0,
-  total_signals: 0,
-  location: 'Minneapolis, Minnesota',
-  is_popular: true,
-};
+const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800';
 
 export default function ExploreScreen() {
   const { theme, isDark } = useThemeContext();
   const { user } = useAuth();
-  const [universes, setUniverses] = useState<Universe[]>([]);
-  const [featuredUniverse, setFeaturedUniverse] = useState<Universe | null>(mockFeaturedUniverse);
-  const [nearbyUniverses, setNearbyUniverses] = useState<Universe[]>(mockNearbyUniverses);
+  const [featuredUniverse, setFeaturedUniverse] = useState<Universe | null>(null);
+  const [popularUniverses, setPopularUniverses] = useState<Universe[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUniverses();
@@ -112,34 +64,29 @@ export default function ExploreScreen() {
   const fetchUniverses = async () => {
     setLoading(true);
     try {
-      // Fetch featured universe
       let featuredQuery = supabase
         .from('atlas_universes')
         .select('*')
-        .eq('status', 'published')
         .eq('is_featured', true)
-        .order('published_at', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(1);
 
-      // Fetch all universes
       let universesQuery = supabase
         .from('atlas_universes')
         .select('*')
-        .eq('status', 'published')
-        .order('total_signals', { ascending: false });
+        .order('created_at', { ascending: false });
 
       const [featuredResult, universesResult] = await Promise.all([
         featuredQuery.single(),
-        universesQuery.limit(20),
+        universesQuery.limit(4),
       ]);
 
       if (featuredResult.data) {
         setFeaturedUniverse(featuredResult.data);
       }
 
-      if (universesResult.data && universesResult.data.length > 0) {
-        setUniverses(universesResult.data);
-        setNearbyUniverses(universesResult.data.slice(0, 3));
+      if (universesResult.data) {
+        setPopularUniverses(universesResult.data);
       }
     } catch (error) {
       console.error('Error fetching universes:', error);
@@ -148,165 +95,134 @@ export default function ExploreScreen() {
     }
   };
 
-  const bgColor = isDark ? '#0F172A' : '#F9F7F2';
+  const getActivityLevel = (signals: number) => {
+    if (signals > 100) return 'High Activity';
+    if (signals > 50) return 'Moderate';
+    return 'Active';
+  };
 
   return (
     <>
       <Head>
         <title>Universes | TavvY</title>
-        <meta name="description" content="Explore TavvY Universes - worlds with many places inside" />
+        <meta name="description" content="Explore TavvY Universes - curated worlds" />
       </Head>
 
       <AppLayout>
         <div className="explore-screen">
-          {/* Teal Gradient Header */}
-          <header className="explore-header">
-            <div className="header-row">
-              <div className="header-left">
-                <h1 className="header-title">Universes</h1>
-                <p className="header-subtitle">Explore worlds with many places inside</p>
-              </div>
-              <button className="profile-btn">
-                <IoPersonCircleOutline size={32} color="#fff" />
-              </button>
-            </div>
-            
-            {/* Search Bar */}
-            <div className="search-container">
-              <IoSearch size={18} color="rgba(0,0,0,0.4)" />
+          {/* Header */}
+          <header className="header">
+            <h1 className="title">Universes</h1>
+            <p className="tagline">Explore curated worlds.</p>
+          </header>
+
+          {/* Search Bar */}
+          <div className="search-section">
+            <div className="search-bar">
+              <IoSearch size={20} />
               <input
                 type="text"
                 className="search-input"
-                placeholder="Find a universe..."
+                placeholder="Search parks, airports, cities..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-          </header>
-
-          {/* Category Chips */}
-          <div className="category-chips">
-            {CATEGORY_CHIPS.map((cat) => (
-              <button
-                key={cat.id}
-                className={`category-chip ${activeCategory === cat.id ? 'active' : ''}`}
-                onClick={() => setActiveCategory(cat.id)}
-              >
-                {cat.icon && <span className="chip-icon">{cat.icon}</span>}
-                <span>{cat.name}</span>
-              </button>
-            ))}
           </div>
 
-          {/* Main Content */}
-          <main className="main-content">
-            {/* Featured Universe */}
-            {featuredUniverse && !searchQuery && (
-              <section className="featured-section">
-                <h2 className="section-label">Featured Universe</h2>
-                <Link 
-                  href={`/app/universe/${featuredUniverse.slug || featuredUniverse.id}`}
-                  className="featured-card"
-                >
-                  <img 
-                    src={featuredUniverse.cover_image_url || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800'}
-                    alt={featuredUniverse.name}
-                    className="featured-image"
-                  />
-                  <div className="featured-overlay">
-                    {featuredUniverse.is_popular && (
-                      <span className="featured-badge">🔥 Popular</span>
-                    )}
-                    <h2 className="featured-title">{featuredUniverse.name}</h2>
-                    <p className="featured-location">
-                      <IoLocationSharp size={14} />
-                      {featuredUniverse.location || 'Location'} • {featuredUniverse.place_count || 0} Places
+          {/* Featured Universe Hero */}
+          {featuredUniverse && (
+            <Link 
+              href={`/app/universe/${featuredUniverse.slug || featuredUniverse.id}`}
+              className="featured-card"
+            >
+              <img 
+                src={featuredUniverse.banner_image_url || PLACEHOLDER_IMAGE}
+                alt={featuredUniverse.name}
+                className="featured-image"
+              />
+              <div className="featured-label-container">
+                <div className="featured-label">
+                  <span>FEATURED UNIVERSE</span>
+                </div>
+              </div>
+              <div className="featured-gradient">
+                <div className="featured-bottom-row">
+                  <div className="featured-text-content">
+                    <h2 className="featured-name">{featuredUniverse.name}</h2>
+                    <p className="featured-meta">
+                      {featuredUniverse.location || 'Explore Now'}
                     </p>
                   </div>
-                </Link>
-              </section>
-            )}
-
-            {/* Nearby Universes */}
-            <section className="nearby-section">
-              <div className="section-header">
-                <div className="section-title-row">
-                  <span className="section-icon">📍</span>
-                  <h2>Nearby Universes</h2>
+                  <button className="explore-button">
+                    Explore Universe
+                  </button>
                 </div>
-                <Link href="/app/explore/map" className="see-map">
-                  See Map
-                </Link>
               </div>
-              <div className="nearby-scroll">
-                {nearbyUniverses.map((universe) => (
+            </Link>
+          )}
+
+          {/* Filter by Category */}
+          <section className="filter-section">
+            <h2 className="section-title">Filter by Category</h2>
+            <div className="filter-grid">
+              {CATEGORY_FILTERS.map((filter) => {
+                const Icon = filter.icon;
+                const isActive = activeCategory === filter.id;
+                return (
+                  <button
+                    key={filter.id}
+                    className={`filter-button ${isActive ? 'active' : ''}`}
+                    onClick={() => setActiveCategory(isActive ? null : filter.id)}
+                  >
+                    <Icon size={24} />
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Popular Universes Grid */}
+          <section className="popular-section">
+            <h2 className="section-title">Popular Universes</h2>
+            <div className="grid-container">
+              {loading ? (
+                <div className="loading-container">
+                  <div className="loading-spinner" />
+                  <p>Loading universes...</p>
+                </div>
+              ) : popularUniverses.length === 0 ? (
+                <div className="empty-state">
+                  <span className="empty-icon">🌌</span>
+                  <h3>No universes found</h3>
+                  <p>Check back soon for new universes</p>
+                </div>
+              ) : (
+                popularUniverses.map((universe) => (
                   <Link 
                     key={universe.id}
                     href={`/app/universe/${universe.slug || universe.id}`}
-                    className="nearby-card"
+                    className="grid-card"
                   >
-                    <div className="nearby-image">
-                      <img 
-                        src={universe.cover_image_url || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'}
-                        alt={universe.name}
-                      />
-                    </div>
-                    <div className="nearby-info">
-                      <h3>{universe.name}</h3>
-                      <div className="nearby-meta">
-                        <span>{universe.place_count || 0} places</span>
-                        <span className="signals">{universe.total_signals || 0} signals</span>
+                    <img 
+                      src={universe.thumbnail_image_url || PLACEHOLDER_IMAGE}
+                      alt={universe.name}
+                      className="grid-image"
+                    />
+                    <div className="grid-content">
+                      <h3 className="grid-name">{universe.name}</h3>
+                      <div className="activity-badge">
+                        <span className="activity-icon">🔥</span>
+                        <span className="activity-text">
+                          {getActivityLevel(universe.total_signals || 0)}
+                        </span>
                       </div>
                     </div>
                   </Link>
-                ))}
-              </div>
-            </section>
-
-            {/* Popular Destinations */}
-            <section className="popular-section">
-              <div className="section-header">
-                <h2>Popular Destinations</h2>
-                <button className="see-all">
-                  See All <FiChevronRight size={16} />
-                </button>
-              </div>
-              <div className="popular-grid">
-                {loading ? (
-                  <div className="loading-container">
-                    <div className="loading-spinner" />
-                    <p>Loading universes...</p>
-                  </div>
-                ) : universes.length === 0 ? (
-                  <div className="empty-state">
-                    <span className="empty-icon">🌌</span>
-                    <h3>No universes found</h3>
-                    <p>Check back soon for new universes</p>
-                  </div>
-                ) : (
-                  universes.slice(0, 6).map((universe) => (
-                    <Link 
-                      key={universe.id}
-                      href={`/app/universe/${universe.slug || universe.id}`}
-                      className="popular-card"
-                    >
-                      <div className="popular-image">
-                        <img 
-                          src={universe.cover_image_url || 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400'}
-                          alt={universe.name}
-                        />
-                        <div className="popular-gradient" />
-                      </div>
-                      <div className="popular-info">
-                        <h3>{universe.name}</h3>
-                        <p>{universe.place_count || 0} places • {universe.total_signals || 0} signals</p>
-                      </div>
-                    </Link>
-                  ))
-                )}
-              </div>
-            </section>
-          </main>
+                ))
+              )}
+            </div>
+          </section>
 
           {/* Bottom Spacing */}
           <div className="bottom-spacing" />
@@ -315,51 +231,43 @@ export default function ExploreScreen() {
         <style jsx>{`
           .explore-screen {
             min-height: 100vh;
-            background-color: ${bgColor};
+            background-color: ${theme.background};
+            padding-bottom: 100px;
           }
 
-          /* Teal Header */
-          .explore-header {
-            background: ${TEAL_GRADIENT};
-            padding: 20px;
-            padding-top: max(20px, env(safe-area-inset-top));
-            padding-bottom: 24px;
+          /* Header */
+          .header {
+            padding: 8px 20px 16px;
           }
 
-          .header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 16px;
-          }
-
-          .header-title {
-            font-size: 28px;
+          .title {
+            font-size: 32px;
             font-weight: 700;
-            color: #fff;
-            margin: 0 0 4px;
-          }
-
-          .header-subtitle {
-            font-size: 14px;
-            color: rgba(255,255,255,0.85);
+            color: ${theme.text};
             margin: 0;
           }
 
-          .profile-btn {
-            background: none;
-            border: none;
-            padding: 4px;
-            cursor: pointer;
+          .tagline {
+            font-size: 16px;
+            font-weight: 500;
+            color: ${COLORS.accent};
+            margin: 4px 0 0;
           }
 
-          .search-container {
+          /* Search */
+          .search-section {
+            padding: 0 20px;
+            margin-bottom: 20px;
+          }
+
+          .search-bar {
             display: flex;
             align-items: center;
-            gap: 10px;
-            background: #fff;
+            gap: 12px;
+            background: ${theme.surface};
             padding: 14px 16px;
             border-radius: 16px;
+            color: ${theme.textSecondary};
           }
 
           .search-input {
@@ -367,337 +275,228 @@ export default function ExploreScreen() {
             border: none;
             background: transparent;
             font-size: 16px;
-            color: #111;
+            color: ${theme.text};
             outline: none;
           }
 
           .search-input::placeholder {
-            color: rgba(0,0,0,0.4);
+            color: ${theme.textSecondary};
           }
 
-          /* Category Chips */
-          .category-chips {
-            display: flex;
-            gap: 8px;
-            padding: 16px 20px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-          }
-
-          .category-chips::-webkit-scrollbar {
-            display: none;
-          }
-
-          .category-chip {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 10px 16px;
-            border-radius: 24px;
-            border: none;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s;
-            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#fff'};
-            color: ${isDark ? 'rgba(255,255,255,0.7)' : '#666'};
-          }
-
-          .category-chip.active {
-            background: ${TEAL};
-            color: #fff;
-          }
-
-          .chip-icon {
-            font-size: 14px;
-          }
-
-          /* Main Content */
-          .main-content {
-            padding: 0 20px;
-          }
-
-          /* Section Label */
-          .section-label {
-            font-size: 13px;
-            font-weight: 500;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#999'};
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin: 0 0 12px;
-          }
-
-          /* Featured Section */
-          .featured-section {
-            margin-bottom: 32px;
-          }
-
+          /* Featured Card */
           .featured-card {
-            display: block;
             position: relative;
+            margin: 0 20px 24px;
             border-radius: 20px;
             overflow: hidden;
+            height: 220px;
+            display: block;
             text-decoration: none;
           }
 
           .featured-image {
             width: 100%;
-            height: 220px;
-            object-fit: cover;
-          }
-
-          .featured-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 20px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
-          }
-
-          .featured-badge {
-            display: inline-block;
-            background: rgba(255,255,255,0.2);
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-size: 12px;
-            color: #fff;
-            margin-bottom: 8px;
-          }
-
-          .featured-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #fff;
-            margin: 0 0 6px;
-          }
-
-          .featured-location {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 14px;
-            color: rgba(255,255,255,0.85);
-            margin: 0;
-          }
-
-          /* Nearby Section */
-          .nearby-section {
-            margin-bottom: 32px;
-          }
-
-          .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-          }
-
-          .section-title-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          }
-
-          .section-icon {
-            font-size: 18px;
-          }
-
-          .section-header h2 {
-            font-size: 18px;
-            font-weight: 700;
-            color: ${isDark ? '#fff' : '#111'};
-            margin: 0;
-          }
-
-          .see-map, .see-all {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 14px;
-            font-weight: 600;
-            color: ${TEAL};
-            text-decoration: none;
-            background: none;
-            border: none;
-            cursor: pointer;
-          }
-
-          .nearby-scroll {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding-bottom: 8px;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-          }
-
-          .nearby-scroll::-webkit-scrollbar {
-            display: none;
-          }
-
-          .nearby-card {
-            min-width: 200px;
-            max-width: 200px;
-            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#fff'};
-            border-radius: 16px;
-            overflow: hidden;
-            text-decoration: none;
-          }
-
-          .nearby-image {
-            height: 120px;
-            overflow: hidden;
-          }
-
-          .nearby-image img {
-            width: 100%;
             height: 100%;
             object-fit: cover;
           }
 
-          .nearby-info {
-            padding: 12px;
+          .featured-label-container {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            z-index: 10;
           }
 
-          .nearby-info h3 {
-            font-size: 14px;
-            font-weight: 600;
-            color: ${isDark ? '#fff' : '#111'};
-            margin: 0 0 6px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+          .featured-label {
+            background: transparent;
+            border: 1.5px solid ${COLORS.accent};
+            padding: 4px 10px;
+            border-radius: 6px;
           }
 
-          .nearby-meta {
+          .featured-label span {
+            color: ${COLORS.accent};
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+          }
+
+          .featured-gradient {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 50px 16px 16px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.85));
+          }
+
+          .featured-bottom-row {
             display: flex;
             justify-content: space-between;
-            font-size: 12px;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#666'};
+            align-items: flex-end;
           }
 
-          .nearby-meta .signals {
-            color: ${TEAL};
+          .featured-text-content {
+            flex: 1;
+            margin-right: 12px;
+          }
+
+          .featured-name {
+            color: #FFFFFF;
+            font-size: 22px;
+            font-weight: 700;
+            margin: 0 0 4px;
+          }
+
+          .featured-meta {
+            color: #D1D5DB;
+            font-size: 13px;
+            margin: 0;
+          }
+
+          .explore-button {
+            background: ${COLORS.accent};
+            color: #FFFFFF;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+          }
+
+          /* Filter Section */
+          .filter-section {
+            padding: 0 20px;
+            margin-bottom: 24px;
+          }
+
+          .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: ${theme.text};
+            margin: 0 0 12px;
+          }
+
+          .filter-grid {
+            display: flex;
+            gap: 12px;
+          }
+
+          .filter-button {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            border: none;
+            background: ${theme.surface};
+            color: ${theme.textSecondary};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+          }
+
+          .filter-button.active {
+            border: 2px solid ${COLORS.accent};
+            color: ${COLORS.accent};
           }
 
           /* Popular Section */
           .popular-section {
-            margin-bottom: 32px;
+            padding: 0 20px;
           }
 
-          .popular-grid {
+          .grid-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+            gap: 20px;
           }
 
-          .popular-card {
-            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#fff'};
-            border-radius: 16px;
-            overflow: hidden;
+          .grid-card {
+            display: block;
             text-decoration: none;
           }
 
-          .popular-image {
-            position: relative;
-            height: 100px;
-          }
-
-          .popular-image img {
+          .grid-image {
             width: 100%;
-            height: 100%;
+            height: 110px;
+            border-radius: 14px;
             object-fit: cover;
           }
 
-          .popular-gradient {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 50%;
-            background: linear-gradient(transparent, rgba(0,0,0,0.5));
+          .grid-content {
+            padding-top: 8px;
           }
 
-          .popular-info {
-            padding: 12px;
-          }
-
-          .popular-info h3 {
-            font-size: 14px;
+          .grid-name {
+            font-size: 15px;
             font-weight: 600;
-            color: ${isDark ? '#fff' : '#111'};
+            color: ${theme.text};
             margin: 0 0 4px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
           }
 
-          .popular-info p {
-            font-size: 12px;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#666'};
-            margin: 0;
+          .activity-badge {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+          }
+
+          .activity-icon {
+            font-size: 13px;
+          }
+
+          .activity-text {
+            font-size: 13px;
+            font-weight: 500;
+            color: ${COLORS.activityHigh};
           }
 
           /* Loading & Empty States */
-          .loading-container, .empty-state {
+          .loading-container,
+          .empty-state {
             grid-column: 1 / -1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            text-align: center;
             padding: 40px 20px;
           }
 
           .loading-spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid ${isDark ? '#333' : '#ddd'};
-            border-top-color: ${TEAL};
+            width: 40px;
+            height: 40px;
+            border: 3px solid ${theme.surface};
+            border-top-color: ${COLORS.accent};
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 12px;
+            margin: 0 auto 12px;
           }
 
           @keyframes spin {
             to { transform: rotate(360deg); }
           }
 
-          .loading-container p, .empty-state p {
-            font-size: 14px;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#666'};
-            margin: 0;
-          }
-
           .empty-icon {
             font-size: 48px;
+            display: block;
             margin-bottom: 12px;
           }
 
           .empty-state h3 {
-            font-size: 16px;
-            font-weight: 600;
-            color: ${isDark ? '#fff' : '#111'};
-            margin: 0 0 4px;
+            color: ${theme.text};
+            font-size: 18px;
+            margin: 0 0 8px;
           }
 
-          /* Bottom Spacing */
+          .empty-state p {
+            color: ${theme.textSecondary};
+            font-size: 14px;
+            margin: 0;
+          }
+
           .bottom-spacing {
             height: 100px;
-          }
-
-          /* Responsive */
-          @media (min-width: 768px) {
-            .popular-grid {
-              grid-template-columns: repeat(3, 1fr);
-            }
-
-            .nearby-card {
-              min-width: 240px;
-              max-width: 240px;
-            }
           }
         `}</style>
       </AppLayout>
