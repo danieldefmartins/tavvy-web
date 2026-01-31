@@ -77,12 +77,12 @@ export default function ExploreScreen() {
         .order('created_at', { ascending: false });
 
       const [featuredResult, universesResult] = await Promise.all([
-        featuredQuery.single(),
+        featuredQuery,
         universesQuery.limit(4),
       ]);
 
-      if (featuredResult.data) {
-        setFeaturedUniverse(featuredResult.data);
+      if (featuredResult.data && featuredResult.data.length > 0) {
+        setFeaturedUniverse(featuredResult.data[0]);
       }
 
       if (universesResult.data) {
