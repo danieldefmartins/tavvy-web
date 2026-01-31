@@ -81,7 +81,7 @@ export default function UniversesScreen() {
         <meta name="description" content="Explore curated worlds" />
       </Head>
 
-      <AppLayout forceTheme='dark'>
+      <AppLayout>
         <div style={{
           minHeight: '100vh',
           paddingBottom: '80px'

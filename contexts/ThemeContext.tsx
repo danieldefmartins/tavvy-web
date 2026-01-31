@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { lightTheme, darkTheme, Theme } from '../constants/Colors';
+import { getThemeColors, tavvyTheme } from '../styles/tavvyTheme';
+import type { Theme } from '../styles/tavvyTheme';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -68,7 +69,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const isDark = themeMode === 'dark' || (themeMode === 'system' && systemPrefersDark);
   
   // Select the appropriate theme
-  const theme = isDark ? darkTheme : lightTheme;
+  const theme = getThemeColors(isDark);
 
   // Don't render until we've loaded the saved preference (prevents flash)
   if (!isLoaded) {
