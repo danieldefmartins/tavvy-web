@@ -216,13 +216,18 @@ export const getThemeColors = (isDark: boolean = true) => {
   const { colors } = tavvyTheme;
   
   return {
-    bg: isDark ? colors.background.dark : colors.background.light,
+    background: isDark ? colors.background.dark : colors.background.light,
     surface: isDark ? colors.background.surface.dark : colors.background.surface.light,
     text: isDark ? colors.text.primary.dark : colors.text.primary.light,
     textSecondary: isDark ? colors.text.secondary.dark : colors.text.secondary.light,
+    textTertiary: isDark ? colors.text.tertiary.dark : colors.text.tertiary.light,
     border: isDark ? colors.border.dark : colors.border.light,
+    accent: colors.brand.universes,
   };
 };
+
+// TypeScript type for the theme object
+export type Theme = ReturnType<typeof getThemeColors>;
 
 /**
  * Get brand color for specific section
