@@ -58,6 +58,7 @@ export default function ExploreScreen() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('[Explore] useEffect triggered, activeCategory:', activeCategory);
     fetchUniverses();
   }, [activeCategory]);
 
