@@ -68,29 +68,13 @@ export default function LoginScreen() {
             </button>
           </header>
 
-          {/* Logo - Tavvy gradient infinity + wordmark */}
+          {/* Logo - Tavvy horizontal logo */}
           <div className="logo-container">
-            <div className="logo-wrapper">
-              {/* Gradient infinity symbol */}
-              <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#4ECDC4" />
-                    <stop offset="33%" stopColor="#44A08D" />
-                    <stop offset="66%" stopColor="#F7B733" />
-                    <stop offset="100%" stopColor="#FC4A1A" />
-                  </linearGradient>
-                </defs>
-                <path 
-                  d="M24 12C18.48 12 14 16.48 14 22C14 27.52 18.48 32 24 32C29.52 32 34 27.52 34 22C34 16.48 29.52 12 24 12ZM24 28C20.69 28 18 25.31 18 22C18 18.69 20.69 16 24 16C27.31 16 30 18.69 30 22C30 25.31 27.31 28 24 28Z" 
-                  fill="url(#logoGradient)"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              <span className="logo-text" style={{ color: theme.text }}>tavvy</span>
-            </div>
+            <img 
+              src="/brand/logo-horizontal.png" 
+              alt="TavvY" 
+              className="logo"
+            />
           </div>
 
           {/* Login Form */}
@@ -268,16 +252,9 @@ export default function LoginScreen() {
             margin-bottom: ${spacing.md}px;
           }
           
-          .logo-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-          }
-          
-          .logo-text {
-            font-size: 32px;
-            font-weight: 600;
-            letter-spacing: -0.5px;
+          .logo {
+            height: 48px;
+            width: auto;
           }
           
           .form-container {
