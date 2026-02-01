@@ -207,7 +207,7 @@ export const routeAccessConfig: Record<string, AccessLevel> = {
   '/app/profile': 'authenticated',
   '/app/saved': 'authenticated',
   '/app/account': 'authenticated',
-  '/app/settings': 'authenticated',
+  '/app/settings': 'public', // Settings accessible without login (theme, language, etc.)
   '/app/apps': 'public',
   
   // Pro-only routes (requires active Stripe subscription)
