@@ -1,6 +1,11 @@
 /** @type {import('next').NextConfig} */
+const { i18n } = require('./next-i18next.config');
+
 const nextConfig = {
   reactStrictMode: true,
+  
+  // i18n configuration
+  i18n,
   
   // Enable standalone output for smaller, optimized production builds
   output: 'standalone',
