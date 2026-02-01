@@ -10,6 +10,8 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
 import { spacing, borderRadius } from '../../constants/Colors';
 import { FiMapPin, FiClock, FiCalendar, FiZap, FiExternalLink, FiRefreshCw } from 'react-icons/fi';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { getHappeningNowEvents, TavvyEvent } from '../../lib/eventsService';
 
 const EVENT_CATEGORIES = [
@@ -577,4 +579,12 @@ export default function HappeningNowScreen() {
       </AppLayout>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

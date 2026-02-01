@@ -13,6 +13,8 @@ import { supabase } from '../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../constants/Colors';
 import { FiSearch, FiMapPin, FiFilter } from 'react-icons/fi';
 import { UnifiedHeader } from '../../components/UnifiedHeader';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 interface Place {
   id: string;
@@ -40,6 +42,7 @@ const CATEGORIES = [
 export default function RVCampingScreen() {
   const { theme } = useThemeContext();
   const [places, setPlaces] = useState<Place[]>([]);
+  const { t } = useTranslation('common');
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -274,4 +277,12 @@ export default function RVCampingScreen() {
       </AppLayout>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

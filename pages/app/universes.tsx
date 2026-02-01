@@ -18,6 +18,8 @@ import {
   IoLeafOutline, IoBusinessOutline, IoFlameOutline
 } from 'react-icons/io5';
 import { tavvyTheme, getThemeColors, getBrandColor } from '../../styles/tavvyTheme';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 interface Universe {
   id: string;
@@ -39,6 +41,7 @@ const CATEGORY_ICONS = [
 
 export default function UniversesScreen() {
   const router = useRouter();
+  const { t } = useTranslation('common');
   const { isDark } = useThemeContext();
   
   const [searchQuery, setSearchQuery] = useState('');
@@ -373,3 +376,11 @@ export default function UniversesScreen() {
 }
 
 // Cache-busting comment
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
+}

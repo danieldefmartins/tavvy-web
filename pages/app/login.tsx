@@ -11,10 +11,13 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import AppLayout from '../../components/AppLayout';
 import { spacing, borderRadius } from '../../constants/Colors';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 export default function LoginScreen() {
   const { theme } = useThemeContext();
   const { signIn } = useAuth();
+  const { t } = useTranslation('common');
   const router = useRouter();
   
   const [email, setEmail] = useState('');
@@ -445,4 +448,12 @@ export default function LoginScreen() {
       </AppLayout>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

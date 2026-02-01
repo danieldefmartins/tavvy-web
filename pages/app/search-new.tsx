@@ -15,6 +15,8 @@ import { spacing, borderRadius } from '../../constants/Colors';
 import PlaceCard from '../../components/PlaceCard';
 import { FiSearch, FiX, FiFilter, FiMapPin, FiClock } from 'react-icons/fi';
 import type { PlaceCard as PlaceCardType } from '../../lib/placeService';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 const POPULAR_SEARCHES = [
   'Restaurants', 'Coffee', 'Bars', 'Pizza', 'Sushi', 
@@ -23,6 +25,7 @@ const POPULAR_SEARCHES = [
 
 export default function SearchScreen() {
   const router = useRouter();
+  const { t } = useTranslation('common');
   const { q, category } = router.query;
   const { theme } = useThemeContext();
 
@@ -461,4 +464,12 @@ export default function SearchScreen() {
       </AppLayout>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

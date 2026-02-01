@@ -37,6 +37,8 @@ import {
   IoBonfire, IoStorefront, IoSparkles, IoChevronForward,
   IoLocationSharp, IoSearch
 } from 'react-icons/io5';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // ============================================
 // CONSTANTS
@@ -99,9 +101,9 @@ const mockStories = [
 
 // Mock happening now data
 const mockHappeningNow = [
-  { id: '1', title: 'Happy Hour at The Pub', subtitle: '2 hours left', image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=300&fit=crop', type: 'event' },
-  { id: '2', title: 'Live Music Tonight', subtitle: 'Starts at 8 PM', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop', type: 'event' },
-  { id: '3', title: 'Food Truck Festival', subtitle: 'All day today', image: 'https://images.unsplash.com/photo-1565123409695-7b5ef63a2efb?w=400&h=300&fit=crop', type: 'event' },
+  { id: '1', title: 'Happy Hour at The Pub', subtitle: '2 {t('home.hoursLeft')}', image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=300&fit=crop', type: 'event' },
+  { id: '2', title: 'Live Music Tonight', subtitle: '{t('home.startsAt')} 8 PM', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop', type: 'event' },
+  { id: '3', title: 'Food Truck Festival', subtitle: '{t('home.allDayToday')}', image: 'https://images.unsplash.com/photo-1565123409695-7b5ef63a2efb?w=400&h=300&fit=crop', type: 'event' },
 ];
 
 // Search suggestion interface
@@ -119,6 +121,7 @@ interface SearchSuggestion {
 export default function HomeScreen() {
   const { theme, isDark, setThemeMode } = useThemeContext();
   const { user } = useAuth();
+  const { t } = useTranslation('common');
   const router = useRouter();
   
   // View mode
@@ -147,11 +150,11 @@ export default function HomeScreen() {
   useEffect(() => {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) {
-      setGreeting('Good morning');
+      setGreeting(t('home.greeting.morning'));
     } else if (hour >= 12 && hour < 17) {
-      setGreeting('Good afternoon');
+      setGreeting(t('home.greeting.afternoon'));
     } else if (hour >= 17 && hour < 21) {
-      setGreeting('Good evening');
+      setGreeting(t('home.greeting.evening'));
     } else {
       setGreeting('Good night');
     }
@@ -461,7 +464,7 @@ export default function HomeScreen() {
               </div>
               <div className="tagline">
                 <span className="tagline-dot">•</span>
-                <span className="tagline-text">Find your perfect spot in seconds. Not hours.</span>
+                <span className="tagline-text">{t('home.tagline')}</span>
               </div>
             </section>
 
@@ -529,32 +532,32 @@ export default function HomeScreen() {
                   <div className="quick-action-icon">
                     <IoLocationSharp size={24} />
                   </div>
-                  <span>Near Me</span>
+                  <span>{t('home.nearMe')}</span>
                 </button>
                 <button className="quick-action-btn" onClick={switchToMapMode}>
                   <div className="quick-action-icon">
                     <FiMapPin size={24} />
                   </div>
-                  <span>Map</span>
+                  <span>{t('home.map')}</span>
                 </button>
                 <button className="quick-action-btn">
                   <div className="quick-action-icon">
                     <IoSparkles size={24} />
                   </div>
-                  <span>Surprise</span>
+                  <span>{t('home.surprise')}</span>
                 </button>
                 <button className="quick-action-btn">
                   <div className="quick-action-icon">
                     ⭐
                   </div>
-                  <span>Saved</span>
+                  <span>{t('home.saved')}</span>
                 </button>
               </div>
             </div>
 
             {/* Mood Section - iOS Style */}
             <section className="mood-section">
-              <h2 className="section-title">WHAT'S YOUR MOOD?</h2>
+              <h2 className="section-title">{t('home.whatsYourMood')}</h2>
               <div className="mood-cards">
                 <button 
                   className="mood-card mood-card-hungry"
@@ -562,12 +565,12 @@ export default function HomeScreen() {
                 >
                   <div className="mood-badge">
                     <span className="mood-badge-icon">🔥</span>
-                    <span className="mood-badge-text">Popular</span>
+                    <span className="mood-badge-text">{t('home.popular')}</span>
                   </div>
                   <div className="mood-emoji">🍕</div>
                   <div className="mood-content">
-                    <h3 className="mood-title">Hungry</h3>
-                    <p className="mood-subtitle">Restaurants & Food</p>
+                    <h3 className="mood-title">{t('home.hungry')}</h3>
+                    <p className="mood-subtitle">{t('home.restaurantsFood')}</p>
                   </div>
                 </button>
                 <button 
@@ -576,12 +579,12 @@ export default function HomeScreen() {
                 >
                   <div className="mood-badge">
                     <span className="mood-badge-icon">📈</span>
-                    <span className="mood-badge-text">Trending</span>
+                    <span className="mood-badge-text">{t('home.trending')}</span>
                   </div>
                   <div className="mood-emoji">🍸</div>
                   <div className="mood-content">
-                    <h3 className="mood-title">Thirsty</h3>
-                    <p className="mood-subtitle">Bars & Cafes</p>
+                    <h3 className="mood-title">{t('home.thirsty')}</h3>
+                    <p className="mood-subtitle">{t('home.barsCafes')}</p>
                   </div>
                 </button>
               </div>
@@ -590,7 +593,7 @@ export default function HomeScreen() {
             {/* Live Now Section */}
             <section className="section">
               <div className="section-header">
-                <h2>🔴 Live Now</h2>
+                <h2>{t('home.liveNow')}</h2>
                 <Link href="/app/explore" className="see-all">
                   See All <IoChevronForward size={16} />
                 </Link>
@@ -615,10 +618,10 @@ export default function HomeScreen() {
             <div className="explore-new-card">
               <div className="explore-new-header">
                 <span className="explore-sparkles">✨</span>
-                <span className="explore-count">3 experiences nearby</span>
+                <span className="explore-count">3 {t('home.experiencesNearby')}</span>
               </div>
-              <h3 className="explore-new-title">Explore Something New</h3>
-              <p className="explore-new-subtitle">Events, activities & hidden gems</p>
+              <h3 className="explore-new-title">{t('home.exploreSomethingNew')}</h3>
+              <p className="explore-new-subtitle">{t('home.eventsActivities')}</p>
               <div className="explore-new-icon">🌟</div>
             </div>
 
@@ -662,8 +665,8 @@ export default function HomeScreen() {
               <div className="did-you-know-card">
                 <div className="dyk-icon">💡</div>
                 <div className="dyk-content">
-                  <h3>Did you know?</h3>
-                  <p>Tavvy uses tap-based signals instead of star ratings to give you honest, structured insights about places.</p>
+                  <h3>{t('home.didYouKnow')}</h3>
+                  <p>{t('home.didYouKnowText')}</p>
                 </div>
               </div>
             </section>
@@ -674,7 +677,7 @@ export default function HomeScreen() {
                 <h2>🏆 Top Contributors</h2>
                 {/* See All button removed - LeaderboardScreen not yet implemented */}
               </div>
-              <p className="section-subtitle">Community members making a difference</p>
+              <p className="section-subtitle">{t('home.communityMembers')}</p>
               <div className="leaderboard-card">
                 {topContributors.map((user, index) => (
                   <div key={user.rank} className="leaderboard-row">
@@ -685,12 +688,12 @@ export default function HomeScreen() {
                       </div>
                       <div className="leaderboard-info">
                         <span className="leaderboard-name">{user.name}</span>
-                        <span className="leaderboard-streak">🔥 {user.streak} day streak</span>
+                        <span className="leaderboard-streak">🔥 {user.streak} {t('home.dayStreak')}</span>
                       </div>
                     </div>
                     <div className="leaderboard-right">
                       <span className="leaderboard-taps">{user.taps.toLocaleString()}</span>
-                      <span className="leaderboard-label">taps</span>
+                      <span className="leaderboard-label">{t('home.taps')}</span>
                     </div>
                   </div>
                 ))}
@@ -1283,4 +1286,12 @@ export default function HomeScreen() {
       </div>
     </AppLayout>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

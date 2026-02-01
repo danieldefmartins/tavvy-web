@@ -13,6 +13,8 @@ import { supabase } from '../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../constants/Colors';
 import PlaceCard from '../../components/PlaceCard';
 import { FiSearch, FiX, FiFilter, FiMapPin } from 'react-icons/fi';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 interface Place {
   id: string;
@@ -32,6 +34,7 @@ const POPULAR_SEARCHES = [
 
 export default function SearchScreen() {
   const router = useRouter();
+  const { t } = useTranslation('common');
   const { q, category } = router.query;
   const { theme } = useThemeContext();
 
@@ -386,4 +389,12 @@ export default function SearchScreen() {
       </AppLayout>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

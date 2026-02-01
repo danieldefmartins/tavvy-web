@@ -11,6 +11,8 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import AppLayout from '../../components/AppLayout';
 import { spacing, borderRadius } from '../../constants/Colors';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { 
   FiUser, FiMail, FiLock, FiBell, FiCreditCard, FiShield, 
   FiHelpCircle, FiLogOut, FiChevronRight, FiEdit2 
@@ -20,6 +22,7 @@ export default function AccountScreen() {
   const router = useRouter();
   const { theme } = useThemeContext();
   const { user, signOut } = useAuth();
+  const { t } = useTranslation('common');
 
   const handleSignOut = async () => {
     await signOut();
@@ -323,4 +326,12 @@ export default function AccountScreen() {
       </AppLayout>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

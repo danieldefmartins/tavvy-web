@@ -9,6 +9,8 @@ import Link from 'next/link';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
 import { spacing, borderRadius } from '../../constants/Colors';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 const QUICK_CATEGORIES = [
   { id: 'restaurants', name: 'Restaurants', icon: '🍽️', color: '#EF4444' },
@@ -250,4 +252,12 @@ export default function QuickFindsScreen() {
       </AppLayout>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

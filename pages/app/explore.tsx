@@ -17,6 +17,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
 import { IoSearch, IoRocketOutline, IoAirplaneOutline, IoLeafOutline, IoBusinessOutline } from 'react-icons/io5';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // Design System Colors
 const COLORS = {
@@ -51,6 +53,7 @@ const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda
 export default function ExploreScreen() {
   const { theme, isDark } = useThemeContext();
   const { user } = useAuth();
+  const { t } = useTranslation('common');
   const [featuredUniverse, setFeaturedUniverse] = useState<Universe | null>(null);
   const [popularUniverses, setPopularUniverses] = useState<Universe[]>([]);
   const [loading, setLoading] = useState(true);
@@ -502,4 +505,12 @@ export default function ExploreScreen() {
       </AppLayout>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

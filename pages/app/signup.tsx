@@ -11,10 +11,13 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import AppLayout from '../../components/AppLayout';
 import { spacing, borderRadius } from '../../constants/Colors';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 export default function SignUpScreen() {
   const { theme } = useThemeContext();
   const { signUp } = useAuth();
+  const { t } = useTranslation('common');
   const router = useRouter();
   
   const [displayName, setDisplayName] = useState('');
@@ -400,4 +403,12 @@ export default function SignUpScreen() {
       </AppLayout>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

@@ -10,6 +10,8 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
 import { spacing, borderRadius } from '../../constants/Colors';
 import { FiArrowLeft, FiSearch, FiChevronRight, FiMail, FiMessageCircle, FiBook, FiHelpCircle } from 'react-icons/fi';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 const FAQ_ITEMS = [
   {
@@ -49,6 +51,7 @@ const HELP_TOPICS = [
 
 export default function HelpScreen() {
   const router = useRouter();
+  const { t } = useTranslation('common');
   const { theme } = useThemeContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
@@ -379,4 +382,12 @@ export default function HelpScreen() {
       </AppLayout>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

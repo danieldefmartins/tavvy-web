@@ -19,6 +19,8 @@ import { useRouter } from 'next/router';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import {
   IoLocationOutline, IoTimeOutline, IoCallOutline, IoChevronDown,
   IoChevronUp, IoFastFoodOutline, IoCafeOutline, IoGridOutline,
@@ -85,6 +87,7 @@ interface LiveSession {
 
 export default function OnTheGoScreen() {
   const router = useRouter();
+  const { t } = useTranslation('common');
   const { isDark } = useThemeContext();
   
   const [loading, setLoading] = useState(true);
@@ -678,4 +681,12 @@ export default function OnTheGoScreen() {
       </AppLayout>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

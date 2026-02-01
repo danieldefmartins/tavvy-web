@@ -18,6 +18,8 @@ import { useRouter } from 'next/router';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import AppLayout from '../../components/AppLayout';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { 
   FiSearch, FiUser, FiSun, FiMoon
 } from 'react-icons/fi';
@@ -151,6 +153,7 @@ export default function AppsScreen() {
   const router = useRouter();
   const { themeMode, setThemeMode } = useThemeContext();
   const { user } = useAuth();
+  const { t } = useTranslation('common');
   const [searchQuery, setSearchQuery] = useState('');
 
   const isDark = themeMode === 'dark';
@@ -513,4 +516,12 @@ export default function AppsScreen() {
       </AppLayout>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

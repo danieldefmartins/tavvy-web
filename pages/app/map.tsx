@@ -19,6 +19,8 @@ import dynamic from 'next/dynamic';
 import { useThemeContext } from '../../contexts/ThemeContext';
 // Using API routes instead of direct Supabase calls for runtime env var support
 import { PlaceCard as PlaceCardType, SearchResult } from '../../lib/placeService';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { 
   FiArrowLeft, FiSearch, FiX, FiInfo, FiLayers, FiNavigation,
   FiCloud, FiFilter, FiChevronDown, FiMapPin
@@ -167,6 +169,7 @@ const MapCenterUpdater = dynamic(
 
 export default function MapScreen() {
   const router = useRouter();
+  const { t } = useTranslation('common');
   const { theme, isDark } = useThemeContext();
   
   // Map states
@@ -1655,4 +1658,12 @@ export default function MapScreen() {
       `}</style>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

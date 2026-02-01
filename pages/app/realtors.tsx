@@ -15,6 +15,8 @@ import { supabase } from '../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../constants/Colors';
 import { FiSearch, FiMapPin, FiStar, FiChevronRight, FiZap } from 'react-icons/fi';
 import { UnifiedHeader } from '../../components/UnifiedHeader';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 interface Realtor {
   id: string;
@@ -44,6 +46,7 @@ const SPECIALTIES = ['All', 'Luxury', 'First-Time', 'Investment', 'Relocation', 
 export default function RealtorsHubScreen() {
   const { theme } = useThemeContext();
   const router = useRouter();
+  const { t } = useTranslation('common');
   const [realtors, setRealtors] = useState<Realtor[]>(SAMPLE_REALTORS);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -619,4 +622,12 @@ export default function RealtorsHubScreen() {
       </AppLayout>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

@@ -11,6 +11,8 @@ import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../constants/Colors';
 import { FiSearch, FiMapPin, FiChevronRight } from 'react-icons/fi';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { UnifiedHeader } from '../../components/UnifiedHeader';
 
 interface City {
@@ -355,4 +357,12 @@ export default function CitiesBrowseScreen() {
       </AppLayout>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

@@ -19,6 +19,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import AppLayout from '../../../components/AppLayout';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { 
   IoAddCircleOutline, IoChevronForward, IoTimeOutline, IoCheckmark,
   IoShieldCheckmark, IoHelpCircleOutline, IoCashOutline, IoFlagOutline,
@@ -90,6 +92,7 @@ const EDUCATION_CONTENT = [
 export default function ProsScreen() {
   const { theme, isDark } = useThemeContext();
   const router = useRouter();
+  const { t } = useTranslation('common');
   const [viewMode, setViewMode] = useState<'user' | 'pro'>('user');
 
   const bgColor = isDark ? '#121212' : '#FAFAFA';
@@ -923,4 +926,12 @@ export default function ProsScreen() {
       </AppLayout>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

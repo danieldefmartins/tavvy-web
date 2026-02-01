@@ -10,6 +10,8 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 import TabBar from '../../components/TabBar';
 import ECardAddressAutocomplete from '../../components/atlas/ECardAddressAutocomplete';
 import { useDrafts, ContentType, ContentSubtype } from '../../hooks/useDrafts';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { 
   FiArrowLeft, FiMapPin, FiCheck, FiX, FiCamera, FiPlus, 
   FiChevronRight, FiAlertTriangle, FiLoader, FiHome, FiTruck, FiUsers
@@ -78,6 +80,7 @@ const BUSINESS_CATEGORIES = [
 
 export default function UniversalAddScreen() {
   const router = useRouter();
+  const { t } = useTranslation('common');
   const { theme, isDark } = useThemeContext();
   const {
     currentDraft, pendingDraft, isLoading, isSaving,
@@ -1396,4 +1399,12 @@ export default function UniversalAddScreen() {
       `}</style>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

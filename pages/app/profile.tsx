@@ -13,6 +13,8 @@ import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../constants/Colors';
 import { FiArrowLeft, FiEdit2, FiMapPin, FiCalendar, FiStar, FiBookmark, FiSettings, FiLogOut } from 'react-icons/fi';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 interface UserProfile {
   id: string;
@@ -30,6 +32,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { theme } = useThemeContext();
   const { user, signOut } = useAuth();
+  const { t } = useTranslation('common');
 
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -486,4 +489,12 @@ export default function ProfileScreen() {
       </AppLayout>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

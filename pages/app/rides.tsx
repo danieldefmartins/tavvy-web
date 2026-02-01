@@ -26,6 +26,8 @@ import {
   IoFlame, IoTime, IoLocation, IoTrainOutline
 } from 'react-icons/io5';
 import { UnifiedHeader } from '../../components/UnifiedHeader';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // Design System Colors (matching mobile)
 const COLORS = {
@@ -115,6 +117,7 @@ const getCategoryFallbackImage = (subcategory: string | undefined): string => {
 
 export default function RidesScreen() {
   const router = useRouter();
+  const { t } = useTranslation('common');
   const { theme, isDark } = useThemeContext();
   
   const [rides, setRides] = useState<Ride[]>([]);
@@ -801,4 +804,12 @@ export default function RidesScreen() {
       </AppLayout>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }

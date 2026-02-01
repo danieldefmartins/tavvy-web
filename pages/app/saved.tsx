@@ -14,6 +14,8 @@ import { supabase } from '../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../constants/Colors';
 import PlaceCard from '../../components/PlaceCard';
 import { FiArrowLeft, FiBookmark, FiSearch, FiTrash2 } from 'react-icons/fi';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 interface SavedPlace {
   id: string;
@@ -34,6 +36,7 @@ export default function SavedScreen() {
   const router = useRouter();
   const { theme } = useThemeContext();
   const { user } = useAuth();
+  const { t } = useTranslation('common');
 
   const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>([]);
   const [loading, setLoading] = useState(true);
@@ -342,4 +345,12 @@ export default function SavedScreen() {
       </AppLayout>
     </>
   );
+}
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }
