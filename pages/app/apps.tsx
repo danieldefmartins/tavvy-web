@@ -1,13 +1,14 @@
 /**
- * Apps Screen - Tools & shortcuts dashboard
- * Pixel-perfect port from tavvy-mobile/screens/AppsScreen.tsx
+ * Apps Screen - Tools & shortcuts
+ * Pixel-perfect match to iOS Tavvy V2 Apps Screen
  * 
  * Features:
- * - Navy header with Tavvy logo
- * - Light/Dark mode toggle
- * - Personal Login / Pro Login buttons
- * - App icon grid with colored backgrounds
- * - "More tools coming soon" footer
+ * - Profile icon (top right) → navigates to login
+ * - Search bar
+ * - Featured section (horizontal scroll)
+ * - All Apps grid
+ * - Appearance toggle (bottom)
+ * - Dark/Light theme support
  */
 
 import React, { useState } from 'react';
@@ -17,63 +18,42 @@ import { useRouter } from 'next/router';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import AppLayout from '../../components/AppLayout';
-import { spacing, borderRadius } from '../../constants/Colors';
 import { 
-  FiTool, FiHome, FiMap, FiBook, FiSun, FiMoon, 
-  FiGlobe, FiTruck, FiStar, FiZap, FiHeart, FiUser, 
-  FiPlus, FiSettings, FiLogOut, FiLogIn, FiHelpCircle,
-  FiBriefcase, FiMenu
+  FiSearch, FiUser, FiSun, FiMoon
 } from 'react-icons/fi';
 import { 
-  IoConstruct, IoHome, IoBusinessOutline, IoBook, IoCar,
-  IoPlanet, IoTrain, IoLeaf, IoSparkles, IoWallet, IoFlash,
-  IoHeart, IoPersonOutline, IoAddCircle
+  IoConstruct, IoCar, IoPlanet, IoTrain, IoWallet, 
+  IoBusinessOutline, IoHeart, IoPersonOutline, IoAddCircle,
+  IoHome, IoSparkles, IoBook, IoSettings
 } from 'react-icons/io5';
 
-// Theme colors
-const ACCENT = '#0F1233';
-const BG_LIGHT = '#F9F7F2';
-const BG_DARK = '#0F172A';
-
-// App tiles configuration matching mobile app exactly
-const APP_TILES = [
-  // Row 1: Pros, Realtors, Cities
+// Featured apps (large cards, horizontal scroll)
+const FEATURED_APPS = [
   {
     id: 'pros',
     name: 'Pros',
     icon: IoConstruct,
-    color: '#3B82F6',
+    gradient: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
     href: '/app/pros',
   },
-  {
-    id: 'realtors',
-    name: 'Realtors',
-    icon: IoHome,
-    color: '#10B981',
-    href: '/app/realtors',
-  },
-  {
-    id: 'cities',
-    name: 'Cities',
-    icon: IoBusinessOutline,
-    color: '#60A5FA',
-    href: '/app/cities',
-  },
-  // Row 2: Atlas, RV & Camping, Universes
   {
     id: 'atlas',
     name: 'Atlas',
     icon: IoBook,
-    color: '#818CF8',
+    gradient: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
     href: '/app/atlas',
   },
   {
-    id: 'rv-camping',
-    name: 'RV & Camping',
-    icon: IoCar,
-    color: '#F97316',
-    href: '/app/rv-camping',
+    id: 'ecard',
+    name: 'eCard',
+    icon: IoHeart,
+    gradient: 'linear-gradient(135deg, #EC4899 0%, #DB2777 100%)',
+    href: '/app/ecard',
   },
+];
+
+// All apps grid
+const ALL_APPS = [
   {
     id: 'universes',
     name: 'Universes',
@@ -81,7 +61,13 @@ const APP_TILES = [
     color: '#14B8A6',
     href: '/app/explore',
   },
-  // Row 3: Rides, Experiences, Happening Now
+  {
+    id: 'onthego',
+    name: 'On The Go',
+    icon: IoCar,
+    color: '#10B981',
+    href: '/app/onthego',
+  },
   {
     id: 'rides',
     name: 'Rides',
@@ -90,50 +76,46 @@ const APP_TILES = [
     href: '/app/rides',
   },
   {
-    id: 'experiences',
-    name: 'Experiences',
-    icon: IoLeaf,
-    color: '#A78BFA',
-    href: '/app/experiences',
+    id: 'rv-camping',
+    name: 'RV & Cam...',
+    icon: IoCar,
+    color: '#F97316',
+    href: '/app/rv-camping',
   },
   {
-    id: 'happening',
-    name: 'Happening Now',
-    icon: IoSparkles,
-    color: '#EC4899',
-    href: '/app/happening-now',
+    id: 'messages',
+    name: 'Messages',
+    icon: IoHeart,
+    color: '#EF4444',
+    href: '/app/messages',
   },
-  // Row 4: Wallet, Quick Finds, Saved
   {
     id: 'wallet',
     name: 'Wallet',
     icon: IoWallet,
-    color: '#818CF8',
+    color: '#8B5CF6',
     href: '/app/wallet',
   },
   {
-    id: 'quick-finds',
-    name: 'Quick Finds',
-    icon: IoFlash,
-    color: '#FBBF24',
-    href: '/app/quick-finds',
+    id: 'cities',
+    name: 'Cities',
+    icon: IoBusinessOutline,
+    color: '#3B82F6',
+    href: '/app/cities',
   },
   {
     id: 'saved',
     name: 'Saved',
     icon: IoHeart,
-    color: '#FB7185',
+    color: '#EC4899',
     href: '/app/saved',
-    requiresAuth: true,
   },
-  // Row 5: Account, (empty), Create
   {
     id: 'account',
     name: 'Account',
     icon: IoPersonOutline,
     color: '#94A3B8',
     href: '/app/profile',
-    requiresAuth: true,
   },
   {
     id: 'create',
@@ -141,37 +123,49 @@ const APP_TILES = [
     icon: IoAddCircle,
     color: '#10B981',
     href: '/app/create',
-    requiresAuth: true,
+  },
+  {
+    id: 'realtors',
+    name: 'Realtors',
+    icon: IoHome,
+    color: '#14B8A6',
+    href: '/app/realtors',
+  },
+  {
+    id: 'happening',
+    name: 'Happening',
+    icon: IoSparkles,
+    color: '#EC4899',
+    href: '/app/happening-now',
+  },
+  {
+    id: 'settings',
+    name: 'Settings',
+    icon: IoSettings,
+    color: '#64748B',
+    href: '/app/settings',
   },
 ];
 
 export default function AppsScreen() {
   const router = useRouter();
-  const { theme, isDark, themeMode, setThemeMode } = useThemeContext();
-  const { user, signOut, loading: authLoading } = useAuth();
-  const [loggingOut, setLoggingOut] = useState(false);
+  const { themeMode, setThemeMode } = useThemeContext();
+  const { user } = useAuth();
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const handleTilePress = (tile: typeof APP_TILES[0]) => {
-    if (tile.requiresAuth && !user) {
+  const isDark = themeMode === 'dark';
+
+  const handleProfileClick = () => {
+    if (user) {
+      router.push('/app/profile');
+    } else {
       router.push('/app/login');
-      return;
-    }
-    router.push(tile.href);
-  };
-
-  const handleSignOut = async () => {
-    setLoggingOut(true);
-    try {
-      await signOut();
-      router.push('/app');
-    } catch (error) {
-      console.error('Sign out error:', error);
-    } finally {
-      setLoggingOut(false);
     }
   };
 
-  const bgColor = isDark ? BG_DARK : BG_LIGHT;
+  const filteredApps = ALL_APPS.filter(app =>
+    app.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <>
@@ -182,100 +176,89 @@ export default function AppsScreen() {
 
       <AppLayout>
         <div className="apps-screen">
-          {/* Navy Header */}
-          <header className="nav-header">
-            <div className="nav-content">
-              <img 
-                src="/brand/tavvy-logo-white.png" 
-                alt="Tavvy" 
-                className="nav-logo"
-              />
-              <button className="menu-btn">
-                <FiMenu size={24} color="#fff" />
-              </button>
-            </div>
+          {/* Header */}
+          <header className="header">
+            <h1>Apps</h1>
+            <button className="profile-btn" onClick={handleProfileClick}>
+              <div className="profile-icon">
+                {user ? (
+                  <span>{user.email?.charAt(0).toUpperCase()}</span>
+                ) : (
+                  <FiUser size={20} />
+                )}
+              </div>
+            </button>
           </header>
 
-          {/* Main Content */}
-          <main className="main-content">
-            {/* Theme Toggle */}
-            <div className="theme-toggle-wrap">
-              <div className="theme-toggle">
-                <button
-                  className={`theme-btn ${!isDark ? 'active' : ''}`}
-                  onClick={() => setThemeMode('light')}
-                >
-                  Light
-                </button>
-                <button
-                  className={`theme-btn ${isDark ? 'active' : ''}`}
-                  onClick={() => setThemeMode('dark')}
-                >
-                  Dark
-                </button>
+          {/* Subtitle */}
+          <p className="subtitle">Tools & shortcuts</p>
+
+          {/* Search Bar */}
+          <div className="search-container">
+            <FiSearch className="search-icon" size={18} />
+            <input
+              type="text"
+              placeholder="Search apps..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="search-input"
+            />
+          </div>
+
+          {/* Featured Section */}
+          {!searchQuery && (
+            <>
+              <h2 className="section-title">Featured</h2>
+              <div className="featured-scroll">
+                {FEATURED_APPS.map((app) => {
+                  const Icon = app.icon;
+                  return (
+                    <Link key={app.id} href={app.href} className="featured-card">
+                      <div className="featured-icon" style={{ background: app.gradient }}>
+                        <Icon size={48} color="#fff" />
+                      </div>
+                      <span className="featured-name">{app.name}</span>
+                    </Link>
+                  );
+                })}
               </div>
-            </div>
+            </>
+          )}
 
-            {/* Apps Title */}
-            <div className="apps-header">
-              <h1>Apps</h1>
-              <p>Tools & shortcuts</p>
-            </div>
-
-            {/* Login Buttons */}
-            <div className="login-buttons">
-              {user ? (
-                <div className="user-info-row">
-                  <div className="user-avatar">
-                    {user.email?.charAt(0).toUpperCase()}
+          {/* All Apps Section */}
+          <h2 className="section-title">All Apps</h2>
+          <div className="apps-grid">
+            {filteredApps.map((app) => {
+              const Icon = app.icon;
+              return (
+                <Link key={app.id} href={app.href} className="app-item">
+                  <div className="app-icon" style={{ backgroundColor: app.color }}>
+                    <Icon size={32} color="#fff" />
                   </div>
-                  <div className="user-details">
-                    <span className="user-name">{user.user_metadata?.display_name || user.email?.split('@')[0]}</span>
-                    <span className="user-email">{user.email}</span>
-                  </div>
-                  <button className="logout-btn" onClick={handleSignOut}>
-                    <FiLogOut size={20} />
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <Link href="/app/login" className="login-btn personal">
-                    <FiUser size={18} />
-                    <span>Personal Login</span>
-                  </Link>
-                  <Link href="/app/pros/login" className="login-btn pro">
-                    <FiBriefcase size={18} />
-                    <span>Pro Login</span>
-                  </Link>
-                </>
-              )}
-            </div>
+                  <span className="app-name">{app.name}</span>
+                </Link>
+              );
+            })}
+          </div>
 
-            {/* App Tiles Grid */}
-            <div className="tiles-grid">
-              {APP_TILES.map((tile) => {
-                const Icon = tile.icon;
-                return (
-                  <button
-                    key={tile.id}
-                    className="app-tile"
-                    onClick={() => handleTilePress(tile)}
-                  >
-                    <div 
-                      className="tile-icon"
-                      style={{ backgroundColor: tile.color }}
-                    >
-                      <Icon size={28} color="#fff" />
-                    </div>
-                    <span className="tile-name">{tile.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Coming Soon */}
-            <p className="coming-soon">More tools coming soon</p>
-          </main>
+          {/* Appearance Section */}
+          <h2 className="section-title appearance-title">Appearance</h2>
+          <div className="appearance-toggle">
+            <button
+              className={`theme-btn ${!isDark ? 'active' : ''}`}
+              onClick={() => setThemeMode('light')}
+            >
+              <FiSun size={18} />
+              <span>Light</span>
+            </button>
+            <button
+              className={`theme-btn ${isDark ? 'active' : ''}`}
+              onClick={() => setThemeMode('dark')}
+            >
+              <FiMoon size={18} />
+              <span>Dark</span>
+            </button>
+          </div>
 
           {/* Bottom Spacing */}
           <div className="bottom-spacing" />
@@ -284,237 +267,246 @@ export default function AppsScreen() {
         <style jsx>{`
           .apps-screen {
             min-height: 100vh;
-            background-color: ${bgColor};
+            background-color: ${isDark ? '#000000' : '#FFFFFF'};
+            padding: 0 20px;
+            padding-top: max(20px, env(safe-area-inset-top));
+            padding-bottom: 100px;
           }
 
-          /* Navy Header */
-          .nav-header {
-            background-color: ${ACCENT};
-            padding: 16px 20px;
-            padding-top: max(16px, env(safe-area-inset-top));
-          }
-
-          .nav-content {
+          /* Header */
+          .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 8px;
           }
 
-          .nav-logo {
-            height: 32px;
-            width: auto;
-          }
-
-          .menu-btn {
-            background: none;
-            border: none;
-            padding: 8px;
-            cursor: pointer;
-          }
-
-          /* Main Content */
-          .main-content {
-            padding: 0 20px;
-          }
-
-          /* Theme Toggle */
-          .theme-toggle-wrap {
-            display: flex;
-            justify-content: center;
-            padding: 16px 0;
-          }
-
-          .theme-toggle {
-            display: flex;
-            background: ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.65)'};
-            border: 1px solid ${isDark ? 'rgba(255,255,255,0.14)' : 'rgba(15,18,51,0.12)'};
-            border-radius: 12px;
-            padding: 4px;
-          }
-
-          .theme-btn {
-            padding: 10px 24px;
-            border: none;
-            background: transparent;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            color: ${isDark ? 'rgba(255,255,255,0.6)' : '#6B6B6B'};
-            cursor: pointer;
-            transition: all 0.2s;
-          }
-
-          .theme-btn.active {
-            background: ${ACCENT};
-            color: #fff;
-          }
-
-          /* Apps Header */
-          .apps-header {
-            margin-bottom: 20px;
-          }
-
-          .apps-header h1 {
-            font-size: 28px;
+          .header h1 {
+            font-size: 34px;
             font-weight: 700;
-            color: ${isDark ? '#fff' : '#111'};
-            margin: 0 0 4px;
-          }
-
-          .apps-header p {
-            font-size: 14px;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#666'};
+            color: ${isDark ? '#FFFFFF' : '#000000'};
             margin: 0;
           }
 
-          /* Login Buttons */
-          .login-buttons {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
+          .profile-btn {
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
           }
 
-          .login-btn {
+          .profile-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 22px;
+            background-color: ${isDark ? '#2A2A2A' : '#F5F5F5'};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: ${isDark ? '#FFFFFF' : '#000000'};
+            font-weight: 600;
+            font-size: 16px;
+          }
+
+          /* Subtitle */
+          .subtitle {
+            font-size: 16px;
+            color: ${isDark ? '#8B5CF6' : '#7C3AED'};
+            margin: 0 0 20px 0;
+          }
+
+          /* Search Bar */
+          .search-container {
+            position: relative;
+            margin-bottom: 28px;
+          }
+
+          .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: ${isDark ? '#666666' : '#999999'};
+          }
+
+          .search-input {
+            width: 100%;
+            padding: 14px 16px 14px 46px;
+            background-color: ${isDark ? '#2A2A2A' : '#F5F5F5'};
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            color: ${isDark ? '#FFFFFF' : '#000000'};
+            outline: none;
+          }
+
+          .search-input::placeholder {
+            color: ${isDark ? '#666666' : '#999999'};
+          }
+
+          /* Section Titles */
+          .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: ${isDark ? '#FFFFFF' : '#000000'};
+            margin: 0 0 16px 0;
+          }
+
+          .appearance-title {
+            margin-top: 40px;
+          }
+
+          /* Featured Section */
+          .featured-scroll {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            margin-bottom: 32px;
+            padding-bottom: 4px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+          }
+
+          .featured-scroll::-webkit-scrollbar {
+            display: none;
+          }
+
+          .featured-card {
+            flex-shrink: 0;
+            width: 160px;
+            text-decoration: none;
+            cursor: pointer;
+          }
+
+          .featured-icon {
+            width: 160px;
+            height: 160px;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            transition: transform 0.2s;
+          }
+
+          .featured-card:hover .featured-icon {
+            transform: scale(1.02);
+          }
+
+          .featured-name {
+            display: block;
+            font-size: 17px;
+            font-weight: 600;
+            color: ${isDark ? '#FFFFFF' : '#000000'};
+            text-align: center;
+          }
+
+          /* All Apps Grid */
+          .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px 16px;
+            margin-bottom: 32px;
+          }
+
+          .app-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            cursor: pointer;
+          }
+
+          .app-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            transition: transform 0.2s;
+          }
+
+          .app-item:hover .app-icon {
+            transform: scale(1.05);
+          }
+
+          .app-name {
+            font-size: 12px;
+            font-weight: 500;
+            color: ${isDark ? '#CCCCCC' : '#666666'};
+            text-align: center;
+            max-width: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+
+          /* Appearance Toggle */
+          .appearance-toggle {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+          }
+
+          .theme-btn {
             flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 14px 20px;
-            border-radius: 12px;
-            font-size: 14px;
+            padding: 16px;
+            background-color: ${isDark ? '#2A2A2A' : '#F5F5F5'};
+            border: none;
+            border-radius: 16px;
+            font-size: 16px;
             font-weight: 600;
-            text-decoration: none;
+            color: ${isDark ? '#CCCCCC' : '#666666'};
+            cursor: pointer;
             transition: all 0.2s;
           }
 
-          .login-btn.personal {
-            background: transparent;
-            border: 2px solid ${isDark ? 'rgba(16, 185, 129, 0.5)' : '#10B981'};
-            color: #10B981;
+          .theme-btn.active {
+            background-color: ${isDark ? '#3B82F6' : '#3B82F6'};
+            color: #FFFFFF;
           }
 
-          .login-btn.pro {
-            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#fff'};
-            border: 1px solid ${isDark ? 'rgba(255,255,255,0.14)' : '#ddd'};
-            color: ${isDark ? 'rgba(255,255,255,0.7)' : '#666'};
-          }
-
-          .login-btn:hover {
-            transform: scale(1.02);
-          }
-
-          /* User Info Row */
-          .user-info-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            width: 100%;
-            padding: 12px 16px;
-            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#fff'};
-            border-radius: 12px;
-          }
-
-          .user-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 18px;
-            font-weight: 600;
-          }
-
-          .user-details {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-          }
-
-          .user-name {
-            font-size: 15px;
-            font-weight: 600;
-            color: ${isDark ? '#fff' : '#111'};
-          }
-
-          .user-email {
-            font-size: 13px;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#666'};
-          }
-
-          .logout-btn {
-            background: none;
-            border: none;
-            padding: 8px;
-            cursor: pointer;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#999'};
-          }
-
-          /* Tiles Grid */
-          .tiles-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
-          }
-
-          .app-tile {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 8px;
-          }
-
-          .tile-icon {
-            width: 72px;
-            height: 72px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s;
-          }
-
-          .app-tile:hover .tile-icon {
-            transform: scale(1.05);
-          }
-
-          .tile-name {
-            font-size: 12px;
-            font-weight: 500;
-            color: ${isDark ? 'rgba(255,255,255,0.7)' : '#666'};
-            text-align: center;
-          }
-
-          /* Coming Soon */
-          .coming-soon {
-            text-align: center;
-            font-size: 14px;
-            color: ${isDark ? 'rgba(255,255,255,0.3)' : '#999'};
-            margin: 32px 0;
+          .theme-btn:hover:not(.active) {
+            background-color: ${isDark ? '#333333' : '#EEEEEE'};
           }
 
           /* Bottom Spacing */
           .bottom-spacing {
-            height: 100px;
+            height: 40px;
           }
 
           /* Responsive */
-          @media (min-width: 768px) {
-            .tiles-grid {
+          @media (max-width: 640px) {
+            .apps-grid {
               grid-template-columns: repeat(4, 1fr);
+              gap: 16px 12px;
             }
 
-            .tile-icon {
-              width: 80px;
-              height: 80px;
+            .app-icon {
+              width: 56px;
+              height: 56px;
+            }
+
+            .featured-card {
+              width: 140px;
+            }
+
+            .featured-icon {
+              width: 140px;
+              height: 140px;
+            }
+          }
+
+          @media (min-width: 768px) {
+            .apps-screen {
+              max-width: 600px;
+              margin: 0 auto;
             }
           }
         `}</style>
