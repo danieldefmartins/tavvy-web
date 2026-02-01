@@ -248,18 +248,18 @@ export default function LoginScreen() {
           .logo-container {
             display: flex;
             justify-content: center;
-            padding: ${spacing.xl}px;
-            margin-bottom: ${spacing.md}px;
+            padding: ${spacing.lg}px ${spacing.xl}px;
+            margin-bottom: ${spacing.sm}px;
           }
           
           .logo {
-            height: 48px;
+            height: 64px;
             width: auto;
           }
           
           .form-container {
             flex: 1;
-            padding: ${spacing.xl}px;
+            padding: ${spacing.md}px ${spacing.xl}px;
             max-width: 400px;
             margin: 0 auto;
             width: 100%;
@@ -268,13 +268,13 @@ export default function LoginScreen() {
           .title {
             font-size: 32px;
             font-weight: 700;
-            margin: 0 0 8px;
+            margin: 0 0 ${spacing.xs}px;
             text-align: center;
           }
           
           .subtitle {
             font-size: 16px;
-            margin: 0 0 ${spacing.xl}px;
+            margin: 0 0 ${spacing.lg}px;
             text-align: center;
           }
           
@@ -289,7 +289,7 @@ export default function LoginScreen() {
           .login-form {
             display: flex;
             flex-direction: column;
-            gap: ${spacing.lg}px;
+            gap: ${spacing.md}px;
           }
           
           .input-group {
@@ -374,7 +374,7 @@ export default function LoginScreen() {
             display: flex;
             align-items: center;
             gap: ${spacing.md}px;
-            margin: ${spacing.xl}px 0;
+            margin: ${spacing.lg}px 0;
           }
           
           .divider-line {
