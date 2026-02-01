@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
+import { parseSearchQuery } from '../../lib/smartQueryParser';
 
 // Server-side Supabase client
 const getServerSupabase = () => {
@@ -64,6 +65,10 @@ export default async function handler(
 
     console.log('[API/search] Searching for:', searchTerm);
 
+    // SMART PARSING: Parse natural language query
+    const parsed = parseSearchQuery(searchTerm);
+    console.log('[API/search] Parsed query:', parsed);
+
     const supabase = getServerSupabase();
 
     let suggestions: SearchSuggestion[] = [];
@@ -72,9 +77,29 @@ export default async function handler(
     try {
       let query = supabase
         .from('fsq_places_raw')
-        .select('fsq_id, name, category_name, city, latitude, longitude')
-        .ilike('name', `%${searchTerm}%`)
-        .limit(limitNum * 2); // Fetch more to filter later
+        .select('fsq_id, name, category_name, city, latitude, longitude');
+      
+      // Apply smart parsing filters if available
+      if (parsed.isParsed) {
+        query = query.ilike('name', `%${parsed.placeName}%`);
+        
+        if (parsed.city) {
+          query = query.ilike('locality', `%${parsed.city}%`);
+        }
+        
+        if (parsed.region) {
+          query = query.eq('region', parsed.region);
+        }
+        
+        if (parsed.country) {
+          query = query.eq('country', parsed.country);
+        }
+      } else {
+        // Fallback to simple name search
+        query = query.ilike('name', `%${searchTerm}%`);
+      }
+      
+      query = query.limit(limitNum * 2); // Fetch more to filter later
 
       const { data, error } = await query;
 
