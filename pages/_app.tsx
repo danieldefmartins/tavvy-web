@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { appWithTranslation } from 'next-i18next';
 import { AuthProvider } from '../contexts/AuthContext';
+import { ProAuthProvider } from '../contexts/ProAuthContext';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import '../styles/globals.css';
 
@@ -30,9 +31,11 @@ function App({ Component, pageProps }: AppProps) {
       </Head>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <ThemeProvider>
-            <Component {...pageProps} />
-          </ThemeProvider>
+          <ProAuthProvider>
+            <ThemeProvider>
+              <Component {...pageProps} />
+            </ThemeProvider>
+          </ProAuthProvider>
         </AuthProvider>
       </QueryClientProvider>
     </>

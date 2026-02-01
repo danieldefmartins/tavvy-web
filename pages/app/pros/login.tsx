@@ -1,26 +1,30 @@
 /**
- * Login Screen
- * Updated to match iOS design with social login, forgot password, and pro login link
+ * Pro Login Screen
+ * Service Provider Portal login with teal/green theme
+ * Matches iOS design exactly
  */
 
 import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useThemeContext } from '../../contexts/ThemeContext';
-import { useAuth } from '../../contexts/AuthContext';
-import AppLayout from '../../components/AppLayout';
-import { spacing, borderRadius } from '../../constants/Colors';
+import { useThemeContext } from '../../../contexts/ThemeContext';
+import { useProAuth } from '../../../contexts/ProAuthContext';
+import AppLayout from '../../../components/AppLayout';
+import { spacing, borderRadius } from '../../../constants/Colors';
 
-export default function LoginScreen() {
+export default function ProLoginScreen() {
   const { theme } = useThemeContext();
-  const { signIn } = useAuth();
+  const { signIn } = useProAuth();
   const router = useRouter();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Pro-specific teal/green color
+  const proColor = '#10B981';
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +39,7 @@ export default function LoginScreen() {
     
     try {
       await signIn(email, password);
-      router.push('/app');
+      router.push('/app/pros/dashboard');
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');
     } finally {
@@ -44,19 +48,19 @@ export default function LoginScreen() {
   };
 
   const handleSocialLogin = (provider: 'apple' | 'google') => {
-    // TODO: Implement social login
-    console.log(`Login with ${provider}`);
+    // TODO: Implement social login for pros
+    console.log(`Pro login with ${provider}`);
   };
 
   return (
     <>
       <Head>
-        <title>Log In | TavvY</title>
-        <meta name="description" content="Log in to your TavvY account" />
+        <title>Pro Login | TavvY</title>
+        <meta name="description" content="Log in to your TavvY Pro account" />
       </Head>
 
       <AppLayout hideTabBar>
-        <div className="login-screen" style={{ backgroundColor: theme.background }}>
+        <div className="pro-login-screen" style={{ backgroundColor: theme.background }}>
           {/* Header */}
           <header className="login-header">
             <button 
@@ -77,15 +81,28 @@ export default function LoginScreen() {
             />
           </div>
 
+          {/* PROS Badge */}
+          <div className="pros-badge-container">
+            <div className="pros-badge" style={{ borderColor: proColor, color: proColor }}>
+              PROS
+            </div>
+            <p className="portal-subtitle" style={{ color: theme.textSecondary }}>
+              Service Provider Portal
+            </p>
+          </div>
+
+          {/* Value Proposition */}
+          <div className="value-prop">
+            <h2 className="value-prop-main" style={{ color: theme.text }}>
+              No per-lead fees. No bidding wars.
+            </h2>
+            <p className="value-prop-sub" style={{ color: theme.textSecondary }}>
+              Just real customers finding you.
+            </p>
+          </div>
+
           {/* Login Form */}
           <div className="form-container">
-            <h1 className="title" style={{ color: theme.text }}>
-              Welcome back!
-            </h1>
-            <p className="subtitle" style={{ color: theme.textSecondary }}>
-              Sign in to continue your journey
-            </p>
-
             {error && (
               <div className="error-message" style={{ backgroundColor: theme.errorLight, color: theme.error }}>
                 {error}
@@ -95,7 +112,7 @@ export default function LoginScreen() {
             <form onSubmit={handleLogin} className="login-form">
               {/* Email Input */}
               <div className="input-group">
-                <label className="input-label" style={{ color: theme.textSecondary }}>
+                <label className="input-label" style={{ color: theme.text }}>
                   Email
                 </label>
                 <div className="input-wrapper">
@@ -117,7 +134,7 @@ export default function LoginScreen() {
 
               {/* Password Input */}
               <div className="input-group">
-                <label className="input-label" style={{ color: theme.textSecondary }}>
+                <label className="input-label" style={{ color: theme.text }}>
                   Password
                 </label>
                 <div className="input-wrapper">
@@ -144,27 +161,21 @@ export default function LoginScreen() {
                 </div>
               </div>
 
-              {/* Log In Button */}
+              {/* Log In as Pro Button */}
               <button
                 type="submit"
                 className="login-button"
                 disabled={loading}
-                style={{ backgroundColor: theme.primary }}
+                style={{ backgroundColor: proColor }}
               >
-                {loading ? 'Signing in...' : 'Log In →'}
+                {loading ? 'Signing in...' : 'Log In as Pro →'}
               </button>
 
-              {/* Forgot Password & Pro Login Links */}
-              <div className="secondary-links">
-                <Link href="/app/forgot-password" className="forgot-link" style={{ color: theme.primary }}>
+              {/* Forgot Password Link */}
+              <div className="forgot-link-container">
+                <Link href="/app/forgot-password" className="forgot-link" style={{ color: proColor }}>
                   Forgot Password?
                 </Link>
-                <div className="pro-login-link">
-                  <span style={{ color: theme.textSecondary }}>Are you a Pro?{' '}</span>
-                  <Link href="/app/pros/login" style={{ color: '#10B981', fontWeight: 600 }}>
-                    Sign in here
-                  </Link>
-                </div>
               </div>
             </form>
 
@@ -212,19 +223,17 @@ export default function LoginScreen() {
             {/* Sign Up Prompt */}
             <div className="signup-prompt">
               <span style={{ color: theme.textSecondary }}>
-                Don't have an account?{' '}
+                New to Tavvy Pros?{' '}
               </span>
-              <Link href="/app/signup" style={{ color: theme.primary }}>
+              <Link href="/app/pros/register" style={{ color: proColor }}>
                 Sign Up
               </Link>
             </div>
-
-
           </div>
         </div>
 
         <style jsx>{`
-          .login-screen {
+          .pro-login-screen {
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -248,7 +257,7 @@ export default function LoginScreen() {
           .logo-container {
             display: flex;
             justify-content: center;
-            padding: ${spacing.lg}px ${spacing.xl}px;
+            padding: ${spacing.md}px ${spacing.xl}px;
             margin-bottom: ${spacing.sm}px;
           }
           
@@ -257,25 +266,52 @@ export default function LoginScreen() {
             width: auto;
           }
           
+          .pros-badge-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: ${spacing.xs}px;
+            margin-bottom: ${spacing.lg}px;
+          }
+          
+          .pros-badge {
+            padding: 8px 24px;
+            border: 2px solid;
+            border-radius: 24px;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 1px;
+          }
+          
+          .portal-subtitle {
+            font-size: 16px;
+            margin: 0;
+          }
+          
+          .value-prop {
+            text-align: center;
+            padding: 0 ${spacing.xl}px;
+            margin-bottom: ${spacing.lg}px;
+          }
+          
+          .value-prop-main {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 ${spacing.xs}px;
+            line-height: 1.3;
+          }
+          
+          .value-prop-sub {
+            font-size: 16px;
+            margin: 0;
+          }
+          
           .form-container {
             flex: 1;
             padding: ${spacing.md}px ${spacing.xl}px;
             max-width: 400px;
             margin: 0 auto;
             width: 100%;
-          }
-          
-          .title {
-            font-size: 32px;
-            font-weight: 700;
-            margin: 0 0 ${spacing.xs}px;
-            text-align: center;
-          }
-          
-          .subtitle {
-            font-size: 16px;
-            margin: 0 0 ${spacing.lg}px;
-            text-align: center;
           }
           
           .error-message {
@@ -328,7 +364,7 @@ export default function LoginScreen() {
           }
           
           .input:focus {
-            border-color: ${theme.primary};
+            border-color: ${proColor};
           }
           
           .password-toggle {
@@ -362,23 +398,16 @@ export default function LoginScreen() {
             cursor: not-allowed;
           }
           
-          .secondary-links {
+          .forgot-link-container {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: ${spacing.md}px;
-            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: ${spacing.sm}px;
           }
           
           .forgot-link {
             font-size: 14px;
             font-weight: 600;
             text-decoration: none;
-          }
-          
-          .pro-login-link {
-            font-size: 14px;
-            text-align: right;
           }
           
           .divider {
@@ -427,17 +456,6 @@ export default function LoginScreen() {
           }
           
           .signup-prompt a {
-            font-weight: 600;
-            text-decoration: none;
-          }
-          
-          .pro-login-prompt {
-            text-align: center;
-            margin-top: ${spacing.md}px;
-            font-size: 15px;
-          }
-          
-          .pro-login-prompt a {
             font-weight: 600;
             text-decoration: none;
           }
