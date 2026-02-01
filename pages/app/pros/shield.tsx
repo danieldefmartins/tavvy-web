@@ -28,6 +28,7 @@ import {
 export default function TavvyShieldScreen() {
   const { theme, isDark } = useThemeContext();
   const router = useRouter();
+  const { locale } = router;
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
   const bgColor = isDark ? '#000000' : '#F9F7F2';

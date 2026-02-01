@@ -34,6 +34,7 @@ const POPULAR_SEARCHES = [
 
 export default function SearchScreen() {
   const router = useRouter();
+  const { locale } = router;
   const { t } = useTranslation('common');
   const { q, category } = router.query;
   const { theme } = useThemeContext();

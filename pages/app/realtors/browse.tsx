@@ -31,6 +31,7 @@ const SPECIALTIES = ['All', 'Luxury', 'First-Time', 'Investment', 'Relocation', 
 
 export default function RealtorsBrowseScreen() {
   const router = useRouter();
+  const { locale } = router;
   const [realtors, setRealtors] = useState<Realtor[]>(SAMPLE_REALTORS);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');

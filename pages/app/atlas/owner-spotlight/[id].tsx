@@ -86,6 +86,7 @@ const PLACEHOLDER_POST = 'https://images.unsplash.com/photo-1506905925346-21bda4
 
 export default function OwnerSpotlightScreen() {
   const router = useRouter();
+  const { locale } = router;
   const { id } = router.query;
   const { theme, isDark } = useThemeContext();
 

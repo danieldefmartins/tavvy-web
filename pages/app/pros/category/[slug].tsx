@@ -48,6 +48,7 @@ const CATEGORY_DATA: Record<string, Category> = {
 
 export default function ProsCategoryScreen() {
   const router = useRouter();
+  const { locale } = router;
   const { slug } = router.query;
   const { theme } = useThemeContext();
 
@@ -159,7 +160,7 @@ export default function ProsCategoryScreen() {
                 <p style={{ color: theme.textSecondary }}>
                   Be the first {category.name.toLowerCase()} pro in your area!
                 </p>
-                <Link href="/app/pros/register" className="register-link" style={{ color: theme.primary }}>
+                <Link href="/app/pros/register" locale={locale} className="register-link" style={{ color: theme.primary }}>
                   Register as a Pro
                 </Link>
               </div>

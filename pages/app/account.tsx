@@ -20,6 +20,7 @@ import {
 
 export default function AccountScreen() {
   const router = useRouter();
+  const { locale } = router;
   const { theme } = useThemeContext();
   const { user, signOut } = useAuth();
   const { t } = useTranslation('common');
@@ -38,10 +39,10 @@ export default function AccountScreen() {
           <p style={{ color: theme.textSecondary }}>
             Access your profile, settings, and preferences
           </p>
-          <Link href="/app/login" className="sign-in-button" style={{ backgroundColor: theme.primary }}>
+          <Link href="/app/login" locale={locale} className="sign-in-button" style={{ backgroundColor: theme.primary }}>
             Sign In
           </Link>
-          <Link href="/app/signup" className="sign-up-link" style={{ color: theme.primary }}>
+          <Link href="/app/signup" locale={locale} className="sign-up-link" style={{ color: theme.primary }}>
             Create an Account
           </Link>
           <style jsx>{`
@@ -132,7 +133,7 @@ export default function AccountScreen() {
               </h2>
               <p style={{ color: theme.textSecondary }}>{user.email}</p>
             </div>
-            <Link href="/app/profile" className="edit-button">
+            <Link href="/app/profile" locale={locale} className="edit-button">
               <FiEdit2 size={18} color={theme.primary} />
             </Link>
           </div>

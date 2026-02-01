@@ -31,6 +31,7 @@ const SERVICE_CATEGORIES = [
 
 export default function ProsRegisterScreen() {
   const router = useRouter();
+  const { locale } = router;
   const { theme } = useThemeContext();
   const { user } = useAuth();
 
@@ -272,7 +273,7 @@ export default function ProsRegisterScreen() {
                   {formData.agreeToTerms && <FiCheck size={16} color={theme.primary} />}
                 </button>
                 <span style={{ color: theme.text }}>
-                  I agree to the <Link href="/terms" style={{ color: theme.primary }}>Terms of Service</Link> and <Link href="/privacy" style={{ color: theme.primary }}>Privacy Policy</Link> *
+                  I agree to the <Link href="/terms" locale={locale} style={{ color: theme.primary }}>Terms of Service</Link> and <Link href="/privacy" locale={locale} style={{ color: theme.primary }}>Privacy Policy</Link> *
                 </span>
               </div>
             </div>

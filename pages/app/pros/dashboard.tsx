@@ -30,6 +30,7 @@ const STRIPE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
 
 export default function ProDashboardScreen() {
   const router = useRouter();
+  const { locale } = router;
   const { theme } = useThemeContext();
   const { user, session } = useAuth();
   const { isPro, loading: rolesLoading } = useRoles();
@@ -161,7 +162,7 @@ export default function ProDashboardScreen() {
                 </button>
                 {!hasProviderProfile && (
                   <p className="hint" style={{ color: theme.textTertiary }}>
-                    Complete your <Link href="/app/pros/register" style={{ color: theme.primary }}>provider profile</Link> first
+                    Complete your <Link href="/app/pros/register" locale={locale} style={{ color: theme.primary }}>provider profile</Link> first
                   </p>
                 )}
               </div>
@@ -196,19 +197,19 @@ export default function ProDashboardScreen() {
 
           {/* Menu Items */}
           <div className="menu-section">
-            <Link href="/app/pros/profile" className="menu-item" style={{ backgroundColor: theme.surface }}>
+            <Link href="/app/pros/profile" locale={locale} className="menu-item" style={{ backgroundColor: theme.surface }}>
               <FiUser size={20} color={theme.primary} />
               <span style={{ color: theme.text }}>Edit Profile</span>
               <FiExternalLink size={16} color={theme.textTertiary} />
             </Link>
 
-            <Link href="/app/pros/messages" className="menu-item" style={{ backgroundColor: theme.surface }}>
+            <Link href="/app/pros/messages" locale={locale} className="menu-item" style={{ backgroundColor: theme.surface }}>
               <FiMessageSquare size={20} color={theme.primary} />
               <span style={{ color: theme.text }}>Messages</span>
               <FiExternalLink size={16} color={theme.textTertiary} />
             </Link>
 
-            <Link href="/app/pros/settings" className="menu-item" style={{ backgroundColor: theme.surface }}>
+            <Link href="/app/pros/settings" locale={locale} className="menu-item" style={{ backgroundColor: theme.surface }}>
               <FiSettings size={20} color={theme.primary} />
               <span style={{ color: theme.text }}>Settings</span>
               <FiExternalLink size={16} color={theme.textTertiary} />

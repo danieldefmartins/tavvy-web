@@ -6,6 +6,7 @@
 import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
 import { spacing, borderRadius } from '../../constants/Colors';
@@ -32,6 +33,8 @@ const QUICK_CATEGORIES = [
 ];
 
 export default function QuickFindsScreen() {
+  const router = useRouter();
+  const { locale } = router;
   const { theme } = useThemeContext();
 
   return (
@@ -106,7 +109,7 @@ export default function QuickFindsScreen() {
               <div className="nearby-content">
                 <h3>📍 What's Nearby?</h3>
                 <p>Discover places around your current location</p>
-                <Link href="/app?view=map" className="nearby-button">
+                <Link href="/app?view=map" locale={locale} className="nearby-button">
                   Explore Map
                 </Link>
               </div>

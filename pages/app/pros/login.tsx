@@ -17,6 +17,7 @@ export default function ProLoginScreen() {
   const { theme } = useThemeContext();
   const { signIn } = useProAuth();
   const router = useRouter();
+  const { locale } = router;
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -173,7 +174,7 @@ export default function ProLoginScreen() {
 
               {/* Forgot Password Link */}
               <div className="forgot-link-container">
-                <Link href="/app/forgot-password" className="forgot-link" style={{ color: proColor }}>
+                <Link href="/app/forgot-password" locale={locale} className="forgot-link" style={{ color: proColor }}>
                   Forgot Password?
                 </Link>
               </div>
@@ -225,7 +226,7 @@ export default function ProLoginScreen() {
               <span style={{ color: theme.textSecondary }}>
                 New to Tavvy Pros?{' '}
               </span>
-              <Link href="/app/pros/register" style={{ color: proColor }}>
+              <Link href="/app/pros/register" locale={locale} style={{ color: proColor }}>
                 Sign Up
               </Link>
             </div>

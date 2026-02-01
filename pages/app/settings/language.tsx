@@ -60,7 +60,7 @@ export default function LanguageSettingsPage() {
     setSelectedLanguage(languageCode);
     
     // Store preference in localStorage
-    localStorage.setItem('tavvy-language', languageCode);
+    localStorage.setItem('tavvy-locale', languageCode);
     
     // Navigate to the same page with new locale
     const { pathname, asPath, query } = router;

@@ -30,6 +30,7 @@ interface UserProfile {
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { locale } = router;
   const { theme } = useThemeContext();
   const { user, signOut } = useAuth();
   const { t } = useTranslation('common');
@@ -93,10 +94,10 @@ export default function ProfileScreen() {
           <p style={{ color: theme.textSecondary }}>
             Create an account to save places, leave reviews, and more
           </p>
-          <Link href="/app/login" className="sign-in-button" style={{ backgroundColor: theme.primary }}>
+          <Link href="/app/login" locale={locale} className="sign-in-button" style={{ backgroundColor: theme.primary }}>
             Sign In
           </Link>
-          <Link href="/app/signup" className="sign-up-link" style={{ color: theme.primary }}>
+          <Link href="/app/signup" locale={locale} className="sign-up-link" style={{ color: theme.primary }}>
             Don't have an account? Sign Up
           </Link>
           <style jsx>{`
@@ -147,7 +148,7 @@ export default function ProfileScreen() {
               <FiArrowLeft size={24} color={theme.text} />
             </button>
             <h1 style={{ color: theme.text }}>Profile</h1>
-            <Link href="/app/settings" className="settings-button">
+            <Link href="/app/settings" locale={locale} className="settings-button">
               <FiSettings size={24} color={theme.text} />
             </Link>
           </header>
@@ -205,7 +206,7 @@ export default function ProfileScreen() {
             </div>
 
             {/* Edit Profile Button */}
-            <Link href="/app/profile/edit" className="edit-button" style={{ borderColor: theme.border, color: theme.text }}>
+            <Link href="/app/profile/edit" locale={locale} className="edit-button" style={{ borderColor: theme.border, color: theme.text }}>
               <FiEdit2 size={16} /> Edit Profile
             </Link>
           </div>
@@ -243,7 +244,7 @@ export default function ProfileScreen() {
                 <p style={{ color: theme.textSecondary }}>
                   Start exploring and leave your first review!
                 </p>
-                <Link href="/app" className="explore-link" style={{ color: theme.primary }}>
+                <Link href="/app" locale={locale} className="explore-link" style={{ color: theme.primary }}>
                   Explore Places
                 </Link>
               </div>
@@ -254,7 +255,7 @@ export default function ProfileScreen() {
                 <p style={{ color: theme.textSecondary }}>
                   Save places you want to visit later
                 </p>
-                <Link href="/app" className="explore-link" style={{ color: theme.primary }}>
+                <Link href="/app" locale={locale} className="explore-link" style={{ color: theme.primary }}>
                   Explore Places
                 </Link>
               </div>

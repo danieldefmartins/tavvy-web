@@ -6,6 +6,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 interface CategoryCardProps {
   category: {
@@ -27,6 +28,8 @@ interface CategoryCardProps {
 }
 
 export default function CategoryCard({ category, variant = 'default', isDark = false, theme }: CategoryCardProps) {
+  const router = useRouter();
+  const { locale } = router;
   const textColor = theme?.text || (isDark ? '#F5F5F5' : '#1F2937');
   const secondaryTextColor = theme?.textSecondary || (isDark ? '#9CA3AF' : '#6B7280');
   const surfaceColor = theme?.surface || (isDark ? '#1F2937' : '#FFFFFF');
@@ -35,7 +38,7 @@ export default function CategoryCard({ category, variant = 'default', isDark = f
   if (variant === 'chip') {
     return (
       <Link
-        href={`/app/atlas/category/${category.slug || category.id}`}
+        href={`/app/atlas/category/${category.slug || category.id} locale={locale}`}
         className="chip-card"
         style={{ backgroundColor: `${categoryColor}20` }}
       >
@@ -75,7 +78,7 @@ export default function CategoryCard({ category, variant = 'default', isDark = f
   if (variant === 'compact') {
     return (
       <Link
-        href={`/app/atlas/category/${category.slug || category.id}`}
+        href={`/app/atlas/category/${category.slug || category.id} locale={locale}`}
         className="compact-card"
       >
         <div 
@@ -128,7 +131,7 @@ export default function CategoryCard({ category, variant = 'default', isDark = f
   // Default variant
   return (
     <Link
-      href={`/app/atlas/category/${category.slug || category.id}`}
+      href={`/app/atlas/category/${category.slug || category.id} locale={locale}`}
       className="default-card"
     >
       <div 

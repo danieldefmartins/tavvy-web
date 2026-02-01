@@ -6,6 +6,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { IoLocationOutline, IoDocumentTextOutline } from 'react-icons/io5';
 
 const TEAL_PRIMARY = '#14b8a6';
@@ -32,6 +33,8 @@ interface UniverseCardProps {
 const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800';
 
 export default function UniverseCard({ universe, variant = 'default', isDark = false, theme }: UniverseCardProps) {
+  const router = useRouter();
+  const { locale } = router;
   const textColor = theme?.text || (isDark ? '#F5F5F5' : '#1F2937');
   const secondaryTextColor = theme?.textSecondary || (isDark ? '#9CA3AF' : '#6B7280');
   const surfaceColor = theme?.surface || (isDark ? '#1F2937' : '#FFFFFF');
@@ -39,7 +42,7 @@ export default function UniverseCard({ universe, variant = 'default', isDark = f
   if (variant === 'large') {
     return (
       <Link
-        href={`/app/atlas/universe/${universe.slug || universe.id}`}
+        href={`/app/atlas/universe/${universe.slug || universe.id} locale={locale}`}
         className="large-card"
       >
         <img
@@ -146,7 +149,7 @@ export default function UniverseCard({ universe, variant = 'default', isDark = f
   if (variant === 'compact') {
     return (
       <Link
-        href={`/app/atlas/universe/${universe.slug || universe.id}`}
+        href={`/app/atlas/universe/${universe.slug || universe.id} locale={locale}`}
         className="compact-card"
       >
         <img
@@ -203,7 +206,7 @@ export default function UniverseCard({ universe, variant = 'default', isDark = f
   // Default variant
   return (
     <Link
-      href={`/app/atlas/universe/${universe.slug || universe.id}`}
+      href={`/app/atlas/universe/${universe.slug || universe.id} locale={locale}`}
       className="default-card"
     >
       <img

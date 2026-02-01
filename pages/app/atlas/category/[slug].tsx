@@ -45,6 +45,7 @@ const TEAL_PRIMARY = '#14b8a6';
 
 export default function CategoryBrowseScreen() {
   const router = useRouter();
+  const { locale } = router;
   const { slug } = router.query;
   const { theme, isDark } = useThemeContext();
 

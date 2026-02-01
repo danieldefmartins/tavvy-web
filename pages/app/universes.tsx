@@ -41,6 +41,7 @@ const CATEGORY_ICONS = [
 
 export default function UniversesScreen() {
   const router = useRouter();
+  const { locale } = router;
   const { t } = useTranslation('common');
   const { isDark } = useThemeContext();
   

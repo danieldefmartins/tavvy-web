@@ -19,6 +19,7 @@ export default function SignUpScreen() {
   const { signUp } = useAuth();
   const { t } = useTranslation('common');
   const router = useRouter();
+  const { locale } = router;
   
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
@@ -75,7 +76,7 @@ export default function SignUpScreen() {
                 We've sent a confirmation link to <strong>{email}</strong>. 
                 Please click the link to verify your account.
               </p>
-              <Link href="/app/login" className="back-to-login" style={{ color: theme.primary }}>
+              <Link href="/app/login" locale={locale} className="back-to-login" style={{ color: theme.primary }}>
                 Back to Login
               </Link>
             </div>
@@ -251,16 +252,16 @@ export default function SignUpScreen() {
 
             <p className="terms-text" style={{ color: theme.textTertiary }}>
               By signing up, you agree to our{' '}
-              <Link href="/terms" style={{ color: theme.primary }}>Terms of Service</Link>
+              <Link href="/terms" locale={locale} style={{ color: theme.primary }}>Terms of Service</Link>
               {' '}and{' '}
-              <Link href="/privacy" style={{ color: theme.primary }}>Privacy Policy</Link>
+              <Link href="/privacy" locale={locale} style={{ color: theme.primary }}>Privacy Policy</Link>
             </p>
 
             <div className="login-prompt">
               <span style={{ color: theme.textSecondary }}>
                 Already have an account?{' '}
               </span>
-              <Link href="/app/login" style={{ color: theme.primary }}>
+              <Link href="/app/login" locale={locale} style={{ color: theme.primary }}>
                 Log In
               </Link>
             </div>

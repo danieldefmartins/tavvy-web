@@ -46,6 +46,7 @@ const SPECIALTIES = ['All', 'Luxury', 'First-Time', 'Investment', 'Relocation', 
 export default function RealtorsHubScreen() {
   const { theme } = useThemeContext();
   const router = useRouter();
+  const { locale } = router;
   const { t } = useTranslation('common');
   const [realtors, setRealtors] = useState<Realtor[]>(SAMPLE_REALTORS);
   const [loading, setLoading] = useState(true);
@@ -229,7 +230,7 @@ export default function RealtorsHubScreen() {
 
           {/* Browse All Link */}
           <section className="browse-all-section">
-            <Link href="/app/realtors/browse" className="browse-all-link">
+            <Link href="/app/realtors/browse" locale={locale} className="browse-all-link">
               Browse All Realtors
               <FiChevronRight size={20} />
             </Link>

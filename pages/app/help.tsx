@@ -51,6 +51,7 @@ const HELP_TOPICS = [
 
 export default function HelpScreen() {
   const router = useRouter();
+  const { locale } = router;
   const { t } = useTranslation('common');
   const { theme } = useThemeContext();
   const [searchQuery, setSearchQuery] = useState('');
@@ -186,7 +187,7 @@ export default function HelpScreen() {
 
           {/* Documentation Link */}
           <section className="docs-section">
-            <Link href="/docs" className="docs-card" style={{ backgroundColor: theme.surface }}>
+            <Link href="/docs" locale={locale} className="docs-card" style={{ backgroundColor: theme.surface }}>
               <FiBook size={24} color={theme.primary} />
               <div>
                 <h3 style={{ color: theme.text }}>Documentation</h3>

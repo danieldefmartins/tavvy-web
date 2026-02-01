@@ -37,13 +37,13 @@ export default function AppLayout({
     if (!hasAccess) {
       if (!isAuthenticated && accessLevel !== 'public') {
         // Not logged in - redirect to login
-        router.replace(`/app/login?redirect=${encodeURIComponent(router.asPath)}`);
+        router.replace(`/app/login?redirect=${encodeURIComponent(router.asPath)}`, undefined, { locale: router.locale });
       } else if (accessLevel === 'pro' && !roles.includes('pro') && !roles.includes('super_admin')) {
         // Not a pro - redirect to pros info page
-        router.replace('/app/pros');
+        router.replace('/app/pros', undefined, { locale: router.locale });
       } else if (accessLevel === 'super_admin' && !roles.includes('super_admin')) {
         // Not an admin - redirect to home
-        router.replace('/app');
+        router.replace('/app', undefined, { locale: router.locale });
       }
     }
   }, [loading, hasAccess, isAuthenticated, accessLevel, roles, router]);

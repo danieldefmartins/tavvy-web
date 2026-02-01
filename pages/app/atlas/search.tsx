@@ -37,6 +37,7 @@ interface Article {
 
 export default function AtlasSearchScreen() {
   const router = useRouter();
+  const { locale } = router;
   const { theme, isDark } = useThemeContext();
   const searchInputRef = useRef<HTMLInputElement>(null);
 

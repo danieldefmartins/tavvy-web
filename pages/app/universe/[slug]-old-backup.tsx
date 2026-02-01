@@ -88,6 +88,7 @@ interface Place {
 
 export default function UniverseDetailScreen() {
   const router = useRouter();
+  const { locale } = router;
   const { slug } = router.query;
   const { theme, isDark } = useThemeContext();
 

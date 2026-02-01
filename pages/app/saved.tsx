@@ -34,6 +34,7 @@ interface SavedPlace {
 
 export default function SavedScreen() {
   const router = useRouter();
+  const { locale } = router;
   const { theme } = useThemeContext();
   const { user } = useAuth();
   const { t } = useTranslation('common');
@@ -100,7 +101,7 @@ export default function SavedScreen() {
           <p style={{ color: theme.textSecondary }}>
             Save your favorite places and access them anytime
           </p>
-          <Link href="/app/login" className="sign-in-button" style={{ backgroundColor: theme.primary }}>
+          <Link href="/app/login" locale={locale} className="sign-in-button" style={{ backgroundColor: theme.primary }}>
             Sign In
           </Link>
           <style jsx>{`
@@ -180,7 +181,7 @@ export default function SavedScreen() {
                     : 'Tap the bookmark icon on any place to save it here'}
                 </p>
                 {!searchQuery && (
-                  <Link href="/app" className="explore-link" style={{ color: theme.primary }}>
+                  <Link href="/app" locale={locale} className="explore-link" style={{ color: theme.primary }}>
                     Explore Places
                   </Link>
                 )}

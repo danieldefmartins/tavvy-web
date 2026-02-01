@@ -151,6 +151,7 @@ const ALL_APPS = [
 
 export default function AppsScreen() {
   const router = useRouter();
+  const { locale } = router;
   const { themeMode, setThemeMode } = useThemeContext();
   const { user } = useAuth();
   const { t } = useTranslation('common');

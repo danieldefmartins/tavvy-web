@@ -22,6 +22,7 @@ import { IoLanguage, IoRadio } from 'react-icons/io5';
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { locale } = router;
   const { t } = useTranslation('common');
   const { themeMode, setThemeMode } = useThemeContext();
   const { user } = useAuth();
@@ -65,7 +66,7 @@ export default function SettingsScreen() {
             {/* Language Section */}
             <section className="section">
               <h2 className="section-label">{t("settings.languageSection")}</h2>
-              <Link href="/app/settings/language" className="setting-row clickable">
+              <Link href="/app/settings/language" locale={locale} className="setting-row clickable">
                 <div className="row-left">
                   <div className="icon-container blue">
                     <IoLanguage size={20} />
@@ -228,7 +229,7 @@ export default function SettingsScreen() {
             <section className="section">
               <h2 className="section-label">{t("settings.preferencesSection")}</h2>
               <div className="settings-group">
-                <Link href="/app/settings/distance-unit" className="setting-row clickable">
+                <Link href="/app/settings/distance-unit" locale={locale} className="setting-row clickable">
                   <div className="row-left">
                     <div className="icon-container purple">
                       <FiMap size={20} />
@@ -243,7 +244,7 @@ export default function SettingsScreen() {
 
                 <div className="divider" />
 
-                <Link href="/app/settings/map-layer" className="setting-row clickable">
+                <Link href="/app/settings/map-layer" locale={locale} className="setting-row clickable">
                   <div className="row-left">
                     <div className="icon-container purple">
                       <FiMap size={20} />
@@ -262,7 +263,7 @@ export default function SettingsScreen() {
             <section className="section">
               <h2 className="section-label">{t("settings.helpSection")}</h2>
               <div className="settings-group">
-                <Link href="/app/support" className="setting-row clickable">
+                <Link href="/app/support" locale={locale} className="setting-row clickable">
                   <div className="row-left">
                     <div className="icon-container orange">
                       <FiHelpCircle size={20} />
@@ -274,7 +275,7 @@ export default function SettingsScreen() {
 
                 <div className="divider" />
 
-                <Link href="/app/guidelines" className="setting-row clickable">
+                <Link href="/app/guidelines" locale={locale} className="setting-row clickable">
                   <div className="row-left">
                     <div className="icon-container green">
                       <FiFileText size={20} />
@@ -286,7 +287,7 @@ export default function SettingsScreen() {
 
                 <div className="divider" />
 
-                <Link href="/app/privacy" className="setting-row clickable">
+                <Link href="/app/privacy" locale={locale} className="setting-row clickable">
                   <div className="row-left">
                     <div className="icon-container blue">
                       <FiShield size={20} />

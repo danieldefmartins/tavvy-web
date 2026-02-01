@@ -45,6 +45,7 @@ interface Review {
 
 export default function ProviderProfileScreen() {
   const router = useRouter();
+  const { locale } = router;
   const { id } = router.query;
   const { theme } = useThemeContext();
 

@@ -11,6 +11,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useThemeContext } from '../contexts/ThemeContext';
 import { spacing, borderRadius, shadows, Colors } from '../constants/Colors';
 import { FiPhone, FiNavigation, FiGlobe, FiInstagram, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
@@ -131,6 +132,8 @@ const getSignalEmoji = (type: 'positive' | 'neutral' | 'negative') => {
 
 export default function PlaceCard({ place, onPress, showQuickActions = true, compact = false }: PlaceCardProps) {
   const { theme, isDark } = useThemeContext();
+  const router = useRouter();
+  const { locale } = router;
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   
   const fullAddress = place.city && place.state_region
@@ -540,7 +543,7 @@ export default function PlaceCard({ place, onPress, showQuickActions = true, com
   }
 
   return (
-    <Link href={`/place/${place.id}`} style={{ textDecoration: 'none' }}>
+    <Link href={`/place/${place.id}`} locale={locale} style={{ textDecoration: 'none' }}>
       {cardContent}
     </Link>
   );

@@ -10,6 +10,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { supabase } from '../../lib/supabaseClient';
 import { IoCheckmark, IoBulb, IoWarning, IoInformationCircle, IoPaw, IoChatboxEllipses, IoLocation } from 'react-icons/io5';
 
@@ -367,7 +368,7 @@ const PlaceCardBlockComponent: React.FC<{ block: PlaceCardBlock }> = ({ block })
         </div>
       </div>
       <Link
-        href={`/app/place/${place.id}`}
+        href={`/app/place/${place.id} locale={locale}`}
         style={{
           display: 'block',
           marginTop: 12,
@@ -433,7 +434,7 @@ const ItineraryBlockComponent: React.FC<{ block: ItineraryBlock; settings: Readi
               )}
               {item.place_id && (
                 <Link
-                  href={`/app/place/${item.place_id}`}
+                  href={`/app/place/${item.place_id} locale={locale}`}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: TEAL_PRIMARY, fontSize: 13, marginTop: 4, textDecoration: 'none' }}
                 >
                   <IoLocation size={14} />

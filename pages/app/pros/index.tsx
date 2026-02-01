@@ -92,6 +92,7 @@ const EDUCATION_CONTENT = [
 export default function ProsScreen() {
   const { theme, isDark } = useThemeContext();
   const router = useRouter();
+  const { locale } = router;
   const { t } = useTranslation('common');
   const [viewMode, setViewMode] = useState<'user' | 'pro'>('user');
 
@@ -139,7 +140,7 @@ export default function ProsScreen() {
           </div>
 
           {/* Start a Project Card - Primary CTA */}
-          <Link href="/app/pros/new-project" className="start-project-card">
+          <Link href="/app/pros/new-project" locale={locale} className="start-project-card">
             <div className="start-project-gradient">
               <div className="start-project-icon">
                 <IoAddCircleOutline size={28} color="#FFFFFF" />
@@ -194,7 +195,7 @@ export default function ProsScreen() {
           </div>
 
           {/* Tavvy Shield - Prominent Card */}
-          <Link href="/app/pros/shield" className="tavvy-shield-card">
+          <Link href="/app/pros/shield" locale={locale} className="tavvy-shield-card">
             <div className="tavvy-shield-gradient">
               <div className="shield-icon-container">
                 <IoShieldCheckmark size={32} color={COLORS.primaryBlue} />

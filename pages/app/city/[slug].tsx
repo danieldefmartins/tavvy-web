@@ -39,6 +39,7 @@ interface Place {
 
 export default function CityDetailScreen() {
   const router = useRouter();
+  const { locale } = router;
   const { slug } = router.query;
   const { theme } = useThemeContext();
 

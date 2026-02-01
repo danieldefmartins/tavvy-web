@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
@@ -36,6 +37,8 @@ const FEATURED_CITIES = [
 ];
 
 export default function CitiesBrowseScreen() {
+  const router = useRouter();
+  const { locale } = router;
   const { theme } = useThemeContext();
   const [cities, setCities] = useState<City[]>(FEATURED_CITIES);
   const [loading, setLoading] = useState(true);

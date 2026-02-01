@@ -5,11 +5,14 @@
 import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import AppLayout from '../../../components/AppLayout';
 import { Colors } from '../../../constants/Colors';
 import { FiCheck, FiMail, FiMessageCircle } from 'react-icons/fi';
 
 export default function ProjectSubmittedPage() {
+  const router = useRouter();
+  const { locale } = router;
   return (
     <AppLayout>
       <Head>
@@ -153,7 +156,7 @@ export default function ProjectSubmittedPage() {
 
           {/* Actions */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <Link href="/app/pros">
+            <Link href="/app/pros" locale={locale}>
               <a style={{
                 display: 'block',
                 padding: '16px',
@@ -168,7 +171,7 @@ export default function ProjectSubmittedPage() {
               </a>
             </Link>
             
-            <Link href="/app">
+            <Link href="/app" locale={locale}>
               <a style={{
                 display: 'block',
                 padding: '16px',

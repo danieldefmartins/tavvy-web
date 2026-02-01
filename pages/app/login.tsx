@@ -19,6 +19,7 @@ export default function LoginScreen() {
   const { signIn } = useAuth();
   const { t } = useTranslation('common');
   const router = useRouter();
+  const { locale } = router;
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -159,12 +160,12 @@ export default function LoginScreen() {
 
               {/* Forgot Password & Pro Login Links */}
               <div className="secondary-links">
-                <Link href="/app/forgot-password" className="forgot-link" style={{ color: theme.primary }}>
+                <Link href="/app/forgot-password" locale={locale} className="forgot-link" style={{ color: theme.primary }}>
                   Forgot Password?
                 </Link>
                 <div className="pro-login-link">
                   <span style={{ color: theme.textSecondary }}>Are you a Pro?{' '}</span>
-                  <Link href="/app/pros/login" style={{ color: '#10B981', fontWeight: 600 }}>
+                  <Link href="/app/pros/login" locale={locale} style={{ color: '#10B981', fontWeight: 600 }}>
                     Sign in here
                   </Link>
                 </div>
@@ -217,7 +218,7 @@ export default function LoginScreen() {
               <span style={{ color: theme.textSecondary }}>
                 Don't have an account?{' '}
               </span>
-              <Link href="/app/signup" style={{ color: theme.primary }}>
+              <Link href="/app/signup" locale={locale} style={{ color: theme.primary }}>
                 Sign Up
               </Link>
             </div>

@@ -12,6 +12,7 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import AppLayout from '../../components/AppLayout';
@@ -51,6 +52,8 @@ const CATEGORY_FILTERS = [
 const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800';
 
 export default function ExploreScreen() {
+  const router = useRouter();
+  const { locale } = router;
   const { theme, isDark } = useThemeContext();
   const { user } = useAuth();
   const { t } = useTranslation('common');

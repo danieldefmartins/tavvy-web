@@ -6,6 +6,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { IoHeart, IoTime } from 'react-icons/io5';
 
 const TEAL_PRIMARY = '#14b8a6';
@@ -40,6 +41,8 @@ const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda
 const PLACEHOLDER_AVATAR = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100';
 
 export default function ArticleCard({ article, variant = 'horizontal', isDark = false, theme }: ArticleCardProps) {
+  const router = useRouter();
+  const { locale } = router;
   const formatNumber = (num: number): string => {
     if (num >= 1000) {
       return `${(num / 1000).toFixed(1)}k`;
@@ -54,7 +57,7 @@ export default function ArticleCard({ article, variant = 'horizontal', isDark = 
   if (variant === 'featured') {
     return (
       <Link
-        href={`/app/article/${article.slug || article.id}`}
+        href={`/app/article/${article.slug || article.id} locale={locale}`}
         className="featured-card"
       >
         <img
@@ -164,7 +167,7 @@ export default function ArticleCard({ article, variant = 'horizontal', isDark = 
   if (variant === 'vertical') {
     return (
       <Link
-        href={`/app/article/${article.slug || article.id}`}
+        href={`/app/article/${article.slug || article.id} locale={locale}`}
         className="vertical-card"
       >
         <img
@@ -254,7 +257,7 @@ export default function ArticleCard({ article, variant = 'horizontal', isDark = 
   // Default: horizontal variant
   return (
     <Link
-      href={`/app/article/${article.slug || article.id}`}
+      href={`/app/article/${article.slug || article.id} locale={locale}`}
       className="horizontal-card"
     >
       <img

@@ -68,6 +68,7 @@ const tabs: TabItem[] = [
 export default function TabBar() {
   const router = useRouter();
   const { theme, isDark } = useThemeContext();
+  const { locale } = router;
   
   const isActive = (href: string) => {
     if (href === '/app') {
@@ -93,6 +94,7 @@ export default function TabBar() {
             <Link
               key="add-button"
               href={tab.href}
+              locale={locale}
               className="add-button-container"
             >
               <div className="add-button">
@@ -106,6 +108,7 @@ export default function TabBar() {
           <Link
             key={tab.name}
             href={tab.href}
+            locale={locale}
             className={`tab-item ${active ? 'active' : ''}`}
             style={{ 
               color: active ? theme.tabBarActive : theme.tabBarInactive,
@@ -119,7 +122,7 @@ export default function TabBar() {
         );
       })}
 
-      <style jsx global>{`
+      <style jsx global>{\`
         .tab-bar {
           position: fixed;
           bottom: 0;
@@ -222,7 +225,7 @@ export default function TabBar() {
             border-radius: 22px;
           }
         }
-      `}</style>
+      \`}</style>
     </nav>
   );
 }

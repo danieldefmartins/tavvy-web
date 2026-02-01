@@ -109,6 +109,7 @@ const PLACEHOLDER_AVATAR = 'https://images.unsplash.com/photo-1472099645785-5658
 
 export default function ArticleDetailScreen() {
   const router = useRouter();
+  const { locale } = router;
   const { id } = router.query;
   const { theme, isDark: systemIsDark } = useThemeContext();
 

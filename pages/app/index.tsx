@@ -101,9 +101,9 @@ const mockStories = [
 
 // Mock happening now data
 const mockHappeningNow = [
-  { id: '1', title: 'Happy Hour at The Pub', subtitle: '2 {t('home.hoursLeft')}', image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=300&fit=crop', type: 'event' },
-  { id: '2', title: 'Live Music Tonight', subtitle: '{t('home.startsAt')} 8 PM', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop', type: 'event' },
-  { id: '3', title: 'Food Truck Festival', subtitle: '{t('home.allDayToday')}', image: 'https://images.unsplash.com/photo-1565123409695-7b5ef63a2efb?w=400&h=300&fit=crop', type: 'event' },
+  { id: '1', title: 'Happy Hour at The Pub', subtitleKey: 'hoursLeft', subtitleValue: '2', image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=300&fit=crop', type: 'event' },
+  { id: '2', title: 'Live Music Tonight', subtitleKey: 'startsAt', subtitleValue: '8 PM', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop', type: 'event' },
+  { id: '3', title: 'Food Truck Festival', subtitleKey: 'allDayToday', subtitleValue: '', image: 'https://images.unsplash.com/photo-1565123409695-7b5ef63a2efb?w=400&h=300&fit=crop', type: 'event' },
 ];
 
 // Search suggestion interface
@@ -123,6 +123,7 @@ export default function HomeScreen() {
   const { user } = useAuth();
   const { t } = useTranslation('common');
   const router = useRouter();
+  const { locale } = router;
   
   // View mode
   const [viewMode, setViewMode] = useState<'standard' | 'map'>('standard');
@@ -594,7 +595,7 @@ export default function HomeScreen() {
             <section className="section">
               <div className="section-header">
                 <h2>{t('home.liveNow')}</h2>
-                <Link href="/app/explore" className="see-all">
+                <Link href="/app/explore" locale={locale} className="see-all">
                   See All <IoChevronForward size={16} />
                 </Link>
               </div>
@@ -629,7 +630,7 @@ export default function HomeScreen() {
             <section className="section explore-section" style={{ display: 'none' }}>
               <div className="section-header">
                 <h2>Explore Tavvy</h2>
-                <Link href="/app/explore" className="see-all">
+                <Link href="/app/explore" locale={locale} className="see-all">
                   See All <IoChevronForward size={16} />
                 </Link>
               </div>
