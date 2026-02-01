@@ -5,6 +5,8 @@
  */
 
 import React, { useState } from 'react';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -20,6 +22,7 @@ import { IoLanguage, IoRadio } from 'react-icons/io5';
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { t } = useTranslation('common');
   const { themeMode, setThemeMode } = useThemeContext();
   const { user } = useAuth();
 
@@ -54,20 +57,20 @@ export default function SettingsScreen() {
             <button className="back-btn" onClick={() => router.back()}>
               <FiArrowLeft size={24} />
             </button>
-            <h1>Settings</h1>
+            <h1>{t("settings.title")}</h1>
             <div style={{ width: 24 }} />
           </header>
 
           <div className="content">
             {/* Language Section */}
             <section className="section">
-              <h2 className="section-label">LANGUAGE</h2>
+              <h2 className="section-label">{t("settings.languageSection")}</h2>
               <Link href="/app/settings/language" className="setting-row clickable">
                 <div className="row-left">
                   <div className="icon-container blue">
                     <IoLanguage size={20} />
                   </div>
-                  <span className="row-title">Language</span>
+                  <span className="row-title">{t("settings.language")}</span>
                 </div>
                 <div className="row-right">
                   <span className="row-value">🇺🇸 English</span>
@@ -78,13 +81,13 @@ export default function SettingsScreen() {
 
             {/* Theme Section */}
             <section className="section">
-              <h2 className="section-label">THEME</h2>
+              <h2 className="section-label">{t("settings.themeSection")}</h2>
               <div className="setting-row">
                 <div className="row-left">
                   <div className="icon-container purple">
                     <FiMoon size={20} />
                   </div>
-                  <span className="row-title">Dark Mode</span>
+                  <span className="row-title">{t("settings.darkMode")}</span>
                 </div>
                 <label className="toggle">
                   <input
@@ -99,13 +102,13 @@ export default function SettingsScreen() {
 
             {/* Reviews Section */}
             <section className="section">
-              <h2 className="section-label">REVIEWS</h2>
+              <h2 className="section-label">{t("settings.reviewsSection")}</h2>
               <div className="setting-row">
                 <div className="row-left">
                   <div className="icon-container blue">
                     <IoLanguage size={20} />
                   </div>
-                  <span className="row-title">Auto-translate reviews</span>
+                  <span className="row-title">{t("settings.autoTranslate")}</span>
                 </div>
                 <label className="toggle">
                   <input
@@ -120,14 +123,14 @@ export default function SettingsScreen() {
 
             {/* Notifications Section */}
             <section className="section">
-              <h2 className="section-label">NOTIFICATIONS</h2>
+              <h2 className="section-label">{t("settings.notificationsSection")}</h2>
               <div className="settings-group">
                 <div className="setting-row">
                   <div className="row-left">
                     <div className="icon-container blue">
                       <FiBell size={20} />
                     </div>
-                    <span className="row-title">Push Notifications</span>
+                    <span className="row-title">{t("settings.pushNotifications")}</span>
                   </div>
                   <label className="toggle">
                     <input
@@ -146,7 +149,7 @@ export default function SettingsScreen() {
                     <div className="icon-container blue">
                       <FiMail size={20} />
                     </div>
-                    <span className="row-title">Email Notifications</span>
+                    <span className="row-title">{t("settings.emailNotifications")}</span>
                   </div>
                   <label className="toggle">
                     <input
@@ -165,7 +168,7 @@ export default function SettingsScreen() {
                     <div className="icon-container blue">
                       <IoRadio size={20} />
                     </div>
-                    <span className="row-title">Live Business Alerts</span>
+                    <span className="row-title">{t("settings.liveBusinessAlerts")}</span>
                   </div>
                   <label className="toggle">
                     <input
@@ -181,14 +184,14 @@ export default function SettingsScreen() {
 
             {/* Privacy & Security Section */}
             <section className="section">
-              <h2 className="section-label">PRIVACY & SECURITY</h2>
+              <h2 className="section-label">{t("settings.privacySection")}</h2>
               <div className="settings-group">
                 <div className="setting-row">
                   <div className="row-left">
                     <div className="icon-container blue">
                       <FiMapPin size={20} />
                     </div>
-                    <span className="row-title">Location Sharing</span>
+                    <span className="row-title">{t("settings.locationSharing")}</span>
                   </div>
                   <label className="toggle">
                     <input
@@ -207,7 +210,7 @@ export default function SettingsScreen() {
                     <div className="icon-container blue">
                       <FiTrendingUp size={20} />
                     </div>
-                    <span className="row-title">Share Usage Data</span>
+                    <span className="row-title">{t("settings.shareUsageData")}</span>
                   </div>
                   <label className="toggle">
                     <input
@@ -223,14 +226,14 @@ export default function SettingsScreen() {
 
             {/* Preferences Section */}
             <section className="section">
-              <h2 className="section-label">PREFERENCES</h2>
+              <h2 className="section-label">{t("settings.preferencesSection")}</h2>
               <div className="settings-group">
                 <Link href="/app/settings/distance-unit" className="setting-row clickable">
                   <div className="row-left">
                     <div className="icon-container purple">
                       <FiMap size={20} />
                     </div>
-                    <span className="row-title">Distance Unit</span>
+                    <span className="row-title">{t("settings.distanceUnit")}</span>
                   </div>
                   <div className="row-right">
                     <span className="row-value">Miles</span>
@@ -245,7 +248,7 @@ export default function SettingsScreen() {
                     <div className="icon-container purple">
                       <FiMap size={20} />
                     </div>
-                    <span className="row-title">Default Map Layer</span>
+                    <span className="row-title">{t("settings.defaultMapLayer")}</span>
                   </div>
                   <div className="row-right">
                     <span className="row-value">Standard</span>
@@ -257,14 +260,14 @@ export default function SettingsScreen() {
 
             {/* Help & Support Section */}
             <section className="section">
-              <h2 className="section-label">HELP & SUPPORT</h2>
+              <h2 className="section-label">{t("settings.helpSection")}</h2>
               <div className="settings-group">
                 <Link href="/app/support" className="setting-row clickable">
                   <div className="row-left">
                     <div className="icon-container orange">
                       <FiHelpCircle size={20} />
                     </div>
-                    <span className="row-title">Contact Support</span>
+                    <span className="row-title">{t("settings.contactSupport")}</span>
                   </div>
                   <FiChevronRight size={20} className="chevron" />
                 </Link>
@@ -288,7 +291,7 @@ export default function SettingsScreen() {
                     <div className="icon-container blue">
                       <FiShield size={20} />
                     </div>
-                    <span className="row-title">Privacy Policy</span>
+                    <span className="row-title">{t("settings.privacyPolicy")}</span>
                   </div>
                   <FiChevronRight size={20} className="chevron" />
                 </Link>
@@ -523,4 +526,13 @@ export default function SettingsScreen() {
       </AppLayout>
     </>
   );
+}
+
+
+export async function getStaticProps({ locale }: { locale: string }) {
+  return {
+    props: {
+      ...(await serverSideTranslations(locale, ['common'])),
+    },
+  };
 }
