@@ -269,7 +269,7 @@ export default function OnTheGoScreen() {
               </div>
               <div style={{ fontSize: '14px', color: colors.textSecondary }}>
                 {userLocation ? 
-                  `Centered at ${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)}` :
+                  `Centered at ${userLocation.lat && !isNaN(userLocation.lat) ? userLocation.lat.toFixed(4) : '0.0000'}, ${userLocation.lng && !isNaN(userLocation.lng) ? userLocation.lng.toFixed(4) : '0.0000'}` :
                   'Getting your location...'
                 }
               </div>

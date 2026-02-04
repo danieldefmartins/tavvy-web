@@ -365,7 +365,10 @@ function getTimeBucket(dateStr: string): string {
 }
 
 function getGeoBucket(lat?: number, lng?: number): string {
-  if (!lat || !lng) return 'unknown';
+  // Validate coordinates
+  if (!lat || !lng || typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
+    return 'unknown';
+  }
   // Round to 3 decimal places (~100m precision)
   return `${lat.toFixed(3)},${lng.toFixed(3)}`;
 }

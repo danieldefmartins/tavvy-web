@@ -406,9 +406,11 @@ export default function MapScreen() {
 
   // Format distance for display (distance is in meters from API)
   const formatDistance = (distanceMeters?: number) => {
-    if (!distanceMeters) return '';
+    if (!distanceMeters || typeof distanceMeters !== 'number') return '';
     // Convert meters to miles (1 mile = 1609.34 meters)
     const distanceMiles = distanceMeters / 1609.34;
+    // Validate miles calculation
+    if (!isFinite(distanceMiles) || isNaN(distanceMiles)) return '';
     if (distanceMiles < 0.1) {
       // Show in feet for very close places (1 mile = 5280 feet)
       return `${Math.round(distanceMiles * 5280)} ft`;

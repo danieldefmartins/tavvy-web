@@ -591,7 +591,7 @@ export default function PlaceDetailScreen() {
                   <div>
                     <div style={{ fontSize: '32px', marginBottom: '8px', textAlign: 'center' }}>🗺️</div>
                     <div style={{ fontSize: '14px' }}>
-                      Map at {place.latitude.toFixed(4)}, {place.longitude.toFixed(4)}
+                      Map at {place.latitude && !isNaN(place.latitude) ? place.latitude.toFixed(4) : '0.0000'}, {place.longitude && !isNaN(place.longitude) ? place.longitude.toFixed(4) : '0.0000'}
                     </div>
                   </div>
                 </div>

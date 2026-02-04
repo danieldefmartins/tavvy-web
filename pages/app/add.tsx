@@ -546,7 +546,7 @@ export default function UniversalAddScreen() {
                   <FiMapPin size={32} color={ACCENT} />
                   <p className="address" style={{ color: textColor }}>{currentDraft.formatted_address}</p>
                   <p className="coords" style={{ color: subtextColor }}>
-                    ({currentDraft.latitude?.toFixed(6)}, {currentDraft.longitude?.toFixed(6)})
+                    ({currentDraft.latitude && !isNaN(currentDraft.latitude) ? currentDraft.latitude.toFixed(6) : '0.000000'}, {currentDraft.longitude && !isNaN(currentDraft.longitude) ? currentDraft.longitude.toFixed(6) : '0.000000'})
                   </p>
                 </div>
                 
