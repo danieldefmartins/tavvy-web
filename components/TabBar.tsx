@@ -14,7 +14,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../contexts/ThemeContext';
-import { spacing, borderRadius } from '../constants/Colors';
+import { spacing } from '../constants/Colors';
 import { 
   FiHome, 
   FiGlobe, 
@@ -65,9 +65,69 @@ const tabs: TabItem[] = [
   },
 ];
 
+const styles = {
+  tabBar: {
+    position: 'fixed' as const,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    display: 'flex',
+    justifyContent: 'space-around',
+    alignItems: 'flex-end',
+    height: '85px',
+    paddingBottom: 'env(safe-area-inset-bottom, 20px)',
+    borderTopWidth: '1px',
+    borderTopStyle: 'solid' as const,
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    zIndex: 1000,
+  },
+  tabItem: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+    height: '60px',
+    textDecoration: 'none',
+    transition: 'color 0.2s, transform 0.2s',
+    padding: `${spacing.sm}px`,
+  },
+  tabIcon: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: '4px',
+  },
+  tabLabel: {
+    fontSize: '11px',
+    fontWeight: 500,
+    letterSpacing: '0.1px',
+  },
+  addButtonContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+    position: 'relative' as const,
+    textDecoration: 'none',
+  },
+  addButton: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '24px',
+    backgroundColor: '#FFFFFF',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 2px 8px rgba(15, 138, 138, 0.3)',
+    transition: 'transform 0.2s, box-shadow 0.2s',
+  },
+};
+
 export default function TabBar() {
   const router = useRouter();
-  const { theme, isDark } = useThemeContext();
+  const { theme } = useThemeContext();
   const { locale } = router;
   
   const isActive = (href: string) => {
@@ -79,8 +139,8 @@ export default function TabBar() {
 
   return (
     <nav 
-      className="tab-bar"
       style={{ 
+        ...styles.tabBar,
         backgroundColor: theme.tabBarBackground,
         borderTopColor: theme.border,
       }}
@@ -88,16 +148,15 @@ export default function TabBar() {
       {tabs.map((tab) => {
         const active = isActive(tab.href);
         
-        // Render elevated center button differently
         if (tab.isCenter) {
           return (
             <Link
               key="add-button"
               href={tab.href}
               locale={locale}
-              className="add-button-container"
+              style={styles.addButtonContainer}
             >
-              <div className="add-button">
+              <div style={styles.addButton}>
                 {tab.icon}
               </div>
             </Link>
@@ -109,123 +168,22 @@ export default function TabBar() {
             key={tab.name}
             href={tab.href}
             locale={locale}
-            className={`tab-item ${active ? 'active' : ''}`}
             style={{ 
+              ...styles.tabItem,
               color: active ? theme.tabBarActive : theme.tabBarInactive,
+              transform: active ? 'scale(1.05)' : 'scale(1)',
             }}
           >
-            <div className="tab-icon">
+            <div style={styles.tabIcon}>
               {active ? tab.activeIcon : tab.icon}
             </div>
-            <span className="tab-label">{tab.name}</span>
+            <span style={{
+              ...styles.tabLabel,
+              fontWeight: active ? 600 : 500,
+            }}>{tab.name}</span>
           </Link>
         );
       })}
-
-      <style jsx global>{\`
-        .tab-bar {
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          display: flex;
-          justify-content: space-around;
-          align-items: flex-end;
-          height: 85px;
-          padding-bottom: env(safe-area-inset-bottom, 20px);
-          border-top-width: 1px;
-          border-top-style: solid;
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          z-index: 1000;
-        }
-        
-        .tab-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          flex: 1;
-          height: 60px;
-          text-decoration: none;
-          transition: color 0.2s, transform 0.2s;
-          padding: ${spacing.sm}px;
-        }
-        
-        .tab-item:hover {
-          transform: scale(1.05);
-        }
-        
-        .tab-item.active {
-          transform: scale(1.05);
-        }
-        
-        .tab-icon {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-bottom: 4px;
-        }
-        
-        .tab-label {
-          font-size: 11px;
-          font-weight: 500;
-          letter-spacing: 0.1px;
-        }
-        
-        .tab-item.active .tab-label {
-          font-weight: 600;
-        }
-
-        /* Elevated Center Add Button */
-        .add-button-container {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex: 1;
-          position: relative;
-          text-decoration: none;
-        }
-        
-        .add-button {
-          width: 48px;
-          height: 48px;
-          border-radius: 24px;
-          background-color: #FFFFFF;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          /* Removed top offset - button now aligns with other tab icons */
-          box-shadow: 0 2px 8px rgba(15, 138, 138, 0.3);
-          transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .add-button:hover {
-          transform: scale(1.1);
-          box-shadow: 0 6px 16px rgba(15, 138, 138, 0.5);
-        }
-        
-        .add-button:active {
-          transform: scale(0.95);
-        }
-
-        @media (max-width: 480px) {
-          .tab-bar {
-            height: 75px;
-            padding-bottom: env(safe-area-inset-bottom, 15px);
-          }
-          
-          .tab-label {
-            font-size: 10px;
-          }
-          
-          .add-button {
-            width: 44px;
-            height: 44px;
-            border-radius: 22px;
-          }
-        }
-      \`}</style>
     </nav>
   );
 }
