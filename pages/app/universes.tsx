@@ -233,18 +233,18 @@ export default function UniversesScreen() {
         }}>
 
           {/* Header */}
-          <div style={{ padding: '24px 20px 8px' }}>
+          <div style={{ padding: '16px 16px 4px' }}>
             <h1 style={{
-              fontSize: '42px',
+              fontSize: '28px',
               fontWeight: '700',
               color: textColor,
-              margin: '0 0 4px 0',
-              letterSpacing: '-0.5px'
+              margin: '0 0 2px 0',
+              letterSpacing: '-0.3px'
             }}>
               Universes
             </h1>
             <p style={{
-              fontSize: '17px',
+              fontSize: '14px',
               color: COLORS.accent,
               margin: 0,
               fontWeight: '500'
@@ -254,14 +254,14 @@ export default function UniversesScreen() {
           </div>
 
           {/* Search Bar */}
-          <div style={{ padding: '16px 20px 24px' }}>
+          <div style={{ padding: '12px 16px 16px' }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '12px',
-              padding: '14px 16px',
+              gap: '10px',
+              padding: '10px 14px',
               backgroundColor: surfaceColor,
-              borderRadius: '14px'
+              borderRadius: '12px'
             }}>
               <IoSearchOutline size={20} color={secondaryTextColor} />
               <input
@@ -407,13 +407,13 @@ export default function UniversesScreen() {
             <>
               {/* Featured Universe */}
               {featuredUniverse && (
-                <div style={{ padding: '0 20px 28px' }}>
+                <div style={{ padding: '0 16px 20px' }}>
                   <div 
                     style={{
                       position: 'relative',
-                      borderRadius: '20px',
+                      borderRadius: '16px',
                       overflow: 'hidden',
-                      height: '200px',
+                      height: '160px',
                       cursor: 'pointer'
                     }}
                     onClick={() => router.push(`/app/universe/${featuredUniverse.slug || featuredUniverse.id}`)}
@@ -504,23 +504,23 @@ export default function UniversesScreen() {
               )}
 
               {/* Filter by Category */}
-              <div style={{ marginBottom: '28px' }}>
+              <div style={{ marginBottom: '20px' }}>
                 <h3 style={{
-                  fontSize: '18px',
+                  fontSize: '15px',
                   fontWeight: '700',
                   color: textColor,
-                  margin: '0 0 14px 0',
-                  paddingLeft: '20px'
+                  margin: '0 0 10px 0',
+                  paddingLeft: '16px'
                 }}>
                   Filter by Category
                 </h3>
                 <div style={{
                   display: 'flex',
-                  gap: '12px',
+                  gap: '8px',
                   overflowX: 'auto',
-                  paddingLeft: '20px',
-                  paddingRight: '20px',
-                  paddingBottom: '8px'
+                  paddingLeft: '16px',
+                  paddingRight: '16px',
+                  paddingBottom: '4px'
                 }}>
                   {Object.entries(CATEGORY_CONFIG).slice(0, 6).map(([slug, config]) => {
                     const isActive = activeCategory === config.label;
@@ -533,22 +533,22 @@ export default function UniversesScreen() {
                           flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          width: '80px',
-                          height: '90px',
-                          padding: '12px',
+                          width: '64px',
+                          height: '72px',
+                          padding: '8px',
                           backgroundColor: surfaceColor,
                           border: isActive ? `2px solid ${COLORS.accent}` : 'none',
-                          borderRadius: '18px',
+                          borderRadius: '14px',
                           cursor: 'pointer',
                           transition: 'all 0.2s',
                           flexShrink: 0
                         }}
                       >
-                        {renderCategoryIcon(config, 32, isActive ? COLORS.accent : secondaryTextColor)}
+                        {renderCategoryIcon(config, 24, isActive ? COLORS.accent : secondaryTextColor)}
                         <span style={{
-                          fontSize: '11px',
+                          fontSize: '10px',
                           fontWeight: '600',
-                          marginTop: '6px',
+                          marginTop: '4px',
                           textAlign: 'center',
                           color: isActive ? COLORS.accent : secondaryTextColor
                         }}>
@@ -561,19 +561,19 @@ export default function UniversesScreen() {
               </div>
 
               {/* Popular Universes */}
-              <div style={{ padding: '0 20px' }}>
+              <div style={{ padding: '0 16px' }}>
                 <h3 style={{
-                  fontSize: '18px',
+                  fontSize: '15px',
                   fontWeight: '700',
                   color: textColor,
-                  margin: '0 0 14px 0'
+                  margin: '0 0 10px 0'
                 }}>
                   Popular Universes
                 </h3>
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: '16px'
+                  gap: '12px'
                 }}>
                   {filteredUniverses.map((universe) => {
                     const activity = getActivityLevel(universe.total_signals || 0);
@@ -588,7 +588,7 @@ export default function UniversesScreen() {
                           transition: 'transform 0.2s'
                         }}>
                           <div style={{
-                            borderRadius: '16px',
+                            borderRadius: '12px',
                             overflow: 'hidden',
                             backgroundColor: isDark ? '#1F2937' : '#E5E7EB'
                           }}>
@@ -597,14 +597,14 @@ export default function UniversesScreen() {
                               alt={universe.name}
                               style={{
                                 width: '100%',
-                                height: '120px',
+                                height: '90px',
                                 objectFit: 'cover'
                               }}
                             />
                           </div>
-                          <div style={{ paddingTop: '10px' }}>
+                          <div style={{ paddingTop: '8px' }}>
                             <p style={{
-                              fontSize: '15px',
+                              fontSize: '13px',
                               fontWeight: '600',
                               color: textColor,
                               margin: 0,
@@ -617,12 +617,12 @@ export default function UniversesScreen() {
                             <div style={{
                               display: 'flex',
                               alignItems: 'center',
-                              gap: '4px',
-                              marginTop: '4px'
+                              gap: '3px',
+                              marginTop: '2px'
                             }}>
-                              <IoFlameOutline size={14} color={activity.color} />
+                              <IoFlameOutline size={12} color={activity.color} />
                               <span style={{
-                                fontSize: '13px',
+                                fontSize: '11px',
                                 fontWeight: '600',
                                 color: activity.color
                               }}>
