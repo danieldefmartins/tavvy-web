@@ -14,7 +14,8 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
 import {
-  IoSearchOutline, IoCloseCircle, IoFlameOutline
+  IoSearchOutline, IoCloseCircle, IoFlameOutline,
+  IoChevronBack, IoPersonCircleOutline
 } from 'react-icons/io5';
 import { 
   MdAttractions, MdFlight, MdPark, MdLocationCity, 
@@ -232,25 +233,69 @@ export default function UniversesScreen() {
           paddingBottom: '100px'
         }}>
 
-          {/* Header */}
-          <div style={{ padding: '16px 16px 4px' }}>
-            <h1 style={{
-              fontSize: '28px',
-              fontWeight: '700',
-              color: textColor,
-              margin: '0 0 2px 0',
-              letterSpacing: '-0.3px'
-            }}>
-              Universes
-            </h1>
-            <p style={{
-              fontSize: '14px',
-              color: COLORS.accent,
-              margin: 0,
-              fontWeight: '500'
-            }}>
-              Explore curated worlds.
-            </p>
+          {/* Header Nav Bar */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '12px 16px',
+            borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
+          }}>
+            {/* Back Button */}
+            <button
+              onClick={() => router.back()}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '36px',
+                height: '36px',
+                backgroundColor: 'transparent',
+                border: 'none',
+                borderRadius: '18px',
+                cursor: 'pointer'
+              }}
+            >
+              <IoChevronBack size={24} color={textColor} />
+            </button>
+
+            {/* Title */}
+            <div style={{ textAlign: 'center' }}>
+              <h1 style={{
+                fontSize: '18px',
+                fontWeight: '700',
+                color: textColor,
+                margin: 0
+              }}>
+                Universes
+              </h1>
+              <p style={{
+                fontSize: '12px',
+                color: COLORS.accent,
+                margin: 0,
+                fontWeight: '500'
+              }}>
+                Explore curated worlds.
+              </p>
+            </div>
+
+            {/* Login/Profile Icon */}
+            <button
+              onClick={() => router.push('/app/profile')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '36px',
+                height: '36px',
+                backgroundColor: 'transparent',
+                border: 'none',
+                borderRadius: '18px',
+                cursor: 'pointer'
+              }}
+            >
+              <IoPersonCircleOutline size={28} color={textColor} />
+            </button>
           </div>
 
           {/* Search Bar */}
