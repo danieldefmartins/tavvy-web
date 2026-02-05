@@ -1,12 +1,6 @@
 /**
  * Universes Screen - Explore curated worlds
- * Pixel-perfect port from tavvy-mobile/screens/UniverseDiscoveryScreen.tsx
- * 
- * PREMIUM DARK MODE DESIGN - January 2026
- * - Minimalist black header with blue tagline
- * - Full-width featured universe hero
- * - Icon-driven category filters
- * - 2x2 popular universes grid with activity signals
+ * Fixed layout with proper structure
  */
 
 import React, { useState, useEffect } from 'react';
@@ -17,11 +11,10 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
-import { IoSearch, IoRocketOutline, IoAirplaneOutline, IoLeafOutline, IoBusinessOutline } from 'react-icons/io5';
+import { IoSearch, IoRocketOutline, IoAirplaneOutline, IoLeafOutline, IoBusinessOutline, IoChevronBack, IoPersonCircleOutline } from 'react-icons/io5';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
-// Design System Colors
 const COLORS = {
   accent: '#667EEA',
   activityHigh: '#EF4444',
@@ -41,7 +34,6 @@ interface Universe {
   location?: string;
 }
 
-// Category filters matching iOS
 const CATEGORY_FILTERS = [
   { id: 'theme-parks', icon: IoRocketOutline, label: 'Theme Parks' },
   { id: 'airports', icon: IoAirplaneOutline, label: 'Airports' },
@@ -53,13 +45,14 @@ const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda
 
 export default function ExploreScreen() {
   const router = useRouter();
-  const { locale } = router;
-  const { theme, isDark } = useThemeContext();
+  const { theme } = useThemeContext();
   const { user } = useAuth();
   const { t } = useTranslation('common');
   const [featuredUniverse, setFeaturedUniverse] = useState<Universe | null>(null);
   const [popularUniverses, setPopularUniverses] = useState<Universe[]>([]);
+  const [searchResults, setSearchResults] = useState<Universe[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searching, setSearching] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
@@ -67,33 +60,28 @@ export default function ExploreScreen() {
     fetchUniverses();
   }, [activeCategory]);
 
+  useEffect(() => {
+    if (searchQuery.trim().length === 0) {
+      setSearchResults([]);
+      setSearching(false);
+      return;
+    }
+    setSearching(true);
+    const timer = setTimeout(() => {
+      searchUniverses(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const fetchUniverses = async () => {
     setLoading(true);
     try {
-      let featuredQuery = supabase
-        .from('atlas_universes')
-        .select('*')
-        .eq('is_featured', true)
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      let universesQuery = supabase
-        .from('atlas_universes')
-        .select('*')
-        .order('created_at', { ascending: false });
-
       const [featuredResult, universesResult] = await Promise.all([
-        featuredQuery,
-        universesQuery.limit(4),
+        supabase.from('atlas_universes').select('*').eq('is_featured', true).limit(1),
+        supabase.from('atlas_universes').select('*').order('created_at', { ascending: false }).limit(6),
       ]);
-
-      if (featuredResult.data && featuredResult.data.length > 0) {
-        setFeaturedUniverse(featuredResult.data[0]);
-      }
-
-      if (universesResult.data && universesResult.data.length > 0) {
-        setPopularUniverses(universesResult.data);
-      }
+      if (featuredResult.data?.[0]) setFeaturedUniverse(featuredResult.data[0]);
+      if (universesResult.data) setPopularUniverses(universesResult.data);
     } catch (error) {
       console.error('Error fetching universes:', error);
     } finally {
@@ -101,408 +89,353 @@ export default function ExploreScreen() {
     }
   };
 
-  const getActivityLevel = (signals: number) => {
-    if (signals > 100) return 'High Activity';
-    if (signals > 50) return 'Moderate';
-    return 'Active';
+  const searchUniverses = async (query: string) => {
+    try {
+      const { data } = await supabase
+        .from('atlas_universes')
+        .select('*')
+        .ilike('name', `%${query}%`)
+        .limit(10);
+      setSearchResults(data || []);
+    } catch (error) {
+      console.error('Error searching:', error);
+    } finally {
+      setSearching(false);
+    }
   };
+
+  const isSearching = searchQuery.trim().length > 0;
 
   return (
     <>
       <Head>
         <title>Universes | TavvY</title>
-        <meta name="description" content="Explore TavvY Universes - curated worlds" />
       </Head>
 
       <AppLayout>
-        <div className="explore-screen">
-          {/* Header */}
-          <header className="header">
-            <h1 className="title">Universes</h1>
-            <p className="tagline">Explore curated worlds.</p>
-          </header>
+        <div style={{
+          minHeight: '100vh',
+          backgroundColor: theme.background,
+          paddingBottom: 100,
+        }}>
+          {/* HEADER - Back | Title | Profile (WHITE) */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '12px 16px',
+            borderBottom: `1px solid ${theme.border}`,
+            backgroundColor: theme.background,
+            position: 'sticky',
+            top: 0,
+            zIndex: 100,
+          }}>
+            <button
+              onClick={() => router.back()}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#FFFFFF',
+                padding: 8,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <IoChevronBack size={24} />
+            </button>
+            
+            <div style={{ flex: 1, textAlign: 'center' }}>
+              <h1 style={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: theme.text,
+                margin: 0,
+              }}>Universes</h1>
+              <p style={{
+                fontSize: 12,
+                color: COLORS.accent,
+                margin: '2px 0 0',
+              }}>Explore curated worlds.</p>
+            </div>
+            
+            <Link
+              href="/app/profile"
+              style={{
+                color: '#FFFFFF',
+                padding: 8,
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <IoPersonCircleOutline size={28} />
+            </Link>
+          </div>
 
-          {/* Search Bar */}
-          <div className="search-section">
-            <div className="search-bar">
-              <IoSearch size={20} />
+          {/* SEARCH BAR */}
+          <div style={{ padding: '12px 16px' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              backgroundColor: theme.surface,
+              padding: '12px 14px',
+              borderRadius: 12,
+            }}>
+              <IoSearch size={20} color={theme.textSecondary} />
               <input
                 type="text"
-                className="search-input"
                 placeholder="Search parks, airports, cities..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  flex: 1,
+                  border: 'none',
+                  background: 'transparent',
+                  fontSize: 15,
+                  color: theme.text,
+                  outline: 'none',
+                }}
               />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  style={{
+                    background: theme.textSecondary,
+                    color: theme.background,
+                    border: 'none',
+                    width: 20,
+                    height: 20,
+                    borderRadius: 10,
+                    fontSize: 12,
+                    cursor: 'pointer',
+                  }}
+                >✕</button>
+              )}
             </div>
           </div>
 
-          {/* Featured Universe Hero */}
-          {featuredUniverse && (
-            <Link 
-              href={`/app/universe/${featuredUniverse.slug || featuredUniverse.id}`}
-              className="featured-card"
-            >
-              <img 
-                src={featuredUniverse.banner_image_url || PLACEHOLDER_IMAGE}
-                alt={featuredUniverse.name}
-                className="featured-image"
-              />
-              <div className="featured-label-container">
-                <div className="featured-label">
-                  <span>FEATURED UNIVERSE</span>
+          {isSearching ? (
+            /* SEARCH RESULTS */
+            <div style={{ padding: '0 16px' }}>
+              <h2 style={{ fontSize: 16, fontWeight: 700, color: theme.text, margin: '0 0 12px' }}>
+                {searching ? 'Searching...' : `Results for "${searchQuery}"`}
+              </h2>
+              {searching ? (
+                <div style={{ textAlign: 'center', padding: 40 }}>
+                  <div style={{
+                    width: 32, height: 32,
+                    border: `3px solid ${theme.surface}`,
+                    borderTopColor: COLORS.accent,
+                    borderRadius: '50%',
+                    animation: 'spin 1s linear infinite',
+                    margin: '0 auto',
+                  }} />
                 </div>
-              </div>
-              <div className="featured-gradient">
-                <div className="featured-bottom-row">
-                  <div className="featured-text-content">
-                    <h2 className="featured-name">{featuredUniverse.name}</h2>
-                    <p className="featured-meta">
-                      {featuredUniverse.location || 'Explore Now'}
-                    </p>
-                  </div>
-                  <button className="explore-button">
-                    Explore Universe
-                  </button>
-                </div>
-              </div>
-            </Link>
-          )}
-
-          {/* Filter by Category */}
-          <section className="filter-section">
-            <h2 className="section-title">Filter by Category</h2>
-            <div className="filter-grid">
-              {CATEGORY_FILTERS.map((filter) => {
-                const Icon = filter.icon;
-                const isActive = activeCategory === filter.id;
-                return (
-                  <button
-                    key={filter.id}
-                    className={`filter-button ${isActive ? 'active' : ''}`}
-                    onClick={() => setActiveCategory(isActive ? null : filter.id)}
-                  >
-                    <Icon size={24} />
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-
-          {/* Popular Universes Grid */}
-          <section className="popular-section">
-            <h2 className="section-title">Popular Universes</h2>
-            <div className="grid-container">
-              {loading ? (
-                <div className="loading-container">
-                  <div className="loading-spinner" />
-                  <p>Loading universes...</p>
-                </div>
-              ) : popularUniverses.length === 0 ? (
-                <div className="empty-state">
-                  <span className="empty-icon">🌌</span>
-                  <h3>No universes found</h3>
-                  <p>Check back soon for new universes</p>
+              ) : searchResults.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: 40 }}>
+                  <span style={{ fontSize: 40 }}>🔍</span>
+                  <h3 style={{ color: theme.text, margin: '12px 0 6px' }}>No universes found</h3>
+                  <p style={{ color: theme.textSecondary, fontSize: 13 }}>Try a different search term</p>
                 </div>
               ) : (
-                popularUniverses.map((universe) => (
-                  <Link 
-                    key={universe.id}
-                    href={`/app/universe/${universe.slug || universe.id}`}
-                    className="grid-card"
-                  >
-                    <img 
-                      src={universe.thumbnail_image_url || PLACEHOLDER_IMAGE}
-                      alt={universe.name}
-                      className="grid-image"
-                    />
-                    <div className="grid-content">
-                      <h3 className="grid-name">{universe.name}</h3>
-                      <div className="activity-badge">
-                        <span className="activity-icon">🔥</span>
-                        <span className="activity-text">
-                          {getActivityLevel(universe.total_signals || 0)}
-                        </span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {searchResults.map((u) => (
+                    <Link
+                      key={u.id}
+                      href={`/app/universe/${u.slug || u.id}`}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        padding: 12,
+                        backgroundColor: theme.surface,
+                        borderRadius: 12,
+                        textDecoration: 'none',
+                      }}
+                    >
+                      <img
+                        src={u.thumbnail_image_url || PLACEHOLDER_IMAGE}
+                        alt={u.name}
+                        style={{ width: 56, height: 56, borderRadius: 10, objectFit: 'cover' }}
+                      />
+                      <div>
+                        <h3 style={{ fontSize: 15, fontWeight: 600, color: theme.text, margin: 0 }}>{u.name}</h3>
+                        <p style={{ fontSize: 13, color: theme.textSecondary, margin: '4px 0 0' }}>{u.location || 'Explore Now'}</p>
                       </div>
-                    </div>
-                  </Link>
-                ))
+                    </Link>
+                  ))}
+                </div>
               )}
             </div>
-          </section>
+          ) : (
+            <>
+              {/* FEATURED UNIVERSE - Medium size (150px) */}
+              {featuredUniverse && (
+                <Link
+                  href={`/app/universe/${featuredUniverse.slug || featuredUniverse.id}`}
+                  style={{
+                    display: 'block',
+                    margin: '0 16px 16px',
+                    borderRadius: 14,
+                    overflow: 'hidden',
+                    height: 150,
+                    position: 'relative',
+                    textDecoration: 'none',
+                  }}
+                >
+                  <img
+                    src={featuredUniverse.banner_image_url || PLACEHOLDER_IMAGE}
+                    alt={featuredUniverse.name}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                  <div style={{
+                    position: 'absolute',
+                    top: 10,
+                    left: 10,
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    border: `1.5px solid ${COLORS.accent}`,
+                    padding: '3px 8px',
+                    borderRadius: 5,
+                  }}>
+                    <span style={{ color: COLORS.accent, fontSize: 9, fontWeight: 700, letterSpacing: 0.5 }}>
+                      FEATURED
+                    </span>
+                  </div>
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    padding: '40px 12px 12px',
+                    background: 'linear-gradient(transparent, rgba(0,0,0,0.85))',
+                  }}>
+                    <h2 style={{ color: '#FFF', fontSize: 18, fontWeight: 700, margin: 0 }}>
+                      {featuredUniverse.name}
+                    </h2>
+                    <p style={{ color: '#D1D5DB', fontSize: 12, margin: '4px 0 0' }}>
+                      {featuredUniverse.location || 'Tap to explore'}
+                    </p>
+                  </div>
+                </Link>
+              )}
 
-          {/* Bottom Spacing */}
-          <div className="bottom-spacing" />
+              {/* CATEGORY FILTERS - Clean grid */}
+              <div style={{ padding: '0 16px', marginBottom: 16 }}>
+                <h2 style={{ fontSize: 15, fontWeight: 700, color: theme.text, margin: '0 0 10px' }}>
+                  Filter by Category
+                </h2>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gap: 10,
+                }}>
+                  {CATEGORY_FILTERS.map((filter) => {
+                    const Icon = filter.icon;
+                    const isActive = activeCategory === filter.id;
+                    return (
+                      <button
+                        key={filter.id}
+                        onClick={() => setActiveCategory(isActive ? null : filter.id)}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: 6,
+                          padding: '12px 4px',
+                          backgroundColor: theme.surface,
+                          border: isActive ? `2px solid ${COLORS.accent}` : 'none',
+                          borderRadius: 12,
+                          color: isActive ? COLORS.accent : theme.textSecondary,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <Icon size={22} />
+                        <span style={{ fontSize: 10, fontWeight: 500, textAlign: 'center' }}>
+                          {filter.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* POPULAR UNIVERSES - Full width cards */}
+              <div style={{ padding: '0 16px' }}>
+                <h2 style={{ fontSize: 15, fontWeight: 700, color: theme.text, margin: '0 0 12px' }}>
+                  Popular Universes
+                </h2>
+                {loading ? (
+                  <div style={{ textAlign: 'center', padding: 40 }}>
+                    <div style={{
+                      width: 32, height: 32,
+                      border: `3px solid ${theme.surface}`,
+                      borderTopColor: COLORS.accent,
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite',
+                      margin: '0 auto 10px',
+                    }} />
+                    <p style={{ color: theme.textSecondary, fontSize: 13 }}>Loading...</p>
+                  </div>
+                ) : popularUniverses.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: 40 }}>
+                    <span style={{ fontSize: 40 }}>🌌</span>
+                    <h3 style={{ color: theme.text, margin: '12px 0 6px' }}>No universes found</h3>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {popularUniverses.map((u) => (
+                      <Link
+                        key={u.id}
+                        href={`/app/universe/${u.slug || u.id}`}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 12,
+                          backgroundColor: theme.surface,
+                          borderRadius: 12,
+                          overflow: 'hidden',
+                          textDecoration: 'none',
+                        }}
+                      >
+                        <img
+                          src={u.thumbnail_image_url || PLACEHOLDER_IMAGE}
+                          alt={u.name}
+                          style={{
+                            width: 100,
+                            height: 80,
+                            objectFit: 'cover',
+                          }}
+                        />
+                        <div style={{ flex: 1, padding: '8px 12px 8px 0' }}>
+                          <h3 style={{
+                            fontSize: 15,
+                            fontWeight: 600,
+                            color: theme.text,
+                            margin: '0 0 4px',
+                          }}>{u.name}</h3>
+                          <p style={{
+                            fontSize: 12,
+                            color: theme.textSecondary,
+                            margin: '0 0 6px',
+                          }}>{u.location || 'Explore Now'}</p>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <span style={{ fontSize: 12 }}>🔥</span>
+                            <span style={{ fontSize: 12, fontWeight: 500, color: COLORS.activityHigh }}>Active</span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
 
-        <style jsx>{`
-          .explore-screen {
-            min-height: 100vh;
-            background-color: ${theme.background};
-            padding-bottom: 100px;
-          }
-
-          /* Header */
-          .header {
-            padding: 8px 20px 16px;
-          }
-
-          .title {
-            font-size: 32px;
-            font-weight: 700;
-            color: ${theme.text};
-            margin: 0;
-          }
-
-          .tagline {
-            font-size: 16px;
-            font-weight: 500;
-            color: ${COLORS.accent};
-            margin: 4px 0 0;
-          }
-
-          /* Search */
-          .search-section {
-            padding: 0 20px;
-            margin-bottom: 20px;
-          }
-
-          .search-bar {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: ${theme.surface};
-            padding: 14px 16px;
-            border-radius: 16px;
-            color: ${theme.textSecondary};
-          }
-
-          .search-input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            font-size: 16px;
-            color: ${theme.text};
-            outline: none;
-          }
-
-          .search-input::placeholder {
-            color: ${theme.textSecondary};
-          }
-
-          /* Featured Card */
-          .featured-card {
-            position: relative;
-            margin: 0 20px 24px;
-            border-radius: 20px;
-            overflow: hidden;
-            height: 220px;
-            display: block;
-            text-decoration: none;
-          }
-
-          .featured-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-
-          .featured-label-container {
-            position: absolute;
-            top: 16px;
-            left: 16px;
-            z-index: 10;
-          }
-
-          .featured-label {
-            background: transparent;
-            border: 1.5px solid ${COLORS.accent};
-            padding: 4px 10px;
-            border-radius: 6px;
-          }
-
-          .featured-label span {
-            color: ${COLORS.accent};
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-          }
-
-          .featured-gradient {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 50px 16px 16px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.85));
-          }
-
-          .featured-bottom-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-          }
-
-          .featured-text-content {
-            flex: 1;
-            margin-right: 12px;
-          }
-
-          .featured-name {
-            color: #FFFFFF;
-            font-size: 22px;
-            font-weight: 700;
-            margin: 0 0 4px;
-          }
-
-          .featured-meta {
-            color: #D1D5DB;
-            font-size: 13px;
-            margin: 0;
-          }
-
-          .explore-button {
-            background: ${COLORS.accent};
-            color: #FFFFFF;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-          }
-
-          /* Filter Section */
-          .filter-section {
-            padding: 0 20px;
-            margin-bottom: 24px;
-          }
-
-          .section-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: ${theme.text};
-            margin: 0 0 12px;
-          }
-
-          .filter-grid {
-            display: flex;
-            gap: 12px;
-          }
-
-          .filter-button {
-            width: 70px;
-            height: 70px;
-            border-radius: 16px;
-            border: none;
-            background: ${theme.surface};
-            color: ${theme.textSecondary};
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-          }
-
-          .filter-button.active {
-            border: 2px solid ${COLORS.accent};
-            color: ${COLORS.accent};
-          }
-
-          /* Popular Section */
-          .popular-section {
-            padding: 0 20px;
-          }
-
-          .grid-container {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-          }
-
-          .grid-card {
-            display: block;
-            text-decoration: none;
-          }
-
-          .grid-image {
-            width: 100%;
-            height: 110px;
-            border-radius: 14px;
-            object-fit: cover;
-          }
-
-          .grid-content {
-            padding-top: 8px;
-          }
-
-          .grid-name {
-            font-size: 15px;
-            font-weight: 600;
-            color: ${theme.text};
-            margin: 0 0 4px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
-
-          .activity-badge {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-          }
-
-          .activity-icon {
-            font-size: 13px;
-          }
-
-          .activity-text {
-            font-size: 13px;
-            font-weight: 500;
-            color: ${COLORS.activityHigh};
-          }
-
-          /* Loading & Empty States */
-          .loading-container,
-          .empty-state {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 40px 20px;
-          }
-
-          .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid ${theme.surface};
-            border-top-color: ${COLORS.accent};
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 12px;
-          }
-
+        <style jsx global>{`
           @keyframes spin {
             to { transform: rotate(360deg); }
-          }
-
-          .empty-icon {
-            font-size: 48px;
-            display: block;
-            margin-bottom: 12px;
-          }
-
-          .empty-state h3 {
-            color: ${theme.text};
-            font-size: 18px;
-            margin: 0 0 8px;
-          }
-
-          .empty-state p {
-            color: ${theme.textSecondary};
-            font-size: 14px;
-            margin: 0;
-          }
-
-          .bottom-spacing {
-            height: 100px;
           }
         `}</style>
       </AppLayout>
