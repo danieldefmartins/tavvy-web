@@ -78,6 +78,19 @@ interface Review {
   created_at: string;
 }
 
+interface MenuItem {
+  id: string;
+  place_id: string;
+  item_name: string;
+  description?: string;
+  price?: number;
+  category?: string;
+  dietary_tags?: string[];
+  image_url?: string;
+  place_name?: string;
+  place_thumbnail?: string;
+}
+
 export default function UniverseLandingScreen() {
   const router = useRouter();
   const { slug } = router.query;
@@ -96,6 +109,12 @@ export default function UniverseLandingScreen() {
   const [showAddPlaceModal, setShowAddPlaceModal] = useState(false);
   const [showSuggestModal, setShowSuggestModal] = useState(false);
   const [suggestionText, setSuggestionText] = useState('');
+  
+  // Food search states
+  const [showFoodSearchModal, setShowFoodSearchModal] = useState(false);
+  const [foodSearchQuery, setFoodSearchQuery] = useState('');
+  const [foodSearchResults, setFoodSearchResults] = useState<MenuItem[]>([]);
+  const [foodSearchLoading, setFoodSearchLoading] = useState(false);
   
   // Check if user is verified (simplified - you'd check from auth context)
   const [isVerified, setIsVerified] = useState(true); // TODO: Get from auth context
@@ -240,6 +259,78 @@ export default function UniverseLandingScreen() {
   const handleAddPlace = (type: string) => {
     router.push(`/app/add-place?universeId=${universe?.id}&universeName=${encodeURIComponent(universe?.name || '')}&placeType=${type}`);
     setShowAddPlaceModal(false);
+  };
+
+  // Handle food search
+  const handleFoodSearch = async (query: string) => {
+    setFoodSearchQuery(query);
+    if (!query.trim() || !universe?.id) {
+      setFoodSearchResults([]);
+      return;
+    }
+
+    setFoodSearchLoading(true);
+    try {
+      // Get all dining places in this universe
+      const { data: placeLinks } = await supabase
+        .from('atlas_universe_places')
+        .select('place_id')
+        .eq('universe_id', universe.id);
+
+      if (!placeLinks || placeLinks.length === 0) {
+        setFoodSearchResults([]);
+        setFoodSearchLoading(false);
+        return;
+      }
+
+      const placeIds = placeLinks.map(link => link.place_id);
+
+      // Search menu items in those places
+      const { data: menuItems, error } = await supabase
+        .from('restaurant_menu_items')
+        .select(`
+          id,
+          place_id,
+          item_name,
+          description,
+          price,
+          category,
+          dietary_tags,
+          image_url
+        `)
+        .in('place_id', placeIds)
+        .ilike('item_name', `%${query}%`)
+        .eq('is_available', true)
+        .limit(20);
+
+      if (error) throw error;
+
+      // Get place names for the results
+      if (menuItems && menuItems.length > 0) {
+        const uniquePlaceIds = [...new Set(menuItems.map(item => item.place_id))];
+        const { data: placesData } = await supabase
+          .from('places')
+          .select('id, name, thumbnail_url')
+          .in('id', uniquePlaceIds);
+
+        const placeMap = new Map(placesData?.map(p => [p.id, p]) || []);
+        
+        const resultsWithPlaces = menuItems.map(item => ({
+          ...item,
+          place_name: placeMap.get(item.place_id)?.name || 'Unknown Restaurant',
+          place_thumbnail: placeMap.get(item.place_id)?.thumbnail_url
+        }));
+
+        setFoodSearchResults(resultsWithPlaces);
+      } else {
+        setFoodSearchResults([]);
+      }
+    } catch (error) {
+      console.error('Error searching food:', error);
+      setFoodSearchResults([]);
+    } finally {
+      setFoodSearchLoading(false);
+    }
   };
 
   // Handle submit suggestion
@@ -423,16 +514,16 @@ export default function UniverseLandingScreen() {
       {/* Quick Actions */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', padding: '16px', marginBottom: '16px' }}>
         {[
-          { icon: IoExitOutline, label: "Entrances", type: "entrance" },
-          { icon: IoRestaurantOutline, label: "Dining", type: "dining" },
-          { icon: IoWaterOutline, label: "Restrooms", type: "restroom" },
-          { icon: IoCarOutline, label: "Parking", type: "parking" }
-        ].map((action, i) => {
-          const Icon = action.icon;
+          { icon: IoExitOutline, label: "Entrances", type: "entrance", action: () => setSearchQuery('entrance') },
+          { icon: IoRestaurantOutline, label: "Dining", type: "dining", action: () => setShowFoodSearchModal(true) },
+          { icon: IoWaterOutline, label: "Restrooms", type: "restroom", action: () => setSearchQuery('restroom') },
+          { icon: IoCarOutline, label: "Parking", type: "parking", action: () => setSearchQuery('parking') }
+        ].map((actionItem, i) => {
+          const Icon = actionItem.icon;
           return (
             <button
               key={i}
-              onClick={() => setSearchQuery(action.type)}
+              onClick={actionItem.action}
               style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -1155,6 +1246,196 @@ export default function UniverseLandingScreen() {
                 >
                   <span style={{ color: '#FFFFFF', fontSize: '16px', fontWeight: '600' }}>Submit Suggestion</span>
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* Food Search Modal */}
+          {showFoodSearchModal && (
+            <div style={{
+              position: 'fixed',
+              top: 0, left: 0, right: 0, bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'center',
+              zIndex: 1000
+            }}>
+              <div style={{
+                backgroundColor: colors.surface,
+                borderTopLeftRadius: '24px',
+                borderTopRightRadius: '24px',
+                padding: '24px',
+                width: '100%',
+                maxWidth: '500px',
+                maxHeight: '85%',
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
+                {/* Header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <h3 style={{ fontSize: '20px', fontWeight: '700', color: colors.text }}>🍽️ What do you want to eat?</h3>
+                  <button onClick={() => { setShowFoodSearchModal(false); setFoodSearchQuery(''); setFoodSearchResults([]); }} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                    <IoClose size={24} color={colors.text} />
+                  </button>
+                </div>
+                <p style={{ fontSize: '14px', color: colors.textSecondary, marginBottom: '16px' }}>
+                  Search for a food item and we'll show you which restaurants have it!
+                </p>
+
+                {/* Search Input */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  backgroundColor: colors.inputBg,
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  marginBottom: '16px'
+                }}>
+                  <IoSearch size={20} color={colors.textTertiary} />
+                  <input
+                    type="text"
+                    placeholder="e.g., pizza, burger, vegan..."
+                    value={foodSearchQuery}
+                    onChange={(e) => handleFoodSearch(e.target.value)}
+                    autoFocus
+                    style={{
+                      flex: 1,
+                      marginLeft: '12px',
+                      fontSize: '16px',
+                      color: colors.text,
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      outline: 'none'
+                    }}
+                  />
+                  {foodSearchQuery && (
+                    <button onClick={() => { setFoodSearchQuery(''); setFoodSearchResults([]); }} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                      <IoClose size={20} color={colors.textTertiary} />
+                    </button>
+                  )}
+                </div>
+
+                {/* Quick Suggestions */}
+                {!foodSearchQuery && (
+                  <div style={{ marginBottom: '16px' }}>
+                    <p style={{ fontSize: '12px', color: colors.textSecondary, marginBottom: '8px', fontWeight: '600' }}>POPULAR SEARCHES</p>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      {['Pizza', 'Burger', 'Ice Cream', 'Chicken', 'Salad', 'Vegan', 'Fries', 'Hot Dog'].map((suggestion) => (
+                        <button
+                          key={suggestion}
+                          onClick={() => handleFoodSearch(suggestion)}
+                          style={{
+                            padding: '8px 14px',
+                            backgroundColor: colors.inputBg,
+                            border: `1px solid ${colors.border}`,
+                            borderRadius: '20px',
+                            fontSize: '13px',
+                            color: colors.text,
+                            cursor: 'pointer'
+                          }}
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Results */}
+                <div style={{ flex: 1, overflowY: 'auto' }}>
+                  {foodSearchLoading ? (
+                    <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                      <div style={{ fontSize: '24px', marginBottom: '8px' }}>🔍</div>
+                      <p style={{ color: colors.textSecondary }}>Searching menus...</p>
+                    </div>
+                  ) : foodSearchQuery && foodSearchResults.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                      <div style={{ fontSize: '48px', marginBottom: '12px' }}>🤷</div>
+                      <p style={{ color: colors.textSecondary, fontSize: '14px' }}>No menu items found for "{foodSearchQuery}"</p>
+                      <p style={{ color: colors.textTertiary, fontSize: '12px', marginTop: '8px' }}>Try a different search term or check back later as menus are being added.</p>
+                    </div>
+                  ) : foodSearchResults.length > 0 ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <p style={{ fontSize: '12px', color: colors.textSecondary, fontWeight: '600' }}>
+                        {foodSearchResults.length} RESULT{foodSearchResults.length !== 1 ? 'S' : ''} FOUND
+                      </p>
+                      {foodSearchResults.map((item) => (
+                        <div
+                          key={item.id}
+                          onClick={() => router.push(`/app/place/${item.place_id}`)}
+                          style={{
+                            display: 'flex',
+                            backgroundColor: colors.inputBg,
+                            borderRadius: '12px',
+                            overflow: 'hidden',
+                            cursor: 'pointer',
+                            border: `1px solid ${colors.border}`
+                          }}
+                        >
+                          {item.image_url || item.place_thumbnail ? (
+                            <img
+                              src={item.image_url || item.place_thumbnail || ''}
+                              alt={item.item_name}
+                              style={{ width: '80px', height: '80px', objectFit: 'cover' }}
+                            />
+                          ) : (
+                            <div style={{
+                              width: '80px',
+                              height: '80px',
+                              backgroundColor: colors.surface,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '32px'
+                            }}>
+                              🍽️
+                            </div>
+                          )}
+                          <div style={{ flex: 1, padding: '10px 12px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                            <div style={{ fontSize: '14px', fontWeight: '600', color: colors.text, marginBottom: '2px' }}>
+                              {item.item_name}
+                            </div>
+                            <div style={{ fontSize: '12px', color: colors.primary, fontWeight: '500', marginBottom: '4px' }}>
+                              📍 {item.place_name}
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              {item.price && (
+                                <span style={{ fontSize: '13px', fontWeight: '600', color: '#10B981' }}>
+                                  ${item.price.toFixed(2)}
+                                </span>
+                              )}
+                              {item.category && (
+                                <span style={{
+                                  fontSize: '10px',
+                                  backgroundColor: colors.surface,
+                                  padding: '2px 6px',
+                                  borderRadius: '4px',
+                                  color: colors.textSecondary,
+                                  textTransform: 'capitalize'
+                                }}>
+                                  {item.category}
+                                </span>
+                              )}
+                              {item.dietary_tags && item.dietary_tags.length > 0 && (
+                                <span style={{ fontSize: '10px', color: '#10B981' }}>
+                                  {item.dietary_tags.includes('vegan') ? '🌱' : ''}
+                                  {item.dietary_tags.includes('vegetarian') ? '🥬' : ''}
+                                  {item.dietary_tags.includes('gluten-free') ? '🌾' : ''}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                      <div style={{ fontSize: '48px', marginBottom: '12px' }}>🍔</div>
+                      <p style={{ color: colors.textSecondary, fontSize: '14px' }}>Search for your favorite food above!</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
