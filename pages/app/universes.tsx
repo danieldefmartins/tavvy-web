@@ -6,7 +6,8 @@
  * category filters with labels, popular universes grid, working search
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import Fuse from 'fuse.js';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -86,8 +87,25 @@ export default function UniversesScreen() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [categories, setCategories] = useState<Category[]>([]);
   const [universes, setUniverses] = useState<Universe[]>([]);
+  const [allUniverses, setAllUniverses] = useState<Universe[]>([]); // For fuzzy search
   const [featuredUniverse, setFeaturedUniverse] = useState<Universe | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Fuse.js instance for fuzzy search with typo tolerance
+  const fuse = useMemo(() => {
+    return new Fuse(allUniverses, {
+      keys: [
+        { name: 'name', weight: 0.7 },
+        { name: 'location', weight: 0.2 },
+        { name: 'description', weight: 0.1 }
+      ],
+      threshold: 0.4, // Lower = stricter, Higher = more fuzzy (0.4 allows typos like Bush->Busch)
+      distance: 100,
+      includeScore: true,
+      minMatchCharLength: 2,
+      ignoreLocation: true,
+    });
+  }, [allUniverses]);
 
   // Theme colors based on mode
   const backgroundColor = isDark ? COLORS.background : COLORS.backgroundLight;
@@ -138,7 +156,7 @@ export default function UniversesScreen() {
         setFeaturedUniverse(featuredData);
       }
 
-      // Load popular universes
+      // Load popular universes (for display)
       const { data: universesData } = await supabase
         .from('atlas_universes')
         .select('*')
@@ -153,6 +171,17 @@ export default function UniversesScreen() {
           setFeaturedUniverse(universesData[0]);
         }
       }
+
+      // Load ALL universes for fuzzy search (no limit)
+      const { data: allUniversesData } = await supabase
+        .from('atlas_universes')
+        .select('*')
+        .eq('status', 'published')
+        .order('name');
+
+      if (allUniversesData) {
+        setAllUniverses(allUniversesData);
+      }
     } catch (error) {
       console.error('Error loading universes:', error);
     } finally {
@@ -160,22 +189,21 @@ export default function UniversesScreen() {
     }
   };
 
-  const performSearch = async (query: string) => {
+  const performSearch = (query: string) => {
     setIsSearching(true);
     try {
-      const { data, error } = await supabase
-        .from('atlas_universes')
-        .select('*')
-        .eq('status', 'published')
-        .or(`name.ilike.%${query}%,location.ilike.%${query}%,description.ilike.%${query}%`)
-        .order('total_signals', { ascending: false })
-        .limit(20);
-
-      if (data) {
-        setSearchResults(data);
-      }
+      // Use Fuse.js for fuzzy search with typo tolerance
+      const results = fuse.search(query);
+      
+      // Extract the universe objects from Fuse results and limit to 20
+      const matchedUniverses = results
+        .slice(0, 20)
+        .map(result => result.item);
+      
+      setSearchResults(matchedUniverses);
     } catch (error) {
       console.error('Search error:', error);
+      setSearchResults([]);
     } finally {
       setIsSearching(false);
     }
