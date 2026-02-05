@@ -29,6 +29,7 @@ import {
   IoRestaurant, IoCafe, IoBeer, IoCarSport, IoStorefront,
   IoThumbsUp, IoTrendingUp, IoWarning, IoClose, IoLocationSharp
 } from 'react-icons/io5';
+import L from 'leaflet';
 
 // Dynamic import for Leaflet (SSR disabled)
 const MapContainer = dynamic(
@@ -325,8 +326,21 @@ export default function MapScreen() {
         console.error('[Map] API error:', data.error);
         setPlaces([]);
       } else {
-        console.log(`[Map] Fetched ${data.places?.length || 0} places via API`, data.metrics);
-        setPlaces(data.places || []);
+        const fetchedPlaces = data.places || [];
+        
+        // Deduplicate by place ID (keep first occurrence)
+        const seenIds = new Set<string>();
+        const uniquePlaces = fetchedPlaces.filter((place: PlaceCardType) => {
+          if (seenIds.has(place.id)) {
+            console.log(`[Dedup] Removing duplicate place: ${place.name} (${place.id})`);
+            return false;
+          }
+          seenIds.add(place.id);
+          return true;
+        });
+        
+        console.log(`[Map] Fetched ${fetchedPlaces.length} places, ${uniquePlaces.length} unique via API`, data.metrics);
+        setPlaces(uniquePlaces);
       }
     } catch (error) {
       console.error('Error fetching places:', error);
@@ -561,11 +575,37 @@ export default function MapScreen() {
                 }}
               />
               {/* Place markers */}
-              {places.map((place) => (
-                place.latitude && place.longitude && (
+              {places.map((place, index) => {
+                const isSelected = selectedPlaceId === place.id || index === 0;
+                const markerHtml = `
+                  <div style="
+                    width: ${isSelected ? '42px' : '36px'};
+                    height: ${isSelected ? '42px' : '36px'};
+                    background-color: ${isSelected ? '#EF4444' : '#667EEA'};
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                    border: ${isSelected ? '3px solid white' : 'none'};
+                    cursor: pointer;
+                  ">
+                    <svg width="${isSelected ? '20' : '18'}" height="${isSelected ? '20' : '18'}" viewBox="0 0 24 24" fill="white">
+                      <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    </svg>
+                  </div>
+                `;
+                
+                return place.latitude && place.longitude && (
                   <Marker
                     key={place.id}
                     position={[place.latitude, place.longitude]}
+                    icon={L.divIcon({
+                      html: markerHtml,
+                      className: '',
+                      iconSize: [isSelected ? 42 : 36, isSelected ? 42 : 36],
+                      iconAnchor: [isSelected ? 21 : 18, isSelected ? 42 : 36],
+                    })}
                     eventHandlers={{
                       click: () => {
                         setSelectedPlaceId(place.id);
@@ -577,8 +617,8 @@ export default function MapScreen() {
                       }
                     }}
                   />
-                )
-              ))}
+                );
+              })}
               {/* Map center updater - responds to mapCenter state changes */}
               <MapCenterUpdater center={mapCenter} zoom={mapZoom} />
             </MapContainer>
