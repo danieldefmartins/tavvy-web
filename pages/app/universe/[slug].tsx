@@ -63,9 +63,7 @@ interface Place {
   name: string;
   tavvy_category?: string;
   tavvy_subcategory?: string;
-  total_signals?: number;
-  thumbnail_url?: string;
-  is_open?: boolean;
+  cover_image_url?: string;
   latitude?: number;
   longitude?: number;
 }
@@ -118,6 +116,8 @@ export default function UniverseLandingScreen() {
   
   // Check if user is verified (simplified - you'd check from auth context)
   const [isVerified, setIsVerified] = useState(true); // TODO: Get from auth context
+  
+  
 
   useEffect(() => {
     if (slug) {
@@ -170,24 +170,22 @@ export default function UniverseLandingScreen() {
       }
 
       // Fetch places - two-step approach for reliability
-      console.log('[Universe] Fetching places for universe:', universeData.id);
       const { data: placeLinks, error: linksError } = await supabase
         .from('atlas_universe_places')
         .select('place_id')
         .eq('universe_id', universeData.id)
         .limit(100);
 
-      console.log('[Universe] Place links result:', { placeLinks, linksError, count: placeLinks?.length });
+      
 
       if (placeLinks && placeLinks.length > 0) {
         const placeIds = placeLinks.map(link => link.place_id);
-        console.log('[Universe] Fetching places for IDs:', placeIds.slice(0, 5), '...');
         const { data: placesData, error: placesError } = await supabase
           .from('places')
-          .select('id, name, tavvy_category, tavvy_subcategory, total_signals, thumbnail_url, is_open, latitude, longitude')
+          .select('id, name, tavvy_category, tavvy_subcategory, cover_image_url, latitude, longitude')
           .in('id', placeIds);
         
-        console.log('[Universe] Places result:', { placesData, placesError, count: placesData?.length });
+        
         
         if (placesData) {
           setPlaces(placesData as Place[]);
@@ -569,7 +567,7 @@ export default function UniverseLandingScreen() {
                 }}
               >
                 <img
-                  src={place.thumbnail_url || getCategoryFallbackImage(place.tavvy_category || '')}
+                  src={place.cover_image_url || getCategoryFallbackImage(place.tavvy_category || '')}
                   alt={place.name}
                   style={{ width: '100px', height: '100px', objectFit: 'cover' }}
                 />
@@ -578,17 +576,19 @@ export default function UniverseLandingScreen() {
                     <div style={{ fontSize: '14px', fontWeight: '600', color: colors.text, marginBottom: '2px' }}>{place.name}</div>
                     <div style={{ fontSize: '11px', color: colors.primary, fontWeight: '500' }}>{place.tavvy_category || 'Attraction'}</div>
                   </div>
-                  <div style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    backgroundColor: '#ECFEFF',
-                    padding: '4px 8px',
-                    borderRadius: '8px',
-                    border: '1px solid #CFFAFE',
-                    width: 'fit-content'
-                  }}>
-                    <span style={{ fontSize: '10px', color: '#0891B2', fontWeight: '500' }}>✨ {place.total_signals || 0} signals</span>
-                  </div>
+                  {place.tavvy_subcategory && (
+                    <div style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      backgroundColor: '#ECFEFF',
+                      padding: '4px 8px',
+                      borderRadius: '8px',
+                      border: '1px solid #CFFAFE',
+                      width: 'fit-content'
+                    }}>
+                      <span style={{ fontSize: '10px', color: '#0891B2', fontWeight: '500' }}>{place.tavvy_subcategory}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
