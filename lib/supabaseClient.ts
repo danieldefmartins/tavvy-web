@@ -46,14 +46,24 @@ const createMockClient = (): SupabaseClient => {
   } as unknown as SupabaseClient;
 };
 
-// Get Supabase credentials from NEXT_PUBLIC_ env vars
-// These are automatically inlined by Next.js at build time
+// Hardcoded fallback credentials (these are public anon keys, safe to include)
+const FALLBACK_SUPABASE_URL = 'https://scasgwrikoqdwlwlwcff.supabase.co';
+const FALLBACK_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjYXNnd3Jpa29xZHdsd2x3Y2ZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY5ODUxODEsImV4cCI6MjA4MjU2MTE4MX0.83ARHv2Zj6oJpbojPCIT0ljL8Ze2JqMBztLVueGXXhs';
+
+// Get Supabase credentials - use env vars if available, otherwise fallback
 const getSupabaseCredentials = (): { url: string; anonKey: string } => {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+  // Try environment variables first
+  const envUrl = typeof process !== 'undefined' ? process.env?.NEXT_PUBLIC_SUPABASE_URL : undefined;
+  const envKey = typeof process !== 'undefined' ? process.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY : undefined;
   
-  if (url && anonKey) {
+  // Use env vars if available, otherwise use fallback
+  const url = envUrl || FALLBACK_SUPABASE_URL;
+  const anonKey = envKey || FALLBACK_SUPABASE_ANON_KEY;
+  
+  if (envUrl && envKey) {
     console.log('[Supabase] Using credentials from NEXT_PUBLIC_ env vars');
+  } else {
+    console.log('[Supabase] Using fallback credentials');
   }
   
   return { url, anonKey };
@@ -77,18 +87,10 @@ const getSupabaseClient = (): SupabaseClient => {
     console.log('[Supabase] Key available:', !!supabaseAnonKey);
   }
 
-  // If credentials are not available, return mock client
+  // With fallback credentials, we should always have valid credentials
+  // But just in case, log if we somehow don't
   if (!supabaseUrl || !supabaseAnonKey) {
-    // During SSR/build, return mock but don't cache it
-    // This allows runtime to create a real client
-    if (typeof window === 'undefined') {
-      return createMockClient();
-    }
-    
-    // In browser without credentials - this is a problem
-    console.error('[Supabase] Credentials not available in browser!');
-    console.error('[Supabase] Please ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set');
-    return createMockClient();
+    console.error('[Supabase] No credentials available - this should not happen!');
   }
 
   // Create the real client
