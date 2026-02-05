@@ -128,6 +128,7 @@ export default function UniverseLandingScreen() {
   const loadUniverseData = async () => {
     setLoading(true);
     console.log('[Universe] Loading data for slug:', slug);
+    console.log('[Universe] Supabase client:', supabase);
     try {
       // Fetch universe by slug or id
       let universeData = null;
@@ -538,7 +539,7 @@ export default function UniverseLandingScreen() {
             >
               <Icon size={24} color="#374151" />
               <span style={{ fontSize: '11px', color: colors.textSecondary, marginTop: '6px', fontWeight: '500' }}>
-                {action.label}
+                {actionItem.label}
               </span>
             </button>
           );
