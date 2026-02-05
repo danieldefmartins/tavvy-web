@@ -198,6 +198,7 @@ export default function MapScreen() {
   // Places data
   const [places, setPlaces] = useState<PlaceCardType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   
   // Bottom sheet states - always partial, no expand/collapse
   const [sheetHeight] = useState<'partial'>('partial');
@@ -565,25 +566,17 @@ export default function MapScreen() {
                   <Marker
                     key={place.id}
                     position={[place.latitude, place.longitude]}
-                  >
-                    <Popup>
-                      <div style={{ minWidth: '150px' }}>
-                        <strong>{place.name}</strong>
-                        <br />
-                        <span style={{ fontSize: '12px', color: '#666' }}>
-                          {place.category || 'Place'}
-                        </span>
-                        {place.distance && (
-                          <>
-                            <br />
-                            <span style={{ fontSize: '11px', color: '#888' }}>
-                              {formatDistance(place.distance)}
-                            </span>
-                          </>
-                        )}
-                      </div>
-                    </Popup>
-                  </Marker>
+                    eventHandlers={{
+                      click: () => {
+                        setSelectedPlaceId(place.id);
+                        // Scroll to the place card
+                        const cardElement = document.getElementById(`place-card-${place.id}`);
+                        if (cardElement) {
+                          cardElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+                        }
+                      }
+                    }}
+                  />
                 )
               ))}
               {/* Map center updater - responds to mapCenter state changes */}
@@ -839,10 +832,15 @@ export default function MapScreen() {
               </div>
             ) : (
               places.map((place) => (
-                <div key={place.id} className="place-card" onClick={() => {
-                  console.log('[MapScreen] Place card clicked:', place.id);
-                  router.push(`/place/${place.id}`);
-                }}>
+                <div 
+                  key={place.id} 
+                  id={`place-card-${place.id}`}
+                  className={`place-card ${selectedPlaceId === place.id ? 'selected' : ''}`}
+                  onClick={() => {
+                    console.log('[MapScreen] Place card clicked:', place.id);
+                    router.push(`/place/${place.id}`);
+                  }}
+                >
                   <div className="place-image">
                     <img 
                       src={place.cover_image_url || place.photo_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop'} 
@@ -1570,6 +1568,11 @@ export default function MapScreen() {
 
         .place-card:hover {
           transform: translateY(-2px);
+        }
+
+        .place-card.selected {
+          border: 2px solid #667EEA;
+          box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
         }
 
         .place-image {
