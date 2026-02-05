@@ -478,7 +478,7 @@ export default function UniversesScreen() {
           ) : (
             /* Regular Content */
             <>
-              {/* Featured Universe */}
+              {/* Featured Universe - Full 16:9 Image */}
               {featuredUniverse && (
                 <div style={{ padding: '0 16px 20px' }}>
                   <div 
@@ -486,12 +486,12 @@ export default function UniversesScreen() {
                       position: 'relative',
                       borderRadius: '16px',
                       overflow: 'hidden',
-                      height: '160px',
+                      aspectRatio: '16 / 9',
                       cursor: 'pointer'
                     }}
                     onClick={() => router.push(`/app/universe/${featuredUniverse.slug || featuredUniverse.id}`)}
                   >
-                    {/* Background Image */}
+                    {/* Background Image - Full 16:9 */}
                     <img
                       src={featuredUniverse.banner_image_url || featuredUniverse.thumbnail_image_url || PLACEHOLDER_IMAGE}
                       alt={featuredUniverse.name}
