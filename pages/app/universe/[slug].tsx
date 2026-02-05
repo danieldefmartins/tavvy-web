@@ -309,7 +309,7 @@ export default function UniverseLandingScreen() {
         const uniquePlaceIds = [...new Set(menuItems.map(item => item.place_id))];
         const { data: placesData } = await supabase
           .from('places')
-          .select('id, name, thumbnail_url')
+          .select('id, name, cover_image_url')
           .in('id', uniquePlaceIds);
 
         const placeMap = new Map(placesData?.map(p => [p.id, p]) || []);
@@ -317,7 +317,7 @@ export default function UniverseLandingScreen() {
         const resultsWithPlaces = menuItems.map(item => ({
           ...item,
           place_name: placeMap.get(item.place_id)?.name || 'Unknown Restaurant',
-          place_thumbnail: placeMap.get(item.place_id)?.thumbnail_url
+          place_thumbnail: placeMap.get(item.place_id)?.cover_image_url
         }));
 
         setFoodSearchResults(resultsWithPlaces);
