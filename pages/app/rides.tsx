@@ -9,6 +9,7 @@
  * - Featured ride hero with thrill level badges
  * - Popular rides grid
  * - Real data from Supabase places table
+ * - Search by ride name OR theme park name
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -67,6 +68,9 @@ interface Ride {
   is_featured?: boolean;
   city?: string;
   region?: string;
+  description?: string;
+  short_description?: string;
+  min_height_inches?: number;
 }
 
 const FILTER_OPTIONS: { key: FilterOption; label: string }[] = [
@@ -87,14 +91,14 @@ const THRILL_LABELS: Record<string, { label: string; color: string }> = {
 // Placeholder image
 const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?w=800';
 
-// Helper function to determine thrill level from subcategory
+// Helper function to determine thrill level from subcategory (case-insensitive)
 const getThrillLevelFromSubcategory = (subcategory: string | undefined): 'mild' | 'moderate' | 'thrilling' | 'extreme' => {
   if (!subcategory) return 'moderate';
   const lower = subcategory.toLowerCase();
-  if (lower.includes('thrill') || lower === 'roller_coaster') return 'extreme';
-  if (lower.includes('water') || lower === 'simulator') return 'thrilling';
-  if (lower === 'dark_ride' || lower === 'boat_ride') return 'moderate';
-  if (lower === 'carousel' || lower === 'train' || lower === 'playground' || lower === 'show' || lower === 'meet_greet') return 'mild';
+  if (lower.includes('coaster') || lower.includes('thrill') || lower.includes('drop')) return 'extreme';
+  if (lower.includes('water') || lower.includes('simulator') || lower.includes('flume')) return 'thrilling';
+  if (lower.includes('dark') || lower.includes('boat') || lower.includes('interactive')) return 'moderate';
+  if (lower.includes('carousel') || lower.includes('train') || lower.includes('playground') || lower.includes('show') || lower.includes('meet') || lower.includes('spinner')) return 'mild';
   return 'moderate';
 };
 
@@ -106,10 +110,10 @@ const getCategoryFallbackImage = (subcategory: string | undefined): string => {
   if (lower.includes('coaster') || lower.includes('thrill')) {
     return 'https://images.unsplash.com/photo-1560713781-d00f6c18f388?w=800';
   }
-  if (lower.includes('water') || lower.includes('boat')) {
+  if (lower.includes('water') || lower.includes('boat') || lower.includes('flume')) {
     return 'https://images.unsplash.com/photo-1582653291997-079a1c04e5a1?w=800';
   }
-  if (lower === 'dark_ride') {
+  if (lower.includes('dark')) {
     return 'https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?w=800';
   }
   return PLACEHOLDER_IMAGE;
@@ -126,57 +130,72 @@ export default function RidesScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterBy, setFilterBy] = useState<FilterOption>('all');
   const [error, setError] = useState<string | null>(null);
+  const [searchingByPark, setSearchingByPark] = useState(false);
 
   useEffect(() => {
     loadRides();
   }, [filterBy]);
 
+  // Search when query changes (with debounce)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery.length >= 2) {
+        searchRides(searchQuery);
+      } else if (searchQuery.length === 0) {
+        loadRides();
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const loadRides = async () => {
     setLoading(true);
     setError(null);
+    setSearchingByPark(false);
     
     try {
-      // Query places table with attraction category (matching mobile)
+      // Query places table with attraction category
+      // Use ilike for case-insensitive matching
       let query = supabase
         .from('places')
-        .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos')
+        .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos, description, short_description, min_height_inches')
         .eq('tavvy_category', 'attraction')
-        .order('created_at', { ascending: false })
-        .limit(50);
+        .order('name', { ascending: true })
+        .limit(100);
 
-      // Apply filter based on subcategory
+      // Apply filter based on subcategory (case-insensitive with ilike)
       if (filterBy === 'roller_coaster') {
         query = supabase
           .from('places')
-          .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos')
+          .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos, description, short_description, min_height_inches')
           .eq('tavvy_category', 'attraction')
-          .eq('tavvy_subcategory', 'roller_coaster')
-          .order('created_at', { ascending: false })
-          .limit(50);
+          .ilike('tavvy_subcategory', '%coaster%')
+          .order('name', { ascending: true })
+          .limit(100);
       } else if (filterBy === 'water') {
         query = supabase
           .from('places')
-          .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos')
+          .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos, description, short_description, min_height_inches')
           .eq('tavvy_category', 'attraction')
-          .or('tavvy_subcategory.eq.water_ride,tavvy_subcategory.eq.boat_ride')
-          .order('created_at', { ascending: false })
-          .limit(50);
+          .or('tavvy_subcategory.ilike.%water%,tavvy_subcategory.ilike.%boat%,tavvy_subcategory.ilike.%flume%')
+          .order('name', { ascending: true })
+          .limit(100);
       } else if (filterBy === 'family') {
         query = supabase
           .from('places')
-          .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos')
+          .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos, description, short_description, min_height_inches')
           .eq('tavvy_category', 'attraction')
-          .or('tavvy_subcategory.eq.carousel,tavvy_subcategory.eq.train,tavvy_subcategory.eq.spinner,tavvy_subcategory.eq.playground')
-          .order('created_at', { ascending: false })
-          .limit(50);
+          .or('tavvy_subcategory.ilike.%carousel%,tavvy_subcategory.ilike.%train%,tavvy_subcategory.ilike.%spinner%,tavvy_subcategory.ilike.%playground%,tavvy_subcategory.ilike.%show%')
+          .order('name', { ascending: true })
+          .limit(100);
       } else if (filterBy === 'dark') {
         query = supabase
           .from('places')
-          .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos')
+          .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos, description, short_description, min_height_inches')
           .eq('tavvy_category', 'attraction')
-          .eq('tavvy_subcategory', 'dark_ride')
-          .order('created_at', { ascending: false })
-          .limit(50);
+          .ilike('tavvy_subcategory', '%dark%')
+          .order('name', { ascending: true })
+          .limit(100);
       }
 
       const { data, error: queryError } = await query;
@@ -197,8 +216,11 @@ export default function RidesScreen() {
           region: place.region,
           cover_image_url: place.cover_image_url,
           photos: place.photos,
+          description: place.description,
+          short_description: place.short_description,
+          min_height_inches: place.min_height_inches,
           thrill_level: getThrillLevelFromSubcategory(place.tavvy_subcategory),
-          is_must_ride: place.tavvy_subcategory === 'roller_coaster' || place.tavvy_subcategory === 'thrill_ride',
+          is_must_ride: (place.tavvy_subcategory || '').toLowerCase().includes('coaster'),
           is_featured: false,
         }));
         setRides(mappedRides);
@@ -213,13 +235,120 @@ export default function RidesScreen() {
     }
   };
 
+  const searchRides = async (query: string) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // First, try to find a universe/theme park matching the search
+      const { data: universeData } = await supabase
+        .from('atlas_universes')
+        .select('id, name')
+        .ilike('name', `%${query}%`)
+        .limit(1);
+
+      if (universeData && universeData.length > 0) {
+        // Found a theme park - get all its rides
+        const universeId = universeData[0].id;
+        const universeName = universeData[0].name;
+        setSearchingByPark(true);
+
+        // Get place IDs linked to this universe
+        const { data: placeLinks } = await supabase
+          .from('atlas_universe_places')
+          .select('place_id')
+          .eq('universe_id', universeId)
+          .limit(200);
+
+        if (placeLinks && placeLinks.length > 0) {
+          const placeIds = placeLinks.map((link: any) => link.place_id);
+          
+          // Get the places that are attractions
+          const { data: placesData } = await supabase
+            .from('places')
+            .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos, description, short_description, min_height_inches')
+            .in('id', placeIds)
+            .eq('tavvy_category', 'attraction')
+            .order('name', { ascending: true });
+
+          if (placesData) {
+            const mappedRides: Ride[] = placesData.map((place: any) => ({
+              id: place.id,
+              name: place.name,
+              category: place.tavvy_category || 'attraction',
+              subcategory: place.tavvy_subcategory,
+              park_name: universeName,
+              universe_name: universeName,
+              city: place.city,
+              region: place.region,
+              cover_image_url: place.cover_image_url,
+              photos: place.photos,
+              description: place.description,
+              short_description: place.short_description,
+              min_height_inches: place.min_height_inches,
+              thrill_level: getThrillLevelFromSubcategory(place.tavvy_subcategory),
+              is_must_ride: (place.tavvy_subcategory || '').toLowerCase().includes('coaster'),
+              is_featured: false,
+            }));
+            setRides(mappedRides);
+            setLoading(false);
+            return;
+          }
+        }
+      }
+
+      // No theme park found, search by ride name
+      setSearchingByPark(false);
+      const { data, error: queryError } = await supabase
+        .from('places')
+        .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos, description, short_description, min_height_inches')
+        .eq('tavvy_category', 'attraction')
+        .ilike('name', `%${query}%`)
+        .order('name', { ascending: true })
+        .limit(100);
+
+      if (queryError) {
+        console.error('Error searching rides:', queryError);
+        setRides([]);
+      } else {
+        const mappedRides: Ride[] = (data || []).map((place: any) => ({
+          id: place.id,
+          name: place.name,
+          category: place.tavvy_category || 'attraction',
+          subcategory: place.tavvy_subcategory,
+          park_name: place.city,
+          city: place.city,
+          region: place.region,
+          cover_image_url: place.cover_image_url,
+          photos: place.photos,
+          description: place.description,
+          short_description: place.short_description,
+          min_height_inches: place.min_height_inches,
+          thrill_level: getThrillLevelFromSubcategory(place.tavvy_subcategory),
+          is_must_ride: (place.tavvy_subcategory || '').toLowerCase().includes('coaster'),
+          is_featured: false,
+        }));
+        setRides(mappedRides);
+      }
+    } catch (err) {
+      console.error('Error searching rides:', err);
+      setRides([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    loadRides();
-  }, [filterBy]);
+    if (searchQuery.length >= 2) {
+      searchRides(searchQuery);
+    } else {
+      loadRides();
+    }
+  }, [filterBy, searchQuery]);
 
   const handleRidePress = (ride: Ride) => {
-    router.push(`/app/ride/${ride.id}?name=${encodeURIComponent(ride.name)}&park=${encodeURIComponent(ride.park_name || ride.city || '')}`);
+    router.push(`/app/ride/${ride.id}?name=${encodeURIComponent(ride.name)}&park=${encodeURIComponent(ride.park_name || ride.universe_name || ride.city || '')}`);
   };
 
   const handleBack = () => {
@@ -232,20 +361,29 @@ export default function RidesScreen() {
   const textColor = isDark ? COLORS.textPrimary : '#111827';
   const secondaryTextColor = isDark ? COLORS.textSecondary : '#6B7280';
 
-  // Filter by search query
-  const filteredRides = searchQuery
-    ? rides.filter(r => r.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    : rides;
+  // Apply filter to rides (for when searching by park)
+  const filteredRides = rides.filter(r => {
+    if (filterBy === 'all') return true;
+    const sub = (r.subcategory || '').toLowerCase();
+    if (filterBy === 'roller_coaster') return sub.includes('coaster');
+    if (filterBy === 'water') return sub.includes('water') || sub.includes('boat') || sub.includes('flume');
+    if (filterBy === 'family') return sub.includes('carousel') || sub.includes('train') || sub.includes('spinner') || sub.includes('show');
+    if (filterBy === 'dark') return sub.includes('dark');
+    return true;
+  });
 
   const featuredRide = filteredRides.find(r => r.is_must_ride || r.is_featured) || filteredRides[0];
-  const popularRides = filteredRides.filter(r => r.id !== featuredRide?.id).slice(0, 8);
+  const popularRides = filteredRides.filter(r => r.id !== featuredRide?.id).slice(0, 20);
 
   // Format subcategory for display
   const formatSubcategory = (subcategory: string | undefined): string => {
     if (!subcategory) return 'Attraction';
+    // Already formatted (e.g., "Roller Coaster") - just return it
+    if (subcategory.includes(' ')) return subcategory;
+    // Convert snake_case to Title Case
     return subcategory
       .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
   };
 
@@ -257,551 +395,368 @@ export default function RidesScreen() {
       </Head>
 
       <AppLayout>
-        <div className="rides-screen" style={{ backgroundColor }}>
+        <div className="rides-screen" style={{ backgroundColor, minHeight: '100vh' }}>
           {/* Header */}
-          <div className="rides-header" style={{ backgroundColor: surfaceColor }}>
-            <button className="back-button" onClick={handleBack}>
+          <div className="rides-header" style={{ 
+            backgroundColor: surfaceColor,
+            padding: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: `1px solid ${isDark ? '#374151' : '#E5E7EB'}`
+          }}>
+            <button 
+              onClick={handleBack}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px' }}
+            >
               <FiArrowLeft size={24} color={textColor} />
             </button>
-            <div className="header-content">
-              <h1 style={{ color: textColor }}>Rides</h1>
-              <p style={{ color: COLORS.accent }}>Theme park thrills await.</p>
+            <div style={{ textAlign: 'center', flex: 1 }}>
+              <h1 style={{ color: textColor, fontSize: '20px', fontWeight: '600', margin: 0 }}>Rides</h1>
+              <p style={{ color: COLORS.accent, fontSize: '14px', margin: 0 }}>Theme park thrills await.</p>
             </div>
             <button 
-              className="refresh-button" 
               onClick={onRefresh}
               disabled={refreshing}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px' }}
             >
               <FiRefreshCw 
                 size={20} 
                 color={secondaryTextColor} 
-                className={refreshing ? 'spinning' : ''}
+                style={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }}
               />
             </button>
           </div>
 
           {/* Search Bar */}
-          <div className="search-section" style={{ backgroundColor: surfaceColor }}>
-            <div className="search-bar" style={{ 
+          <div style={{ padding: '12px 16px', backgroundColor: surfaceColor }}>
+            <div style={{ 
+              display: 'flex',
+              alignItems: 'center',
               backgroundColor: glassyColor,
-              borderColor: isDark ? 'transparent' : '#E5E7EB'
+              borderRadius: '12px',
+              padding: '12px 16px',
+              gap: '12px'
             }}>
               <FiSearch size={20} color={secondaryTextColor} />
               <input
                 type="text"
-                placeholder="Search rides & attractions..."
+                placeholder="Search rides or theme parks..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ color: textColor }}
+                style={{ 
+                  flex: 1,
+                  background: 'none',
+                  border: 'none',
+                  outline: 'none',
+                  color: textColor,
+                  fontSize: '16px'
+                }}
               />
               {searchQuery.length > 0 && (
-                <button className="clear-button" onClick={() => setSearchQuery('')}>
+                <button 
+                  onClick={() => setSearchQuery('')}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}
+                >
                   <FiX size={20} color={secondaryTextColor} />
                 </button>
               )}
             </div>
+            {searchingByPark && searchQuery && (
+              <p style={{ 
+                color: COLORS.accent, 
+                fontSize: '12px', 
+                marginTop: '8px',
+                marginLeft: '4px'
+              }}>
+                Showing rides from "{searchQuery}"
+              </p>
+            )}
           </div>
 
           {/* Filter Pills */}
-          <div className="filter-container">
+          <div style={{ 
+            display: 'flex',
+            gap: '8px',
+            padding: '12px 16px',
+            overflowX: 'auto',
+            backgroundColor
+          }}>
             {FILTER_OPTIONS.map((option) => (
               <button
                 key={option.key}
-                className={`filter-pill ${filterBy === option.key ? 'active' : ''}`}
+                onClick={() => setFilterBy(option.key)}
                 style={{ 
                   backgroundColor: filterBy === option.key ? COLORS.accent : glassyColor,
-                  borderColor: filterBy === option.key ? COLORS.accent : (isDark ? 'transparent' : '#E5E7EB'),
+                  color: filterBy === option.key ? '#FFFFFF' : secondaryTextColor,
+                  border: 'none',
+                  borderRadius: '20px',
+                  padding: '8px 16px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  transition: 'all 0.2s'
                 }}
-                onClick={() => setFilterBy(option.key)}
               >
-                <span style={{ 
-                  color: filterBy === option.key ? '#FFFFFF' : secondaryTextColor 
-                }}>
-                  {option.label}
-                </span>
+                {option.label}
               </button>
             ))}
           </div>
 
           {/* Content */}
-          <div className="content-area">
+          <div style={{ padding: '16px' }}>
             {loading ? (
-              <div className="loading-container">
-                <div className="spinner" />
-                <p style={{ color: secondaryTextColor }}>Loading rides...</p>
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                padding: '60px 20px'
+              }}>
+                <div style={{ 
+                  width: '40px', 
+                  height: '40px', 
+                  border: `3px solid ${glassyColor}`,
+                  borderTopColor: COLORS.accent,
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite'
+                }} />
+                <p style={{ color: secondaryTextColor, marginTop: '16px' }}>Loading rides...</p>
               </div>
             ) : error ? (
-              <div className="error-container">
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                padding: '60px 20px'
+              }}>
                 <IoTrainOutline size={64} color={secondaryTextColor} />
-                <p className="error-text" style={{ color: textColor }}>{error}</p>
-                <button className="retry-button" onClick={onRefresh}>
+                <p style={{ color: textColor, marginTop: '16px', fontWeight: '600' }}>{error}</p>
+                <button 
+                  onClick={onRefresh}
+                  style={{
+                    marginTop: '16px',
+                    backgroundColor: COLORS.accent,
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '12px 24px',
+                    cursor: 'pointer'
+                  }}
+                >
                   Try Again
                 </button>
               </div>
             ) : filteredRides.length === 0 ? (
-              <div className="empty-container">
-                <div className="empty-icon" style={{ backgroundColor: glassyColor }}>
-                  <IoTrainOutline size={48} color={secondaryTextColor} />
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                padding: '60px 20px'
+              }}>
+                <div style={{ 
+                  width: '80px', 
+                  height: '80px', 
+                  backgroundColor: glassyColor,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <IoTrainOutline size={40} color={secondaryTextColor} />
                 </div>
-                <p className="empty-title" style={{ color: textColor }}>No rides yet</p>
-                <p className="empty-subtitle" style={{ color: secondaryTextColor }}>
-                  Theme park rides and attractions will appear here once added.
+                <p style={{ color: textColor, marginTop: '16px', fontWeight: '600', fontSize: '18px' }}>No rides found</p>
+                <p style={{ color: secondaryTextColor, marginTop: '8px', textAlign: 'center' }}>
+                  {searchQuery ? `No rides matching "${searchQuery}"` : 'Theme park rides and attractions will appear here.'}
                 </p>
               </div>
             ) : (
               <>
-                {/* Featured Ride Hero */}
+                {/* Featured Ride */}
                 {featuredRide && (
-                  <div className="featured-section">
-                    <h2 className="section-title" style={{ color: textColor }}>Featured Ride</h2>
-                    <div 
-                      className="featured-card"
-                      onClick={() => handleRidePress(featuredRide)}
-                    >
-                      <img 
-                        src={featuredRide.cover_image_url || featuredRide.photos?.[0] || getCategoryFallbackImage(featuredRide.subcategory)} 
-                        alt={featuredRide.name}
-                        className="featured-image"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = PLACEHOLDER_IMAGE;
-                        }}
-                      />
-                      <div className="featured-gradient">
+                  <div 
+                    onClick={() => handleRidePress(featuredRide)}
+                    style={{
+                      position: 'relative',
+                      borderRadius: '16px',
+                      overflow: 'hidden',
+                      marginBottom: '20px',
+                      cursor: 'pointer',
+                      height: '180px'
+                    }}
+                  >
+                    <img 
+                      src={featuredRide.cover_image_url || getCategoryFallbackImage(featuredRide.subcategory)}
+                      alt={featuredRide.name}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = getCategoryFallbackImage(featuredRide.subcategory);
+                      }}
+                    />
+                    <div style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      padding: '16px',
+                      background: 'linear-gradient(transparent, rgba(0,0,0,0.8))'
+                    }}>
+                      <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
                         {featuredRide.is_must_ride && (
-                          <div className="must-ride-badge">
-                            <IoFlame size={12} color="#fff" />
-                            <span>MUST RIDE</span>
-                          </div>
+                          <span style={{
+                            backgroundColor: COLORS.mustRide,
+                            color: '#FFFFFF',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            fontSize: '10px',
+                            fontWeight: '600'
+                          }}>
+                            MUST RIDE
+                          </span>
                         )}
-                        <div className="featured-info">
-                          <h3 className="featured-name">{featuredRide.name}</h3>
-                          <p className="featured-location">
-                            {formatSubcategory(featuredRide.subcategory)} • {featuredRide.park_name || featuredRide.city || 'Theme Park'}
-                          </p>
-                          {featuredRide.thrill_level && (
-                            <div 
-                              className="thrill-badge"
-                              style={{ backgroundColor: THRILL_LABELS[featuredRide.thrill_level]?.color || '#3B82F6' }}
-                            >
-                              {THRILL_LABELS[featuredRide.thrill_level]?.label || 'Moderate'}
-                            </div>
-                          )}
-                        </div>
+                        {featuredRide.thrill_level && THRILL_LABELS[featuredRide.thrill_level] && (
+                          <span style={{
+                            backgroundColor: THRILL_LABELS[featuredRide.thrill_level].color,
+                            color: '#FFFFFF',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            fontSize: '10px',
+                            fontWeight: '600'
+                          }}>
+                            {THRILL_LABELS[featuredRide.thrill_level].label}
+                          </span>
+                        )}
+                        {featuredRide.min_height_inches && (
+                          <span style={{
+                            backgroundColor: 'rgba(255,255,255,0.2)',
+                            color: '#FFFFFF',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            fontSize: '10px',
+                            fontWeight: '600'
+                          }}>
+                            {featuredRide.min_height_inches}" min
+                          </span>
+                        )}
                       </div>
+                      <h3 style={{ color: '#FFFFFF', fontSize: '18px', fontWeight: '600', margin: 0 }}>
+                        {featuredRide.name}
+                      </h3>
+                      <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px', margin: '4px 0 0' }}>
+                        {formatSubcategory(featuredRide.subcategory)} • {featuredRide.park_name || featuredRide.universe_name || 'Theme Park'}
+                      </p>
                     </div>
                   </div>
                 )}
 
-                {/* Popular Rides Grid */}
-                {popularRides.length > 0 && (
-                  <div className="popular-section">
-                    <h2 className="section-title" style={{ color: textColor }}>All Rides</h2>
-                    <div className="rides-grid">
-                      {popularRides.map((ride, index) => (
-                        <div 
-                          key={`ride-${ride.id}-${index}`}
-                          className="ride-card"
-                          onClick={() => handleRidePress(ride)}
-                          style={{ backgroundColor: surfaceColor }}
-                        >
-                          <div className="ride-image-container">
-                            <img 
-                              src={ride.cover_image_url || ride.photos?.[0] || getCategoryFallbackImage(ride.subcategory)} 
-                              alt={ride.name}
-                              className="ride-image"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = PLACEHOLDER_IMAGE;
-                              }}
-                            />
-                            {ride.thrill_level && (
-                              <div 
-                                className="thrill-indicator"
-                                style={{ backgroundColor: THRILL_LABELS[ride.thrill_level]?.color || '#3B82F6' }}
-                              >
-                                {THRILL_LABELS[ride.thrill_level]?.label || 'Moderate'}
-                              </div>
-                            )}
-                          </div>
-                          <div className="ride-info">
-                            <h3 className="ride-name" style={{ color: textColor }}>{ride.name}</h3>
-                            <p className="ride-location" style={{ color: secondaryTextColor }}>
-                              {formatSubcategory(ride.subcategory)}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
+                {/* Rides Count */}
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  marginBottom: '12px'
+                }}>
+                  <h2 style={{ color: textColor, fontSize: '16px', fontWeight: '600', margin: 0 }}>
+                    {searchingByPark ? 'Rides & Attractions' : 'Popular Rides'}
+                  </h2>
+                  <span style={{ color: secondaryTextColor, fontSize: '14px' }}>
+                    {filteredRides.length} rides
+                  </span>
+                </div>
+
+                {/* Rides Grid */}
+                <div style={{ 
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '12px'
+                }}>
+                  {popularRides.map((ride) => (
+                    <div
+                      key={ride.id}
+                      onClick={() => handleRidePress(ride)}
+                      style={{
+                        backgroundColor: surfaceColor,
+                        borderRadius: '12px',
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        border: `1px solid ${isDark ? '#374151' : '#E5E7EB'}`
+                      }}
+                    >
+                      <div style={{ position: 'relative', height: '100px' }}>
+                        <img 
+                          src={ride.cover_image_url || getCategoryFallbackImage(ride.subcategory)}
+                          alt={ride.name}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = getCategoryFallbackImage(ride.subcategory);
+                          }}
+                        />
+                        {ride.thrill_level && THRILL_LABELS[ride.thrill_level] && (
+                          <span style={{
+                            position: 'absolute',
+                            top: '8px',
+                            right: '8px',
+                            backgroundColor: THRILL_LABELS[ride.thrill_level].color,
+                            color: '#FFFFFF',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            fontSize: '9px',
+                            fontWeight: '600'
+                          }}>
+                            {THRILL_LABELS[ride.thrill_level].label}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ padding: '10px' }}>
+                        <h4 style={{ 
+                          color: textColor, 
+                          fontSize: '13px', 
+                          fontWeight: '600', 
+                          margin: 0,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {ride.name}
+                        </h4>
+                        <p style={{ 
+                          color: secondaryTextColor, 
+                          fontSize: '11px', 
+                          margin: '4px 0 0',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {formatSubcategory(ride.subcategory)}
+                          {ride.min_height_inches && ` • ${ride.min_height_inches}"`}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  ))}
+                </div>
               </>
             )}
           </div>
         </div>
-
-        <style jsx>{`
-          .rides-screen {
-            min-height: 100vh;
-            padding-bottom: 100px;
-          }
-          
-          .rides-header {
-            display: flex;
-            align-items: center;
-            padding: 16px;
-            padding-top: max(16px, env(safe-area-inset-top));
-            gap: 12px;
-          }
-          
-          .back-button {
-            padding: 8px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: background 0.2s;
-          }
-          
-          .back-button:hover {
-            background: rgba(0,0,0,0.05);
-          }
-          
-          .header-content {
-            flex: 1;
-          }
-          
-          .header-content h1 {
-            font-size: 28px;
-            font-weight: 700;
-            margin: 0;
-          }
-          
-          .header-content p {
-            font-size: 14px;
-            margin: 4px 0 0;
-            font-weight: 500;
-          }
-          
-          .refresh-button {
-            padding: 8px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            border-radius: 8px;
-          }
-          
-          .refresh-button :global(.spinning) {
-            animation: spin 1s linear infinite;
-          }
-          
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-          
-          /* Search Section */
-          .search-section {
-            padding: 0 16px 12px;
-          }
-          
-          .search-bar {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: 12px;
-            border: 1px solid;
-          }
-          
-          .search-bar input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            font-size: 16px;
-            outline: none;
-          }
-          
-          .search-bar input::placeholder {
-            color: ${secondaryTextColor};
-          }
-          
-          .clear-button {
-            padding: 4px;
-            background: none;
-            border: none;
-            cursor: pointer;
-          }
-          
-          /* Filter Container */
-          .filter-container {
-            display: flex;
-            gap: 8px;
-            padding: 0 16px 16px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-          }
-          
-          .filter-container::-webkit-scrollbar {
-            display: none;
-          }
-          
-          .filter-pill {
-            padding: 10px 20px;
-            border-radius: 24px;
-            border: 1px solid;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s;
-          }
-          
-          .filter-pill.active {
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-          }
-          
-          /* Content Area */
-          .content-area {
-            padding: 0 16px;
-          }
-          
-          .loading-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 80px 20px;
-          }
-          
-          .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #E5E5EA;
-            border-top-color: ${COLORS.accent};
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 16px;
-          }
-          
-          .error-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 80px 20px;
-            text-align: center;
-          }
-          
-          .error-text {
-            font-size: 16px;
-            margin: 16px 0;
-          }
-          
-          .retry-button {
-            padding: 12px 24px;
-            background: ${COLORS.accent};
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-          }
-          
-          .empty-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 80px 20px;
-            text-align: center;
-          }
-          
-          .empty-icon {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 16px;
-          }
-          
-          .empty-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin: 0 0 8px;
-          }
-          
-          .empty-subtitle {
-            font-size: 14px;
-            margin: 0;
-          }
-          
-          /* Featured Section */
-          .featured-section {
-            margin-bottom: 24px;
-          }
-          
-          .section-title {
-            font-size: 20px;
-            font-weight: 700;
-            margin: 0 0 12px;
-          }
-          
-          .featured-card {
-            position: relative;
-            border-radius: 16px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.2s;
-          }
-          
-          .featured-card:hover {
-            transform: scale(1.02);
-          }
-          
-          .featured-image {
-            width: 100%;
-            height: 220px;
-            object-fit: cover;
-          }
-          
-          .featured-gradient {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 140px;
-            background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-          }
-          
-          .must-ride-badge {
-            position: absolute;
-            top: 16px;
-            left: 16px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            background: ${COLORS.mustRide};
-            padding: 6px 10px;
-            border-radius: 6px;
-          }
-          
-          .must-ride-badge span {
-            color: #fff;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-          }
-          
-          .featured-info {
-            margin-top: auto;
-          }
-          
-          .featured-name {
-            font-size: 24px;
-            font-weight: 700;
-            color: #fff;
-            margin: 0 0 4px;
-          }
-          
-          .featured-location {
-            font-size: 14px;
-            color: rgba(255,255,255,0.85);
-            margin: 0 0 8px;
-          }
-          
-          .thrill-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #fff;
-          }
-          
-          /* Popular Section */
-          .popular-section {
-            margin-bottom: 24px;
-          }
-          
-          .rides-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-          }
-          
-          @media (min-width: 768px) {
-            .rides-grid {
-              grid-template-columns: repeat(3, 1fr);
-            }
-          }
-          
-          @media (min-width: 1024px) {
-            .rides-grid {
-              grid-template-columns: repeat(4, 1fr);
-            }
-          }
-          
-          .ride-card {
-            border-radius: 12px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-          }
-          
-          .ride-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-          }
-          
-          .ride-image-container {
-            position: relative;
-            height: 120px;
-          }
-          
-          .ride-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-          
-          .thrill-indicator {
-            position: absolute;
-            bottom: 8px;
-            left: 8px;
-            padding: 4px 8px;
-            border-radius: 8px;
-            font-size: 10px;
-            font-weight: 600;
-            color: #fff;
-          }
-          
-          .ride-info {
-            padding: 12px;
-          }
-          
-          .ride-name {
-            font-size: 14px;
-            font-weight: 600;
-            margin: 0 0 4px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-          }
-          
-          .ride-location {
-            font-size: 12px;
-            margin: 0;
-          }
-        `}</style>
       </AppLayout>
+
+      <style jsx global>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </>
   );
 }
@@ -809,7 +764,7 @@ export default function RidesScreen() {
 export async function getStaticProps({ locale }: { locale: string }) {
   return {
     props: {
-      ...(await serverSideTranslations(locale, ['common'])),
+      ...(await serverSideTranslations(locale || 'en', ['common'])),
     },
   };
 }
