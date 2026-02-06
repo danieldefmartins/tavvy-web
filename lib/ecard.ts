@@ -221,7 +221,7 @@ export async function getCardBySlug(slug: string): Promise<CardData | null> {
  */
 export async function getCardLinks(cardId: string): Promise<LinkItem[]> {
   const { data, error } = await supabase
-    .from('card_links')
+    .from('digital_card_links')
     .select('*')
     .eq('card_id', cardId)
     .eq('is_active', true)
@@ -295,7 +295,7 @@ export async function deleteCard(cardId: string): Promise<boolean> {
 export async function saveCardLinks(cardId: string, links: LinkItem[]): Promise<boolean> {
   // First, delete existing links
   await supabase
-    .from('card_links')
+    .from('digital_card_links')
     .delete()
     .eq('card_id', cardId);
 
@@ -312,7 +312,7 @@ export async function saveCardLinks(cardId: string, links: LinkItem[]): Promise<
     }));
 
     const { error } = await supabase
-      .from('card_links')
+      .from('digital_card_links')
       .insert(linksToInsert);
 
     if (error) {
@@ -425,19 +425,17 @@ export async function uploadProfilePhoto(userId: string, file: File): Promise<st
   const fileName = `${userId}/profile_${Date.now()}.${fileExt}`;
 
   const { data, error } = await supabase.storage
-    .from('ecard-photos')
+    .from('ecard-assets')
     .upload(fileName, file, {
       cacheControl: '3600',
       upsert: true,
     });
-
   if (error) {
     console.error('Error uploading photo:', error);
     return null;
   }
-
   const { data: urlData } = supabase.storage
-    .from('ecard-photos')
+    .from('ecard-assets')
     .getPublicUrl(data.path);
 
   return urlData.publicUrl;

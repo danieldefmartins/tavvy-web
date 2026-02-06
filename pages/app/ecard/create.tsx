@@ -270,6 +270,7 @@ export default function ECardCreateScreen() {
         background_type: color.background?.includes('gradient') ? 'gradient' : 'solid',
         is_published: false,
         gallery_images: galleryImages.map((g) => ({ id: g.id, url: g.url, caption: '' })),
+        featured_socials: featuredIcons,
       });
 
       if (card && links.length > 0) {
