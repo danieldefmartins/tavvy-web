@@ -408,9 +408,8 @@ export default function ECardCreateScreen() {
     return cs.text === '#1A1A1A' || cs.text === '#1f2937' || cs.primary === '#FFFFFF';
   };
 
-  // Helper: get the best preview color scheme for a template (prefer a gradient/dark one for visual impact)
+  // Helper: get the best preview color scheme for a template
   const getPreviewScheme = (t: Template): ColorScheme => {
-    // Try to find a non-white, non-black gradient scheme first for best visual preview
     const gradientScheme = t.colorSchemes.find(cs => 
       cs.background?.includes('gradient') || 
       (cs.primary !== '#FFFFFF' && cs.primary !== '#1A1A1A')
@@ -418,56 +417,121 @@ export default function ECardCreateScreen() {
     return gradientScheme || t.colorSchemes[0];
   };
 
-  // Render a mini card preview for the carousel
+  // Get background style from a color scheme
+  const getBgStyle = (cs: ColorScheme, isLight: boolean) => {
+    if (cs.background?.includes('gradient')) return { background: cs.background };
+    if (cs.cardBg && cs.cardBg !== 'transparent') {
+      return { background: cs.cardBg, border: isLight ? '1px solid #E5E7EB' : 'none' };
+    }
+    return { background: `linear-gradient(135deg, ${cs.primary}, ${cs.secondary})` };
+  };
+
+  // Render a realistic card preview for the carousel with sample data
   const renderCardPreview = (t: Template, isPeek: boolean, locked?: boolean) => {
     const cs = getPreviewScheme(t);
     const isLight = isLightScheme(cs);
-    const bgStyle = cs.background?.includes('gradient') 
-      ? { background: cs.background.replace('180deg', '135deg') }
-      : cs.cardBg && cs.cardBg !== 'transparent' 
-        ? { background: cs.cardBg, border: isLight ? '1px solid #E5E7EB' : 'none' }
-        : { background: `linear-gradient(135deg, ${cs.primary}, ${cs.secondary})` };
-
-    const textColor = isLight ? 'rgba(0,0,0,0.4)' : (cs.text === '#d4af37' || cs.text === '#c0c0c0' ? cs.text : 'rgba(255,255,255,0.5)');
-    const textColor2 = isLight ? 'rgba(0,0,0,0.25)' : (cs.text === '#d4af37' || cs.text === '#c0c0c0' ? `${cs.text}80` : 'rgba(255,255,255,0.3)');
-    const photoSize = t.layout.photoSize === 'small' ? 50 : t.layout.photoSize === 'large' ? 80 : t.layout.photoSize === 'cover' ? '100%' : 65;
-    const photoBorder = isLight ? '2px solid rgba(0,0,0,0.15)' : (cs.border ? `2px solid ${cs.border}` : '2px solid rgba(255,255,255,0.3)');
-    const btnBg = isLight ? 'rgba(0,0,0,0.08)' : (cs.accent || 'rgba(255,255,255,0.2)');
-    const btnBorder = t.layout.buttonStyle === 'outline' ? `1px solid ${isLight ? 'rgba(0,0,0,0.2)' : (cs.accent || 'rgba(255,255,255,0.3)')}` : 'none';
+    const bgStyle = getBgStyle(cs, isLight);
+    const txtColor = cs.text || '#FFFFFF';
+    const txtSecondary = cs.textSecondary || 'rgba(255,255,255,0.7)';
+    const accentColor = cs.accent || 'rgba(255,255,255,0.2)';
     const btnRadius = t.layout.buttonStyle === 'pill' ? 20 : t.layout.buttonStyle === 'square' ? 4 : 8;
+    const isOutline = t.layout.buttonStyle === 'outline';
+    const isFrosted = t.layout.buttonStyle === 'frosted';
+    const photoSizeMap: Record<string, number> = { small: 48, medium: 60, large: 72, cover: 0 };
+    const pSize = photoSizeMap[t.layout.photoSize] || 60;
+    const font = t.layout.fontFamily === 'elegant' ? "'Georgia', serif" 
+      : t.layout.fontFamily === 'playful' ? "'Comic Sans MS', cursive" 
+      : t.layout.fontFamily === 'classic' ? "'Times New Roman', serif"
+      : "'Inter', -apple-system, sans-serif";
+
+    // Social icon colors
+    const socialIconColor = isLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.7)';
+    const socialIcons = ['IG', 'TT', 'YT', 'X'];
 
     return (
-      <div className="card-face" style={bgStyle as any}>
+      <div className="card-face" style={{ ...bgStyle as any, fontFamily: font }}>
         {locked && (
           <div className="lock-overlay">
-            <IoLockClosed size={32} color="#fff" />
+            <IoLockClosed size={28} color="#fff" />
             <span>Premium</span>
           </div>
         )}
         <div className="card-face-content">
+          {/* Cover photo for cover layout */}
           {t.layout.photoSize === 'cover' ? (
-            <div style={{
-              width: '100%', height: 80, background: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.1)',
-              borderRadius: 8, marginBottom: 4,
-            }} />
+            <>
+              <div style={{
+                width: '100%', height: 90, 
+                background: isLight 
+                  ? 'linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.03))' 
+                  : 'linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04))',
+                borderRadius: '0',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <IoCamera size={20} color={isLight ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.3)'} />
+              </div>
+              <div style={{ marginTop: -16, width: 36, height: 36, borderRadius: '50%', 
+                background: isLight ? '#E5E7EB' : 'rgba(255,255,255,0.2)', 
+                border: `2px solid ${isLight ? '#fff' : 'rgba(255,255,255,0.3)'}`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1,
+              }}>
+                <IoCamera size={12} color={isLight ? '#999' : 'rgba(255,255,255,0.5)'} />
+              </div>
+            </>
           ) : (
-            <div className="face-photo-placeholder" style={{
-              width: typeof photoSize === 'number' ? photoSize : 65,
-              height: typeof photoSize === 'number' ? photoSize : 65,
+            /* Profile photo circle */
+            <div style={{
+              width: pSize, height: pSize,
               borderRadius: t.layout.photoStyle === 'square' ? 8 : '50%',
-              border: photoBorder,
-              background: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.15)',
-            }} />
+              background: isLight ? '#E5E7EB' : 'rgba(255,255,255,0.15)',
+              border: cs.border ? `2px solid ${cs.border}` : `2px solid ${isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)'}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              <IoCamera size={pSize > 50 ? 20 : 16} color={isLight ? '#999' : 'rgba(255,255,255,0.4)'} />
+            </div>
           )}
-          <div className="face-line w60" style={{ backgroundColor: textColor }} />
-          <div className="face-line w40" style={{ backgroundColor: textColor2 }} />
-          <div className="face-buttons">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="face-button" style={{
+
+          {/* Name */}
+          <div style={{ color: txtColor, fontSize: isPeek ? 9 : 12, fontWeight: 700, textAlign: 'center', lineHeight: 1.2 }}>
+            Your Name
+          </div>
+
+          {/* Title */}
+          <div style={{ color: txtSecondary, fontSize: isPeek ? 7 : 9, textAlign: 'center', marginTop: -6, lineHeight: 1.2 }}>
+            Your Title
+          </div>
+
+          {/* Social icons row */}
+          <div style={{ display: 'flex', gap: isPeek ? 4 : 6, marginTop: 2 }}>
+            {socialIcons.map((icon, i) => (
+              <div key={i} style={{
+                width: isPeek ? 16 : 22, height: isPeek ? 16 : 22,
+                borderRadius: '50%',
+                background: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: isPeek ? 6 : 8, color: socialIconColor, fontWeight: 600,
+              }}>
+                {icon}
+              </div>
+            ))}
+          </div>
+
+          {/* Link buttons */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: isPeek ? 4 : 5, width: '85%', marginTop: 4 }}>
+            {['Your Website', 'Contact Me', 'Your Link'].map((label, i) => (
+              <div key={i} style={{
+                height: isPeek ? 18 : 24,
                 borderRadius: btnRadius,
-                backgroundColor: t.layout.buttonStyle === 'outline' ? 'transparent' : btnBg,
-                border: btnBorder,
-              }} />
+                background: isOutline ? 'transparent' : isFrosted ? (isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.12)') : accentColor,
+                border: isOutline ? `1px solid ${isLight ? 'rgba(0,0,0,0.15)' : (accentColor || 'rgba(255,255,255,0.2)')}` : 'none',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: isPeek ? 6 : 8, fontWeight: 500,
+                color: isOutline ? txtColor : (isLight ? '#333' : '#fff'),
+                backdropFilter: isFrosted ? 'blur(8px)' : 'none',
+              }}>
+                {label}
+              </div>
             ))}
           </div>
         </div>
