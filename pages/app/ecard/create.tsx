@@ -20,6 +20,7 @@ import {
   createCard, 
   generateSlug, 
   uploadProfilePhoto,
+  uploadEcardFile,
   saveCardLinks,
   updateCard,
   PLATFORM_ICONS, 
@@ -343,13 +344,46 @@ export default function ECardCreateScreen() {
     if (!name.trim()) { alert('Please enter your name.'); return; }
     setIsCreating(true);
     try {
-      let photoUrl = profileImage;
+      // Upload profile photo to storage
+      let photoUrl: string | null = null;
       if (profileImageFile) {
         try {
           photoUrl = await uploadProfilePhoto(user.id, profileImageFile);
         } catch (uploadErr) {
           console.warn('Photo upload failed, continuing without photo:', uploadErr);
-          photoUrl = null;
+        }
+      }
+
+      // Upload gallery images to storage (convert blob URLs to real URLs)
+      const uploadedGallery: { id: string; url: string; caption: string }[] = [];
+      for (const img of galleryImages) {
+        if (img.file) {
+          try {
+            const galleryUrl = await uploadEcardFile(user.id, img.file, 'gallery');
+            if (galleryUrl) {
+              uploadedGallery.push({ id: img.id, url: galleryUrl, caption: '' });
+            }
+          } catch (e) {
+            console.warn('Gallery image upload failed:', e);
+          }
+        } else if (img.url && !img.url.startsWith('blob:')) {
+          // Already a real URL (e.g. from draft restore)
+          uploadedGallery.push({ id: img.id, url: img.url, caption: '' });
+        }
+      }
+
+      // Upload video files to storage
+      const uploadedVideos: { type: string; url: string }[] = [];
+      for (const vid of videos) {
+        if ((vid as any).file) {
+          try {
+            const vidUrl = await uploadEcardFile(user.id, (vid as any).file, 'video');
+            if (vidUrl) uploadedVideos.push({ type: vid.type, url: vidUrl });
+          } catch (e) {
+            console.warn('Video upload failed:', e);
+          }
+        } else if (vid.url && !vid.url.startsWith('blob:')) {
+          uploadedVideos.push({ type: vid.type, url: vid.url });
         }
       }
 
@@ -379,9 +413,9 @@ export default function ECardCreateScreen() {
         background_type: color?.background?.includes('gradient') ? 'gradient' : 'solid',
         is_published: false,
         is_active: true,
-        gallery_images: galleryImages.length > 0 ? galleryImages.map((g) => ({ id: g.id, url: g.url, caption: '' })) : undefined,
+        gallery_images: uploadedGallery.length > 0 ? uploadedGallery : undefined,
         featured_socials: featuredIcons.length > 0 ? featuredIcons.map(fi => ({ platform: fi.platform, url: fi.url })) : undefined,
-        videos: videos.length > 0 ? videos.map(v => ({ type: v.type, url: v.url })) : undefined,
+        videos: uploadedVideos.length > 0 ? uploadedVideos : undefined,
       } as any);
 
       if (!card) {

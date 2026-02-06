@@ -418,20 +418,21 @@ export async function incrementTapCount(cardId: string): Promise<void> {
 }
 
 /**
- * Upload profile photo
+ * Upload any file to ecard-assets bucket
  */
-export async function uploadProfilePhoto(userId: string, file: File): Promise<string | null> {
-  const fileExt = file.name.split('.').pop();
-  const fileName = `${userId}/profile_${Date.now()}.${fileExt}`;
+export async function uploadEcardFile(userId: string, file: File, folder: string = 'profile'): Promise<string | null> {
+  const fileExt = file.name?.split('.').pop() || 'jpg';
+  const fileName = `${userId}/${folder}_${Date.now()}_${Math.random().toString(36).substring(2, 6)}.${fileExt}`;
 
   const { data, error } = await supabase.storage
     .from('ecard-assets')
     .upload(fileName, file, {
       cacheControl: '3600',
       upsert: true,
+      contentType: file.type || 'image/jpeg',
     });
   if (error) {
-    console.error('Error uploading photo:', error);
+    console.error(`Error uploading ${folder} file:`, error);
     return null;
   }
   const { data: urlData } = supabase.storage
@@ -439,6 +440,13 @@ export async function uploadProfilePhoto(userId: string, file: File): Promise<st
     .getPublicUrl(data.path);
 
   return urlData.publicUrl;
+}
+
+/**
+ * Upload profile photo (convenience wrapper)
+ */
+export async function uploadProfilePhoto(userId: string, file: File): Promise<string | null> {
+  return uploadEcardFile(userId, file, 'profile');
 }
 
 /**
