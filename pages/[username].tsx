@@ -611,13 +611,39 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
     <>
       <Head>
         <title>{cardData.fullName} | Digital Card | Tavvy</title>
-        <meta name="description" content={`${cardData.fullName}${cardData.title ? ` - ${cardData.title}` : ''}${cardData.company ? ` at ${cardData.company}` : ''}`} />
-        <meta property="og:title" content={`${cardData.fullName}'s Digital Card`} />
-        <meta property="og:description" content={`${cardData.title || 'Professional'}${cardData.company ? ` at ${cardData.company}` : ''}`} />
+        <meta name="description" content={[
+          cardData.fullName,
+          cardData.title,
+          cardData.company ? `at ${cardData.company}` : '',
+          cardData.phone ? `\u260E ${cardData.phone}` : '',
+          cardData.email ? `\u2709 ${cardData.email}` : '',
+        ].filter(Boolean).join(' · ')} />
+        <meta property="og:site_name" content="Tavvy" />
+        <meta property="og:title" content={`${cardData.fullName}${cardData.title ? ` — ${cardData.title}` : ''}`} />
+        <meta property="og:description" content={[
+          cardData.company || '',
+          cardData.phone || '',
+          cardData.email || '',
+          cardData.city || '',
+        ].filter(Boolean).join(' · ') || 'Digital Business Card on Tavvy'} />
         <meta property="og:type" content="profile" />
-        <meta property="og:url" content={`https://tavvy.com/card/${cardData.slug}`} />
-        {cardData.profilePhotoUrl && <meta property="og:image" content={cardData.profilePhotoUrl} />}
-        <meta name="twitter:card" content="summary" />
+        <meta property="og:url" content={`https://tavvy.com/${cardData.slug}`} />
+        {cardData.profilePhotoUrl && (
+          <>
+            <meta property="og:image" content={cardData.profilePhotoUrl} />
+            <meta property="og:image:width" content="400" />
+            <meta property="og:image:height" content="400" />
+            <meta property="og:image:alt" content={`${cardData.fullName}'s profile photo`} />
+          </>
+        )}
+        <meta name="twitter:card" content={cardData.profilePhotoUrl ? 'summary_large_image' : 'summary'} />
+        <meta name="twitter:title" content={`${cardData.fullName}${cardData.title ? ` — ${cardData.title}` : ''}`} />
+        <meta name="twitter:description" content={[
+          cardData.company || '',
+          cardData.phone || '',
+          cardData.email || '',
+        ].filter(Boolean).join(' · ') || 'Digital Business Card on Tavvy'} />
+        {cardData.profilePhotoUrl && <meta name="twitter:image" content={cardData.profilePhotoUrl} />}
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
         <style>{`

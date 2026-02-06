@@ -53,6 +53,9 @@ import {
   IoLink,
   IoExpand,
   IoLockClosed,
+  IoVideocam,
+  IoPlay,
+  IoFilm,
 } from 'react-icons/io5';
 
 const ACCENT_GREEN = '#00C853';
@@ -101,6 +104,17 @@ interface LinkData {
   value: string;
 }
 
+interface FeaturedIcon {
+  platform: string;
+  url: string;
+}
+
+interface VideoData {
+  type: 'youtube' | 'tavvy_short' | 'external';
+  url: string;
+  file?: File;
+}
+
 function getSocialIcon(pid: string, size = 18) {
   const m: Record<string, React.ReactNode> = {
     instagram: <IoLogoInstagram size={size} />,
@@ -142,9 +156,14 @@ export default function ECardCreateScreen() {
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [photoSizeIndex, setPhotoSizeIndex] = useState(1);
 
-  // Featured social icons (independent, up to 4)
-  const [featuredIcons, setFeaturedIcons] = useState<string[]>([]); // array of platform ids
+  // Featured social icons (independent, up to 4, each with a URL)
+  const [featuredIcons, setFeaturedIcons] = useState<FeaturedIcon[]>([]);
   const [showFeaturedIconPicker, setShowFeaturedIconPicker] = useState(false);
+
+  // Video section
+  const [videos, setVideos] = useState<VideoData[]>([]);
+  const [showVideoTypePicker, setShowVideoTypePicker] = useState(false);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   // Links (separate from featured icons)
   const [links, setLinks] = useState<LinkData[]>([]);
@@ -175,6 +194,7 @@ export default function ECardCreateScreen() {
         if (typeof draft.photoSizeIndex === 'number') setPhotoSizeIndex(draft.photoSizeIndex);
         if (Array.isArray(draft.featuredIcons)) setFeaturedIcons(draft.featuredIcons);
         if (Array.isArray(draft.links)) setLinks(draft.links);
+        if (Array.isArray(draft.videos)) setVideos(draft.videos);
         if (draft.profileImage) setProfileImage(draft.profileImage);
         // Clear the draft after restoring
         localStorage.removeItem('ecard_draft');
@@ -242,14 +262,45 @@ export default function ECardCreateScreen() {
 
   // Featured icons management
   const addFeaturedIcon = (platformId: string) => {
-    if (featuredIcons.length < 4 && !featuredIcons.includes(platformId)) {
-      setFeaturedIcons(prev => [...prev, platformId]);
+    if (featuredIcons.length < 4 && !featuredIcons.find(fi => fi.platform === platformId)) {
+      setFeaturedIcons(prev => [...prev, { platform: platformId, url: '' }]);
     }
     setShowFeaturedIconPicker(false);
   };
 
   const removeFeaturedIcon = (platformId: string) => {
-    setFeaturedIcons(prev => prev.filter(id => id !== platformId));
+    setFeaturedIcons(prev => prev.filter(fi => fi.platform !== platformId));
+  };
+
+  const updateFeaturedIconUrl = (platformId: string, url: string) => {
+    setFeaturedIcons(prev => prev.map(fi => fi.platform === platformId ? { ...fi, url } : fi));
+  };
+
+  // Video management
+  const addVideo = (type: VideoData['type']) => {
+    if (type === 'tavvy_short') {
+      videoInputRef.current?.click();
+    } else {
+      setVideos(prev => [...prev, { type, url: '' }]);
+    }
+    setShowVideoTypePicker(false);
+  };
+
+  const handleVideoFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 50 * 1024 * 1024) { alert('Video must be under 50MB'); return; }
+      const url = URL.createObjectURL(file);
+      setVideos(prev => [...prev, { type: 'tavvy_short', url, file }]);
+    }
+  };
+
+  const removeVideo = (index: number) => {
+    setVideos(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const updateVideoUrl = (index: number, url: string) => {
+    setVideos(prev => prev.map((v, i) => i === index ? { ...v, url } : v));
   };
 
   // Add link
@@ -272,7 +323,7 @@ export default function ECardCreateScreen() {
       const draft = {
         name, titleRole, bio, email, phone, website, address,
         templateIndex, colorIndex, photoSizeIndex,
-        featuredIcons, links,
+        featuredIcons, links, videos: videos.map(v => ({ type: v.type, url: v.url })),
         profileImage, // base64 or blob URL (blob URLs won't persist across sessions, but base64 will)
       };
       localStorage.setItem('ecard_draft', JSON.stringify(draft));
@@ -329,7 +380,8 @@ export default function ECardCreateScreen() {
         is_published: false,
         is_active: true,
         gallery_images: galleryImages.length > 0 ? galleryImages.map((g) => ({ id: g.id, url: g.url, caption: '' })) : undefined,
-        featured_socials: featuredIcons.length > 0 ? featuredIcons : undefined,
+        featured_socials: featuredIcons.length > 0 ? featuredIcons.map(fi => ({ platform: fi.platform, url: fi.url })) : undefined,
+        videos: videos.length > 0 ? videos.map(v => ({ type: v.type, url: v.url })) : undefined,
       } as any);
 
       if (!card) {
@@ -482,31 +534,48 @@ export default function ECardCreateScreen() {
               <IoExpand size={12} /> {photoSize.label} &middot; Tap to change size
             </button>
 
-            {/* ===== FEATURED SOCIAL ICONS (independent, up to 4) ===== */}
-            <div className="featured-icons-row">
-              {featuredIcons.map(platformId => {
-                const iconInfo = PLATFORM_ICONS[platformId];
+            {/* ===== FEATURED SOCIAL ICONS (independent, up to 4, each with URL) ===== */}
+            <div className="featured-icons-section">
+              <div className="featured-icons-row">
+                {featuredIcons.map(fi => {
+                  const iconInfo = PLATFORM_ICONS[fi.platform];
+                  return (
+                    <div key={fi.platform} className="featured-icon-slot" style={{ background: iconInfo?.bgColor || '#666' }}>
+                      {getSocialIcon(fi.platform, 18)}
+                      <button 
+                        className="featured-icon-remove"
+                        onClick={(e) => { e.stopPropagation(); removeFeaturedIcon(fi.platform); }}
+                      >
+                        <IoClose size={10} />
+                      </button>
+                    </div>
+                  );
+                })}
+                {featuredIcons.length < 4 && (
+                  <button 
+                    className="featured-icon-add"
+                    onClick={() => setShowFeaturedIconPicker(true)}
+                    style={{ borderColor: isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.2)' }}
+                  >
+                    <IoAdd size={18} color={isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.4)'} />
+                  </button>
+                )}
+              </div>
+              {/* URL inputs for each featured icon */}
+              {featuredIcons.map(fi => {
+                const platform = FEATURED_ICON_PLATFORMS.find(p => p.id === fi.platform);
                 return (
-                  <div key={platformId} className="featured-icon-slot" style={{ background: iconInfo?.bgColor || '#666' }}>
-                    {getSocialIcon(platformId, 18)}
-                    <button 
-                      className="featured-icon-remove"
-                      onClick={(e) => { e.stopPropagation(); removeFeaturedIcon(platformId); }}
-                    >
-                      <IoClose size={10} />
-                    </button>
+                  <div key={`url-${fi.platform}`} className="featured-icon-url-row" style={{ borderBottom: `1px solid ${isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'}` }}>
+                    <span style={{ color: txtSecondary, flexShrink: 0, fontSize: 12 }}>{getSocialIcon(fi.platform, 14)}</span>
+                    <input
+                      style={{ ...cardInputStyle('left'), fontSize: 12 }}
+                      placeholder={`${platform?.name || fi.platform} URL or @username`}
+                      value={fi.url}
+                      onChange={e => updateFeaturedIconUrl(fi.platform, e.target.value)}
+                    />
                   </div>
                 );
               })}
-              {featuredIcons.length < 4 && (
-                <button 
-                  className="featured-icon-add"
-                  onClick={() => setShowFeaturedIconPicker(true)}
-                  style={{ borderColor: isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.2)' }}
-                >
-                  <IoAdd size={18} color={isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.4)'} />
-                </button>
-              )}
             </div>
 
             {/* Editable fields */}
@@ -603,6 +672,47 @@ export default function ECardCreateScreen() {
                 </button>
               </div>
             </div>
+
+            {/* Video section */}
+            <div className="video-section">
+              <div className="gallery-header" style={{ color: txtSecondary }}>
+                <IoVideocam size={16} /> Videos
+              </div>
+              {videos.map((video, idx) => (
+                <div key={idx} className="video-item" style={{ borderBottom: `1px solid ${isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'}` }}>
+                  <span style={{ color: txtSecondary, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    {video.type === 'youtube' ? <IoLogoYoutube size={16} color="#FF0000" /> : video.type === 'tavvy_short' ? <IoFilm size={16} /> : <IoPlay size={16} />}
+                    <span style={{ fontSize: 11, opacity: 0.7 }}>
+                      {video.type === 'youtube' ? 'YouTube' : video.type === 'tavvy_short' ? 'Tavvy Short' : 'Video URL'}
+                    </span>
+                  </span>
+                  {video.type === 'tavvy_short' && video.url ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
+                      <video src={video.url} style={{ width: 60, height: 40, borderRadius: 6, objectFit: 'cover' }} />
+                      <span style={{ fontSize: 11, color: txtSecondary }}>15s video ready</span>
+                    </div>
+                  ) : (
+                    <input
+                      style={{ ...cardInputStyle('left'), fontSize: 12, flex: 1 }}
+                      placeholder={video.type === 'youtube' ? 'YouTube URL (e.g. https://youtube.com/watch?v=...)' : 'Video URL'}
+                      value={video.url}
+                      onChange={e => updateVideoUrl(idx, e.target.value)}
+                    />
+                  )}
+                  <button className="link-action" onClick={() => removeVideo(idx)} style={{ color: '#EF4444' }}>
+                    <IoTrash size={14} />
+                  </button>
+                </div>
+              ))}
+              <button 
+                className="add-link-btn" 
+                onClick={() => setShowVideoTypePicker(true)}
+                style={btnStyle()}
+              >
+                <IoAdd size={18} /> Add Video
+              </button>
+              <input ref={videoInputRef} type="file" accept="video/*" style={{ display: 'none' }} onChange={handleVideoFileUpload} />
+            </div>
           </div>
         </div>
 
@@ -675,7 +785,7 @@ export default function ECardCreateScreen() {
                 Choose a social media icon ({featuredIcons.length}/4 used)
               </p>
               <div className="platform-grid">
-                {FEATURED_ICON_PLATFORMS.filter(p => !featuredIcons.includes(p.id)).map(p => (
+                {FEATURED_ICON_PLATFORMS.filter(p => !featuredIcons.find(fi => fi.platform === p.id)).map(p => (
                   <button key={p.id} className="platform-btn" onClick={() => addFeaturedIcon(p.id)}>
                     <div className="platform-icon" style={{ background: PLATFORM_ICONS[p.id]?.bgColor || '#666' }}>
                       {getSocialIcon(p.id, 20)}
@@ -711,6 +821,38 @@ export default function ECardCreateScreen() {
         {lightboxImage && (
           <div className="modal-overlay" onClick={() => setLightboxImage(null)}>
             <img src={lightboxImage} className="lightbox-img" alt="" />
+          </div>
+        )}
+
+        {/* Video type picker modal */}
+        {showVideoTypePicker && (
+          <div className="modal-overlay" onClick={() => setShowVideoTypePicker(false)}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+              <h3>Add Video</h3>
+              <p style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#999', fontSize: 13, margin: '-8px 0 16px' }}>
+                Choose a video type
+              </p>
+              <div className="platform-grid">
+                <button className="platform-btn" onClick={() => addVideo('youtube')}>
+                  <div className="platform-icon" style={{ background: '#FF0000' }}>
+                    <IoLogoYoutube size={20} color="#fff" />
+                  </div>
+                  <span>YouTube</span>
+                </button>
+                <button className="platform-btn" onClick={() => addVideo('tavvy_short')}>
+                  <div className="platform-icon" style={{ background: ACCENT_GREEN }}>
+                    <IoFilm size={20} color="#fff" />
+                  </div>
+                  <span>Tavvy Short (15s)</span>
+                </button>
+                <button className="platform-btn" onClick={() => addVideo('external')}>
+                  <div className="platform-icon" style={{ background: '#6366F1' }}>
+                    <IoPlay size={20} color="#fff" />
+                  </div>
+                  <span>Video URL</span>
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -959,6 +1101,33 @@ export default function ECardCreateScreen() {
           align-items: center;
           justify-content: center;
           cursor: pointer;
+        }
+
+        .featured-icons-section {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .featured-icon-url-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 6px 16px;
+        }
+
+        /* Video section */
+        .video-section {
+          width: 100%;
+          padding: 12px 16px;
+        }
+
+        .video-item {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 0;
         }
 
         /* Card fields */
