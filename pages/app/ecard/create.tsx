@@ -156,9 +156,6 @@ export default function ECardCreateScreen() {
   // Photo size picker
   const [showPhotoSizePicker, setShowPhotoSizePicker] = useState(false);
 
-  // Touch swipe
-  const touchStartX = useRef(0);
-  const touchEndX = useRef(0);
 
   const template = TEMPLATES[templateIndex];
   const colorSchemes = template?.colorSchemes || [];
@@ -188,21 +185,9 @@ export default function ECardCreateScreen() {
     : template?.layout?.fontFamily === 'classic' ? "'Times New Roman', serif"
     : "'Inter', -apple-system, sans-serif";
 
-  // Swipe handlers
-  const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
-  const handleTouchMove = (e: React.TouchEvent) => { touchEndX.current = e.touches[0].clientX; };
-  const handleTouchEnd = () => {
-    const diff = touchStartX.current - touchEndX.current;
-    if (Math.abs(diff) > 60) {
-      if (diff > 0 && templateIndex < TEMPLATES.length - 1) {
-        setTemplateIndex(templateIndex + 1);
-        setColorIndex(0);
-      } else if (diff < 0 && templateIndex > 0) {
-        setTemplateIndex(templateIndex - 1);
-        setColorIndex(0);
-      }
-    }
-  };
+  // Template navigation helpers
+  const goToPrevTemplate = () => { if (templateIndex > 0) { setTemplateIndex(templateIndex - 1); setColorIndex(0); } };
+  const goToNextTemplate = () => { if (templateIndex < TEMPLATES.length - 1) { setTemplateIndex(templateIndex + 1); setColorIndex(0); } };
 
   // Photo upload
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -361,22 +346,20 @@ export default function ECardCreateScreen() {
           </button>
         </div>
 
-        {/* Swipe hint */}
-        <div className="swipe-hint">
-          <IoChevronBack size={14} color={isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)'} />
-          <span>Swipe to change style</span>
-          <IoChevronForward size={14} color={isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)'} />
-        </div>
-
         {/* ===== THE CARD ===== */}
-        <div 
-          className="card-container"
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-
-          <div className="live-card" style={{ background: cardBg, fontFamily: font }}>
+        <div className="card-container">
+          <div className="live-card" style={{ background: cardBg, fontFamily: font, position: 'relative' }}>
+            {/* Big overlay arrows for template switching */}
+            {templateIndex > 0 && (
+              <button className="overlay-arrow overlay-arrow-left" onClick={goToPrevTemplate} type="button">
+                <IoChevronBack size={28} color="#fff" />
+              </button>
+            )}
+            {templateIndex < TEMPLATES.length - 1 && (
+              <button className="overlay-arrow overlay-arrow-right" onClick={goToNextTemplate} type="button">
+                <IoChevronForward size={28} color="#fff" />
+              </button>
+            )}
             {/* Cover photo */}
             {isCover ? (
               <div className="cover-photo" onClick={() => fileInputRef.current?.click()}>
@@ -548,7 +531,7 @@ export default function ECardCreateScreen() {
         <div className="bottom-bar">
           <button 
             className="nav-arrow" 
-            onClick={() => { if (templateIndex > 0) { setTemplateIndex(templateIndex - 1); setColorIndex(0); } }}
+            onClick={goToPrevTemplate}
             disabled={templateIndex === 0}
           >
             <IoChevronBack size={20} />
@@ -572,7 +555,7 @@ export default function ECardCreateScreen() {
 
           <button 
             className="nav-arrow" 
-            onClick={() => { if (templateIndex < TEMPLATES.length - 1) { setTemplateIndex(templateIndex + 1); setColorIndex(0); } }}
+            onClick={goToNextTemplate}
             disabled={templateIndex === TEMPLATES.length - 1}
           >
             <IoChevronForward size={20} />
@@ -710,17 +693,6 @@ export default function ECardCreateScreen() {
           cursor: not-allowed;
         }
 
-        .swipe-hint {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          font-size: 12px;
-          color: ${isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.35)'};
-          padding: 0 0 8px;
-          flex-shrink: 0;
-        }
-
         .card-container {
           flex: 1;
           overflow-y: auto;
@@ -741,6 +713,35 @@ export default function ECardCreateScreen() {
           position: relative;
           box-shadow: 0 8px 40px rgba(0,0,0,0.2);
           transition: background 0.3s ease;
+        }
+
+        /* Big overlay arrows on card */
+        .overlay-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 20;
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          background: rgba(0,0,0,0.45);
+          border: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+          transition: background 0.2s, transform 0.2s;
+        }
+        .overlay-arrow:hover {
+          background: rgba(0,0,0,0.65);
+          transform: translateY(-50%) scale(1.1);
+        }
+        .overlay-arrow-left {
+          left: 8px;
+        }
+        .overlay-arrow-right {
+          right: 8px;
         }
 
         /* Profile photo */
