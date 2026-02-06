@@ -1,7 +1,6 @@
 /**
  * eCard Dashboard Screen
- * Full editing interface for eCard - links, appearance, analytics
- * Ported from tavvy-mobile/screens/ecard/ECardDashboardScreen.tsx
+ * Full editing interface for eCard - content, links, appearance, analytics
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -18,8 +17,11 @@ import {
   checkSlugAvailability,
   publishCard,
   generateSlug,
+  uploadProfilePhoto,
+  uploadEcardFile,
   CardData, 
   LinkItem,
+  FeaturedSocial,
   PLATFORM_ICONS,
   THEMES,
   PRESET_GRADIENTS,
@@ -45,19 +47,21 @@ import {
   IoCamera,
   IoChevronForward,
   IoLockClosed,
+  IoPersonCircle,
+  IoCreate,
 } from 'react-icons/io5';
 
 const ACCENT_GREEN = '#00C853';
 const BG_LIGHT = '#FAFAFA';
 const BG_DARK = '#0F172A';
 
-type Tab = 'links' | 'appearance' | 'analytics';
+type Tab = 'content' | 'links' | 'appearance' | 'analytics';
 
 const SOCIAL_PLATFORMS = [
-  { id: 'instagram', name: 'Instagram', placeholder: '@username' },
-  { id: 'tiktok', name: 'TikTok', placeholder: '@username' },
+  { id: 'instagram', name: 'Instagram', placeholder: '@username or URL' },
+  { id: 'tiktok', name: 'TikTok', placeholder: '@username or URL' },
   { id: 'youtube', name: 'YouTube', placeholder: 'Channel URL' },
-  { id: 'twitter', name: 'Twitter/X', placeholder: '@username' },
+  { id: 'twitter', name: 'Twitter/X', placeholder: '@username or URL' },
   { id: 'linkedin', name: 'LinkedIn', placeholder: 'Profile URL' },
   { id: 'facebook', name: 'Facebook', placeholder: 'Profile URL' },
   { id: 'website', name: 'Website', placeholder: 'https://...' },
@@ -68,6 +72,25 @@ const SOCIAL_PLATFORMS = [
   { id: 'spotify', name: 'Spotify', placeholder: 'Profile URL' },
   { id: 'github', name: 'GitHub', placeholder: '@username' },
   { id: 'discord', name: 'Discord', placeholder: 'Server invite' },
+  { id: 'snapchat', name: 'Snapchat', placeholder: '@username' },
+  { id: 'pinterest', name: 'Pinterest', placeholder: 'Profile URL' },
+  { id: 'twitch', name: 'Twitch', placeholder: 'Channel URL' },
+];
+
+const FEATURED_PLATFORMS = [
+  { id: 'instagram', name: 'Instagram' },
+  { id: 'tiktok', name: 'TikTok' },
+  { id: 'youtube', name: 'YouTube' },
+  { id: 'twitter', name: 'Twitter/X' },
+  { id: 'linkedin', name: 'LinkedIn' },
+  { id: 'facebook', name: 'Facebook' },
+  { id: 'whatsapp', name: 'WhatsApp' },
+  { id: 'snapchat', name: 'Snapchat' },
+  { id: 'spotify', name: 'Spotify' },
+  { id: 'github', name: 'GitHub' },
+  { id: 'pinterest', name: 'Pinterest' },
+  { id: 'twitch', name: 'Twitch' },
+  { id: 'discord', name: 'Discord' },
 ];
 
 export default function ECardDashboardScreen() {
@@ -75,13 +98,32 @@ export default function ECardDashboardScreen() {
   const { cardId, isNew, openAppearance } = router.query;
   const { theme, isDark } = useThemeContext();
   const { user, isPro } = useAuth();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [cardData, setCardData] = useState<CardData | null>(null);
   const [links, setLinks] = useState<LinkItem[]>([]);
-  const [activeTab, setActiveTab] = useState<Tab>(openAppearance ? 'appearance' : 'links');
+  const [activeTab, setActiveTab] = useState<Tab>(openAppearance ? 'appearance' : 'content');
+
+  // Content state
+  const [fullName, setFullName] = useState('');
+  const [titleRole, setTitleRole] = useState('');
+  const [bio, setBio] = useState('');
+  const [emailField, setEmailField] = useState('');
+  const [phoneField, setPhoneField] = useState('');
+  const [websiteField, setWebsiteField] = useState('');
+  const [addressField, setAddressField] = useState('');
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null);
+  const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
+  const [featuredIcons, setFeaturedIcons] = useState<FeaturedSocial[]>([]);
+  const [galleryImages, setGalleryImages] = useState<{ id: string; url: string; file?: File }[]>([]);
+  const [videos, setVideos] = useState<{ type: string; url: string }[]>([]);
+  const [showFeaturedPicker, setShowFeaturedPicker] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [videoUrlInput, setVideoUrlInput] = useState('');
+  const [videoTypeInput, setVideoTypeInput] = useState<'youtube' | 'tavvy_short' | 'external'>('youtube');
 
   // Appearance state
   const [selectedTheme, setSelectedTheme] = useState('classic');
@@ -114,6 +156,19 @@ export default function ECardDashboardScreen() {
         const card = await getCardById(cardId);
         if (card) {
           setCardData(card);
+          // Content fields
+          setFullName(card.full_name || '');
+          setTitleRole(card.title || '');
+          setBio(card.bio || '');
+          setEmailField(card.email || '');
+          setPhoneField(card.phone || '');
+          setWebsiteField(card.website || '');
+          setAddressField(card.city || '');
+          setProfilePhotoUrl(card.profile_photo_url || null);
+          setFeaturedIcons(card.featured_socials || []);
+          setGalleryImages((card.gallery_images || []).map((g: any) => ({ id: g.id, url: g.url })));
+          setVideos(card.videos || []);
+          // Appearance fields
           setGradientColors([card.gradient_color_1 || '#667eea', card.gradient_color_2 || '#764ba2']);
           setSelectedTheme(card.theme || 'classic');
           setSelectedButtonStyle(card.button_style || 'fill');
@@ -126,6 +181,7 @@ export default function ECardDashboardScreen() {
             id: l.id,
             platform: l.icon || l.platform || 'other',
             value: l.url,
+            url: l.url,
             title: l.title,
           })));
         }
@@ -145,22 +201,131 @@ export default function ECardDashboardScreen() {
 
     setSaving(true);
     try {
+      // Upload new profile photo if changed
+      let photoUrl = profilePhotoUrl;
+      if (profilePhotoFile && user) {
+        try {
+          const uploaded = await uploadProfilePhoto(user.id, profilePhotoFile);
+          if (uploaded) photoUrl = uploaded;
+        } catch (e) {
+          console.warn('Photo upload failed:', e);
+        }
+      }
+
+      // Upload new gallery images
+      const uploadedGallery: { id: string; url: string; caption: string }[] = [];
+      for (const img of galleryImages) {
+        if (img.file && user) {
+          try {
+            const url = await uploadEcardFile(user.id, img.file, 'gallery');
+            if (url) uploadedGallery.push({ id: img.id, url, caption: '' });
+          } catch (e) {
+            console.warn('Gallery upload failed:', e);
+          }
+        } else if (img.url && !img.url.startsWith('blob:')) {
+          uploadedGallery.push({ id: img.id, url: img.url, caption: '' });
+        }
+      }
+
       await updateCard(cardId as string, {
+        full_name: fullName.trim(),
+        title: titleRole || undefined,
+        bio: bio || undefined,
+        email: emailField || undefined,
+        phone: phoneField || undefined,
+        website: websiteField || undefined,
+        city: addressField || undefined,
+        profile_photo_url: photoUrl || undefined,
+        profile_photo_size: profilePhotoSize,
         gradient_color_1: gradientColors[0],
         gradient_color_2: gradientColors[1],
         theme: selectedTheme,
         button_style: selectedButtonStyle,
         font_style: selectedFont,
-        profile_photo_size: profilePhotoSize,
-      });
+        featured_socials: featuredIcons.length > 0 ? featuredIcons : undefined,
+        gallery_images: uploadedGallery.length > 0 ? uploadedGallery : undefined,
+        videos: videos.length > 0 ? videos : undefined,
+      } as any);
 
       await saveCardLinks(cardId as string, links);
+
+      // Update local state
+      setCardData(prev => prev ? {
+        ...prev,
+        full_name: fullName.trim(),
+        title: titleRole,
+        bio,
+        email: emailField,
+        phone: phoneField,
+        website: websiteField,
+        city: addressField,
+        profile_photo_url: photoUrl || undefined,
+        profile_photo_size: profilePhotoSize,
+        gradient_color_1: gradientColors[0],
+        gradient_color_2: gradientColors[1],
+      } : null);
+
+      setProfilePhotoFile(null);
+      alert('Card saved successfully!');
     } catch (error) {
       console.error('Error saving:', error);
       alert('Failed to save changes');
     } finally {
       setSaving(false);
     }
+  };
+
+  // Photo handlers
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setProfilePhotoFile(file);
+      setProfilePhotoUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleGalleryAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      const newImages = Array.from(files).map(f => ({
+        id: `g_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        url: URL.createObjectURL(f),
+        file: f,
+      }));
+      setGalleryImages(prev => [...prev, ...newImages]);
+    }
+  };
+
+  const removeGalleryImage = (id: string) => {
+    setGalleryImages(prev => prev.filter(g => g.id !== id));
+  };
+
+  // Featured icon handlers
+  const addFeaturedIcon = (platformId: string) => {
+    if (featuredIcons.length >= 4) return;
+    if (featuredIcons.some(fi => fi.platform === platformId)) return;
+    setFeaturedIcons(prev => [...prev, { platform: platformId, url: '' }]);
+    setShowFeaturedPicker(false);
+  };
+
+  const updateFeaturedIconUrl = (platform: string, url: string) => {
+    setFeaturedIcons(prev => prev.map(fi => fi.platform === platform ? { ...fi, url } : fi));
+  };
+
+  const removeFeaturedIcon = (platform: string) => {
+    setFeaturedIcons(prev => prev.filter(fi => fi.platform !== platform));
+  };
+
+  // Video handlers
+  const addVideo = () => {
+    if (!videoUrlInput.trim()) return;
+    setVideos(prev => [...prev, { type: videoTypeInput, url: videoUrlInput.trim() }]);
+    setVideoUrlInput('');
+    setShowVideoModal(false);
+  };
+
+  const removeVideo = (index: number) => {
+    setVideos(prev => prev.filter((_, i) => i !== index));
   };
 
   // Check slug availability
@@ -196,22 +361,20 @@ export default function ECardDashboardScreen() {
     }
   };
 
-  // Add link
+  // Link handlers
   const addLink = (platform: string) => {
     if (!canAddMoreLinks) {
       router.push('/app/ecard/premium');
       return;
     }
-    setLinks([...links, { id: Date.now().toString(), platform, value: '', title: platform }]);
+    setLinks([...links, { id: Date.now().toString(), platform, value: '', url: '', title: platform }]);
     setShowAddLink(false);
   };
 
-  // Update link
   const updateLink = (id: string, value: string) => {
-    setLinks(links.map(link => link.id === id ? { ...link, value } : link));
+    setLinks(links.map(link => link.id === id ? { ...link, value, url: value } : link));
   };
 
-  // Remove link
   const removeLink = (id: string) => {
     setLinks(links.filter(link => link.id !== id));
   };
@@ -250,6 +413,10 @@ export default function ECardDashboardScreen() {
 
       <AppLayout hideTabBar>
         <div className="dashboard" style={{ backgroundColor: bgColor }}>
+          {/* Hidden file inputs */}
+          <input type="file" ref={photoInputRef} accept="image/*" style={{ display: 'none' }} onChange={handlePhotoChange} />
+          <input type="file" ref={galleryInputRef} accept="image/*" multiple style={{ display: 'none' }} onChange={handleGalleryAdd} />
+
           {/* Header */}
           <header className="header">
             <button className="back-btn" onClick={() => router.push('/app/ecard')}>
@@ -267,15 +434,15 @@ export default function ECardDashboardScreen() {
               className="card-preview"
               style={{ background: `linear-gradient(135deg, ${gradientColors[0]}, ${gradientColors[1]})` }}
             >
-              {cardData?.profile_photo_url ? (
-                <img src={cardData.profile_photo_url} alt="" className="preview-photo" />
+              {profilePhotoUrl ? (
+                <img src={profilePhotoUrl} alt="" className="preview-photo" onClick={() => photoInputRef.current?.click()} />
               ) : (
-                <div className="preview-photo-placeholder">
+                <div className="preview-photo-placeholder" onClick={() => photoInputRef.current?.click()}>
                   <IoCamera size={24} color="rgba(255,255,255,0.5)" />
                 </div>
               )}
-              <h3 className="preview-name">{cardData?.full_name || 'Your Name'}</h3>
-              {cardData?.title && <p className="preview-title">{cardData.title}</p>}
+              <h3 className="preview-name">{fullName || 'Your Name'}</h3>
+              {titleRole && <p className="preview-title">{titleRole}</p>}
               
               {/* Status Badge */}
               <div className={`status-badge ${cardData?.is_published ? 'published' : 'draft'}`}>
@@ -306,34 +473,266 @@ export default function ECardDashboardScreen() {
           {/* Tabs */}
           <div className="tabs">
             <button 
+              className={`tab ${activeTab === 'content' ? 'active' : ''}`}
+              onClick={() => setActiveTab('content')}
+            >
+              <IoCreate size={16} />
+              <span>Content</span>
+            </button>
+            <button 
               className={`tab ${activeTab === 'links' ? 'active' : ''}`}
               onClick={() => setActiveTab('links')}
             >
-              <IoLink size={18} />
+              <IoLink size={16} />
               <span>Links</span>
             </button>
             <button 
               className={`tab ${activeTab === 'appearance' ? 'active' : ''}`}
               onClick={() => setActiveTab('appearance')}
             >
-              <IoColorPalette size={18} />
-              <span>Appearance</span>
+              <IoColorPalette size={16} />
+              <span>Style</span>
             </button>
             <button 
               className={`tab ${activeTab === 'analytics' ? 'active' : ''}`}
               onClick={() => setActiveTab('analytics')}
             >
-              <IoBarChart size={18} />
-              <span>Analytics</span>
+              <IoBarChart size={16} />
+              <span>Stats</span>
             </button>
           </div>
 
           {/* Tab Content */}
           <div className="tab-content">
-            {/* Links Tab */}
+
+            {/* ── Content Tab ── */}
+            {activeTab === 'content' && (
+              <div className="content-tab">
+                {/* Profile Photo */}
+                <div className="section">
+                  <h3 style={{ color: isDark ? '#fff' : '#333' }}>Profile Photo</h3>
+                  <div className="photo-edit-row">
+                    {profilePhotoUrl ? (
+                      <img src={profilePhotoUrl} alt="" className="edit-photo" onClick={() => photoInputRef.current?.click()} />
+                    ) : (
+                      <div className="edit-photo-placeholder" onClick={() => photoInputRef.current?.click()}>
+                        <IoCamera size={28} color={isDark ? '#94A3B8' : '#9CA3AF'} />
+                      </div>
+                    )}
+                    <div className="photo-actions">
+                      <button className="photo-action-btn" onClick={() => photoInputRef.current?.click()}>
+                        {profilePhotoUrl ? 'Change Photo' : 'Upload Photo'}
+                      </button>
+                      {profilePhotoUrl && (
+                        <button className="photo-action-btn danger" onClick={() => { setProfilePhotoUrl(null); setProfilePhotoFile(null); }}>
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Basic Info */}
+                <div className="section">
+                  <h3 style={{ color: isDark ? '#fff' : '#333' }}>Basic Info</h3>
+                  <div className="field-group">
+                    <label style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>Full Name *</label>
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Your full name"
+                      className="field-input"
+                      style={{ backgroundColor: isDark ? '#1E293B' : '#fff', color: isDark ? '#fff' : '#333' }}
+                    />
+                  </div>
+                  <div className="field-group">
+                    <label style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>Title / Role</label>
+                    <input
+                      type="text"
+                      value={titleRole}
+                      onChange={(e) => setTitleRole(e.target.value)}
+                      placeholder="e.g. CEO, Designer, Realtor"
+                      className="field-input"
+                      style={{ backgroundColor: isDark ? '#1E293B' : '#fff', color: isDark ? '#fff' : '#333' }}
+                    />
+                  </div>
+                  <div className="field-group">
+                    <label style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>Bio</label>
+                    <textarea
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      placeholder="A short bio about yourself"
+                      className="field-textarea"
+                      rows={3}
+                      style={{ backgroundColor: isDark ? '#1E293B' : '#fff', color: isDark ? '#fff' : '#333' }}
+                    />
+                  </div>
+                </div>
+
+                {/* Contact Info */}
+                <div className="section">
+                  <h3 style={{ color: isDark ? '#fff' : '#333' }}>Contact Info</h3>
+                  <div className="field-group">
+                    <label style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>Email</label>
+                    <input
+                      type="email"
+                      value={emailField}
+                      onChange={(e) => setEmailField(e.target.value)}
+                      placeholder="your@email.com"
+                      className="field-input"
+                      style={{ backgroundColor: isDark ? '#1E293B' : '#fff', color: isDark ? '#fff' : '#333' }}
+                    />
+                  </div>
+                  <div className="field-group">
+                    <label style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>Phone</label>
+                    <input
+                      type="tel"
+                      value={phoneField}
+                      onChange={(e) => setPhoneField(e.target.value)}
+                      placeholder="+1 (555) 123-4567"
+                      className="field-input"
+                      style={{ backgroundColor: isDark ? '#1E293B' : '#fff', color: isDark ? '#fff' : '#333' }}
+                    />
+                  </div>
+                  <div className="field-group">
+                    <label style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>Website</label>
+                    <input
+                      type="url"
+                      value={websiteField}
+                      onChange={(e) => setWebsiteField(e.target.value)}
+                      placeholder="https://yourwebsite.com"
+                      className="field-input"
+                      style={{ backgroundColor: isDark ? '#1E293B' : '#fff', color: isDark ? '#fff' : '#333' }}
+                    />
+                  </div>
+                  <div className="field-group">
+                    <label style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>Location</label>
+                    <input
+                      type="text"
+                      value={addressField}
+                      onChange={(e) => setAddressField(e.target.value)}
+                      placeholder="City, State"
+                      className="field-input"
+                      style={{ backgroundColor: isDark ? '#1E293B' : '#fff', color: isDark ? '#fff' : '#333' }}
+                    />
+                  </div>
+                </div>
+
+                {/* Featured Social Icons */}
+                <div className="section">
+                  <h3 style={{ color: isDark ? '#fff' : '#333' }}>Featured Social Icons <span className="hint">(up to 4)</span></h3>
+                  <div className="featured-icons-list">
+                    {featuredIcons.map((fi) => {
+                      const pi = PLATFORM_ICONS[fi.platform];
+                      const pName = FEATURED_PLATFORMS.find(p => p.id === fi.platform)?.name || fi.platform;
+                      return (
+                        <div key={fi.platform} className="featured-icon-item" style={{ backgroundColor: isDark ? '#1E293B' : '#fff' }}>
+                          <div className="fi-left">
+                            <div className="fi-dot" style={{ backgroundColor: pi?.bgColor || '#888' }} />
+                            <span className="fi-name" style={{ color: isDark ? '#fff' : '#333' }}>{pName}</span>
+                          </div>
+                          <input
+                            type="text"
+                            value={fi.url}
+                            onChange={(e) => updateFeaturedIconUrl(fi.platform, e.target.value)}
+                            placeholder={`${pName} URL or @username`}
+                            className="fi-url-input"
+                            style={{ color: isDark ? '#94A3B8' : '#6B7280' }}
+                          />
+                          <button className="fi-remove" onClick={() => removeFeaturedIcon(fi.platform)}>
+                            <IoTrash size={16} color="#EF4444" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                    {featuredIcons.length < 4 && (
+                      <button
+                        className="add-featured-btn"
+                        onClick={() => setShowFeaturedPicker(true)}
+                        style={{ borderColor: isDark ? '#334155' : '#E5E7EB' }}
+                      >
+                        <IoAdd size={20} color={ACCENT_GREEN} />
+                        <span style={{ color: isDark ? '#fff' : '#333' }}>Add Social Icon</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Featured Icon Picker */}
+                  {showFeaturedPicker && (
+                    <div className="platform-picker" style={{ backgroundColor: isDark ? '#1E293B' : '#fff' }}>
+                      <div className="picker-header">
+                        <span style={{ color: isDark ? '#fff' : '#333' }}>Choose Platform</span>
+                        <button onClick={() => setShowFeaturedPicker(false)}>
+                          <IoClose size={20} color={isDark ? '#94A3B8' : '#6B7280'} />
+                        </button>
+                      </div>
+                      <div className="platform-grid">
+                        {FEATURED_PLATFORMS.filter(p => !featuredIcons.some(fi => fi.platform === p.id)).map((platform) => (
+                          <button
+                            key={platform.id}
+                            className="platform-option"
+                            onClick={() => addFeaturedIcon(platform.id)}
+                            style={{ backgroundColor: isDark ? '#0F172A' : '#F3F4F6' }}
+                          >
+                            <div className="po-dot" style={{ backgroundColor: PLATFORM_ICONS[platform.id]?.bgColor || '#888' }} />
+                            <span style={{ color: isDark ? '#fff' : '#333' }}>{platform.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Photo Gallery */}
+                <div className="section">
+                  <h3 style={{ color: isDark ? '#fff' : '#333' }}>Photo Gallery</h3>
+                  <div className="gallery-grid">
+                    {galleryImages.map((img) => (
+                      <div key={img.id} className="gallery-thumb">
+                        <img src={img.url} alt="" />
+                        <button className="gallery-remove" onClick={() => removeGalleryImage(img.id)}>
+                          <IoClose size={14} color="#fff" />
+                        </button>
+                      </div>
+                    ))}
+                    <button className="gallery-add" onClick={() => galleryInputRef.current?.click()} style={{ backgroundColor: isDark ? '#1E293B' : '#F3F4F6' }}>
+                      <IoAdd size={24} color={isDark ? '#94A3B8' : '#9CA3AF'} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Videos */}
+                <div className="section">
+                  <h3 style={{ color: isDark ? '#fff' : '#333' }}>Videos</h3>
+                  {videos.map((vid, i) => (
+                    <div key={i} className="video-item" style={{ backgroundColor: isDark ? '#1E293B' : '#fff' }}>
+                      <div className="video-info">
+                        <span className="video-type" style={{ color: isDark ? '#fff' : '#333' }}>
+                          {vid.type === 'youtube' ? 'YouTube' : vid.type === 'tavvy_short' ? 'Tavvy Short' : 'Video URL'}
+                        </span>
+                        <span className="video-url" style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>{vid.url}</span>
+                      </div>
+                      <button onClick={() => removeVideo(i)}>
+                        <IoTrash size={16} color="#EF4444" />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    className="add-featured-btn"
+                    onClick={() => setShowVideoModal(true)}
+                    style={{ borderColor: isDark ? '#334155' : '#E5E7EB' }}
+                  >
+                    <IoAdd size={20} color={ACCENT_GREEN} />
+                    <span style={{ color: isDark ? '#fff' : '#333' }}>Add Video</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ── Links Tab ── */}
             {activeTab === 'links' && (
               <div className="links-tab">
-                {/* Links List */}
                 {links.map((link) => {
                   const platform = SOCIAL_PLATFORMS.find(p => p.id === link.platform);
                   return (
@@ -347,7 +746,7 @@ export default function ECardDashboardScreen() {
                         </span>
                         <input
                           type="text"
-                          value={link.value}
+                          value={link.value || link.url || ''}
                           onChange={(e) => updateLink(link.id, e.target.value)}
                           placeholder={platform?.placeholder || 'Enter URL'}
                           style={{ color: isDark ? '#94A3B8' : '#6B7280' }}
@@ -360,7 +759,6 @@ export default function ECardDashboardScreen() {
                   );
                 })}
 
-                {/* Add Link Button */}
                 {!showAddLink ? (
                   <button 
                     className="add-link-btn"
@@ -394,7 +792,6 @@ export default function ECardDashboardScreen() {
                   </div>
                 )}
 
-                {/* Link Limit Warning */}
                 {!isPro && (
                   <p className="link-limit" style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>
                     {links.length}/{FREE_LINK_LIMIT} links used • <a onClick={() => router.push('/app/ecard/premium')}>Upgrade for unlimited</a>
@@ -403,10 +800,9 @@ export default function ECardDashboardScreen() {
               </div>
             )}
 
-            {/* Appearance Tab */}
+            {/* ── Appearance Tab ── */}
             {activeTab === 'appearance' && (
               <div className="appearance-tab">
-                {/* Gradient Colors */}
                 <div className="section">
                   <h3 style={{ color: isDark ? '#fff' : '#333' }}>Background Color</h3>
                   <div className="gradient-presets">
@@ -421,7 +817,6 @@ export default function ECardDashboardScreen() {
                   </div>
                 </div>
 
-                {/* Photo Size */}
                 <div className="section">
                   <h3 style={{ color: isDark ? '#fff' : '#333' }}>Photo Size</h3>
                   <div className="size-options">
@@ -441,7 +836,6 @@ export default function ECardDashboardScreen() {
                   </div>
                 </div>
 
-                {/* Button Style */}
                 <div className="section">
                   <h3 style={{ color: isDark ? '#fff' : '#333' }}>Button Style</h3>
                   <div className="button-styles">
@@ -461,7 +855,6 @@ export default function ECardDashboardScreen() {
                   </div>
                 </div>
 
-                {/* Font Style */}
                 <div className="section">
                   <h3 style={{ color: isDark ? '#fff' : '#333' }}>Font Style</h3>
                   <div className="font-options">
@@ -490,7 +883,7 @@ export default function ECardDashboardScreen() {
               </div>
             )}
 
-            {/* Analytics Tab */}
+            {/* ── Analytics Tab ── */}
             {activeTab === 'analytics' && (
               <div className="analytics-tab">
                 <div className="stats-grid">
@@ -578,6 +971,46 @@ export default function ECardDashboardScreen() {
               </div>
             </div>
           )}
+
+          {/* Video Add Modal */}
+          {showVideoModal && (
+            <div className="modal-overlay" onClick={() => setShowVideoModal(false)}>
+              <div className="modal" onClick={e => e.stopPropagation()} style={{ backgroundColor: isDark ? '#1E293B' : '#fff' }}>
+                <h2 style={{ color: isDark ? '#fff' : '#333' }}>Add Video</h2>
+                <div className="video-type-picker">
+                  {(['youtube', 'tavvy_short', 'external'] as const).map(t => (
+                    <button
+                      key={t}
+                      className={`vt-btn ${videoTypeInput === t ? 'active' : ''}`}
+                      onClick={() => setVideoTypeInput(t)}
+                      style={{
+                        backgroundColor: videoTypeInput === t ? ACCENT_GREEN : (isDark ? '#0F172A' : '#F3F4F6'),
+                        color: videoTypeInput === t ? '#fff' : (isDark ? '#fff' : '#333'),
+                      }}
+                    >
+                      {t === 'youtube' ? 'YouTube' : t === 'tavvy_short' ? 'Tavvy Short (15s)' : 'Video URL'}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="url"
+                  value={videoUrlInput}
+                  onChange={(e) => setVideoUrlInput(e.target.value)}
+                  placeholder={videoTypeInput === 'youtube' ? 'Paste YouTube URL' : videoTypeInput === 'tavvy_short' ? 'Paste video URL (max 15s)' : 'Paste any video URL'}
+                  className="field-input"
+                  style={{ backgroundColor: isDark ? '#0F172A' : '#F3F4F6', color: isDark ? '#fff' : '#333', marginTop: 12 }}
+                />
+                <div className="modal-actions" style={{ marginTop: 16 }}>
+                  <button className="cancel-btn" onClick={() => { setShowVideoModal(false); setVideoUrlInput(''); }}>
+                    Cancel
+                  </button>
+                  <button className="publish-btn" onClick={addVideo} disabled={!videoUrlInput.trim()}>
+                    Add
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <style jsx>{`
@@ -632,6 +1065,7 @@ export default function ECardDashboardScreen() {
             text-align: center;
             position: relative;
             margin-bottom: 12px;
+            cursor: pointer;
           }
 
           .preview-photo {
@@ -639,8 +1073,10 @@ export default function ECardDashboardScreen() {
             height: 64px;
             border-radius: 32px;
             object-fit: cover;
-            margin-bottom: 12px;
+            margin: 0 auto 12px;
+            display: block;
             border: 2px solid rgba(255,255,255,0.3);
+            cursor: pointer;
           }
 
           .preview-photo-placeholder {
@@ -652,6 +1088,7 @@ export default function ECardDashboardScreen() {
             align-items: center;
             justify-content: center;
             margin: 0 auto 12px;
+            cursor: pointer;
           }
 
           .preview-name {
@@ -716,7 +1153,7 @@ export default function ECardDashboardScreen() {
           .tabs {
             display: flex;
             padding: 0 20px;
-            gap: 8px;
+            gap: 6px;
             margin-bottom: 20px;
           }
 
@@ -725,13 +1162,13 @@ export default function ECardDashboardScreen() {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            padding: 12px;
+            gap: 4px;
+            padding: 10px 6px;
             background: ${isDark ? '#1E293B' : '#fff'};
             border: none;
             border-radius: 12px;
             color: ${isDark ? '#94A3B8' : '#6B7280'};
-            font-size: 13px;
+            font-size: 12px;
             cursor: pointer;
             transition: all 0.2s;
           }
@@ -744,6 +1181,310 @@ export default function ECardDashboardScreen() {
           /* Tab Content */
           .tab-content {
             padding: 0 20px;
+          }
+
+          /* Content Tab */
+          .section {
+            margin-bottom: 24px;
+          }
+
+          .section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 12px;
+          }
+
+          .section h3 .hint {
+            font-size: 12px;
+            font-weight: 400;
+            color: ${isDark ? '#64748B' : '#9CA3AF'};
+          }
+
+          .field-group {
+            margin-bottom: 12px;
+          }
+
+          .field-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 4px;
+          }
+
+          .field-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            box-sizing: border-box;
+          }
+
+          .field-textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            resize: vertical;
+            font-family: inherit;
+            box-sizing: border-box;
+          }
+
+          /* Photo Edit */
+          .photo-edit-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+          }
+
+          .edit-photo {
+            width: 72px;
+            height: 72px;
+            border-radius: 36px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid ${isDark ? '#334155' : '#E5E7EB'};
+          }
+
+          .edit-photo-placeholder {
+            width: 72px;
+            height: 72px;
+            border-radius: 36px;
+            background: ${isDark ? '#1E293B' : '#F3F4F6'};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px dashed ${isDark ? '#334155' : '#E5E7EB'};
+          }
+
+          .photo-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+          }
+
+          .photo-action-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: ${isDark ? '#1E293B' : '#F3F4F6'};
+            color: ${isDark ? '#fff' : '#333'};
+            font-size: 13px;
+            cursor: pointer;
+          }
+
+          .photo-action-btn.danger {
+            color: #EF4444;
+          }
+
+          /* Featured Icons */
+          .featured-icons-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          }
+
+          .featured-icon-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            border-radius: 10px;
+            gap: 10px;
+          }
+
+          .fi-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 100px;
+          }
+
+          .fi-dot {
+            width: 24px;
+            height: 24px;
+            border-radius: 12px;
+            flex-shrink: 0;
+          }
+
+          .fi-name {
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+          }
+
+          .fi-url-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 13px;
+            min-width: 0;
+          }
+
+          .fi-remove {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            flex-shrink: 0;
+          }
+
+          .add-featured-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px;
+            border: 1px dashed;
+            border-radius: 12px;
+            background: transparent;
+            cursor: pointer;
+          }
+
+          /* Gallery */
+          .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+          }
+
+          .gallery-thumb {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+          }
+
+          .gallery-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+
+          .gallery-remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 22px;
+            height: 22px;
+            border-radius: 11px;
+            background: rgba(239,68,68,0.9);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+          }
+
+          .gallery-add {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            border: 2px dashed ${isDark ? '#334155' : '#E5E7EB'};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+          }
+
+          /* Video */
+          .video-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            gap: 12px;
+          }
+
+          .video-info {
+            flex: 1;
+            min-width: 0;
+          }
+
+          .video-type {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 2px;
+          }
+
+          .video-url {
+            display: block;
+            font-size: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+
+          .video-item button {
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+          }
+
+          .video-type-picker {
+            display: flex;
+            gap: 6px;
+          }
+
+          .vt-btn {
+            flex: 1;
+            padding: 10px 6px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            text-align: center;
+          }
+
+          /* Platform Picker */
+          .platform-picker {
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 8px;
+          }
+
+          .picker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+          }
+
+          .picker-header button {
+            background: none;
+            border: none;
+            cursor: pointer;
+          }
+
+          .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+          }
+
+          .platform-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+          }
+
+          .po-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 10px;
+            flex-shrink: 0;
           }
 
           /* Links Tab */
@@ -799,39 +1540,6 @@ export default function ECardDashboardScreen() {
             cursor: pointer;
           }
 
-          .platform-picker {
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-          }
-
-          .picker-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-          }
-
-          .picker-header button {
-            background: none;
-            border: none;
-            cursor: pointer;
-          }
-
-          .platform-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-          }
-
-          .platform-option {
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: center;
-          }
-
           .link-limit {
             text-align: center;
             font-size: 13px;
@@ -844,16 +1552,6 @@ export default function ECardDashboardScreen() {
           }
 
           /* Appearance Tab */
-          .section {
-            margin-bottom: 24px;
-          }
-
-          .section h3 {
-            font-size: 16px;
-            font-weight: 600;
-            margin: 0 0 12px;
-          }
-
           .gradient-presets {
             display: flex;
             flex-wrap: wrap;

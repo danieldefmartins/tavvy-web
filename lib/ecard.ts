@@ -39,6 +39,11 @@ export interface CardData {
   review_rating?: number;
   industry_icons?: IndustryIcon[];
   youtube_video_url?: string;
+  featured_socials?: FeaturedSocial[];
+  videos?: { type: string; url: string }[];
+  template_id?: string;
+  color_scheme_id?: string;
+  is_active?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -81,7 +86,7 @@ export interface IndustryIcon {
 }
 
 export interface FeaturedSocial {
-  platformId: string;
+  platform: string;
   url: string;
 }
 
