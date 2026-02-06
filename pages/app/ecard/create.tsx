@@ -35,7 +35,6 @@ import {
   IoClose,
   IoAdd,
   IoTrash,
-  IoLockClosed,
   IoImage,
   IoMail,
   IoGlobe,
@@ -125,7 +124,6 @@ export default function ECardCreateScreen() {
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const [isCreating, setIsCreating] = useState(false);
-  const [isPremiumUser] = useState(false);
 
   // Template & color
   const [templateIndex, setTemplateIndex] = useState(0);
@@ -165,7 +163,8 @@ export default function ECardCreateScreen() {
   const template = TEMPLATES[templateIndex];
   const colorSchemes = template?.colorSchemes || [];
   const color = colorSchemes[colorIndex] || colorSchemes[0];
-  const isLocked = template?.isPremium && !isPremiumUser;
+  // Premium check deferred to upsell — let users design freely
+  const usesPremiumTemplate = template?.isPremium || false;
 
   // Derived styles
   const isLight = color?.text === '#1A1A1A' || color?.text === '#1f2937' || color?.primary === '#FFFFFF';
@@ -376,16 +375,6 @@ export default function ECardCreateScreen() {
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          {/* Locked overlay */}
-          {isLocked && (
-            <div className="locked-overlay">
-              <IoLockClosed size={36} color="#fff" />
-              <span>Premium Template</span>
-              <button className="unlock-btn" onClick={() => router.push('/app/ecard/premium')}>
-                Unlock Premium
-              </button>
-            </div>
-          )}
 
           <div className="live-card" style={{ background: cardBg, fontFamily: font }}>
             {/* Cover photo */}
@@ -567,21 +556,15 @@ export default function ECardCreateScreen() {
 
           <div className="color-dots">
             {colorSchemes.map((cs, i) => {
-              const isFree = cs.isFree;
-              const locked = !isFree && !isPremiumUser;
               return (
                 <button
                   key={cs.id}
-                  className={`color-dot ${i === colorIndex ? 'active' : ''} ${locked ? 'locked' : ''}`}
+                  className={`color-dot ${i === colorIndex ? 'active' : ''}`}
                   style={{
                     background: cs.background?.includes('gradient') ? cs.background : `linear-gradient(135deg, ${cs.primary}, ${cs.secondary})`,
                   }}
-                  onClick={() => {
-                    if (locked) { router.push('/app/ecard/premium'); }
-                    else { setColorIndex(i); }
-                  }}
+                  onClick={() => setColorIndex(i)}
                 >
-                  {locked && <IoLockClosed size={8} color="#fff" />}
                 </button>
               );
             })}
@@ -746,32 +729,6 @@ export default function ECardCreateScreen() {
           -webkit-overflow-scrolling: touch;
         }
 
-        .locked-overlay {
-          position: absolute;
-          inset: 0;
-          background: rgba(0,0,0,0.6);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 12px;
-          z-index: 10;
-          border-radius: 20px;
-          color: #fff;
-          font-size: 16px;
-          font-weight: 600;
-        }
-
-        .unlock-btn {
-          background: ${ACCENT_GREEN};
-          color: #fff;
-          border: none;
-          padding: 10px 24px;
-          border-radius: 20px;
-          font-weight: 600;
-          cursor: pointer;
-          margin-top: 8px;
-        }
 
         .live-card {
           border-radius: 20px;
@@ -1096,9 +1053,6 @@ export default function ECardCreateScreen() {
           box-shadow: 0 0 0 2px ${isDark ? '#0F172A' : '#F5F5F5'}, 0 0 0 4px ${ACCENT_GREEN};
         }
 
-        .color-dot.locked {
-          opacity: 0.5;
-        }
 
         /* ===== MODALS ===== */
         .modal-overlay {
