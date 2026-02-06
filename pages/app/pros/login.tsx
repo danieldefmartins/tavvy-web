@@ -174,7 +174,7 @@ export default function ProLoginScreen() {
 
               {/* Forgot Password Link */}
               <div className="forgot-link-container">
-                <Link href="/app/forgot-password" locale={locale} className="forgot-link" style={{ color: proColor }}>
+                <Link href="/app/pros/forgot-password" locale={locale} className="forgot-link" style={{ color: proColor }}>
                   Forgot Password?
                 </Link>
               </div>
