@@ -29,7 +29,11 @@ import {
   IoRestaurant, IoCafe, IoBeer, IoCarSport, IoStorefront,
   IoThumbsUp, IoTrendingUp, IoWarning, IoClose, IoLocationSharp
 } from 'react-icons/io5';
-import L from 'leaflet';
+// Leaflet is imported dynamically in useEffect to avoid SSR issues
+let L: typeof import('leaflet') | null = null;
+if (typeof window !== 'undefined') {
+  L = require('leaflet');
+}
 
 // Dynamic import for Leaflet (SSR disabled)
 const MapContainer = dynamic(
@@ -596,7 +600,7 @@ export default function MapScreen() {
                   </div>
                 `;
                 
-                return place.latitude && place.longitude && (
+                return place.latitude && place.longitude && L && (
                   <Marker
                     key={place.id}
                     position={[place.latitude, place.longitude]}
