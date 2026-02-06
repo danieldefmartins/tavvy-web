@@ -14,6 +14,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import AppLayout from '../../../components/AppLayout';
+import StoriesRow from '../../../components/StoriesRow';
 import { supabase } from '../../../lib/supabaseClient';
 import {
   IoArrowBack, IoHeartOutline, IoShareOutline, IoLocation,
@@ -1057,6 +1058,13 @@ export default function UniverseLandingScreen() {
               );
             })}
           </div>
+
+          {/* Stories Row */}
+          <StoriesRow
+            universeId={universe.id}
+            isDark={isDark}
+            onAddStoryPress={() => router.push(`/app/add-story?universeId=${universe.id}&universeName=${encodeURIComponent(universe.name)}`)}
+          />
 
           {/* Tab Navigation */}
           <div style={{
