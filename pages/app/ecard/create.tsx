@@ -193,7 +193,12 @@ export default function ECardCreateScreen() {
         if (typeof draft.templateIndex === 'number') setTemplateIndex(draft.templateIndex);
         if (typeof draft.colorIndex === 'number') setColorIndex(draft.colorIndex);
         if (typeof draft.photoSizeIndex === 'number') setPhotoSizeIndex(draft.photoSizeIndex);
-        if (Array.isArray(draft.featuredIcons)) setFeaturedIcons(draft.featuredIcons);
+        if (Array.isArray(draft.featuredIcons)) {
+          // Normalize: handle both flat strings and objects
+          setFeaturedIcons(draft.featuredIcons.map((item: any) => 
+            typeof item === 'string' ? { platform: item, url: '' } : item
+          ));
+        }
         if (Array.isArray(draft.links)) setLinks(draft.links);
         if (Array.isArray(draft.videos)) setVideos(draft.videos);
         if (draft.profileImage) setProfileImage(draft.profileImage);

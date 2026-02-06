@@ -165,7 +165,15 @@ export default function ECardDashboardScreen() {
           setWebsiteField(card.website || '');
           setAddressField(card.city || '');
           setProfilePhotoUrl(card.profile_photo_url || null);
-          setFeaturedIcons(card.featured_socials || []);
+          // Normalize featured_socials: handle both flat strings ["instagram"] and objects [{platform:"instagram",url:""}]
+          const rawSocials = card.featured_socials || [];
+          const normalizedSocials = rawSocials.map((item: any) => {
+            if (typeof item === 'string') {
+              return { platform: item, url: '' };
+            }
+            return item;
+          });
+          setFeaturedIcons(normalizedSocials);
           setGalleryImages((card.gallery_images || []).map((g: any) => ({ id: g.id, url: g.url })));
           setVideos(card.videos || []);
           // Appearance fields

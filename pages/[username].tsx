@@ -86,8 +86,8 @@ interface CardData {
   socialSnapchat: string;
   socialPinterest: string;
   socialWhatsapp: string;
-  // Featured socials (array of platform IDs to show in icon row)
-  featuredSocials: string[];
+  // Featured socials (array of platform IDs or objects with platform+url)
+  featuredSocials: (string | { platform: string; url: string })[];
   // YouTube video block
   youtubeVideoId: string;
   youtubeTitle: string;
