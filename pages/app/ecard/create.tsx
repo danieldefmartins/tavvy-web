@@ -52,6 +52,7 @@ import {
   IoImages,
   IoLink,
   IoExpand,
+  IoLockClosed,
 } from 'react-icons/io5';
 
 const ACCENT_GREEN = '#00C853';
@@ -338,7 +339,15 @@ export default function ECardCreateScreen() {
             <IoArrowBack size={22} color={isDark ? '#fff' : '#333'} />
           </button>
           <div className="template-indicator">
-            <span className="template-name-label">{template?.name}</span>
+            <div className="template-name-row">
+              <span className="template-name-label">{template?.name}</span>
+              {usesPremiumTemplate && (
+                <span className="pro-badge">
+                  <IoLockClosed size={9} color="#fff" />
+                  PRO
+                </span>
+              )}
+            </div>
             <span className="template-count">{templateIndex + 1} / {TEMPLATES.length}</span>
           </div>
           <button className="save-btn" onClick={handleSave} disabled={isCreating || !name.trim()}>
@@ -666,10 +675,29 @@ export default function ECardCreateScreen() {
           align-items: center;
         }
 
+        .template-name-row {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+
         .template-name-label {
           font-size: 16px;
           font-weight: 700;
           color: ${isDark ? '#fff' : '#333'};
+        }
+
+        .pro-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 3px;
+          background: #F59E0B;
+          color: #fff;
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 0.5px;
+          padding: 2px 6px;
+          border-radius: 6px;
         }
 
         .template-count {
