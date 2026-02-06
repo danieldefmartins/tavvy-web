@@ -241,55 +241,77 @@ export default function ECardCreateScreen() {
 
   // Save card
   const handleSave = async () => {
-    if (!user || !name.trim()) return;
+    if (!user) { alert('Please log in to create a card.'); return; }
+    if (!name.trim()) { alert('Please enter your name.'); return; }
     setIsCreating(true);
     try {
       let photoUrl = profileImage;
       if (profileImageFile) {
-        photoUrl = await uploadProfilePhoto(user.id, profileImageFile);
+        try {
+          photoUrl = await uploadProfilePhoto(user.id, profileImageFile);
+        } catch (uploadErr) {
+          console.warn('Photo upload failed, continuing without photo:', uploadErr);
+          photoUrl = null;
+        }
       }
 
-      const slug = generateSlug(name);
+      // Generate unique slug to avoid conflicts
+      const uniqueId = `${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 8)}`;
+      const slug = `draft_${user.id.substring(0, 8)}_${uniqueId}`;
+
       const card = await createCard({
         user_id: user.id,
         slug,
-        full_name: name,
-        title: titleRole,
-        bio,
+        full_name: name.trim(),
+        title: titleRole || undefined,
+        bio: bio || undefined,
         email: email || undefined,
         phone: phone || undefined,
         website: website || undefined,
         city: address || undefined,
         profile_photo_url: photoUrl || undefined,
         profile_photo_size: photoSize.id,
-        gradient_color_1: color.primary,
-        gradient_color_2: color.secondary,
+        gradient_color_1: color?.primary,
+        gradient_color_2: color?.secondary,
+        template_id: template.id,
+        color_scheme_id: color?.id || undefined,
         theme: template.id,
         button_style: template.layout.buttonStyle,
         font_style: template.layout.fontFamily,
-        background_type: color.background?.includes('gradient') ? 'gradient' : 'solid',
+        background_type: color?.background?.includes('gradient') ? 'gradient' : 'solid',
         is_published: false,
-        gallery_images: galleryImages.map((g) => ({ id: g.id, url: g.url, caption: '' })),
-        featured_socials: featuredIcons,
-      });
+        is_active: true,
+        gallery_images: galleryImages.length > 0 ? galleryImages.map((g) => ({ id: g.id, url: g.url, caption: '' })) : undefined,
+        featured_socials: featuredIcons.length > 0 ? featuredIcons : undefined,
+      } as any);
 
-      if (card && links.length > 0) {
-        await saveCardLinks(card.id, links.map((l, i) => ({
-          id: l.id,
-          card_id: card.id,
-          platform: l.platform,
-          url: l.value,
-          value: l.value,
-          sort_order: i,
-          is_active: true,
-        })));
+      if (!card) {
+        alert('Failed to save card. Please check your connection and try again.');
+        setIsCreating(false);
+        return;
       }
 
-      if (card) {
-        router.push(`/app/ecard/dashboard?cardId=${card.id}`);
+      // Save links (non-blocking)
+      if (links.length > 0) {
+        try {
+          await saveCardLinks(card.id, links.filter(l => l.value.trim()).map((l, i) => ({
+            id: l.id,
+            card_id: card.id,
+            platform: l.platform,
+            url: l.value,
+            value: l.value,
+            sort_order: i,
+            is_active: true,
+          })));
+        } catch (linkErr) {
+          console.warn('Links save failed, card still saved:', linkErr);
+        }
       }
-    } catch (err) {
+
+      router.push(`/app/ecard/dashboard?cardId=${card.id}`);
+    } catch (err: any) {
       console.error('Error creating card:', err);
+      alert(`Error: ${err?.message || 'Unknown error'}. Please try again.`);
     } finally {
       setIsCreating(false);
     }
@@ -358,7 +380,7 @@ export default function ECardCreateScreen() {
 
         {/* ===== THE CARD ===== */}
         <div className="card-container">
-          <div className="live-card" style={{ background: cardBg, fontFamily: font, position: 'relative' }}>
+          <div key={`card_${templateIndex}_${colorIndex}`} className="live-card" style={{ background: cardBg, fontFamily: font, position: 'relative' }}>
             {/* Big overlay arrows for template switching */}
             {templateIndex > 0 && (
               <button className="overlay-arrow overlay-arrow-left" onClick={goToPrevTemplate} type="button">
