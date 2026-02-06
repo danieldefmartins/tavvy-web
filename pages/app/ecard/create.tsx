@@ -5,9 +5,10 @@
  * - One full card on screen at a time
  * - Swipe left/right to change template
  * - Edit directly on the card (tap fields to type)
- * - Tap photo to change size or upload
- * - Add links, gallery, etc. all on the card
- * - Bottom bar: color picker + save/continue
+ * - Tap photo to upload; tap "change size" to open size picker (always available)
+ * - 4 independent featured social icon slots (centered row, tap to pick platform)
+ * - Links section separate from featured icons
+ * - Bottom bar: color picker + template arrows
  */
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import Head from 'next/head';
@@ -64,6 +65,23 @@ const PHOTO_SIZE_OPTIONS = [
   { id: 'cover', label: 'Cover', size: -1 },
 ];
 
+// Platforms available for the 4 featured icon slots
+const FEATURED_ICON_PLATFORMS = [
+  { id: 'instagram', name: 'Instagram' },
+  { id: 'tiktok', name: 'TikTok' },
+  { id: 'youtube', name: 'YouTube' },
+  { id: 'twitter', name: 'Twitter/X' },
+  { id: 'linkedin', name: 'LinkedIn' },
+  { id: 'facebook', name: 'Facebook' },
+  { id: 'whatsapp', name: 'WhatsApp' },
+  { id: 'snapchat', name: 'Snapchat' },
+  { id: 'spotify', name: 'Spotify' },
+  { id: 'github', name: 'GitHub' },
+  { id: 'pinterest', name: 'Pinterest' },
+  { id: 'twitch', name: 'Twitch' },
+  { id: 'discord', name: 'Discord' },
+];
+
 const SOCIAL_PLATFORMS = [
   { id: 'instagram', name: 'Instagram', placeholder: '@username' },
   { id: 'tiktok', name: 'TikTok', placeholder: '@username' },
@@ -81,7 +99,6 @@ interface LinkData {
   id: string;
   platform: string;
   value: string;
-  isFeatured: boolean;
 }
 
 function getSocialIcon(pid: string, size = 18) {
@@ -113,9 +130,8 @@ export default function ECardCreateScreen() {
   // Template & color
   const [templateIndex, setTemplateIndex] = useState(0);
   const [colorIndex, setColorIndex] = useState(0);
-  const [showColorPicker, setShowColorPicker] = useState(false);
 
-  // Card data - editable directly on the card
+  // Card data
   const [name, setName] = useState('');
   const [titleRole, setTitleRole] = useState('');
   const [bio, setBio] = useState('');
@@ -127,7 +143,11 @@ export default function ECardCreateScreen() {
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [photoSizeIndex, setPhotoSizeIndex] = useState(1);
 
-  // Links
+  // Featured social icons (independent, up to 4)
+  const [featuredIcons, setFeaturedIcons] = useState<string[]>([]); // array of platform ids
+  const [showFeaturedIconPicker, setShowFeaturedIconPicker] = useState(false);
+
+  // Links (separate from featured icons)
   const [links, setLinks] = useState<LinkData[]>([]);
   const [showAddLink, setShowAddLink] = useState(false);
 
@@ -135,7 +155,7 @@ export default function ECardCreateScreen() {
   const [galleryImages, setGalleryImages] = useState<{ id: string; url: string; file?: File }[]>([]);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
-  // Show photo size picker
+  // Photo size picker
   const [showPhotoSizePicker, setShowPhotoSizePicker] = useState(false);
 
   // Touch swipe
@@ -147,7 +167,7 @@ export default function ECardCreateScreen() {
   const color = colorSchemes[colorIndex] || colorSchemes[0];
   const isLocked = template?.isPremium && !isPremiumUser;
 
-  // Derived styles from template + color
+  // Derived styles
   const isLight = color?.text === '#1A1A1A' || color?.text === '#1f2937' || color?.primary === '#FFFFFF';
   const cardBg = color?.background?.includes('gradient')
     ? color.background
@@ -168,9 +188,6 @@ export default function ECardCreateScreen() {
     : template?.layout?.fontFamily === 'playful' ? "'Comic Sans MS', cursive"
     : template?.layout?.fontFamily === 'classic' ? "'Times New Roman', serif"
     : "'Inter', -apple-system, sans-serif";
-
-  const featuredLinks = links.filter(l => l.isFeatured).slice(0, 4);
-  const additionalLinks = links.filter(l => !l.isFeatured);
 
   // Swipe handlers
   const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
@@ -211,43 +228,31 @@ export default function ECardCreateScreen() {
     }
   };
 
+  // Featured icons management
+  const addFeaturedIcon = (platformId: string) => {
+    if (featuredIcons.length < 4 && !featuredIcons.includes(platformId)) {
+      setFeaturedIcons(prev => [...prev, platformId]);
+    }
+    setShowFeaturedIconPicker(false);
+  };
+
+  const removeFeaturedIcon = (platformId: string) => {
+    setFeaturedIcons(prev => prev.filter(id => id !== platformId));
+  };
+
   // Add link
   const addLink = (platformId: string) => {
     const newLink: LinkData = {
       id: `link-${Date.now()}`,
       platform: platformId,
       value: '',
-      isFeatured: links.filter(l => l.isFeatured).length < 4,
     };
     setLinks(prev => [...prev, newLink]);
     setShowAddLink(false);
   };
 
-  // Remove link
-  const removeLink = (id: string) => {
-    setLinks(prev => prev.filter(l => l.id !== id));
-  };
-
-  // Update link value
-  const updateLinkValue = (id: string, value: string) => {
-    setLinks(prev => prev.map(l => l.id === id ? { ...l, value } : l));
-  };
-
-  // Toggle featured
-  const toggleFeatured = (id: string) => {
-    setLinks(prev => prev.map(l => {
-      if (l.id === id) {
-        if (!l.isFeatured && prev.filter(x => x.isFeatured).length >= 4) return l;
-        return { ...l, isFeatured: !l.isFeatured };
-      }
-      return l;
-    }));
-  };
-
-  // Cycle photo size on tap
-  const cyclePhotoSize = () => {
-    setShowPhotoSizePicker(true);
-  };
+  const removeLink = (id: string) => { setLinks(prev => prev.filter(l => l.id !== id)); };
+  const updateLinkValue = (id: string, value: string) => { setLinks(prev => prev.map(l => l.id === id ? { ...l, value } : l)); };
 
   // Save card
   const handleSave = async () => {
@@ -279,7 +284,7 @@ export default function ECardCreateScreen() {
         font_style: template.layout.fontFamily,
         background_type: color.background?.includes('gradient') ? 'gradient' : 'solid',
         is_published: false,
-        gallery_images: galleryImages.map((g, i) => ({ id: g.id, url: g.url, caption: '' })),
+        gallery_images: galleryImages.map((g) => ({ id: g.id, url: g.url, caption: '' })),
       });
 
       if (card && links.length > 0) {
@@ -305,7 +310,7 @@ export default function ECardCreateScreen() {
   };
 
   // Button style helper
-  const btnStyle = (label?: string): React.CSSProperties => ({
+  const btnStyle = (): React.CSSProperties => ({
     height: 44,
     borderRadius: btnRadius,
     background: isOutline ? 'transparent' : isFrosted ? (isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.12)') : accentColor,
@@ -418,30 +423,40 @@ export default function ECardCreateScreen() {
                     </div>
                   )}
                 </div>
-                <button className="size-hint" onClick={cyclePhotoSize} style={{ color: txtSecondary }}>
-                  {photoSize.label} &middot; Tap to change size
-                </button>
               </div>
             )}
 
-            {/* Featured social icons */}
-            {featuredLinks.length > 0 && (
-              <div className="featured-socials">
-                {featuredLinks.map(link => {
-                  const platform = SOCIAL_PLATFORMS.find(p => p.id === link.platform);
-                  const iconInfo = PLATFORM_ICONS[link.platform];
-                  return (
-                    <div 
-                      key={link.id} 
-                      className="featured-icon"
-                      style={{ background: iconInfo?.bgColor || '#666' }}
+            {/* Size hint - ALWAYS visible, works for both cover and regular */}
+            <button className="size-hint" onClick={() => setShowPhotoSizePicker(true)} style={{ color: txtSecondary }}>
+              <IoExpand size={12} /> {photoSize.label} &middot; Tap to change size
+            </button>
+
+            {/* ===== FEATURED SOCIAL ICONS (independent, up to 4) ===== */}
+            <div className="featured-icons-row">
+              {featuredIcons.map(platformId => {
+                const iconInfo = PLATFORM_ICONS[platformId];
+                return (
+                  <div key={platformId} className="featured-icon-slot" style={{ background: iconInfo?.bgColor || '#666' }}>
+                    {getSocialIcon(platformId, 18)}
+                    <button 
+                      className="featured-icon-remove"
+                      onClick={(e) => { e.stopPropagation(); removeFeaturedIcon(platformId); }}
                     >
-                      {getSocialIcon(link.platform, 16)}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+                      <IoClose size={10} />
+                    </button>
+                  </div>
+                );
+              })}
+              {featuredIcons.length < 4 && (
+                <button 
+                  className="featured-icon-add"
+                  onClick={() => setShowFeaturedIconPicker(true)}
+                  style={{ borderColor: isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.2)' }}
+                >
+                  <IoAdd size={18} color={isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.4)'} />
+                </button>
+              )}
+            </div>
 
             {/* Editable fields */}
             <div className="card-fields">
@@ -492,7 +507,7 @@ export default function ECardCreateScreen() {
                 const platform = SOCIAL_PLATFORMS.find(p => p.id === link.platform);
                 return (
                   <div key={link.id} className="link-button" style={btnStyle()}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1 }}>
                       {getSocialIcon(link.platform, 16)}
                       <input
                         style={{ ...cardInputStyle('left'), fontSize: 13, width: 'auto', flex: 1 }}
@@ -502,24 +517,13 @@ export default function ECardCreateScreen() {
                         onClick={e => e.stopPropagation()}
                       />
                     </span>
-                    <div style={{ display: 'flex', gap: 4 }}>
-                      <button 
-                        className="link-action"
-                        onClick={() => toggleFeatured(link.id)}
-                        title={link.isFeatured ? 'Remove from featured' : 'Add to featured'}
-                        style={{ color: link.isFeatured ? ACCENT_GREEN : txtSecondary }}
-                      >
-                        ★
-                      </button>
-                      <button className="link-action" onClick={() => removeLink(link.id)} style={{ color: '#EF4444' }}>
-                        <IoTrash size={14} />
-                      </button>
-                    </div>
+                    <button className="link-action" onClick={() => removeLink(link.id)} style={{ color: '#EF4444' }}>
+                      <IoTrash size={14} />
+                    </button>
                   </div>
                 );
               })}
 
-              {/* Add link button */}
               <button 
                 className="add-link-btn" 
                 onClick={() => setShowAddLink(true)}
@@ -535,7 +539,7 @@ export default function ECardCreateScreen() {
                 <IoImages size={16} /> Photo Gallery
               </div>
               <div className="gallery-grid">
-                {galleryImages.map((img, i) => (
+                {galleryImages.map((img) => (
                   <div key={img.id} className="gallery-thumb" onClick={() => setLightboxImage(img.url)}>
                     <img src={img.url} alt="" />
                     <button className="gallery-remove" onClick={e => { e.stopPropagation(); setGalleryImages(prev => prev.filter(g => g.id !== img.id)); }}>
@@ -553,7 +557,6 @@ export default function ECardCreateScreen() {
 
         {/* Bottom toolbar */}
         <div className="bottom-bar">
-          {/* Template arrows */}
           <button 
             className="nav-arrow" 
             onClick={() => { if (templateIndex > 0) { setTemplateIndex(templateIndex - 1); setColorIndex(0); } }}
@@ -562,7 +565,6 @@ export default function ECardCreateScreen() {
             <IoChevronBack size={20} />
           </button>
 
-          {/* Color dots */}
           <div className="color-dots">
             {colorSchemes.map((cs, i) => {
               const isFree = cs.isFree;
@@ -575,11 +577,8 @@ export default function ECardCreateScreen() {
                     background: cs.background?.includes('gradient') ? cs.background : `linear-gradient(135deg, ${cs.primary}, ${cs.secondary})`,
                   }}
                   onClick={() => {
-                    if (locked) {
-                      router.push('/app/ecard/premium');
-                    } else {
-                      setColorIndex(i);
-                    }
+                    if (locked) { router.push('/app/ecard/premium'); }
+                    else { setColorIndex(i); }
                   }}
                 >
                   {locked && <IoLockClosed size={8} color="#fff" />}
@@ -588,7 +587,6 @@ export default function ECardCreateScreen() {
             })}
           </div>
 
-          {/* Template arrows */}
           <button 
             className="nav-arrow" 
             onClick={() => { if (templateIndex < TEMPLATES.length - 1) { setTemplateIndex(templateIndex + 1); setColorIndex(0); } }}
@@ -619,6 +617,28 @@ export default function ECardCreateScreen() {
                   {i === photoSizeIndex && <span className="check">✓</span>}
                 </button>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Featured icon picker modal */}
+        {showFeaturedIconPicker && (
+          <div className="modal-overlay" onClick={() => setShowFeaturedIconPicker(false)}>
+            <div className="modal-content" onClick={e => e.stopPropagation()}>
+              <h3>Add Featured Icon</h3>
+              <p style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#999', fontSize: 13, margin: '-8px 0 16px' }}>
+                Choose a social media icon ({featuredIcons.length}/4 used)
+              </p>
+              <div className="platform-grid">
+                {FEATURED_ICON_PLATFORMS.filter(p => !featuredIcons.includes(p.id)).map(p => (
+                  <button key={p.id} className="platform-btn" onClick={() => addFeaturedIcon(p.id)}>
+                    <div className="platform-icon" style={{ background: PLATFORM_ICONS[p.id]?.bgColor || '#666' }}>
+                      {getSocialIcon(p.id, 20)}
+                    </div>
+                    <span>{p.name}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -718,7 +738,6 @@ export default function ECardCreateScreen() {
           flex-shrink: 0;
         }
 
-        /* ===== THE CARD ===== */
         .card-container {
           flex: 1;
           overflow-y: auto;
@@ -761,7 +780,7 @@ export default function ECardCreateScreen() {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 16px;
+          gap: 12px;
           position: relative;
           box-shadow: 0 8px 40px rgba(0,0,0,0.2);
           transition: background 0.3s ease;
@@ -798,12 +817,15 @@ export default function ECardCreateScreen() {
         }
 
         .size-hint {
-          background: none;
+          background: ${isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.1)'};
           border: none;
           font-size: 11px;
           cursor: pointer;
-          opacity: 0.6;
-          padding: 2px 8px;
+          padding: 4px 12px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          gap: 4px;
         }
 
         /* Cover photo */
@@ -833,20 +855,54 @@ export default function ECardCreateScreen() {
           background: ${isLight ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.06)'};
         }
 
-        /* Featured socials */
-        .featured-socials {
+        /* ===== FEATURED ICONS ROW ===== */
+        .featured-icons-row {
           display: flex;
-          gap: 10px;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          padding: 4px 0;
         }
 
-        .featured-icon {
-          width: 36px;
-          height: 36px;
+        .featured-icon-slot {
+          width: 40px;
+          height: 40px;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
           color: #fff;
+          position: relative;
+          cursor: default;
+        }
+
+        .featured-icon-remove {
+          position: absolute;
+          top: -4px;
+          right: -4px;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: rgba(239,68,68,0.9);
+          color: #fff;
+          border: 2px solid ${isLight ? '#fff' : '#1a1a2e'};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          padding: 0;
+        }
+
+        .featured-icon-add {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          border: 2px dashed;
+          background: transparent;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
         }
 
         /* Card fields */
@@ -1137,7 +1193,6 @@ export default function ECardCreateScreen() {
           object-fit: contain;
         }
 
-        /* Mobile responsive */
         @media (max-width: 480px) {
           .live-card {
             border-radius: 16px;
