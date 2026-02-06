@@ -628,21 +628,23 @@ export default function ECardDashboardScreen() {
                       const pName = FEATURED_PLATFORMS.find(p => p.id === fi.platform)?.name || fi.platform;
                       return (
                         <div key={fi.platform} className="featured-icon-item" style={{ backgroundColor: isDark ? '#1E293B' : '#fff' }}>
-                          <div className="fi-left">
-                            <div className="fi-dot" style={{ backgroundColor: pi?.bgColor || '#888' }} />
-                            <span className="fi-name" style={{ color: isDark ? '#fff' : '#333' }}>{pName}</span>
+                          <div className="fi-header">
+                            <div className="fi-left">
+                              <div className="fi-dot" style={{ backgroundColor: pi?.bgColor || '#888' }} />
+                              <span className="fi-name" style={{ color: isDark ? '#fff' : '#333' }}>{pName}</span>
+                            </div>
+                            <button className="fi-remove" onClick={() => removeFeaturedIcon(fi.platform)}>
+                              <IoTrash size={16} color="#EF4444" />
+                            </button>
                           </div>
                           <input
                             type="text"
                             value={fi.url}
                             onChange={(e) => updateFeaturedIconUrl(fi.platform, e.target.value)}
-                            placeholder={`${pName} URL or @username`}
+                            placeholder={`Enter your ${pName} URL or @username`}
                             className="fi-url-input"
-                            style={{ color: isDark ? '#94A3B8' : '#6B7280' }}
+                            style={{ color: isDark ? '#fff' : '#333', backgroundColor: isDark ? '#0F172A' : '#F3F4F6' }}
                           />
-                          <button className="fi-remove" onClick={() => removeFeaturedIcon(fi.platform)}>
-                            <IoTrash size={16} color="#EF4444" />
-                          </button>
                         </div>
                       );
                     })}
@@ -1290,38 +1292,44 @@ export default function ECardDashboardScreen() {
 
           .featured-icon-item {
             display: flex;
-            align-items: center;
-            padding: 10px 12px;
+            flex-direction: column;
+            padding: 12px;
             border-radius: 10px;
-            gap: 10px;
+            gap: 8px;
+          }
+
+          .fi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
           }
 
           .fi-left {
             display: flex;
             align-items: center;
             gap: 8px;
-            min-width: 100px;
           }
 
           .fi-dot {
-            width: 24px;
-            height: 24px;
-            border-radius: 12px;
+            width: 28px;
+            height: 28px;
+            border-radius: 14px;
             flex-shrink: 0;
           }
 
           .fi-name {
-            font-size: 13px;
-            font-weight: 500;
+            font-size: 15px;
+            font-weight: 600;
             white-space: nowrap;
           }
 
           .fi-url-input {
-            flex: 1;
+            width: 100%;
             border: none;
-            background: transparent;
             outline: none;
-            font-size: 13px;
+            font-size: 14px;
+            padding: 8px 10px;
+            border-radius: 8px;
             min-width: 0;
           }
 
