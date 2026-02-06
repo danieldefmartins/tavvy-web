@@ -212,15 +212,27 @@ export default function ECardCreateScreen() {
   // Premium check deferred to upsell — let users design freely
   const usesPremiumTemplate = template?.isPremium || false;
 
-  // Derived styles
-  const isLight = color?.text === '#1A1A1A' || color?.text === '#1f2937' || color?.primary === '#FFFFFF';
+  // Auto-compute contrast text color based on background luminance
+  const hexToLum = (hex: string): number => {
+    const c = hex.replace('#', '');
+    if (c.length < 6) return 0.5;
+    const r = parseInt(c.substring(0, 2), 16) / 255;
+    const g = parseInt(c.substring(2, 4), 16) / 255;
+    const b = parseInt(c.substring(4, 6), 16) / 255;
+    const toL = (v: number) => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    return 0.2126 * toL(r) + 0.7152 * toL(g) + 0.0722 * toL(b);
+  };
+  const p1 = color?.primary || '#667eea';
+  const p2 = color?.secondary || '#764ba2';
+  const avgLum = (hexToLum(p1.startsWith('#') ? p1 : '#667eea') + hexToLum(p2.startsWith('#') ? p2 : '#764ba2')) / 2;
+  const isLight = avgLum > 0.45;
   const cardBg = color?.background?.includes('gradient')
     ? color.background
     : color?.cardBg && color.cardBg !== 'transparent'
       ? color.cardBg
       : `linear-gradient(180deg, ${color?.primary}, ${color?.secondary})`;
-  const txtColor = color?.text || '#fff';
-  const txtSecondary = color?.textSecondary || 'rgba(255,255,255,0.7)';
+  const txtColor = isLight ? '#1A1A1A' : '#FFFFFF';
+  const txtSecondary = isLight ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.7)';
   const accentColor = color?.accent || 'rgba(255,255,255,0.2)';
   const btnRadius = template?.layout?.buttonStyle === 'pill' ? 24
     : template?.layout?.buttonStyle === 'square' ? 4
