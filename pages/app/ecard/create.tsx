@@ -403,6 +403,78 @@ export default function ECardCreateScreen() {
     return lightColors.includes(selectedColor.id) || selectedColor.text === '#1A1A1A' || selectedColor.text === '#1f2937';
   };
 
+  // Helper: determine if a color scheme is light
+  const isLightScheme = (cs: ColorScheme) => {
+    return cs.text === '#1A1A1A' || cs.text === '#1f2937' || cs.primary === '#FFFFFF';
+  };
+
+  // Helper: get the best preview color scheme for a template (prefer a gradient/dark one for visual impact)
+  const getPreviewScheme = (t: Template): ColorScheme => {
+    // Try to find a non-white, non-black gradient scheme first for best visual preview
+    const gradientScheme = t.colorSchemes.find(cs => 
+      cs.background?.includes('gradient') || 
+      (cs.primary !== '#FFFFFF' && cs.primary !== '#1A1A1A')
+    );
+    return gradientScheme || t.colorSchemes[0];
+  };
+
+  // Render a mini card preview for the carousel
+  const renderCardPreview = (t: Template, isPeek: boolean, locked?: boolean) => {
+    const cs = getPreviewScheme(t);
+    const isLight = isLightScheme(cs);
+    const bgStyle = cs.background?.includes('gradient') 
+      ? { background: cs.background.replace('180deg', '135deg') }
+      : cs.cardBg && cs.cardBg !== 'transparent' 
+        ? { background: cs.cardBg, border: isLight ? '1px solid #E5E7EB' : 'none' }
+        : { background: `linear-gradient(135deg, ${cs.primary}, ${cs.secondary})` };
+
+    const textColor = isLight ? 'rgba(0,0,0,0.4)' : (cs.text === '#d4af37' || cs.text === '#c0c0c0' ? cs.text : 'rgba(255,255,255,0.5)');
+    const textColor2 = isLight ? 'rgba(0,0,0,0.25)' : (cs.text === '#d4af37' || cs.text === '#c0c0c0' ? `${cs.text}80` : 'rgba(255,255,255,0.3)');
+    const photoSize = t.layout.photoSize === 'small' ? 50 : t.layout.photoSize === 'large' ? 80 : t.layout.photoSize === 'cover' ? '100%' : 65;
+    const photoBorder = isLight ? '2px solid rgba(0,0,0,0.15)' : (cs.border ? `2px solid ${cs.border}` : '2px solid rgba(255,255,255,0.3)');
+    const btnBg = isLight ? 'rgba(0,0,0,0.08)' : (cs.accent || 'rgba(255,255,255,0.2)');
+    const btnBorder = t.layout.buttonStyle === 'outline' ? `1px solid ${isLight ? 'rgba(0,0,0,0.2)' : (cs.accent || 'rgba(255,255,255,0.3)')}` : 'none';
+    const btnRadius = t.layout.buttonStyle === 'pill' ? 20 : t.layout.buttonStyle === 'square' ? 4 : 8;
+
+    return (
+      <div className="card-face" style={bgStyle as any}>
+        {locked && (
+          <div className="lock-overlay">
+            <IoLockClosed size={32} color="#fff" />
+            <span>Premium</span>
+          </div>
+        )}
+        <div className="card-face-content">
+          {t.layout.photoSize === 'cover' ? (
+            <div style={{
+              width: '100%', height: 80, background: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.1)',
+              borderRadius: 8, marginBottom: 4,
+            }} />
+          ) : (
+            <div className="face-photo-placeholder" style={{
+              width: typeof photoSize === 'number' ? photoSize : 65,
+              height: typeof photoSize === 'number' ? photoSize : 65,
+              borderRadius: t.layout.photoStyle === 'square' ? 8 : '50%',
+              border: photoBorder,
+              background: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.15)',
+            }} />
+          )}
+          <div className="face-line w60" style={{ backgroundColor: textColor }} />
+          <div className="face-line w40" style={{ backgroundColor: textColor2 }} />
+          <div className="face-buttons">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="face-button" style={{
+                borderRadius: btnRadius,
+                backgroundColor: t.layout.buttonStyle === 'outline' ? 'transparent' : btnBg,
+                border: btnBorder,
+              }} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // ==================== STEP 1: TEMPLATE SELECTION ====================
   const renderTemplateStep = () => {
     const template = TEMPLATES[selectedTemplateIndex];
@@ -432,77 +504,13 @@ export default function ECardCreateScreen() {
                 className="carousel-card peek left"
                 onClick={() => scrollToTemplate(selectedTemplateIndex - 1)}
               >
-                <div 
-                  className="card-face"
-                  style={{ 
-                    background: `linear-gradient(135deg, ${TEMPLATES[selectedTemplateIndex - 1].colorSchemes[0]?.primary || '#667eea'}, ${TEMPLATES[selectedTemplateIndex - 1].colorSchemes[0]?.secondary || '#764ba2'})`,
-                  }}
-                >
-                  <div className="card-face-content">
-                    <div className="face-photo-placeholder" />
-                    <div className="face-line w60" />
-                    <div className="face-line w40" />
-                  </div>
-                </div>
+                {renderCardPreview(TEMPLATES[selectedTemplateIndex - 1], true)}
               </div>
             )}
 
             {/* Current card */}
             <div className="carousel-card active">
-              <div 
-                className="card-face"
-                style={{ 
-                  background: template.colorSchemes[0]?.cardBg === '#FFFFFF' 
-                    ? '#FFFFFF' 
-                    : `linear-gradient(135deg, ${template.colorSchemes[0]?.primary || '#667eea'}, ${template.colorSchemes[0]?.secondary || '#764ba2'})`,
-                  border: template.colorSchemes[0]?.border ? `2px solid ${template.colorSchemes[0].border}` : 'none',
-                }}
-              >
-                {isLocked && (
-                  <div className="lock-overlay">
-                    <IoLockClosed size={32} color="#fff" />
-                    <span>Premium</span>
-                  </div>
-                )}
-                <div className="card-face-content">
-                  <div 
-                    className="face-photo-placeholder"
-                    style={{ 
-                      width: template.layout.photoSize === 'small' ? 50 : template.layout.photoSize === 'large' ? 80 : 65,
-                      height: template.layout.photoSize === 'small' ? 50 : template.layout.photoSize === 'large' ? 80 : 65,
-                      borderRadius: template.layout.photoStyle === 'square' ? 8 : '50%',
-                      border: template.colorSchemes[0]?.border ? `2px solid ${template.colorSchemes[0].border}` : '2px solid rgba(255,255,255,0.3)',
-                    }}
-                  />
-                  <div className="face-line w60" style={{ 
-                    backgroundColor: template.colorSchemes[0]?.text === '#1f2937' || template.colorSchemes[0]?.text === '#1A1A1A' 
-                      ? 'rgba(0,0,0,0.3)' 
-                      : template.colorSchemes[0]?.text === '#d4af37' || template.colorSchemes[0]?.text === '#c0c0c0'
-                        ? template.colorSchemes[0].text
-                        : 'rgba(255,255,255,0.5)' 
-                  }} />
-                  <div className="face-line w40" style={{ 
-                    backgroundColor: template.colorSchemes[0]?.text === '#1f2937' || template.colorSchemes[0]?.text === '#1A1A1A'
-                      ? 'rgba(0,0,0,0.2)' 
-                      : template.colorSchemes[0]?.text === '#d4af37' || template.colorSchemes[0]?.text === '#c0c0c0'
-                        ? `${template.colorSchemes[0].text}80`
-                        : 'rgba(255,255,255,0.3)' 
-                  }} />
-                  <div className="face-buttons">
-                    {[1, 2, 3].map(i => (
-                      <div 
-                        key={i} 
-                        className="face-button"
-                        style={{ 
-                          borderRadius: template.layout.buttonStyle === 'pill' ? 20 : template.layout.buttonStyle === 'square' ? 4 : 8,
-                          backgroundColor: template.colorSchemes[0]?.accent || 'rgba(255,255,255,0.2)',
-                          border: template.layout.buttonStyle === 'outline' ? `1px solid ${template.colorSchemes[0]?.accent || 'rgba(255,255,255,0.3)'}` : 'none',
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
+              {renderCardPreview(template, false, isLocked)}
               <div className="card-label">
                 <span className="template-name" style={{ color: isDark ? '#fff' : '#333' }}>
                   {template.name}
@@ -525,18 +533,7 @@ export default function ECardCreateScreen() {
                 className="carousel-card peek right"
                 onClick={() => scrollToTemplate(selectedTemplateIndex + 1)}
               >
-                <div 
-                  className="card-face"
-                  style={{ 
-                    background: `linear-gradient(135deg, ${TEMPLATES[selectedTemplateIndex + 1].colorSchemes[0]?.primary || '#667eea'}, ${TEMPLATES[selectedTemplateIndex + 1].colorSchemes[0]?.secondary || '#764ba2'})`,
-                  }}
-                >
-                  <div className="card-face-content">
-                    <div className="face-photo-placeholder" />
-                    <div className="face-line w60" />
-                    <div className="face-line w40" />
-                  </div>
-                </div>
+                {renderCardPreview(TEMPLATES[selectedTemplateIndex + 1], true)}
               </div>
             )}
           </div>
