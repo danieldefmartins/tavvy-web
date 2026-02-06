@@ -31,13 +31,16 @@ const BG_DARK = '#0F172A';
 export default function ECardHubScreen() {
   const router = useRouter();
   const { theme, isDark } = useThemeContext();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   
   const [cards, setCards] = useState<CardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchCards = useCallback(async () => {
+    // Wait for auth to finish loading before checking user
+    if (authLoading) return;
+    
     if (!user) {
       setCards([]);
       setLoading(false);
@@ -53,7 +56,7 @@ export default function ECardHubScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   useEffect(() => {
     fetchCards();

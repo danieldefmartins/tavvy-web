@@ -29,6 +29,9 @@ export default function AppLayout({
   const accessLevel = requiredAccess || getRouteAccessLevel(router.pathname);
   const hasAccess = checkAccess(roles, isAuthenticated, accessLevel);
 
+  // For public routes, don't block on loading — render children immediately
+  const isPublicRoute = accessLevel === 'public';
+
   useEffect(() => {
     // Don't redirect while loading
     if (loading) return;
@@ -48,8 +51,9 @@ export default function AppLayout({
     }
   }, [loading, hasAccess, isAuthenticated, accessLevel, roles, router]);
 
-  // Show loading state while checking access
-  if (loading) {
+  // For public routes, skip the loading gate — show content immediately
+  // The page itself handles its own loading state (e.g. fetching card data)
+  if (loading && !isPublicRoute) {
     return (
       <div 
         className="app-layout"
@@ -111,7 +115,7 @@ export default function AppLayout({
   }
 
   // Show access denied briefly before redirect
-  if (!hasAccess && accessLevel !== 'public') {
+  if (!loading && !hasAccess && accessLevel !== 'public') {
     return (
       <div 
         className="app-layout"

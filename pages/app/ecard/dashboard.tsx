@@ -144,9 +144,13 @@ export default function ECardDashboardScreen() {
   const bgColor = isDark ? BG_DARK : BG_LIGHT;
   const canAddMoreLinks = isPro || links.length < FREE_LINK_LIMIT;
 
-  // Load card data
+  // Load card data — wait for router to be ready (query params available)
   useEffect(() => {
     const loadCard = async () => {
+      // On Next.js, router.query is empty on first render during client-side navigation
+      // Wait for router to be ready before checking cardId
+      if (!router.isReady) return;
+      
       if (!cardId || typeof cardId !== 'string') {
         setLoading(false);
         return;
@@ -201,7 +205,7 @@ export default function ECardDashboardScreen() {
     };
 
     loadCard();
-  }, [cardId]);
+  }, [cardId, router.isReady]);
 
   // Save changes
   const handleSave = async () => {

@@ -2,6 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchUserRoles, UserRole, UserRoleData, checkAccess, AccessLevel } from '../lib/roleService';
 
+// Timeout for role fetching (4 seconds max)
+const ROLES_TIMEOUT_MS = 4000;
+
 /**
  * Hook to get and manage user roles
  * 
@@ -16,6 +19,8 @@ export function useRoles(): UserRoleData {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadRoles() {
       if (authLoading) {
         return;
@@ -29,17 +34,36 @@ export function useRoles(): UserRoleData {
 
       setLoading(true);
       try {
-        const userRoles = await fetchUserRoles();
-        setRoles(userRoles);
+        // Race role fetching against a timeout
+        const rolesPromise = fetchUserRoles();
+        const timeoutPromise = new Promise<UserRole[]>((resolve) => {
+          setTimeout(() => {
+            console.warn('[useRoles] Role fetching timed out after', ROLES_TIMEOUT_MS, 'ms — defaulting to empty roles');
+            resolve([]);
+          }, ROLES_TIMEOUT_MS);
+        });
+
+        const userRoles = await Promise.race([rolesPromise, timeoutPromise]);
+        if (!cancelled) {
+          setRoles(userRoles);
+        }
       } catch (error) {
         console.error('Error loading roles:', error);
-        setRoles([]);
+        if (!cancelled) {
+          setRoles([]);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
     loadRoles();
+
+    return () => {
+      cancelled = true;
+    };
   }, [user, authLoading]);
 
   return {
