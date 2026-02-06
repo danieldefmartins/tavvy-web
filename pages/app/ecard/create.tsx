@@ -157,6 +157,33 @@ export default function ECardCreateScreen() {
   // Photo size picker
   const [showPhotoSizePicker, setShowPhotoSizePicker] = useState(false);
 
+  // ── Restore saved card data after login redirect ──
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('ecard_draft');
+      if (saved) {
+        const draft = JSON.parse(saved);
+        if (draft.name) setName(draft.name);
+        if (draft.titleRole) setTitleRole(draft.titleRole);
+        if (draft.bio) setBio(draft.bio);
+        if (draft.email) setEmail(draft.email);
+        if (draft.phone) setPhone(draft.phone);
+        if (draft.website) setWebsite(draft.website);
+        if (draft.address) setAddress(draft.address);
+        if (typeof draft.templateIndex === 'number') setTemplateIndex(draft.templateIndex);
+        if (typeof draft.colorIndex === 'number') setColorIndex(draft.colorIndex);
+        if (typeof draft.photoSizeIndex === 'number') setPhotoSizeIndex(draft.photoSizeIndex);
+        if (Array.isArray(draft.featuredIcons)) setFeaturedIcons(draft.featuredIcons);
+        if (Array.isArray(draft.links)) setLinks(draft.links);
+        if (draft.profileImage) setProfileImage(draft.profileImage);
+        // Clear the draft after restoring
+        localStorage.removeItem('ecard_draft');
+      }
+    } catch (e) {
+      console.warn('Could not restore eCard draft:', e);
+    }
+  }, []);
+
 
   const template = TEMPLATES[templateIndex];
   const colorSchemes = template?.colorSchemes || [];
@@ -239,9 +266,29 @@ export default function ECardCreateScreen() {
   const removeLink = (id: string) => { setLinks(prev => prev.filter(l => l.id !== id)); };
   const updateLinkValue = (id: string, value: string) => { setLinks(prev => prev.map(l => l.id === id ? { ...l, value } : l)); };
 
+  // Save card draft to localStorage (for login redirect)
+  const saveDraftToLocalStorage = () => {
+    try {
+      const draft = {
+        name, titleRole, bio, email, phone, website, address,
+        templateIndex, colorIndex, photoSizeIndex,
+        featuredIcons, links,
+        profileImage, // base64 or blob URL (blob URLs won't persist across sessions, but base64 will)
+      };
+      localStorage.setItem('ecard_draft', JSON.stringify(draft));
+    } catch (e) {
+      console.warn('Could not save eCard draft:', e);
+    }
+  };
+
   // Save card
   const handleSave = async () => {
-    if (!user) { alert('Please log in to create a card.'); return; }
+    if (!user) {
+      // Save all card data to localStorage before redirecting to login
+      saveDraftToLocalStorage();
+      router.push('/app/login?returnUrl=/app/ecard/create');
+      return;
+    }
     if (!name.trim()) { alert('Please enter your name.'); return; }
     setIsCreating(true);
     try {

@@ -39,7 +39,9 @@ export default function LoginScreen() {
     
     try {
       await signIn(email, password);
-      router.push('/app');
+      // Redirect to returnUrl if provided (e.g., from eCard create), otherwise go to /app
+      const returnUrl = router.query.returnUrl as string;
+      router.push(returnUrl || '/app');
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');
     } finally {
@@ -218,7 +220,7 @@ export default function LoginScreen() {
               <span style={{ color: theme.textSecondary }}>
                 Don't have an account?{' '}
               </span>
-              <Link href="/app/signup" locale={locale} style={{ color: theme.primary }}>
+              <Link href={`/app/signup${router.query.returnUrl ? `?returnUrl=${encodeURIComponent(router.query.returnUrl as string)}` : ''}`} locale={locale} style={{ color: theme.primary }}>
                 Sign Up
               </Link>
             </div>

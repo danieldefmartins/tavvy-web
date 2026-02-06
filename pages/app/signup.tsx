@@ -76,7 +76,7 @@ export default function SignUpScreen() {
                 We've sent a confirmation link to <strong>{email}</strong>. 
                 Please click the link to verify your account.
               </p>
-              <Link href="/app/login" locale={locale} className="back-to-login" style={{ color: theme.primary }}>
+              <Link href={`/app/login${router.query.returnUrl ? `?returnUrl=${encodeURIComponent(router.query.returnUrl as string)}` : ''}`} locale={locale} className="back-to-login" style={{ color: theme.primary }}>
                 Back to Login
               </Link>
             </div>
