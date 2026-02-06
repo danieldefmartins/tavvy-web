@@ -762,7 +762,7 @@ export default function ECardCreateScreen() {
               >
                 <IoAdd size={18} /> Add Video
               </button>
-              <input ref={videoInputRef} type="file" accept="video/*" style={{ display: 'none' }} onChange={handleVideoFileUpload} />
+              <input ref={videoInputRef} type="file" accept="video/*" capture="environment" style={{ display: 'none' }} onChange={handleVideoFileUpload} />
             </div>
           </div>
         </div>
