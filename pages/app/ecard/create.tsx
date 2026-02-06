@@ -163,7 +163,9 @@ export default function ECardCreateScreen() {
   const [selectedTemplate, setSelectedTemplate] = useState<Template>(TEMPLATES[0]);
 
   // Color state
-  const [selectedColor, setSelectedColor] = useState<ColorScheme>(FREE_COLORS[2]); // Default gradient
+  const [selectedColor, setSelectedColor] = useState<ColorScheme>(
+    TEMPLATES[0]?.colorSchemes?.find(c => c.isFree) || TEMPLATES[0]?.colorSchemes?.[0] || FREE_COLORS[0]
+  ); // Default to first free color from template
   const [isPremiumUser, setIsPremiumUser] = useState(false);
 
   // Profile state
@@ -569,7 +571,9 @@ export default function ECardCreateScreen() {
 
   // ==================== STEP 2: COLOR SELECTION ====================
   const renderColorStep = () => {
-    const templateColors = selectedTemplate.colorSchemes || [];
+    const allColors = selectedTemplate.colorSchemes || [];
+    const freeColors = allColors.filter(c => c.isFree);
+    const premiumColors = allColors.filter(c => !c.isFree);
 
     return (
       <div className="step-content color-step">
@@ -579,48 +583,50 @@ export default function ECardCreateScreen() {
         </p>
 
         {/* Free Colors */}
-        <div className="color-section">
-          <h3 style={{ color: isDark ? '#fff' : '#333' }}>Free</h3>
-          <div className="color-grid">
-            {FREE_COLORS.map((color) => (
-              <button
-                key={color.id}
-                className={`color-swatch ${selectedColor.id === color.id ? 'selected' : ''}`}
-                onClick={() => setSelectedColor(color)}
-              >
-                <div 
-                  className="swatch-preview"
-                  style={{ 
-                    background: color.id === 'free-gradient' 
-                      ? `linear-gradient(135deg, ${color.primary}, ${color.secondary})`
-                      : color.primary,
-                    border: color.id === 'free-white' ? '2px solid #E5E7EB' : 'none',
-                  }}
+        {freeColors.length > 0 && (
+          <div className="color-section">
+            <h3 style={{ color: isDark ? '#fff' : '#333' }}>Free</h3>
+            <div className="color-grid">
+              {freeColors.map((color) => (
+                <button
+                  key={color.id}
+                  className={`color-swatch ${selectedColor.id === color.id ? 'selected' : ''}`}
+                  onClick={() => setSelectedColor(color)}
                 >
-                  {selectedColor.id === color.id && (
-                    <IoCheckmark size={20} color={color.id === 'free-white' ? '#333' : '#fff'} />
-                  )}
-                </div>
-                <span style={{ color: isDark ? '#fff' : '#333' }}>{color.name}</span>
-              </button>
-            ))}
+                  <div 
+                    className="swatch-preview"
+                    style={{ 
+                      background: color.primary === color.secondary 
+                        ? color.primary 
+                        : `linear-gradient(135deg, ${color.primary}, ${color.secondary})`,
+                      border: color.primary === '#FFFFFF' ? '2px solid #E5E7EB' : 'none',
+                    }}
+                  >
+                    {selectedColor.id === color.id && (
+                      <IoCheckmark size={20} color={color.text === '#1A1A1A' ? '#333' : '#fff'} />
+                    )}
+                  </div>
+                  <span style={{ color: isDark ? '#fff' : '#333' }}>{color.name}</span>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Template Colors (Premium) */}
-        {templateColors.length > 0 && (
+        {/* Premium Colors */}
+        {premiumColors.length > 0 && (
           <div className="color-section">
             <h3 style={{ color: isDark ? '#fff' : '#333' }}>
-              {selectedTemplate.name} Colors
-              {selectedTemplate.isPremium && !isPremiumUser && (
+              Premium Colors
+              {!isPremiumUser && (
                 <span className="premium-label">
                   <IoLockClosed size={14} /> Premium
                 </span>
               )}
             </h3>
             <div className="color-grid">
-              {templateColors.map((color) => {
-                const locked = selectedTemplate.isPremium && !isPremiumUser;
+              {premiumColors.map((color) => {
+                const locked = !isPremiumUser;
                 return (
                   <button
                     key={color.id}

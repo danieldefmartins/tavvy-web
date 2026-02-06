@@ -13,6 +13,7 @@ export interface ColorScheme {
   background: string;   // Card background
   cardBg: string;       // Inner card background (for minimal templates)
   border?: string;      // Border color (for luxury templates)
+  isFree?: boolean;     // If true, available to all users (white, black, basic gradient)
 }
 
 export interface Template {
@@ -50,6 +51,30 @@ export const TEMPLATES: Template[] = [
     features: ['gradient-bg', 'action-buttons', 'social-icons'],
     colorSchemes: [
       {
+        id: 'white',
+        name: 'White',
+        primary: '#FFFFFF',
+        secondary: '#F5F5F5',
+        accent: 'rgba(0,0,0,0.1)',
+        text: '#1A1A1A',
+        textSecondary: '#666666',
+        background: '#FFFFFF',
+        cardBg: '#FFFFFF',
+        isFree: true,
+      },
+      {
+        id: 'black',
+        name: 'Black',
+        primary: '#1A1A1A',
+        secondary: '#333333',
+        accent: 'rgba(255,255,255,0.15)',
+        text: '#FFFFFF',
+        textSecondary: 'rgba(255,255,255,0.7)',
+        background: '#1A1A1A',
+        cardBg: '#1A1A1A',
+        isFree: true,
+      },
+      {
         id: 'blue',
         name: 'Ocean Blue',
         primary: '#1E90FF',
@@ -59,6 +84,7 @@ export const TEMPLATES: Template[] = [
         textSecondary: 'rgba(255,255,255,0.8)',
         background: 'linear-gradient(180deg, #1E90FF 0%, #00BFFF 100%)',
         cardBg: 'transparent',
+        isFree: true,
       },
       {
         id: 'navy',
