@@ -967,24 +967,12 @@ export default function ECardCreateScreen() {
      ============================================================ */
   const renderFeaturedIcons = () => (
     <div className="featured-icons-section">
-      {featuredIcons.length === 0 && (
-        <div className="social-empty-state">
-          <div className="social-empty-icon-row">
-            <IoLogoInstagram size={20} color={isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)'} />
-            <IoLogoTiktok size={20} color={isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)'} />
-            <IoLogoYoutube size={20} color={isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)'} />
-            <IoLogoLinkedin size={20} color={isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)'} />
-          </div>
-          <span style={{ fontSize: 14, fontWeight: 600, color: isLight ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.6)', textAlign: 'center' }}>Social Media</span>
-          <span style={{ fontSize: 12, color: isLight ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.4)', textAlign: 'center' }}>Add up to 4 social profiles</span>
-        </div>
-      )}
       <div className="featured-icons-row">
         {featuredIcons.map(fi => {
           const iconInfo = PLATFORM_ICONS[fi.platform];
           return (
             <div key={fi.platform} className="featured-icon-slot" style={{ background: iconInfo?.bgColor || '#666' }}>
-              {getSocialIcon(fi.platform, 20)}
+              {getSocialIcon(fi.platform, 18)}
               <button className="featured-icon-remove" onClick={(e) => { e.stopPropagation(); removeFeaturedIcon(fi.platform); }}>
                 <IoClose size={10} />
               </button>
@@ -992,17 +980,17 @@ export default function ECardCreateScreen() {
           );
         })}
         {featuredIcons.length < 4 && (
-          <button className="featured-icon-add" onClick={() => setShowFeaturedIconPicker(true)} style={{ borderColor: isLight ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.35)' }}>
-            <IoAdd size={24} color={isLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.6)'} />
+          <button className="featured-icon-add" onClick={() => setShowFeaturedIconPicker(true)} style={{ borderColor: isLight ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.25)' }}>
+            <IoAdd size={18} color={isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.5)'} />
           </button>
         )}
       </div>
       {featuredIcons.map(fi => {
         const platform = FEATURED_ICON_PLATFORMS.find(p => p.id === fi.platform);
         return (
-          <div key={`url-${fi.platform}`} className="featured-icon-url-row" style={{ borderBottom: `1px solid ${isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'}` }}>
-            <span style={{ color: txtSecondary, flexShrink: 0, fontSize: 12 }}>{getSocialIcon(fi.platform, 14)}</span>
-            <input style={{ ...cardInputStyle('left'), fontSize: 13 }} placeholder={`${platform?.name || fi.platform} URL or @username`} value={fi.url} onChange={e => updateFeaturedIconUrl(fi.platform, e.target.value)} />
+          <div key={`url-${fi.platform}`} className="featured-icon-url-row">
+            <span style={{ color: txtSecondary, flexShrink: 0 }}>{getSocialIcon(fi.platform, 14)}</span>
+            <input style={{ ...cardInputStyle('left'), fontSize: 13 }} placeholder={`${platform?.name || fi.platform} URL`} value={fi.url} onChange={e => updateFeaturedIconUrl(fi.platform, e.target.value)} />
           </div>
         );
       })}
@@ -1012,19 +1000,14 @@ export default function ECardCreateScreen() {
   const renderContactFields = () => (
     <div className="contact-fields">
       {[
-        { icon: <IoMail size={18} />, placeholder: 'Email', value: email, set: setEmail, label: 'Email' },
-        { icon: <IoCall size={18} />, placeholder: 'Phone', value: phone, set: setPhone, label: 'Phone' },
-        { icon: <IoGlobe size={18} />, placeholder: 'Website', value: website, set: setWebsite, label: 'Website' },
-        { icon: <IoLocationOutline size={18} />, placeholder: 'Address', value: address, set: setAddress, label: 'Location' },
+        { icon: <IoMail size={16} />, placeholder: 'Email', value: email, set: setEmail },
+        { icon: <IoCall size={16} />, placeholder: 'Phone', value: phone, set: setPhone },
+        { icon: <IoGlobe size={16} />, placeholder: 'Website', value: website, set: setWebsite },
+        { icon: <IoLocationOutline size={16} />, placeholder: 'Address', value: address, set: setAddress },
       ].map((field, i) => (
-        <div key={i} className="contact-row" style={{ background: isLight ? 'rgba(0,0,0,0.035)' : 'rgba(255,255,255,0.055)', borderRadius: 12, padding: '12px 16px', marginBottom: 8 }}>
-          <div className="contact-icon-wrap" style={{ background: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)', color: accentColor || (isLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.6)') }}>
-            {field.icon}
-          </div>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <span style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.5, color: isLight ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.35)' }}>{field.label}</span>
-            <input style={{ ...cardInputStyle('left'), fontSize: 14, padding: 0 }} placeholder={field.placeholder} value={field.value} onChange={e => field.set(e.target.value)} />
-          </div>
+        <div key={i} className="contact-row">
+          <span className="contact-icon" style={{ color: txtSecondary }}>{field.icon}</span>
+          <input style={{ ...cardInputStyle('left'), fontSize: 14, padding: '8px 0' }} placeholder={field.placeholder} value={field.value} onChange={e => field.set(e.target.value)} />
         </div>
       ))}
     </div>
@@ -1055,12 +1038,9 @@ export default function ECardCreateScreen() {
     <div className="gallery-section editor-section">
       <div className="editor-section-label" style={{ color: txtSecondary }}><IoImages size={16} /> Photo Gallery</div>
       {galleryImages.length === 0 ? (
-        <button className="gallery-empty-upload" onClick={() => galleryInputRef.current?.click()} style={{ borderColor: isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.2)', background: isLight ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.03)' }}>
-          <div className="gallery-empty-icon" style={{ background: isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.08)' }}>
-            <IoImages size={28} color={isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.35)'} />
-          </div>
-          <span style={{ fontSize: 14, fontWeight: 600, color: isLight ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.6)' }}>Add Photos</span>
-          <span style={{ fontSize: 12, color: isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.35)' }}>Tap to upload images</span>
+        <button className="gallery-empty-upload" onClick={() => galleryInputRef.current?.click()} style={{ borderColor: isLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.15)' }}>
+          <IoImages size={20} color={isLight ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.3)'} />
+          <span style={{ fontSize: 13, fontWeight: 500, color: isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.45)' }}>Add Photos</span>
         </button>
       ) : (
         <div className="gallery-grid">
@@ -1099,12 +1079,9 @@ export default function ECardCreateScreen() {
         </div>
       ))}
       {videos.length === 0 ? (
-        <button className="video-empty-upload" onClick={() => setShowVideoTypePicker(true)} style={{ borderColor: isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.2)', background: isLight ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.03)' }}>
-          <div className="video-empty-icon" style={{ background: isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.08)' }}>
-            <IoVideocam size={24} color={isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.35)'} />
-          </div>
-          <span style={{ fontSize: 14, fontWeight: 600, color: isLight ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.6)' }}>Add Video</span>
-          <span style={{ fontSize: 12, color: isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.35)' }}>YouTube, Tavvy Short, or URL</span>
+        <button className="gallery-empty-upload" onClick={() => setShowVideoTypePicker(true)} style={{ borderColor: isLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.15)' }}>
+          <IoVideocam size={20} color={isLight ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.3)'} />
+          <span style={{ fontSize: 13, fontWeight: 500, color: isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.45)' }}>Add Video</span>
         </button>
       ) : (
         <button className="add-link-btn" onClick={() => setShowVideoTypePicker(true)}>
@@ -1124,11 +1101,8 @@ export default function ECardCreateScreen() {
             <img src={profileImage} alt="Cover" className="cover-img" />
           ) : (
             <div className="cover-placeholder">
-              <div className="cover-upload-icon">
-                <IoCamera size={36} color={isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.5)'} />
-              </div>
-              <span style={{ color: isLight ? 'rgba(0,0,0,0.65)' : 'rgba(255,255,255,0.7)', fontSize: 16, fontWeight: 700, marginTop: 8 }}>Add Cover Photo</span>
-              <span style={{ color: isLight ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.4)', fontSize: 12 }}>1200 x 800px recommended</span>
+              <IoCamera size={24} color={isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.4)'} />
+              <span style={{ color: isLight ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 500, marginTop: 4 }}>Add Cover Photo</span>
             </div>
           )}
         </div>
@@ -1148,10 +1122,8 @@ export default function ECardCreateScreen() {
             <img src={profileImage} alt="Profile" className="profile-img" />
           ) : (
             <div className="photo-placeholder" style={{ background: 'transparent' }}>
-              <div className="photo-upload-ring" style={{ borderColor: isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.2)' }}>
-                <IoCamera size={28} color={isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.5)'} />
-              </div>
-              <span style={{ fontSize: 12, fontWeight: 600, color: isLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.55)', marginTop: 6 }}>Add Photo</span>
+              <IoCamera size={24} color={isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.4)'} />
+              <span style={{ fontSize: 11, fontWeight: 500, color: isLight ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.4)', marginTop: 4 }}>Add Photo</span>
             </div>
           )}
         </div>
@@ -1173,11 +1145,8 @@ export default function ECardCreateScreen() {
         <img src={bannerImage} alt="Banner" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       ) : (
         <div className="banner-placeholder">
-          <div className="banner-upload-icon" style={{ background: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.1)' }}>
-            <IoImage size={28} color={isLight ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.4)'} />
-          </div>
-          <span style={{ color: isLight ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.6)', fontSize: 14, fontWeight: 600 }}>Add Banner Photo</span>
-          <span style={{ color: isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.35)', fontSize: 11 }}>Recommended: 1200 x 400px</span>
+          <IoImage size={20} color={isLight ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.3)'} />
+          <span style={{ color: isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.45)', fontSize: 13, fontWeight: 500 }}>Add Banner</span>
         </div>
       )}
     </div>
@@ -1194,8 +1163,8 @@ export default function ECardCreateScreen() {
           {/* Profile photo - centered and prominent */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginBottom: 8 }}>
             {renderPhotoUpload()}
-            <button className="size-hint" onClick={() => setShowPhotoSizePicker(true)} style={{ color: txtSecondary }}>
-              <IoExpand size={12} /> {photoSize.label} &middot; Tap to change size
+            <button className="size-hint" onClick={() => setShowPhotoSizePicker(true)} style={{ color: txtSecondary, fontSize: 11, opacity: 0.6 }}>
+              <IoExpand size={10} /> {photoSize.label} &middot; Tap to change size
             </button>
           </div>
 
@@ -2121,13 +2090,13 @@ export default function ECardCreateScreen() {
         .live-card {
           border-radius: 24px;
           min-height: 500px;
-          padding: 24px 20px 36px;
+          padding: 20px 18px 28px;
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 18px;
+          gap: 12px;
           position: relative;
-          box-shadow: 0 12px 48px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.1);
+          box-shadow: 0 4px 24px rgba(0,0,0,0.12);
           transition: background 0.3s ease;
         }
 
@@ -2135,9 +2104,9 @@ export default function ECardCreateScreen() {
           width: 100%;
           display: flex;
           flex-direction: column;
-          gap: 6px;
-          padding: 16px 0;
-          border-top: 1px solid ${isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'};
+          gap: 4px;
+          padding: 10px 0;
+          border-top: 1px solid ${isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)'};
         }
 
         .editor-section:first-of-type {
@@ -2147,13 +2116,13 @@ export default function ECardCreateScreen() {
         .editor-section-label {
           display: flex;
           align-items: center;
-          gap: 8px;
-          font-size: 13px;
-          font-weight: 700;
+          gap: 6px;
+          font-size: 12px;
+          font-weight: 600;
           text-transform: uppercase;
-          letter-spacing: 0.8px;
-          margin-bottom: 8px;
-          opacity: 0.7;
+          letter-spacing: 0.5px;
+          margin-bottom: 6px;
+          opacity: 0.5;
         }
 
         /* Profile photo */
@@ -2167,14 +2136,12 @@ export default function ECardCreateScreen() {
         .profile-photo {
           overflow: hidden;
           cursor: pointer;
-          transition: all 0.3s ease;
+          transition: all 0.2s ease;
           flex-shrink: 0;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.15);
         }
 
         .profile-photo:hover {
-          transform: scale(1.03);
-          box-shadow: 0 6px 24px rgba(0,0,0,0.2);
+          opacity: 0.9;
         }
 
         .profile-img {
@@ -2229,9 +2196,9 @@ export default function ECardCreateScreen() {
 
         /* Cover photo */
         .cover-photo {
-          width: calc(100% + 40px);
-          margin: -24px -20px 0;
-          height: 280px;
+          width: calc(100% + 36px);
+          margin: -20px -18px 0;
+          height: 180px;
           cursor: pointer;
           overflow: hidden;
           border-radius: 20px 20px 0 0;
@@ -2255,8 +2222,8 @@ export default function ECardCreateScreen() {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 8px;
-          background: ${isLight ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.06)'};
+          gap: 4px;
+          background: ${isLight ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.04)'};
         }
 
         .cover-upload-icon {
@@ -2273,7 +2240,7 @@ export default function ECardCreateScreen() {
         /* Banner upload */
         .banner-upload {
           width: 100%;
-          height: 180px;
+          height: 120px;
           cursor: pointer;
           overflow: hidden;
           position: relative;
@@ -2292,10 +2259,10 @@ export default function ECardCreateScreen() {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 6px;
-          background: ${isLight ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.05)'};
-          border: 2px dashed ${isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.12)'};
-          border-radius: 16px;
+          gap: 4px;
+          background: ${isLight ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.03)'};
+          border: 1.5px dashed ${isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.1)'};
+          border-radius: 12px;
         }
 
         .banner-upload-icon {
@@ -2312,13 +2279,13 @@ export default function ECardCreateScreen() {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 14px;
-          padding: 8px 0;
+          gap: 10px;
+          padding: 4px 0;
         }
 
         .featured-icon-slot {
-          width: 52px;
-          height: 52px;
+          width: 40px;
+          height: 40px;
           border-radius: 50%;
           display: flex;
           align-items: center;
@@ -2326,7 +2293,6 @@ export default function ECardCreateScreen() {
           color: #fff;
           position: relative;
           cursor: default;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.15);
           transition: transform 0.2s ease;
         }
 
@@ -2352,16 +2318,16 @@ export default function ECardCreateScreen() {
         }
 
         .featured-icon-add {
-          width: 52px;
-          height: 52px;
+          width: 40px;
+          height: 40px;
           border-radius: 50%;
-          border: 2.5px dashed;
-          background: ${isLight ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.06)'};
+          border: 1.5px dashed;
+          background: transparent;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          transition: all 0.25s ease;
+          transition: all 0.2s ease;
         }
 
         .featured-icon-add:hover {
@@ -2374,31 +2340,19 @@ export default function ECardCreateScreen() {
           width: 100%;
           display: flex;
           flex-direction: column;
-          gap: 10px;
-        }
-
-        .social-empty-state {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 6px;
-          padding: 8px 0;
-        }
-
-        .social-empty-icon-row {
-          display: flex;
-          gap: 16px;
-          margin-bottom: 4px;
+          gap: 8px;
         }
 
         .featured-icon-url-row {
           display: flex;
           align-items: center;
-          gap: 10px;
-          padding: 10px 14px;
-          background: ${isLight ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.04)'};
-          border-radius: 10px;
-          margin: 3px 0;
+          gap: 8px;
+          padding: 6px 0;
+          border-bottom: 1px solid ${isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)'};
+        }
+
+        .featured-icon-url-row:last-child {
+          border-bottom: none;
         }
 
         .featured-icon-url-row input::placeholder {
@@ -2454,7 +2408,7 @@ export default function ECardCreateScreen() {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 2px;
+          gap: 0;
         }
 
         .card-fields input,
@@ -2472,32 +2426,31 @@ export default function ECardCreateScreen() {
           width: 100%;
           display: flex;
           flex-direction: column;
-          gap: 2px;
+          gap: 0;
         }
 
         .contact-row {
           display: flex;
           align-items: center;
-          gap: 12px;
-          transition: background 0.2s ease;
+          gap: 10px;
+          padding: 4px 0;
+          border-bottom: 1px solid ${isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)'};
         }
 
-        .contact-row:hover {
-          background: ${isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.07)'} !important;
+        .contact-row:last-child {
+          border-bottom: none;
         }
 
-        .contact-icon-wrap {
-          width: 36px;
-          height: 36px;
-          border-radius: 10px;
+        .contact-icon {
           display: flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
+          opacity: 0.5;
         }
 
         .contact-row input::placeholder {
-          color: ${isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)'};
+          color: ${isLight ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.35)'};
         }
 
         /* Links */
@@ -2537,14 +2490,14 @@ export default function ECardCreateScreen() {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 8px;
-          height: 48px;
-          border-radius: 12px;
-          border: 2px dashed ${isLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)'};
-          background: ${isLight ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.03)'};
+          gap: 6px;
+          height: 40px;
+          border-radius: 10px;
+          border: 1.5px dashed ${isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)'};
+          background: transparent;
           color: ${ACCENT_GREEN};
-          font-size: 14px;
-          font-weight: 600;
+          font-size: 13px;
+          font-weight: 500;
           cursor: pointer;
           transition: all 0.2s ease;
           width: 100%;
@@ -2571,17 +2524,17 @@ export default function ECardCreateScreen() {
 
         .gallery-empty-upload {
           width: 100%;
-          min-height: 100px;
-          border: 2px dashed;
-          border-radius: 16px;
+          min-height: 70px;
+          border: 1.5px dashed;
+          border-radius: 12px;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 6px;
+          gap: 4px;
           cursor: pointer;
-          padding: 24px 16px;
-          transition: all 0.25s ease;
+          padding: 16px 12px;
+          transition: all 0.2s ease;
         }
 
         .gallery-empty-upload:hover {
@@ -2590,13 +2543,13 @@ export default function ECardCreateScreen() {
         }
 
         .gallery-empty-icon {
-          width: 56px;
-          height: 56px;
+          width: 36px;
+          height: 36px;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          margin-bottom: 4px;
+          margin-bottom: 2px;
         }
 
         .gallery-grid {
