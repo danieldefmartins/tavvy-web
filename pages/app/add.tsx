@@ -43,7 +43,7 @@ const STEPS_WITHOUT_SERVICE_LOCATION: StepType[] = ['location', 'business_type',
 
 // Colors
 const BG_LIGHT = '#F9F7F2';
-const BG_DARK = '#0F172A';
+const BG_DARK = '#000000';
 const ACCENT = '#0F8A8A';
 
 // Business type options

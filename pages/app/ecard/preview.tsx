@@ -46,7 +46,7 @@ import {
 
 const ACCENT_GREEN = '#00C853';
 const BG_LIGHT = '#FAFAFA';
-const BG_DARK = '#0F172A';
+const BG_DARK = '#000000';
 
 // Light background themes that need dark text
 const LIGHT_THEMES = ['minimal'];

@@ -24,7 +24,7 @@ import {
 } from 'react-icons/io5';
 
 const ACCENT_GREEN = '#00C853';
-const BG_DARK = '#0F172A';
+const BG_DARK = '#000000';
 
 const FEATURES = [
   {

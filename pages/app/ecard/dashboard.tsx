@@ -54,7 +54,7 @@ import {
 
 const ACCENT_GREEN = '#00C853';
 const BG_LIGHT = '#FAFAFA';
-const BG_DARK = '#0F172A';
+const BG_DARK = '#000000';
 
 type Tab = 'content' | 'links' | 'appearance' | 'analytics';
 
@@ -669,7 +669,7 @@ export default function ECardDashboardScreen() {
                             onChange={(e) => updateFeaturedIconUrl(fi.platform, e.target.value)}
                             placeholder={`Enter your ${pName} URL or @username`}
                             className="fi-url-input"
-                            style={{ color: isDark ? '#fff' : '#333', backgroundColor: isDark ? '#0F172A' : '#F3F4F6' }}
+                            style={{ color: isDark ? '#fff' : '#333', backgroundColor: isDark ? '#000000' : '#F3F4F6' }}
                           />
                         </div>
                       );
@@ -701,7 +701,7 @@ export default function ECardDashboardScreen() {
                             key={platform.id}
                             className="platform-option"
                             onClick={() => addFeaturedIcon(platform.id)}
-                            style={{ backgroundColor: isDark ? '#0F172A' : '#F3F4F6' }}
+                            style={{ backgroundColor: isDark ? '#000000' : '#F3F4F6' }}
                           >
                             <div className="po-dot" style={{ backgroundColor: PLATFORM_ICONS[platform.id]?.bgColor || '#888' }} />
                             <span style={{ color: isDark ? '#fff' : '#333' }}>{platform.name}</span>
@@ -811,7 +811,7 @@ export default function ECardDashboardScreen() {
                           key={platform.id}
                           className="platform-option"
                           onClick={() => addLink(platform.id)}
-                          style={{ backgroundColor: isDark ? '#0F172A' : '#F3F4F6' }}
+                          style={{ backgroundColor: isDark ? '#000000' : '#F3F4F6' }}
                         >
                           <span style={{ color: isDark ? '#fff' : '#333' }}>{platform.name}</span>
                         </button>
@@ -1012,7 +1012,7 @@ export default function ECardDashboardScreen() {
                       className={`vt-btn ${videoTypeInput === t ? 'active' : ''}`}
                       onClick={() => setVideoTypeInput(t)}
                       style={{
-                        backgroundColor: videoTypeInput === t ? ACCENT_GREEN : (isDark ? '#0F172A' : '#F3F4F6'),
+                        backgroundColor: videoTypeInput === t ? ACCENT_GREEN : (isDark ? '#000000' : '#F3F4F6'),
                         color: videoTypeInput === t ? '#fff' : (isDark ? '#fff' : '#333'),
                       }}
                     >
@@ -1026,7 +1026,7 @@ export default function ECardDashboardScreen() {
                   onChange={(e) => setVideoUrlInput(e.target.value)}
                   placeholder={videoTypeInput === 'youtube' ? 'Paste YouTube URL' : videoTypeInput === 'tavvy_short' ? 'Paste video URL (max 15s)' : 'Paste any video URL'}
                   className="field-input"
-                  style={{ backgroundColor: isDark ? '#0F172A' : '#F3F4F6', color: isDark ? '#fff' : '#333', marginTop: 12 }}
+                  style={{ backgroundColor: isDark ? '#000000' : '#F3F4F6', color: isDark ? '#fff' : '#333', marginTop: 12 }}
                 />
                 <div className="modal-actions" style={{ marginTop: 16 }}>
                   <button className="cancel-btn" onClick={() => { setShowVideoModal(false); setVideoUrlInput(''); }}>
@@ -1718,7 +1718,7 @@ export default function ECardDashboardScreen() {
             display: flex;
             align-items: center;
             padding: 12px 16px;
-            background: ${isDark ? '#0F172A' : '#F3F4F6'};
+            background: ${isDark ? '#000000' : '#F3F4F6'};
             border-radius: 12px;
             margin-bottom: 12px;
           }
@@ -1758,7 +1758,7 @@ export default function ECardDashboardScreen() {
           .cancel-btn {
             flex: 1;
             padding: 12px;
-            background: ${isDark ? '#0F172A' : '#F3F4F6'};
+            background: ${isDark ? '#000000' : '#F3F4F6'};
             border: none;
             border-radius: 8px;
             color: ${isDark ? '#fff' : '#333'};

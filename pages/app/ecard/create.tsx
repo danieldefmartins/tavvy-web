@@ -913,7 +913,7 @@ export default function ECardCreateScreen() {
           display: flex;
           flex-direction: column;
           height: 100vh;
-          background: ${isDark ? '#0F172A' : '#F5F5F5'};
+          background: ${isDark ? '#000000' : '#F5F5F5'};
           overflow: hidden;
         }
 
@@ -1369,7 +1369,7 @@ export default function ECardCreateScreen() {
         .color-dot.active {
           border-color: ${ACCENT_GREEN};
           transform: scale(1.15);
-          box-shadow: 0 0 0 2px ${isDark ? '#0F172A' : '#F5F5F5'}, 0 0 0 4px ${ACCENT_GREEN};
+          box-shadow: 0 0 0 2px ${isDark ? '#000000' : '#F5F5F5'}, 0 0 0 4px ${ACCENT_GREEN};
         }
 
 
