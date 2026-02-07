@@ -286,20 +286,79 @@ export async function updateCard(cardId: string, updates: Partial<CardData>): Pr
 }
 
 /**
- * Delete a card
+ * Delete a card with full cascade cleanup.
+ *
+ * Database rows in child tables (digital_card_links, card_links, card_blocks,
+ * form_submissions, card_recommendations) are removed automatically by the
+ * ON DELETE CASCADE foreign-key constraints.
+ *
+ * This function additionally removes every file the card references inside
+ * the `ecard-assets` storage bucket so nothing is left orphaned.
  */
 export async function deleteCard(cardId: string): Promise<boolean> {
-  const { error } = await supabase
-    .from('digital_cards')
-    .delete()
-    .eq('id', cardId);
+  try {
+    // 1. Fetch the card so we know which storage files to clean up
+    const card = await getCardById(cardId);
+    if (!card) {
+      console.error('deleteCard: card not found', cardId);
+      return false;
+    }
 
-  if (error) {
-    console.error('Error deleting card:', error);
+    // 2. Collect every storage URL referenced by this card
+    const urlsToDelete: string[] = [];
+
+    if (card.profile_photo_url) urlsToDelete.push(card.profile_photo_url);
+    if (card.banner_image_url) urlsToDelete.push(card.banner_image_url);
+    if (card.background_image_url) urlsToDelete.push(card.background_image_url);
+
+    // gallery_images is a JSONB array of { id, url, caption }
+    if (Array.isArray(card.gallery_images)) {
+      for (const img of card.gallery_images) {
+        if (img?.url) urlsToDelete.push(img.url);
+      }
+    }
+
+    // videos is a JSONB array of { type, url }
+    if (Array.isArray(card.videos)) {
+      for (const vid of card.videos) {
+        if (vid?.url) urlsToDelete.push(vid.url);
+      }
+    }
+
+    // 3. Convert public URLs to storage paths and batch-delete them
+    const storagePaths: string[] = [];
+    for (const url of urlsToDelete) {
+      if (!url) continue;
+      const match = url.match(/ecard-assets\/(.+)$/);
+      if (match) storagePaths.push(match[1]);
+    }
+
+    if (storagePaths.length > 0) {
+      const { error: storageErr } = await supabase.storage
+        .from('ecard-assets')
+        .remove(storagePaths);
+      if (storageErr) {
+        // Log but don't block — the DB row delete is more important
+        console.warn('deleteCard: failed to remove some storage files:', storageErr);
+      }
+    }
+
+    // 4. Delete the card row (cascades to all child tables automatically)
+    const { error } = await supabase
+      .from('digital_cards')
+      .delete()
+      .eq('id', cardId);
+
+    if (error) {
+      console.error('Error deleting card:', error);
+      return false;
+    }
+
+    return true;
+  } catch (err) {
+    console.error('deleteCard unexpected error:', err);
     return false;
   }
-
-  return true;
 }
 
 /**

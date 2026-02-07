@@ -11,7 +11,7 @@ import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import AppLayout from '../../../components/AppLayout';
-import { getUserCards, CardData } from '../../../lib/ecard';
+import { getUserCards, deleteCard, CardData } from '../../../lib/ecard';
 import { 
   IoArrowBack, 
   IoAdd, 
@@ -21,6 +21,8 @@ import {
   IoIdCard,
   IoBulb,
   IoRefresh,
+  IoTrash,
+  IoClose,
 } from 'react-icons/io5';
 
 // Brand colors
@@ -36,6 +38,8 @@ export default function ECardHubScreen() {
   const [cards, setCards] = useState<CardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [deleteModalCard, setDeleteModalCard] = useState<CardData | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchCards = useCallback(async () => {
     // Wait for auth to finish loading before checking user
@@ -77,6 +81,25 @@ export default function ECardHubScreen() {
 
   const handleViewCard = (card: CardData) => {
     router.push(`/app/ecard/preview?cardId=${card.id}`);
+  };
+
+  const handleDeleteCard = async () => {
+    if (!deleteModalCard) return;
+    setDeleting(true);
+    try {
+      const success = await deleteCard(deleteModalCard.id);
+      if (success) {
+        setCards(prev => prev.filter(c => c.id !== deleteModalCard.id));
+        setDeleteModalCard(null);
+      } else {
+        alert('Failed to delete card. Please try again.');
+      }
+    } catch (err) {
+      console.error('Error deleting card:', err);
+      alert('Failed to delete card. Please try again.');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const bgColor = isDark ? BG_DARK : BG_LIGHT;
@@ -191,10 +214,22 @@ export default function ECardHubScreen() {
                   </div>
                 </div>
 
-                {/* Edit Button */}
+                {/* Action Buttons */}
                 <div className="card-actions" style={{ backgroundColor: isDark ? '#1E293B' : '#fff' }}>
                   <span style={{ color: isDark ? '#94A3B8' : '#666' }}>Edit Card</span>
-                  <IoChevronForward size={16} color={isDark ? '#94A3B8' : '#666'} />
+                  <div className="card-actions-right">
+                    <button
+                      className="delete-btn"
+                      title="Delete card"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteModalCard(card);
+                      }}
+                    >
+                      <IoTrash size={16} color="#EF4444" />
+                    </button>
+                    <IoChevronForward size={16} color={isDark ? '#94A3B8' : '#666'} />
+                  </div>
                 </div>
               </div>
             ))}
@@ -269,6 +304,41 @@ export default function ECardHubScreen() {
           {/* Bottom Spacing */}
           <div style={{ height: 100 }} />
         </div>
+
+        {/* Delete Confirmation Modal */}
+        {deleteModalCard && (
+          <div className="modal-overlay" onClick={() => !deleting && setDeleteModalCard(null)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ backgroundColor: isDark ? '#1E293B' : '#fff' }}>
+              <button className="modal-close" onClick={() => !deleting && setDeleteModalCard(null)}>
+                <IoClose size={20} color={isDark ? '#94A3B8' : '#666'} />
+              </button>
+              <div className="modal-icon">
+                <IoTrash size={32} color="#EF4444" />
+              </div>
+              <h3 className="modal-title" style={{ color: isDark ? '#fff' : '#111' }}>Delete Card?</h3>
+              <p className="modal-desc" style={{ color: isDark ? '#94A3B8' : '#666' }}>
+                Are you sure you want to delete <strong>&ldquo;{deleteModalCard.full_name || 'Untitled Card'}&rdquo;</strong>? This will permanently remove the card, all its links, and uploaded photos. This cannot be undone.
+              </p>
+              <div className="modal-actions">
+                <button
+                  className="modal-btn modal-btn-cancel"
+                  onClick={() => setDeleteModalCard(null)}
+                  disabled={deleting}
+                  style={{ backgroundColor: isDark ? '#334155' : '#F1F5F9', color: isDark ? '#fff' : '#333' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="modal-btn modal-btn-delete"
+                  onClick={handleDeleteCard}
+                  disabled={deleting}
+                >
+                  {deleting ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <style jsx>{`
           .ecard-hub {
@@ -443,6 +513,28 @@ export default function ECardHubScreen() {
             font-size: 13px;
           }
 
+          .card-actions-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+
+          .delete-btn {
+            background: none;
+            border: none;
+            padding: 6px;
+            cursor: pointer;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+          }
+
+          .delete-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+          }
+
           /* Create New Tile */
           .create-new-gradient {
             padding: 16px;
@@ -589,6 +681,116 @@ export default function ECardHubScreen() {
 
           @keyframes spin {
             to { transform: rotate(360deg); }
+          }
+
+          /* Delete Confirmation Modal */
+          .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            padding: 20px;
+            animation: fadeIn 0.15s ease;
+          }
+
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+
+          .modal-content {
+            width: 100%;
+            max-width: 380px;
+            border-radius: 20px;
+            padding: 28px 24px 24px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.2s ease;
+          }
+
+          @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+          }
+
+          .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            padding: 6px;
+            cursor: pointer;
+            border-radius: 8px;
+          }
+
+          .modal-close:hover {
+            background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'};
+          }
+
+          .modal-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 28px;
+            background: rgba(239, 68, 68, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+          }
+
+          .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 8px;
+            text-align: center;
+          }
+
+          .modal-desc {
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 0 0 24px;
+            text-align: center;
+          }
+
+          .modal-actions {
+            display: flex;
+            gap: 12px;
+          }
+
+          .modal-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s, opacity 0.15s;
+          }
+
+          .modal-btn:hover:not(:disabled) {
+            transform: scale(1.02);
+          }
+
+          .modal-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+          }
+
+          .modal-btn-delete {
+            background: #EF4444;
+            color: #fff;
+          }
+
+          .modal-btn-delete:hover:not(:disabled) {
+            background: #DC2626;
           }
         `}</style>
       </AppLayout>
