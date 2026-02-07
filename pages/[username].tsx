@@ -106,6 +106,8 @@ interface CardData {
   buttonStyle: string;
   fontStyle: string;
   links: CardLink[];
+  // Videos (Tavvy Shorts, external URLs)
+  videos: { type: string; url: string }[];
   tapCount: number;
 }
 
@@ -1094,16 +1096,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           {/* Divider */}
           <div style={styles.divider} />
 
-          {/* Toggle for Links */}
-          {hasLinks && (
-            <button 
-              onClick={() => setShowMore(!showMore)}
-              style={styles.toggleButton}
-            >
-              <span style={styles.toggleText}>{showMore ? 'Hide Links' : 'View Links'}</span>
-              <ChevronIcon rotated={showMore} />
-            </button>
-          )}
+          {/* Links Section - always visible */}
 
           {/* YouTube Video Block */}
           {cardData.youtubeVideoId && (
@@ -1392,31 +1385,116 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             </div>
           )}
 
+          {/* Videos Section (Tavvy Shorts & External) */}
+          {cardData.videos && cardData.videos.length > 0 && (
+            <div style={{ width: '100%', maxWidth: '360px', marginTop: 16 }}>
+              {cardData.videos.map((video, index) => {
+                if (video.type === 'tavvy_short') {
+                  return (
+                    <div key={index} style={{ marginBottom: 12, borderRadius: 16, overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                      <video
+                        src={video.url}
+                        controls
+                        playsInline
+                        preload="metadata"
+                        style={{ width: '100%', display: 'block', borderRadius: 16, maxHeight: 400 }}
+                      />
+                      <div style={{ padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00C853" strokeWidth="2">
+                          <polygon points="23 7 16 12 23 17 23 7"/>
+                          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                        </svg>
+                        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>Tavvy Short</span>
+                      </div>
+                    </div>
+                  );
+                } else if (video.type === 'youtube') {
+                  // Extract YouTube video ID from URL
+                  const ytMatch = video.url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([\w-]{11})/);
+                  const ytId = ytMatch ? ytMatch[1] : null;
+                  if (!ytId) return null;
+                  return (
+                    <div key={index} style={{ marginBottom: 12, borderRadius: 16, overflow: 'hidden' }}>
+                      <a href={video.url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', position: 'relative' }}>
+                        <img
+                          src={`https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`}
+                          alt="YouTube Video"
+                          style={{ width: '100%', display: 'block', borderRadius: 16 }}
+                        />
+                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.3)' }}>
+                          <div style={{ width: 50, height: 50, borderRadius: '50%', backgroundColor: 'rgba(255,0,0,0.9)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                          </div>
+                        </div>
+                      </a>
+                    </div>
+                  );
+                } else {
+                  // External video URL
+                  return (
+                    <a
+                      key={index}
+                      href={video.url.startsWith('http') ? video.url : `https://${video.url}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px',
+                        backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 14,
+                        border: '1px solid rgba(255,255,255,0.12)', marginBottom: 10,
+                        textDecoration: 'none', color: 'white',
+                      }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                        <polygon points="23 7 16 12 23 17 23 7"/>
+                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                      </svg>
+                      <span style={{ fontSize: 14, fontWeight: 500, flex: 1 }}>Video</span>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                        <polyline points="9 18 15 12 9 6"/>
+                      </svg>
+                    </a>
+                  );
+                }
+              })}
+            </div>
+          )}
+
           {/* Links Section */}
-          {hasLinks && showMore && (
+          {hasLinks && (
             <div style={styles.linksSection}>
-              {cardData.links.map((link, index) => (
-                <a
-                  key={link.id || index}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="link-btn"
-                  style={{
-                    ...styles.linkButton,
-                    animationDelay: `${index * 0.05}s`,
-                  }}
-                  onClick={() => handleLinkClick(link)}
-                >
-                  <div style={styles.linkIconContainer}>
-                    <LinkIcon />
-                  </div>
-                  <span style={styles.linkButtonText}>{link.title}</span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
-                    <polyline points="9 18 15 12 9 6"/>
-                  </svg>
-                </a>
-              ))}
+              {cardData.links.map((link, index) => {
+                // Ensure URL has protocol prefix for proper linking
+                let href = link.url;
+                if (href && !href.startsWith('http://') && !href.startsWith('https://') && !href.startsWith('tel:') && !href.startsWith('mailto:')) {
+                  href = 'https://' + href;
+                }
+                return (
+                  <a
+                    key={link.id || index}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="link-btn"
+                    style={{
+                      ...styles.linkButton,
+                      animationDelay: `${index * 0.05}s`,
+                    }}
+                    onClick={() => handleLinkClick(link)}
+                  >
+                    <div style={styles.linkIconContainer}>
+                      {link.icon === 'website' || link.icon === 'link' ? (
+                        <GlobeIcon />
+                      ) : (
+                        <LinkIcon />
+                      )}
+                    </div>
+                    <span style={styles.linkButtonText}>{link.title}</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                  </a>
+                );
+              })}
             </div>
           )}
 
@@ -2427,12 +2505,27 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
     
     console.log('[Card SSR] Card found:', data.full_name);
     
-    const { data: linksData } = await serverSupabase
-      .from('card_links')
+    // Fetch links from digital_card_links (primary) and card_links (legacy fallback)
+    let linksData: any[] = [];
+    const { data: digitalLinksData } = await serverSupabase
+      .from('digital_card_links')
       .select('*')
       .eq('card_id', data.id)
       .eq('is_active', true)
       .order('sort_order', { ascending: true });
+    
+    if (digitalLinksData && digitalLinksData.length > 0) {
+      linksData = digitalLinksData;
+    } else {
+      // Fallback to legacy card_links table
+      const { data: legacyLinksData } = await serverSupabase
+        .from('card_links')
+        .select('*')
+        .eq('card_id', data.id)
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
+      linksData = legacyLinksData || [];
+    }
     
     // Increment view count
     serverSupabase
@@ -2510,6 +2603,10 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
         sort_order: l.sort_order,
         clicks: l.clicks || 0,
       })) || [],
+      // Videos
+      videos: data.videos ?
+        (typeof data.videos === 'string' ? JSON.parse(data.videos) : data.videos)
+        : [],
     };
     
     return {
