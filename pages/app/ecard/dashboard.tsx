@@ -105,6 +105,8 @@ export default function ECardDashboardScreen() {
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [videoDurationError, setVideoDurationError] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -353,27 +355,54 @@ export default function ECardDashboardScreen() {
   // Video handlers
   const handleVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (!file) return;
+    setVideoDurationError(null);
+    // Check file size (50MB max)
+    if (file.size > 50 * 1024 * 1024) {
+      setVideoDurationError('Video file is too large. Maximum size is 50MB.');
+      return;
+    }
+    // Check video duration using HTML5 video element
+    const videoEl = document.createElement('video');
+    videoEl.preload = 'metadata';
+    videoEl.onloadedmetadata = () => {
+      URL.revokeObjectURL(videoEl.src);
+      if (videoEl.duration > 16) {
+        setVideoDurationError(`Video is ${Math.round(videoEl.duration)} seconds. Max is 15 seconds.`);
+        setVideoFile(null);
+        setVideoUrlInput('');
+      } else {
+        setVideoFile(file);
+        setVideoUrlInput(file.name);
+        setVideoDurationError(null);
+      }
+    };
+    videoEl.onerror = () => {
+      // If we can't read metadata, allow the upload anyway
       setVideoFile(file);
       setVideoUrlInput(file.name);
-    }
+    };
+    videoEl.src = URL.createObjectURL(file);
   };
 
   const addVideo = async () => {
     if (videoTypeInput === 'tavvy_short' && videoFile) {
       // Upload video file to Supabase Storage
+      setIsUploadingVideo(true);
       try {
         const userId = user?.id;
-        if (!userId) { alert('Please log in to upload videos'); return; }
+        if (!userId) { alert('Please log in to upload videos'); setIsUploadingVideo(false); return; }
         const uploadedUrl = await uploadEcardFile(userId, videoFile, 'video');
         if (uploadedUrl) {
           setVideos(prev => [...prev, { type: 'tavvy_short', url: uploadedUrl }]);
         } else {
-          alert('Failed to upload video. Please try again.');
+          alert('Failed to upload video. Please check the file format and try again.');
         }
       } catch (err) {
         console.error('Video upload error:', err);
-        alert('Failed to upload video.');
+        alert('Failed to upload video. Please try a different file or check your connection.');
+      } finally {
+        setIsUploadingVideo(false);
       }
       setVideoFile(null);
       setVideoUrlInput('');
@@ -1063,11 +1092,13 @@ export default function ECardDashboardScreen() {
                     <button
                       className="publish-btn"
                       onClick={() => videoInputRef.current?.click()}
-                      style={{ marginTop: 12, width: '100%', padding: '14px', borderRadius: 12, border: `2px dashed ${isDark ? '#444' : '#ccc'}`, backgroundColor: isDark ? '#000000' : '#F3F4F6', color: isDark ? '#fff' : '#333', cursor: 'pointer', fontSize: 15 }}
+                      disabled={isUploadingVideo}
+                      style={{ marginTop: 12, width: '100%', padding: '14px', borderRadius: 12, border: `2px dashed ${isDark ? '#444' : '#ccc'}`, backgroundColor: isDark ? '#000000' : '#F3F4F6', color: isDark ? '#fff' : '#333', cursor: isUploadingVideo ? 'not-allowed' : 'pointer', fontSize: 15, opacity: isUploadingVideo ? 0.5 : 1 }}
                     >
                       {videoFile ? `Selected: ${videoFile.name}` : 'Choose Video from Device'}
                     </button>
                     <p style={{ fontSize: 12, color: isDark ? '#888' : '#999', marginTop: 6, textAlign: 'center' }}>Max 15 seconds. Tap to select from camera, library, or files.</p>
+                    {videoDurationError && <p style={{ fontSize: 13, color: '#EF4444', marginTop: 6, textAlign: 'center', fontWeight: 600 }}>{videoDurationError}</p>}
                   </>
                 ) : (
                   <input
@@ -1083,8 +1114,8 @@ export default function ECardDashboardScreen() {
                   <button className="cancel-btn" onClick={() => { setShowVideoModal(false); setVideoUrlInput(''); setVideoFile(null); }}>
                     Cancel
                   </button>
-                  <button className="publish-btn" onClick={addVideo} disabled={videoTypeInput === 'tavvy_short' ? !videoFile : !videoUrlInput.trim()}>
-                    {videoTypeInput === 'tavvy_short' ? 'Upload' : 'Add'}
+                  <button className="publish-btn" onClick={addVideo} disabled={isUploadingVideo || (videoTypeInput === 'tavvy_short' ? !videoFile : !videoUrlInput.trim())} style={{ opacity: isUploadingVideo ? 0.6 : 1, cursor: isUploadingVideo ? 'not-allowed' : 'pointer' }}>
+                    {isUploadingVideo ? 'Uploading...' : (videoTypeInput === 'tavvy_short' ? 'Upload' : 'Add')}
                   </button>
                 </div>
               </div>
