@@ -1802,7 +1802,7 @@ export default function ECardCreateScreen() {
         )}
       </div>
 
-      <style jsx>{`
+      <style jsx global>{`
         .ecard-editor {
           display: flex;
           flex-direction: column;
