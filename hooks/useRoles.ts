@@ -1,68 +1,63 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { fetchUserRoles, UserRole, UserRoleData, checkAccess, AccessLevel } from '../lib/roleService';
-
-// Timeout for role fetching (4 seconds max)
-const ROLES_TIMEOUT_MS = 4000;
 
 /**
  * Hook to get and manage user roles
  * 
- * Architecture (aligned with security audit):
- * - Regular Users: Just authenticated (no role row needed)
- * - Pro Users: Status from pro_subscriptions table (Stripe webhook sets this)
- * - Super Admins: Stored in user_roles table (manual assignment only)
+ * Simplified: auth loading resolves in max 3s, roles loading resolves in max 3s.
+ * Total worst case: 6s from page load to content.
  */
 export function useRoles(): UserRoleData {
   const { user, loading: authLoading } = useAuth();
   const [roles, setRoles] = useState<UserRole[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [rolesLoading, setRolesLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
 
-    async function loadRoles() {
-      if (authLoading) {
-        return;
-      }
-
-      if (!user) {
-        setRoles([]);
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      try {
-        // Race role fetching against a timeout
-        const rolesPromise = fetchUserRoles();
-        const timeoutPromise = new Promise<UserRole[]>((resolve) => {
-          setTimeout(() => {
-            console.warn('[useRoles] Role fetching timed out after', ROLES_TIMEOUT_MS, 'ms — defaulting to empty roles');
-            resolve([]);
-          }, ROLES_TIMEOUT_MS);
-        });
-
-        const userRoles = await Promise.race([rolesPromise, timeoutPromise]);
-        if (!cancelled) {
-          setRoles(userRoles);
-        }
-      } catch (error) {
-        console.error('Error loading roles:', error);
-        if (!cancelled) {
-          setRoles([]);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
+    // If auth is still loading, wait
+    if (authLoading) {
+      setRolesLoading(true);
+      return;
     }
 
-    loadRoles();
+    // No user = no roles, done immediately
+    if (!user) {
+      setRoles([]);
+      setRolesLoading(false);
+      return;
+    }
+
+    // Fetch roles with a hard 3-second timeout
+    setRolesLoading(true);
+    
+    const timeout = setTimeout(() => {
+      if (!cancelled) {
+        console.warn('[useRoles] Timed out — defaulting to empty roles');
+        setRoles([]);
+        setRolesLoading(false);
+      }
+    }, 3000);
+
+    fetchUserRoles().then((userRoles) => {
+      if (!cancelled) {
+        setRoles(userRoles);
+        setRolesLoading(false);
+      }
+    }).catch((err) => {
+      console.error('[useRoles] Error:', err);
+      if (!cancelled) {
+        setRoles([]);
+        setRolesLoading(false);
+      }
+    }).finally(() => {
+      clearTimeout(timeout);
+    });
 
     return () => {
       cancelled = true;
+      clearTimeout(timeout);
     };
   }, [user, authLoading]);
 
@@ -71,7 +66,7 @@ export function useRoles(): UserRoleData {
     isSuperAdmin: roles.includes('super_admin'),
     isPro: roles.includes('pro') || roles.includes('super_admin'),
     isAuthenticated: !!user,
-    loading: authLoading || loading,
+    loading: authLoading || rolesLoading,
   };
 }
 
@@ -92,9 +87,9 @@ export function useAccess(requiredLevel: AccessLevel): {
     if (!isAuthenticated && requiredLevel !== 'public') {
       redirectTo = '/app/login';
     } else if (requiredLevel === 'pro' && !roles.includes('pro') && !roles.includes('super_admin')) {
-      redirectTo = '/app/pros'; // Redirect to pros info page
+      redirectTo = '/app/pros';
     } else if (requiredLevel === 'super_admin' && !roles.includes('super_admin')) {
-      redirectTo = '/app'; // Redirect to home
+      redirectTo = '/app';
     }
   }
 

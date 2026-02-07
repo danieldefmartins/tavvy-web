@@ -28,15 +28,15 @@ export interface UserRoleData {
  * Fetch the current user's super_admin status from user_roles table
  * Only super_admin roles are stored in user_roles
  */
-export async function fetchSuperAdminStatus(): Promise<boolean> {
+export async function fetchSuperAdminStatus(userId?: string): Promise<boolean> {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
+    const uid = userId || (await supabase.auth.getSession()).data.session?.user?.id;
+    if (!uid) return false;
 
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
-      .eq('user_id', user.id)
+      .eq('user_id', uid)
       .eq('role', 'super_admin')
       .maybeSingle();
     
@@ -58,16 +58,16 @@ export async function fetchSuperAdminStatus(): Promise<boolean> {
  * 
  * Flow: User -> pro_providers (user_id) -> pro_subscriptions (provider_id, status='active')
  */
-export async function fetchProStatus(): Promise<boolean> {
+export async function fetchProStatus(userId?: string): Promise<boolean> {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return false;
+    const uid = userId || (await supabase.auth.getSession()).data.session?.user?.id;
+    if (!uid) return false;
 
     // First get the provider_id for this user
     const { data: provider, error: providerError } = await supabase
       .from('pro_providers')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('user_id', uid)
       .maybeSingle();
     
     if (providerError || !provider) {
@@ -97,13 +97,20 @@ export async function fetchProStatus(): Promise<boolean> {
 
 /**
  * Fetch all user role data (combines super_admin and pro checks)
+ * Optimized: gets user ID once from cached session (no network call),
+ * then runs both role checks in parallel.
  */
 export async function fetchUserRoles(): Promise<UserRole[]> {
   const roles: UserRole[] = [];
   
+  // Get user ID from cached session (no network call)
+  const { data: { session } } = await supabase.auth.getSession();
+  const userId = session?.user?.id;
+  if (!userId) return roles;
+  
   const [isSuperAdmin, isPro] = await Promise.all([
-    fetchSuperAdminStatus(),
-    fetchProStatus()
+    fetchSuperAdminStatus(userId),
+    fetchProStatus(userId)
   ]);
   
   if (isSuperAdmin) {

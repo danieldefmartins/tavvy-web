@@ -13,214 +13,79 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Session backup key for recovery when localStorage is cleared (private browsing)
-const SESSION_BACKUP_KEY = 'tavvy_session_backup';
-
-// Save session to sessionStorage as backup (survives tab switches in private browsing)
-function backupSession(session: Session | null) {
-  try {
-    if (typeof window === 'undefined') return;
-    if (session) {
-      sessionStorage.setItem(SESSION_BACKUP_KEY, JSON.stringify({
-        access_token: session.access_token,
-        refresh_token: session.refresh_token,
-        user: session.user,
-        expires_at: session.expires_at,
-      }));
-    }
-  } catch (e) {
-    // sessionStorage might not be available
-  }
-}
-
-// Recover session from sessionStorage backup
-function recoverSessionBackup(): { access_token: string; refresh_token: string } | null {
-  try {
-    if (typeof window === 'undefined') return null;
-    const backup = sessionStorage.getItem(SESSION_BACKUP_KEY);
-    if (backup) {
-      const parsed = JSON.parse(backup);
-      if (parsed.refresh_token) {
-        return { access_token: parsed.access_token, refresh_token: parsed.refresh_token };
-      }
-    }
-  } catch (e) {
-    // ignore
-  }
-  return null;
-}
-
-function clearSessionBackup() {
-  try {
-    if (typeof window !== 'undefined') {
-      sessionStorage.removeItem(SESSION_BACKUP_KEY);
-    }
-  } catch (e) {
-    // ignore
-  }
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const initializedRef = useRef(false);
-  // Track if user explicitly signed out — only then should we clear state
+  const mountedRef = useRef(true);
   const explicitSignOutRef = useRef(false);
-  // Keep a ref to the latest session for use in event handlers
-  const sessionRef = useRef<Session | null>(null);
-  const userRef = useRef<User | null>(null);
-
-  const updateSession = useCallback((newSession: Session | null) => {
-    setSession(newSession);
-    sessionRef.current = newSession;
-    const newUser = newSession?.user ?? null;
-    setUser(newUser);
-    userRef.current = newUser;
-    setLoading(false);
-    
-    // Backup session for recovery
-    if (newSession) {
-      backupSession(newSession);
-    }
-  }, []);
 
   useEffect(() => {
-    if (initializedRef.current) return;
-    initializedRef.current = true;
+    mountedRef.current = true;
 
-    const initSession = async () => {
-      try {
-        // Try to get session from Supabase (reads from localStorage)
-        const { data: { session: existingSession } } = await supabase.auth.getSession();
-        
-        if (existingSession) {
-          updateSession(existingSession);
-          return;
-        }
+    // Simple init: get session, set user, done.
+    // If it fails or times out, we just proceed with no user.
+    let resolved = false;
 
-        // If no session in localStorage, try to recover from sessionStorage backup
-        // This handles the case where private browsing cleared localStorage
-        const backup = recoverSessionBackup();
-        if (backup) {
-          console.log('[Auth] Attempting session recovery from backup...');
-          const { data: { session: recoveredSession }, error } = await supabase.auth.setSession({
-            access_token: backup.access_token,
-            refresh_token: backup.refresh_token,
-          });
-          if (recoveredSession && !error) {
-            console.log('[Auth] Session recovered from backup');
-            updateSession(recoveredSession);
-            return;
-          }
-        }
-
-        // No session available
-        setLoading(false);
-      } catch (err) {
-        console.error('[Auth] Error initializing session:', err);
-        setLoading(false);
-      }
+    const resolve = (s: Session | null) => {
+      if (resolved || !mountedRef.current) return;
+      resolved = true;
+      setSession(s);
+      setUser(s?.user ?? null);
+      setLoading(false);
     };
 
-    // Initialize with a timeout
+    // Hard timeout — NEVER let loading hang for more than 3 seconds
     const timeout = setTimeout(() => {
-      if (loading) {
-        console.warn('[Auth] Session init timed out, proceeding without session');
-        setLoading(false);
+      if (!resolved) {
+        console.warn('[Auth] Init timed out after 3s — proceeding without session');
+        resolve(null);
       }
-    }, 5000);
+    }, 3000);
 
-    initSession().finally(() => clearTimeout(timeout));
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      resolve(s);
+    }).catch((err) => {
+      console.error('[Auth] getSession error:', err);
+      resolve(null);
+    });
 
-    // Listen for auth changes
+    // Listen for auth state changes AFTER init
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
-      console.log('[Auth] Auth state change:', event);
-      
-      if (event === 'SIGNED_OUT') {
-        // Only clear state if user explicitly signed out
+      if (!mountedRef.current) return;
+
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+        setLoading(false);
+      } else if (event === 'SIGNED_OUT') {
         if (explicitSignOutRef.current) {
-          updateSession(null);
-          clearSessionBackup();
+          // User explicitly clicked sign out
+          setSession(null);
+          setUser(null);
+          setLoading(false);
           explicitSignOutRef.current = false;
-        } else {
-          // This is likely a spurious sign-out from localStorage being cleared
-          // Don't clear the user state — try to recover instead
-          console.warn('[Auth] Unexpected SIGNED_OUT event, attempting recovery...');
-          const backup = recoverSessionBackup();
-          if (backup) {
-            supabase.auth.setSession({
-              access_token: backup.access_token,
-              refresh_token: backup.refresh_token,
-            }).then(({ data: { session: recovered } }) => {
-              if (recovered) {
-                console.log('[Auth] Session recovered after unexpected sign-out');
-                updateSession(recovered);
-              } else {
-                // Truly lost — clear state
-                console.warn('[Auth] Recovery failed, clearing session');
-                updateSession(null);
-                clearSessionBackup();
-              }
-            }).catch(() => {
-              updateSession(null);
-              clearSessionBackup();
-            });
-          } else {
-            // No backup available — clear state
-            updateSession(null);
-          }
         }
-      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        updateSession(newSession);
+        // If not explicit, IGNORE the sign-out event.
+        // This prevents spurious logouts from localStorage clearing,
+        // tab backgrounding, or Railway deploys.
+        // The user stays "logged in" with stale data until they
+        // refresh or navigate — which will trigger a fresh getSession().
       } else if (event === 'INITIAL_SESSION') {
         if (newSession) {
-          updateSession(newSession);
+          setSession(newSession);
+          setUser(newSession?.user ?? null);
+          setLoading(false);
         }
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // Handle visibility change — refresh session when user comes back to the tab
-  useEffect(() => {
-    const handleVisibilityChange = async () => {
-      if (document.visibilityState !== 'visible') return;
-      
-      // If we have a user in state, try to refresh the session
-      if (userRef.current) {
-        try {
-          const { data: { session: refreshed } } = await supabase.auth.getSession();
-          if (refreshed) {
-            updateSession(refreshed);
-            return;
-          }
-          
-          // Session gone from localStorage — try backup recovery
-          const backup = recoverSessionBackup();
-          if (backup) {
-            console.log('[Auth] Tab returned: recovering session from backup...');
-            const { data: { session: recovered } } = await supabase.auth.setSession({
-              access_token: backup.access_token,
-              refresh_token: backup.refresh_token,
-            });
-            if (recovered) {
-              console.log('[Auth] Tab returned: session recovered');
-              updateSession(recovered);
-            }
-          }
-        } catch (err) {
-          console.warn('[Auth] Tab return session refresh failed:', err);
-        }
-      }
+    return () => {
+      mountedRef.current = false;
+      clearTimeout(timeout);
+      subscription.unsubscribe();
     };
-
-    if (typeof document !== 'undefined') {
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-      return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-    }
-  }, [updateSession]);
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -232,18 +97,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email, 
       password,
       options: {
-        data: { 
-          display_name: displayName 
-        }
+        data: { display_name: displayName }
       }
     });
     if (error) throw error;
   };
 
   const signOut = async () => {
-    // Mark as explicit sign out so the listener knows to clear state
     explicitSignOutRef.current = true;
-    clearSessionBackup();
     const { error } = await supabase.auth.signOut();
     if (error) {
       explicitSignOutRef.current = false;

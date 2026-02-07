@@ -1,8 +1,13 @@
 /**
  * AppLayout - Layout wrapper for app pages (with TabBar and route protection)
+ * 
+ * Loading strategy:
+ * - Public routes: render immediately, no loading gate
+ * - Authenticated routes: show spinner for max 6 seconds, then render
+ * - If auth fails after timeout, redirect to login
  */
 
-import React, { ReactNode, useEffect } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../contexts/ThemeContext';
 
@@ -13,8 +18,11 @@ import TabBar from './TabBar';
 interface AppLayoutProps {
   children: ReactNode;
   hideTabBar?: boolean;
-  requiredAccess?: AccessLevel; // Optional override for route access level
+  requiredAccess?: AccessLevel;
 }
+
+// Maximum time to show loading spinner before giving up (in ms)
+const MAX_LOADING_MS = 8000;
 
 export default function AppLayout({ 
   children, 
@@ -24,36 +32,51 @@ export default function AppLayout({
   const { theme } = useThemeContext();
   const router = useRouter();
   const { roles, isAuthenticated, loading } = useRoles();
+  const [forceReady, setForceReady] = useState(false);
 
   // Determine required access level
   const accessLevel = requiredAccess || getRouteAccessLevel(router.pathname);
   const hasAccess = checkAccess(roles, isAuthenticated, accessLevel);
-
-  // For public routes, don't block on loading — render children immediately
   const isPublicRoute = accessLevel === 'public';
 
+  // Hard timeout: never show spinner for more than MAX_LOADING_MS
   useEffect(() => {
-    // Don't redirect while loading
-    if (loading) return;
+    if (!loading || isPublicRoute) return;
+    
+    const timeout = setTimeout(() => {
+      console.warn('[AppLayout] Loading timed out — forcing ready state');
+      setForceReady(true);
+    }, MAX_LOADING_MS);
 
-    // Check access and redirect if needed
-    if (!hasAccess) {
-      if (!isAuthenticated && accessLevel !== 'public') {
-        // Not logged in - redirect to login
+    return () => clearTimeout(timeout);
+  }, [loading, isPublicRoute]);
+
+  // Reset forceReady when loading completes normally
+  useEffect(() => {
+    if (!loading) {
+      setForceReady(false);
+    }
+  }, [loading]);
+
+  const effectivelyLoading = loading && !forceReady;
+
+  // Redirect logic — only runs when loading is complete (or forced ready)
+  useEffect(() => {
+    if (effectivelyLoading) return;
+
+    if (!hasAccess && !isPublicRoute) {
+      if (!isAuthenticated) {
         router.replace(`/app/login?redirect=${encodeURIComponent(router.asPath)}`, undefined, { locale: router.locale });
       } else if (accessLevel === 'pro' && !roles.includes('pro') && !roles.includes('super_admin')) {
-        // Not a pro - redirect to pros info page
         router.replace('/app/pros', undefined, { locale: router.locale });
       } else if (accessLevel === 'super_admin' && !roles.includes('super_admin')) {
-        // Not an admin - redirect to home
         router.replace('/app', undefined, { locale: router.locale });
       }
     }
-  }, [loading, hasAccess, isAuthenticated, accessLevel, roles, router]);
+  }, [effectivelyLoading, hasAccess, isAuthenticated, accessLevel, roles, router, isPublicRoute]);
 
-  // For public routes, skip the loading gate — show content immediately
-  // The page itself handles its own loading state (e.g. fetching card data)
-  if (loading && !isPublicRoute) {
+  // For public routes, skip the loading gate entirely
+  if (effectivelyLoading && !isPublicRoute) {
     return (
       <div 
         className="app-layout"
@@ -114,8 +137,8 @@ export default function AppLayout({
     );
   }
 
-  // Show access denied briefly before redirect
-  if (!loading && !hasAccess && accessLevel !== 'public') {
+  // Show access denied briefly before redirect (only if not loading and no access)
+  if (!effectivelyLoading && !hasAccess && !isPublicRoute) {
     return (
       <div 
         className="app-layout"
