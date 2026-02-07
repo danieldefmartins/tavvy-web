@@ -1963,8 +1963,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             {(() => {
               const signals = cardData.endorsementSignals || [];
               const categories = [...new Set(signals.map(s => s.category))];
-              const catColors: Record<string, string> = { universal: '#3B9FD9', sales: '#E87D3E', real_estate: '#6B7280', marketing: '#8B5CF6', general: '#3B9FD9' };
-              const catLabels: Record<string, string> = { universal: 'Strengths', sales: 'Sales Skills', real_estate: 'Real Estate', marketing: 'Marketing', general: 'Strengths' };
+              const catColors: Record<string, string> = { universal: '#3B9FD9', sales: '#E87D3E', real_estate: '#6B7280', food_dining: '#E53E3E', health_wellness: '#38A169', beauty: '#D53F8C', home_services: '#DD6B20', legal_finance: '#2B6CB0', creative_marketing: '#8B5CF6', education_coaching: '#D69E2E', tech_it: '#319795', automotive: '#718096', events_entertainment: '#9F7AEA', pets: '#ED8936' };
+              const catLabels: Record<string, string> = { universal: 'Strengths', sales: 'Sales Skills', real_estate: 'Real Estate', food_dining: 'Food & Dining', health_wellness: 'Health & Wellness', beauty: 'Beauty', home_services: 'Home Services', legal_finance: 'Legal & Finance', creative_marketing: 'Creative & Marketing', education_coaching: 'Education & Coaching', tech_it: 'Tech & IT', automotive: 'Automotive', events_entertainment: 'Events & Entertainment', pets: 'Pets' };
               return categories.map(cat => (
                 <div key={cat} style={{ marginBottom: 16 }}>
                   <div style={{ display: 'inline-block', padding: '4px 12px', borderRadius: 12, background: catColors[cat] || '#3B9FD9', color: '#fff', fontSize: 12, fontWeight: 700, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>
@@ -3193,17 +3193,21 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       }
 
       // Get available endorsement signals for this card's category
+      // Always show universal + the card's specific category
+      const cardCategory = data.professional_category || 'universal';
+      const categoriesToShow = cardCategory === 'universal' ? ['universal'] : ['universal', cardCategory];
       const { data: signals } = await serverSupabase
         .from('review_items')
-        .select('id, label, icon_emoji, sort_order')
+        .select('id, label, icon_emoji, sort_order, category')
         .eq('signal_type', 'pro_endorsement')
         .eq('is_active', true)
+        .in('category', categoriesToShow)
         .order('sort_order', { ascending: true });
       endorsementSignals = (signals || []).map((s: any) => ({
         id: s.id,
         label: s.label,
         emoji: s.icon_emoji || '⭐',
-        category: (s.sort_order || 0) < 10 ? 'universal' : (s.sort_order || 0) < 20 ? 'sales' : 'real_estate',
+        category: s.category || 'universal',
       }));
     } catch (endorseErr) {
       console.error('[Card SSR] Endorsement fetch error:', endorseErr);

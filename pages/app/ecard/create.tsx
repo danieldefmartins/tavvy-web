@@ -66,21 +66,20 @@ import {
 const ACCENT_GREEN = '#00C853';
 
 const PROFESSIONAL_CATEGORIES = [
-  { id: 'general', label: 'General' },
+  { id: 'universal', label: 'General' },
   { id: 'sales', label: 'Sales' },
   { id: 'real_estate', label: 'Real Estate' },
-  { id: 'marketing', label: 'Marketing' },
-  { id: 'consulting', label: 'Consulting' },
-  { id: 'finance', label: 'Finance' },
-  { id: 'healthcare', label: 'Healthcare' },
-  { id: 'legal', label: 'Legal' },
-  { id: 'tech', label: 'Technology' },
-  { id: 'creative', label: 'Creative / Design' },
-  { id: 'education', label: 'Education' },
-  { id: 'restaurant', label: 'Restaurant / Food' },
+  { id: 'food_dining', label: 'Food & Dining' },
+  { id: 'health_wellness', label: 'Health & Wellness' },
+  { id: 'beauty', label: 'Beauty & Personal Care' },
+  { id: 'home_services', label: 'Home Services' },
+  { id: 'legal_finance', label: 'Legal & Finance' },
+  { id: 'creative_marketing', label: 'Creative & Marketing' },
+  { id: 'education_coaching', label: 'Education & Coaching' },
+  { id: 'tech_it', label: 'Tech & IT' },
   { id: 'automotive', label: 'Automotive' },
-  { id: 'construction', label: 'Construction' },
-  { id: 'fitness', label: 'Fitness / Wellness' },
+  { id: 'events_entertainment', label: 'Events & Entertainment' },
+  { id: 'pets', label: 'Pets' },
 ];
 
 const EXTERNAL_REVIEW_PLATFORMS = [
