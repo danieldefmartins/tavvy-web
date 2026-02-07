@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Session, User } from '@supabase/supabase-js';
 
@@ -13,37 +13,11 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/**
- * Clear any stale Supabase auth tokens from localStorage.
- * This handles the case where expired/corrupted tokens prevent
- * fresh login from working properly.
- */
-function clearStaleAuthTokens() {
-  if (typeof window === 'undefined') return;
-  try {
-    // Supabase stores auth tokens with keys containing 'supabase' and 'auth'
-    const keysToRemove: string[] = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && (key.includes('supabase') || key.includes('sb-'))) {
-        keysToRemove.push(key);
-      }
-    }
-    keysToRemove.forEach(key => {
-      console.log('[Auth] Clearing stale token:', key);
-      localStorage.removeItem(key);
-    });
-  } catch (e) {
-    console.error('[Auth] Error clearing stale tokens:', e);
-  }
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const mountedRef = useRef(true);
-  const explicitSignOutRef = useRef(false);
   const resolvedRef = useRef(false);
 
   useEffect(() => {
@@ -58,69 +32,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     };
 
-    // Listen for auth state changes
+    // Listen for auth state changes — this is the PRIMARY mechanism
+    // Supabase handles token refresh, session persistence, etc. automatically.
+    // We should NOT interfere with localStorage — Supabase manages its own tokens.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       if (!mountedRef.current) return;
 
       console.log('[Auth] onAuthStateChange:', event, newSession ? 'has session' : 'no session');
 
-      if (event === 'INITIAL_SESSION') {
-        if (newSession) {
-          // Valid session found — use it
+      switch (event) {
+        case 'INITIAL_SESSION':
+          // This fires once on page load with the current session state.
+          // If newSession is null, the user is genuinely not logged in.
+          // Do NOT clear localStorage — Supabase already checked and found nothing.
           resolve(newSession);
-        } else {
-          // No session found on init — this is normal for logged-out users
-          // BUT if there are stale tokens in localStorage, Supabase may be
-          // stuck trying to refresh them. Clear them so fresh login works.
-          clearStaleAuthTokens();
-          resolve(null);
-        }
-      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
-        setLoading(false);
-        resolvedRef.current = true;
-      } else if (event === 'SIGNED_OUT') {
-        // Always handle SIGNED_OUT — whether explicit or from token expiry.
-        // The old approach of ignoring non-explicit sign-outs was causing
-        // stale state where the app thought the user was logged in but
-        // the tokens were actually expired.
-        setSession(null);
-        setUser(null);
-        setLoading(false);
-        resolvedRef.current = true;
-        
-        // Clear any stale tokens to ensure fresh login works
-        if (!explicitSignOutRef.current) {
-          console.log('[Auth] Implicit sign-out detected (token expired?) — clearing stale tokens');
-          clearStaleAuthTokens();
-        }
-        explicitSignOutRef.current = false;
+          break;
+
+        case 'SIGNED_IN':
+        case 'TOKEN_REFRESHED':
+          // User just logged in or token was refreshed — update state
+          setSession(newSession);
+          setUser(newSession?.user ?? null);
+          setLoading(false);
+          resolvedRef.current = true;
+          break;
+
+        case 'SIGNED_OUT':
+          // User signed out (explicitly or token expired beyond recovery)
+          setSession(null);
+          setUser(null);
+          setLoading(false);
+          resolvedRef.current = true;
+          break;
       }
     });
 
-    // Also call getSession() as a backup — whichever resolves first wins
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      if (s) {
-        resolve(s);
-      }
-      // If s is null, don't resolve yet — let INITIAL_SESSION handle it
-      // (it will also clear stale tokens)
-    }).catch((err) => {
-      console.error('[Auth] getSession error:', err);
-      // getSession failed — likely corrupted tokens. Clear them.
-      clearStaleAuthTokens();
-      resolve(null);
-    });
-
-    // Hard timeout — NEVER let loading hang for more than 5 seconds
+    // Safety timeout — if INITIAL_SESSION never fires (shouldn't happen, but just in case)
     const timeout = setTimeout(() => {
       if (!resolvedRef.current) {
-        console.warn('[Auth] Init timed out after 5s — clearing stale tokens and proceeding');
-        clearStaleAuthTokens();
+        console.warn('[Auth] Init timed out after 8s — resolving with no session');
         resolve(null);
       }
-    }, 5000);
+    }, 8000);
 
     return () => {
       mountedRef.current = false;
@@ -130,12 +83,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    // Clear any stale tokens before attempting login
-    // This ensures a fresh login even if old tokens are corrupted
-    clearStaleAuthTokens();
-    
+    // Do NOT clear localStorage before login — Supabase handles this.
+    // Clearing tokens here would destroy a valid session if the user
+    // is already logged in and accidentally hits the login page.
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
+    // After successful signIn, Supabase will fire SIGNED_IN event
+    // which updates our state automatically via onAuthStateChange.
   };
 
   const signUp = async (email: string, password: string, displayName?: string) => {
@@ -150,14 +104,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    explicitSignOutRef.current = true;
     const { error } = await supabase.auth.signOut();
     if (error) {
-      explicitSignOutRef.current = false;
-      // Even if signOut fails, clear local tokens so user can re-login
-      clearStaleAuthTokens();
+      // Even if signOut API call fails, clear local state
+      // so the user can attempt to log in again
+      setSession(null);
+      setUser(null);
       throw error;
     }
+    // Supabase will fire SIGNED_OUT event which clears our state
   };
 
   return (

@@ -467,6 +467,10 @@ export default function ECardDashboardScreen() {
     setLinks(links.map(link => link.id === id ? { ...link, value, url: value } : link));
   };
 
+  const updateLinkTitle = (id: string, title: string) => {
+    setLinks(links.map(link => link.id === id ? { ...link, title } : link));
+  };
+
   const removeLink = (id: string) => {
     setLinks(links.filter(link => link.id !== id));
   };
@@ -836,9 +840,14 @@ export default function ECardDashboardScreen() {
                         <IoReorderTwo size={20} color={isDark ? '#64748B' : '#9CA3AF'} />
                       </div>
                       <div className="link-content">
-                        <span className="link-platform" style={{ color: isDark ? '#fff' : '#333' }}>
-                          {platform?.name || link.platform}
-                        </span>
+                        <input
+                          type="text"
+                          className="link-title-input"
+                          value={link.title || ''}
+                          onChange={(e) => updateLinkTitle(link.id, e.target.value)}
+                          placeholder={platform?.name || 'Link Title'}
+                          style={{ color: isDark ? '#fff' : '#333', fontWeight: 600, fontSize: '15px', border: 'none', background: 'transparent', padding: '0', width: '100%', outline: 'none' }}
+                        />
                         <input
                           type="text"
                           value={link.value || link.url || ''}
