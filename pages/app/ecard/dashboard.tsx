@@ -32,6 +32,7 @@ import {
   FREE_LINK_LIMIT,
 } from '../../../lib/ecard';
 import { FONTS, PREMIUM_FONT_COUNT } from '../../../config/eCardFonts';
+import { TEMPLATES, getTemplateById, resolveTemplateId, Template, TemplateLayout } from '../../../config/eCardTemplates';
 import { 
   IoArrowBack, 
   IoEye,
@@ -51,6 +52,8 @@ import {
   IoLockClosed,
   IoPersonCircle,
   IoCreate,
+  IoImage,
+  IoGrid,
 } from 'react-icons/io5';
 
 const ACCENT_GREEN = '#00C853';
@@ -138,11 +141,17 @@ export default function ECardDashboardScreen() {
 
   // Appearance state
   const [selectedTheme, setSelectedTheme] = useState('classic');
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('classic');
   const [gradientColors, setGradientColors] = useState<[string, string]>(['#667eea', '#764ba2']);
   const [selectedButtonStyle, setSelectedButtonStyle] = useState('fill');
   const [selectedFont, setSelectedFont] = useState('default');
   const [profilePhotoSize, setProfilePhotoSize] = useState('medium');
   const [fontColor, setFontColor] = useState<string | null>(null);
+  
+  // Banner image state
+  const [bannerImageUrl, setBannerImageUrl] = useState<string | null>(null);
+  const [bannerImageFile, setBannerImageFile] = useState<File | null>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   // Modals
   const [showAddLink, setShowAddLink] = useState(false);
@@ -206,6 +215,10 @@ export default function ECardDashboardScreen() {
           setSelectedFont(card.font_style || 'default');
           setProfilePhotoSize(card.profile_photo_size || 'medium');
           setFontColor(card.font_color || null);
+          setBannerImageUrl(card.banner_image_url || null);
+          // Resolve template ID (handles migration from old template IDs)
+          const resolvedTemplate = resolveTemplateId(card.template_id || card.theme || 'classic');
+          setSelectedTemplateId(resolvedTemplate);
           setSlugInput(card.slug?.startsWith('draft_') ? generateSlug(card.full_name || '') : card.slug || '');
 
           const cardLinks = await getCardLinks(cardId);
@@ -265,6 +278,17 @@ export default function ECardDashboardScreen() {
         }
       }
 
+      // Upload banner image if changed
+      let bannerUrl = bannerImageUrl;
+      if (bannerImageFile && user) {
+        try {
+          const uploaded = await uploadEcardFile(user.id, bannerImageFile, 'banner');
+          if (uploaded) bannerUrl = uploaded;
+        } catch (e) {
+          console.warn('Banner upload failed:', e);
+        }
+      }
+
       await updateCard(cardId, {
         full_name: fullName.trim(),
         title: titleRole || undefined,
@@ -278,9 +302,11 @@ export default function ECardDashboardScreen() {
         gradient_color_1: gradientColors[0],
         gradient_color_2: gradientColors[1],
         theme: selectedTheme,
+        template_id: selectedTemplateId,
         button_style: selectedButtonStyle,
         font_style: selectedFont,
         font_color: fontColor || null,
+        banner_image_url: bannerUrl || null,
         featured_socials: featuredIcons.length > 0 ? featuredIcons : [],
         gallery_images: uploadedGallery,
         videos: videos,
@@ -322,6 +348,14 @@ export default function ECardDashboardScreen() {
     if (file) {
       setProfilePhotoFile(file);
       setProfilePhotoUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setBannerImageFile(file);
+      setBannerImageUrl(URL.createObjectURL(file));
     }
   };
 
@@ -522,6 +556,7 @@ export default function ECardDashboardScreen() {
           {/* Hidden file inputs */}
           <input type="file" ref={photoInputRef} accept="image/*" style={{ display: 'none' }} onChange={handlePhotoChange} />
           <input type="file" ref={galleryInputRef} accept="image/*" multiple style={{ display: 'none' }} onChange={handleGalleryAdd} />
+          <input type="file" ref={bannerInputRef} accept="image/*" style={{ display: 'none' }} onChange={handleBannerChange} />
           <input type="file" ref={videoInputRef} accept="video/*" style={{ display: 'none' }} onChange={handleVideoFileChange} />
 
           {/* Header */}
@@ -931,20 +966,213 @@ export default function ECardDashboardScreen() {
             {/* ── Appearance Tab ── */}
             {activeTab === 'appearance' && (
               <div className="appearance-tab">
+                {/* Template Selector */}
                 <div className="section">
-                  <h3 style={{ color: isDark ? '#fff' : '#333' }}>Background Color</h3>
-                  <div className="gradient-presets">
-                    {PRESET_GRADIENTS.map((gradient) => (
-                      <button
-                        key={gradient.id}
-                        className={`gradient-btn ${gradientColors[0] === gradient.colors[0] ? 'selected' : ''}`}
-                        onClick={() => setGradientColors(gradient.colors as [string, string])}
-                        style={{ background: `linear-gradient(135deg, ${gradient.colors[0]}, ${gradient.colors[1]})` }}
-                      />
-                    ))}
+                  <h3 style={{ color: isDark ? '#fff' : '#333' }}>Card Layout</h3>
+                  <p style={{ color: isDark ? '#94A3B8' : '#6B7280', fontSize: '13px', marginBottom: '12px' }}>
+                    Choose how your card looks. Each template has a unique layout.
+                  </p>
+                  <div className="template-grid">
+                    {TEMPLATES.map((template) => {
+                      const isSelected = selectedTemplateId === template.id;
+                      const isLocked = (template.isPremium && !isPro) || (template.isProOnly && !isPro);
+                      return (
+                        <button
+                          key={template.id}
+                          className={`template-card ${isSelected ? 'selected' : ''} ${isLocked ? 'locked' : ''}`}
+                          onClick={() => {
+                            if (isLocked) {
+                              router.push('/app/ecard/premium');
+                              return;
+                            }
+                            setSelectedTemplateId(template.id);
+                            // Apply default color scheme
+                            const defaultScheme = template.colorSchemes[0];
+                            if (defaultScheme) {
+                              setGradientColors([defaultScheme.primary, defaultScheme.secondary]);
+                            }
+                          }}
+                          style={{
+                            backgroundColor: isDark ? '#1E293B' : '#fff',
+                            borderColor: isSelected ? ACCENT_GREEN : (isDark ? '#334155' : '#E5E7EB'),
+                          }}
+                        >
+                          {/* Template Preview Mini */}
+                          <div className="template-preview-mini" style={{
+                            background: template.layout === 'minimal' || template.layout === 'split'
+                              ? '#0f172a'
+                              : `linear-gradient(135deg, ${template.colorSchemes[0]?.primary || '#667eea'}, ${template.colorSchemes[0]?.secondary || '#764ba2'})`,
+                          }}>
+                            {template.layout === 'banner' && (
+                              <>
+                                <div style={{ height: '40%', background: 'rgba(255,255,255,0.15)', borderRadius: '4px 4px 0 0' }} />
+                                <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,0.4)', margin: '-10px auto 0', border: '2px solid rgba(255,255,255,0.6)' }} />
+                              </>
+                            )}
+                            {template.layout === 'bold' && (
+                              <>
+                                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }} />
+                                <div style={{ position: 'absolute', bottom: 6, left: 6, width: '60%', height: 4, background: 'rgba(255,255,255,0.6)', borderRadius: 2 }} />
+                                <div style={{ position: 'absolute', bottom: 14, left: 6, width: '40%', height: 3, background: 'rgba(255,255,255,0.4)', borderRadius: 2 }} />
+                              </>
+                            )}
+                            {template.layout === 'classic' && (
+                              <>
+                                <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', margin: '12px auto 4px' }} />
+                                <div style={{ width: '50%', height: 3, background: 'rgba(255,255,255,0.5)', margin: '0 auto 3px', borderRadius: 2 }} />
+                                <div style={{ width: '35%', height: 2, background: 'rgba(255,255,255,0.3)', margin: '0 auto', borderRadius: 2 }} />
+                              </>
+                            )}
+                            {template.layout === 'minimal' && (
+                              <div style={{ background: '#fff', borderRadius: 4, margin: 6, padding: 6, flex: 1 }}>
+                                <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#E5E7EB', margin: '0 auto 3px' }} />
+                                <div style={{ width: '60%', height: 2, background: '#D1D5DB', margin: '0 auto 2px', borderRadius: 2 }} />
+                                <div style={{ width: '40%', height: 2, background: '#E5E7EB', margin: '0 auto', borderRadius: 2 }} />
+                              </div>
+                            )}
+                            {template.layout === 'elegant' && (
+                              <>
+                                <div style={{ border: '1px solid rgba(212,175,55,0.5)', borderRadius: 3, margin: 5, padding: 5, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                  <div style={{ width: 18, height: 18, borderRadius: '50%', border: '1px solid #d4af37', margin: '0 auto 3px' }} />
+                                  <div style={{ width: '50%', height: 2, background: '#d4af37', margin: '0 auto', borderRadius: 2 }} />
+                                </div>
+                              </>
+                            )}
+                            {template.layout === 'modern' && (
+                              <>
+                                <div style={{ width: '100%', height: '35%', background: 'rgba(255,255,255,0.15)', borderRadius: '4px 4px 0 0' }} />
+                                <div style={{ background: isDark ? '#27272a' : '#fff', borderRadius: 3, margin: '4px 4px 0', padding: 4, flex: 1 }}>
+                                  <div style={{ width: '60%', height: 2, background: isDark ? '#52525b' : '#D1D5DB', borderRadius: 2, marginBottom: 2 }} />
+                                  <div style={{ width: '40%', height: 2, background: isDark ? '#3f3f46' : '#E5E7EB', borderRadius: 2 }} />
+                                </div>
+                              </>
+                            )}
+                            {template.layout === 'split' && (
+                              <div style={{ display: 'flex', flex: 1, margin: 4, gap: 3 }}>
+                                <div style={{ flex: 1, background: 'rgba(255,255,255,0.15)', borderRadius: 3 }} />
+                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2 }}>
+                                  <div style={{ width: '80%', height: 2, background: 'rgba(255,255,255,0.5)', borderRadius: 2 }} />
+                                  <div style={{ width: '60%', height: 2, background: 'rgba(255,255,255,0.3)', borderRadius: 2 }} />
+                                </div>
+                              </div>
+                            )}
+                            {template.layout === 'neon' && (
+                              <>
+                                <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', margin: '10px auto 4px', boxShadow: '0 0 8px rgba(236,72,153,0.5)' }} />
+                                <div style={{ width: '50%', height: 3, background: 'rgba(255,255,255,0.5)', margin: '0 auto 3px', borderRadius: 2 }} />
+                              </>
+                            )}
+                            {template.layout === 'showcase' && (
+                              <>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, margin: 5, flex: 1 }}>
+                                  <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 2 }} />
+                                  <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: 2 }} />
+                                  <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: 2 }} />
+                                  <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 2 }} />
+                                </div>
+                              </>
+                            )}
+                            {template.layout === 'executive' && (
+                              <>
+                                <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', margin: '8px auto 3px' }} />
+                                <div style={{ width: '55%', height: 2, background: 'rgba(255,255,255,0.5)', margin: '0 auto 6px', borderRadius: 2 }} />
+                                <div style={{ display: 'flex', gap: 2, justifyContent: 'center', padding: '0 8px' }}>
+                                  <div style={{ flex: 1, height: 12, background: 'rgba(255,255,255,0.1)', borderRadius: 2 }} />
+                                  <div style={{ flex: 1, height: 12, background: 'rgba(255,255,255,0.1)', borderRadius: 2 }} />
+                                </div>
+                              </>
+                            )}
+                          </div>
+                          <span className="template-name" style={{ color: isDark ? '#fff' : '#333' }}>
+                            {template.name}
+                          </span>
+                          {isLocked && (
+                            <span className="template-lock">
+                              <IoLockClosed size={10} />
+                              {template.isProOnly ? 'Pro' : 'Premium'}
+                            </span>
+                          )}
+                          {isSelected && (
+                            <span className="template-check">
+                              <IoCheckmark size={12} color="#fff" />
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
+                {/* Banner Image Upload */}
+                <div className="section">
+                  <h3 style={{ color: isDark ? '#fff' : '#333' }}>Banner Image</h3>
+                  <p style={{ color: isDark ? '#94A3B8' : '#6B7280', fontSize: '13px', marginBottom: '12px' }}>
+                    Add a cover photo to your card. Works with Banner, Bold, Modern, and other templates.
+                  </p>
+                  {bannerImageUrl ? (
+                    <div className="banner-preview">
+                      <img src={bannerImageUrl} alt="Banner" className="banner-img" />
+                      <div className="banner-actions">
+                        <button onClick={() => bannerInputRef.current?.click()} className="banner-action-btn">
+                          <IoCamera size={16} /> Change
+                        </button>
+                        <button onClick={() => { setBannerImageUrl(null); setBannerImageFile(null); }} className="banner-action-btn remove">
+                          <IoClose size={16} /> Remove
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      className="banner-upload-btn"
+                      onClick={() => bannerInputRef.current?.click()}
+                      style={{ backgroundColor: isDark ? '#1E293B' : '#F3F4F6', color: isDark ? '#94A3B8' : '#6B7280' }}
+                    >
+                      <IoImage size={24} />
+                      <span>Upload Banner Image</span>
+                      <span style={{ fontSize: '11px' }}>Recommended: 1200 x 400px</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Color Scheme */}
+                <div className="section">
+                  <h3 style={{ color: isDark ? '#fff' : '#333' }}>Color</h3>
+                  {(() => {
+                    const currentTemplate = getTemplateById(selectedTemplateId);
+                    if (!currentTemplate) return null;
+                    return (
+                      <div className="color-scheme-grid">
+                        {currentTemplate.colorSchemes.map((scheme) => (
+                          <button
+                            key={scheme.id}
+                            className={`color-scheme-btn ${gradientColors[0] === scheme.primary && gradientColors[1] === scheme.secondary ? 'selected' : ''}`}
+                            onClick={() => setGradientColors([scheme.primary, scheme.secondary])}
+                          >
+                            <div className="color-swatch" style={{ background: `linear-gradient(135deg, ${scheme.primary}, ${scheme.secondary})` }} />
+                            <span style={{ color: isDark ? '#ccc' : '#555', fontSize: '11px' }}>{scheme.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                  <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <label style={{ color: isDark ? '#94A3B8' : '#6B7280', fontSize: '13px' }}>Custom:</label>
+                    <input
+                      type="color"
+                      value={gradientColors[0]}
+                      onChange={(e) => setGradientColors([e.target.value, gradientColors[1]])}
+                      style={{ width: '36px', height: '36px', border: 'none', cursor: 'pointer', borderRadius: '6px', background: 'none' }}
+                    />
+                    <input
+                      type="color"
+                      value={gradientColors[1]}
+                      onChange={(e) => setGradientColors([gradientColors[0], e.target.value])}
+                      style={{ width: '36px', height: '36px', border: 'none', cursor: 'pointer', borderRadius: '6px', background: 'none' }}
+                    />
+                  </div>
+                </div>
+
+                {/* Photo Size */}
                 <div className="section">
                   <h3 style={{ color: isDark ? '#fff' : '#333' }}>Photo Size</h3>
                   <div className="size-options">
@@ -964,6 +1192,7 @@ export default function ECardDashboardScreen() {
                   </div>
                 </div>
 
+                {/* Button Style */}
                 <div className="section">
                   <h3 style={{ color: isDark ? '#fff' : '#333' }}>Button Style</h3>
                   <div className="button-styles">
@@ -983,6 +1212,7 @@ export default function ECardDashboardScreen() {
                   </div>
                 </div>
 
+                {/* Font Style */}
                 <div className="section">
                   <h3 style={{ color: isDark ? '#fff' : '#333' }}>Font Style</h3>
                   <div className="font-options">
@@ -1009,11 +1239,9 @@ export default function ECardDashboardScreen() {
                   )}
                 </div>
 
+                {/* Font Color */}
                 <div className="section">
                   <h3 style={{ color: isDark ? '#fff' : '#333' }}>Font Color</h3>
-                  <p style={{ color: isDark ? '#94A3B8' : '#6B7280', fontSize: '13px', marginBottom: '12px' }}>
-                    Choose a text color for your card. "Auto" picks the best contrast automatically.
-                  </p>
                   <div className="font-color-options">
                     <button
                       className={`font-color-btn ${!fontColor ? 'selected' : ''}`}
@@ -1030,9 +1258,6 @@ export default function ECardDashboardScreen() {
                       { id: '#000000', name: 'Black', preview: '#000000' },
                       { id: '#1f2937', name: 'Dark Gray', preview: '#1f2937' },
                       { id: '#d4af37', name: 'Gold', preview: '#d4af37' },
-                      { id: '#E5E7EB', name: 'Light Gray', preview: '#E5E7EB' },
-                      { id: '#3B82F6', name: 'Blue', preview: '#3B82F6' },
-                      { id: '#EF4444', name: 'Red', preview: '#EF4444' },
                     ].map((color) => (
                       <button
                         key={color.id}
@@ -1044,14 +1269,9 @@ export default function ECardDashboardScreen() {
                         }}
                       >
                         <span style={{
-                          display: 'inline-block',
-                          width: '14px',
-                          height: '14px',
-                          borderRadius: '50%',
-                          backgroundColor: color.preview,
-                          border: '1px solid rgba(128,128,128,0.3)',
-                          marginRight: '6px',
-                          verticalAlign: 'middle',
+                          display: 'inline-block', width: '14px', height: '14px', borderRadius: '50%',
+                          backgroundColor: color.preview, border: '1px solid rgba(128,128,128,0.3)',
+                          marginRight: '6px', verticalAlign: 'middle',
                         }} />
                         {color.name}
                       </button>
@@ -1065,9 +1285,6 @@ export default function ECardDashboardScreen() {
                       onChange={(e) => setFontColor(e.target.value)}
                       style={{ width: '36px', height: '36px', border: 'none', cursor: 'pointer', borderRadius: '6px', background: 'none' }}
                     />
-                    {fontColor && (
-                      <span style={{ color: isDark ? '#94A3B8' : '#6B7280', fontSize: '12px', fontFamily: 'monospace' }}>{fontColor}</span>
-                    )}
                   </div>
                 </div>
               </div>
@@ -1819,6 +2036,167 @@ export default function ECardDashboardScreen() {
           }
 
           /* Appearance Tab */
+          .template-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+          }
+
+          .template-card {
+            position: relative;
+            border: 2px solid;
+            border-radius: 12px;
+            padding: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+          }
+
+          .template-card.selected {
+            border-color: ${ACCENT_GREEN} !important;
+            box-shadow: 0 0 0 2px rgba(0,200,83,0.2);
+          }
+
+          .template-card.locked {
+            opacity: 0.6;
+          }
+
+          .template-preview-mini {
+            width: 100%;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+          }
+
+          .template-name {
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+          }
+
+          .template-lock {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+          }
+
+          .template-check {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            background: ${ACCENT_GREEN};
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          /* Banner Upload */
+          .banner-preview {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+          }
+
+          .banner-img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            display: block;
+          }
+
+          .banner-actions {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            display: flex;
+            gap: 6px;
+          }
+
+          .banner-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            font-size: 12px;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+          }
+
+          .banner-action-btn.remove {
+            background: rgba(239,68,68,0.8);
+          }
+
+          .banner-upload-btn {
+            width: 100%;
+            height: 120px;
+            border: 2px dashed ${isDark ? '#334155' : '#D1D5DB'};
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+          }
+
+          .banner-upload-btn:hover {
+            border-color: ${ACCENT_GREEN};
+          }
+
+          /* Color Scheme Grid */
+          .color-scheme-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+          }
+
+          .color-scheme-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 4px;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            background: none;
+            cursor: pointer;
+            transition: all 0.2s;
+          }
+
+          .color-scheme-btn.selected {
+            border-color: ${ACCENT_GREEN};
+          }
+
+          .color-swatch {
+            width: 44px;
+            height: 44px;
+            border-radius: 22px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          }
+
           .gradient-presets {
             display: flex;
             flex-wrap: wrap;

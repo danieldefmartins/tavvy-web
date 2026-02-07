@@ -43,6 +43,14 @@ export interface CardData {
   videos?: { type: string; url: string }[];
   template_id?: string;
   color_scheme_id?: string;
+  banner_image_url?: string;
+  qr_style?: {
+    shape?: 'square' | 'dots' | 'rounded';
+    color?: string;
+    bgColor?: string;
+    logoUrl?: string;
+    cornerStyle?: 'square' | 'rounded' | 'dots';
+  };
   is_active?: boolean;
   created_at?: string;
   updated_at?: string;

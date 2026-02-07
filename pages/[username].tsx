@@ -17,6 +17,7 @@ import React, { useState } from 'react';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
 import { createClient } from '@supabase/supabase-js';
+import { getTemplateByIdWithMigration, resolveTemplateId, TemplateLayout } from '../config/eCardTemplates';
 
 interface CardLink {
   id: string;
@@ -112,6 +113,7 @@ interface CardData {
   showContactInfo: boolean;
   showSocialIcons: boolean;
   fontColor: string | null;
+  bannerImageUrl: string | null;
 }
 
 interface PageProps {
@@ -497,40 +499,30 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   const hasSocialLinks = cardData.socialInstagram || cardData.socialFacebook || cardData.socialLinkedin || cardData.socialTwitter || cardData.socialTiktok;
   const hasLinks = cardData.links && cardData.links.length > 0;
 
-  // Get template-specific styles based on templateId
+  // Resolve template to new layout system
+  const resolvedTemplateId = resolveTemplateId(cardData.templateId || 'classic');
+  const templateConfig = getTemplateByIdWithMigration(cardData.templateId || 'classic');
+  const templateLayout: TemplateLayout = templateConfig?.layout || 'classic';
+
+  // Get template-specific styles based on resolved template
   const getTemplateStyles = () => {
-    const templateId = cardData.templateId || 'classic-blue';
-    
-    // Luxury templates (black/gold)
-    if (templateId === 'luxury-gold') {
+    // Elegant / luxury templates
+    if (templateLayout === 'elegant') {
+      const accent = templateConfig?.colorSchemes[0]?.accent || '#d4af37';
       return {
         isLuxury: true,
         isDark: true,
         hasOrnate: true,
-        accentColor: '#d4af37',
-        textColor: '#d4af37',
-        buttonBg: 'rgba(212, 175, 55, 0.1)',
-        buttonBorder: 'rgba(212, 175, 55, 0.3)',
+        accentColor: accent,
+        textColor: accent,
+        buttonBg: `${accent}15`,
+        buttonBorder: `${accent}40`,
         photoStyle: 'ornate',
       };
     }
     
-    // Dark Pro templates
-    if (templateId === 'dark-pro') {
-      return {
-        isLuxury: false,
-        isDark: true,
-        hasOrnate: false,
-        accentColor: '#d4af37',
-        textColor: '#FFFFFF',
-        buttonBg: 'rgba(255, 255, 255, 0.1)',
-        buttonBorder: 'rgba(255, 255, 255, 0.15)',
-        photoStyle: 'circle',
-      };
-    }
-    
-    // Minimal templates (white card)
-    if (templateId === 'minimal-white') {
+    // Minimal templates (white card on dark bg)
+    if (templateLayout === 'minimal') {
       return {
         isLuxury: false,
         isDark: false,
@@ -543,22 +535,51 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
         hasWhiteCard: true,
       };
     }
-    
-    // Fun/Colorful templates
-    if (templateId === 'fun-colorful') {
+
+    // Bold template (text on photo)
+    if (templateLayout === 'bold') {
+      return {
+        isLuxury: false,
+        isDark: true,
+        hasOrnate: false,
+        accentColor: 'rgba(255, 255, 255, 0.3)',
+        textColor: '#FFFFFF',
+        buttonBg: 'rgba(255, 255, 255, 0.15)',
+        buttonBorder: 'rgba(255, 255, 255, 0.2)',
+        photoStyle: 'cover',
+      };
+    }
+
+    // Neon template
+    if (templateLayout === 'neon') {
       return {
         isLuxury: false,
         isDark: false,
         hasOrnate: false,
-        accentColor: '#fde047',
+        accentColor: cardData.gradientColor1,
         textColor: '#FFFFFF',
-        buttonBg: 'rgba(255, 255, 255, 0.2)',
+        buttonBg: 'rgba(255, 255, 255, 0.15)',
         buttonBorder: 'rgba(255, 255, 255, 0.2)',
-        photoStyle: 'circle',
+        photoStyle: 'neon',
+      };
+    }
+
+    // Split template
+    if (templateLayout === 'split') {
+      const isLight = cardData.gradientColor1.toLowerCase() === '#ffffff' || cardData.gradientColor1.toLowerCase() === '#f8fafc';
+      return {
+        isLuxury: false,
+        isDark: !isLight,
+        hasOrnate: false,
+        accentColor: templateConfig?.colorSchemes[0]?.accent || '#1e40af',
+        textColor: isLight ? '#1f2937' : '#FFFFFF',
+        buttonBg: isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255, 255, 255, 0.12)',
+        buttonBorder: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255, 255, 255, 0.15)',
+        photoStyle: 'square',
       };
     }
     
-    // Default (classic, creator, etc.)
+    // Default (classic, banner, modern, showcase, executive, etc.)
     return {
       isLuxury: false,
       isDark: false,
@@ -719,25 +740,53 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
       </Head>
 
       <div style={styles.page}>
-        {/* Background - supports solid, gradient, and image */}
+        {/* Background - supports solid, gradient, image, and template layouts */}
         <div 
           style={{
             ...styles.backgroundGradient,
-            ...(cardData.backgroundType === 'solid' 
-              ? { background: cardData.gradientColor1 }
-              : cardData.backgroundType === 'image' && cardData.backgroundImageUrl
-                ? { 
-                    backgroundImage: `url(${cardData.backgroundImageUrl})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                  }
-                : { background: `linear-gradient(165deg, ${cardData.gradientColor1} 0%, ${cardData.gradientColor2} 50%, #0a0f1e 100%)` }
+            ...(templateLayout === 'bold' && (cardData.bannerImageUrl || cardData.profilePhotoUrl)
+              ? {
+                  backgroundImage: `url(${cardData.bannerImageUrl || cardData.profilePhotoUrl})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }
+              : templateLayout === 'minimal'
+                ? { background: cardData.gradientColor1 === '#FFFFFF' ? '#0f172a' : `linear-gradient(165deg, ${cardData.gradientColor1} 0%, ${cardData.gradientColor2} 100%)` }
+                : cardData.backgroundType === 'solid' 
+                  ? { background: cardData.gradientColor1 }
+                  : cardData.backgroundType === 'image' && cardData.backgroundImageUrl
+                    ? { 
+                        backgroundImage: `url(${cardData.backgroundImageUrl})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                      }
+                    : { background: `linear-gradient(165deg, ${cardData.gradientColor1} 0%, ${cardData.gradientColor2} 50%, #0a0f1e 100%)` }
             ),
           }}
         />
 
+        {/* Bold template gradient overlay */}
+        {templateLayout === 'bold' && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0,
+            background: `linear-gradient(to bottom, transparent 0%, transparent 30%, ${cardData.gradientColor1}cc 60%, ${cardData.gradientColor2} 100%)`,
+          }} />
+        )}
+
         {/* Main Card Container */}
-        <div style={styles.cardContainer}>
+        <div style={{
+          ...styles.cardContainer,
+          ...(templateLayout === 'minimal' ? {
+            maxWidth: '420px',
+            background: '#FFFFFF',
+            borderRadius: '28px',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            margin: '20px auto',
+            minHeight: 'auto',
+            padding: '32px 24px 40px',
+          } : {}),
+          ...(templateLayout === 'bold' ? { padding: '0 24px 40px' } : {}),
+        }}>
           {/* Crown Button - Top Right */}
           <button 
             onClick={handleTap}
@@ -771,10 +820,40 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             <span style={styles.crownCount}>{cardData.tapCount || 0}</span>
           </button>
 
+          {/* Banner Image (for banner, modern, executive templates) */}
+          {(templateLayout === 'banner' || templateLayout === 'modern' || templateLayout === 'executive' || templateLayout === 'showcase') && cardData.bannerImageUrl && (
+            <div style={{
+              width: '100%',
+              maxWidth: '400px',
+              height: '180px',
+              borderRadius: '20px',
+              overflow: 'hidden',
+              marginBottom: templateLayout === 'banner' ? '-50px' : '16px',
+              position: 'relative',
+              zIndex: 2,
+            }}>
+              <img
+                src={cardData.bannerImageUrl}
+                alt="Banner"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+            </div>
+          )}
+
+          {/* Minimal template - add white card class to container via CSS */}
+
           {/* Profile Section */}
-          <div style={styles.profileSection}>
-            {/* Profile Photo */}
-            {(() => {
+          <div style={{
+            ...styles.profileSection,
+            ...(templateLayout === 'banner' && cardData.bannerImageUrl ? { zIndex: 3, position: 'relative' as const } : {}),
+            ...(templateLayout === 'bold' ? { marginTop: '40vh', zIndex: 2 } : {}),
+          }}>
+            {/* Profile Photo - skip for bold template (photo is the background) */}
+            {templateLayout !== 'bold' && (() => {
               // Photo size configurations
               const photoSizes = {
                 small: { ring: 100, photo: 92, initials: 28, borderRadius: 50 },
@@ -784,6 +863,11 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               };
               const sizeConfig = photoSizes[cardData.profilePhotoSize] || photoSizes.medium;
               
+              // Neon glow for neon template
+              const neonGlow = templateLayout === 'neon' ? {
+                boxShadow: `0 0 20px ${cardData.gradientColor1}80, 0 0 40px ${cardData.gradientColor1}40, 0 12px 40px rgba(0,0,0,0.25)`,
+              } : {};
+              
               return (
                 <div style={styles.photoWrapper}>
                   <div style={{
@@ -791,6 +875,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                     width: `${sizeConfig.ring}px`,
                     height: `${sizeConfig.ring}px`,
                     borderRadius: `${sizeConfig.borderRadius}px`,
+                    ...neonGlow,
                   }}>
                     {cardData.profilePhotoUrl ? (
                       <img 
@@ -1550,6 +1635,72 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             <button onClick={handleShare} style={styles.shareButton}>
               <ShareIcon />
               <span>Share</span>
+            </button>
+          </div>
+
+          {/* Wallet Buttons */}
+          <div style={{ width: '100%', marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <button
+              onClick={() => {
+                // Apple Wallet - try API first, fallback to vCard
+                fetch('/api/ecard/wallet/apple-pass', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ slug: cardData.slug }),
+                }).then(res => {
+                  if (res.status === 503 || !res.ok) {
+                    window.open(`/api/ecard/wallet/vcard?slug=${cardData.slug}`, '_blank');
+                    return;
+                  }
+                  return res.blob();
+                }).then(blob => {
+                  if (blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url; a.download = `${cardData.slug}.pkpass`; a.click();
+                    URL.revokeObjectURL(url);
+                  }
+                }).catch(() => {
+                  window.open(`/api/ecard/wallet/vcard?slug=${cardData.slug}`, '_blank');
+                });
+              }}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                padding: '14px 20px', borderRadius: 12, border: 'none',
+                background: '#000', color: '#fff', fontSize: 15, fontWeight: 600,
+                cursor: 'pointer', width: '100%',
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+              <span>Add to Apple Wallet</span>
+            </button>
+            <button
+              onClick={() => {
+                fetch('/api/ecard/wallet/google-pass', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ slug: cardData.slug }),
+                }).then(res => {
+                  if (res.status === 503 || !res.ok) {
+                    window.open(`/api/ecard/wallet/vcard?slug=${cardData.slug}`, '_blank');
+                    return res.json().catch(() => null);
+                  }
+                  return res.json();
+                }).then(data => {
+                  if (data?.saveUrl) window.open(data.saveUrl, '_blank');
+                }).catch(() => {
+                  window.open(`/api/ecard/wallet/vcard?slug=${cardData.slug}`, '_blank');
+                });
+              }}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                padding: '14px 20px', borderRadius: 12,
+                background: '#fff', color: '#1f2937', fontSize: 15, fontWeight: 600,
+                cursor: 'pointer', width: '100%', border: '1px solid #E5E7EB',
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/></svg>
+              <span>Add to Google Wallet</span>
             </button>
           </div>
 
@@ -2789,6 +2940,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       showContactInfo: data.show_contact_info !== false,
       showSocialIcons: data.show_social_icons !== false,
       fontColor: data.font_color || null,
+      bannerImageUrl: data.banner_image_url || null,
     };
     
     return {

@@ -20,6 +20,7 @@ import {
   getCardUrl,
   getQRCodeUrl,
 } from '../../../lib/ecard';
+import StyledQRCode, { QR_STYLE_PRESETS, QRStyleConfig, DEFAULT_QR_STYLE } from '../../../components/ecard/StyledQRCode';
 import { 
   IoArrowBack, 
   IoShare,
@@ -28,6 +29,7 @@ import {
   IoCheckmark,
   IoClose,
   IoCall,
+  IoDownload,
   IoMail,
   IoGlobe,
   IoLogoInstagram,
@@ -75,6 +77,8 @@ export default function ECardPreviewScreen() {
   const [cardData, setCardData] = useState<CardData | null>(null);
   const [links, setLinks] = useState<LinkItem[]>([]);
   const [showQRModal, setShowQRModal] = useState(false);
+  const [qrStyle, setQrStyle] = useState<Partial<QRStyleConfig>>({});
+  const qrContainerRef = React.useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [cardId, setCardId] = useState<string | null>(null);
 
@@ -372,21 +376,88 @@ export default function ECardPreviewScreen() {
           {/* QR Code Modal */}
           {showQRModal && cardData.slug && (
             <div className="modal-overlay" onClick={() => setShowQRModal(false)}>
-              <div className="modal" onClick={e => e.stopPropagation()} style={{ backgroundColor: isDark ? '#1E293B' : '#fff' }}>
+              <div className="modal qr-modal" onClick={e => e.stopPropagation()} style={{ backgroundColor: isDark ? '#1E293B' : '#fff', maxWidth: 420 }}>
                 <button className="modal-close" onClick={() => setShowQRModal(false)}>
                   <IoClose size={24} color={isDark ? '#fff' : '#333'} />
                 </button>
-                <h2 style={{ color: isDark ? '#fff' : '#333' }}>Scan to View</h2>
-                <div className="qr-container">
-                  <img src={getQRCodeUrl(cardData.slug)} alt="QR Code" className="qr-code" />
+                <h2 style={{ color: isDark ? '#fff' : '#333', marginBottom: 4 }}>QR Code</h2>
+                <p style={{ color: isDark ? '#94A3B8' : '#6B7280', fontSize: 13, marginBottom: 16 }}>
+                  Customize your QR code style
+                </p>
+                
+                {/* QR Code Preview */}
+                <div ref={qrContainerRef} className="qr-container" style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+                  <StyledQRCode url={getCardUrl(cardData.slug)} style={qrStyle} />
                 </div>
-                <p style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>
+
+                {/* Style Presets */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 16 }}>
+                  {QR_STYLE_PRESETS.map((preset) => (
+                    <button
+                      key={preset.id}
+                      onClick={() => setQrStyle(preset.config)}
+                      style={{
+                        padding: '8px 4px',
+                        borderRadius: 8,
+                        border: `2px solid ${JSON.stringify(qrStyle) === JSON.stringify(preset.config) ? '#00C853' : (isDark ? '#334155' : '#E5E7EB')}`,
+                        backgroundColor: isDark ? '#0F172A' : '#F9FAFB',
+                        cursor: 'pointer',
+                        fontSize: 11,
+                        fontWeight: 600,
+                        color: isDark ? '#E2E8F0' : '#374151',
+                        textAlign: 'center',
+                      }}
+                    >
+                      <div style={{
+                        width: 32, height: 32, margin: '0 auto 4px',
+                        borderRadius: preset.config.dotStyle === 'dots' ? '50%' : 4,
+                        background: preset.config.backgroundColor === '#FFFFFF' 
+                          ? `linear-gradient(135deg, ${preset.config.dotColor}, ${preset.config.dotColor}88)` 
+                          : preset.config.backgroundColor,
+                        border: `2px solid ${preset.config.dotColor}`,
+                      }} />
+                      {preset.name}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Custom Color Pickers */}
+                <div style={{ display: 'flex', gap: 12, marginBottom: 16, alignItems: 'center', justifyContent: 'center' }}>
+                  <label style={{ color: isDark ? '#94A3B8' : '#6B7280', fontSize: 12 }}>Dot Color</label>
+                  <input
+                    type="color"
+                    value={qrStyle.dotColor || '#000000'}
+                    onChange={(e) => setQrStyle(prev => ({ ...prev, dotColor: e.target.value, cornerColor: e.target.value }))}
+                    style={{ width: 32, height: 32, border: 'none', cursor: 'pointer', borderRadius: 6 }}
+                  />
+                  <label style={{ color: isDark ? '#94A3B8' : '#6B7280', fontSize: 12 }}>Background</label>
+                  <input
+                    type="color"
+                    value={qrStyle.backgroundColor || '#FFFFFF'}
+                    onChange={(e) => setQrStyle(prev => ({ ...prev, backgroundColor: e.target.value }))}
+                    style={{ width: 32, height: 32, border: 'none', cursor: 'pointer', borderRadius: 6 }}
+                  />
+                </div>
+
+                <p style={{ color: isDark ? '#64748B' : '#9CA3AF', fontSize: 12, textAlign: 'center', marginBottom: 12 }}>
                   {getCardUrl(cardData.slug)}
                 </p>
-                <button className="download-btn" onClick={copyCardUrl}>
-                  <IoCopy size={18} />
-                  <span>Copy Link</span>
-                </button>
+
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button className="download-btn" onClick={copyCardUrl} style={{ flex: 1 }}>
+                    <IoCopy size={16} />
+                    <span>Copy Link</span>
+                  </button>
+                  <button className="download-btn" onClick={async () => {
+                    if (qrContainerRef.current) {
+                      const { downloadQRCode } = await import('../../../components/ecard/StyledQRCode');
+                      await downloadQRCode(qrContainerRef.current, `${cardData.slug}-qr`);
+                    }
+                  }} style={{ flex: 1, background: '#00C853' }}>
+                    <IoDownload size={16} />
+                    <span>Download</span>
+                  </button>
+                </div>
               </div>
             </div>
           )}
