@@ -674,7 +674,8 @@ export default function ECardCreateScreen() {
   const touchEndX = useRef(0);
   const isSwiping = useRef(false);
 
-  const handleSwipeStart = (x: number) => { touchStartX.current = x; isSwiping.current = true; };
+  const tapStartTime = useRef(0);
+  const handleSwipeStart = (x: number) => { touchStartX.current = x; isSwiping.current = true; tapStartTime.current = Date.now(); };
   const handleSwipeMove = (x: number) => { if (isSwiping.current) touchEndX.current = x; };
   const handleSwipeEnd = () => {
     if (!isSwiping.current) return;
@@ -1481,6 +1482,14 @@ export default function ECardCreateScreen() {
                       borderWidth: currentTmpl.layout === 'business-card' ? 1 : 0,
                       borderStyle: 'solid',
                     }}
+                    onClick={() => {
+                      // Only treat as tap if the touch was short and didn't move much
+                      const elapsed = Date.now() - tapStartTime.current;
+                      const dist = Math.abs(touchStartX.current - touchEndX.current);
+                      if (elapsed < 300 && dist < 15) {
+                        selectTemplate();
+                      }
+                    }}
                   >
                     <FullCardPreview tmpl={currentTmpl} />
                   </div>
@@ -1662,6 +1671,7 @@ export default function ECardCreateScreen() {
 
         .swiper-container {
           flex: 1;
+          min-height: 0;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1686,9 +1696,10 @@ export default function ECardCreateScreen() {
           transition: transform 0.3s ease, opacity 0.3s ease;
           display: flex;
           flex-direction: column;
-          max-height: calc(100vh - 260px);
+          max-height: calc(100vh - 300px);
           overflow-y: auto;
           -webkit-overflow-scrolling: touch;
+          cursor: pointer;
         }
 
         .swiper-arrow {
@@ -1723,8 +1734,9 @@ export default function ECardCreateScreen() {
 
         .swiper-info {
           flex-shrink: 0;
-          padding: 12px 24px 16px;
+          padding: 12px 24px 20px;
           text-align: center;
+          padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
         }
 
         .swiper-dots {
