@@ -212,13 +212,13 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
      White bg, circle photo, @handle, dark rounded link buttons
      ═══════════════════════════════════════════════════════════ */
   if (tmpl.layout === 'basic') {
-    const isDarkTheme = !isLightBg;
-    const btnBg = isDarkTheme ? '#2D3436' : '#2D3436';
+    // Basic template always has a white/light card background
+    const btnBg = '#2D3436';
     const btnTxt = '#FFFFFF';
-    const nameTxt = isDarkTheme ? '#fff' : '#1a1a1a';
-    const subTxt = isDarkTheme ? 'rgba(255,255,255,0.65)' : '#555';
+    const nameTxt = '#1a1a1a';
+    const subTxt = '#555';
     return (
-      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 28px 36px' }}>
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 28px 36px', background: '#fff', borderRadius: 16 }}>
         <PhotoAvatar size={110} border="3px solid rgba(0,0,0,0.06)" shadow="0 4px 20px rgba(0,0,0,0.1)" />
         <div style={{ fontSize: 20, fontWeight: 700, color: nameTxt, marginTop: 16, textAlign: 'center' }}>{SAMPLE_DATA.handle}</div>
         <div style={{ fontSize: 13, color: subTxt, marginTop: 6, textAlign: 'center', lineHeight: 1.5, padding: '0 8px' }}>
@@ -675,7 +675,7 @@ export default function ECardCreateScreen() {
   const isSwiping = useRef(false);
 
   const tapStartTime = useRef(0);
-  const handleSwipeStart = (x: number) => { touchStartX.current = x; isSwiping.current = true; tapStartTime.current = Date.now(); };
+  const handleSwipeStart = (x: number) => { touchStartX.current = x; touchEndX.current = x; isSwiping.current = true; tapStartTime.current = Date.now(); };
   const handleSwipeMove = (x: number) => { if (isSwiping.current) touchEndX.current = x; };
   const handleSwipeEnd = () => {
     if (!isSwiping.current) return;
@@ -1432,16 +1432,26 @@ export default function ECardCreateScreen() {
         {step === 'gallery' ? (
           /* ===== STEP 1: FULL-SCREEN SWIPEABLE TEMPLATE BROWSER ===== */
           <>
-            {/* Top bar */}
+            {/* Top bar with back button */}
             <div className="gallery-top-bar">
               <button className="back-btn" onClick={() => router.back()}>
                 <IoArrowBack size={22} color={isDark ? '#fff' : '#333'} />
               </button>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 18, fontWeight: 700, color: isDark ? '#fff' : '#111' }}>Choose a Style</div>
-                <div style={{ fontSize: 13, color: isDark ? 'rgba(255,255,255,0.5)' : '#888', marginTop: 2 }}>Swipe to browse templates</div>
-              </div>
               <div style={{ width: 30 }} />
+            </div>
+
+            {/* Template name + description + badge — ABOVE the card */}
+            <div className="swiper-header">
+              <div className="tg-name-row" style={{ justifyContent: 'center' }}>
+                <span className="tg-name" style={{ fontSize: 20 }}>{TEMPLATES[galleryIndex].name}</span>
+                {TEMPLATES[galleryIndex].isPremium ? (
+                  <span className="tg-pro-tag">PRO</span>
+                ) : (
+                  <span className="tg-free-tag">FREE</span>
+                )}
+              </div>
+              <span className="tg-desc" style={{ textAlign: 'center', display: 'block', marginTop: 4 }}>{TEMPLATES[galleryIndex].description}</span>
+              <span style={{ fontSize: 11, color: isDark ? 'rgba(255,255,255,0.3)' : '#bbb', display: 'block', marginTop: 6 }}>Swipe to browse &middot; Tap card to select</span>
             </div>
 
             {/* Swipeable card area */}
@@ -1483,10 +1493,9 @@ export default function ECardCreateScreen() {
                       borderStyle: 'solid',
                     }}
                     onClick={() => {
-                      // Only treat as tap if the touch was short and didn't move much
                       const elapsed = Date.now() - tapStartTime.current;
                       const dist = Math.abs(touchStartX.current - touchEndX.current);
-                      if (elapsed < 300 && dist < 15) {
+                      if (elapsed < 500 && dist < 30) {
                         selectTemplate();
                       }
                     }}
@@ -1497,19 +1506,8 @@ export default function ECardCreateScreen() {
               })()}
             </div>
 
-            {/* Template info + Use button */}
-            <div className="swiper-info">
-              <div className="tg-name-row" style={{ justifyContent: 'center' }}>
-                <span className="tg-name" style={{ fontSize: 18 }}>{TEMPLATES[galleryIndex].name}</span>
-                {TEMPLATES[galleryIndex].isPremium ? (
-                  <span className="tg-pro-tag">PRO</span>
-                ) : (
-                  <span className="tg-free-tag">FREE</span>
-                )}
-              </div>
-              <span className="tg-desc" style={{ textAlign: 'center', display: 'block', marginTop: 4 }}>{TEMPLATES[galleryIndex].description}</span>
-
-              {/* Dot indicators */}
+            {/* Dots + Use button — BELOW the card */}
+            <div className="swiper-footer">
               <div className="swiper-dots">
                 {TEMPLATES.map((_, i) => (
                   <button
@@ -1519,7 +1517,6 @@ export default function ECardCreateScreen() {
                   />
                 ))}
               </div>
-
               <button className="use-template-btn" onClick={selectTemplate}>
                 Use This Template
               </button>
@@ -1665,8 +1662,14 @@ export default function ECardCreateScreen() {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 12px 16px;
+          padding: 8px 16px 0;
           flex-shrink: 0;
+        }
+
+        .swiper-header {
+          flex-shrink: 0;
+          text-align: center;
+          padding: 4px 24px 10px;
         }
 
         .swiper-container {
@@ -1732,11 +1735,15 @@ export default function ECardCreateScreen() {
           right: 4px;
         }
 
-        .swiper-info {
+        .swiper-footer {
           flex-shrink: 0;
-          padding: 12px 24px 20px;
+          padding: 10px 24px;
+          padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
           text-align: center;
-          padding-bottom: max(20px, env(safe-area-inset-bottom, 20px));
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
         }
 
         .swiper-dots {
