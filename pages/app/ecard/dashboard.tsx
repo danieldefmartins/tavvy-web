@@ -142,6 +142,7 @@ export default function ECardDashboardScreen() {
   const [selectedButtonStyle, setSelectedButtonStyle] = useState('fill');
   const [selectedFont, setSelectedFont] = useState('default');
   const [profilePhotoSize, setProfilePhotoSize] = useState('medium');
+  const [fontColor, setFontColor] = useState<string | null>(null);
 
   // Modals
   const [showAddLink, setShowAddLink] = useState(false);
@@ -204,6 +205,7 @@ export default function ECardDashboardScreen() {
           setSelectedButtonStyle(card.button_style || 'fill');
           setSelectedFont(card.font_style || 'default');
           setProfilePhotoSize(card.profile_photo_size || 'medium');
+          setFontColor(card.font_color || null);
           setSlugInput(card.slug?.startsWith('draft_') ? generateSlug(card.full_name || '') : card.slug || '');
 
           const cardLinks = await getCardLinks(cardId);
@@ -278,6 +280,7 @@ export default function ECardDashboardScreen() {
         theme: selectedTheme,
         button_style: selectedButtonStyle,
         font_style: selectedFont,
+        font_color: fontColor || null,
         featured_socials: featuredIcons.length > 0 ? featuredIcons : [],
         gallery_images: uploadedGallery,
         videos: videos,
@@ -1004,6 +1007,68 @@ export default function ECardDashboardScreen() {
                       <IoLockClosed size={14} /> {PREMIUM_FONT_COUNT}+ premium fonts available with Pro
                     </p>
                   )}
+                </div>
+
+                <div className="section">
+                  <h3 style={{ color: isDark ? '#fff' : '#333' }}>Font Color</h3>
+                  <p style={{ color: isDark ? '#94A3B8' : '#6B7280', fontSize: '13px', marginBottom: '12px' }}>
+                    Choose a text color for your card. "Auto" picks the best contrast automatically.
+                  </p>
+                  <div className="font-color-options">
+                    <button
+                      className={`font-color-btn ${!fontColor ? 'selected' : ''}`}
+                      onClick={() => setFontColor(null)}
+                      style={{
+                        backgroundColor: !fontColor ? ACCENT_GREEN : (isDark ? '#1E293B' : '#F3F4F6'),
+                        color: !fontColor ? '#fff' : (isDark ? '#fff' : '#333'),
+                      }}
+                    >
+                      Auto
+                    </button>
+                    {[
+                      { id: '#FFFFFF', name: 'White', preview: '#FFFFFF' },
+                      { id: '#000000', name: 'Black', preview: '#000000' },
+                      { id: '#1f2937', name: 'Dark Gray', preview: '#1f2937' },
+                      { id: '#d4af37', name: 'Gold', preview: '#d4af37' },
+                      { id: '#E5E7EB', name: 'Light Gray', preview: '#E5E7EB' },
+                      { id: '#3B82F6', name: 'Blue', preview: '#3B82F6' },
+                      { id: '#EF4444', name: 'Red', preview: '#EF4444' },
+                    ].map((color) => (
+                      <button
+                        key={color.id}
+                        className={`font-color-btn ${fontColor === color.id ? 'selected' : ''}`}
+                        onClick={() => setFontColor(color.id)}
+                        style={{
+                          backgroundColor: fontColor === color.id ? ACCENT_GREEN : (isDark ? '#1E293B' : '#F3F4F6'),
+                          color: fontColor === color.id ? '#fff' : (isDark ? '#fff' : '#333'),
+                        }}
+                      >
+                        <span style={{
+                          display: 'inline-block',
+                          width: '14px',
+                          height: '14px',
+                          borderRadius: '50%',
+                          backgroundColor: color.preview,
+                          border: '1px solid rgba(128,128,128,0.3)',
+                          marginRight: '6px',
+                          verticalAlign: 'middle',
+                        }} />
+                        {color.name}
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <label style={{ color: isDark ? '#94A3B8' : '#6B7280', fontSize: '13px' }}>Custom:</label>
+                    <input
+                      type="color"
+                      value={fontColor || '#FFFFFF'}
+                      onChange={(e) => setFontColor(e.target.value)}
+                      style={{ width: '36px', height: '36px', border: 'none', cursor: 'pointer', borderRadius: '6px', background: 'none' }}
+                    />
+                    {fontColor && (
+                      <span style={{ color: isDark ? '#94A3B8' : '#6B7280', fontSize: '12px', fontFamily: 'monospace' }}>{fontColor}</span>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
@@ -1787,6 +1852,23 @@ export default function ECardDashboardScreen() {
             font-size: 13px;
             cursor: pointer;
             transition: all 0.2s;
+          }
+
+          .font-color-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+          }
+
+          .font-color-btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
           }
 
           .premium-hint {

@@ -230,12 +230,16 @@ export default function ECardCreateScreen() {
   const p1 = color?.primary || '#667eea';
   const p2 = color?.secondary || '#764ba2';
   const avgLum = (hexToLum(p1.startsWith('#') ? p1 : '#667eea') + hexToLum(p2.startsWith('#') ? p2 : '#764ba2')) / 2;
-  const isLight = avgLum > 0.45;
   const cardBg = color?.background?.includes('gradient')
     ? color.background
     : color?.cardBg && color.cardBg !== 'transparent'
       ? color.cardBg
       : `linear-gradient(180deg, ${color?.primary}, ${color?.secondary})`;
+  // If cardBg is a solid hex color (like #FFFFFF for Minimal templates), use its luminance instead
+  const effectiveLum = (color?.cardBg && color.cardBg !== 'transparent' && color.cardBg.startsWith('#'))
+    ? hexToLum(color.cardBg)
+    : avgLum;
+  const isLight = effectiveLum > 0.45;
   const txtColor = isLight ? '#1A1A1A' : '#FFFFFF';
   const txtSecondary = isLight ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.7)';
   const accentColor = color?.accent || 'rgba(255,255,255,0.2)';
@@ -1197,7 +1201,7 @@ export default function ECardCreateScreen() {
 
         .card-fields input::placeholder,
         .card-fields textarea::placeholder {
-          color: ${isLight ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.25)'};
+          color: ${isLight ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.45)'};
         }
 
         /* Contact fields */
@@ -1215,7 +1219,7 @@ export default function ECardCreateScreen() {
         }
 
         .contact-row input::placeholder {
-          color: ${isLight ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.25)'};
+          color: ${isLight ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.45)'};
         }
 
         /* Links */
@@ -1232,7 +1236,7 @@ export default function ECardCreateScreen() {
         }
 
         .link-button input::placeholder {
-          color: ${isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.3)'};
+          color: ${isLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)'};
         }
 
         .link-action {

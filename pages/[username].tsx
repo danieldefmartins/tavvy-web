@@ -111,6 +111,7 @@ interface CardData {
   tapCount: number;
   showContactInfo: boolean;
   showSocialIcons: boolean;
+  fontColor: string | null;
 }
 
 interface PageProps {
@@ -570,7 +571,38 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
     };
   };
 
-  const templateStyles = getTemplateStyles();
+  const rawTemplateStyles = getTemplateStyles();
+
+  // Auto-contrast: compute best text color based on gradient background
+  const getAutoContrastColor = (hex1: string, hex2: string): string => {
+    const hexToRgb = (hex: string) => {
+      const h = hex.replace('#', '');
+      return {
+        r: parseInt(h.substring(0, 2), 16),
+        g: parseInt(h.substring(2, 4), 16),
+        b: parseInt(h.substring(4, 6), 16),
+      };
+    };
+    // Average the two gradient colors
+    const c1 = hexToRgb(hex1);
+    const c2 = hexToRgb(hex2);
+    const avgR = (c1.r + c2.r) / 2;
+    const avgG = (c1.g + c2.g) / 2;
+    const avgB = (c1.b + c2.b) / 2;
+    // Relative luminance (WCAG)
+    const luminance = (0.299 * avgR + 0.587 * avgG + 0.114 * avgB) / 255;
+    return luminance > 0.55 ? '#1f2937' : '#FFFFFF';
+  };
+
+  // Apply user font color override, or auto-contrast fallback
+  const templateStyles = {
+    ...rawTemplateStyles,
+    textColor: cardData.fontColor
+      ? cardData.fontColor
+      : (rawTemplateStyles.textColor === '#FFFFFF' || rawTemplateStyles.textColor === '#1f2937')
+        ? getAutoContrastColor(cardData.gradientColor1, cardData.gradientColor2)
+        : rawTemplateStyles.textColor,
+  };
 
   // Get button style based on cardData.buttonStyle
   const getButtonStyleOverrides = () => {
@@ -2756,6 +2788,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       // Visibility toggles
       showContactInfo: data.show_contact_info !== false,
       showSocialIcons: data.show_social_icons !== false,
+      fontColor: data.font_color || null,
     };
     
     return {
