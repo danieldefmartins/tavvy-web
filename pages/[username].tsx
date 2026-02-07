@@ -92,7 +92,7 @@ interface CardData {
   youtubeVideoId: string;
   youtubeTitle: string;
   // Gallery block
-  galleryImages: { id: string; uri: string; caption?: string }[];
+  galleryImages: { id: string; url: string; uri?: string; caption?: string }[];
   galleryTitle: string;
   // Testimonials block
   testimonials: { id: string; customerName: string; reviewText: string; rating: number; customerPhoto?: string; date?: string; source?: string }[];
@@ -1099,7 +1099,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 {cardData.galleryImages.slice(0, 9).map((image, index) => (
                   <div key={image.id || index} style={styles.galleryImageContainer}>
                     <img 
-                      src={image.uri} 
+                      src={image.url || image.uri} 
                       alt={image.caption || `Gallery image ${index + 1}`}
                       style={styles.galleryImage}
                     />

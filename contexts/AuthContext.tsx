@@ -59,14 +59,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Handle visibility change — refresh session when user comes back to the tab
+  // In private browsing, localStorage can be cleared when backgrounded, so we need
+  // to be careful not to log the user out just because getSession returns null
   useEffect(() => {
+    const lastKnownUserRef = { user: user, session: session };
+    
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && session) {
-        // Silently refresh the session when tab becomes visible again
+      if (document.visibilityState === 'visible') {
+        // Try to refresh the session when tab becomes visible again
         supabase.auth.getSession().then(({ data: { session: refreshedSession } }) => {
           if (refreshedSession) {
             setSession(refreshedSession);
             setUser(refreshedSession.user);
+          } else if (lastKnownUserRef.session) {
+            // Session was lost (likely private browsing cleared localStorage)
+            // Try to use the refresh token if we still have it in memory
+            console.warn('[Auth] Session lost on tab return, attempting recovery...');
+            supabase.auth.refreshSession().then(({ data: { session: recoveredSession } }) => {
+              if (recoveredSession) {
+                setSession(recoveredSession);
+                setUser(recoveredSession.user);
+                console.log('[Auth] Session recovered successfully');
+              } else {
+                // Only log out if we truly can't recover
+                console.warn('[Auth] Session recovery failed - user will need to log in again');
+                // Don't immediately clear - give a grace period
+                // The user might navigate to login page themselves
+              }
+            }).catch(() => {
+              console.warn('[Auth] Session refresh failed on tab return');
+            });
           }
         }).catch((err) => {
           console.warn('[Auth] Session refresh on visibility change failed:', err);
@@ -78,7 +100,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       document.addEventListener('visibilitychange', handleVisibilityChange);
       return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
     }
-  }, [session]);
+  }, [session, user]);
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });

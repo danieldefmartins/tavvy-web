@@ -20,6 +20,7 @@ import {
   generateSlug,
   uploadProfilePhoto,
   uploadEcardFile,
+  deleteEcardFile,
   CardData, 
   LinkItem,
   FeaturedSocial,
@@ -268,9 +269,9 @@ export default function ECardDashboardScreen() {
         theme: selectedTheme,
         button_style: selectedButtonStyle,
         font_style: selectedFont,
-        featured_socials: featuredIcons.length > 0 ? featuredIcons : undefined,
-        gallery_images: uploadedGallery.length > 0 ? uploadedGallery : undefined,
-        videos: videos.length > 0 ? videos : undefined,
+        featured_socials: featuredIcons.length > 0 ? featuredIcons : [],
+        gallery_images: uploadedGallery,
+        videos: videos,
       } as any);
 
       await saveCardLinks(cardId, links);
@@ -322,8 +323,13 @@ export default function ECardDashboardScreen() {
     }
   };
 
-  const removeGalleryImage = (id: string) => {
+  const removeGalleryImage = async (id: string) => {
+    const imageToRemove = galleryImages.find(g => g.id === id);
     setGalleryImages(prev => prev.filter(g => g.id !== id));
+    // Delete from Supabase Storage if it's a remote URL (not a blob)
+    if (imageToRemove && imageToRemove.url && !imageToRemove.url.startsWith('blob:')) {
+      await deleteEcardFile(imageToRemove.url);
+    }
   };
 
   // Featured icon handlers

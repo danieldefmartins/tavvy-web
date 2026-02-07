@@ -448,6 +448,26 @@ export async function uploadEcardFile(userId: string, file: File, folder: string
 }
 
 /**
+ * Delete a file from ecard-assets storage bucket
+ */
+export async function deleteEcardFile(publicUrl: string): Promise<boolean> {
+  try {
+    // Extract path from public URL: https://xxx.supabase.co/storage/v1/object/public/ecard-assets/userId/gallery_xxx.jpg
+    const match = publicUrl.match(/ecard-assets\/(.+)$/);
+    if (!match) return false;
+    const { error } = await supabase.storage.from('ecard-assets').remove([match[1]]);
+    if (error) {
+      console.error('Error deleting file from storage:', error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error('Delete file error:', err);
+    return false;
+  }
+}
+
+/**
  * Upload profile photo (convenience wrapper)
  */
 export async function uploadProfilePhoto(userId: string, file: File): Promise<string | null> {
