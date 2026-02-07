@@ -3163,14 +3163,14 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       // Get top signal tags (aggregated)
       const { data: signalTaps } = await serverSupabase
         .from('ecard_endorsement_signals')
-        .select('signal_id, review_items(label, emoji)')
+        .select('signal_id, review_items(label, icon_emoji)')
         .eq('card_id', data.id);
       if (signalTaps && signalTaps.length > 0) {
         const tagCounts: Record<string, { label: string; emoji: string; count: number }> = {};
         signalTaps.forEach((tap: any) => {
           const ri = tap.review_items;
           if (ri) {
-            if (!tagCounts[tap.signal_id]) tagCounts[tap.signal_id] = { label: ri.label, emoji: ri.emoji, count: 0 };
+            if (!tagCounts[tap.signal_id]) tagCounts[tap.signal_id] = { label: ri.label, emoji: ri.icon_emoji || '⭐', count: 0 };
             tagCounts[tap.signal_id].count++;
           }
         });
@@ -3193,15 +3193,18 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       }
 
       // Get available endorsement signals for this card's category
-      const category = data.professional_category || 'general';
       const { data: signals } = await serverSupabase
         .from('review_items')
-        .select('id, label, emoji, category')
+        .select('id, label, icon_emoji, sort_order')
         .eq('signal_type', 'pro_endorsement')
-        .in('category', [category, 'universal'])
         .eq('is_active', true)
         .order('sort_order', { ascending: true });
-      endorsementSignals = (signals || []).map((s: any) => ({ id: s.id, label: s.label, emoji: s.emoji, category: s.category }));
+      endorsementSignals = (signals || []).map((s: any) => ({
+        id: s.id,
+        label: s.label,
+        emoji: s.icon_emoji || '⭐',
+        category: (s.sort_order || 0) < 10 ? 'universal' : (s.sort_order || 0) < 20 ? 'sales' : 'real_estate',
+      }));
     } catch (endorseErr) {
       console.error('[Card SSR] Endorsement fetch error:', endorseErr);
     }

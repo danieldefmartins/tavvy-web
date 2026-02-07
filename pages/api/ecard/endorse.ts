@@ -97,7 +97,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       card_id: cardId,
       card_owner_id: cardData.user_id,
       signal_id: signalId,
-      endorser_id: user.id,
     }));
 
     const { error: signalError } = await supabase
