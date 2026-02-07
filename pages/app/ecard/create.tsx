@@ -57,9 +57,38 @@ import {
   IoPerson,
   IoBriefcase,
   IoHome,
+  IoStar,
+  IoChevronDown,
+  IoLogoGoogle,
 } from 'react-icons/io5';
 
 const ACCENT_GREEN = '#00C853';
+
+const PROFESSIONAL_CATEGORIES = [
+  { id: 'general', label: 'General' },
+  { id: 'sales', label: 'Sales' },
+  { id: 'real_estate', label: 'Real Estate' },
+  { id: 'marketing', label: 'Marketing' },
+  { id: 'consulting', label: 'Consulting' },
+  { id: 'finance', label: 'Finance' },
+  { id: 'healthcare', label: 'Healthcare' },
+  { id: 'legal', label: 'Legal' },
+  { id: 'tech', label: 'Technology' },
+  { id: 'creative', label: 'Creative / Design' },
+  { id: 'education', label: 'Education' },
+  { id: 'restaurant', label: 'Restaurant / Food' },
+  { id: 'automotive', label: 'Automotive' },
+  { id: 'construction', label: 'Construction' },
+  { id: 'fitness', label: 'Fitness / Wellness' },
+];
+
+const EXTERNAL_REVIEW_PLATFORMS = [
+  { id: 'google', label: 'Google Reviews', field: 'reviewGoogleUrl', color: '#4285F4', icon: '🔍' },
+  { id: 'yelp', label: 'Yelp', field: 'reviewYelpUrl', color: '#D32323', icon: '⭐' },
+  { id: 'tripadvisor', label: 'TripAdvisor', field: 'reviewTripadvisorUrl', color: '#00AF87', icon: '🦉' },
+  { id: 'facebook', label: 'Facebook Reviews', field: 'reviewFacebookUrl', color: '#1877F2', icon: '👍' },
+  { id: 'bbb', label: 'BBB', field: 'reviewBbbUrl', color: '#005A8C', icon: '🏛️' },
+];
 
 const PHOTO_SIZE_OPTIONS = [
   { id: 'small', label: 'Small', size: 80 },
@@ -725,6 +754,16 @@ export default function ECardCreateScreen() {
   // Photo size picker
   const [showPhotoSizePicker, setShowPhotoSizePicker] = useState(false);
 
+  // Professional category & external reviews
+  const [professionalCategory, setProfessionalCategory] = useState('general');
+  const [reviewGoogleUrl, setReviewGoogleUrl] = useState('');
+  const [reviewYelpUrl, setReviewYelpUrl] = useState('');
+  const [reviewTripadvisorUrl, setReviewTripadvisorUrl] = useState('');
+  const [reviewFacebookUrl, setReviewFacebookUrl] = useState('');
+  const [reviewBbbUrl, setReviewBbbUrl] = useState('');
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+  const [showExternalReviews, setShowExternalReviews] = useState(false);
+
   // ── Restore saved card data after login redirect ──
   useEffect(() => {
     try {
@@ -749,6 +788,12 @@ export default function ECardCreateScreen() {
         if (Array.isArray(draft.links)) setLinks(draft.links);
         if (Array.isArray(draft.videos)) setVideos(draft.videos);
         if (draft.profileImage) setProfileImage(draft.profileImage);
+        if (draft.professionalCategory) setProfessionalCategory(draft.professionalCategory);
+        if (draft.reviewGoogleUrl) setReviewGoogleUrl(draft.reviewGoogleUrl);
+        if (draft.reviewYelpUrl) setReviewYelpUrl(draft.reviewYelpUrl);
+        if (draft.reviewTripadvisorUrl) setReviewTripadvisorUrl(draft.reviewTripadvisorUrl);
+        if (draft.reviewFacebookUrl) setReviewFacebookUrl(draft.reviewFacebookUrl);
+        if (draft.reviewBbbUrl) setReviewBbbUrl(draft.reviewBbbUrl);
         localStorage.removeItem('ecard_draft');
       }
     } catch (e) {
@@ -877,7 +922,8 @@ export default function ECardCreateScreen() {
         name, titleRole, bio, email, phone, website, address,
         templateIndex, colorIndex, photoSizeIndex,
         featuredIcons, links, videos: videos.map(v => ({ type: v.type, url: v.url })),
-        profileImage,
+        profileImage, professionalCategory,
+        reviewGoogleUrl, reviewYelpUrl, reviewTripadvisorUrl, reviewFacebookUrl, reviewBbbUrl,
       }));
     } catch (e) { console.warn('Could not save eCard draft:', e); }
   };
@@ -927,6 +973,12 @@ export default function ECardCreateScreen() {
         gallery_images: uploadedGallery.length > 0 ? uploadedGallery : undefined,
         featured_socials: featuredIcons.length > 0 ? featuredIcons.map(fi => ({ platform: fi.platform, url: fi.url })) : undefined,
         videos: uploadedVideos.length > 0 ? uploadedVideos : undefined,
+        professional_category: professionalCategory || undefined,
+        review_google_url: reviewGoogleUrl || undefined,
+        review_yelp_url: reviewYelpUrl || undefined,
+        review_tripadvisor_url: reviewTripadvisorUrl || undefined,
+        review_facebook_url: reviewFacebookUrl || undefined,
+        review_bbb_url: reviewBbbUrl || undefined,
       } as any);
 
       if (!card) { alert('Failed to save card. Please check your connection and try again.'); setIsCreating(false); return; }
@@ -1131,6 +1183,53 @@ export default function ECardCreateScreen() {
     );
   };
 
+  // External review URL getter/setter map
+  const reviewUrlMap: Record<string, { value: string; set: (v: string) => void }> = {
+    reviewGoogleUrl: { value: reviewGoogleUrl, set: setReviewGoogleUrl },
+    reviewYelpUrl: { value: reviewYelpUrl, set: setReviewYelpUrl },
+    reviewTripadvisorUrl: { value: reviewTripadvisorUrl, set: setReviewTripadvisorUrl },
+    reviewFacebookUrl: { value: reviewFacebookUrl, set: setReviewFacebookUrl },
+    reviewBbbUrl: { value: reviewBbbUrl, set: setReviewBbbUrl },
+  };
+
+  const renderCategoryPicker = () => (
+    <div className="category-picker-section editor-section">
+      <div className="editor-section-label" style={{ color: txtSecondary }}>
+        <IoBriefcase size={14} /> Professional Category
+      </div>
+      <button className="category-select-btn" onClick={() => setShowCategoryPicker(true)} style={{ color: txtColor, borderColor: isLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.15)' }}>
+        <span>{PROFESSIONAL_CATEGORIES.find(c => c.id === professionalCategory)?.label || 'Select Category'}</span>
+        <IoChevronDown size={16} color={txtSecondary} />
+      </button>
+    </div>
+  );
+
+  const renderExternalReviews = () => (
+    <div className="external-reviews-section editor-section">
+      <div className="editor-section-label" style={{ color: txtSecondary }}>
+        <IoStar size={14} /> External Reviews
+      </div>
+      <div className="external-reviews-list">
+        {EXTERNAL_REVIEW_PLATFORMS.map(platform => {
+          const { value, set } = reviewUrlMap[platform.field];
+          return (
+            <div key={platform.id} className="external-review-row">
+              <span className="external-review-badge" style={{ background: platform.color }}>
+                {platform.icon}
+              </span>
+              <input
+                style={{ ...cardInputStyle('left'), fontSize: 13, flex: 1 }}
+                placeholder={`${platform.label} URL`}
+                value={value}
+                onChange={e => set(e.target.value)}
+              />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
   const renderNameFields = () => (
     <div className="card-fields">
       <input style={{ ...cardInputStyle(), fontSize: 24, fontWeight: 700, letterSpacing: -0.3 }} placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} />
@@ -1194,6 +1293,10 @@ export default function ECardCreateScreen() {
             {renderLinksSection()}
           </div>
 
+          {/* Category & External Reviews */}
+          {renderCategoryPicker()}
+          {renderExternalReviews()}
+
           {/* Media sections */}
           {renderGallerySection()}
           {renderVideoSection()}
@@ -1232,6 +1335,8 @@ export default function ECardCreateScreen() {
               </div>
               {renderLinksSection()}
             </div>
+            {renderCategoryPicker()}
+            {renderExternalReviews()}
             {renderGallerySection()}
             {renderVideoSection()}
           </div>
@@ -1282,6 +1387,8 @@ export default function ECardCreateScreen() {
               ))}
             </div>
             {renderLinksSection()}
+            {renderCategoryPicker()}
+            {renderExternalReviews()}
             {renderGallerySection()}
             {renderVideoSection()}
           </div>
@@ -1335,6 +1442,8 @@ export default function ECardCreateScreen() {
               </div>
               {renderLinksSection()}
             </div>
+            {renderCategoryPicker()}
+            {renderExternalReviews()}
             {renderGallerySection()}
             {renderVideoSection()}
           </div>
@@ -1386,6 +1495,8 @@ export default function ECardCreateScreen() {
               </div>
               {renderLinksSection()}
             </div>
+            {renderCategoryPicker()}
+            {renderExternalReviews()}
             {renderGallerySection()}
             {renderVideoSection()}
           </div>
@@ -1435,6 +1546,8 @@ export default function ECardCreateScreen() {
               ))}
             </div>
             {renderLinksSection()}
+            {renderCategoryPicker()}
+            {renderExternalReviews()}
             {renderGallerySection()}
             {renderVideoSection()}
           </div>
@@ -1475,6 +1588,8 @@ export default function ECardCreateScreen() {
             </div>
             {renderLinksSection()}
           </div>
+          {renderCategoryPicker()}
+          {renderExternalReviews()}
           {renderGallerySection()}
           {renderVideoSection()}
         </div>
@@ -1525,6 +1640,8 @@ export default function ECardCreateScreen() {
               </div>
               {renderLinksSection()}
             </div>
+            {renderCategoryPicker()}
+            {renderExternalReviews()}
             {renderGallerySection()}
             {renderVideoSection()}
           </div>
@@ -1559,6 +1676,8 @@ export default function ECardCreateScreen() {
           </div>
           {renderLinksSection()}
         </div>
+        {renderCategoryPicker()}
+        {renderExternalReviews()}
         {renderGallerySection()}
         {renderVideoSection()}
       </div>
@@ -1794,6 +1913,24 @@ export default function ECardCreateScreen() {
                       <div className="platform-icon" style={{ background: '#6366F1' }}><IoPlay size={20} color="#fff" /></div>
                       <span>Video URL</span>
                     </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Category picker modal */}
+            {showCategoryPicker && (
+              <div className="modal-overlay" onClick={() => setShowCategoryPicker(false)}>
+                <div className="modal-content" onClick={e => e.stopPropagation()}>
+                  <h3>Professional Category</h3>
+                  <p style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#999', fontSize: 13, margin: '-8px 0 16px' }}>Choose your industry for relevant endorsement tags</p>
+                  <div className="category-list">
+                    {PROFESSIONAL_CATEGORIES.map(cat => (
+                      <button key={cat.id} className={`category-option ${professionalCategory === cat.id ? 'active' : ''}`} onClick={() => { setProfessionalCategory(cat.id); setShowCategoryPicker(false); }}>
+                        <span>{cat.label}</span>
+                        {professionalCategory === cat.id && <span className="check">✓</span>}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -2816,6 +2953,89 @@ export default function ECardCreateScreen() {
           max-height: 90vh;
           border-radius: 12px;
           object-fit: contain;
+        }
+
+        /* ===== CATEGORY PICKER ===== */
+        .category-select-btn {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+          padding: 10px 14px;
+          border-radius: 10px;
+          border: 1px solid;
+          background: transparent;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 500;
+          transition: all 0.2s ease;
+        }
+
+        .category-select-btn:hover {
+          opacity: 0.8;
+        }
+
+        .category-list {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          max-height: 400px;
+          overflow-y: auto;
+        }
+
+        .category-option {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 12px 16px;
+          border: none;
+          background: transparent;
+          cursor: pointer;
+          font-size: 14px;
+          color: ${isDark ? '#fff' : '#333'};
+          border-radius: 8px;
+          transition: background 0.15s ease;
+        }
+
+        .category-option:hover {
+          background: ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)'};
+        }
+
+        .category-option.active {
+          background: ${ACCENT_GREEN}15;
+          color: ${ACCENT_GREEN};
+          font-weight: 600;
+        }
+
+        /* ===== EXTERNAL REVIEWS ===== */
+        .external-reviews-list {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .external-review-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 6px 0;
+          border-bottom: 1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'};
+        }
+
+        .external-review-row:last-child {
+          border-bottom: none;
+        }
+
+        .external-review-badge {
+          width: 28px;
+          height: 28px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 14px;
+          flex-shrink: 0;
+          color: #fff;
         }
 
         @media (max-width: 480px) {
