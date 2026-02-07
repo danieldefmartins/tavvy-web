@@ -149,8 +149,8 @@ export default function ECardCreateScreen() {
   const [templateIndex, setTemplateIndex] = useState(0);
   const [colorIndex, setColorIndex] = useState(0);
 
-  // Filter templates for gallery (exclude pro-only)
-  const galleryTemplates = TEMPLATES.filter(t => !t.isProOnly);
+  // Show all templates in gallery (paid ones show lock/PRO badge)
+  const galleryTemplates = TEMPLATES;
 
   // Card data
   const [name, setName] = useState('');
@@ -254,16 +254,17 @@ export default function ECardCreateScreen() {
   const txtColor = isLight ? '#1A1A1A' : '#FFFFFF';
   const txtSecondary = isLight ? 'rgba(0,0,0,0.55)' : 'rgba(255,255,255,0.7)';
   const accentColor = color?.accent || 'rgba(255,255,255,0.2)';
-  const btnRadius = template?.layout?.buttonStyle === 'pill' ? 24
-    : template?.layout?.buttonStyle === 'square' ? 4
-    : template?.layout?.buttonStyle === 'outline' ? 12 : 12;
-  const isOutline = template?.layout?.buttonStyle === 'outline';
-  const isFrosted = template?.layout?.buttonStyle === 'frosted';
+  const btnRadius = template?.layoutConfig?.buttonStyle === 'pill' ? 24
+    : template?.layoutConfig?.buttonStyle === 'square' ? 4
+    : template?.layoutConfig?.buttonStyle === 'outline' ? 12 : 12;
+  const isOutline = template?.layoutConfig?.buttonStyle === 'outline';
+  const isFrosted = template?.layoutConfig?.buttonStyle === 'frosted';
   const photoSize = PHOTO_SIZE_OPTIONS[photoSizeIndex];
   const isCover = photoSize.id === 'cover';
-  const font = template?.layout?.fontFamily === 'elegant' ? "'Georgia', serif"
-    : template?.layout?.fontFamily === 'playful' ? "'Comic Sans MS', cursive"
-    : template?.layout?.fontFamily === 'classic' ? "'Times New Roman', serif"
+  const font = template?.layoutConfig?.fontFamily === 'elegant' ? "'Georgia', serif"
+    : template?.layoutConfig?.fontFamily === 'script' ? "'Georgia', serif"
+    : template?.layoutConfig?.fontFamily === 'classic' ? "'Times New Roman', serif"
+    : template?.layoutConfig?.fontFamily === 'executive' ? "'Georgia', serif"
     : "'Inter', -apple-system, sans-serif";
 
   // Template selection from gallery
@@ -301,7 +302,7 @@ export default function ECardCreateScreen() {
   };
 
   // Template layout type
-  const templateLayout = template?.layout || 'classic';
+  const templateLayout = template?.layout || 'basic';
 
   // Gallery upload
   const handleGalleryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -472,8 +473,8 @@ export default function ECardCreateScreen() {
         template_id: template.id,
         color_scheme_id: color?.id || undefined,
         theme: template.id,
-        button_style: template.layout.buttonStyle,
-        font_style: template.layout.fontFamily,
+        button_style: template.layoutConfig.buttonStyle,
+        font_style: template.layoutConfig.fontFamily,
         background_type: color?.background?.includes('gradient') ? 'gradient' : 'solid',
         is_published: false,
         is_active: true,
@@ -573,14 +574,7 @@ export default function ECardCreateScreen() {
                 {galleryTemplates.map((tmpl) => {
                   const cs = tmpl.colorSchemes[0];
                   const bg = cs?.background?.includes('gradient') ? cs.background : `linear-gradient(135deg, ${cs?.primary || '#333'}, ${cs?.secondary || '#555'})`;
-                  const isMinimalLayout = tmpl.layout === 'minimal';
-                  const isBannerLayout = tmpl.layout === 'banner';
-                  const isBoldLayout = tmpl.layout === 'bold';
-                  const isElegantLayout = tmpl.layout === 'elegant';
-                  const isSplitLayout = tmpl.layout === 'split';
-                  const isNeonLayout = tmpl.layout === 'neon';
-                  const isShowcaseLayout = tmpl.layout === 'showcase';
-                  const isExecLayout = tmpl.layout === 'executive';
+                  const isBloggerLayout = tmpl.layout === 'blogger';
                   const txtCol = cs?.text || '#fff';
                   const txtSec = cs?.textSecondary || 'rgba(255,255,255,0.7)';
                   const accentCol = cs?.accent || '#00C853';
@@ -594,28 +588,66 @@ export default function ECardCreateScreen() {
                     >
                       {/* Mini preview */}
                       <div className="tg-preview" style={{
-                        background: isMinimalLayout ? (cs?.background || '#0f172a') : bg,
-                        borderColor: isElegantLayout ? borderCol : 'transparent',
-                        borderWidth: isElegantLayout ? 1 : 0,
+                        background: isBloggerLayout ? (cs?.background || '#f8e8ee') : bg,
+                        borderColor: tmpl.layout === 'business-card' ? borderCol : 'transparent',
+                        borderWidth: tmpl.layout === 'business-card' ? 1 : 0,
                         borderStyle: 'solid',
                       }}>
-                        {/* Banner layout preview */}
-                        {isBannerLayout && (
+                        {/* BASIC: Circle photo, name, stacked link buttons */}
+                        {tmpl.layout === 'basic' && (
                           <>
-                            <div style={{ width: '100%', height: 48, background: 'rgba(255,255,255,0.12)', borderRadius: '8px 8px 0 0' }} />
-                            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', border: `2px solid ${accentCol}`, marginTop: -16, zIndex: 2 }} />
-                            <div style={{ width: 52, height: 5, borderRadius: 3, background: txtCol, opacity: 0.8, marginTop: 6 }} />
+                            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', marginTop: 12 }} />
+                            <div style={{ width: 52, height: 5, borderRadius: 3, background: txtCol, opacity: 0.8, marginTop: 8 }} />
                             <div style={{ width: 36, height: 3, borderRadius: 3, background: txtSec, marginTop: 3 }} />
-                            <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
-                              {[1,2,3,4].map(i => <div key={i} style={{ width: 14, height: 14, borderRadius: '50%', background: 'rgba(255,255,255,0.2)' }} />)}
+                            <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
+                              {[1,2,3].map(i => <div key={i} style={{ width: 14, height: 14, borderRadius: '50%', background: 'rgba(255,255,255,0.2)' }} />)}
                             </div>
+                            <div style={{ width: '80%', height: 10, borderRadius: 5, background: 'rgba(255,255,255,0.15)', marginTop: 8 }} />
+                            <div style={{ width: '80%', height: 10, borderRadius: 5, background: 'rgba(255,255,255,0.12)', marginTop: 4 }} />
+                            <div style={{ width: '80%', height: 10, borderRadius: 5, background: 'rgba(255,255,255,0.09)', marginTop: 4 }} />
                           </>
                         )}
 
-                        {/* Bold / Full Width layout preview */}
-                        {isBoldLayout && (
+                        {/* BLOGGER: Soft card cutout, circle photo, script name, pastel buttons */}
+                        {tmpl.layout === 'blogger' && (
+                          <div style={{ background: cs?.cardBg || '#fff', borderRadius: 8, padding: 10, width: '85%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+                            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(0,0,0,0.06)' }} />
+                            <div style={{ width: 48, height: 5, borderRadius: 2, background: cs?.text || '#2d2d2d', opacity: 0.7, fontStyle: 'italic' }} />
+                            <div style={{ width: 32, height: 3, borderRadius: 2, background: cs?.textSecondary || '#666' }} />
+                            <div style={{ width: '90%', height: 9, borderRadius: 4, background: `${accentCol}25`, marginTop: 4 }} />
+                            <div style={{ width: '90%', height: 9, borderRadius: 4, background: `${accentCol}18` }} />
+                            <div style={{ width: '90%', height: 9, borderRadius: 4, background: `${accentCol}12` }} />
+                          </div>
+                        )}
+
+                        {/* BUSINESS CARD: Dark top with name+photo, light bottom with contacts */}
+                        {tmpl.layout === 'business-card' && (
+                          <div style={{ display: 'flex', flexDirection: 'column', width: '100%', height: '100%', borderRadius: 8, overflow: 'hidden' }}>
+                            <div style={{ flex: 1.2, padding: '10px 10px 0', display: 'flex', gap: 6, alignItems: 'flex-start' }}>
+                              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3, paddingTop: 4 }}>
+                                <div style={{ width: '80%', height: 5, background: accentCol, borderRadius: 2, opacity: 0.9 }} />
+                                <div style={{ width: '60%', height: 3, background: 'rgba(255,255,255,0.4)', borderRadius: 2 }} />
+                                <div style={{ width: '45%', height: 3, background: 'rgba(255,255,255,0.25)', borderRadius: 2 }} />
+                              </div>
+                              <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', border: `2px solid ${accentCol}`, flexShrink: 0 }} />
+                            </div>
+                            <div style={{ background: cs?.cardBg || '#f8f9fa', padding: '8px 10px', flex: 0.8 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
+                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: accentCol, opacity: 0.4 }} />
+                                <div style={{ width: '60%', height: 3, background: '#999', borderRadius: 2 }} />
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: accentCol, opacity: 0.4 }} />
+                                <div style={{ width: '50%', height: 3, background: '#bbb', borderRadius: 2 }} />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* FULL WIDTH: Hero photo with gradient overlay, name on photo */}
+                        {tmpl.layout === 'full-width' && (
                           <>
-                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%)', borderRadius: 8 }} />
+                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.7) 100%)', borderRadius: 8 }} />
                             <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 10, position: 'relative', zIndex: 1 }}>
                               <div style={{ width: 56, height: 6, borderRadius: 3, background: '#fff', opacity: 0.9 }} />
                               <div style={{ width: 38, height: 3, borderRadius: 3, background: 'rgba(255,255,255,0.6)', marginTop: 3 }} />
@@ -626,96 +658,67 @@ export default function ECardCreateScreen() {
                           </>
                         )}
 
-                        {/* Classic layout preview */}
-                        {tmpl.layout === 'classic' && (
+                        {/* PRO REALTOR: Arch photo, intro text, accent-tab buttons */}
+                        {tmpl.layout === 'pro-realtor' && (
                           <>
-                            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', marginTop: 12 }} />
-                            <div style={{ width: 52, height: 5, borderRadius: 3, background: txtCol, opacity: 0.8, marginTop: 8 }} />
-                            <div style={{ width: 36, height: 3, borderRadius: 3, background: txtSec, marginTop: 3 }} />
-                            <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
-                              {[1,2,3].map(i => <div key={i} style={{ width: 14, height: 14, borderRadius: '50%', background: 'rgba(255,255,255,0.2)' }} />)}
+                            <div style={{ width: '100%', height: 44, background: 'rgba(255,255,255,0.1)', borderRadius: '8px 8px 0 0' }} />
+                            <div style={{ width: 36, height: 36, borderRadius: '8px 8px 50% 50%', background: 'rgba(255,255,255,0.2)', border: `2px solid ${accentCol}`, marginTop: -18, zIndex: 2 }} />
+                            <div style={{ width: 48, height: 4, borderRadius: 2, background: txtCol, opacity: 0.8, marginTop: 6 }} />
+                            <div style={{ width: 36, height: 3, borderRadius: 2, background: txtSec, marginTop: 3 }} />
+                            <div style={{ width: '75%', height: 10, borderRadius: 5, background: `${accentCol}30`, marginTop: 6, borderLeft: `3px solid ${accentCol}` }} />
+                            <div style={{ width: '75%', height: 10, borderRadius: 5, background: `${accentCol}20`, marginTop: 3, borderLeft: `3px solid ${accentCol}` }} />
+                          </>
+                        )}
+
+                        {/* PRO CREATIVE: Bold top, wave divider, contact rows */}
+                        {tmpl.layout === 'pro-creative' && (
+                          <>
+                            <div style={{ height: '45%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                              <div style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(255,255,255,0.25)' }} />
+                              <div style={{ width: 48, height: 4, borderRadius: 2, background: '#fff', opacity: 0.9, marginTop: 4 }} />
                             </div>
-                            <div style={{ width: '80%', height: 10, borderRadius: 5, background: 'rgba(255,255,255,0.15)', marginTop: 8 }} />
-                          </>
-                        )}
-
-                        {/* Minimal layout preview */}
-                        {isMinimalLayout && (
-                          <div style={{ background: cs?.cardBg || '#fff', borderRadius: 6, padding: 10, width: '80%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                            <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(0,0,0,0.08)' }} />
-                            <div style={{ width: 44, height: 4, borderRadius: 2, background: '#1f2937', opacity: 0.7 }} />
-                            <div style={{ width: 32, height: 3, borderRadius: 2, background: '#6b7280' }} />
-                            <div style={{ width: '90%', height: 8, borderRadius: 4, background: accentCol, opacity: 0.3, marginTop: 4 }} />
-                          </div>
-                        )}
-
-                        {/* Elegant layout preview */}
-                        {isElegantLayout && (
-                          <>
-                            <div style={{ width: 32, height: 32, borderRadius: '50%', border: `2px solid ${borderCol}`, background: 'rgba(255,255,255,0.05)', marginTop: 10 }} />
-                            <div style={{ width: 48, height: 5, borderRadius: 3, background: borderCol, opacity: 0.9, marginTop: 6 }} />
-                            <div style={{ width: 32, height: 3, borderRadius: 3, background: txtSec, marginTop: 3 }} />
-                            <div style={{ width: '70%', height: 1, background: borderCol, opacity: 0.3, marginTop: 8 }} />
-                            <div style={{ width: '60%', height: 8, borderRadius: 4, background: 'transparent', border: `1px solid ${borderCol}`, marginTop: 6, opacity: 0.5 }} />
-                          </>
-                        )}
-
-                        {/* Neon layout preview */}
-                        {isNeonLayout && (
-                          <>
-                            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', boxShadow: `0 0 12px ${cs?.primary || '#ec4899'}, 0 0 24px ${cs?.secondary || '#8b5cf6'}`, marginTop: 10 }} />
-                            <div style={{ width: 52, height: 5, borderRadius: 3, background: txtCol, opacity: 0.9, marginTop: 8 }} />
-                            <div style={{ width: 36, height: 3, borderRadius: 3, background: txtSec, marginTop: 3 }} />
-                            <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
-                              {[1,2,3].map(i => <div key={i} style={{ width: 14, height: 14, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', boxShadow: `0 0 6px ${cs?.primary}` }} />)}
+                            <svg viewBox="0 0 120 12" style={{ width: '100%', height: 12, display: 'block' }}><path d="M0 6 Q30 0 60 6 Q90 12 120 6 L120 12 L0 12 Z" fill={cs?.cardBg || 'white'} opacity="0.95" /></svg>
+                            <div style={{ background: cs?.cardBg || '#fff', flex: 1, width: '100%', padding: '4px 10px', display: 'flex', flexDirection: 'column', gap: 3 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: accentCol, opacity: 0.5 }} />
+                                <div style={{ width: '55%', height: 3, background: '#999', borderRadius: 2 }} />
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                <div style={{ width: 10, height: 10, borderRadius: '50%', background: accentCol, opacity: 0.5 }} />
+                                <div style={{ width: '45%', height: 3, background: '#bbb', borderRadius: 2 }} />
+                              </div>
                             </div>
                           </>
                         )}
 
-                        {/* Split layout preview */}
-                        {isSplitLayout && (
-                          <div style={{ display: 'flex', width: '100%', height: '100%', borderRadius: 8, overflow: 'hidden' }}>
-                            <div style={{ width: '40%', background: `linear-gradient(135deg, ${cs?.primary}, ${cs?.secondary})` }} />
-                            <div style={{ flex: 1, padding: 8, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4, background: cs?.cardBg || '#fff' }}>
-                              <div style={{ width: 44, height: 4, borderRadius: 2, background: cs?.text || '#1f2937', opacity: 0.8 }} />
-                              <div style={{ width: 32, height: 3, borderRadius: 2, background: cs?.textSecondary || '#6b7280' }} />
-                              <div style={{ width: '80%', height: 7, borderRadius: 3, background: accentCol, opacity: 0.2, marginTop: 4 }} />
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Showcase layout preview */}
-                        {isShowcaseLayout && (
-                          <>
-                            <div style={{ width: '90%', aspectRatio: '16/9', background: 'rgba(255,255,255,0.1)', borderRadius: 4, marginTop: 8 }} />
-                            <div style={{ width: 44, height: 4, borderRadius: 2, background: txtCol, opacity: 0.8, marginTop: 6 }} />
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 3, width: '90%', marginTop: 4 }}>
-                              {[1,2,3].map(i => <div key={i} style={{ aspectRatio: '1', background: 'rgba(255,255,255,0.08)', borderRadius: 3 }} />)}
-                            </div>
-                          </>
-                        )}
-
-                        {/* Executive layout preview */}
-                        {isExecLayout && (
+                        {/* PRO CORPORATE: Company logo top, structured professional layout */}
+                        {tmpl.layout === 'pro-corporate' && (
                           <>
                             <div style={{ width: '100%', height: 18, background: 'rgba(255,255,255,0.08)', borderRadius: '8px 8px 0 0', display: 'flex', alignItems: 'center', paddingLeft: 8 }}>
                               <div style={{ width: 20, height: 3, borderRadius: 2, background: accentCol, opacity: 0.8 }} />
                             </div>
-                            <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', marginTop: 6 }} />
+                            <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', marginTop: 6 }} />
                             <div style={{ width: 48, height: 4, borderRadius: 2, background: txtCol, opacity: 0.8, marginTop: 4 }} />
                             <div style={{ width: 34, height: 3, borderRadius: 2, background: txtSec, marginTop: 2 }} />
-                            <div style={{ width: '70%', height: 8, borderRadius: 4, background: 'rgba(255,255,255,0.1)', marginTop: 6 }} />
+                            <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
+                              {[1,2,3,4].map(i => <div key={i} style={{ width: 12, height: 12, borderRadius: '50%', border: `1px solid ${accentCol}`, opacity: 0.5 }} />)}
+                            </div>
+                            <div style={{ width: '70%', height: 8, borderRadius: 4, background: 'rgba(255,255,255,0.08)', marginTop: 4 }} />
                           </>
                         )}
 
-                        {/* Modern layout preview */}
-                        {tmpl.layout === 'modern' && (
+                        {/* PRO CARD: Banner + photo + industry + services grid */}
+                        {tmpl.layout === 'pro-card' && (
                           <>
-                            <div style={{ width: '80%', height: 40, borderRadius: 6, background: 'rgba(255,255,255,0.1)', marginTop: 8 }} />
-                            <div style={{ width: 48, height: 4, borderRadius: 2, background: txtCol, opacity: 0.8, marginTop: 6 }} />
-                            <div style={{ width: 34, height: 3, borderRadius: 2, background: txtSec, marginTop: 2 }} />
-                            <div style={{ width: '85%', padding: 6, borderRadius: 4, background: cs?.cardBg || 'rgba(255,255,255,0.05)', border: `1px solid ${borderCol || 'rgba(255,255,255,0.1)'}`, marginTop: 6 }}>
-                              <div style={{ width: '60%', height: 3, borderRadius: 2, background: txtSec, opacity: 0.5 }} />
+                            <div style={{ width: '100%', height: 40, background: 'rgba(255,255,255,0.12)', borderRadius: '8px 8px 0 0' }} />
+                            <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', border: `2px solid ${accentCol}`, marginTop: -15, zIndex: 2 }} />
+                            <div style={{ width: 48, height: 4, borderRadius: 2, background: txtCol, opacity: 0.8, marginTop: 4 }} />
+                            <div style={{ width: 30, height: 3, borderRadius: 2, background: txtSec, marginTop: 2 }} />
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3, width: '80%', marginTop: 6 }}>
+                              <div style={{ height: 14, background: `${accentCol}25`, borderRadius: 3 }} />
+                              <div style={{ height: 14, background: `${accentCol}20`, borderRadius: 3 }} />
+                              <div style={{ height: 14, background: `${accentCol}18`, borderRadius: 3 }} />
+                              <div style={{ height: 14, background: `${accentCol}15`, borderRadius: 3 }} />
                             </div>
                           </>
                         )}
@@ -778,7 +781,7 @@ export default function ECardCreateScreen() {
                 <div style={{
                   width: 100,
                   height: 100,
-                  borderRadius: template?.layout?.photoStyle === 'square' ? 12 : '50%',
+                  borderRadius: template?.layoutConfig?.photoStyle === 'square' ? 12 : '50%',
                   background: isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.12)',
                   border: color?.border ? `3px solid ${color.border}` : `3px solid ${isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)'}`,
                   display: 'flex',
@@ -909,7 +912,7 @@ export default function ECardCreateScreen() {
                   style={{
                     width: photoSize.size,
                     height: photoSize.size,
-                    borderRadius: template?.layout?.photoStyle === 'square' ? 12 : '50%',
+                    borderRadius: template?.layoutConfig?.photoStyle === 'square' ? 12 : '50%',
                     border: color?.border ? `3px solid ${color.border}` : `3px solid ${isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)'}`,
                   }}
                   onClick={() => fileInputRef.current?.click()}

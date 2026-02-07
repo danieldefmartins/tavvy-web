@@ -502,92 +502,154 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   // Resolve template to new layout system
   const resolvedTemplateId = resolveTemplateId(cardData.templateId || 'classic');
   const templateConfig = getTemplateByIdWithMigration(cardData.templateId || 'classic');
-  const templateLayout: TemplateLayout = templateConfig?.layout || 'classic';
+  const templateLayout: TemplateLayout = templateConfig?.layout || 'basic';
+
+  // Get color scheme from template config
+  const activeColorScheme = templateConfig?.colorSchemes.find(cs => cs.id === (cardData as any).colorSchemeId) || templateConfig?.colorSchemes[0];
+  const isLightBg = (hex: string) => {
+    if (hex.includes('gradient') || hex.includes('linear')) return false;
+    const c = hex.replace('#', '');
+    const r = parseInt(c.substring(0, 2), 16) || 0;
+    const g = parseInt(c.substring(2, 4), 16) || 0;
+    const b = parseInt(c.substring(4, 6), 16) || 0;
+    return (r * 299 + g * 587 + b * 114) / 1000 > 128;
+  };
 
   // Get template-specific styles based on resolved template
   const getTemplateStyles = () => {
-    // Elegant / luxury templates
-    if (templateLayout === 'elegant') {
-      const accent = templateConfig?.colorSchemes[0]?.accent || '#d4af37';
+    const cs = activeColorScheme;
+
+    // Basic Tavvy eCard — Linktree-style
+    if (templateLayout === 'basic') {
+      const bgIsLight = isLightBg(cs?.background || cardData.gradientColor1);
       return {
-        isLuxury: true,
-        isDark: true,
-        hasOrnate: true,
-        accentColor: accent,
-        textColor: accent,
-        buttonBg: `${accent}15`,
-        buttonBorder: `${accent}40`,
-        photoStyle: 'ornate',
+        isLuxury: false,
+        isDark: !bgIsLight,
+        hasOrnate: false,
+        accentColor: cs?.accent || cardData.gradientColor1,
+        textColor: cs?.text || (bgIsLight ? '#2d3436' : '#FFFFFF'),
+        buttonBg: bgIsLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)',
+        buttonBorder: bgIsLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.15)',
+        photoStyle: 'circle',
       };
     }
-    
-    // Minimal templates (white card on dark bg)
-    if (templateLayout === 'minimal') {
+
+    // Blogger eCard — Soft/creative
+    if (templateLayout === 'blogger') {
       return {
         isLuxury: false,
         isDark: false,
         hasOrnate: false,
-        accentColor: cardData.gradientColor1,
-        textColor: '#1f2937',
-        buttonBg: 'rgba(0, 0, 0, 0.05)',
-        buttonBorder: 'rgba(0, 0, 0, 0.1)',
-        photoStyle: 'circle',
+        accentColor: cs?.accent || '#d4a0a0',
+        textColor: cs?.text || '#2d2d2d',
+        buttonBg: cs?.accent ? `${cs.accent}20` : 'rgba(0,0,0,0.04)',
+        buttonBorder: cs?.accent ? `${cs.accent}40` : 'rgba(0,0,0,0.08)',
+        photoStyle: 'cutout',
         hasWhiteCard: true,
       };
     }
 
-    // Bold template (text on photo)
-    if (templateLayout === 'bold') {
+    // Business Card — Corporate split layout
+    if (templateLayout === 'business-card') {
+      return {
+        isLuxury: true,
+        isDark: true,
+        hasOrnate: true,
+        accentColor: cs?.accent || '#d4af37',
+        textColor: cs?.text || '#d4af37',
+        buttonBg: cs?.accent ? `${cs.accent}15` : 'rgba(212,175,55,0.08)',
+        buttonBorder: cs?.accent ? `${cs.accent}40` : 'rgba(212,175,55,0.25)',
+        photoStyle: 'ornate',
+        hasSplitLayout: true,
+      };
+    }
+
+    // Full Width Premium — Hero photo with gradient overlay
+    if (templateLayout === 'full-width') {
       return {
         isLuxury: false,
         isDark: true,
         hasOrnate: false,
-        accentColor: 'rgba(255, 255, 255, 0.3)',
+        accentColor: cs?.accent || '#FFFFFF',
         textColor: '#FFFFFF',
-        buttonBg: 'rgba(255, 255, 255, 0.15)',
-        buttonBorder: 'rgba(255, 255, 255, 0.2)',
+        buttonBg: 'rgba(255,255,255,0.15)',
+        buttonBorder: 'rgba(255,255,255,0.2)',
         photoStyle: 'cover',
       };
     }
 
-    // Neon template
-    if (templateLayout === 'neon') {
+    // Pro Realtor — Arch photo, intro text
+    if (templateLayout === 'pro-realtor') {
+      const bgIsLight = isLightBg(cs?.background || '#f5f0eb');
       return {
         isLuxury: false,
-        isDark: false,
+        isDark: !bgIsLight,
         hasOrnate: false,
-        accentColor: cardData.gradientColor1,
-        textColor: '#FFFFFF',
-        buttonBg: 'rgba(255, 255, 255, 0.15)',
-        buttonBorder: 'rgba(255, 255, 255, 0.2)',
-        photoStyle: 'neon',
+        accentColor: cs?.accent || '#c8a87c',
+        textColor: cs?.text || '#2d2d2d',
+        buttonBg: cs?.accent ? `${cs.accent}30` : 'rgba(200,168,124,0.2)',
+        buttonBorder: cs?.accent ? `${cs.accent}60` : 'rgba(200,168,124,0.4)',
+        photoStyle: 'arch',
+        hasBannerImage: true,
       };
     }
 
-    // Split template
-    if (templateLayout === 'split') {
-      const isLight = cardData.gradientColor1.toLowerCase() === '#ffffff' || cardData.gradientColor1.toLowerCase() === '#f8fafc';
+    // Pro Creative — Bold colored top, wave divider
+    if (templateLayout === 'pro-creative') {
       return {
         isLuxury: false,
-        isDark: !isLight,
+        isDark: true,
         hasOrnate: false,
-        accentColor: templateConfig?.colorSchemes[0]?.accent || '#1e40af',
-        textColor: isLight ? '#1f2937' : '#FFFFFF',
-        buttonBg: isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255, 255, 255, 0.12)',
-        buttonBorder: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255, 255, 255, 0.15)',
-        photoStyle: 'square',
+        accentColor: cs?.accent || '#f97316',
+        textColor: '#FFFFFF',
+        buttonBg: cs?.accent ? `${cs.accent}25` : 'rgba(249,115,22,0.15)',
+        buttonBorder: cs?.accent ? `${cs.accent}50` : 'rgba(249,115,22,0.3)',
+        photoStyle: 'rounded',
+        hasWaveDivider: true,
       };
     }
-    
-    // Default (classic, banner, modern, showcase, executive, etc.)
+
+    // Pro Corporate — Company logo, structured layout
+    if (templateLayout === 'pro-corporate') {
+      return {
+        isLuxury: false,
+        isDark: true,
+        hasOrnate: false,
+        accentColor: cs?.accent || '#FFFFFF',
+        textColor: '#FFFFFF',
+        buttonBg: 'rgba(255,255,255,0.1)',
+        buttonBorder: 'rgba(255,255,255,0.2)',
+        photoStyle: 'circle',
+      };
+    }
+
+    // Pro Card — Banner + industry + services
+    if (templateLayout === 'pro-card') {
+      return {
+        isLuxury: false,
+        isDark: true,
+        hasOrnate: false,
+        accentColor: cs?.accent || '#fbbf24',
+        textColor: '#FFFFFF',
+        buttonBg: cs?.accent ? `${cs.accent}20` : 'rgba(251,191,36,0.12)',
+        buttonBorder: cs?.accent ? `${cs.accent}50` : 'rgba(251,191,36,0.3)',
+        photoStyle: 'circle',
+        hasBannerImage: true,
+        hasIndustrySection: true,
+        hasServicesGrid: true,
+        hasServiceArea: true,
+      };
+    }
+
+    // Default fallback
     return {
       isLuxury: false,
       isDark: false,
       hasOrnate: false,
-      accentColor: 'rgba(255, 255, 255, 0.2)',
+      accentColor: 'rgba(255,255,255,0.2)',
       textColor: '#FFFFFF',
-      buttonBg: 'rgba(255, 255, 255, 0.12)',
-      buttonBorder: 'rgba(255, 255, 255, 0.15)',
+      buttonBg: 'rgba(255,255,255,0.12)',
+      buttonBorder: 'rgba(255,255,255,0.15)',
       photoStyle: 'circle',
     };
   };
@@ -744,14 +806,14 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
         <div 
           style={{
             ...styles.backgroundGradient,
-            ...(templateLayout === 'bold' && (cardData.bannerImageUrl || cardData.profilePhotoUrl)
+            ...(templateLayout === 'full-width' && (cardData.bannerImageUrl || cardData.profilePhotoUrl)
               ? {
                   backgroundImage: `url(${cardData.bannerImageUrl || cardData.profilePhotoUrl})`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                 }
-              : templateLayout === 'minimal'
-                ? { background: cardData.gradientColor1 === '#FFFFFF' ? '#0f172a' : `linear-gradient(165deg, ${cardData.gradientColor1} 0%, ${cardData.gradientColor2} 100%)` }
+              : templateLayout === 'blogger'
+                ? { background: activeColorScheme?.background || cardData.gradientColor1 }
                 : cardData.backgroundType === 'solid' 
                   ? { background: cardData.gradientColor1 }
                   : cardData.backgroundType === 'image' && cardData.backgroundImageUrl
@@ -760,13 +822,13 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
                       }
-                    : { background: `linear-gradient(165deg, ${cardData.gradientColor1} 0%, ${cardData.gradientColor2} 50%, #0a0f1e 100%)` }
+                    : { background: activeColorScheme?.background || `linear-gradient(165deg, ${cardData.gradientColor1} 0%, ${cardData.gradientColor2} 50%, #0a0f1e 100%)` }
             ),
           }}
         />
 
-        {/* Bold template gradient overlay */}
-        {templateLayout === 'bold' && (
+        {/* Full Width template gradient overlay */}
+        {templateLayout === 'full-width' && (
           <div style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0,
             background: `linear-gradient(to bottom, transparent 0%, transparent 30%, ${cardData.gradientColor1}cc 60%, ${cardData.gradientColor2} 100%)`,
@@ -776,16 +838,20 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
         {/* Main Card Container */}
         <div style={{
           ...styles.cardContainer,
-          ...(templateLayout === 'minimal' ? {
+          ...(templateLayout === 'blogger' ? {
             maxWidth: '420px',
-            background: '#FFFFFF',
+            background: activeColorScheme?.cardBg || '#FFFFFF',
             borderRadius: '28px',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
             margin: '20px auto',
             minHeight: 'auto',
             padding: '32px 24px 40px',
           } : {}),
-          ...(templateLayout === 'bold' ? { padding: '0 24px 40px' } : {}),
+          ...(templateLayout === 'full-width' ? { padding: '0 24px 40px' } : {}),
+          ...(templateLayout === 'business-card' ? {
+            maxWidth: '420px',
+            margin: '20px auto',
+          } : {}),
         }}>
           {/* Crown Button - Top Right */}
           <button 
@@ -821,14 +887,14 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           </button>
 
           {/* Banner Image (for banner, modern, executive templates) */}
-          {(templateLayout === 'banner' || templateLayout === 'modern' || templateLayout === 'executive' || templateLayout === 'showcase') && cardData.bannerImageUrl && (
+          {(templateLayout === 'pro-realtor' || templateLayout === 'pro-card' || templateLayout === 'pro-creative') && cardData.bannerImageUrl && (
             <div style={{
               width: '100%',
               maxWidth: '400px',
               height: '180px',
               borderRadius: '20px',
               overflow: 'hidden',
-              marginBottom: templateLayout === 'banner' ? '-50px' : '16px',
+              marginBottom: (templateLayout === 'pro-realtor' || templateLayout === 'pro-card') ? '-50px' : '16px',
               position: 'relative',
               zIndex: 2,
             }}>
@@ -849,11 +915,11 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           {/* Profile Section */}
           <div style={{
             ...styles.profileSection,
-            ...(templateLayout === 'banner' && cardData.bannerImageUrl ? { zIndex: 3, position: 'relative' as const } : {}),
-            ...(templateLayout === 'bold' ? { marginTop: '40vh', zIndex: 2 } : {}),
+            ...((templateLayout === 'pro-realtor' || templateLayout === 'pro-card') && cardData.bannerImageUrl ? { zIndex: 3, position: 'relative' as const } : {}),
+            ...(templateLayout === 'full-width' ? { marginTop: '40vh', zIndex: 2 } : {}),
           }}>
             {/* Profile Photo - skip for bold template (photo is the background) */}
-            {templateLayout !== 'bold' && (() => {
+            {templateLayout !== 'full-width' && (() => {
               // Photo size configurations
               const photoSizes = {
                 small: { ring: 100, photo: 92, initials: 28, borderRadius: 50 },
@@ -864,7 +930,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               const sizeConfig = photoSizes[cardData.profilePhotoSize] || photoSizes.medium;
               
               // Neon glow for neon template
-              const neonGlow = templateLayout === 'neon' ? {
+              const neonGlow = (templateLayout === 'pro-creative') ? {
                 boxShadow: `0 0 20px ${cardData.gradientColor1}80, 0 0 40px ${cardData.gradientColor1}40, 0 12px 40px rgba(0,0,0,0.25)`,
               } : {};
               

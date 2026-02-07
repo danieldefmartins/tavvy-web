@@ -975,7 +975,7 @@ export default function ECardDashboardScreen() {
                   <div className="template-grid">
                     {TEMPLATES.map((template) => {
                       const isSelected = selectedTemplateId === template.id;
-                      const isLocked = (template.isPremium && !isPro) || (template.isProOnly && !isPro);
+                      const isLocked = template.isPremium && !isPro;
                       return (
                         <button
                           key={template.id}
@@ -999,86 +999,98 @@ export default function ECardDashboardScreen() {
                         >
                           {/* Template Preview Mini */}
                           <div className="template-preview-mini" style={{
-                            background: template.layout === 'minimal' || template.layout === 'split'
-                              ? '#0f172a'
+                            background: template.layout === 'blogger'
+                              ? (template.colorSchemes[0]?.background || '#fce4ec')
                               : `linear-gradient(135deg, ${template.colorSchemes[0]?.primary || '#667eea'}, ${template.colorSchemes[0]?.secondary || '#764ba2'})`,
                           }}>
-                            {template.layout === 'banner' && (
+                            {/* Basic: circle photo + name + link buttons */}
+                            {template.layout === 'basic' && (
                               <>
-                                <div style={{ height: '40%', background: 'rgba(255,255,255,0.15)', borderRadius: '4px 4px 0 0' }} />
-                                <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,0.4)', margin: '-10px auto 0', border: '2px solid rgba(255,255,255,0.6)' }} />
+                                <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', margin: '8px auto 4px' }} />
+                                <div style={{ width: '50%', height: 3, background: 'rgba(255,255,255,0.5)', margin: '0 auto 3px', borderRadius: 2 }} />
+                                <div style={{ width: '70%', height: 6, background: 'rgba(255,255,255,0.2)', margin: '2px auto', borderRadius: 3 }} />
+                                <div style={{ width: '70%', height: 6, background: 'rgba(255,255,255,0.15)', margin: '2px auto', borderRadius: 3 }} />
+                                <div style={{ width: '70%', height: 6, background: 'rgba(255,255,255,0.12)', margin: '2px auto', borderRadius: 3 }} />
                               </>
                             )}
-                            {template.layout === 'bold' && (
+                            {/* Blogger: white card cutout, circle photo, pastel buttons */}
+                            {template.layout === 'blogger' && (
+                              <div style={{ background: '#fff', borderRadius: 6, margin: 5, padding: 5, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#E5E7EB', margin: '2px auto 3px' }} />
+                                <div style={{ width: '55%', height: 2, background: '#333', margin: '0 auto 2px', borderRadius: 2 }} />
+                                <div style={{ width: '70%', height: 5, background: template.colorSchemes[0]?.accent ? `${template.colorSchemes[0].accent}30` : '#f0e0e0', margin: '2px auto', borderRadius: 2 }} />
+                                <div style={{ width: '70%', height: 5, background: template.colorSchemes[0]?.accent ? `${template.colorSchemes[0].accent}25` : '#f0e0e0', margin: '2px auto', borderRadius: 2 }} />
+                              </div>
+                            )}
+                            {/* Business Card: dark top with name + photo, light bottom with contacts */}
+                            {template.layout === 'business-card' && (
+                              <>
+                                <div style={{ flex: 1, display: 'flex', padding: '6px 5px 0', gap: 4 }}>
+                                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                    <div style={{ width: '80%', height: 3, background: template.colorSchemes[0]?.accent || '#d4af37', borderRadius: 2 }} />
+                                    <div style={{ width: '60%', height: 2, background: 'rgba(255,255,255,0.3)', borderRadius: 2 }} />
+                                  </div>
+                                  <div style={{ width: 18, height: 18, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', border: `1px solid ${template.colorSchemes[0]?.accent || '#d4af37'}` }} />
+                                </div>
+                                <div style={{ background: '#f8f8f8', margin: '3px 0 0', padding: '4px 5px', borderRadius: '0 0 4px 4px' }}>
+                                  <div style={{ width: '70%', height: 2, background: '#ccc', borderRadius: 2, marginBottom: 2 }} />
+                                  <div style={{ width: '50%', height: 2, background: '#ddd', borderRadius: 2 }} />
+                                </div>
+                              </>
+                            )}
+                            {/* Full Width: hero photo with gradient overlay + name */}
+                            {template.layout === 'full-width' && (
                               <>
                                 <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)' }} />
-                                <div style={{ position: 'absolute', bottom: 6, left: 6, width: '60%', height: 4, background: 'rgba(255,255,255,0.6)', borderRadius: 2 }} />
-                                <div style={{ position: 'absolute', bottom: 14, left: 6, width: '40%', height: 3, background: 'rgba(255,255,255,0.4)', borderRadius: 2 }} />
-                              </>
-                            )}
-                            {template.layout === 'classic' && (
-                              <>
-                                <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', margin: '12px auto 4px' }} />
-                                <div style={{ width: '50%', height: 3, background: 'rgba(255,255,255,0.5)', margin: '0 auto 3px', borderRadius: 2 }} />
-                                <div style={{ width: '35%', height: 2, background: 'rgba(255,255,255,0.3)', margin: '0 auto', borderRadius: 2 }} />
-                              </>
-                            )}
-                            {template.layout === 'minimal' && (
-                              <div style={{ background: '#fff', borderRadius: 4, margin: 6, padding: 6, flex: 1 }}>
-                                <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#E5E7EB', margin: '0 auto 3px' }} />
-                                <div style={{ width: '60%', height: 2, background: '#D1D5DB', margin: '0 auto 2px', borderRadius: 2 }} />
-                                <div style={{ width: '40%', height: 2, background: '#E5E7EB', margin: '0 auto', borderRadius: 2 }} />
-                              </div>
-                            )}
-                            {template.layout === 'elegant' && (
-                              <>
-                                <div style={{ border: '1px solid rgba(212,175,55,0.5)', borderRadius: 3, margin: 5, padding: 5, flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                                  <div style={{ width: 18, height: 18, borderRadius: '50%', border: '1px solid #d4af37', margin: '0 auto 3px' }} />
-                                  <div style={{ width: '50%', height: 2, background: '#d4af37', margin: '0 auto', borderRadius: 2 }} />
+                                <div style={{ position: 'absolute', bottom: 20, left: 6, width: '60%', height: 5, background: 'rgba(255,255,255,0.7)', borderRadius: 2 }} />
+                                <div style={{ position: 'absolute', bottom: 12, left: 6, width: '40%', height: 3, background: 'rgba(255,255,255,0.4)', borderRadius: 2 }} />
+                                <div style={{ position: 'absolute', bottom: 3, left: 6, display: 'flex', gap: 2 }}>
+                                  {[1,2,3,4].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.5)' }} />)}
                                 </div>
                               </>
                             )}
-                            {template.layout === 'modern' && (
+                            {/* Pro Realtor: arch photo + intro text + buttons */}
+                            {template.layout === 'pro-realtor' && (
                               <>
-                                <div style={{ width: '100%', height: '35%', background: 'rgba(255,255,255,0.15)', borderRadius: '4px 4px 0 0' }} />
-                                <div style={{ background: isDark ? '#27272a' : '#fff', borderRadius: 3, margin: '4px 4px 0', padding: 4, flex: 1 }}>
-                                  <div style={{ width: '60%', height: 2, background: isDark ? '#52525b' : '#D1D5DB', borderRadius: 2, marginBottom: 2 }} />
-                                  <div style={{ width: '40%', height: 2, background: isDark ? '#3f3f46' : '#E5E7EB', borderRadius: 2 }} />
+                                <div style={{ height: '35%', background: 'rgba(255,255,255,0.12)', borderRadius: '4px 4px 0 0' }} />
+                                <div style={{ width: 22, height: 22, borderRadius: '6px 6px 50% 50%', background: 'rgba(255,255,255,0.3)', margin: '-8px auto 3px', border: '2px solid rgba(255,255,255,0.5)' }} />
+                                <div style={{ width: '65%', height: 5, background: `${template.colorSchemes[0]?.accent || '#c8a87c'}60`, margin: '2px auto', borderRadius: 2 }} />
+                                <div style={{ width: '65%', height: 5, background: `${template.colorSchemes[0]?.accent || '#c8a87c'}40`, margin: '2px auto', borderRadius: 2 }} />
+                              </>
+                            )}
+                            {/* Pro Creative: bold top + wave divider + contacts */}
+                            {template.layout === 'pro-creative' && (
+                              <>
+                                <div style={{ height: '45%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <div style={{ width: 20, height: 20, borderRadius: 4, background: 'rgba(255,255,255,0.3)' }} />
+                                </div>
+                                <svg viewBox="0 0 60 8" style={{ width: '100%', height: 8 }}><path d="M0 4 Q15 0 30 4 Q45 8 60 4 L60 8 L0 8 Z" fill="white" opacity="0.9" /></svg>
+                                <div style={{ background: '#fff', flex: 1, padding: '3px 5px' }}>
+                                  <div style={{ width: '60%', height: 2, background: '#333', borderRadius: 2, marginBottom: 2 }} />
+                                  <div style={{ width: '80%', height: 2, background: '#ddd', borderRadius: 2 }} />
                                 </div>
                               </>
                             )}
-                            {template.layout === 'split' && (
-                              <div style={{ display: 'flex', flex: 1, margin: 4, gap: 3 }}>
-                                <div style={{ flex: 1, background: 'rgba(255,255,255,0.15)', borderRadius: 3 }} />
-                                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 2 }}>
-                                  <div style={{ width: '80%', height: 2, background: 'rgba(255,255,255,0.5)', borderRadius: 2 }} />
-                                  <div style={{ width: '60%', height: 2, background: 'rgba(255,255,255,0.3)', borderRadius: 2 }} />
-                                </div>
-                              </div>
-                            )}
-                            {template.layout === 'neon' && (
+                            {/* Pro Corporate: logo + photo + structured layout */}
+                            {template.layout === 'pro-corporate' && (
                               <>
-                                <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', margin: '10px auto 4px', boxShadow: '0 0 8px rgba(236,72,153,0.5)' }} />
-                                <div style={{ width: '50%', height: 3, background: 'rgba(255,255,255,0.5)', margin: '0 auto 3px', borderRadius: 2 }} />
-                              </>
-                            )}
-                            {template.layout === 'showcase' && (
-                              <>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, margin: 5, flex: 1 }}>
-                                  <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 2 }} />
-                                  <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: 2 }} />
-                                  <div style={{ background: 'rgba(255,255,255,0.15)', borderRadius: 2 }} />
-                                  <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 2 }} />
+                                <div style={{ width: 14, height: 6, background: 'rgba(255,255,255,0.4)', borderRadius: 2, margin: '6px auto 4px' }} />
+                                <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', margin: '0 auto 3px' }} />
+                                <div style={{ width: '55%', height: 3, background: 'rgba(255,255,255,0.5)', margin: '0 auto 2px', borderRadius: 2 }} />
+                                <div style={{ display: 'flex', gap: 3, justifyContent: 'center', marginTop: 2 }}>
+                                  {[1,2,3,4].map(i => <div key={i} style={{ width: 7, height: 7, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.4)' }} />)}
                                 </div>
                               </>
                             )}
-                            {template.layout === 'executive' && (
+                            {/* Pro Card: banner + photo + industry + services grid */}
+                            {template.layout === 'pro-card' && (
                               <>
-                                <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', margin: '8px auto 3px' }} />
-                                <div style={{ width: '55%', height: 2, background: 'rgba(255,255,255,0.5)', margin: '0 auto 6px', borderRadius: 2 }} />
-                                <div style={{ display: 'flex', gap: 2, justifyContent: 'center', padding: '0 8px' }}>
-                                  <div style={{ flex: 1, height: 12, background: 'rgba(255,255,255,0.1)', borderRadius: 2 }} />
-                                  <div style={{ flex: 1, height: 12, background: 'rgba(255,255,255,0.1)', borderRadius: 2 }} />
+                                <div style={{ height: '30%', background: 'rgba(255,255,255,0.15)', borderRadius: '4px 4px 0 0' }} />
+                                <div style={{ width: 18, height: 18, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', margin: '-8px auto 2px', border: '2px solid rgba(255,255,255,0.5)', position: 'relative', zIndex: 1 }} />
+                                <div style={{ width: '50%', height: 2, background: 'rgba(255,255,255,0.5)', margin: '0 auto 3px', borderRadius: 2 }} />
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, margin: '0 5px', flex: 1 }}>
+                                  <div style={{ background: `${template.colorSchemes[0]?.accent || '#fbbf24'}30`, borderRadius: 2 }} />
+                                  <div style={{ background: `${template.colorSchemes[0]?.accent || '#fbbf24'}25`, borderRadius: 2 }} />
                                 </div>
                               </>
                             )}
@@ -1089,7 +1101,7 @@ export default function ECardDashboardScreen() {
                           {isLocked && (
                             <span className="template-lock">
                               <IoLockClosed size={10} />
-                              {template.isProOnly ? 'Pro' : 'Premium'}
+                              {template.category === 'paid' ? 'Pro' : 'Premium'}
                             </span>
                           )}
                           {isSelected && (
