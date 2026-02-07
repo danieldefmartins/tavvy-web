@@ -114,6 +114,18 @@ interface CardData {
   showSocialIcons: boolean;
   fontColor: string | null;
   bannerImageUrl: string | null;
+  // Professional category & endorsements
+  professionalCategory: string;
+  endorsementCount: number;
+  topEndorsementTags: { label: string; emoji: string; count: number }[];
+  recentEndorsements: { endorserName: string; note: string; createdAt: string }[];
+  endorsementSignals: { id: string; label: string; emoji: string; category: string }[];
+  // External review URLs
+  reviewGoogleUrl: string;
+  reviewYelpUrl: string;
+  reviewTripadvisorUrl: string;
+  reviewFacebookUrl: string;
+  reviewBbbUrl: string;
 }
 
 interface PageProps {
@@ -220,6 +232,13 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   const [showFormEmbed, setShowFormEmbed] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  // Endorsement state
+  const [showEndorsementPopup, setShowEndorsementPopup] = useState(false);
+  const [showEndorseFlow, setShowEndorseFlow] = useState(false);
+  const [selectedSignals, setSelectedSignals] = useState<string[]>([]);
+  const [endorseNote, setEndorseNote] = useState('');
+  const [isSubmittingEndorsement, setIsSubmittingEndorsement] = useState(false);
+  const [endorsementSubmitted, setEndorsementSubmitted] = useState(false);
 
   const generateVCard = () => {
     if (!cardData) return '';
@@ -869,15 +888,14 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             margin: '20px auto',
           } : {}),
         }}>
-          {/* Crown Button - Top Right */}
+          {/* Crown Button - Top Right — Opens Endorsement Popup */}
           <button 
-            onClick={handleTap}
+            onClick={() => setShowEndorsementPopup(true)}
             className="crown-btn"
             style={{
               ...styles.crownButton,
-              ...(hasTapped ? styles.crownButtonTapped : {}),
+              ...(cardData.endorsementCount > 0 ? styles.crownButtonTapped : {}),
             }}
-            disabled={hasTapped}
           >
             <svg 
               width="24" 
@@ -899,7 +917,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 fill="url(#crownGold)"
               />
             </svg>
-            <span style={styles.crownCount}>{cardData.tapCount || 0}</span>
+            <span style={styles.crownCount}>{cardData.endorsementCount || cardData.tapCount || 0}</span>
           </button>
 
           {/* Banner Image (for banner, modern, executive templates) */}
@@ -1708,6 +1726,42 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             </div>
           )}
 
+          {/* External Review Badges */}
+          {(cardData.reviewGoogleUrl || cardData.reviewYelpUrl || cardData.reviewTripadvisorUrl || cardData.reviewFacebookUrl || cardData.reviewBbbUrl) && (
+            <div style={{ width: '100%', display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 8 }}>
+              {cardData.reviewGoogleUrl && (
+                <a href={cardData.reviewGoogleUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, background: 'rgba(66,133,244,0.12)', border: '1px solid rgba(66,133,244,0.25)', textDecoration: 'none', fontSize: 13, fontWeight: 600, color: '#4285F4' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/></svg>
+                  Google Reviews
+                </a>
+              )}
+              {cardData.reviewYelpUrl && (
+                <a href={cardData.reviewYelpUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, background: 'rgba(211,35,35,0.12)', border: '1px solid rgba(211,35,35,0.25)', textDecoration: 'none', fontSize: 13, fontWeight: 600, color: '#D32323' }}>
+                  <span style={{ fontSize: 16 }}>Y</span>
+                  Yelp
+                </a>
+              )}
+              {cardData.reviewTripadvisorUrl && (
+                <a href={cardData.reviewTripadvisorUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, background: 'rgba(0,175,135,0.12)', border: '1px solid rgba(0,175,135,0.25)', textDecoration: 'none', fontSize: 13, fontWeight: 600, color: '#00AF87' }}>
+                  <span style={{ fontSize: 14 }}>🦉</span>
+                  TripAdvisor
+                </a>
+              )}
+              {cardData.reviewFacebookUrl && (
+                <a href={cardData.reviewFacebookUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, background: 'rgba(24,119,242,0.12)', border: '1px solid rgba(24,119,242,0.25)', textDecoration: 'none', fontSize: 13, fontWeight: 600, color: '#1877F2' }}>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                  Facebook
+                </a>
+              )}
+              {cardData.reviewBbbUrl && (
+                <a href={cardData.reviewBbbUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, background: 'rgba(0,90,140,0.12)', border: '1px solid rgba(0,90,140,0.25)', textDecoration: 'none', fontSize: 13, fontWeight: 600, color: '#005A8C' }}>
+                  <span style={{ fontSize: 14 }}>🏛️</span>
+                  BBB
+                </a>
+              )}
+            </div>
+          )}
+
           {/* Bottom Actions */}
           <div style={styles.bottomActions}>
             <button onClick={handleSaveContact} style={styles.saveButton}>
@@ -1810,6 +1864,173 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           </div>
         </div>
       </div>
+
+      {/* Endorsement Popup */}
+      {showEndorsementPopup && cardData && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 10000, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+          onClick={() => setShowEndorsementPopup(false)}
+        >
+          <div
+            style={{ background: '#1a1a2e', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 420, maxHeight: '80vh', overflowY: 'auto', padding: '24px 20px 32px', color: '#fff' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <svg width="28" height="28" viewBox="0 0 24 24"><defs><linearGradient id="crownGold2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#FFE066" /><stop offset="50%" stopColor="#FFD700" /><stop offset="100%" stopColor="#FFA500" /></linearGradient></defs><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" fill="url(#crownGold2)" /></svg>
+                <div>
+                  <div style={{ fontSize: 18, fontWeight: 700 }}>Endorsements</div>
+                  <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>{cardData.endorsementCount || cardData.tapCount || 0} total</div>
+                </div>
+              </div>
+              <button onClick={() => setShowEndorsementPopup(false)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+
+            {/* Top Endorsement Tags */}
+            {cardData.topEndorsementTags && cardData.topEndorsementTags.length > 0 ? (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
+                {cardData.topEndorsementTags.map((tag, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 20, background: 'rgba(255,215,0,0.12)', border: '1px solid rgba(255,215,0,0.25)', fontSize: 13, fontWeight: 600 }}>
+                    <span>{tag.emoji}</span>
+                    <span style={{ color: '#FFD700' }}>{tag.label}</span>
+                    <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }}>{tag.count}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px 0', color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>
+                No endorsements yet. Be the first!
+              </div>
+            )}
+
+            {/* Recent Endorsements */}
+            {cardData.recentEndorsements && cardData.recentEndorsements.length > 0 && (
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.6)', marginBottom: 12 }}>Recent</div>
+                {cardData.recentEndorsements.map((e, i) => (
+                  <div key={i} style={{ padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ fontSize: 14, fontWeight: 600 }}>{e.endorserName}</div>
+                    {e.note && <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>{e.note}</div>}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Endorse Button */}
+            {!endorsementSubmitted ? (
+              <button
+                onClick={() => { setShowEndorsementPopup(false); setShowEndorseFlow(true); }}
+                style={{ width: '100%', padding: '14px', borderRadius: 12, background: 'linear-gradient(135deg, #FFD700, #FFA500)', border: 'none', color: '#1a1a2e', fontSize: 15, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" fill="#1a1a2e" /></svg>
+                Endorse {cardData.fullName.split(' ')[0]}
+              </button>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '14px', borderRadius: 12, background: 'rgba(0,200,83,0.15)', color: '#00C853', fontSize: 14, fontWeight: 600 }}>
+                Thank you for your endorsement!
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Endorse Flow - Tap Signal Tags */}
+      {showEndorseFlow && cardData && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 10001, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+          onClick={() => setShowEndorseFlow(false)}
+        >
+          <div
+            style={{ background: '#1a1a2e', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 420, maxHeight: '85vh', overflowY: 'auto', padding: '24px 20px 32px', color: '#fff' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ textAlign: 'center', marginBottom: 20 }}>
+              <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Endorse {cardData.fullName.split(' ')[0]}</div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>Tap the qualities that describe them best</div>
+            </div>
+
+            {/* Signal Tags */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
+              {(cardData.endorsementSignals || []).map(signal => {
+                const isSelected = selectedSignals.includes(signal.id);
+                return (
+                  <button
+                    key={signal.id}
+                    onClick={() => setSelectedSignals(prev => isSelected ? prev.filter(s => s !== signal.id) : [...prev, signal.id])}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 6, padding: '10px 16px', borderRadius: 20,
+                      background: isSelected ? 'rgba(255,215,0,0.2)' : 'rgba(255,255,255,0.06)',
+                      border: isSelected ? '1.5px solid #FFD700' : '1.5px solid rgba(255,255,255,0.1)',
+                      color: isSelected ? '#FFD700' : 'rgba(255,255,255,0.7)',
+                      fontSize: 14, fontWeight: isSelected ? 600 : 500, cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <span>{signal.emoji}</span>
+                    <span>{signal.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Optional Note */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>Add a note (optional)</div>
+              <textarea
+                value={endorseNote}
+                onChange={e => setEndorseNote(e.target.value)}
+                placeholder="Say something nice..."
+                style={{ width: '100%', padding: '12px 14px', borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 14, resize: 'none', minHeight: 60, outline: 'none', fontFamily: 'inherit' }}
+                rows={2}
+              />
+            </div>
+
+            {/* Submit */}
+            <button
+              onClick={async () => {
+                if (selectedSignals.length === 0) { alert('Please select at least one quality.'); return; }
+                setIsSubmittingEndorsement(true);
+                try {
+                  const res = await fetch('/api/ecard/endorse', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cardId: cardData.id, cardOwnerId: cardData.id, signals: selectedSignals, note: endorseNote }),
+                  });
+                  if (res.ok) {
+                    setEndorsementSubmitted(true);
+                    setShowEndorseFlow(false);
+                    setShowEndorsementPopup(true);
+                  } else {
+                    const data = await res.json();
+                    if (data?.requireLogin) {
+                      alert('Please create a Tavvy account to endorse. Your endorsement will be saved after login.');
+                    } else {
+                      alert(data?.error || 'Failed to submit endorsement.');
+                    }
+                  }
+                } catch (err) {
+                  alert('Network error. Please try again.');
+                } finally {
+                  setIsSubmittingEndorsement(false);
+                }
+              }}
+              disabled={isSubmittingEndorsement || selectedSignals.length === 0}
+              style={{
+                width: '100%', padding: '14px', borderRadius: 12,
+                background: selectedSignals.length > 0 ? 'linear-gradient(135deg, #FFD700, #FFA500)' : 'rgba(255,255,255,0.1)',
+                border: 'none', color: selectedSignals.length > 0 ? '#1a1a2e' : 'rgba(255,255,255,0.3)',
+                fontSize: 15, fontWeight: 700, cursor: selectedSignals.length > 0 ? 'pointer' : 'not-allowed',
+                opacity: isSubmittingEndorsement ? 0.6 : 1,
+              }}
+            >
+              {isSubmittingEndorsement ? 'Submitting...' : `Submit Endorsement${selectedSignals.length > 0 ? ` (${selectedSignals.length})` : ''}`}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Photo Lightbox */}
       {lightboxOpen && cardData?.galleryImages && (
@@ -2892,6 +3113,66 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       .update({ view_count: (data.view_count || 0) + 1 })
       .eq('id', data.id)
       .then(() => {});
+
+    // Fetch endorsement data
+    let endorsementCount = 0;
+    let topEndorsementTags: { label: string; emoji: string; count: number }[] = [];
+    let recentEndorsements: { endorserName: string; note: string; createdAt: string }[] = [];
+    let endorsementSignals: { id: string; label: string; emoji: string; category: string }[] = [];
+
+    try {
+      // Get endorsement count
+      const { count } = await serverSupabase
+        .from('ecard_endorsements')
+        .select('*', { count: 'exact', head: true })
+        .eq('card_id', data.id);
+      endorsementCount = count || 0;
+
+      // Get top signal tags (aggregated)
+      const { data: signalTaps } = await serverSupabase
+        .from('ecard_endorsement_signals')
+        .select('signal_id, review_items(label, emoji)')
+        .eq('card_id', data.id);
+      if (signalTaps && signalTaps.length > 0) {
+        const tagCounts: Record<string, { label: string; emoji: string; count: number }> = {};
+        signalTaps.forEach((tap: any) => {
+          const ri = tap.review_items;
+          if (ri) {
+            if (!tagCounts[tap.signal_id]) tagCounts[tap.signal_id] = { label: ri.label, emoji: ri.emoji, count: 0 };
+            tagCounts[tap.signal_id].count++;
+          }
+        });
+        topEndorsementTags = Object.values(tagCounts).sort((a, b) => b.count - a.count).slice(0, 8);
+      }
+
+      // Get recent endorsements with endorser names
+      const { data: recentData } = await serverSupabase
+        .from('ecard_endorsements')
+        .select('public_note, created_at, endorser_id, profiles(full_name)')
+        .eq('card_id', data.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      if (recentData) {
+        recentEndorsements = recentData.map((e: any) => ({
+          endorserName: e.profiles?.full_name || 'Tavvy User',
+          note: e.public_note || '',
+          createdAt: e.created_at,
+        }));
+      }
+
+      // Get available endorsement signals for this card's category
+      const category = data.professional_category || 'general';
+      const { data: signals } = await serverSupabase
+        .from('review_items')
+        .select('id, label, emoji, category')
+        .eq('signal_type', 'pro_endorsement')
+        .in('category', [category, 'universal'])
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
+      endorsementSignals = (signals || []).map((s: any) => ({ id: s.id, label: s.label, emoji: s.emoji, category: s.category }));
+    } catch (endorseErr) {
+      console.error('[Card SSR] Endorsement fetch error:', endorseErr);
+    }
     
     const cardData: CardData = {
       id: data.id,
@@ -2971,6 +3252,18 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       showSocialIcons: data.show_social_icons !== false,
       fontColor: data.font_color || null,
       bannerImageUrl: data.banner_image_url || null,
+      // Professional category & endorsements
+      professionalCategory: data.professional_category || '',
+      endorsementCount,
+      topEndorsementTags,
+      recentEndorsements,
+      endorsementSignals,
+      // External review URLs
+      reviewGoogleUrl: data.review_google_url || '',
+      reviewYelpUrl: data.review_yelp_url || '',
+      reviewTripadvisorUrl: data.review_tripadvisor_url || '',
+      reviewFacebookUrl: data.review_facebook_url || '',
+      reviewBbbUrl: data.review_bbb_url || '',
     };
     
     return {
