@@ -109,6 +109,8 @@ interface CardData {
   // Videos (Tavvy Shorts, external URLs)
   videos: { type: string; url: string }[];
   tapCount: number;
+  showContactInfo: boolean;
+  showSocialIcons: boolean;
 }
 
 interface PageProps {
@@ -848,7 +850,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           </div>
 
           {/* Action Buttons */}
-          <div style={styles.actionButtons}>
+          {cardData.showContactInfo && <div style={styles.actionButtons}>
             {cardData.phone && (
               <a href={`tel:${cardData.phone}`} className="action-btn" style={{
                 ...styles.actionButton,
@@ -911,10 +913,10 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 <span style={{...styles.actionText, color: templateStyles.textColor}}>Website</span>
               </a>
             )}
-          </div>
+          </div>}
 
           {/* Featured Social Icons */}
-          {cardData.featuredSocials && cardData.featuredSocials.length > 0 && (
+          {cardData.showSocialIcons && cardData.featuredSocials && cardData.featuredSocials.length > 0 && (
             <div style={styles.featuredSocials}>
               {cardData.featuredSocials.map((item, index) => {
                 const platform = typeof item === 'string' ? item : item.platform;
@@ -964,7 +966,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           )}
 
           {/* Social Links */}
-          {hasSocialLinks && (
+          {cardData.showSocialIcons && hasSocialLinks && (
             <div style={styles.socialLinks}>
               {cardData.socialInstagram && (
                 <a 
@@ -2751,6 +2753,9 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       videos: data.videos ?
         (typeof data.videos === 'string' ? JSON.parse(data.videos) : data.videos)
         : [],
+      // Visibility toggles
+      showContactInfo: data.show_contact_info !== false,
+      showSocialIcons: data.show_social_icons !== false,
     };
     
     return {

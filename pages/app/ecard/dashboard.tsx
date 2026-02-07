@@ -129,6 +129,8 @@ export default function ECardDashboardScreen() {
   const [featuredIcons, setFeaturedIcons] = useState<FeaturedSocial[]>([]);
   const [galleryImages, setGalleryImages] = useState<{ id: string; url: string; file?: File }[]>([]);
   const [videos, setVideos] = useState<{ type: string; url: string }[]>([]);
+  const [showContactInfo, setShowContactInfo] = useState(true);
+  const [showSocialIcons, setShowSocialIcons] = useState(true);
   const [showFeaturedPicker, setShowFeaturedPicker] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [videoUrlInput, setVideoUrlInput] = useState('');
@@ -193,6 +195,9 @@ export default function ECardDashboardScreen() {
           setFeaturedIcons(normalizedSocials);
           setGalleryImages((card.gallery_images || []).map((g: any) => ({ id: g.id, url: g.url })));
           setVideos(card.videos || []);
+          // Visibility toggles
+          setShowContactInfo(card.show_contact_info !== false);
+          setShowSocialIcons(card.show_social_icons !== false);
           // Appearance fields
           setGradientColors([card.gradient_color_1 || '#667eea', card.gradient_color_2 || '#764ba2']);
           setSelectedTheme(card.theme || 'classic');
@@ -276,6 +281,8 @@ export default function ECardDashboardScreen() {
         featured_socials: featuredIcons.length > 0 ? featuredIcons : [],
         gallery_images: uploadedGallery,
         videos: videos,
+        show_contact_info: showContactInfo,
+        show_social_icons: showSocialIcons,
       } as any);
 
       await saveCardLinks(cardId, links);
@@ -669,7 +676,14 @@ export default function ECardDashboardScreen() {
 
                 {/* Contact Info */}
                 <div className="section">
-                  <h3 style={{ color: isDark ? '#fff' : '#333' }}>Contact Info</h3>
+                  <div className="section-header-toggle">
+                    <h3 style={{ color: isDark ? '#fff' : '#333' }}>Contact Info</h3>
+                    <label className="toggle-switch">
+                      <input type="checkbox" checked={showContactInfo} onChange={(e) => setShowContactInfo(e.target.checked)} />
+                      <span className="toggle-slider"></span>
+                      <span className="toggle-label" style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>{showContactInfo ? 'Visible' : 'Hidden'}</span>
+                    </label>
+                  </div>
                   <div className="field-group">
                     <label style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>Email</label>
                     <input
@@ -718,7 +732,14 @@ export default function ECardDashboardScreen() {
 
                 {/* Featured Social Icons */}
                 <div className="section">
-                  <h3 style={{ color: isDark ? '#fff' : '#333' }}>Featured Social Icons <span className="hint">(up to 4)</span></h3>
+                  <div className="section-header-toggle">
+                    <h3 style={{ color: isDark ? '#fff' : '#333' }}>Featured Social Icons <span className="hint">(up to 4)</span></h3>
+                    <label className="toggle-switch">
+                      <input type="checkbox" checked={showSocialIcons} onChange={(e) => setShowSocialIcons(e.target.checked)} />
+                      <span className="toggle-slider"></span>
+                      <span className="toggle-label" style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>{showSocialIcons ? 'Visible' : 'Hidden'}</span>
+                    </label>
+                  </div>
                   <div className="featured-icons-list">
                     {featuredIcons.map((fi) => {
                       const pi = PLATFORM_ICONS[fi.platform];
@@ -1317,6 +1338,62 @@ export default function ECardDashboardScreen() {
             font-size: 12px;
             font-weight: 400;
             color: ${isDark ? '#64748B' : '#9CA3AF'};
+          }
+
+          .section-header-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+          }
+
+          .section-header-toggle h3 {
+            margin: 0;
+          }
+
+          .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+          }
+
+          .toggle-switch input {
+            display: none;
+          }
+
+          .toggle-slider {
+            width: 44px;
+            height: 24px;
+            background-color: ${isDark ? '#374151' : '#D1D5DB'};
+            border-radius: 12px;
+            position: relative;
+            transition: background-color 0.2s;
+          }
+
+          .toggle-slider::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.2s;
+          }
+
+          .toggle-switch input:checked + .toggle-slider {
+            background-color: #22C55E;
+          }
+
+          .toggle-switch input:checked + .toggle-slider::after {
+            transform: translateX(20px);
+          }
+
+          .toggle-label {
+            font-size: 12px;
+            font-weight: 500;
           }
 
           .field-group {
