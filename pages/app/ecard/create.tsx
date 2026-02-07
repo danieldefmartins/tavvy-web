@@ -967,6 +967,12 @@ export default function ECardCreateScreen() {
      ============================================================ */
   const renderFeaturedIcons = () => (
     <div className="featured-icons-section">
+      {featuredIcons.length === 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+          <span style={{ fontSize: 13, fontWeight: 500, color: isLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.55)', textAlign: 'center' }}>Social Media</span>
+          <span style={{ fontSize: 11, color: isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.35)', textAlign: 'center' }}>Tap + to add your profiles</span>
+        </div>
+      )}
       <div className="featured-icons-row">
         {featuredIcons.map(fi => {
           const iconInfo = PLATFORM_ICONS[fi.platform];
@@ -980,8 +986,8 @@ export default function ECardCreateScreen() {
           );
         })}
         {featuredIcons.length < 4 && (
-          <button className="featured-icon-add" onClick={() => setShowFeaturedIconPicker(true)} style={{ borderColor: isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.2)' }}>
-            <IoAdd size={18} color={isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.4)'} />
+          <button className="featured-icon-add" onClick={() => setShowFeaturedIconPicker(true)} style={{ borderColor: isLight ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.3)' }}>
+            <IoAdd size={22} color={isLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.6)'} />
           </button>
         )}
       </div>
@@ -1000,14 +1006,14 @@ export default function ECardCreateScreen() {
   const renderContactFields = () => (
     <div className="contact-fields">
       {[
-        { icon: <IoMail size={16} />, placeholder: 'Email', value: email, set: setEmail },
-        { icon: <IoCall size={16} />, placeholder: 'Phone', value: phone, set: setPhone },
-        { icon: <IoGlobe size={16} />, placeholder: 'Website', value: website, set: setWebsite },
-        { icon: <IoLocationOutline size={16} />, placeholder: 'Address', value: address, set: setAddress },
+        { icon: <IoMail size={18} />, placeholder: 'Email', value: email, set: setEmail },
+        { icon: <IoCall size={18} />, placeholder: 'Phone', value: phone, set: setPhone },
+        { icon: <IoGlobe size={18} />, placeholder: 'Website', value: website, set: setWebsite },
+        { icon: <IoLocationOutline size={18} />, placeholder: 'Address', value: address, set: setAddress },
       ].map((field, i) => (
-        <div key={i} className="contact-row" style={{ borderBottom: `1px solid ${isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'}` }}>
-          <span style={{ color: txtSecondary, flexShrink: 0 }}>{field.icon}</span>
-          <input style={{ ...cardInputStyle('left'), fontSize: 13 }} placeholder={field.placeholder} value={field.value} onChange={e => field.set(e.target.value)} />
+        <div key={i} className="contact-row" style={{ background: isLight ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.05)', borderRadius: 10, padding: '10px 14px', marginBottom: 6 }}>
+          <span style={{ color: isLight ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.5)', flexShrink: 0, display: 'flex', alignItems: 'center' }}>{field.icon}</span>
+          <input style={{ ...cardInputStyle('left'), fontSize: 14 }} placeholder={field.placeholder} value={field.value} onChange={e => field.set(e.target.value)} />
         </div>
       ))}
     </div>
@@ -1027,13 +1033,13 @@ export default function ECardCreateScreen() {
           </div>
         );
       })}
-      <button className="add-link-btn" onClick={() => setShowAddLink(true)} style={btnStyle()}><IoAdd size={18} /> Add Link</button>
+      <button className="add-link-btn" onClick={() => setShowAddLink(true)} style={{ ...btnStyle(), background: isLight ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.06)', borderStyle: 'dashed' }}><IoAdd size={18} /> Add Link</button>
     </div>
   );
 
   const renderGallerySection = () => (
-    <div className="gallery-section">
-      <div className="gallery-header" style={{ color: txtSecondary }}><IoImages size={16} /> Photo Gallery</div>
+    <div className="gallery-section editor-section">
+      <div className="editor-section-label" style={{ color: txtSecondary }}><IoImages size={14} /> Photo Gallery</div>
       <div className="gallery-grid">
         {galleryImages.map((img) => (
           <div key={img.id} className="gallery-thumb" onClick={() => setLightboxImage(img.url)}>
@@ -1049,8 +1055,8 @@ export default function ECardCreateScreen() {
   );
 
   const renderVideoSection = () => (
-    <div className="video-section">
-      <div className="gallery-header" style={{ color: txtSecondary }}><IoVideocam size={16} /> Videos</div>
+    <div className="video-section editor-section">
+      <div className="editor-section-label" style={{ color: txtSecondary }}><IoVideocam size={14} /> Videos</div>
       {videos.map((video, idx) => (
         <div key={idx} className="video-item" style={{ borderBottom: `1px solid ${isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'}` }}>
           <span style={{ color: txtSecondary, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -1068,7 +1074,7 @@ export default function ECardCreateScreen() {
           <button className="link-action" onClick={() => removeVideo(idx)} style={{ color: '#EF4444' }}><IoTrash size={14} /></button>
         </div>
       ))}
-      <button className="add-link-btn" onClick={() => setShowVideoTypePicker(true)} style={btnStyle()}><IoAdd size={18} /> Add Video</button>
+      <button className="add-link-btn" onClick={() => setShowVideoTypePicker(true)} style={{ ...btnStyle(), background: isLight ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.06)', borderStyle: 'dashed' }}><IoAdd size={18} /> Add Video</button>
       <input ref={videoInputRef} type="file" accept="video/*" style={{ display: 'none' }} onChange={handleVideoFileUpload} />
     </div>
   );
@@ -1142,14 +1148,41 @@ export default function ECardCreateScreen() {
     if (templateLayout === 'basic') {
       return (
         <div className="live-card" style={{ background: cardBg, fontFamily: font, position: 'relative' }}>
-          {renderPhotoUpload()}
-          <button className="size-hint" onClick={() => setShowPhotoSizePicker(true)} style={{ color: txtSecondary }}>
-            <IoExpand size={12} /> {photoSize.label} &middot; Tap to change size
-          </button>
-          {renderFeaturedIcons()}
-          {renderNameFields()}
-          {renderContactFields()}
-          {renderLinksSection()}
+          {/* Profile photo - centered and prominent */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            {renderPhotoUpload()}
+            <button className="size-hint" onClick={() => setShowPhotoSizePicker(true)} style={{ color: txtSecondary }}>
+              <IoExpand size={12} /> {photoSize.label} &middot; Tap to change size
+            </button>
+          </div>
+
+          {/* Name & bio section */}
+          <div className="editor-section">
+            {renderNameFields()}
+          </div>
+
+          {/* Social icons */}
+          <div className="editor-section" style={{ alignItems: 'center' }}>
+            {renderFeaturedIcons()}
+          </div>
+
+          {/* Contact info section */}
+          <div className="editor-section">
+            <div className="editor-section-label" style={{ color: txtSecondary }}>
+              <IoMail size={14} /> Contact Information
+            </div>
+            {renderContactFields()}
+          </div>
+
+          {/* Links section */}
+          <div className="editor-section">
+            <div className="editor-section-label" style={{ color: txtSecondary }}>
+              <IoLink size={14} /> Links
+            </div>
+            {renderLinksSection()}
+          </div>
+
+          {/* Media sections */}
           {renderGallerySection()}
           {renderVideoSection()}
         </div>
@@ -1162,15 +1195,31 @@ export default function ECardCreateScreen() {
       const innerBg = color?.cardBg || '#FFFFFF';
       return (
         <div className="live-card" style={{ background: outerBg, fontFamily: font, position: 'relative', padding: 0 }}>
-          <div style={{ background: innerBg, borderRadius: 16, margin: 16, padding: '24px 20px 32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, boxShadow: '0 4px 20px rgba(0,0,0,0.06)', width: 'calc(100% - 32px)' }}>
-            {renderPhotoUpload()}
-            <button className="size-hint" onClick={() => setShowPhotoSizePicker(true)} style={{ color: txtSecondary }}>
-              <IoExpand size={12} /> {photoSize.label}
-            </button>
-            {renderFeaturedIcons()}
-            {renderNameFields()}
-            {renderContactFields()}
-            {renderLinksSection()}
+          <div style={{ background: innerBg, borderRadius: 16, margin: 16, padding: '24px 20px 32px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, boxShadow: '0 4px 20px rgba(0,0,0,0.06)', width: 'calc(100% - 32px)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+              {renderPhotoUpload()}
+              <button className="size-hint" onClick={() => setShowPhotoSizePicker(true)} style={{ color: txtSecondary }}>
+                <IoExpand size={12} /> {photoSize.label}
+              </button>
+            </div>
+            <div className="editor-section">
+              {renderNameFields()}
+            </div>
+            <div className="editor-section" style={{ alignItems: 'center' }}>
+              {renderFeaturedIcons()}
+            </div>
+            <div className="editor-section">
+              <div className="editor-section-label" style={{ color: 'rgba(0,0,0,0.4)' }}>
+                <IoMail size={14} /> Contact Information
+              </div>
+              {renderContactFields()}
+            </div>
+            <div className="editor-section">
+              <div className="editor-section-label" style={{ color: 'rgba(0,0,0,0.4)' }}>
+                <IoLink size={14} /> Links
+              </div>
+              {renderLinksSection()}
+            </div>
             {renderGallerySection()}
             {renderVideoSection()}
           </div>
@@ -1233,7 +1282,7 @@ export default function ECardCreateScreen() {
       return (
         <div className="live-card" style={{ background: cardBg, fontFamily: font, position: 'relative', padding: 0, overflow: 'hidden' }}>
           {/* Hero photo area */}
-          <div className="banner-upload" onClick={() => fileInputRef.current?.click()} style={{ height: 280, position: 'relative' }}>
+          <div className="banner-upload" onClick={() => fileInputRef.current?.click()} style={{ height: 300, position: 'relative' }}>
             {profileImage ? (
               <>
                 <img src={profileImage} alt="Hero" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -1241,8 +1290,11 @@ export default function ECardCreateScreen() {
               </>
             ) : (
               <div className="banner-placeholder" style={{ background: isLight ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.06)' }}>
-                <IoCamera size={32} color={isLight ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.3)'} />
-                <span style={{ color: isLight ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.4)', fontSize: 12 }}>Tap to add hero photo</span>
+                <div style={{ width: 56, height: 56, borderRadius: '50%', background: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <IoCamera size={28} color={isLight ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.4)'} />
+                </div>
+                <span style={{ color: isLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.55)', fontSize: 14, fontWeight: 500 }}>Tap to add hero photo</span>
+                <span style={{ color: isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.3)', fontSize: 11 }}>Recommended: 1200 x 800px</span>
               </div>
             )}
             {/* Name overlay at bottom of hero */}
@@ -1252,11 +1304,25 @@ export default function ECardCreateScreen() {
             </div>
           </div>
           {/* Content below hero */}
-          <div style={{ padding: '16px 20px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-            {renderFeaturedIcons()}
-            <textarea style={{ ...cardInputStyle(), fontSize: 13, color: txtSecondary, resize: 'none', minHeight: 40, width: '100%' }} placeholder="Short bio about yourself..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
-            {renderContactFields()}
-            {renderLinksSection()}
+          <div style={{ padding: '16px 20px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+            <div className="editor-section" style={{ alignItems: 'center', borderTop: 'none' }}>
+              {renderFeaturedIcons()}
+            </div>
+            <div className="editor-section">
+              <textarea style={{ ...cardInputStyle(), fontSize: 14, color: txtSecondary, resize: 'none', minHeight: 48, width: '100%', background: isLight ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '10px 14px' }} placeholder="Short bio about yourself..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
+            </div>
+            <div className="editor-section">
+              <div className="editor-section-label" style={{ color: txtSecondary }}>
+                <IoMail size={14} /> Contact Information
+              </div>
+              {renderContactFields()}
+            </div>
+            <div className="editor-section">
+              <div className="editor-section-label" style={{ color: txtSecondary }}>
+                <IoLink size={14} /> Links
+              </div>
+              {renderLinksSection()}
+            </div>
             {renderGallerySection()}
             {renderVideoSection()}
           </div>
@@ -1289,11 +1355,25 @@ export default function ECardCreateScreen() {
             </div>
           </div>
           {/* Content */}
-          <div style={{ padding: '12px 20px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-            {renderNameFields()}
-            {renderFeaturedIcons()}
-            {renderContactFields()}
-            {renderLinksSection()}
+          <div style={{ padding: '12px 20px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+            <div className="editor-section" style={{ borderTop: 'none' }}>
+              {renderNameFields()}
+            </div>
+            <div className="editor-section" style={{ alignItems: 'center' }}>
+              {renderFeaturedIcons()}
+            </div>
+            <div className="editor-section">
+              <div className="editor-section-label" style={{ color: txtSecondary }}>
+                <IoMail size={14} /> Contact Information
+              </div>
+              {renderContactFields()}
+            </div>
+            <div className="editor-section">
+              <div className="editor-section-label" style={{ color: txtSecondary }}>
+                <IoLink size={14} /> Links
+              </div>
+              {renderLinksSection()}
+            </div>
             {renderGallerySection()}
             {renderVideoSection()}
           </div>
@@ -1362,13 +1442,27 @@ export default function ECardCreateScreen() {
           <button className="size-hint" onClick={() => setShowPhotoSizePicker(true)} style={{ color: txtSecondary }}>
             <IoExpand size={12} /> {photoSize.label}
           </button>
-          <div className="card-fields">
-            <input style={{ ...cardInputStyle(), fontSize: 22, fontWeight: 700 }} placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} />
-            <input style={{ ...cardInputStyle(), fontSize: 14, color: txtSecondary }} placeholder="Your Title / Role" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+          <div className="editor-section" style={{ borderTop: 'none' }}>
+            <div className="card-fields">
+              <input style={{ ...cardInputStyle(), fontSize: 22, fontWeight: 700 }} placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} />
+              <input style={{ ...cardInputStyle(), fontSize: 14, color: txtSecondary }} placeholder="Your Title / Role" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+            </div>
           </div>
-          {renderFeaturedIcons()}
-          {renderContactFields()}
-          {renderLinksSection()}
+          <div className="editor-section" style={{ alignItems: 'center' }}>
+            {renderFeaturedIcons()}
+          </div>
+          <div className="editor-section">
+            <div className="editor-section-label" style={{ color: txtSecondary }}>
+              <IoMail size={14} /> Contact Information
+            </div>
+            {renderContactFields()}
+          </div>
+          <div className="editor-section">
+            <div className="editor-section-label" style={{ color: txtSecondary }}>
+              <IoLink size={14} /> Links
+            </div>
+            {renderLinksSection()}
+          </div>
           {renderGallerySection()}
           {renderVideoSection()}
         </div>
@@ -1400,11 +1494,25 @@ export default function ECardCreateScreen() {
             </div>
           </div>
           {/* Content */}
-          <div style={{ padding: '8px 20px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-            {renderNameFields()}
-            {renderFeaturedIcons()}
-            {renderContactFields()}
-            {renderLinksSection()}
+          <div style={{ padding: '8px 20px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+            <div className="editor-section" style={{ borderTop: 'none' }}>
+              {renderNameFields()}
+            </div>
+            <div className="editor-section" style={{ alignItems: 'center' }}>
+              {renderFeaturedIcons()}
+            </div>
+            <div className="editor-section">
+              <div className="editor-section-label" style={{ color: txtSecondary }}>
+                <IoMail size={14} /> Contact Information
+              </div>
+              {renderContactFields()}
+            </div>
+            <div className="editor-section">
+              <div className="editor-section-label" style={{ color: txtSecondary }}>
+                <IoLink size={14} /> Links
+              </div>
+              {renderLinksSection()}
+            </div>
             {renderGallerySection()}
             {renderVideoSection()}
           </div>
@@ -1415,11 +1523,30 @@ export default function ECardCreateScreen() {
     // Fallback — basic layout
     return (
       <div className="live-card" style={{ background: cardBg, fontFamily: font, position: 'relative' }}>
-        {renderPhotoUpload()}
-        {renderFeaturedIcons()}
-        {renderNameFields()}
-        {renderContactFields()}
-        {renderLinksSection()}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          {renderPhotoUpload()}
+          <button className="size-hint" onClick={() => setShowPhotoSizePicker(true)} style={{ color: txtSecondary }}>
+            <IoExpand size={12} /> {photoSize.label} &middot; Tap to change size
+          </button>
+        </div>
+        <div className="editor-section">
+          {renderNameFields()}
+        </div>
+        <div className="editor-section" style={{ alignItems: 'center' }}>
+          {renderFeaturedIcons()}
+        </div>
+        <div className="editor-section">
+          <div className="editor-section-label" style={{ color: txtSecondary }}>
+            <IoMail size={14} /> Contact Information
+          </div>
+          {renderContactFields()}
+        </div>
+        <div className="editor-section">
+          <div className="editor-section-label" style={{ color: txtSecondary }}>
+            <IoLink size={14} /> Links
+          </div>
+          {renderLinksSection()}
+        </div>
         {renderGallerySection()}
         {renderVideoSection()}
       </div>
@@ -1935,10 +2062,35 @@ export default function ECardCreateScreen() {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 12px;
+          gap: 16px;
           position: relative;
           box-shadow: 0 8px 40px rgba(0,0,0,0.2);
           transition: background 0.3s ease;
+        }
+
+        .editor-section {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          padding: 12px 0;
+          border-top: 1px solid ${isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)'};
+        }
+
+        .editor-section:first-of-type {
+          border-top: none;
+        }
+
+        .editor-section-label {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 12px;
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          margin-bottom: 4px;
+          opacity: 0.6;
         }
 
         /* Profile photo */
@@ -2042,8 +2194,8 @@ export default function ECardCreateScreen() {
         }
 
         .featured-icon-slot {
-          width: 40px;
-          height: 40px;
+          width: 48px;
+          height: 48px;
           border-radius: 50%;
           display: flex;
           align-items: center;
@@ -2071,29 +2223,42 @@ export default function ECardCreateScreen() {
         }
 
         .featured-icon-add {
-          width: 40px;
-          height: 40px;
+          width: 48px;
+          height: 48px;
           border-radius: 50%;
-          border: 2px dashed;
-          background: transparent;
+          border: 2.5px dashed;
+          background: ${isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'};
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .featured-icon-add:hover {
+          background: ${isLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.15)'};
+          transform: scale(1.05);
         }
 
         .featured-icons-section {
           width: 100%;
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 8px;
         }
 
         .featured-icon-url-row {
           display: flex;
           align-items: center;
-          gap: 8px;
-          padding: 6px 16px;
+          gap: 10px;
+          padding: 8px 14px;
+          background: ${isLight ? 'rgba(0,0,0,0.02)' : 'rgba(255,255,255,0.03)'};
+          border-radius: 8px;
+          margin: 2px 0;
+        }
+
+        .featured-icon-url-row input::placeholder {
+          color: ${isLight ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.35)'};
         }
 
         /* Video section */
@@ -2139,11 +2304,10 @@ export default function ECardCreateScreen() {
           display: flex;
           align-items: center;
           gap: 10px;
-          padding: 8px 0;
         }
 
         .contact-row input::placeholder {
-          color: ${isLight ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.45)'};
+          color: ${isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.4)'};
         }
 
         /* Links */
