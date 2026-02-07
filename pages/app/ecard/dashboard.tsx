@@ -103,6 +103,8 @@ export default function ECardDashboardScreen() {
   const { isPro } = useRoles();
   const photoInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -349,10 +351,39 @@ export default function ECardDashboardScreen() {
   };
 
   // Video handlers
-  const addVideo = () => {
+  const handleVideoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setVideoFile(file);
+      setVideoUrlInput(file.name);
+    }
+  };
+
+  const addVideo = async () => {
+    if (videoTypeInput === 'tavvy_short' && videoFile) {
+      // Upload video file to Supabase Storage
+      try {
+        const userId = user?.id;
+        if (!userId) { alert('Please log in to upload videos'); return; }
+        const uploadedUrl = await uploadEcardFile(userId, videoFile, 'video');
+        if (uploadedUrl) {
+          setVideos(prev => [...prev, { type: 'tavvy_short', url: uploadedUrl }]);
+        } else {
+          alert('Failed to upload video. Please try again.');
+        }
+      } catch (err) {
+        console.error('Video upload error:', err);
+        alert('Failed to upload video.');
+      }
+      setVideoFile(null);
+      setVideoUrlInput('');
+      setShowVideoModal(false);
+      return;
+    }
     if (!videoUrlInput.trim()) return;
     setVideos(prev => [...prev, { type: videoTypeInput, url: videoUrlInput.trim() }]);
     setVideoUrlInput('');
+    setVideoFile(null);
     setShowVideoModal(false);
   };
 
@@ -448,6 +479,7 @@ export default function ECardDashboardScreen() {
           {/* Hidden file inputs */}
           <input type="file" ref={photoInputRef} accept="image/*" style={{ display: 'none' }} onChange={handlePhotoChange} />
           <input type="file" ref={galleryInputRef} accept="image/*" multiple style={{ display: 'none' }} onChange={handleGalleryAdd} />
+          <input type="file" ref={videoInputRef} accept="video/*" capture="environment" style={{ display: 'none' }} onChange={handleVideoFileChange} />
 
           {/* Header */}
           <header className="header">
@@ -1026,20 +1058,33 @@ export default function ECardDashboardScreen() {
                     </button>
                   ))}
                 </div>
-                <input
-                  type="url"
-                  value={videoUrlInput}
-                  onChange={(e) => setVideoUrlInput(e.target.value)}
-                  placeholder={videoTypeInput === 'youtube' ? 'Paste YouTube URL' : videoTypeInput === 'tavvy_short' ? 'Paste video URL (max 15s)' : 'Paste any video URL'}
-                  className="field-input"
-                  style={{ backgroundColor: isDark ? '#000000' : '#F3F4F6', color: isDark ? '#fff' : '#333', marginTop: 12 }}
-                />
+                {videoTypeInput === 'tavvy_short' ? (
+                  <>
+                    <button
+                      className="publish-btn"
+                      onClick={() => videoInputRef.current?.click()}
+                      style={{ marginTop: 12, width: '100%', padding: '14px', borderRadius: 12, border: `2px dashed ${isDark ? '#444' : '#ccc'}`, backgroundColor: isDark ? '#000000' : '#F3F4F6', color: isDark ? '#fff' : '#333', cursor: 'pointer', fontSize: 15 }}
+                    >
+                      {videoFile ? `Selected: ${videoFile.name}` : 'Choose Video from Device'}
+                    </button>
+                    <p style={{ fontSize: 12, color: isDark ? '#888' : '#999', marginTop: 6, textAlign: 'center' }}>Max 15 seconds. Tap to select from camera, library, or files.</p>
+                  </>
+                ) : (
+                  <input
+                    type="url"
+                    value={videoUrlInput}
+                    onChange={(e) => setVideoUrlInput(e.target.value)}
+                    placeholder={videoTypeInput === 'youtube' ? 'Paste YouTube URL' : 'Paste any video URL'}
+                    className="field-input"
+                    style={{ backgroundColor: isDark ? '#000000' : '#F3F4F6', color: isDark ? '#fff' : '#333', marginTop: 12 }}
+                  />
+                )}
                 <div className="modal-actions" style={{ marginTop: 16 }}>
-                  <button className="cancel-btn" onClick={() => { setShowVideoModal(false); setVideoUrlInput(''); }}>
+                  <button className="cancel-btn" onClick={() => { setShowVideoModal(false); setVideoUrlInput(''); setVideoFile(null); }}>
                     Cancel
                   </button>
-                  <button className="publish-btn" onClick={addVideo} disabled={!videoUrlInput.trim()}>
-                    Add
+                  <button className="publish-btn" onClick={addVideo} disabled={videoTypeInput === 'tavvy_short' ? !videoFile : !videoUrlInput.trim()}>
+                    {videoTypeInput === 'tavvy_short' ? 'Upload' : 'Add'}
                   </button>
                 </div>
               </div>

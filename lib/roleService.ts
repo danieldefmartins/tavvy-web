@@ -203,6 +203,13 @@ export const routeAccessConfig: Record<string, AccessLevel> = {
   '/app/signup': 'public',
   '/app/help': 'public',
   
+  // eCard routes (login required for editing, hub is public)
+  '/app/ecard': 'authenticated',
+  '/app/ecard/create': 'authenticated',
+  '/app/ecard/dashboard': 'authenticated',
+  '/app/ecard/preview': 'authenticated',
+  '/app/ecard/premium': 'authenticated',
+  
   // Authenticated user routes (login required)
   '/app/profile': 'authenticated',
   '/app/saved': 'authenticated',
