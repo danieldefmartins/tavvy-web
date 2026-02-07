@@ -138,12 +138,19 @@ export default function ECardCreateScreen() {
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const [isCreating, setIsCreating] = useState(false);
+
+  // Step: 'gallery' = pick template layout, 'colors' = pick color scheme, 'editor' = customize card
+  const [step, setStep] = useState<'gallery' | 'colors' | 'editor'>('gallery');
 
   // Template & color
   const [templateIndex, setTemplateIndex] = useState(0);
   const [colorIndex, setColorIndex] = useState(0);
+
+  // Filter templates for gallery (exclude pro-only)
+  const galleryTemplates = TEMPLATES.filter(t => !t.isProOnly);
 
   // Card data
   const [name, setName] = useState('');
@@ -173,6 +180,10 @@ export default function ECardCreateScreen() {
   // Gallery
   const [galleryImages, setGalleryImages] = useState<{ id: string; url: string; file?: File }[]>([]);
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+
+  // Banner image
+  const [bannerImage, setBannerImage] = useState<string | null>(null);
+  const [bannerImageFile, setBannerImageFile] = useState<File | null>(null);
 
   // Photo size picker
   const [showPhotoSizePicker, setShowPhotoSizePicker] = useState(false);
@@ -255,7 +266,17 @@ export default function ECardCreateScreen() {
     : template?.layout?.fontFamily === 'classic' ? "'Times New Roman', serif"
     : "'Inter', -apple-system, sans-serif";
 
-  // Template navigation helpers
+  // Template selection from gallery
+  const selectTemplate = (tmpl: Template) => {
+    const idx = TEMPLATES.findIndex(t => t.id === tmpl.id);
+    if (idx >= 0) {
+      setTemplateIndex(idx);
+      setColorIndex(0);
+      setStep('colors');
+    }
+  };
+
+  // Template navigation helpers (kept for bottom bar arrows in editor)
   const goToPrevTemplate = () => { if (templateIndex > 0) { setTemplateIndex(templateIndex - 1); setColorIndex(0); } };
   const goToNextTemplate = () => { if (templateIndex < TEMPLATES.length - 1) { setTemplateIndex(templateIndex + 1); setColorIndex(0); } };
 
@@ -268,6 +289,19 @@ export default function ECardCreateScreen() {
       setProfileImage(url);
     }
   };
+
+  // Banner image upload
+  const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setBannerImageFile(file);
+      const url = URL.createObjectURL(file);
+      setBannerImage(url);
+    }
+  };
+
+  // Template layout type
+  const templateLayout = template?.layout || 'classic';
 
   // Gallery upload
   const handleGalleryUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -412,6 +446,14 @@ export default function ECardCreateScreen() {
       const uniqueId = `${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 8)}`;
       const slug = `draft_${user.id.substring(0, 8)}_${uniqueId}`;
 
+      // Upload banner image if present
+      let bannerUrl: string | undefined;
+      if (bannerImageFile) {
+        try {
+          bannerUrl = await uploadEcardFile(user.id, bannerImageFile, 'banner');
+        } catch (e) { console.warn('Banner upload failed:', e); }
+      }
+
       const card = await createCard({
         user_id: user.id,
         slug,
@@ -423,6 +465,7 @@ export default function ECardCreateScreen() {
         website: website || undefined,
         city: address || undefined,
         profile_photo_url: photoUrl || undefined,
+        banner_image_url: bannerUrl || undefined,
         profile_photo_size: photoSize.id,
         gradient_color_1: color?.primary,
         gradient_color_2: color?.secondary,
@@ -508,11 +551,309 @@ export default function ECardCreateScreen() {
 
       <input type="file" ref={fileInputRef} accept="image/*" style={{ display: 'none' }} onChange={handlePhotoUpload} />
       <input type="file" ref={galleryInputRef} accept="image/*" multiple style={{ display: 'none' }} onChange={handleGalleryUpload} />
+      <input type="file" ref={bannerInputRef} accept="image/*" style={{ display: 'none' }} onChange={handleBannerUpload} />
 
       <div className="ecard-editor">
+        {step === 'gallery' ? (
+          /* ===== STEP 1: TEMPLATE GALLERY ===== */
+          <>
+            <div className="gallery-top-bar">
+              <button className="back-btn" onClick={() => router.back()}>
+                <IoArrowBack size={22} color={isDark ? '#fff' : '#333'} />
+              </button>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: isDark ? '#fff' : '#111' }}>Choose a Style</div>
+                <div style={{ fontSize: 13, color: isDark ? 'rgba(255,255,255,0.5)' : '#888', marginTop: 2 }}>Pick a layout for your card</div>
+              </div>
+              <div style={{ width: 30 }} />
+            </div>
+
+            <div className="template-gallery-scroll">
+              <div className="template-gallery-grid">
+                {galleryTemplates.map((tmpl) => {
+                  const cs = tmpl.colorSchemes[0];
+                  const bg = cs?.background?.includes('gradient') ? cs.background : `linear-gradient(135deg, ${cs?.primary || '#333'}, ${cs?.secondary || '#555'})`;
+                  const isMinimalLayout = tmpl.layout === 'minimal';
+                  const isBannerLayout = tmpl.layout === 'banner';
+                  const isBoldLayout = tmpl.layout === 'bold';
+                  const isElegantLayout = tmpl.layout === 'elegant';
+                  const isSplitLayout = tmpl.layout === 'split';
+                  const isNeonLayout = tmpl.layout === 'neon';
+                  const isShowcaseLayout = tmpl.layout === 'showcase';
+                  const isExecLayout = tmpl.layout === 'executive';
+                  const txtCol = cs?.text || '#fff';
+                  const txtSec = cs?.textSecondary || 'rgba(255,255,255,0.7)';
+                  const accentCol = cs?.accent || '#00C853';
+                  const borderCol = cs?.border || 'transparent';
+
+                  return (
+                    <button
+                      key={tmpl.id}
+                      className="template-gallery-card"
+                      onClick={() => selectTemplate(tmpl)}
+                    >
+                      {/* Mini preview */}
+                      <div className="tg-preview" style={{
+                        background: isMinimalLayout ? (cs?.background || '#0f172a') : bg,
+                        borderColor: isElegantLayout ? borderCol : 'transparent',
+                        borderWidth: isElegantLayout ? 1 : 0,
+                        borderStyle: 'solid',
+                      }}>
+                        {/* Banner layout preview */}
+                        {isBannerLayout && (
+                          <>
+                            <div style={{ width: '100%', height: 48, background: 'rgba(255,255,255,0.12)', borderRadius: '8px 8px 0 0' }} />
+                            <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', border: `2px solid ${accentCol}`, marginTop: -16, zIndex: 2 }} />
+                            <div style={{ width: 52, height: 5, borderRadius: 3, background: txtCol, opacity: 0.8, marginTop: 6 }} />
+                            <div style={{ width: 36, height: 3, borderRadius: 3, background: txtSec, marginTop: 3 }} />
+                            <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
+                              {[1,2,3,4].map(i => <div key={i} style={{ width: 14, height: 14, borderRadius: '50%', background: 'rgba(255,255,255,0.2)' }} />)}
+                            </div>
+                          </>
+                        )}
+
+                        {/* Bold / Full Width layout preview */}
+                        {isBoldLayout && (
+                          <>
+                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%)', borderRadius: 8 }} />
+                            <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 10, position: 'relative', zIndex: 1 }}>
+                              <div style={{ width: 56, height: 6, borderRadius: 3, background: '#fff', opacity: 0.9 }} />
+                              <div style={{ width: 38, height: 3, borderRadius: 3, background: 'rgba(255,255,255,0.6)', marginTop: 3 }} />
+                              <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
+                                {[1,2,3,4].map(i => <div key={i} style={{ width: 12, height: 12, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.5)' }} />)}
+                              </div>
+                            </div>
+                          </>
+                        )}
+
+                        {/* Classic layout preview */}
+                        {tmpl.layout === 'classic' && (
+                          <>
+                            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', marginTop: 12 }} />
+                            <div style={{ width: 52, height: 5, borderRadius: 3, background: txtCol, opacity: 0.8, marginTop: 8 }} />
+                            <div style={{ width: 36, height: 3, borderRadius: 3, background: txtSec, marginTop: 3 }} />
+                            <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
+                              {[1,2,3].map(i => <div key={i} style={{ width: 14, height: 14, borderRadius: '50%', background: 'rgba(255,255,255,0.2)' }} />)}
+                            </div>
+                            <div style={{ width: '80%', height: 10, borderRadius: 5, background: 'rgba(255,255,255,0.15)', marginTop: 8 }} />
+                          </>
+                        )}
+
+                        {/* Minimal layout preview */}
+                        {isMinimalLayout && (
+                          <div style={{ background: cs?.cardBg || '#fff', borderRadius: 6, padding: 10, width: '80%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                            <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(0,0,0,0.08)' }} />
+                            <div style={{ width: 44, height: 4, borderRadius: 2, background: '#1f2937', opacity: 0.7 }} />
+                            <div style={{ width: 32, height: 3, borderRadius: 2, background: '#6b7280' }} />
+                            <div style={{ width: '90%', height: 8, borderRadius: 4, background: accentCol, opacity: 0.3, marginTop: 4 }} />
+                          </div>
+                        )}
+
+                        {/* Elegant layout preview */}
+                        {isElegantLayout && (
+                          <>
+                            <div style={{ width: 32, height: 32, borderRadius: '50%', border: `2px solid ${borderCol}`, background: 'rgba(255,255,255,0.05)', marginTop: 10 }} />
+                            <div style={{ width: 48, height: 5, borderRadius: 3, background: borderCol, opacity: 0.9, marginTop: 6 }} />
+                            <div style={{ width: 32, height: 3, borderRadius: 3, background: txtSec, marginTop: 3 }} />
+                            <div style={{ width: '70%', height: 1, background: borderCol, opacity: 0.3, marginTop: 8 }} />
+                            <div style={{ width: '60%', height: 8, borderRadius: 4, background: 'transparent', border: `1px solid ${borderCol}`, marginTop: 6, opacity: 0.5 }} />
+                          </>
+                        )}
+
+                        {/* Neon layout preview */}
+                        {isNeonLayout && (
+                          <>
+                            <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', boxShadow: `0 0 12px ${cs?.primary || '#ec4899'}, 0 0 24px ${cs?.secondary || '#8b5cf6'}`, marginTop: 10 }} />
+                            <div style={{ width: 52, height: 5, borderRadius: 3, background: txtCol, opacity: 0.9, marginTop: 8 }} />
+                            <div style={{ width: 36, height: 3, borderRadius: 3, background: txtSec, marginTop: 3 }} />
+                            <div style={{ display: 'flex', gap: 4, marginTop: 6 }}>
+                              {[1,2,3].map(i => <div key={i} style={{ width: 14, height: 14, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', boxShadow: `0 0 6px ${cs?.primary}` }} />)}
+                            </div>
+                          </>
+                        )}
+
+                        {/* Split layout preview */}
+                        {isSplitLayout && (
+                          <div style={{ display: 'flex', width: '100%', height: '100%', borderRadius: 8, overflow: 'hidden' }}>
+                            <div style={{ width: '40%', background: `linear-gradient(135deg, ${cs?.primary}, ${cs?.secondary})` }} />
+                            <div style={{ flex: 1, padding: 8, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4, background: cs?.cardBg || '#fff' }}>
+                              <div style={{ width: 44, height: 4, borderRadius: 2, background: cs?.text || '#1f2937', opacity: 0.8 }} />
+                              <div style={{ width: 32, height: 3, borderRadius: 2, background: cs?.textSecondary || '#6b7280' }} />
+                              <div style={{ width: '80%', height: 7, borderRadius: 3, background: accentCol, opacity: 0.2, marginTop: 4 }} />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Showcase layout preview */}
+                        {isShowcaseLayout && (
+                          <>
+                            <div style={{ width: '90%', aspectRatio: '16/9', background: 'rgba(255,255,255,0.1)', borderRadius: 4, marginTop: 8 }} />
+                            <div style={{ width: 44, height: 4, borderRadius: 2, background: txtCol, opacity: 0.8, marginTop: 6 }} />
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 3, width: '90%', marginTop: 4 }}>
+                              {[1,2,3].map(i => <div key={i} style={{ aspectRatio: '1', background: 'rgba(255,255,255,0.08)', borderRadius: 3 }} />)}
+                            </div>
+                          </>
+                        )}
+
+                        {/* Executive layout preview */}
+                        {isExecLayout && (
+                          <>
+                            <div style={{ width: '100%', height: 18, background: 'rgba(255,255,255,0.08)', borderRadius: '8px 8px 0 0', display: 'flex', alignItems: 'center', paddingLeft: 8 }}>
+                              <div style={{ width: 20, height: 3, borderRadius: 2, background: accentCol, opacity: 0.8 }} />
+                            </div>
+                            <div style={{ width: 24, height: 24, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', marginTop: 6 }} />
+                            <div style={{ width: 48, height: 4, borderRadius: 2, background: txtCol, opacity: 0.8, marginTop: 4 }} />
+                            <div style={{ width: 34, height: 3, borderRadius: 2, background: txtSec, marginTop: 2 }} />
+                            <div style={{ width: '70%', height: 8, borderRadius: 4, background: 'rgba(255,255,255,0.1)', marginTop: 6 }} />
+                          </>
+                        )}
+
+                        {/* Modern layout preview */}
+                        {tmpl.layout === 'modern' && (
+                          <>
+                            <div style={{ width: '80%', height: 40, borderRadius: 6, background: 'rgba(255,255,255,0.1)', marginTop: 8 }} />
+                            <div style={{ width: 48, height: 4, borderRadius: 2, background: txtCol, opacity: 0.8, marginTop: 6 }} />
+                            <div style={{ width: 34, height: 3, borderRadius: 2, background: txtSec, marginTop: 2 }} />
+                            <div style={{ width: '85%', padding: 6, borderRadius: 4, background: cs?.cardBg || 'rgba(255,255,255,0.05)', border: `1px solid ${borderCol || 'rgba(255,255,255,0.1)'}`, marginTop: 6 }}>
+                              <div style={{ width: '60%', height: 3, borderRadius: 2, background: txtSec, opacity: 0.5 }} />
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      {/* Template info */}
+                      <div className="tg-info">
+                        <div className="tg-name-row">
+                          <span className="tg-name">{tmpl.name}</span>
+                          {tmpl.isPremium && (
+                            <span className="tg-pro-tag">PRO</span>
+                          )}
+                          {!tmpl.isPremium && (
+                            <span className="tg-free-tag">FREE</span>
+                          )}
+                        </div>
+                        <span className="tg-desc">{tmpl.description}</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        ) : step === 'colors' ? (
+          /* ===== STEP 2: COLOR & STYLE PICKER ===== */
+          <>
+            <div className="colors-top-bar">
+              <button className="back-btn" onClick={() => setStep('gallery')}>
+                <IoArrowBack size={22} color={isDark ? '#fff' : '#333'} />
+              </button>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: 18, fontWeight: 700, color: isDark ? '#fff' : '#111' }}>{template?.name}</div>
+                <div style={{ fontSize: 13, color: isDark ? 'rgba(255,255,255,0.5)' : '#888', marginTop: 2 }}>Choose a color & style</div>
+              </div>
+              <button className="save-btn" onClick={() => setStep('editor')} style={{ fontSize: 13, padding: '8px 16px' }}>
+                Continue
+              </button>
+            </div>
+
+            {/* Card Preview */}
+            <div className="colors-preview-area">
+              <div className="colors-card-preview" style={{
+                background: cardBg,
+                fontFamily: font,
+                borderRadius: 20,
+                padding: '32px 24px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 12,
+                boxShadow: '0 8px 40px rgba(0,0,0,0.2)',
+                maxWidth: 380,
+                width: '100%',
+                margin: '0 auto',
+                minHeight: 420,
+                position: 'relative',
+              }}>
+                {/* Profile photo placeholder */}
+                <div style={{
+                  width: 100,
+                  height: 100,
+                  borderRadius: template?.layout?.photoStyle === 'square' ? 12 : '50%',
+                  background: isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.12)',
+                  border: color?.border ? `3px solid ${color.border}` : `3px solid ${isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)'}`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }} >
+                  <IoCamera size={28} color={isLight ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.3)'} />
+                </div>
+
+                {/* Name placeholder */}
+                <div style={{ width: 140, height: 8, borderRadius: 4, background: isLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.2)', marginTop: 4 }} />
+                <div style={{ width: 100, height: 6, borderRadius: 3, background: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.1)' }} />
+
+                {/* Featured icons placeholder */}
+                <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+                  {[1,2,3,4].map(i => (
+                    <div key={i} style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      background: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.1)',
+                    }} />
+                  ))}
+                </div>
+
+                {/* Bio placeholder */}
+                <div style={{ width: '80%', display: 'flex', flexDirection: 'column', gap: 4, marginTop: 8 }}>
+                  <div style={{ width: '100%', height: 5, borderRadius: 3, background: isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.07)' }} />
+                  <div style={{ width: '70%', height: 5, borderRadius: 3, background: isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.07)' }} />
+                </div>
+
+                {/* Link buttons placeholder */}
+                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+                  {[1,2,3].map(i => (
+                    <div key={i} style={{
+                      height: 44,
+                      borderRadius: btnRadius,
+                      background: isOutline ? 'transparent' : isFrosted ? (isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.12)') : accentColor,
+                      border: isOutline ? `1.5px solid ${isLight ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.2)'}` : 'none',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}>
+                      <div style={{ width: 80 + i * 10, height: 5, borderRadius: 3, background: isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.15)' }} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Color scheme dots */}
+            <div className="colors-bottom-bar">
+              <div className="colors-scheme-label" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#888' }}>
+                {colorSchemes.length} color styles available
+              </div>
+              <div className="color-dots">
+                {colorSchemes.map((cs, i) => (
+                  <button
+                    key={cs.id}
+                    className={`color-dot ${i === colorIndex ? 'active' : ''}`}
+                    style={{
+                      background: cs.background?.includes('gradient') ? cs.background : `linear-gradient(135deg, ${cs.primary}, ${cs.secondary})`,
+                    }}
+                    onClick={() => setColorIndex(i)}
+                  />
+                ))}
+              </div>
+            </div>
+          </>
+        ) : (
+          /* ===== STEP 3: CARD EDITOR ===== */
+          <>
         {/* Top bar */}
         <div className="top-bar">
-          <button className="back-btn" onClick={() => router.back()}>
+          <button className="back-btn" onClick={() => setStep('colors')}>
             <IoArrowBack size={22} color={isDark ? '#fff' : '#333'} />
           </button>
           <div className="template-indicator">
@@ -525,7 +866,7 @@ export default function ECardCreateScreen() {
                 </span>
               )}
             </div>
-            <span className="template-count">{templateIndex + 1} / {TEMPLATES.length}</span>
+            <span className="template-count">Customize your card</span>
           </div>
           <button className="save-btn" onClick={handleSave} disabled={isCreating || !name.trim()}>
             {isCreating ? 'Saving...' : 'Continue'}
@@ -771,16 +1112,8 @@ export default function ECardCreateScreen() {
           </div>
         </div>
 
-        {/* Bottom toolbar */}
+        {/* Bottom toolbar - color dots only (template already chosen in Step 1) */}
         <div className="bottom-bar">
-          <button 
-            className="nav-arrow" 
-            onClick={goToPrevTemplate}
-            disabled={templateIndex === 0}
-          >
-            <IoChevronBack size={20} />
-          </button>
-
           <div className="color-dots">
             {colorSchemes.map((cs, i) => {
               return (
@@ -796,14 +1129,6 @@ export default function ECardCreateScreen() {
               );
             })}
           </div>
-
-          <button 
-            className="nav-arrow" 
-            onClick={goToNextTemplate}
-            disabled={templateIndex === TEMPLATES.length - 1}
-          >
-            <IoChevronForward size={20} />
-          </button>
         </div>
 
         {/* Photo size picker modal */}
@@ -910,6 +1235,8 @@ export default function ECardCreateScreen() {
             </div>
           </div>
         )}
+          </>
+        )}
       </div>
 
       <style jsx>{`
@@ -921,6 +1248,142 @@ export default function ECardCreateScreen() {
           overflow: hidden;
         }
 
+        /* ===== STEP 1: TEMPLATE GALLERY ===== */
+        .gallery-top-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 12px 16px;
+          flex-shrink: 0;
+        }
+
+        .template-gallery-scroll {
+          flex: 1;
+          overflow-y: auto;
+          overflow-x: hidden;
+          padding: 8px 16px 24px;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .template-gallery-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 16px;
+          max-width: 500px;
+          margin: 0 auto;
+        }
+
+        .template-gallery-card {
+          background: none;
+          border: none;
+          cursor: pointer;
+          text-align: left;
+          padding: 0;
+          transition: transform 0.2s;
+        }
+
+        .template-gallery-card:hover {
+          transform: translateY(-2px);
+        }
+
+        .tg-preview {
+          width: 100%;
+          aspect-ratio: 3/4;
+          border-radius: 12px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 4px;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .tg-info {
+          padding: 8px 2px 0;
+        }
+
+        .tg-name-row {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          margin-bottom: 2px;
+        }
+
+        .tg-name {
+          font-size: 14px;
+          font-weight: 600;
+          color: ${isDark ? '#fff' : '#111'};
+        }
+
+        .tg-pro-tag {
+          display: inline-flex;
+          align-items: center;
+          gap: 2px;
+          background: linear-gradient(135deg, #F59E0B, #D97706);
+          color: #fff;
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 0.5px;
+          padding: 2px 6px;
+          border-radius: 4px;
+        }
+
+        .tg-free-tag {
+          display: inline-flex;
+          align-items: center;
+          background: ${ACCENT_GREEN};
+          color: #fff;
+          font-size: 9px;
+          font-weight: 800;
+          letter-spacing: 0.5px;
+          padding: 2px 6px;
+          border-radius: 4px;
+        }
+
+        .tg-desc {
+          font-size: 12px;
+          color: ${isDark ? 'rgba(255,255,255,0.45)' : '#888'};
+          line-height: 1.3;
+        }
+
+        /* ===== STEP 2: COLORS PICKER ===== */
+        .colors-top-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 12px 16px;
+          flex-shrink: 0;
+        }
+
+        .colors-preview-area {
+          flex: 1;
+          overflow-y: auto;
+          overflow-x: hidden;
+          padding: 8px 16px 16px;
+          display: flex;
+          align-items: flex-start;
+          justify-content: center;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .colors-bottom-bar {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+          padding: 12px 16px 16px;
+          background: ${isDark ? 'rgba(15,23,42,0.95)' : 'rgba(255,255,255,0.95)'};
+          border-top: 1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'};
+          flex-shrink: 0;
+          backdrop-filter: blur(10px);
+        }
+
+        .colors-scheme-label {
+          font-size: 12px;
+        }
+
+        /* ===== STEP 3: CARD EDITOR ===== */
         .top-bar {
           display: flex;
           align-items: center;
