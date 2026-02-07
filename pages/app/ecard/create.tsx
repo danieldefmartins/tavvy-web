@@ -1081,8 +1081,11 @@ export default function ECardCreateScreen() {
             <img src={profileImage} alt="Cover" className="cover-img" />
           ) : (
             <div className="cover-placeholder">
-              <IoCamera size={28} color={isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.4)'} />
-              <span style={{ color: isLight ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.5)', fontSize: 12 }}>Tap to add cover photo</span>
+              <div style={{ width: 56, height: 56, borderRadius: '50%', background: isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <IoCamera size={28} color={isLight ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.5)'} />
+              </div>
+              <span style={{ color: isLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.6)', fontSize: 14, fontWeight: 500 }}>Tap to add hero photo</span>
+              <span style={{ color: isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.35)', fontSize: 11 }}>Recommended: 1200 x 800px</span>
             </div>
           )}
         </div>
@@ -1099,7 +1102,8 @@ export default function ECardCreateScreen() {
             <img src={profileImage} alt="Profile" className="profile-img" />
           ) : (
             <div className="photo-placeholder" style={{ background: isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.1)' }}>
-              <IoCamera size={photoSize.size > 100 ? 28 : 22} color={isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.4)'} />
+              <IoCamera size={photoSize.size > 100 ? 32 : 24} color={isLight ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.5)'} />
+              {photoSize.size > 80 && <span style={{ fontSize: 10, color: isLight ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.4)', marginTop: 2 }}>Add Photo</span>}
             </div>
           )}
         </div>
@@ -1121,8 +1125,10 @@ export default function ECardCreateScreen() {
         <img src={bannerImage} alt="Banner" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       ) : (
         <div className="banner-placeholder">
-          <IoImage size={24} color={isLight ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.3)'} />
-          <span style={{ color: isLight ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.4)', fontSize: 11 }}>Tap to add banner</span>
+          <div style={{ width: 48, height: 48, borderRadius: '50%', background: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <IoImage size={24} color={isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.35)'} />
+          </div>
+          <span style={{ color: isLight ? 'rgba(0,0,0,0.45)' : 'rgba(255,255,255,0.5)', fontSize: 13, fontWeight: 500 }}>Tap to add banner / logo</span>
         </div>
       )}
     </div>
@@ -1537,7 +1543,7 @@ export default function ECardCreateScreen() {
                     <span className="pro-badge"><IoLockClosed size={9} color="#fff" /> PRO</span>
                   )}
                 </div>
-                <span className="template-count">Customize your card</span>
+                <span className="template-count">Edit &amp; customize your card</span>
               </div>
               <button className="save-btn" onClick={handleSave} disabled={isCreating || !name.trim()}>
                 {isCreating ? 'Saving...' : 'Save'}
@@ -1549,8 +1555,17 @@ export default function ECardCreateScreen() {
               {renderEditorCard()}
             </div>
 
-            {/* Bottom toolbar - color dots */}
+            {/* Bottom toolbar - template switcher + color dots */}
             <div className="bottom-bar">
+              <div className="template-switcher">
+                <button className="template-nav-btn" onClick={goToPrevTemplate} disabled={templateIndex === 0}>
+                  <IoChevronBack size={18} />
+                </button>
+                <span className="template-nav-label">{template?.name}</span>
+                <button className="template-nav-btn" onClick={goToNextTemplate} disabled={templateIndex === TEMPLATES.length - 1}>
+                  <IoChevronForward size={18} />
+                </button>
+              </div>
               <div className="color-dots">
                 {colorSchemes.map((cs, i) => (
                   <button
@@ -1951,8 +1966,10 @@ export default function ECardCreateScreen() {
           width: 100%;
           height: 100%;
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
+          gap: 2px;
           border-radius: inherit;
         }
 
@@ -1973,7 +1990,7 @@ export default function ECardCreateScreen() {
         .cover-photo {
           width: calc(100% + 40px);
           margin: -24px -20px 0;
-          height: 200px;
+          height: 260px;
           cursor: pointer;
           overflow: hidden;
           border-radius: 20px 20px 0 0;
@@ -1999,7 +2016,7 @@ export default function ECardCreateScreen() {
         /* Banner upload */
         .banner-upload {
           width: 100%;
-          height: 160px;
+          height: 180px;
           cursor: pointer;
           overflow: hidden;
           position: relative;
@@ -2227,14 +2244,51 @@ export default function ECardCreateScreen() {
         /* ===== BOTTOM BAR ===== */
         .bottom-bar {
           display: flex;
+          flex-direction: column;
           align-items: center;
-          justify-content: center;
-          gap: 12px;
+          gap: 10px;
           padding: 12px 16px;
           background: ${isDark ? 'rgba(15,23,42,0.95)' : 'rgba(255,255,255,0.95)'};
           border-top: 1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'};
           flex-shrink: 0;
           backdrop-filter: blur(10px);
+        }
+
+        .template-switcher {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .template-nav-btn {
+          background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)'};
+          border: none;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          color: ${isDark ? '#fff' : '#333'};
+          transition: all 0.2s ease;
+        }
+
+        .template-nav-btn:disabled {
+          opacity: 0.25;
+          cursor: not-allowed;
+        }
+
+        .template-nav-btn:not(:disabled):hover {
+          background: ${isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.1)'};
+        }
+
+        .template-nav-label {
+          font-size: 13px;
+          font-weight: 600;
+          color: ${isDark ? '#fff' : '#333'};
+          min-width: 100px;
+          text-align: center;
         }
 
         .color-dots {
