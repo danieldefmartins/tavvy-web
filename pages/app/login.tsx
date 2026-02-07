@@ -43,9 +43,12 @@ export default function LoginScreen() {
       if (typeof window !== 'undefined') {
         sessionStorage.setItem('tavvy_login_ts', Date.now().toString());
       }
+      // Small delay to let Supabase auth state propagate through the context
+      await new Promise(resolve => setTimeout(resolve, 500));
       // Redirect to returnUrl or redirect param if provided, otherwise go to /app
+      // Use replace to prevent back-button returning to login page
       const returnUrl = (router.query.returnUrl || router.query.redirect) as string;
-      router.push(returnUrl || '/app');
+      router.replace(returnUrl || '/app');
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');
     } finally {

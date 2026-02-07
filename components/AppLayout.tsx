@@ -1,13 +1,14 @@
 /**
  * AppLayout - Layout wrapper for app pages (with TabBar and route protection)
  * 
- * Loading strategy:
+ * Strategy:
  * - Public routes: render immediately, no loading gate
- * - Authenticated routes: show spinner for max 6 seconds, then render
- * - If auth fails after timeout, redirect to login
+ * - Authenticated routes: show spinner while auth is loading
+ * - Only redirect to login after auth has FULLY resolved with no user
+ * - Never show "Access Restricted" flash — show spinner instead, then redirect
  */
 
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../contexts/ThemeContext';
 
@@ -22,7 +23,10 @@ interface AppLayoutProps {
 }
 
 // Maximum time to show loading spinner before giving up (in ms)
-const MAX_LOADING_MS = 8000;
+const MAX_LOADING_MS = 10000;
+
+// Grace period after login before we consider redirecting (in ms)
+const POST_LOGIN_GRACE_MS = 8000;
 
 export default function AppLayout({ 
   children, 
@@ -33,7 +37,7 @@ export default function AppLayout({
   const router = useRouter();
   const { roles, isAuthenticated, loading } = useRoles();
   const [forceReady, setForceReady] = useState(false);
-  const [redirectAttempted, setRedirectAttempted] = useState(false);
+  const hasRedirectedRef = useRef(false);
 
   // Determine required access level
   const accessLevel = requiredAccess || getRouteAccessLevel(router.pathname);
@@ -59,46 +63,81 @@ export default function AppLayout({
     }
   }, [loading]);
 
-  // If auth resolves with a user after we initially thought there was none, update
+  // Reset redirect ref on route change
   useEffect(() => {
-    if (isAuthenticated && redirectAttempted) {
-      setRedirectAttempted(false);
-    }
-  }, [isAuthenticated, redirectAttempted]);
+    hasRedirectedRef.current = false;
+  }, [router.pathname]);
 
   const effectivelyLoading = loading && !forceReady;
 
   // Redirect logic — only runs when loading is complete (or forced ready)
   useEffect(() => {
     if (effectivelyLoading) return;
+    if (hasRedirectedRef.current) return;
 
     if (!hasAccess && !isPublicRoute) {
       if (!isAuthenticated) {
-        // Prevent redirect loop: if we just came from login, wait longer
-        // Check if referrer is the login page or if we have a recent login timestamp
+        // Check if user just logged in — give auth more time to settle
         const justLoggedIn = typeof window !== 'undefined' && 
           sessionStorage.getItem('tavvy_login_ts') && 
-          (Date.now() - parseInt(sessionStorage.getItem('tavvy_login_ts') || '0', 10)) < 10000;
+          (Date.now() - parseInt(sessionStorage.getItem('tavvy_login_ts') || '0', 10)) < POST_LOGIN_GRACE_MS;
         
         if (justLoggedIn) {
-          console.log('[AppLayout] Just logged in — waiting for auth to settle, not redirecting');
+          console.log('[AppLayout] Just logged in — waiting for auth to settle');
+          // Don't redirect, don't show restricted — just keep showing spinner
           return;
         }
         
-        if (!redirectAttempted) {
-          setRedirectAttempted(true);
-          router.replace(`/app/login?redirect=${encodeURIComponent(router.asPath)}`, undefined, { locale: router.locale });
-        }
+        hasRedirectedRef.current = true;
+        router.replace(`/app/login?redirect=${encodeURIComponent(router.asPath)}`, undefined, { locale: router.locale });
       } else if (accessLevel === 'pro' && !roles.includes('pro') && !roles.includes('super_admin')) {
+        hasRedirectedRef.current = true;
         router.replace('/app/pros', undefined, { locale: router.locale });
       } else if (accessLevel === 'super_admin' && !roles.includes('super_admin')) {
+        hasRedirectedRef.current = true;
         router.replace('/app', undefined, { locale: router.locale });
       }
     }
-  }, [effectivelyLoading, hasAccess, isAuthenticated, accessLevel, roles, router, isPublicRoute, redirectAttempted]);
+  }, [effectivelyLoading, hasAccess, isAuthenticated, accessLevel, roles, router, isPublicRoute]);
 
   // For public routes, skip the loading gate entirely
-  if (effectivelyLoading && !isPublicRoute) {
+  if (isPublicRoute) {
+    return (
+      <div 
+        className="app-layout"
+        style={{ backgroundColor: theme.background }}
+      >
+        <main className="app-content">
+          {children}
+        </main>
+        {!hideTabBar && <TabBar />}
+
+        <style jsx>{`
+          .app-layout {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+          }
+          
+          .app-content {
+            flex: 1;
+            padding-bottom: ${hideTabBar ? '0' : '83px'};
+          }
+          
+          @media (max-width: 768px) {
+            .app-content {
+              padding-bottom: ${hideTabBar ? '0' : '70px'};
+            }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  // Show loading spinner while auth is loading OR if we don't have access yet
+  // This replaces the old "Access Restricted" flash — we just keep spinning
+  // until either auth resolves with a user, or we redirect to login
+  if (effectivelyLoading || (!hasAccess && !hasRedirectedRef.current)) {
     return (
       <div 
         className="app-layout"
@@ -153,77 +192,6 @@ export default function AppLayout({
             .app-content {
               padding-bottom: ${hideTabBar ? '0' : '70px'};
             }
-          }
-        `}</style>
-      </div>
-    );
-  }
-
-  // Show access denied briefly before redirect (only if not loading and no access)
-  if (!effectivelyLoading && !hasAccess && !isPublicRoute) {
-    return (
-      <div 
-        className="app-layout"
-        style={{ backgroundColor: theme.background }}
-      >
-        <main className="app-content access-denied">
-          <div className="access-denied-container">
-            <div className="lock-icon">🔒</div>
-            <h2>Access Restricted</h2>
-            <p>
-              {!isAuthenticated 
-                ? 'Please log in to access this page.' 
-                : accessLevel === 'pro'
-                ? 'This page is only available to Pro users.'
-                : 'You don\'t have permission to view this page.'}
-            </p>
-            <p className="redirect-text">Redirecting...</p>
-          </div>
-        </main>
-
-        <style jsx>{`
-          .app-layout {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-          }
-          
-          .app-content {
-            flex: 1;
-          }
-          
-          .access-denied {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-          
-          .access-denied-container {
-            text-align: center;
-            padding: 40px 20px;
-          }
-          
-          .lock-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-          }
-          
-          h2 {
-            color: ${theme.text};
-            font-size: 24px;
-            margin-bottom: 8px;
-          }
-          
-          p {
-            color: ${theme.textSecondary};
-            font-size: 16px;
-            margin-bottom: 8px;
-          }
-          
-          .redirect-text {
-            font-size: 12px;
-            color: ${theme.textTertiary};
-            margin-top: 16px;
           }
         `}</style>
       </div>
