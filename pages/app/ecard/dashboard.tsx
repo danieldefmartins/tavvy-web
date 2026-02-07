@@ -8,6 +8,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useRoles } from '../../../hooks/useRoles';
 import AppLayout from '../../../components/AppLayout';
 import { 
   getCardById, 
@@ -95,15 +96,18 @@ const FEATURED_PLATFORMS = [
 
 export default function ECardDashboardScreen() {
   const router = useRouter();
-  const { cardId, isNew, openAppearance } = router.query;
+  const { cardId: queryCardId, isNew, openAppearance } = router.query;
   const { theme, isDark } = useThemeContext();
-  const { user, isPro } = useAuth();
+  const { user } = useAuth();
+  const { isPro } = useRoles();
   const photoInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [cardData, setCardData] = useState<CardData | null>(null);
+  // Store cardId in state so it persists even if router.query changes
+  const [cardId, setCardId] = useState<string | null>(null);
   const [links, setLinks] = useState<LinkItem[]>([]);
   const [activeTab, setActiveTab] = useState<Tab>(openAppearance ? 'appearance' : 'content');
 
@@ -144,15 +148,19 @@ export default function ECardDashboardScreen() {
   const bgColor = isDark ? BG_DARK : BG_LIGHT;
   const canAddMoreLinks = isPro || links.length < FREE_LINK_LIMIT;
 
-  // Load card data — wait for router to be ready (query params available)
+  // Sync cardId from router query to state (persists across re-renders)
+  useEffect(() => {
+    if (router.isReady && queryCardId && typeof queryCardId === 'string') {
+      setCardId(queryCardId);
+    }
+  }, [router.isReady, queryCardId]);
+
+  // Load card data when cardId is available
   useEffect(() => {
     const loadCard = async () => {
-      // On Next.js, router.query is empty on first render during client-side navigation
-      // Wait for router to be ready before checking cardId
-      if (!router.isReady) return;
-      
-      if (!cardId || typeof cardId !== 'string') {
-        setLoading(false);
+      if (!cardId) {
+        // Only stop loading if router is ready but no cardId
+        if (router.isReady) setLoading(false);
         return;
       }
 
@@ -196,6 +204,8 @@ export default function ECardDashboardScreen() {
             url: l.url,
             title: l.title,
           })));
+        } else {
+          console.error('[Dashboard] Card not found for id:', cardId);
         }
       } catch (error) {
         console.error('Error loading card:', error);
@@ -205,11 +215,15 @@ export default function ECardDashboardScreen() {
     };
 
     loadCard();
-  }, [cardId, router.isReady]);
+  }, [cardId]);
 
   // Save changes
   const handleSave = async () => {
-    if (!cardData || !cardId) return;
+    if (!cardData || !cardId) {
+      console.error('[Dashboard] Cannot save: cardData=', !!cardData, 'cardId=', cardId);
+      if (!cardId) alert('Error: Card ID not found. Please go back and try again.');
+      return;
+    }
 
     setSaving(true);
     try {
@@ -239,7 +253,7 @@ export default function ECardDashboardScreen() {
         }
       }
 
-      await updateCard(cardId as string, {
+      await updateCard(cardId, {
         full_name: fullName.trim(),
         title: titleRole || undefined,
         bio: bio || undefined,
@@ -259,7 +273,7 @@ export default function ECardDashboardScreen() {
         videos: videos.length > 0 ? videos : undefined,
       } as any);
 
-      await saveCardLinks(cardId as string, links);
+      await saveCardLinks(cardId, links);
 
       // Update local state
       setCardData(prev => prev ? {
@@ -348,7 +362,7 @@ export default function ECardDashboardScreen() {
     }
 
     setCheckingSlug(true);
-    const available = await checkSlugAvailability(slug, cardId as string);
+    const available = await checkSlugAvailability(slug, cardId || undefined);
     setSlugAvailable(available);
     setCheckingSlug(false);
   };
@@ -359,7 +373,7 @@ export default function ECardDashboardScreen() {
 
     setPublishing(true);
     try {
-      const success = await publishCard(cardId as string, slugInput);
+      const success = await publishCard(cardId!, slugInput);
       if (success) {
         setCardData(prev => prev ? { ...prev, is_published: true, slug: slugInput } : null);
         setShowPublishModal(false);

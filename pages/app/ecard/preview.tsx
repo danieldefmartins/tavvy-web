@@ -67,7 +67,7 @@ const PlatformIcons: Record<string, React.ComponentType<{ size: number; color: s
 
 export default function ECardPreviewScreen() {
   const router = useRouter();
-  const { cardId } = router.query;
+  const { cardId: queryCardId } = router.query;
   const { theme, isDark } = useThemeContext();
   const { user } = useAuth();
 
@@ -76,14 +76,22 @@ export default function ECardPreviewScreen() {
   const [links, setLinks] = useState<LinkItem[]>([]);
   const [showQRModal, setShowQRModal] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [cardId, setCardId] = useState<string | null>(null);
 
   const bgColor = isDark ? BG_DARK : BG_LIGHT;
+
+  // Sync cardId from router query to state
+  useEffect(() => {
+    if (router.isReady && queryCardId && typeof queryCardId === 'string') {
+      setCardId(queryCardId);
+    }
+  }, [router.isReady, queryCardId]);
 
   // Load card data
   useEffect(() => {
     const loadCard = async () => {
-      if (!cardId || typeof cardId !== 'string') {
-        setLoading(false);
+      if (!cardId) {
+        if (router.isReady) setLoading(false);
         return;
       }
 
