@@ -313,26 +313,37 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
   // ─── FULL WIDTH ───
   if (tmpl.layout === 'full-width') {
     return (
-      <div style={{ width: '100%', position: 'relative', overflow: 'hidden', minHeight: 380 }}>
-        {/* Hero photo */}
-        <div style={{ position: 'absolute', inset: 0 }}>
-          <img src={SAMPLE_AVATAR} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.7)' }} />
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Hero photo area with banner background + profile photo + overlay */}
+        <div style={{ width: '100%', height: 240, position: 'relative', overflow: 'hidden' }}>
+          {/* Banner background */}
+          <img src={SAMPLE_BANNER} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          {/* Gradient overlay */}
+          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, transparent 5%, ${cs?.primary || '#000'}99 50%, ${cs?.primary || '#000'} 100%)` }} />
+          {/* Profile photo centered in hero */}
+          <div style={{ position: 'absolute', top: 24, left: '50%', transform: 'translateX(-50%)', zIndex: 3 }}>
+            <PhotoAvatar size={90} border="3px solid rgba(255,255,255,0.3)" />
+          </div>
+          {/* Name overlaid at bottom of hero */}
+          <div style={{ position: 'absolute', bottom: 12, left: 0, right: 0, zIndex: 2, textAlign: 'center' }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: '#fff' }}>{SAMPLE_DATA.name}</div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>{SAMPLE_DATA.title}</div>
+          </div>
         </div>
-        {/* Gradient overlay */}
-        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, transparent 20%, ${cs?.primary || '#000'}cc 60%, ${cs?.primary || '#000'} 100%)` }} />
-        {/* Name + info at bottom */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px', zIndex: 2 }}>
-          <div style={{ fontSize: 22, fontWeight: 700, color: '#fff' }}>{SAMPLE_DATA.name}</div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>{SAMPLE_DATA.title}</div>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 6, lineHeight: 1.4 }}>{SAMPLE_DATA.bio}</div>
-          <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+        {/* Content below hero */}
+        <div style={{ padding: '16px 20px 24px', background: cs?.primary || '#000', display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', lineHeight: 1.4, textAlign: 'center' }}>{SAMPLE_DATA.bio}</div>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
             <ActionBtn icon={<PreviewPhoneIcon />} label="Call" btnBg="rgba(255,255,255,0.15)" textColor="#fff" />
             <ActionBtn icon={<PreviewMsgIcon />} label="Text" btnBg="rgba(255,255,255,0.15)" textColor="#fff" />
             <ActionBtn icon={<PreviewEmailIcon />} label="Email" btnBg="rgba(255,255,255,0.15)" textColor="#fff" />
             <ActionBtn icon={<PreviewGlobeIcon />} label="Website" btnBg="rgba(255,255,255,0.15)" textColor="#fff" />
           </div>
-          <div style={{ marginTop: 10 }}>
-            <SocialIconsRow iconColor="#fff" bgColor="rgba(255,255,255,0.15)" size={28} />
+          <SocialIconsRow iconColor="#fff" bgColor="rgba(255,255,255,0.15)" size={28} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
+            <ContactRow icon={<PreviewPhoneIcon />} text={SAMPLE_DATA.phone} color="rgba(255,255,255,0.7)" />
+            <ContactRow icon={<PreviewEmailIcon />} text={SAMPLE_DATA.email} color="rgba(255,255,255,0.7)" />
+            <ContactRow icon={<PreviewGlobeIcon />} text={SAMPLE_DATA.website} color="rgba(255,255,255,0.7)" />
           </div>
         </div>
       </div>
