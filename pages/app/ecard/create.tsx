@@ -133,9 +133,48 @@ function getSocialIcon(pid: string, size = 18) {
 }
 
 /* ============================================================
-   GALLERY PREVIEW COMPONENT — Renders a realistic mini card
+   FULL-SCREEN CARD PREVIEW — Renders a realistic full card
+   with sample data for the swipeable gallery
    ============================================================ */
-function TemplateGalleryPreview({ tmpl }: { tmpl: Template }) {
+const SAMPLE_AVATAR = '/images/sample-avatar.png';
+const SAMPLE_BANNER = '/images/sample-banner.jpg';
+
+const SAMPLE_DATA = {
+  name: 'Jane Smith',
+  title: 'Content Creator & Designer',
+  company: 'Creative Studio',
+  bio: 'Helping brands tell their story through design and strategy',
+  phone: '(555) 123-4567',
+  email: 'jane@example.com',
+  website: 'janesmith.com',
+  location: 'Los Angeles, CA',
+  links: ['My Portfolio', 'Book a Call', 'Latest Work'],
+  socials: ['instagram', 'tiktok', 'youtube', 'linkedin'],
+  industry: 'Marketing',
+  services: ['Branding', 'Web Design', 'Photography', 'Social Media'],
+};
+
+// SVG icon components for the preview
+const PreviewPhoneIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>;
+const PreviewEmailIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>;
+const PreviewGlobeIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>;
+const PreviewLocationIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>;
+const PreviewMsgIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>;
+
+// Social icon for preview
+function PreviewSocialIcon({ platform, size = 16, color = '#fff' }: { platform: string; size?: number; color?: string }) {
+  const icons: Record<string, React.ReactNode> = {
+    instagram: <IoLogoInstagram size={size} color={color} />,
+    tiktok: <IoLogoTiktok size={size} color={color} />,
+    youtube: <IoLogoYoutube size={size} color={color} />,
+    linkedin: <IoLogoLinkedin size={size} color={color} />,
+    twitter: <IoLogoTwitter size={size} color={color} />,
+    facebook: <IoLogoFacebook size={size} color={color} />,
+  };
+  return <>{icons[platform] || <IoGlobe size={size} color={color} />}</>;
+}
+
+function FullCardPreview({ tmpl }: { tmpl: Template }) {
   const cs = tmpl.colorSchemes[0];
   const bg = cs?.background?.includes('gradient') ? cs.background : `linear-gradient(135deg, ${cs?.primary || '#333'}, ${cs?.secondary || '#555'})`;
   const txtCol = cs?.text || '#fff';
@@ -145,59 +184,74 @@ function TemplateGalleryPreview({ tmpl }: { tmpl: Template }) {
   const borderCol = cs?.border || 'transparent';
   const isLightBg = cs?.text === '#2d2d2d' || cs?.text === '#1f2937';
 
-  // Person silhouette SVG for photo placeholder
-  const PersonAvatar = ({ size, bg: avatarBg, border: avatarBorder }: { size: number; bg: string; border?: string }) => (
+  // Real photo avatar
+  const PhotoAvatar = ({ size, border: avatarBorder, borderRadius }: { size: number; border?: string; borderRadius?: string }) => (
     <div style={{
-      width: size, height: size, borderRadius: '50%', background: avatarBg,
+      width: size, height: size, borderRadius: borderRadius || '50%',
       border: avatarBorder || 'none',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden',
+      flexShrink: 0, overflow: 'hidden',
     }}>
-      <svg viewBox="0 0 24 24" width={size * 0.55} height={size * 0.55} fill={isLightBg ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.35)'}>
-        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-      </svg>
+      <img src={SAMPLE_AVATAR} alt="Jane Smith" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
     </div>
   );
 
-  // Mini social icon dots
-  const SocialDots = ({ color, count = 4, dotSize = 10 }: { color: string; count?: number; dotSize?: number }) => (
-    <div style={{ display: 'flex', gap: 3, justifyContent: 'center' }}>
-      {Array.from({ length: count }).map((_, i) => (
-        <div key={i} style={{ width: dotSize, height: dotSize, borderRadius: '50%', background: color, opacity: 0.6 + i * 0.05 }} />
+  // Social icons row
+  const SocialIconsRow = ({ iconColor, bgColor, size = 28 }: { iconColor: string; bgColor: string; size?: number }) => (
+    <div style={{ display: 'flex', gap: 8, justifyContent: 'center', padding: '4px 0' }}>
+      {SAMPLE_DATA.socials.map(s => (
+        <div key={s} style={{ width: size, height: size, borderRadius: '50%', background: bgColor, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <PreviewSocialIcon platform={s} size={size * 0.5} color={iconColor} />
+        </div>
       ))}
     </div>
   );
 
-  // Mini link button
-  const MiniBtn = ({ w = '78%', bg: btnBg, border: btnBorder, text, borderLeft: bl }: { w?: string; bg?: string; border?: string; text?: string; borderLeft?: string }) => (
+  // Link button
+  const LinkBtn = ({ text, btnBg, btnBorder, textColor, borderLeft: bl, borderRadius: br }: { text: string; btnBg: string; btnBorder?: string; textColor: string; borderLeft?: string; borderRadius?: number }) => (
     <div style={{
-      width: w, height: 11, borderRadius: 5, background: btnBg || 'rgba(255,255,255,0.15)',
+      width: '100%', height: 36, borderRadius: br ?? 8, background: btnBg,
       border: btnBorder || 'none', borderLeft: bl || undefined,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
-      {text && <span style={{ fontSize: 5, fontWeight: 600, color: isLightBg ? '#555' : 'rgba(255,255,255,0.7)', letterSpacing: 0.3 }}>{text}</span>}
+      <span style={{ fontSize: 12, fontWeight: 500, color: textColor, letterSpacing: 0.3 }}>{text}</span>
     </div>
   );
 
-  // Contact row mini
-  const ContactRow = ({ color }: { color: string }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 3, width: '80%' }}>
-      <div style={{ width: 7, height: 7, borderRadius: '50%', background: color, opacity: 0.5, flexShrink: 0 }} />
-      <div style={{ flex: 1, height: 2.5, background: isLightBg ? '#ccc' : 'rgba(255,255,255,0.2)', borderRadius: 2 }} />
+  // Contact row
+  const ContactRow = ({ icon, text, color }: { icon: React.ReactNode; text: string; color: string }) => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '4px 0' }}>
+      <span style={{ color, opacity: 0.7, flexShrink: 0, display: 'flex' }}>{icon}</span>
+      <span style={{ fontSize: 11, color, opacity: 0.8 }}>{text}</span>
+    </div>
+  );
+
+  // Action button (Call, Text, Email, Website)
+  const ActionBtn = ({ icon, label, btnBg, textColor }: { icon: React.ReactNode; label: string; btnBg: string; textColor: string }) => (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+      <div style={{ width: 36, height: 36, borderRadius: '50%', background: btnBg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: textColor }}>{icon}</div>
+      <span style={{ fontSize: 9, color: textColor, opacity: 0.8 }}>{label}</span>
     </div>
   );
 
   // ─── BASIC ───
   if (tmpl.layout === 'basic') {
+    const btnBg = isLightBg ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)';
     return (
-      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, padding: '14px 10px 10px' }}>
-        <PersonAvatar size={38} bg="rgba(255,255,255,0.18)" />
-        <div style={{ width: 52, height: 5, borderRadius: 3, background: txtCol, opacity: 0.85, marginTop: 4 }} />
-        <div style={{ width: 36, height: 3, borderRadius: 2, background: txtSec, marginTop: 1 }} />
-        <SocialDots color={txtCol} count={4} dotSize={9} />
-        <div style={{ width: '82%', display: 'flex', flexDirection: 'column', gap: 3, marginTop: 5 }}>
-          <MiniBtn text="My Website" bg="rgba(255,255,255,0.15)" />
-          <MiniBtn text="Portfolio" bg="rgba(255,255,255,0.12)" />
-          <MiniBtn text="Contact Me" bg="rgba(255,255,255,0.09)" />
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '28px 20px 24px' }}>
+        <PhotoAvatar size={80} border={`3px solid ${isLightBg ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)'}`} />
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 18, fontWeight: 700, color: txtCol }}>{SAMPLE_DATA.name}</div>
+          <div style={{ fontSize: 12, color: txtSec, marginTop: 2 }}>{SAMPLE_DATA.title}</div>
+        </div>
+        <SocialIconsRow iconColor={isLightBg ? '#fff' : '#fff'} bgColor={isLightBg ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)'} size={30} />
+        <div style={{ width: '85%', display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
+          {SAMPLE_DATA.links.map(l => <LinkBtn key={l} text={l} btnBg={btnBg} textColor={txtCol} borderRadius={8} />)}
+        </div>
+        <div style={{ display: 'flex', gap: 16, marginTop: 6 }}>
+          <ActionBtn icon={<PreviewPhoneIcon />} label="Call" btnBg={btnBg} textColor={txtCol} />
+          <ActionBtn icon={<PreviewMsgIcon />} label="Text" btnBg={btnBg} textColor={txtCol} />
+          <ActionBtn icon={<PreviewEmailIcon />} label="Email" btnBg={btnBg} textColor={txtCol} />
+          <ActionBtn icon={<PreviewGlobeIcon />} label="Website" btnBg={btnBg} textColor={txtCol} />
         </div>
       </div>
     );
@@ -206,21 +260,22 @@ function TemplateGalleryPreview({ tmpl }: { tmpl: Template }) {
   // ─── BLOGGER ───
   if (tmpl.layout === 'blogger') {
     return (
-      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 8 }}>
+      <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px 12px' }}>
         <div style={{
-          background: cardBgCol, borderRadius: 8, padding: '10px 8px', width: '88%',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
-          boxShadow: '0 2px 10px rgba(0,0,0,0.06)',
+          background: cardBgCol, borderRadius: 20, padding: '24px 18px 20px', width: '100%',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
         }}>
-          <PersonAvatar size={34} bg="rgba(0,0,0,0.06)" />
-          <div style={{ width: 48, height: 5, borderRadius: 2, background: cs?.text || '#2d2d2d', opacity: 0.7, fontStyle: 'italic' }} />
-          <div style={{ width: 32, height: 3, borderRadius: 2, background: cs?.textSecondary || '#666', opacity: 0.6 }} />
-          <div style={{ width: '88%', display: 'flex', flexDirection: 'column', gap: 3, marginTop: 4 }}>
-            <MiniBtn bg={`${accentCol}25`} text="Blog" />
-            <MiniBtn bg={`${accentCol}18`} text="Shop" />
-            <MiniBtn bg={`${accentCol}12`} text="Contact" />
+          <PhotoAvatar size={80} border={`3px solid ${accentCol}30`} />
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 18, fontWeight: 600, color: cs?.text || '#2d2d2d', fontStyle: 'italic' }}>{SAMPLE_DATA.name}</div>
+            <div style={{ fontSize: 11, color: cs?.textSecondary || '#666', marginTop: 2 }}>{SAMPLE_DATA.title}</div>
           </div>
-          <SocialDots color={accentCol} count={4} dotSize={7} />
+          <div style={{ fontSize: 11, color: cs?.textSecondary || '#666', textAlign: 'center', lineHeight: 1.4, padding: '0 8px' }}>{SAMPLE_DATA.bio}</div>
+          <div style={{ width: '90%', display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
+            {SAMPLE_DATA.links.map(l => <LinkBtn key={l} text={l} btnBg={`${accentCol}18`} textColor={cs?.text || '#2d2d2d'} borderRadius={20} />)}
+          </div>
+          <SocialIconsRow iconColor="#fff" bgColor={accentCol} size={28} />
         </div>
       </div>
     );
@@ -229,23 +284,27 @@ function TemplateGalleryPreview({ tmpl }: { tmpl: Template }) {
   // ─── BUSINESS CARD ───
   if (tmpl.layout === 'business-card') {
     return (
-      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', borderRadius: 8, overflow: 'hidden' }}>
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Dark top half */}
-        <div style={{ flex: 1.3, padding: '10px 10px 6px', display: 'flex', gap: 6, alignItems: 'flex-start' }}>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3, paddingTop: 6 }}>
-            <div style={{ fontSize: 7, fontWeight: 700, color: accentCol, letterSpacing: 0.3 }}>Jane Smith</div>
-            <div style={{ width: '70%', height: 2.5, background: 'rgba(255,255,255,0.3)', borderRadius: 2 }} />
-            <div style={{ width: '50%', height: 2, background: 'rgba(255,255,255,0.2)', borderRadius: 2 }} />
+        <div style={{ padding: '24px 20px 16px', display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: accentCol }}>{SAMPLE_DATA.name}</div>
+            <div style={{ fontSize: 12, color: txtSec }}>{SAMPLE_DATA.title}</div>
+            <div style={{ fontSize: 11, color: txtSec, opacity: 0.7 }}>{SAMPLE_DATA.company}</div>
           </div>
-          <PersonAvatar size={32} bg="rgba(255,255,255,0.12)" border={`2px solid ${accentCol}`} />
+          <PhotoAvatar size={70} border={`3px solid ${accentCol}`} />
         </div>
+        {/* Accent divider */}
+        <div style={{ height: 2, background: accentCol, opacity: 0.3 }} />
         {/* Light bottom half */}
-        <div style={{ background: cardBgCol, padding: '7px 10px 8px', flex: 0.7 }}>
-          <ContactRow color={accentCol} />
-          <div style={{ height: 3 }} />
-          <ContactRow color={accentCol} />
-          <div style={{ height: 3 }} />
-          <ContactRow color={accentCol} />
+        <div style={{ background: cardBgCol, padding: '14px 20px 20px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <ContactRow icon={<PreviewPhoneIcon />} text={SAMPLE_DATA.phone} color={accentCol} />
+          <ContactRow icon={<PreviewEmailIcon />} text={SAMPLE_DATA.email} color={accentCol} />
+          <ContactRow icon={<PreviewGlobeIcon />} text={SAMPLE_DATA.website} color={accentCol} />
+          <ContactRow icon={<PreviewLocationIcon />} text={SAMPLE_DATA.location} color={accentCol} />
+          <div style={{ marginTop: 8 }}>
+            <SocialIconsRow iconColor="#fff" bgColor={accentCol} size={26} />
+          </div>
         </div>
       </div>
     );
@@ -254,19 +313,26 @@ function TemplateGalleryPreview({ tmpl }: { tmpl: Template }) {
   // ─── FULL WIDTH ───
   if (tmpl.layout === 'full-width') {
     return (
-      <div style={{ width: '100%', height: '100%', position: 'relative', borderRadius: 8, overflow: 'hidden' }}>
-        {/* Simulated hero photo area */}
-        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, ${cs?.primary}40 0%, ${cs?.primary} 100%)` }} />
-        {/* Person silhouette in center */}
-        <div style={{ position: 'absolute', top: '15%', left: '50%', transform: 'translateX(-50%)' }}>
-          <PersonAvatar size={44} bg="rgba(255,255,255,0.1)" />
+      <div style={{ width: '100%', position: 'relative', overflow: 'hidden', minHeight: 380 }}>
+        {/* Hero photo */}
+        <div style={{ position: 'absolute', inset: 0 }}>
+          <img src={SAMPLE_AVATAR} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.7)' }} />
         </div>
+        {/* Gradient overlay */}
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, transparent 20%, ${cs?.primary || '#000'}cc 60%, ${cs?.primary || '#000'} 100%)` }} />
         {/* Name + info at bottom */}
-        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '8px 10px 10px', background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)' }}>
-          <div style={{ fontSize: 8, fontWeight: 700, color: '#fff', letterSpacing: 0.3 }}>Jane Smith</div>
-          <div style={{ width: 40, height: 2.5, background: 'rgba(255,255,255,0.5)', borderRadius: 2, marginTop: 2 }} />
-          <div style={{ display: 'flex', gap: 3, marginTop: 5 }}>
-            {[1,2,3,4].map(i => <div key={i} style={{ width: 10, height: 10, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.5)', background: 'rgba(255,255,255,0.1)' }} />)}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px', zIndex: 2 }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: '#fff' }}>{SAMPLE_DATA.name}</div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>{SAMPLE_DATA.title}</div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 6, lineHeight: 1.4 }}>{SAMPLE_DATA.bio}</div>
+          <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+            <ActionBtn icon={<PreviewPhoneIcon />} label="Call" btnBg="rgba(255,255,255,0.15)" textColor="#fff" />
+            <ActionBtn icon={<PreviewMsgIcon />} label="Text" btnBg="rgba(255,255,255,0.15)" textColor="#fff" />
+            <ActionBtn icon={<PreviewEmailIcon />} label="Email" btnBg="rgba(255,255,255,0.15)" textColor="#fff" />
+            <ActionBtn icon={<PreviewGlobeIcon />} label="Website" btnBg="rgba(255,255,255,0.15)" textColor="#fff" />
+          </div>
+          <div style={{ marginTop: 10 }}>
+            <SocialIconsRow iconColor="#fff" bgColor="rgba(255,255,255,0.15)" size={28} />
           </div>
         </div>
       </div>
@@ -276,25 +342,28 @@ function TemplateGalleryPreview({ tmpl }: { tmpl: Template }) {
   // ─── PRO REALTOR ───
   if (tmpl.layout === 'pro-realtor') {
     return (
-      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
-        {/* Banner area */}
-        <div style={{ width: '100%', height: 40, background: isLightBg ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.08)', borderRadius: '8px 8px 0 0' }} />
-        {/* Arch photo */}
-        <div style={{
-          width: 36, height: 36, borderRadius: '8px 8px 50% 50%',
-          background: isLightBg ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.15)',
-          border: `2px solid ${accentCol}`, marginTop: -16, zIndex: 2,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
-        }}>
-          <svg viewBox="0 0 24 24" width={20} height={20} fill={isLightBg ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.25)'}>
-            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-          </svg>
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
+        {/* Banner */}
+        <div style={{ width: '100%', height: 120, overflow: 'hidden' }}>
+          <img src={SAMPLE_BANNER} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
-        <div style={{ fontSize: 6.5, fontWeight: 700, color: txtCol, marginTop: 4, letterSpacing: 0.3 }}>Jane Smith</div>
-        <div style={{ fontSize: 4.5, color: txtSec, marginTop: 1 }}>Licensed Realtor</div>
-        <div style={{ width: '75%', display: 'flex', flexDirection: 'column', gap: 3, marginTop: 6 }}>
-          <MiniBtn bg={`${accentCol}25`} borderLeft={`3px solid ${accentCol}`} text="Listings" />
-          <MiniBtn bg={`${accentCol}18`} borderLeft={`3px solid ${accentCol}`} text="Contact" />
+        {/* Arch photo overlapping */}
+        <div style={{ marginTop: -40, zIndex: 2 }}>
+          <PhotoAvatar size={80} border={`3px solid ${accentCol}`} borderRadius="12px 12px 50% 50%" />
+        </div>
+        <div style={{ textAlign: 'center', marginTop: 8 }}>
+          <div style={{ fontSize: 18, fontWeight: 700, color: txtCol }}>{SAMPLE_DATA.name}</div>
+          <div style={{ fontSize: 12, color: txtSec, marginTop: 2 }}>Licensed Realtor</div>
+        </div>
+        <div style={{ fontSize: 11, color: txtSec, textAlign: 'center', padding: '4px 20px', lineHeight: 1.4 }}>{SAMPLE_DATA.bio}</div>
+        <div style={{ width: '85%', display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
+          {['View Listings', 'Schedule Showing', 'Contact Me'].map(l => (
+            <LinkBtn key={l} text={l} btnBg={`${accentCol}20`} textColor={txtCol} borderLeft={`4px solid ${accentCol}`} borderRadius={8} />
+          ))}
+        </div>
+        <div style={{ marginTop: 10, padding: '0 20px', width: '100%' }}>
+          <ContactRow icon={<PreviewPhoneIcon />} text={SAMPLE_DATA.phone} color={txtCol} />
+          <ContactRow icon={<PreviewEmailIcon />} text={SAMPLE_DATA.email} color={txtCol} />
         </div>
       </div>
     );
@@ -303,24 +372,27 @@ function TemplateGalleryPreview({ tmpl }: { tmpl: Template }) {
   // ─── PRO CREATIVE ───
   if (tmpl.layout === 'pro-creative') {
     return (
-      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Bold colored top */}
-        <div style={{ height: '42%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ width: 26, height: 26, borderRadius: 6, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <IoBriefcase size={14} color="rgba(255,255,255,0.6)" />
-          </div>
-          <div style={{ fontSize: 6.5, fontWeight: 700, color: '#fff', marginTop: 3, letterSpacing: 0.3 }}>Jane Smith</div>
-          <div style={{ fontSize: 4.5, color: 'rgba(255,255,255,0.7)', marginTop: 1 }}>Creative Director</div>
+        <div style={{ padding: '24px 20px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+          <PhotoAvatar size={70} border="none" borderRadius="16px" />
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>{SAMPLE_DATA.name}</div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)' }}>Creative Director</div>
         </div>
         {/* Wave divider */}
-        <svg viewBox="0 0 120 12" style={{ width: '100%', height: 12, display: 'block', flexShrink: 0 }}>
-          <path d="M0 6 Q30 0 60 6 Q90 12 120 6 L120 12 L0 12 Z" fill={cardBgCol} opacity="0.95" />
+        <svg viewBox="0 0 400 40" style={{ width: '100%', height: 30, display: 'block', flexShrink: 0, marginTop: 8 }} preserveAspectRatio="none">
+          <path d="M0 20 Q100 0 200 20 Q300 40 400 20 L400 40 L0 40 Z" fill={cardBgCol} />
         </svg>
         {/* White bottom */}
-        <div style={{ background: cardBgCol, flex: 1, padding: '5px 10px', display: 'flex', flexDirection: 'column', gap: 3 }}>
-          <ContactRow color={accentCol} />
-          <ContactRow color={accentCol} />
-          <ContactRow color={accentCol} />
+        <div style={{ background: cardBgCol, padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div style={{ fontSize: 11, color: '#666', textAlign: 'center', marginBottom: 6, lineHeight: 1.4 }}>{SAMPLE_DATA.bio}</div>
+          <ContactRow icon={<PreviewPhoneIcon />} text={SAMPLE_DATA.phone} color={accentCol} />
+          <ContactRow icon={<PreviewEmailIcon />} text={SAMPLE_DATA.email} color={accentCol} />
+          <ContactRow icon={<PreviewGlobeIcon />} text={SAMPLE_DATA.website} color={accentCol} />
+          <ContactRow icon={<PreviewLocationIcon />} text={SAMPLE_DATA.location} color={accentCol} />
+          <div style={{ marginTop: 8 }}>
+            <SocialIconsRow iconColor="#fff" bgColor={accentCol} size={26} />
+          </div>
         </div>
       </div>
     );
@@ -329,24 +401,28 @@ function TemplateGalleryPreview({ tmpl }: { tmpl: Template }) {
   // ─── PRO CORPORATE ───
   if (tmpl.layout === 'pro-corporate') {
     return (
-      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px 8px 6px' }}>
-        {/* Logo bar */}
-        <div style={{ width: '100%', height: 14, background: 'rgba(255,255,255,0.06)', borderRadius: 4, display: 'flex', alignItems: 'center', paddingLeft: 6, marginBottom: 6 }}>
-          <div style={{ width: 18, height: 4, borderRadius: 2, background: accentCol, opacity: 0.7 }} />
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0' }}>
+        {/* Company name bar */}
+        <div style={{ width: '100%', padding: '10px 20px', borderBottom: `1px solid ${isLightBg ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase' as const, color: accentCol }}>{SAMPLE_DATA.company}</span>
         </div>
-        <PersonAvatar size={30} bg="rgba(255,255,255,0.12)" />
-        <div style={{ fontSize: 6.5, fontWeight: 700, color: txtCol, marginTop: 4, letterSpacing: 0.3 }}>Jane Smith</div>
-        <div style={{ fontSize: 4.5, color: txtSec, marginTop: 1 }}>VP of Marketing</div>
-        {/* Action icons */}
-        <div style={{ display: 'flex', gap: 4, marginTop: 5 }}>
-          {[1,2,3,4].map(i => (
-            <div key={i} style={{ width: 12, height: 12, borderRadius: '50%', border: `1px solid ${accentCol}60`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: 4, height: 4, borderRadius: '50%', background: accentCol, opacity: 0.5 }} />
-            </div>
-          ))}
+        <div style={{ padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, width: '100%' }}>
+          <PhotoAvatar size={70} border={`3px solid ${isLightBg ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.15)'}`} />
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: txtCol }}>{SAMPLE_DATA.name}</div>
+            <div style={{ fontSize: 12, color: txtSec, marginTop: 2 }}>VP of Marketing</div>
+          </div>
+          <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
+            <ActionBtn icon={<PreviewPhoneIcon />} label="Call" btnBg={`${accentCol}20`} textColor={txtCol} />
+            <ActionBtn icon={<PreviewMsgIcon />} label="Text" btnBg={`${accentCol}20`} textColor={txtCol} />
+            <ActionBtn icon={<PreviewEmailIcon />} label="Email" btnBg={`${accentCol}20`} textColor={txtCol} />
+            <ActionBtn icon={<PreviewGlobeIcon />} label="Website" btnBg={`${accentCol}20`} textColor={txtCol} />
+          </div>
+          <div style={{ width: '100%', padding: '10px', borderRadius: 10, background: isLightBg ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.05)', marginTop: 4 }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: txtCol, marginBottom: 4 }}>About</div>
+            <div style={{ fontSize: 11, color: txtSec, lineHeight: 1.4 }}>{SAMPLE_DATA.bio}</div>
+          </div>
         </div>
-        {/* About card */}
-        <div style={{ width: '85%', height: 14, borderRadius: 4, background: 'rgba(255,255,255,0.06)', marginTop: 5 }} />
       </div>
     );
   }
@@ -354,21 +430,35 @@ function TemplateGalleryPreview({ tmpl }: { tmpl: Template }) {
   // ─── PRO CARD ───
   if (tmpl.layout === 'pro-card') {
     return (
-      <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
         {/* Banner */}
-        <div style={{ width: '100%', height: 38, background: 'rgba(255,255,255,0.1)', borderRadius: '8px 8px 0 0' }} />
+        <div style={{ width: '100%', height: 100, overflow: 'hidden' }}>
+          <img src={SAMPLE_BANNER} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </div>
         {/* Overlapping photo */}
-        <PersonAvatar size={30} bg="rgba(255,255,255,0.2)" border={`2px solid ${accentCol}`} />
-        <div style={{ fontSize: 6.5, fontWeight: 700, color: txtCol, marginTop: 3, letterSpacing: 0.3 }}>Jane Smith</div>
-        <div style={{ fontSize: 4.5, color: txtSec, marginTop: 1 }}>Home Services</div>
+        <div style={{ marginTop: -35, zIndex: 2 }}>
+          <PhotoAvatar size={70} border={`3px solid ${accentCol}`} />
+        </div>
+        <div style={{ textAlign: 'center', marginTop: 6, padding: '0 20px' }}>
+          <div style={{ fontSize: 18, fontWeight: 700, color: txtCol }}>{SAMPLE_DATA.name}</div>
+          <div style={{ fontSize: 12, color: txtSec, marginTop: 2 }}>{SAMPLE_DATA.title}</div>
+        </div>
         {/* Industry badge */}
-        <div style={{ width: 40, height: 8, borderRadius: 4, background: `${accentCol}30`, marginTop: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontSize: 4, color: accentCol, fontWeight: 600 }}>Plumbing</span>
+        <div style={{ padding: '4px 14px', borderRadius: 12, background: `${accentCol}25`, marginTop: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ fontSize: 10, color: accentCol, fontWeight: 600 }}>{SAMPLE_DATA.industry}</span>
         </div>
         {/* Services grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, width: '80%', marginTop: 4 }}>
-          <div style={{ height: 10, background: `${accentCol}20`, borderRadius: 3 }} />
-          <div style={{ height: 10, background: `${accentCol}15`, borderRadius: 3 }} />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, width: '85%', marginTop: 10 }}>
+          {SAMPLE_DATA.services.map(s => (
+            <div key={s} style={{ padding: '8px 6px', background: `${accentCol}15`, borderRadius: 8, textAlign: 'center' }}>
+              <span style={{ fontSize: 10, color: txtCol, fontWeight: 500 }}>{s}</span>
+            </div>
+          ))}
+        </div>
+        <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+          <ActionBtn icon={<PreviewPhoneIcon />} label="Call" btnBg={`${accentCol}20`} textColor={txtCol} />
+          <ActionBtn icon={<PreviewMsgIcon />} label="Text" btnBg={`${accentCol}20`} textColor={txtCol} />
+          <ActionBtn icon={<PreviewEmailIcon />} label="Email" btnBg={`${accentCol}20`} textColor={txtCol} />
         </div>
       </div>
     );
@@ -396,6 +486,26 @@ export default function ECardCreateScreen() {
   // Template & color
   const [templateIndex, setTemplateIndex] = useState(0);
   const [colorIndex, setColorIndex] = useState(0);
+
+  // Gallery swiper state
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+  const isSwiping = useRef(false);
+
+  const handleSwipeStart = (x: number) => { touchStartX.current = x; isSwiping.current = true; };
+  const handleSwipeMove = (x: number) => { if (isSwiping.current) touchEndX.current = x; };
+  const handleSwipeEnd = () => {
+    if (!isSwiping.current) return;
+    isSwiping.current = false;
+    const diff = touchStartX.current - touchEndX.current;
+    const threshold = 50;
+    if (diff > threshold && galleryIndex < TEMPLATES.length - 1) {
+      setGalleryIndex(prev => prev + 1);
+    } else if (diff < -threshold && galleryIndex > 0) {
+      setGalleryIndex(prev => prev - 1);
+    }
+  };
 
   // Card data
   const [name, setName] = useState('');
@@ -510,13 +620,10 @@ export default function ECardCreateScreen() {
     : "'Inter', -apple-system, sans-serif";
 
   // Template selection from gallery — go directly to editor
-  const selectTemplate = (tmpl: Template) => {
-    const idx = TEMPLATES.findIndex(t => t.id === tmpl.id);
-    if (idx >= 0) {
-      setTemplateIndex(idx);
-      setColorIndex(0);
-      setStep('editor');
-    }
+  const selectTemplate = () => {
+    setTemplateIndex(galleryIndex);
+    setColorIndex(0);
+    setStep('editor');
   };
 
   // Template navigation
@@ -1141,56 +1248,91 @@ export default function ECardCreateScreen() {
 
       <div className="ecard-editor">
         {step === 'gallery' ? (
-          /* ===== STEP 1: TEMPLATE GALLERY ===== */
+          /* ===== STEP 1: FULL-SCREEN SWIPEABLE TEMPLATE BROWSER ===== */
           <>
+            {/* Top bar */}
             <div className="gallery-top-bar">
               <button className="back-btn" onClick={() => router.back()}>
                 <IoArrowBack size={22} color={isDark ? '#fff' : '#333'} />
               </button>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 18, fontWeight: 700, color: isDark ? '#fff' : '#111' }}>Choose a Style</div>
-                <div style={{ fontSize: 13, color: isDark ? 'rgba(255,255,255,0.5)' : '#888', marginTop: 2 }}>Pick a layout for your card</div>
+                <div style={{ fontSize: 13, color: isDark ? 'rgba(255,255,255,0.5)' : '#888', marginTop: 2 }}>Swipe to browse templates</div>
               </div>
               <div style={{ width: 30 }} />
             </div>
 
-            <div className="template-gallery-scroll">
-              <div className="template-gallery-grid">
-                {TEMPLATES.map((tmpl) => {
-                  const cs = tmpl.colorSchemes[0];
-                  const bg = cs?.background?.includes('gradient') ? cs.background : `linear-gradient(135deg, ${cs?.primary || '#333'}, ${cs?.secondary || '#555'})`;
-                  const isBloggerLayout = tmpl.layout === 'blogger';
+            {/* Swipeable card area */}
+            <div
+              className="swiper-container"
+              onTouchStart={e => handleSwipeStart(e.touches[0].clientX)}
+              onTouchMove={e => handleSwipeMove(e.touches[0].clientX)}
+              onTouchEnd={handleSwipeEnd}
+              onMouseDown={e => handleSwipeStart(e.clientX)}
+              onMouseMove={e => handleSwipeMove(e.clientX)}
+              onMouseUp={handleSwipeEnd}
+              onMouseLeave={handleSwipeEnd}
+            >
+              {/* Navigation arrows */}
+              {galleryIndex > 0 && (
+                <button className="swiper-arrow swiper-arrow-left" onClick={() => setGalleryIndex(prev => prev - 1)}>
+                  <IoChevronBack size={24} color={isDark ? '#fff' : '#333'} />
+                </button>
+              )}
+              {galleryIndex < TEMPLATES.length - 1 && (
+                <button className="swiper-arrow swiper-arrow-right" onClick={() => setGalleryIndex(prev => prev + 1)}>
+                  <IoChevronForward size={24} color={isDark ? '#fff' : '#333'} />
+                </button>
+              )}
 
-                  return (
-                    <button
-                      key={tmpl.id}
-                      className="template-gallery-card"
-                      onClick={() => selectTemplate(tmpl)}
-                    >
-                      <div className="tg-preview" style={{
-                        background: isBloggerLayout ? (cs?.background || '#f8e8ee') : bg,
-                        borderColor: tmpl.layout === 'business-card' ? (cs?.border || 'transparent') : 'transparent',
-                        borderWidth: tmpl.layout === 'business-card' ? 1 : 0,
-                        borderStyle: 'solid',
-                      }}>
-                        <TemplateGalleryPreview tmpl={tmpl} />
-                      </div>
+              {/* The card */}
+              {(() => {
+                const currentTmpl = TEMPLATES[galleryIndex];
+                const cs = currentTmpl.colorSchemes[0];
+                const bg = cs?.background?.includes('gradient') ? cs.background : `linear-gradient(135deg, ${cs?.primary || '#333'}, ${cs?.secondary || '#555'})`;
+                const isBloggerLayout = currentTmpl.layout === 'blogger';
+                return (
+                  <div
+                    className="swiper-card"
+                    style={{
+                      background: isBloggerLayout ? (cs?.background || '#f8e8ee') : bg,
+                      borderColor: currentTmpl.layout === 'business-card' ? (cs?.border || 'transparent') : 'transparent',
+                      borderWidth: currentTmpl.layout === 'business-card' ? 1 : 0,
+                      borderStyle: 'solid',
+                    }}
+                  >
+                    <FullCardPreview tmpl={currentTmpl} />
+                  </div>
+                );
+              })()}
+            </div>
 
-                      <div className="tg-info">
-                        <div className="tg-name-row">
-                          <span className="tg-name">{tmpl.name}</span>
-                          {tmpl.isPremium ? (
-                            <span className="tg-pro-tag">PRO</span>
-                          ) : (
-                            <span className="tg-free-tag">FREE</span>
-                          )}
-                        </div>
-                        <span className="tg-desc">{tmpl.description}</span>
-                      </div>
-                    </button>
-                  );
-                })}
+            {/* Template info + Use button */}
+            <div className="swiper-info">
+              <div className="tg-name-row" style={{ justifyContent: 'center' }}>
+                <span className="tg-name" style={{ fontSize: 18 }}>{TEMPLATES[galleryIndex].name}</span>
+                {TEMPLATES[galleryIndex].isPremium ? (
+                  <span className="tg-pro-tag">PRO</span>
+                ) : (
+                  <span className="tg-free-tag">FREE</span>
+                )}
               </div>
+              <span className="tg-desc" style={{ textAlign: 'center', display: 'block', marginTop: 4 }}>{TEMPLATES[galleryIndex].description}</span>
+
+              {/* Dot indicators */}
+              <div className="swiper-dots">
+                {TEMPLATES.map((_, i) => (
+                  <button
+                    key={i}
+                    className={`swiper-dot ${i === galleryIndex ? 'active' : ''}`}
+                    onClick={() => setGalleryIndex(i)}
+                  />
+                ))}
+              </div>
+
+              <button className="use-template-btn" onClick={selectTemplate}>
+                Use This Template
+              </button>
             </div>
           </>
         ) : (
@@ -1328,7 +1470,7 @@ export default function ECardCreateScreen() {
           overflow: hidden;
         }
 
-        /* ===== STEP 1: TEMPLATE GALLERY ===== */
+        /* ===== STEP 1: SWIPEABLE TEMPLATE BROWSER ===== */
         .gallery-top-bar {
           display: flex;
           align-items: center;
@@ -1337,50 +1479,118 @@ export default function ECardCreateScreen() {
           flex-shrink: 0;
         }
 
-        .template-gallery-scroll {
+        .swiper-container {
           flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          overflow: hidden;
+          padding: 0 16px;
+          user-select: none;
+          -webkit-user-select: none;
+          cursor: grab;
+        }
+
+        .swiper-container:active {
+          cursor: grabbing;
+        }
+
+        .swiper-card {
+          width: 100%;
+          max-width: 360px;
+          border-radius: 20px;
+          overflow: hidden;
+          box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+          transition: transform 0.3s ease, opacity 0.3s ease;
+          display: flex;
+          flex-direction: column;
+          max-height: calc(100vh - 260px);
           overflow-y: auto;
-          overflow-x: hidden;
-          padding: 8px 16px 24px;
           -webkit-overflow-scrolling: touch;
         }
 
-        .template-gallery-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 16px;
-          max-width: 500px;
-          margin: 0 auto;
-        }
-
-        .template-gallery-card {
-          background: none;
+        .swiper-arrow {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 10;
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)'};
           border: none;
           cursor: pointer;
-          text-align: left;
-          padding: 0;
-          transition: transform 0.2s;
-        }
-
-        .template-gallery-card:hover {
-          transform: translateY(-2px);
-        }
-
-        .tg-preview {
-          width: 100%;
-          aspect-ratio: 3/4;
-          border-radius: 12px;
           display: flex;
-          flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 0;
-          overflow: hidden;
-          position: relative;
+          backdrop-filter: blur(8px);
+          transition: background 0.2s;
         }
 
-        .tg-info {
-          padding: 8px 2px 0;
+        .swiper-arrow:hover {
+          background: ${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'};
+        }
+
+        .swiper-arrow-left {
+          left: 4px;
+        }
+
+        .swiper-arrow-right {
+          right: 4px;
+        }
+
+        .swiper-info {
+          flex-shrink: 0;
+          padding: 12px 24px 16px;
+          text-align: center;
+        }
+
+        .swiper-dots {
+          display: flex;
+          gap: 6px;
+          justify-content: center;
+          margin: 10px 0;
+        }
+
+        .swiper-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: ${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'};
+          border: none;
+          cursor: pointer;
+          padding: 0;
+          transition: all 0.2s;
+        }
+
+        .swiper-dot.active {
+          background: ${ACCENT_GREEN};
+          transform: scale(1.3);
+        }
+
+        .use-template-btn {
+          width: 100%;
+          max-width: 320px;
+          margin: 4px auto 0;
+          padding: 14px 24px;
+          border-radius: 14px;
+          border: none;
+          background: ${ACCENT_GREEN};
+          color: #fff;
+          font-size: 16px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: transform 0.2s, opacity 0.2s;
+          display: block;
+        }
+
+        .use-template-btn:hover {
+          transform: scale(1.02);
+        }
+
+        .use-template-btn:active {
+          transform: scale(0.98);
         }
 
         .tg-name-row {
