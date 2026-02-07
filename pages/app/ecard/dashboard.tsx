@@ -479,7 +479,7 @@ export default function ECardDashboardScreen() {
           {/* Hidden file inputs */}
           <input type="file" ref={photoInputRef} accept="image/*" style={{ display: 'none' }} onChange={handlePhotoChange} />
           <input type="file" ref={galleryInputRef} accept="image/*" multiple style={{ display: 'none' }} onChange={handleGalleryAdd} />
-          <input type="file" ref={videoInputRef} accept="video/*" capture="environment" style={{ display: 'none' }} onChange={handleVideoFileChange} />
+          <input type="file" ref={videoInputRef} accept="video/*" style={{ display: 'none' }} onChange={handleVideoFileChange} />
 
           {/* Header */}
           <header className="header">
