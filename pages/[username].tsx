@@ -213,6 +213,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   const [isSubmittingForm, setIsSubmittingForm] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [showFormEmbed, setShowFormEmbed] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const generateVCard = () => {
     if (!cardData) return '';
@@ -1140,14 +1142,21 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               )}
               <div style={styles.galleryGrid}>
                 {cardData.galleryImages.slice(0, 9).map((image, index) => (
-                  <div key={image.id || index} style={styles.galleryImageContainer}>
+                  <div 
+                    key={image.id || index} 
+                    style={{...styles.galleryImageContainer, cursor: 'pointer'}}
+                    onClick={() => { setLightboxIndex(index); setLightboxOpen(true); }}
+                  >
                     <img 
                       src={image.url || image.uri} 
                       alt={image.caption || `Gallery image ${index + 1}`}
                       style={styles.galleryImage}
                     />
                     {index === 8 && cardData.galleryImages.length > 9 && (
-                      <div style={styles.galleryMoreOverlay}>
+                      <div 
+                        style={styles.galleryMoreOverlay}
+                        onClick={(e) => { e.stopPropagation(); setLightboxIndex(index); setLightboxOpen(true); }}
+                      >
                         <span style={styles.galleryMoreText}>+{cardData.galleryImages.length - 9}</span>
                       </div>
                     )}
@@ -1546,6 +1555,62 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           </div>
         </div>
       </div>
+
+      {/* Photo Lightbox */}
+      {lightboxOpen && cardData?.galleryImages && (
+        <div 
+          style={styles.lightboxOverlay}
+          onClick={() => setLightboxOpen(false)}
+        >
+          {/* Close button */}
+          <button 
+            style={styles.lightboxClose}
+            onClick={() => setLightboxOpen(false)}
+          >
+            ✕
+          </button>
+
+          {/* Counter */}
+          <div style={styles.lightboxCounter}>
+            {lightboxIndex + 1} / {cardData.galleryImages.length}
+          </div>
+
+          {/* Previous button */}
+          {lightboxIndex > 0 && (
+            <button 
+              style={{...styles.lightboxNav, left: 8}}
+              onClick={(e) => { e.stopPropagation(); setLightboxIndex(lightboxIndex - 1); }}
+            >
+              ‹
+            </button>
+          )}
+
+          {/* Image */}
+          <img 
+            src={cardData.galleryImages[lightboxIndex]?.url || cardData.galleryImages[lightboxIndex]?.uri}
+            alt={cardData.galleryImages[lightboxIndex]?.caption || `Photo ${lightboxIndex + 1}`}
+            style={styles.lightboxImage}
+            onClick={(e) => e.stopPropagation()}
+          />
+
+          {/* Caption */}
+          {cardData.galleryImages[lightboxIndex]?.caption && (
+            <div style={styles.lightboxCaption}>
+              {cardData.galleryImages[lightboxIndex].caption}
+            </div>
+          )}
+
+          {/* Next button */}
+          {lightboxIndex < cardData.galleryImages.length - 1 && (
+            <button 
+              style={{...styles.lightboxNav, right: 8}}
+              onClick={(e) => { e.stopPropagation(); setLightboxIndex(lightboxIndex + 1); }}
+            >
+              ›
+            </button>
+          )}
+        </div>
+      )}
     </>
   );
 }
@@ -2420,6 +2485,85 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: 'white',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
+  },
+
+  // Lightbox styles
+  lightboxOverlay: {
+    position: 'fixed' as const,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.95)',
+    zIndex: 10000,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '60px 16px 40px',
+  },
+  lightboxClose: {
+    position: 'absolute' as const,
+    top: 16,
+    right: 16,
+    background: 'none',
+    border: 'none',
+    color: 'white',
+    fontSize: '28px',
+    cursor: 'pointer',
+    zIndex: 10001,
+    width: 44,
+    height: 44,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '50%',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  lightboxCounter: {
+    position: 'absolute' as const,
+    top: 20,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: '14px',
+    fontWeight: '500',
+    zIndex: 10001,
+  },
+  lightboxImage: {
+    maxWidth: '100%',
+    maxHeight: '80vh',
+    objectFit: 'contain' as const,
+    borderRadius: '8px',
+    userSelect: 'none' as const,
+  },
+  lightboxNav: {
+    position: 'absolute' as const,
+    top: '50%',
+    transform: 'translateY(-50%)',
+    background: 'rgba(255, 255, 255, 0.15)',
+    border: 'none',
+    color: 'white',
+    fontSize: '36px',
+    cursor: 'pointer',
+    zIndex: 10001,
+    width: 48,
+    height: 48,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '50%',
+    lineHeight: 1,
+  },
+  lightboxCaption: {
+    position: 'absolute' as const,
+    bottom: 16,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: '14px',
+    textAlign: 'center' as const,
+    maxWidth: '80%',
+    zIndex: 10001,
   },
 };
 
