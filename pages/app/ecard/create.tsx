@@ -185,11 +185,12 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
   const isLightBg = cs?.text === '#2d2d2d' || cs?.text === '#1f2937';
 
   // Real photo avatar
-  const PhotoAvatar = ({ size, border: avatarBorder, borderRadius }: { size: number; border?: string; borderRadius?: string }) => (
+  const PhotoAvatar = ({ size, border: avatarBorder, borderRadius, shadow }: { size: number; border?: string; borderRadius?: string; shadow?: string }) => (
     <div style={{
       width: size, height: size, borderRadius: borderRadius || '50%',
       border: avatarBorder || 'none',
       flexShrink: 0, overflow: 'hidden',
+      boxShadow: shadow || 'none',
     }}>
       <img src={SAMPLE_AVATAR} alt="Jane Smith" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
     </div>
@@ -207,47 +208,48 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
   );
 
   // Link button
-  const LinkBtn = ({ text, btnBg, btnBorder, textColor, borderLeft: bl, borderRadius: br }: { text: string; btnBg: string; btnBorder?: string; textColor: string; borderLeft?: string; borderRadius?: number }) => (
+  const LinkBtn = ({ text, btnBg, btnBorder, textColor, borderLeft: bl, borderRadius: br, height: h }: { text: string; btnBg: string; btnBorder?: string; textColor: string; borderLeft?: string; borderRadius?: number; height?: number }) => (
     <div style={{
-      width: '100%', height: 36, borderRadius: br ?? 8, background: btnBg,
+      width: '100%', height: h || 44, borderRadius: br ?? 10, background: btnBg,
       border: btnBorder || 'none', borderLeft: bl || undefined,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
-      <span style={{ fontSize: 12, fontWeight: 500, color: textColor, letterSpacing: 0.3 }}>{text}</span>
+      <span style={{ fontSize: 13, fontWeight: 600, color: textColor, letterSpacing: 0.3 }}>{text}</span>
     </div>
   );
 
   // Contact row
   const ContactRow = ({ icon, text, color }: { icon: React.ReactNode; text: string; color: string }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '4px 0' }}>
-      <span style={{ color, opacity: 0.7, flexShrink: 0, display: 'flex' }}>{icon}</span>
-      <span style={{ fontSize: 11, color, opacity: 0.8 }}>{text}</span>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '6px 0' }}>
+      <span style={{ color, opacity: 0.8, flexShrink: 0, display: 'flex' }}>{icon}</span>
+      <span style={{ fontSize: 13, color, opacity: 0.85 }}>{text}</span>
     </div>
   );
 
   // Action button (Call, Text, Email, Website)
   const ActionBtn = ({ icon, label, btnBg, textColor }: { icon: React.ReactNode; label: string; btnBg: string; textColor: string }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-      <div style={{ width: 36, height: 36, borderRadius: '50%', background: btnBg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: textColor }}>{icon}</div>
-      <span style={{ fontSize: 9, color: textColor, opacity: 0.8 }}>{label}</span>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+      <div style={{ width: 42, height: 42, borderRadius: '50%', background: btnBg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: textColor }}>{icon}</div>
+      <span style={{ fontSize: 10, color: textColor, opacity: 0.8, fontWeight: 500 }}>{label}</span>
     </div>
   );
 
   // ─── BASIC ───
   if (tmpl.layout === 'basic') {
-    const btnBg = isLightBg ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)';
+    const btnBg = isLightBg ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.12)';
     return (
-      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '28px 20px 24px' }}>
-        <PhotoAvatar size={80} border={`3px solid ${isLightBg ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)'}`} />
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: '32px 24px 28px' }}>
+        <PhotoAvatar size={96} border={`3px solid ${isLightBg ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.2)'}`} shadow="0 4px 16px rgba(0,0,0,0.12)" />
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 18, fontWeight: 700, color: txtCol }}>{SAMPLE_DATA.name}</div>
-          <div style={{ fontSize: 12, color: txtSec, marginTop: 2 }}>{SAMPLE_DATA.title}</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: txtCol, letterSpacing: -0.3 }}>{SAMPLE_DATA.name}</div>
+          <div style={{ fontSize: 13, color: txtSec, marginTop: 4 }}>{SAMPLE_DATA.title}</div>
         </div>
-        <SocialIconsRow iconColor={isLightBg ? '#fff' : '#fff'} bgColor={isLightBg ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)'} size={30} />
-        <div style={{ width: '85%', display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
-          {SAMPLE_DATA.links.map(l => <LinkBtn key={l} text={l} btnBg={btnBg} textColor={txtCol} borderRadius={8} />)}
+        <div style={{ fontSize: 12, color: txtSec, textAlign: 'center', lineHeight: 1.5, padding: '0 12px', opacity: 0.8 }}>{SAMPLE_DATA.bio}</div>
+        <SocialIconsRow iconColor="#fff" bgColor={isLightBg ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)'} size={34} />
+        <div style={{ width: '88%', display: 'flex', flexDirection: 'column', gap: 8, marginTop: 2 }}>
+          {SAMPLE_DATA.links.map(l => <LinkBtn key={l} text={l} btnBg={btnBg} textColor={txtCol} borderRadius={10} />)}
         </div>
-        <div style={{ display: 'flex', gap: 16, marginTop: 6 }}>
+        <div style={{ display: 'flex', gap: 18, marginTop: 8 }}>
           <ActionBtn icon={<PreviewPhoneIcon />} label="Call" btnBg={btnBg} textColor={txtCol} />
           <ActionBtn icon={<PreviewMsgIcon />} label="Text" btnBg={btnBg} textColor={txtCol} />
           <ActionBtn icon={<PreviewEmailIcon />} label="Email" btnBg={btnBg} textColor={txtCol} />
@@ -259,23 +261,25 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
 
   // ─── BLOGGER ───
   if (tmpl.layout === 'blogger') {
+    const cardTxt = cs?.text || '#2d2d2d';
+    const cardSec = cs?.textSecondary || '#666';
     return (
-      <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px 12px' }}>
+      <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px 14px' }}>
         <div style={{
-          background: cardBgCol, borderRadius: 20, padding: '24px 18px 20px', width: '100%',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+          background: cardBgCol, borderRadius: 24, padding: '28px 20px 24px', width: '100%',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
         }}>
-          <PhotoAvatar size={80} border={`3px solid ${accentCol}30`} />
+          <PhotoAvatar size={96} border={`3px solid ${accentCol}40`} shadow="0 4px 16px rgba(0,0,0,0.1)" />
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 18, fontWeight: 600, color: cs?.text || '#2d2d2d', fontStyle: 'italic' }}>{SAMPLE_DATA.name}</div>
-            <div style={{ fontSize: 11, color: cs?.textSecondary || '#666', marginTop: 2 }}>{SAMPLE_DATA.title}</div>
+            <div style={{ fontSize: 22, fontWeight: 600, color: cardTxt, fontStyle: 'italic', letterSpacing: -0.3 }}>{SAMPLE_DATA.name}</div>
+            <div style={{ fontSize: 12, color: cardSec, marginTop: 4, textTransform: 'uppercase' as const, letterSpacing: 1.5, fontWeight: 500, fontSize: 10 }}>Business Coach & Entrepreneur</div>
           </div>
-          <div style={{ fontSize: 11, color: cs?.textSecondary || '#666', textAlign: 'center', lineHeight: 1.4, padding: '0 8px' }}>{SAMPLE_DATA.bio}</div>
-          <div style={{ width: '90%', display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
-            {SAMPLE_DATA.links.map(l => <LinkBtn key={l} text={l} btnBg={`${accentCol}18`} textColor={cs?.text || '#2d2d2d'} borderRadius={20} />)}
+          <div style={{ fontSize: 12, color: cardSec, textAlign: 'center', lineHeight: 1.5, padding: '0 10px' }}>{SAMPLE_DATA.bio}</div>
+          <div style={{ width: '92%', display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
+            {['About', 'My Blog', 'Shop', 'Newsletter', 'Contact'].map(l => <LinkBtn key={l} text={l} btnBg={`${accentCol}15`} textColor={cardTxt} borderRadius={6} />)}
           </div>
-          <SocialIconsRow iconColor="#fff" bgColor={accentCol} size={28} />
+          <SocialIconsRow iconColor="#fff" bgColor={accentCol} size={32} />
         </div>
       </div>
     );
@@ -286,24 +290,24 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
     return (
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Dark top half */}
-        <div style={{ padding: '24px 20px 16px', display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <div style={{ fontSize: 18, fontWeight: 700, color: accentCol }}>{SAMPLE_DATA.name}</div>
-            <div style={{ fontSize: 12, color: txtSec }}>{SAMPLE_DATA.title}</div>
-            <div style={{ fontSize: 11, color: txtSec, opacity: 0.7 }}>{SAMPLE_DATA.company}</div>
+        <div style={{ padding: '28px 24px 20px', display: 'flex', gap: 16, alignItems: 'center' }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: accentCol, letterSpacing: -0.3 }}>{SAMPLE_DATA.name}</div>
+            <div style={{ fontSize: 13, color: txtSec }}>{SAMPLE_DATA.title}</div>
+            <div style={{ fontSize: 12, color: txtSec, opacity: 0.6 }}>{SAMPLE_DATA.company}</div>
           </div>
-          <PhotoAvatar size={70} border={`3px solid ${accentCol}`} />
+          <PhotoAvatar size={80} border={`3px solid ${accentCol}`} shadow={`0 4px 20px ${accentCol}40`} />
         </div>
         {/* Accent divider */}
-        <div style={{ height: 2, background: accentCol, opacity: 0.3 }} />
+        <div style={{ height: 2, background: `linear-gradient(90deg, ${accentCol}, ${accentCol}40)` }} />
         {/* Light bottom half */}
-        <div style={{ background: cardBgCol, padding: '14px 20px 20px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{ background: cardBgCol, padding: '18px 24px 24px', display: 'flex', flexDirection: 'column', gap: 4 }}>
           <ContactRow icon={<PreviewPhoneIcon />} text={SAMPLE_DATA.phone} color={accentCol} />
           <ContactRow icon={<PreviewEmailIcon />} text={SAMPLE_DATA.email} color={accentCol} />
           <ContactRow icon={<PreviewGlobeIcon />} text={SAMPLE_DATA.website} color={accentCol} />
           <ContactRow icon={<PreviewLocationIcon />} text={SAMPLE_DATA.location} color={accentCol} />
-          <div style={{ marginTop: 8 }}>
-            <SocialIconsRow iconColor="#fff" bgColor={accentCol} size={26} />
+          <div style={{ marginTop: 10 }}>
+            <SocialIconsRow iconColor="#fff" bgColor={accentCol} size={32} />
           </div>
         </div>
       </div>
@@ -312,38 +316,38 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
 
   // ─── FULL WIDTH ───
   if (tmpl.layout === 'full-width') {
+    const darkBg = cs?.primary || '#000';
     return (
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Hero photo area with banner background + profile photo + overlay */}
-        <div style={{ width: '100%', height: 240, position: 'relative', overflow: 'hidden' }}>
-          {/* Banner background */}
-          <img src={SAMPLE_BANNER} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          {/* Gradient overlay */}
-          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, transparent 5%, ${cs?.primary || '#000'}99 50%, ${cs?.primary || '#000'} 100%)` }} />
-          {/* Profile photo centered in hero */}
-          <div style={{ position: 'absolute', top: 24, left: '50%', transform: 'translateX(-50%)', zIndex: 3 }}>
-            <PhotoAvatar size={90} border="3px solid rgba(255,255,255,0.3)" />
+        {/* Hero photo area — full bleed with gradient overlay */}
+        <div style={{ width: '100%', height: 280, position: 'relative', overflow: 'hidden' }}>
+          <img src={SAMPLE_BANNER} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.7)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, transparent 0%, ${darkBg}80 40%, ${darkBg} 100%)` }} />
+          {/* Profile photo centered */}
+          <div style={{ position: 'absolute', top: 30, left: '50%', transform: 'translateX(-50%)', zIndex: 3 }}>
+            <PhotoAvatar size={100} border="3px solid rgba(255,255,255,0.25)" shadow="0 8px 32px rgba(0,0,0,0.4)" />
           </div>
-          {/* Name overlaid at bottom of hero */}
-          <div style={{ position: 'absolute', bottom: 12, left: 0, right: 0, zIndex: 2, textAlign: 'center' }}>
-            <div style={{ fontSize: 22, fontWeight: 700, color: '#fff' }}>{SAMPLE_DATA.name}</div>
-            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>{SAMPLE_DATA.title}</div>
+          {/* Name overlaid at bottom */}
+          <div style={{ position: 'absolute', bottom: 16, left: 0, right: 0, zIndex: 2, textAlign: 'center' }}>
+            <div style={{ fontSize: 26, fontWeight: 800, color: '#fff', letterSpacing: -0.5, textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>{SAMPLE_DATA.name}</div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 4, fontWeight: 500 }}>Marketing Manager</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{SAMPLE_DATA.company}</div>
           </div>
         </div>
         {/* Content below hero */}
-        <div style={{ padding: '16px 20px 24px', background: cs?.primary || '#000', display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', lineHeight: 1.4, textAlign: 'center' }}>{SAMPLE_DATA.bio}</div>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-            <ActionBtn icon={<PreviewPhoneIcon />} label="Call" btnBg="rgba(255,255,255,0.15)" textColor="#fff" />
-            <ActionBtn icon={<PreviewMsgIcon />} label="Text" btnBg="rgba(255,255,255,0.15)" textColor="#fff" />
-            <ActionBtn icon={<PreviewEmailIcon />} label="Email" btnBg="rgba(255,255,255,0.15)" textColor="#fff" />
-            <ActionBtn icon={<PreviewGlobeIcon />} label="Website" btnBg="rgba(255,255,255,0.15)" textColor="#fff" />
+        <div style={{ padding: '16px 24px 28px', background: darkBg, display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
+            <ActionBtn icon={<PreviewPhoneIcon />} label="Call" btnBg="rgba(255,255,255,0.12)" textColor="#fff" />
+            <ActionBtn icon={<PreviewMsgIcon />} label="Text" btnBg="rgba(255,255,255,0.12)" textColor="#fff" />
+            <ActionBtn icon={<PreviewEmailIcon />} label="Email" btnBg="rgba(255,255,255,0.12)" textColor="#fff" />
+            <ActionBtn icon={<PreviewGlobeIcon />} label="Website" btnBg="rgba(255,255,255,0.12)" textColor="#fff" />
           </div>
-          <SocialIconsRow iconColor="#fff" bgColor="rgba(255,255,255,0.15)" size={28} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, width: '100%' }}>
-            <ContactRow icon={<PreviewPhoneIcon />} text={SAMPLE_DATA.phone} color="rgba(255,255,255,0.7)" />
-            <ContactRow icon={<PreviewEmailIcon />} text={SAMPLE_DATA.email} color="rgba(255,255,255,0.7)" />
-            <ContactRow icon={<PreviewGlobeIcon />} text={SAMPLE_DATA.website} color="rgba(255,255,255,0.7)" />
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.5, textAlign: 'center' }}>{SAMPLE_DATA.bio}</div>
+          <SocialIconsRow iconColor="#fff" bgColor="rgba(255,255,255,0.12)" size={32} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, width: '100%' }}>
+            <ContactRow icon={<PreviewPhoneIcon />} text={SAMPLE_DATA.phone} color="rgba(255,255,255,0.6)" />
+            <ContactRow icon={<PreviewEmailIcon />} text={SAMPLE_DATA.email} color="rgba(255,255,255,0.6)" />
+            <ContactRow icon={<PreviewGlobeIcon />} text={SAMPLE_DATA.website} color="rgba(255,255,255,0.6)" />
           </div>
         </div>
       </div>
@@ -355,24 +359,27 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
     return (
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
         {/* Banner */}
-        <div style={{ width: '100%', height: 120, overflow: 'hidden' }}>
+        <div style={{ width: '100%', height: 160, overflow: 'hidden', position: 'relative' }}>
           <img src={SAMPLE_BANNER} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
         {/* Arch photo overlapping */}
-        <div style={{ marginTop: -40, zIndex: 2 }}>
-          <PhotoAvatar size={80} border={`3px solid ${accentCol}`} borderRadius="12px 12px 50% 50%" />
+        <div style={{ marginTop: -50, zIndex: 2 }}>
+          <PhotoAvatar size={100} border={`4px solid ${cardBgCol}`} borderRadius="16px 16px 50% 50%" shadow="0 4px 20px rgba(0,0,0,0.15)" />
         </div>
-        <div style={{ textAlign: 'center', marginTop: 8 }}>
-          <div style={{ fontSize: 18, fontWeight: 700, color: txtCol }}>{SAMPLE_DATA.name}</div>
-          <div style={{ fontSize: 12, color: txtSec, marginTop: 2 }}>Licensed Realtor</div>
+        <div style={{ textAlign: 'center', marginTop: 10, padding: '0 24px' }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: txtCol, letterSpacing: -0.3 }}>Hi, I&apos;m {SAMPLE_DATA.name.split(' ')[0]},</div>
+          <div style={{ fontSize: 13, color: txtSec, marginTop: 4, textTransform: 'uppercase' as const, letterSpacing: 1, fontWeight: 500 }}>Your Local Realtor</div>
         </div>
-        <div style={{ fontSize: 11, color: txtSec, textAlign: 'center', padding: '4px 20px', lineHeight: 1.4 }}>{SAMPLE_DATA.bio}</div>
-        <div style={{ width: '85%', display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
-          {['View Listings', 'Schedule Showing', 'Contact Me'].map(l => (
-            <LinkBtn key={l} text={l} btnBg={`${accentCol}20`} textColor={txtCol} borderLeft={`4px solid ${accentCol}`} borderRadius={8} />
+        <div style={{ fontSize: 12, color: txtSec, textAlign: 'center', padding: '6px 24px', lineHeight: 1.5 }}>{SAMPLE_DATA.bio}</div>
+        <div style={{ width: '85%', display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
+          {['All About Me', 'Client Testimonials', 'Visit My Website', 'Book a Free Consultation'].map(l => (
+            <LinkBtn key={l} text={l} btnBg={`${accentCol}18`} textColor={txtCol} borderLeft={`4px solid ${accentCol}`} borderRadius={8} />
           ))}
         </div>
-        <div style={{ marginTop: 10, padding: '0 20px', width: '100%' }}>
+        <div style={{ marginTop: 12 }}>
+          <SocialIconsRow iconColor="#fff" bgColor={accentCol} size={32} />
+        </div>
+        <div style={{ marginTop: 8, padding: '0 24px 8px', width: '100%' }}>
           <ContactRow icon={<PreviewPhoneIcon />} text={SAMPLE_DATA.phone} color={txtCol} />
           <ContactRow icon={<PreviewEmailIcon />} text={SAMPLE_DATA.email} color={txtCol} />
         </div>
@@ -385,24 +392,25 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
     return (
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Bold colored top */}
-        <div style={{ padding: '24px 20px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-          <PhotoAvatar size={70} border="none" borderRadius="16px" />
-          <div style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>{SAMPLE_DATA.name}</div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.8)' }}>Creative Director</div>
+        <div style={{ padding: '28px 24px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+          <PhotoAvatar size={90} border="none" borderRadius="50%" shadow="0 4px 20px rgba(0,0,0,0.2)" />
+          <div style={{ fontSize: 24, fontWeight: 800, color: '#fff', letterSpacing: -0.5 }}>{SAMPLE_DATA.name}</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>Creative Director</div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>{SAMPLE_DATA.company}</div>
         </div>
         {/* Wave divider */}
-        <svg viewBox="0 0 400 40" style={{ width: '100%', height: 30, display: 'block', flexShrink: 0, marginTop: 8 }} preserveAspectRatio="none">
-          <path d="M0 20 Q100 0 200 20 Q300 40 400 20 L400 40 L0 40 Z" fill={cardBgCol} />
+        <svg viewBox="0 0 400 50" style={{ width: '100%', height: 40, display: 'block', flexShrink: 0, marginTop: 12 }} preserveAspectRatio="none">
+          <path d="M0 25 Q100 0 200 25 Q300 50 400 25 L400 50 L0 50 Z" fill={cardBgCol} />
         </svg>
         {/* White bottom */}
-        <div style={{ background: cardBgCol, padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <div style={{ fontSize: 11, color: '#666', textAlign: 'center', marginBottom: 6, lineHeight: 1.4 }}>{SAMPLE_DATA.bio}</div>
+        <div style={{ background: cardBgCol, padding: '4px 24px 24px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ fontSize: 13, color: '#555', textAlign: 'center', marginBottom: 8, lineHeight: 1.5, fontStyle: 'italic' }}>{SAMPLE_DATA.bio}</div>
           <ContactRow icon={<PreviewPhoneIcon />} text={SAMPLE_DATA.phone} color={accentCol} />
           <ContactRow icon={<PreviewEmailIcon />} text={SAMPLE_DATA.email} color={accentCol} />
           <ContactRow icon={<PreviewGlobeIcon />} text={SAMPLE_DATA.website} color={accentCol} />
           <ContactRow icon={<PreviewLocationIcon />} text={SAMPLE_DATA.location} color={accentCol} />
-          <div style={{ marginTop: 8 }}>
-            <SocialIconsRow iconColor="#fff" bgColor={accentCol} size={26} />
+          <div style={{ marginTop: 10 }}>
+            <SocialIconsRow iconColor="#fff" bgColor={accentCol} size={32} />
           </div>
         </div>
       </div>
@@ -411,27 +419,28 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
 
   // ─── PRO CORPORATE ───
   if (tmpl.layout === 'pro-corporate') {
+    const glassBg = isLightBg ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.06)';
     return (
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0' }}>
         {/* Company name bar */}
-        <div style={{ width: '100%', padding: '10px 20px', borderBottom: `1px solid ${isLightBg ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase' as const, color: accentCol }}>{SAMPLE_DATA.company}</span>
+        <div style={{ width: '100%', padding: '14px 24px', borderBottom: `1px solid ${isLightBg ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' as const, color: accentCol }}>{SAMPLE_DATA.company}</span>
         </div>
-        <div style={{ padding: '16px 20px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, width: '100%' }}>
-          <PhotoAvatar size={70} border={`3px solid ${isLightBg ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.15)'}`} />
+        <div style={{ padding: '20px 24px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, width: '100%' }}>
+          <PhotoAvatar size={90} border={`3px solid ${isLightBg ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)'}`} shadow="0 4px 16px rgba(0,0,0,0.12)" />
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 18, fontWeight: 700, color: txtCol }}>{SAMPLE_DATA.name}</div>
-            <div style={{ fontSize: 12, color: txtSec, marginTop: 2 }}>VP of Marketing</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: txtCol, letterSpacing: -0.3 }}>{SAMPLE_DATA.name}</div>
+            <div style={{ fontSize: 13, color: txtSec, marginTop: 4 }}>VP of Marketing</div>
           </div>
-          <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
-            <ActionBtn icon={<PreviewPhoneIcon />} label="Call" btnBg={`${accentCol}20`} textColor={txtCol} />
-            <ActionBtn icon={<PreviewMsgIcon />} label="Text" btnBg={`${accentCol}20`} textColor={txtCol} />
-            <ActionBtn icon={<PreviewEmailIcon />} label="Email" btnBg={`${accentCol}20`} textColor={txtCol} />
-            <ActionBtn icon={<PreviewGlobeIcon />} label="Website" btnBg={`${accentCol}20`} textColor={txtCol} />
+          <div style={{ display: 'flex', gap: 14, marginTop: 6 }}>
+            <ActionBtn icon={<PreviewPhoneIcon />} label="Call" btnBg={glassBg} textColor={txtCol} />
+            <ActionBtn icon={<PreviewMsgIcon />} label="Text" btnBg={glassBg} textColor={txtCol} />
+            <ActionBtn icon={<PreviewEmailIcon />} label="Email" btnBg={glassBg} textColor={txtCol} />
+            <ActionBtn icon={<PreviewGlobeIcon />} label="Website" btnBg={glassBg} textColor={txtCol} />
           </div>
-          <div style={{ width: '100%', padding: '10px', borderRadius: 10, background: isLightBg ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.05)', marginTop: 4 }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: txtCol, marginBottom: 4 }}>About</div>
-            <div style={{ fontSize: 11, color: txtSec, lineHeight: 1.4 }}>{SAMPLE_DATA.bio}</div>
+          <div style={{ width: '100%', padding: '14px 16px', borderRadius: 12, background: glassBg, marginTop: 6 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: accentCol, marginBottom: 6, textTransform: 'uppercase' as const, letterSpacing: 0.5 }}>About</div>
+            <div style={{ fontSize: 12, color: txtSec, lineHeight: 1.5 }}>{SAMPLE_DATA.bio}</div>
           </div>
         </div>
       </div>
@@ -443,33 +452,33 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
     return (
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
         {/* Banner */}
-        <div style={{ width: '100%', height: 100, overflow: 'hidden' }}>
+        <div style={{ width: '100%', height: 130, overflow: 'hidden' }}>
           <img src={SAMPLE_BANNER} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
         {/* Overlapping photo */}
-        <div style={{ marginTop: -35, zIndex: 2 }}>
-          <PhotoAvatar size={70} border={`3px solid ${accentCol}`} />
+        <div style={{ marginTop: -45, zIndex: 2 }}>
+          <PhotoAvatar size={90} border={`4px solid ${accentCol}`} shadow={`0 4px 20px ${accentCol}30`} />
         </div>
-        <div style={{ textAlign: 'center', marginTop: 6, padding: '0 20px' }}>
-          <div style={{ fontSize: 18, fontWeight: 700, color: txtCol }}>{SAMPLE_DATA.name}</div>
-          <div style={{ fontSize: 12, color: txtSec, marginTop: 2 }}>{SAMPLE_DATA.title}</div>
+        <div style={{ textAlign: 'center', marginTop: 8, padding: '0 24px' }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: txtCol, letterSpacing: -0.3 }}>{SAMPLE_DATA.name}</div>
+          <div style={{ fontSize: 13, color: txtSec, marginTop: 4 }}>{SAMPLE_DATA.title}</div>
         </div>
         {/* Industry badge */}
-        <div style={{ padding: '4px 14px', borderRadius: 12, background: `${accentCol}25`, marginTop: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontSize: 10, color: accentCol, fontWeight: 600 }}>{SAMPLE_DATA.industry}</span>
+        <div style={{ padding: '6px 18px', borderRadius: 16, background: `${accentCol}20`, marginTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ fontSize: 11, color: accentCol, fontWeight: 600 }}>{SAMPLE_DATA.industry}</span>
         </div>
         {/* Services grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, width: '85%', marginTop: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, width: '88%', marginTop: 12 }}>
           {SAMPLE_DATA.services.map(s => (
-            <div key={s} style={{ padding: '8px 6px', background: `${accentCol}15`, borderRadius: 8, textAlign: 'center' }}>
-              <span style={{ fontSize: 10, color: txtCol, fontWeight: 500 }}>{s}</span>
+            <div key={s} style={{ padding: '10px 8px', background: `${accentCol}12`, borderRadius: 10, textAlign: 'center' }}>
+              <span style={{ fontSize: 12, color: txtCol, fontWeight: 500 }}>{s}</span>
             </div>
           ))}
         </div>
-        <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-          <ActionBtn icon={<PreviewPhoneIcon />} label="Call" btnBg={`${accentCol}20`} textColor={txtCol} />
-          <ActionBtn icon={<PreviewMsgIcon />} label="Text" btnBg={`${accentCol}20`} textColor={txtCol} />
-          <ActionBtn icon={<PreviewEmailIcon />} label="Email" btnBg={`${accentCol}20`} textColor={txtCol} />
+        <div style={{ display: 'flex', gap: 16, marginTop: 14 }}>
+          <ActionBtn icon={<PreviewPhoneIcon />} label="Call" btnBg={`${accentCol}18`} textColor={txtCol} />
+          <ActionBtn icon={<PreviewMsgIcon />} label="Text" btnBg={`${accentCol}18`} textColor={txtCol} />
+          <ActionBtn icon={<PreviewEmailIcon />} label="Email" btnBg={`${accentCol}18`} textColor={txtCol} />
         </div>
       </div>
     );
