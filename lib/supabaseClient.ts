@@ -1,116 +1,72 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Singleton instance - will be created on first use (at runtime, not build time)
-let supabaseInstance: SupabaseClient | null = null;
+/**
+ * Supabase Client — Singleton with robust session persistence
+ *
+ * Key fixes for session logout issues:
+ * 1. Explicit storageKey so it never changes between env-var vs fallback URLs
+ * 2. True singleton — created once, never re-created
+ * 3. Uses localStorage (default) for session persistence
+ */
 
-// Create a chainable mock query builder for build time
-const createMockQueryBuilder = () => {
-  const mockResult = { data: [], error: null };
-  const chainable: any = {
-    select: () => chainable,
-    eq: () => chainable,
-    neq: () => chainable,
-    gte: () => chainable,
-    lte: () => chainable,
-    gt: () => chainable,
-    lt: () => chainable,
-    is: () => chainable,
-    in: () => chainable,
-    or: () => chainable,
-    ilike: () => chainable,
-    like: () => chainable,
-    order: () => chainable,
-    limit: () => chainable,
-    range: () => chainable,
-    single: async () => ({ data: null, error: null }),
-    maybeSingle: async () => ({ data: null, error: null }),
-    then: (resolve: any) => resolve(mockResult),
-    data: [],
-    error: null,
-  };
-  return chainable;
-};
+// Hardcoded fallback credentials (public anon keys, safe to include)
+const SUPABASE_URL = 'https://scasgwrikoqdwlwlwcff.supabase.co';
+const SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjYXNnd3Jpa29xZHdsd2x3Y2ZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY5ODUxODEsImV4cCI6MjA4MjU2MTE4MX0.83ARHv2Zj6oJpbojPCIT0ljL8Ze2JqMBztLVueGXXhs';
 
-// Create a mock client for build time when env vars aren't available
-const createMockClient = (): SupabaseClient => {
-  console.warn('[Supabase] Using mock client - credentials not available');
-  return {
+// Fixed storage key — never changes regardless of how the URL is resolved.
+// This prevents the "lost session" bug where env-var URL vs fallback URL
+// would produce different auto-generated storage keys.
+const STORAGE_KEY = 'sb-scasgwrikoqdwlwlwcff-auth-token';
+
+// Resolve credentials: prefer env vars (inlined at build time by Next.js),
+// fall back to hardcoded values so the app always works.
+function getUrl(): string {
+  if (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_SUPABASE_URL) {
+    return process.env.NEXT_PUBLIC_SUPABASE_URL;
+  }
+  return SUPABASE_URL;
+}
+
+function getAnonKey(): string {
+  if (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  }
+  return SUPABASE_ANON_KEY;
+}
+
+// ── Singleton ────────────────────────────────────────────────────────────────
+let _instance: SupabaseClient | null = null;
+
+function getInstance(): SupabaseClient {
+  if (_instance) return _instance;
+
+  const url = getUrl();
+  const key = getAnonKey();
+
+  _instance = createClient(url, key, {
     auth: {
-      getSession: async () => ({ data: { session: null }, error: null }),
-      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-      signInWithPassword: async () => ({ data: { user: null, session: null }, error: new Error('Supabase not configured') }),
-      signUp: async () => ({ data: { user: null, session: null }, error: new Error('Supabase not configured') }),
-      signOut: async () => ({ error: null }),
-    },
-    from: () => createMockQueryBuilder(),
-  } as unknown as SupabaseClient;
-};
-
-// Hardcoded fallback credentials (these are public anon keys, safe to include)
-const FALLBACK_SUPABASE_URL = 'https://scasgwrikoqdwlwlwcff.supabase.co';
-const FALLBACK_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjYXNnd3Jpa29xZHdsd2x3Y2ZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY5ODUxODEsImV4cCI6MjA4MjU2MTE4MX0.83ARHv2Zj6oJpbojPCIT0ljL8Ze2JqMBztLVueGXXhs';
-
-// Get Supabase credentials - use env vars if available, otherwise fallback
-const getSupabaseCredentials = (): { url: string; anonKey: string } => {
-  // Try environment variables first
-  const envUrl = typeof process !== 'undefined' ? process.env?.NEXT_PUBLIC_SUPABASE_URL : undefined;
-  const envKey = typeof process !== 'undefined' ? process.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY : undefined;
-  
-  // Use env vars if available, otherwise use fallback
-  const url = envUrl || FALLBACK_SUPABASE_URL;
-  const anonKey = envKey || FALLBACK_SUPABASE_ANON_KEY;
-  
-  if (envUrl && envKey) {
-    console.log('[Supabase] Using credentials from NEXT_PUBLIC_ env vars');
-  } else {
-    console.log('[Supabase] Using fallback credentials');
-  }
-  
-  return { url, anonKey };
-};
-
-// Get or create the Supabase client
-// This function is called at runtime, ensuring env vars are available
-const getSupabaseClient = (): SupabaseClient => {
-  // If we already have an instance, return it
-  if (supabaseInstance) {
-    return supabaseInstance;
-  }
-
-  // Get credentials at runtime
-  const { url: supabaseUrl, anonKey: supabaseAnonKey } = getSupabaseCredentials();
-
-  // Check if we're in a browser environment
-  if (typeof window !== 'undefined') {
-    console.log('[Supabase] Initializing client in browser...');
-    console.log('[Supabase] URL available:', !!supabaseUrl, supabaseUrl ? `(${supabaseUrl.substring(0, 30)}...)` : '');
-    console.log('[Supabase] Key available:', !!supabaseAnonKey);
-  }
-
-  // With fallback credentials, we should always have valid credentials
-  // But just in case, log if we somehow don't
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('[Supabase] No credentials available - this should not happen!');
-  }
-
-  // Create the real client
-  console.log('[Supabase] Creating real client');
-  supabaseInstance = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      autoRefreshToken: true,
+      // Explicit, fixed storage key — the most important fix
+      storageKey: STORAGE_KEY,
+      // Keep the session in localStorage and auto-refresh the JWT
       persistSession: true,
+      autoRefreshToken: true,
+      // Detect OAuth redirects with tokens in the URL hash
       detectSessionInUrl: true,
+      // Default flowType is 'implicit' which works for SPA
+      flowType: 'implicit',
     },
   });
 
-  return supabaseInstance;
-};
+  return _instance;
+}
 
-// Export a proxy that lazily initializes the client
-// This ensures the client is created at runtime, not at import time
-export const supabase = new Proxy({} as SupabaseClient, {
+// Export a lazy proxy so imports at the module level (SSR / build time)
+// don't crash — the real client is only created on first property access
+// in the browser.
+export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
   get(_, prop) {
-    const client = getSupabaseClient();
+    const client = getInstance();
     const value = (client as any)[prop];
     if (typeof value === 'function') {
       return value.bind(client);

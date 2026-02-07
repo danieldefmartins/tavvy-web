@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Session, User } from '@supabase/supabase-js';
+import { useAuth } from './AuthContext';
 
 interface Pro {
   id: string;
@@ -31,43 +32,38 @@ interface ProAuthContextType {
 
 const ProAuthContext = createContext<ProAuthContextType | undefined>(undefined);
 
+/**
+ * ProAuthProvider — now piggybacks on AuthContext instead of creating
+ * its own onAuthStateChange listener. This eliminates the competing
+ * listener that was causing race conditions and session instability.
+ */
 export function ProAuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const { user, session, loading: authLoading, signOut: authSignOut } = useAuth();
   const [pro, setPro] = useState<Pro | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [proLoading, setProLoading] = useState(false);
 
+  // Fetch pro profile whenever the authenticated user changes
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      // If user is logged in, fetch their pro profile
-      if (session?.user) {
-        await fetchProProfile(session.user.email!);
-      }
-      
-      setLoading(false);
-    });
+    let cancelled = false;
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      // Fetch pro profile when user logs in
-      if (session?.user) {
-        await fetchProProfile(session.user.email!);
-      } else {
-        setPro(null);
+    if (!user?.email) {
+      setPro(null);
+      setProLoading(false);
+      return;
+    }
+
+    setProLoading(true);
+    fetchProProfile(user.email).then((proData) => {
+      if (!cancelled) {
+        setPro(proData);
+        setProLoading(false);
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    return () => { cancelled = true; };
+  }, [user?.email]);
 
-  const fetchProProfile = async (email: string) => {
+  const fetchProProfile = async (email: string): Promise<Pro | null> => {
     try {
       const { data, error } = await supabase
         .from('pros')
@@ -76,18 +72,17 @@ export function ProAuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error) {
-        console.error('Error fetching pro profile:', error);
-        return;
+        // Not every user is a pro — this is expected for regular users
+        return null;
       }
-
-      setPro(data);
-    } catch (err) {
-      console.error('Error fetching pro profile:', err);
+      return data;
+    } catch {
+      return null;
     }
   };
 
   const signIn = async (email: string, password: string) => {
-    // First, check if this email exists in the pros table
+    // Verify the email belongs to a pro before authenticating
     const { data: proData, error: proError } = await supabase
       .from('pros')
       .select('*')
@@ -98,54 +93,40 @@ export function ProAuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error('Pro account not found. Please check your email or sign up.');
     }
 
-    // Authenticate with Supabase Auth
-    const { error } = await supabase.auth.signInWithPassword({ 
-      email, 
-      password 
-    });
-    
+    // Use the shared Supabase auth — AuthContext will pick up the SIGNED_IN event
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-
-    // Pro profile will be fetched automatically by the auth state change listener
+    // Pro profile will be fetched automatically when user state updates
   };
 
   const signUp = async (email: string, password: string, proData: Partial<Pro>) => {
-    // Create auth user first
-    const { data: authData, error: authError } = await supabase.auth.signUp({ 
-      email, 
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
       password,
-      options: {
-        data: { 
-          user_type: 'pro'
-        }
-      }
+      options: { data: { user_type: 'pro' } },
     });
-    
+
     if (authError) throw authError;
     if (!authData.user) throw new Error('Failed to create user');
 
-    // Create pro profile
     const { error: proError } = await supabase
       .from('pros')
       .insert({
         contact_email: email,
         ...proData,
-        is_active: false, // Needs verification
-        subscription_status: 'inactive'
+        is_active: false,
+        subscription_status: 'inactive',
       });
 
-    if (proError) {
-      // If pro creation fails, we should clean up the auth user
-      // But for now, just throw the error
-      throw proError;
-    }
+    if (proError) throw proError;
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
     setPro(null);
+    await authSignOut();
   };
+
+  const loading = authLoading || proLoading;
 
   return (
     <ProAuthContext.Provider value={{ user, pro, session, loading, signIn, signUp, signOut }}>
