@@ -512,7 +512,7 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
         {/* Name section on white */}
         <div style={{ background: cardBgCol, padding: '16px 24px 8px', textAlign: 'center' }}>
           <div style={{ fontSize: 24, fontWeight: 700, color: '#1a1a1a' }}>{SAMPLE_DATA.name}</div>
-          <div style={{ fontSize: 14, color: '#777', marginTop: 4 }}>Sr. Sales Manager</div>
+          <div style={{ fontSize: 14, color: '#777', marginTop: 4 }}>General Contractor</div>
         </div>
         {/* Action icons */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: 12, padding: '12px 0', background: cardBgCol }}>
@@ -522,19 +522,28 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
             </div>
           ))}
         </div>
-        {/* Schedule Meeting section */}
-        <div style={{ background: cardBgCol, padding: '12px 28px 28px' }}>
-          <div style={{ fontSize: 18, fontWeight: 700, color: '#1a1a1a', marginBottom: 6 }}>Schedule Meeting</div>
-          <div style={{ fontSize: 12, color: '#888', lineHeight: 1.5, marginBottom: 14 }}>
-            Schedule a meeting to discuss potential opportunities for collaboration
+        {/* Industry + Services section */}
+        <div style={{ background: cardBgCol, padding: '12px 24px 24px' }}>
+          {/* Industry */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill={accentCol}><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#1a1a1a' }}>Industry</span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ width: '100%', height: 44, borderRadius: 22, background: accentCol, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>Book on Calendly</span>
-            </div>
-            <div style={{ width: '100%', height: 44, borderRadius: 22, background: '#fff', border: `2px solid ${accentCol}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: accentCol }}>Add to Calendar</span>
-            </div>
+          <div style={{ background: `${accentCol}15`, padding: '8px 14px', borderRadius: 8, marginBottom: 14, display: 'inline-block', borderLeft: `3px solid ${accentCol}` }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: accentCol }}>Construction</span>
+          </div>
+
+          {/* Services */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill={accentCol}><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#1a1a1a' }}>Services</span>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {['Remodeling', 'Roofing', 'Plumbing', 'Electrical', 'Painting', 'Flooring'].map((service, i) => (
+              <div key={i} style={{ background: `${accentCol}12`, padding: '6px 12px', borderRadius: 16, border: `1px solid ${accentCol}30`, fontSize: 11, fontWeight: 500, color: accentCol }}>
+                {service}
+              </div>
+            ))}
           </div>
         </div>
       </div>
