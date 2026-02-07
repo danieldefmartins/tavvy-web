@@ -53,6 +53,22 @@ const BG_DARK = '#000000';
 // Light background themes that need dark text
 const LIGHT_THEMES = ['minimal'];
 
+// Helper: compute perceived brightness from a hex color (0=black, 255=white)
+function hexBrightness(hex: string): number {
+  const c = hex.replace('#', '');
+  if (c.length < 6) return 128;
+  const r = parseInt(c.substring(0, 2), 16);
+  const g = parseInt(c.substring(2, 4), 16);
+  const b = parseInt(c.substring(4, 6), 16);
+  return (r * 299 + g * 587 + b * 114) / 1000;
+}
+
+function isLightBackground(color1?: string, color2?: string): boolean {
+  const b1 = color1 ? hexBrightness(color1) : 128;
+  const b2 = color2 ? hexBrightness(color2) : b1;
+  return (b1 + b2) / 2 > 160;
+}
+
 // Platform icon components mapping
 const PlatformIcons: Record<string, React.ComponentType<{ size: number; color: string }>> = {
   instagram: IoLogoInstagram,
@@ -121,8 +137,9 @@ export default function ECardPreviewScreen() {
     loadCard();
   }, [cardId]);
 
-  // Determine text color based on theme
-  const isLightTheme = cardData?.theme && LIGHT_THEMES.includes(cardData.theme);
+  // Determine text color based on actual background brightness
+  const isLightTheme = (cardData?.theme && LIGHT_THEMES.includes(cardData.theme)) || 
+    isLightBackground(cardData?.gradient_color_1, cardData?.gradient_color_2);
   const textColor = isLightTheme ? '#1A1A1A' : '#FFFFFF';
   const secondaryTextColor = isLightTheme ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.8)';
 
@@ -604,10 +621,10 @@ export default function ECardPreviewScreen() {
             align-items: center;
             gap: 4px;
             padding: 6px 12px;
-            background: rgba(255,255,255,0.2);
+            background: ${isLightTheme ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.2)'};
             border-radius: 16px;
             font-size: 12px;
-            color: #fff;
+            color: ${textColor};
           }
 
           .credential-badge.verified {

@@ -20,6 +20,7 @@ import {
   uploadEcardFile,
   saveCardLinks,
   updateCard,
+  getUserCards,
   PLATFORM_ICONS, 
   CardData, 
   LinkItem as ECardLink,
@@ -763,6 +764,53 @@ export default function ECardCreateScreen() {
   const [reviewBbbUrl, setReviewBbbUrl] = useState('');
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [showExternalReviews, setShowExternalReviews] = useState(false);
+
+  // Auto-fill from previous card
+  const [showAutoFillBanner, setShowAutoFillBanner] = useState(false);
+  const [previousCard, setPreviousCard] = useState<CardData | null>(null);
+
+  const applyAutoFill = (card: CardData) => {
+    if (card.full_name) setName(card.full_name);
+    if (card.title_role) setTitleRole(card.title_role);
+    if (card.bio) setBio(card.bio);
+    if (card.email) setEmail(card.email);
+    if (card.phone) setPhone(card.phone);
+    if (card.website) setWebsite(card.website);
+    if (card.address) setAddress(card.address);
+    if (card.profile_photo_url) setProfileImage(card.profile_photo_url);
+    if (card.professional_category) setProfessionalCategory(card.professional_category);
+    if (card.review_google_url) setReviewGoogleUrl(card.review_google_url);
+    if (card.review_yelp_url) setReviewYelpUrl(card.review_yelp_url);
+    if (card.review_tripadvisor_url) setReviewTripadvisorUrl(card.review_tripadvisor_url);
+    if (card.review_facebook_url) setReviewFacebookUrl(card.review_facebook_url);
+    if (card.review_bbb_url) setReviewBbbUrl(card.review_bbb_url);
+    if (card.featured_icons && Array.isArray(card.featured_icons)) {
+      setFeaturedIcons(card.featured_icons.map((item: any) =>
+        typeof item === 'string' ? { platform: item, url: '' } : item
+      ));
+    }
+    if (card.links && Array.isArray(card.links)) {
+      setLinks(card.links.map((l: any) => ({ id: `link_${Date.now()}_${Math.random()}`, label: l.label || l.title || '', url: l.url || '' })));
+    }
+    setShowAutoFillBanner(false);
+  };
+
+  // Check for existing cards on mount
+  useEffect(() => {
+    const checkExistingCards = async () => {
+      if (!user?.id) return;
+      try {
+        const cards = await getUserCards(user.id);
+        if (cards && cards.length > 0) {
+          setPreviousCard(cards[0] as CardData);
+          setShowAutoFillBanner(true);
+        }
+      } catch (e) {
+        console.warn('Could not fetch existing cards:', e);
+      }
+    };
+    checkExistingCards();
+  }, [user?.id]);
 
   // ── Restore saved card data after login redirect ──
   useEffect(() => {
@@ -1807,6 +1855,20 @@ export default function ECardCreateScreen() {
                 {isCreating ? 'Saving...' : 'Save'}
               </button>
             </div>
+
+            {/* Auto-fill banner */}
+            {showAutoFillBanner && previousCard && (
+              <div className="autofill-banner">
+                <div className="autofill-text">
+                  <span style={{ fontWeight: 600, fontSize: 13 }}>Use info from your previous card?</span>
+                  <span style={{ fontSize: 11, opacity: 0.7 }}>{previousCard.full_name || 'Your last card'}</span>
+                </div>
+                <div className="autofill-actions">
+                  <button className="autofill-yes" onClick={() => applyAutoFill(previousCard)}>Yes, use it</button>
+                  <button className="autofill-no" onClick={() => setShowAutoFillBanner(false)}>No thanks</button>
+                </div>
+              </div>
+            )}
 
             {/* THE CARD — template-specific layout */}
             <div className="card-container">
@@ -3056,13 +3118,53 @@ export default function ECardCreateScreen() {
             display: flex;
             justify-content: center;
           }
-
           .live-card {
             max-width: 420px;
             width: 100%;
           }
         }
-      `}</style>
+
+        /* Auto-fill banner */
+        .autofill-banner {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 14px;
+          margin: 0 0 4px;
+          background: rgba(59, 159, 217, 0.08);
+          border: 1px solid rgba(59, 159, 217, 0.2);
+          border-radius: 12px;
+        }
+        .autofill-text {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+        .autofill-actions {
+          display: flex;
+          gap: 6px;
+          flex-shrink: 0;
+        }
+        .autofill-yes {
+          padding: 6px 12px;
+          border-radius: 8px;
+          background: #3B9FD9;
+          color: #fff;
+          border: none;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+        }
+        .autofill-no {
+          padding: 6px 10px;
+          border-radius: 8px;
+          background: transparent;
+          color: #888;
+          border: 1px solid #ddd;
+          font-size: 12px;
+          cursor: pointer;
+        }
+      `}</style>>
     </AppLayout>
   );
 }

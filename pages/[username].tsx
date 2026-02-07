@@ -235,10 +235,27 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   // Endorsement state
   const [showEndorsementPopup, setShowEndorsementPopup] = useState(false);
   const [showEndorseFlow, setShowEndorseFlow] = useState(false);
-  const [selectedSignals, setSelectedSignals] = useState<string[]>([]);
+  // signalTaps: { signalId: intensity (0=not selected, 1=selected, 2=strong, 3=strongest) }
+  const [signalTaps, setSignalTaps] = useState<Record<string, number>>({});
   const [endorseNote, setEndorseNote] = useState('');
   const [isSubmittingEndorsement, setIsSubmittingEndorsement] = useState(false);
   const [endorsementSubmitted, setEndorsementSubmitted] = useState(false);
+
+  const handleSignalTap = (signalId: string) => {
+    setSignalTaps(prev => {
+      const current = prev[signalId] || 0;
+      if (current >= 3) {
+        // Deselect on 4th tap
+        const next = { ...prev };
+        delete next[signalId];
+        return next;
+      }
+      return { ...prev, [signalId]: current + 1 };
+    });
+  };
+
+  const selectedSignalCount = Object.keys(signalTaps).length;
+  const fireEmojis = (intensity: number) => '🔥'.repeat(Math.max(0, intensity - 1));
 
   const generateVCard = () => {
     if (!cardData) return '';
@@ -1872,7 +1889,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           onClick={() => setShowEndorsementPopup(false)}
         >
           <div
-            style={{ background: '#1a1a2e', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 420, maxHeight: '80vh', overflowY: 'auto', padding: '24px 20px 32px', color: '#fff' }}
+            style={{ background: '#fff', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 420, maxHeight: '80vh', overflowY: 'auto', padding: '24px 20px 32px', color: '#1a1a2e' }}
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
@@ -1880,124 +1897,138 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <svg width="28" height="28" viewBox="0 0 24 24"><defs><linearGradient id="crownGold2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#FFE066" /><stop offset="50%" stopColor="#FFD700" /><stop offset="100%" stopColor="#FFA500" /></linearGradient></defs><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" fill="url(#crownGold2)" /></svg>
                 <div>
-                  <div style={{ fontSize: 18, fontWeight: 700 }}>Endorsements</div>
-                  <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>{cardData.endorsementCount || cardData.tapCount || 0} total</div>
+                  <div style={{ fontSize: 20, fontWeight: 800 }}>Endorsements</div>
+                  <div style={{ fontSize: 13, color: '#888' }}>{cardData.endorsementCount || cardData.tapCount || 0} total endorsements</div>
                 </div>
               </div>
-              <button onClick={() => setShowEndorsementPopup(false)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff' }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              <button onClick={() => setShowEndorsementPopup(false)} style={{ background: '#f0f0f0', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#333' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
 
-            {/* Top Endorsement Tags */}
+            {/* Top Endorsement Tags — shown as rows with ×count */}
             {cardData.topEndorsementTags && cardData.topEndorsementTags.length > 0 ? (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 24 }}>
+              <div style={{ marginBottom: 24 }}>
                 {cardData.topEndorsementTags.map((tag, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 20, background: 'rgba(255,215,0,0.12)', border: '1px solid rgba(255,215,0,0.25)', fontSize: 13, fontWeight: 600 }}>
-                    <span>{tag.emoji}</span>
-                    <span style={{ color: '#FFD700' }}>{tag.label}</span>
-                    <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }}>{tag.count}</span>
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #f0f0f0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontSize: 22 }}>{tag.emoji}</span>
+                      <span style={{ fontSize: 15, fontWeight: 600, color: '#1a1a2e' }}>{tag.label}</span>
+                    </div>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: '#3B9FD9' }}>×{tag.count}</span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div style={{ textAlign: 'center', padding: '20px 0', color: 'rgba(255,255,255,0.4)', fontSize: 14 }}>
+              <div style={{ textAlign: 'center', padding: '30px 0', color: '#aaa', fontSize: 15 }}>
                 No endorsements yet. Be the first!
-              </div>
-            )}
-
-            {/* Recent Endorsements */}
-            {cardData.recentEndorsements && cardData.recentEndorsements.length > 0 && (
-              <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.6)', marginBottom: 12 }}>Recent</div>
-                {cardData.recentEndorsements.map((e, i) => (
-                  <div key={i} style={{ padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                    <div style={{ fontSize: 14, fontWeight: 600 }}>{e.endorserName}</div>
-                    {e.note && <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>{e.note}</div>}
-                  </div>
-                ))}
               </div>
             )}
 
             {/* Endorse Button */}
             {!endorsementSubmitted ? (
               <button
-                onClick={() => { setShowEndorsementPopup(false); setShowEndorseFlow(true); }}
-                style={{ width: '100%', padding: '14px', borderRadius: 12, background: 'linear-gradient(135deg, #FFD700, #FFA500)', border: 'none', color: '#1a1a2e', fontSize: 15, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                onClick={() => { setShowEndorsementPopup(false); setSignalTaps({}); setEndorseNote(''); setShowEndorseFlow(true); }}
+                style={{ width: '100%', padding: '16px', borderRadius: 14, background: '#3B9FD9', border: 'none', color: '#fff', fontSize: 16, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
               >
-                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" fill="#1a1a2e" /></svg>
-                Endorse {cardData.fullName.split(' ')[0]}
+                Endorse {cardData.fullName.split(' ')[0]} →
               </button>
             ) : (
-              <div style={{ textAlign: 'center', padding: '14px', borderRadius: 12, background: 'rgba(0,200,83,0.15)', color: '#00C853', fontSize: 14, fontWeight: 600 }}>
-                Thank you for your endorsement!
+              <div style={{ textAlign: 'center', padding: '16px', borderRadius: 14, background: 'rgba(0,200,83,0.1)', color: '#00C853', fontSize: 15, fontWeight: 700 }}>
+                ✅ Thank you for your endorsement!
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* Endorse Flow - Tap Signal Tags */}
+      {/* Endorse Flow - Tavvy Tap Tile System */}
       {showEndorseFlow && cardData && (
         <div
-          style={{ position: 'fixed', inset: 0, zIndex: 10001, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+          style={{ position: 'fixed', inset: 0, zIndex: 10001, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
           onClick={() => setShowEndorseFlow(false)}
         >
           <div
-            style={{ background: '#1a1a2e', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 420, maxHeight: '85vh', overflowY: 'auto', padding: '24px 20px 32px', color: '#fff' }}
+            style={{ background: '#fff', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 420, maxHeight: '90vh', overflowY: 'auto', padding: '24px 20px 32px', color: '#1a1a2e' }}
             onClick={e => e.stopPropagation()}
           >
-            <div style={{ textAlign: 'center', marginBottom: 20 }}>
-              <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>Endorse {cardData.fullName.split(' ')[0]}</div>
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>Tap the qualities that describe them best</div>
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+              <div style={{ fontSize: 22, fontWeight: 800 }}>What Stood Out?</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#3B9FD9' }}>{selectedSignalCount} selected</div>
             </div>
+            <div style={{ fontSize: 13, color: '#888', marginBottom: 20 }}>Tap to select · Tap again to make it stronger</div>
 
-            {/* Signal Tags */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
-              {(cardData.endorsementSignals || []).map(signal => {
-                const isSelected = selectedSignals.includes(signal.id);
-                return (
-                  <button
-                    key={signal.id}
-                    onClick={() => setSelectedSignals(prev => isSelected ? prev.filter(s => s !== signal.id) : [...prev, signal.id])}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 6, padding: '10px 16px', borderRadius: 20,
-                      background: isSelected ? 'rgba(255,215,0,0.2)' : 'rgba(255,255,255,0.06)',
-                      border: isSelected ? '1.5px solid #FFD700' : '1.5px solid rgba(255,255,255,0.1)',
-                      color: isSelected ? '#FFD700' : 'rgba(255,255,255,0.7)',
-                      fontSize: 14, fontWeight: isSelected ? 600 : 500, cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                    }}
-                  >
-                    <span>{signal.emoji}</span>
-                    <span>{signal.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+            {/* Group signals by category */}
+            {(() => {
+              const signals = cardData.endorsementSignals || [];
+              const categories = [...new Set(signals.map(s => s.category))];
+              const catColors: Record<string, string> = { universal: '#3B9FD9', sales: '#E87D3E', real_estate: '#6B7280', marketing: '#8B5CF6', general: '#3B9FD9' };
+              const catLabels: Record<string, string> = { universal: 'Strengths', sales: 'Sales Skills', real_estate: 'Real Estate', marketing: 'Marketing', general: 'Strengths' };
+              return categories.map(cat => (
+                <div key={cat} style={{ marginBottom: 16 }}>
+                  <div style={{ display: 'inline-block', padding: '4px 12px', borderRadius: 12, background: catColors[cat] || '#3B9FD9', color: '#fff', fontSize: 12, fontWeight: 700, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                    {catLabels[cat] || cat}
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                    {signals.filter(s => s.category === cat).map(signal => {
+                      const intensity = signalTaps[signal.id] || 0;
+                      const isSelected = intensity > 0;
+                      return (
+                        <button
+                          key={signal.id}
+                          onClick={() => handleSignalTap(signal.id)}
+                          style={{
+                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                            padding: '14px 6px', borderRadius: 14, minHeight: 90, cursor: 'pointer',
+                            background: isSelected ? (catColors[cat] || '#3B9FD9') : '#f0f4f8',
+                            border: isSelected ? 'none' : '1.5px solid #e0e4e8',
+                            color: isSelected ? '#fff' : '#555',
+                            transition: 'all 0.15s ease',
+                            position: 'relative' as const,
+                          }}
+                        >
+                          {isSelected && (
+                            <div style={{ position: 'absolute', top: 6, right: 6, width: 18, height: 18, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                            </div>
+                          )}
+                          <span style={{ fontSize: 28, marginBottom: 4 }}>{signal.emoji}</span>
+                          <span style={{ fontSize: 11, fontWeight: 600, textAlign: 'center', lineHeight: 1.2 }}>{signal.label}</span>
+                          {intensity > 1 && (
+                            <span style={{ fontSize: 12, marginTop: 2 }}>{fireEmojis(intensity)}</span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ));
+            })()}
 
             {/* Optional Note */}
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>Add a note (optional)</div>
+            <div style={{ marginTop: 8, marginBottom: 16 }}>
               <textarea
                 value={endorseNote}
                 onChange={e => setEndorseNote(e.target.value)}
-                placeholder="Say something nice..."
-                style={{ width: '100%', padding: '12px 14px', borderRadius: 12, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: 14, resize: 'none', minHeight: 60, outline: 'none', fontFamily: 'inherit' }}
+                placeholder="Add a note (optional)..."
+                style={{ width: '100%', padding: '12px 14px', borderRadius: 12, background: '#f5f5f5', border: '1px solid #e0e0e0', color: '#333', fontSize: 14, resize: 'none', minHeight: 50, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' as const }}
                 rows={2}
               />
             </div>
 
-            {/* Submit */}
+            {/* Continue Button */}
             <button
               onClick={async () => {
-                if (selectedSignals.length === 0) { alert('Please select at least one quality.'); return; }
+                if (selectedSignalCount === 0) return;
                 setIsSubmittingEndorsement(true);
                 try {
+                  // Convert signalTaps to array of signal IDs (repeated by intensity)
+                  const signalIds = Object.keys(signalTaps);
                   const res = await fetch('/api/ecard/endorse', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cardId: cardData.id, cardOwnerId: cardData.id, signals: selectedSignals, note: endorseNote }),
+                    body: JSON.stringify({ cardId: cardData.id, signals: signalIds, intensities: signalTaps, note: endorseNote }),
                   });
                   if (res.ok) {
                     setEndorsementSubmitted(true);
@@ -2017,16 +2048,17 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   setIsSubmittingEndorsement(false);
                 }
               }}
-              disabled={isSubmittingEndorsement || selectedSignals.length === 0}
+              disabled={isSubmittingEndorsement || selectedSignalCount === 0}
               style={{
-                width: '100%', padding: '14px', borderRadius: 12,
-                background: selectedSignals.length > 0 ? 'linear-gradient(135deg, #FFD700, #FFA500)' : 'rgba(255,255,255,0.1)',
-                border: 'none', color: selectedSignals.length > 0 ? '#1a1a2e' : 'rgba(255,255,255,0.3)',
-                fontSize: 15, fontWeight: 700, cursor: selectedSignals.length > 0 ? 'pointer' : 'not-allowed',
+                width: '100%', padding: '16px', borderRadius: 14,
+                background: selectedSignalCount > 0 ? '#3B9FD9' : '#e0e0e0',
+                border: 'none', color: selectedSignalCount > 0 ? '#fff' : '#999',
+                fontSize: 16, fontWeight: 700, cursor: selectedSignalCount > 0 ? 'pointer' : 'not-allowed',
                 opacity: isSubmittingEndorsement ? 0.6 : 1,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               }}
             >
-              {isSubmittingEndorsement ? 'Submitting...' : `Submit Endorsement${selectedSignals.length > 0 ? ` (${selectedSignals.length})` : ''}`}
+              {isSubmittingEndorsement ? 'Submitting...' : 'Continue →'}
             </button>
           </div>
         </div>
