@@ -134,7 +134,8 @@ function getSocialIcon(pid: string, size = 18) {
 
 /* ============================================================
    FULL-SCREEN CARD PREVIEW — Renders a realistic full card
-   with sample data for the swipeable gallery
+   with sample data for the swipeable gallery.
+   Each template matches the reference images pixel-perfectly.
    ============================================================ */
 const SAMPLE_AVATAR = '/images/sample-avatar.png';
 const SAMPLE_BANNER = '/images/sample-banner.jpg';
@@ -143,23 +144,30 @@ const SAMPLE_DATA = {
   name: 'Jane Smith',
   title: 'Content Creator & Designer',
   company: 'Creative Studio',
-  bio: 'Helping brands tell their story through design and strategy',
-  phone: '(555) 123-4567',
-  email: 'jane@example.com',
-  website: 'janesmith.com',
+  bio: 'Helping brands tell their story through design and strategy.',
+  phone: '+1 (555) 123-4567',
+  email: 'jane@creativestudio.com',
+  website: 'www.janesmith.com',
   location: 'Los Angeles, CA',
-  links: ['My Portfolio', 'Book a Call', 'Latest Work'],
-  socials: ['instagram', 'tiktok', 'youtube', 'linkedin'],
-  industry: 'Marketing',
+  handle: '@janesmith',
+  pronouns: '(She/Her)',
+  links: ['Get in Touch', 'Freebies & Resources', 'Read our Latest Blog Post', 'Shop Templates', 'Visit the Website'],
+  bloggerLinks: ['ABOUT', 'MY BLOG', 'SHOP', 'NEWSLETTER', 'FREEBIE', 'CONTACT'],
+  realtorLinks: ['ALL ABOUT ME', 'CLIENT TESTIMONIALS', 'VISIT MY WEBSITE', 'BOOK A FREE CONSULTATION'],
+  socials: ['instagram', 'twitter', 'linkedin', 'facebook'] as string[],
+  realtorSocials: ['instagram', 'twitter', 'linkedin', 'facebook', 'website'] as string[],
+  industry: 'Marketing & Design',
   services: ['Branding', 'Web Design', 'Photography', 'Social Media'],
 };
 
-// SVG icon components for the preview
-const PreviewPhoneIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>;
-const PreviewEmailIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>;
-const PreviewGlobeIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>;
-const PreviewLocationIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>;
-const PreviewMsgIcon = () => <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>;
+// SVG icon components for the preview — sized appropriately
+const PIcon = ({ d, size = 16 }: { d: string; size?: number }) => <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor"><path d={d}/></svg>;
+const PreviewPhoneIcon = ({ size }: { size?: number }) => <PIcon size={size} d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />;
+const PreviewEmailIcon = ({ size }: { size?: number }) => <PIcon size={size} d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />;
+const PreviewGlobeIcon = ({ size }: { size?: number }) => <PIcon size={size} d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />;
+const PreviewLocationIcon = ({ size }: { size?: number }) => <PIcon size={size} d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />;
+const PreviewMsgIcon = ({ size }: { size?: number }) => <PIcon size={size} d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" />;
+const PreviewWhatsAppIcon = ({ size }: { size?: number }) => <PIcon size={size} d="M16.75 13.96c.25.13.41.2.46.3.06.11.04.61-.21 1.18-.2.56-1.24 1.1-1.7 1.12-.46.02-.47.36-2.96-.73-2.49-1.09-3.99-3.75-4.11-3.92-.12-.17-.96-1.38-.92-2.61.05-1.22.69-1.8.95-2.04.24-.22.54-.27.72-.27l.58.01c.17.01.43-.07.68.52.25.6.83 2.09.9 2.24.07.15.05.34-.07.55-.12.21-.18.34-.35.52-.17.19-.37.42-.52.56-.17.16-.35.33-.15.65.2.32.89 1.48 1.88 2.38 1.27 1.14 2.38 1.52 2.72 1.69.34.17.54.14.74-.09.2-.23.83-.97 1.05-1.31.22-.34.44-.28.74-.17.3.11 1.95.92 2.28 1.08z" />;
 
 // Social icon for preview
 function PreviewSocialIcon({ platform, size = 16, color = '#fff' }: { platform: string; size?: number; color?: string }) {
@@ -170,315 +178,459 @@ function PreviewSocialIcon({ platform, size = 16, color = '#fff' }: { platform: 
     linkedin: <IoLogoLinkedin size={size} color={color} />,
     twitter: <IoLogoTwitter size={size} color={color} />,
     facebook: <IoLogoFacebook size={size} color={color} />,
+    website: <IoGlobe size={size} color={color} />,
   };
   return <>{icons[platform] || <IoGlobe size={size} color={color} />}</>;
 }
 
 function FullCardPreview({ tmpl }: { tmpl: Template }) {
   const cs = tmpl.colorSchemes[0];
-  const bg = cs?.background?.includes('gradient') ? cs.background : `linear-gradient(135deg, ${cs?.primary || '#333'}, ${cs?.secondary || '#555'})`;
+  const primary = cs?.primary || '#333';
+  const secondary = cs?.secondary || '#555';
   const txtCol = cs?.text || '#fff';
   const txtSec = cs?.textSecondary || 'rgba(255,255,255,0.7)';
   const accentCol = cs?.accent || '#00C853';
   const cardBgCol = cs?.cardBg || '#fff';
-  const borderCol = cs?.border || 'transparent';
   const isLightBg = cs?.text === '#2d2d2d' || cs?.text === '#1f2937';
 
   // Real photo avatar
-  const PhotoAvatar = ({ size, border: avatarBorder, borderRadius, shadow }: { size: number; border?: string; borderRadius?: string; shadow?: string }) => (
+  const PhotoAvatar = ({ size, border: avatarBorder, borderRadius, shadow, style: extraStyle }: { size: number; border?: string; borderRadius?: string; shadow?: string; style?: React.CSSProperties }) => (
     <div style={{
       width: size, height: size, borderRadius: borderRadius || '50%',
       border: avatarBorder || 'none',
       flexShrink: 0, overflow: 'hidden',
       boxShadow: shadow || 'none',
+      ...extraStyle,
     }}>
       <img src={SAMPLE_AVATAR} alt="Jane Smith" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
     </div>
   );
 
-  // Social icons row
-  const SocialIconsRow = ({ iconColor, bgColor, size = 28 }: { iconColor: string; bgColor: string; size?: number }) => (
-    <div style={{ display: 'flex', gap: 8, justifyContent: 'center', padding: '4px 0' }}>
-      {SAMPLE_DATA.socials.map(s => (
-        <div key={s} style={{ width: size, height: size, borderRadius: '50%', background: bgColor, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <PreviewSocialIcon platform={s} size={size * 0.5} color={iconColor} />
-        </div>
-      ))}
-    </div>
-  );
-
-  // Link button
-  const LinkBtn = ({ text, btnBg, btnBorder, textColor, borderLeft: bl, borderRadius: br, height: h }: { text: string; btnBg: string; btnBorder?: string; textColor: string; borderLeft?: string; borderRadius?: number; height?: number }) => (
-    <div style={{
-      width: '100%', height: h || 44, borderRadius: br ?? 10, background: btnBg,
-      border: btnBorder || 'none', borderLeft: bl || undefined,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }}>
-      <span style={{ fontSize: 13, fontWeight: 600, color: textColor, letterSpacing: 0.3 }}>{text}</span>
-    </div>
-  );
-
-  // Contact row
-  const ContactRow = ({ icon, text, color }: { icon: React.ReactNode; text: string; color: string }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '6px 0' }}>
-      <span style={{ color, opacity: 0.8, flexShrink: 0, display: 'flex' }}>{icon}</span>
-      <span style={{ fontSize: 13, color, opacity: 0.85 }}>{text}</span>
-    </div>
-  );
-
-  // Action button (Call, Text, Email, Website)
-  const ActionBtn = ({ icon, label, btnBg, textColor }: { icon: React.ReactNode; label: string; btnBg: string; textColor: string }) => (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
-      <div style={{ width: 42, height: 42, borderRadius: '50%', background: btnBg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: textColor }}>{icon}</div>
-      <span style={{ fontSize: 10, color: textColor, opacity: 0.8, fontWeight: 500 }}>{label}</span>
-    </div>
-  );
-
-  // ─── BASIC ───
+  /* ═══════════════════════════════════════════════════════════
+     1. BASIC — Linktree style
+     Reference: Linktree+Alternatives-min.png.webp
+     White bg, circle photo, @handle, dark rounded link buttons
+     ═══════════════════════════════════════════════════════════ */
   if (tmpl.layout === 'basic') {
-    const btnBg = isLightBg ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.12)';
+    const isDarkTheme = !isLightBg;
+    const btnBg = isDarkTheme ? '#2D3436' : '#2D3436';
+    const btnTxt = '#FFFFFF';
+    const nameTxt = isDarkTheme ? '#fff' : '#1a1a1a';
+    const subTxt = isDarkTheme ? 'rgba(255,255,255,0.65)' : '#555';
     return (
-      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: '32px 24px 28px' }}>
-        <PhotoAvatar size={96} border={`3px solid ${isLightBg ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.2)'}`} shadow="0 4px 16px rgba(0,0,0,0.12)" />
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 22, fontWeight: 700, color: txtCol, letterSpacing: -0.3 }}>{SAMPLE_DATA.name}</div>
-          <div style={{ fontSize: 13, color: txtSec, marginTop: 4 }}>{SAMPLE_DATA.title}</div>
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 28px 36px' }}>
+        <PhotoAvatar size={110} border="3px solid rgba(0,0,0,0.06)" shadow="0 4px 20px rgba(0,0,0,0.1)" />
+        <div style={{ fontSize: 20, fontWeight: 700, color: nameTxt, marginTop: 16, textAlign: 'center' }}>{SAMPLE_DATA.handle}</div>
+        <div style={{ fontSize: 13, color: subTxt, marginTop: 6, textAlign: 'center', lineHeight: 1.5, padding: '0 8px' }}>
+          Helping brands tell their story through design and creative strategy
         </div>
-        <div style={{ fontSize: 12, color: txtSec, textAlign: 'center', lineHeight: 1.5, padding: '0 12px', opacity: 0.8 }}>{SAMPLE_DATA.bio}</div>
-        <SocialIconsRow iconColor="#fff" bgColor={isLightBg ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)'} size={34} />
-        <div style={{ width: '88%', display: 'flex', flexDirection: 'column', gap: 8, marginTop: 2 }}>
-          {SAMPLE_DATA.links.map(l => <LinkBtn key={l} text={l} btnBg={btnBg} textColor={txtCol} borderRadius={10} />)}
-        </div>
-        <div style={{ display: 'flex', gap: 18, marginTop: 8 }}>
-          <ActionBtn icon={<PreviewPhoneIcon />} label="Call" btnBg={btnBg} textColor={txtCol} />
-          <ActionBtn icon={<PreviewMsgIcon />} label="Text" btnBg={btnBg} textColor={txtCol} />
-          <ActionBtn icon={<PreviewEmailIcon />} label="Email" btnBg={btnBg} textColor={txtCol} />
-          <ActionBtn icon={<PreviewGlobeIcon />} label="Website" btnBg={btnBg} textColor={txtCol} />
-        </div>
-      </div>
-    );
-  }
-
-  // ─── BLOGGER ───
-  if (tmpl.layout === 'blogger') {
-    const cardTxt = cs?.text || '#2d2d2d';
-    const cardSec = cs?.textSecondary || '#666';
-    return (
-      <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px 14px' }}>
-        <div style={{
-          background: cardBgCol, borderRadius: 24, padding: '28px 20px 24px', width: '100%',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-        }}>
-          <PhotoAvatar size={96} border={`3px solid ${accentCol}40`} shadow="0 4px 16px rgba(0,0,0,0.1)" />
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 22, fontWeight: 600, color: cardTxt, fontStyle: 'italic', letterSpacing: -0.3 }}>{SAMPLE_DATA.name}</div>
-            <div style={{ fontSize: 12, color: cardSec, marginTop: 4, textTransform: 'uppercase' as const, letterSpacing: 1.5, fontWeight: 500, fontSize: 10 }}>Business Coach & Entrepreneur</div>
-          </div>
-          <div style={{ fontSize: 12, color: cardSec, textAlign: 'center', lineHeight: 1.5, padding: '0 10px' }}>{SAMPLE_DATA.bio}</div>
-          <div style={{ width: '92%', display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
-            {['About', 'My Blog', 'Shop', 'Newsletter', 'Contact'].map(l => <LinkBtn key={l} text={l} btnBg={`${accentCol}15`} textColor={cardTxt} borderRadius={6} />)}
-          </div>
-          <SocialIconsRow iconColor="#fff" bgColor={accentCol} size={32} />
-        </div>
-      </div>
-    );
-  }
-
-  // ─── BUSINESS CARD ───
-  if (tmpl.layout === 'business-card') {
-    return (
-      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Dark top half */}
-        <div style={{ padding: '28px 24px 20px', display: 'flex', gap: 16, alignItems: 'center' }}>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div style={{ fontSize: 22, fontWeight: 700, color: accentCol, letterSpacing: -0.3 }}>{SAMPLE_DATA.name}</div>
-            <div style={{ fontSize: 13, color: txtSec }}>{SAMPLE_DATA.title}</div>
-            <div style={{ fontSize: 12, color: txtSec, opacity: 0.6 }}>{SAMPLE_DATA.company}</div>
-          </div>
-          <PhotoAvatar size={80} border={`3px solid ${accentCol}`} shadow={`0 4px 20px ${accentCol}40`} />
-        </div>
-        {/* Accent divider */}
-        <div style={{ height: 2, background: `linear-gradient(90deg, ${accentCol}, ${accentCol}40)` }} />
-        {/* Light bottom half */}
-        <div style={{ background: cardBgCol, padding: '18px 24px 24px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <ContactRow icon={<PreviewPhoneIcon />} text={SAMPLE_DATA.phone} color={accentCol} />
-          <ContactRow icon={<PreviewEmailIcon />} text={SAMPLE_DATA.email} color={accentCol} />
-          <ContactRow icon={<PreviewGlobeIcon />} text={SAMPLE_DATA.website} color={accentCol} />
-          <ContactRow icon={<PreviewLocationIcon />} text={SAMPLE_DATA.location} color={accentCol} />
-          <div style={{ marginTop: 10 }}>
-            <SocialIconsRow iconColor="#fff" bgColor={accentCol} size={32} />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ─── FULL WIDTH ───
-  if (tmpl.layout === 'full-width') {
-    const darkBg = cs?.primary || '#000';
-    return (
-      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Hero photo area — full bleed with gradient overlay */}
-        <div style={{ width: '100%', height: 280, position: 'relative', overflow: 'hidden' }}>
-          <img src={SAMPLE_BANNER} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.7)' }} />
-          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, transparent 0%, ${darkBg}80 40%, ${darkBg} 100%)` }} />
-          {/* Profile photo centered */}
-          <div style={{ position: 'absolute', top: 30, left: '50%', transform: 'translateX(-50%)', zIndex: 3 }}>
-            <PhotoAvatar size={100} border="3px solid rgba(255,255,255,0.25)" shadow="0 8px 32px rgba(0,0,0,0.4)" />
-          </div>
-          {/* Name overlaid at bottom */}
-          <div style={{ position: 'absolute', bottom: 16, left: 0, right: 0, zIndex: 2, textAlign: 'center' }}>
-            <div style={{ fontSize: 26, fontWeight: 800, color: '#fff', letterSpacing: -0.5, textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>{SAMPLE_DATA.name}</div>
-            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 4, fontWeight: 500 }}>Marketing Manager</div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{SAMPLE_DATA.company}</div>
-          </div>
-        </div>
-        {/* Content below hero */}
-        <div style={{ padding: '16px 24px 28px', background: darkBg, display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
-          <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
-            <ActionBtn icon={<PreviewPhoneIcon />} label="Call" btnBg="rgba(255,255,255,0.12)" textColor="#fff" />
-            <ActionBtn icon={<PreviewMsgIcon />} label="Text" btnBg="rgba(255,255,255,0.12)" textColor="#fff" />
-            <ActionBtn icon={<PreviewEmailIcon />} label="Email" btnBg="rgba(255,255,255,0.12)" textColor="#fff" />
-            <ActionBtn icon={<PreviewGlobeIcon />} label="Website" btnBg="rgba(255,255,255,0.12)" textColor="#fff" />
-          </div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.5, textAlign: 'center' }}>{SAMPLE_DATA.bio}</div>
-          <SocialIconsRow iconColor="#fff" bgColor="rgba(255,255,255,0.12)" size={32} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, width: '100%' }}>
-            <ContactRow icon={<PreviewPhoneIcon />} text={SAMPLE_DATA.phone} color="rgba(255,255,255,0.6)" />
-            <ContactRow icon={<PreviewEmailIcon />} text={SAMPLE_DATA.email} color="rgba(255,255,255,0.6)" />
-            <ContactRow icon={<PreviewGlobeIcon />} text={SAMPLE_DATA.website} color="rgba(255,255,255,0.6)" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ─── PRO REALTOR ───
-  if (tmpl.layout === 'pro-realtor') {
-    return (
-      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
-        {/* Banner */}
-        <div style={{ width: '100%', height: 160, overflow: 'hidden', position: 'relative' }}>
-          <img src={SAMPLE_BANNER} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        </div>
-        {/* Arch photo overlapping */}
-        <div style={{ marginTop: -50, zIndex: 2 }}>
-          <PhotoAvatar size={100} border={`4px solid ${cardBgCol}`} borderRadius="16px 16px 50% 50%" shadow="0 4px 20px rgba(0,0,0,0.15)" />
-        </div>
-        <div style={{ textAlign: 'center', marginTop: 10, padding: '0 24px' }}>
-          <div style={{ fontSize: 22, fontWeight: 800, color: txtCol, letterSpacing: -0.3 }}>Hi, I&apos;m {SAMPLE_DATA.name.split(' ')[0]},</div>
-          <div style={{ fontSize: 13, color: txtSec, marginTop: 4, textTransform: 'uppercase' as const, letterSpacing: 1, fontWeight: 500 }}>Your Local Realtor</div>
-        </div>
-        <div style={{ fontSize: 12, color: txtSec, textAlign: 'center', padding: '6px 24px', lineHeight: 1.5 }}>{SAMPLE_DATA.bio}</div>
-        <div style={{ width: '85%', display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
-          {['All About Me', 'Client Testimonials', 'Visit My Website', 'Book a Free Consultation'].map(l => (
-            <LinkBtn key={l} text={l} btnBg={`${accentCol}18`} textColor={txtCol} borderLeft={`4px solid ${accentCol}`} borderRadius={8} />
-          ))}
-        </div>
-        <div style={{ marginTop: 12 }}>
-          <SocialIconsRow iconColor="#fff" bgColor={accentCol} size={32} />
-        </div>
-        <div style={{ marginTop: 8, padding: '0 24px 8px', width: '100%' }}>
-          <ContactRow icon={<PreviewPhoneIcon />} text={SAMPLE_DATA.phone} color={txtCol} />
-          <ContactRow icon={<PreviewEmailIcon />} text={SAMPLE_DATA.email} color={txtCol} />
-        </div>
-      </div>
-    );
-  }
-
-  // ─── PRO CREATIVE ───
-  if (tmpl.layout === 'pro-creative') {
-    return (
-      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Bold colored top */}
-        <div style={{ padding: '28px 24px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-          <PhotoAvatar size={90} border="none" borderRadius="50%" shadow="0 4px 20px rgba(0,0,0,0.2)" />
-          <div style={{ fontSize: 24, fontWeight: 800, color: '#fff', letterSpacing: -0.5 }}>{SAMPLE_DATA.name}</div>
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', fontWeight: 500 }}>Creative Director</div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic' }}>{SAMPLE_DATA.company}</div>
-        </div>
-        {/* Wave divider */}
-        <svg viewBox="0 0 400 50" style={{ width: '100%', height: 40, display: 'block', flexShrink: 0, marginTop: 12 }} preserveAspectRatio="none">
-          <path d="M0 25 Q100 0 200 25 Q300 50 400 25 L400 50 L0 50 Z" fill={cardBgCol} />
-        </svg>
-        {/* White bottom */}
-        <div style={{ background: cardBgCol, padding: '4px 24px 24px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div style={{ fontSize: 13, color: '#555', textAlign: 'center', marginBottom: 8, lineHeight: 1.5, fontStyle: 'italic' }}>{SAMPLE_DATA.bio}</div>
-          <ContactRow icon={<PreviewPhoneIcon />} text={SAMPLE_DATA.phone} color={accentCol} />
-          <ContactRow icon={<PreviewEmailIcon />} text={SAMPLE_DATA.email} color={accentCol} />
-          <ContactRow icon={<PreviewGlobeIcon />} text={SAMPLE_DATA.website} color={accentCol} />
-          <ContactRow icon={<PreviewLocationIcon />} text={SAMPLE_DATA.location} color={accentCol} />
-          <div style={{ marginTop: 10 }}>
-            <SocialIconsRow iconColor="#fff" bgColor={accentCol} size={32} />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ─── PRO CORPORATE ───
-  if (tmpl.layout === 'pro-corporate') {
-    const glassBg = isLightBg ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.06)';
-    return (
-      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0' }}>
-        {/* Company name bar */}
-        <div style={{ width: '100%', padding: '14px 24px', borderBottom: `1px solid ${isLightBg ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' as const, color: accentCol }}>{SAMPLE_DATA.company}</span>
-        </div>
-        <div style={{ padding: '20px 24px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, width: '100%' }}>
-          <PhotoAvatar size={90} border={`3px solid ${isLightBg ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)'}`} shadow="0 4px 16px rgba(0,0,0,0.12)" />
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 22, fontWeight: 700, color: txtCol, letterSpacing: -0.3 }}>{SAMPLE_DATA.name}</div>
-            <div style={{ fontSize: 13, color: txtSec, marginTop: 4 }}>VP of Marketing</div>
-          </div>
-          <div style={{ display: 'flex', gap: 14, marginTop: 6 }}>
-            <ActionBtn icon={<PreviewPhoneIcon />} label="Call" btnBg={glassBg} textColor={txtCol} />
-            <ActionBtn icon={<PreviewMsgIcon />} label="Text" btnBg={glassBg} textColor={txtCol} />
-            <ActionBtn icon={<PreviewEmailIcon />} label="Email" btnBg={glassBg} textColor={txtCol} />
-            <ActionBtn icon={<PreviewGlobeIcon />} label="Website" btnBg={glassBg} textColor={txtCol} />
-          </div>
-          <div style={{ width: '100%', padding: '14px 16px', borderRadius: 12, background: glassBg, marginTop: 6 }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: accentCol, marginBottom: 6, textTransform: 'uppercase' as const, letterSpacing: 0.5 }}>About</div>
-            <div style={{ fontSize: 12, color: txtSec, lineHeight: 1.5 }}>{SAMPLE_DATA.bio}</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // ─── PRO CARD ───
-  if (tmpl.layout === 'pro-card') {
-    return (
-      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
-        {/* Banner */}
-        <div style={{ width: '100%', height: 130, overflow: 'hidden' }}>
-          <img src={SAMPLE_BANNER} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        </div>
-        {/* Overlapping photo */}
-        <div style={{ marginTop: -45, zIndex: 2 }}>
-          <PhotoAvatar size={90} border={`4px solid ${accentCol}`} shadow={`0 4px 20px ${accentCol}30`} />
-        </div>
-        <div style={{ textAlign: 'center', marginTop: 8, padding: '0 24px' }}>
-          <div style={{ fontSize: 22, fontWeight: 700, color: txtCol, letterSpacing: -0.3 }}>{SAMPLE_DATA.name}</div>
-          <div style={{ fontSize: 13, color: txtSec, marginTop: 4 }}>{SAMPLE_DATA.title}</div>
-        </div>
-        {/* Industry badge */}
-        <div style={{ padding: '6px 18px', borderRadius: 16, background: `${accentCol}20`, marginTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontSize: 11, color: accentCol, fontWeight: 600 }}>{SAMPLE_DATA.industry}</span>
-        </div>
-        {/* Services grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, width: '88%', marginTop: 12 }}>
-          {SAMPLE_DATA.services.map(s => (
-            <div key={s} style={{ padding: '10px 8px', background: `${accentCol}12`, borderRadius: 10, textAlign: 'center' }}>
-              <span style={{ fontSize: 12, color: txtCol, fontWeight: 500 }}>{s}</span>
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 14, marginTop: 28 }}>
+          {SAMPLE_DATA.links.map(l => (
+            <div key={l} style={{
+              width: '100%', height: 54, borderRadius: 12, background: btnBg,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+            }}>
+              <span style={{ fontSize: 14, fontWeight: 500, color: btnTxt }}>{l}</span>
             </div>
           ))}
         </div>
-        <div style={{ display: 'flex', gap: 16, marginTop: 14 }}>
-          <ActionBtn icon={<PreviewPhoneIcon />} label="Call" btnBg={`${accentCol}18`} textColor={txtCol} />
-          <ActionBtn icon={<PreviewMsgIcon />} label="Text" btnBg={`${accentCol}18`} textColor={txtCol} />
-          <ActionBtn icon={<PreviewEmailIcon />} label="Email" btnBg={`${accentCol}18`} textColor={txtCol} />
+      </div>
+    );
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     2. BLOGGER — Hannah Stone style
+     Reference: blogger.jpg
+     Pastel bg, white card cutout, large circle photo, script name,
+     uppercase subtitle, pastel link buttons
+     ═══════════════════════════════════════════════════════════ */
+  if (tmpl.layout === 'blogger') {
+    const outerBg = `${accentCol}18`;
+    const cardTxt = '#1a1a1a';
+    const btnBg = `${accentCol}20`;
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px 16px 24px' }}>
+        {/* White inner card */}
+        <div style={{
+          background: '#fff', borderRadius: 20, padding: '0 24px 28px', width: '100%',
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.06)',
+          position: 'relative',
+          marginTop: 50,
+        }}>
+          {/* Photo overlapping top of card */}
+          <div style={{ marginTop: -50 }}>
+            <PhotoAvatar size={100} border="4px solid #fff" shadow="0 4px 20px rgba(0,0,0,0.1)" />
+          </div>
+          {/* Script name */}
+          <div style={{ fontSize: 28, fontWeight: 400, color: cardTxt, marginTop: 14, fontFamily: "'Georgia', 'Times New Roman', serif", fontStyle: 'italic', letterSpacing: -0.5 }}>
+            {SAMPLE_DATA.name}
+          </div>
+          <div style={{ fontSize: 10, color: '#777', marginTop: 6, textTransform: 'uppercase' as const, letterSpacing: 2.5, fontWeight: 600, textAlign: 'center' }}>
+            BUSINESS COACH &amp; ENTREPRENEUR
+          </div>
+          {/* Link buttons */}
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, marginTop: 24 }}>
+            {SAMPLE_DATA.bloggerLinks.map(l => (
+              <div key={l} style={{
+                width: '100%', height: 46, borderRadius: 4, background: btnBg,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: cardTxt, letterSpacing: 1.5, textTransform: 'uppercase' as const }}>{l}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     3. BUSINESS CARD — EdgeKart / Thomas Smith style
+     Reference: Digital-Business-Card-1.webp
+     Deep navy top, company name + logo, circle photo with white
+     border, name, pronouns, title, company, colored action icons,
+     white bottom "About Me"
+     ═══════════════════════════════════════════════════════════ */
+  if (tmpl.layout === 'business-card') {
+    const darkBg = primary;
+    const lightBottom = cardBgCol;
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Dark navy top */}
+        <div style={{ background: darkBg, padding: '24px 24px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+          {/* Company name at top */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <div style={{ width: 22, height: 22, borderRadius: '50%', background: accentCol, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: 10, fontWeight: 800, color: '#fff' }}>T</span>
+            </div>
+            <span style={{ fontSize: 13, fontWeight: 600, color: '#fff', letterSpacing: 0.5 }}>{SAMPLE_DATA.company}</span>
+          </div>
+          {/* Circle photo */}
+          <PhotoAvatar size={100} border="4px solid rgba(255,255,255,0.9)" shadow="0 4px 20px rgba(0,0,0,0.3)" />
+          {/* Name & details */}
+          <div style={{ fontSize: 22, fontWeight: 700, color: '#fff', marginTop: 10, textAlign: 'center' }}>{SAMPLE_DATA.name}</div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic', textAlign: 'center' }}>{SAMPLE_DATA.pronouns}</div>
+          <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', textAlign: 'center', marginTop: 2 }}>Solutions Manager</div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', textAlign: 'center' }}>{SAMPLE_DATA.company} Public Solutions LLP</div>
+        </div>
+        {/* Action icon row at the transition */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 14, padding: '16px 0', background: lightBottom }}>
+          {[PreviewPhoneIcon, PreviewEmailIcon, PreviewGlobeIcon, PreviewLocationIcon].map((Icon, i) => (
+            <div key={i} style={{ width: 46, height: 46, borderRadius: '50%', background: accentCol, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+              <span style={{ color: '#fff' }}><Icon size={18} /></span>
+            </div>
+          ))}
+        </div>
+        {/* White bottom — About Me */}
+        <div style={{ background: lightBottom, padding: '4px 28px 28px' }}>
+          <div style={{ fontSize: 15, fontWeight: 600, color: '#333', marginBottom: 8 }}>About Me</div>
+          <div style={{ fontSize: 13, color: '#666', lineHeight: 1.6 }}>
+            I am a skilled Solutions Manager with seven years of experience in solving problems and engaging customers across industries.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     4. FULL WIDTH — John Richards style
+     Reference: FullwidtheCard.jpg
+     Full-bleed B&W hero photo, bold white name overlaid left,
+     title, company logo pill, action icon row, white "About Me"
+     ═══════════════════════════════════════════════════════════ */
+  if (tmpl.layout === 'full-width') {
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Full-bleed hero photo with overlay */}
+        <div style={{ width: '100%', height: 300, position: 'relative', overflow: 'hidden' }}>
+          <img src={SAMPLE_AVATAR} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', filter: 'grayscale(80%) brightness(0.6) contrast(1.1)' }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 20%, rgba(0,0,0,0.7) 100%)' }} />
+          {/* Name overlaid at bottom-left */}
+          <div style={{ position: 'absolute', bottom: 20, left: 24, right: 24, zIndex: 2 }}>
+            <div style={{ fontSize: 32, fontWeight: 900, color: '#fff', lineHeight: 1.1, letterSpacing: -1, textTransform: 'uppercase' as const }}>
+              JANE<br/>SMITH
+            </div>
+            <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 6, fontWeight: 500 }}>Marketing Manager</div>
+            {/* Company pill */}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 8, padding: '4px 12px', borderRadius: 20, background: `${accentCol}cc` }}>
+              <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: 8, fontWeight: 800, color: accentCol }}>T</span>
+              </div>
+              <span style={{ fontSize: 11, fontWeight: 600, color: '#fff' }}>{SAMPLE_DATA.company}</span>
+            </div>
+          </div>
+        </div>
+        {/* Action icon row */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 12, padding: '14px 0', background: '#111' }}>
+          {[PreviewPhoneIcon, PreviewEmailIcon, PreviewMsgIcon, PreviewWhatsAppIcon, PreviewGlobeIcon].map((Icon, i) => (
+            <div key={i} style={{ width: 40, height: 40, borderRadius: '50%', background: '#333', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ color: '#fff' }}><Icon size={16} /></span>
+            </div>
+          ))}
+        </div>
+        {/* White bottom — About Me */}
+        <div style={{ background: '#fff', padding: '20px 28px 28px' }}>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#111' }}>About Me</div>
+          <div style={{ fontSize: 13, color: '#666', lineHeight: 1.6, marginTop: 8 }}>
+            Hi, I am Jane, working as a marketing manager at {SAMPLE_DATA.company}. Expert in building client relationships and driving growth.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     5. PRO REALTOR — Realtor Hannah style
+     Reference: realtor.jpg
+     Full-width banner photo, arch-framed portrait overlapping,
+     "Hi I'm Jane," bold heading, tan/beige link buttons,
+     social icon row, company footer bar
+     ═══════════════════════════════════════════════════════════ */
+  if (tmpl.layout === 'pro-realtor') {
+    const btnBg = `${accentCol}30`;
+    const btnTxt = txtCol;
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
+        {/* Full-width banner photo */}
+        <div style={{ width: '100%', height: 200, overflow: 'hidden', position: 'relative' }}>
+          <img src={SAMPLE_BANNER} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </div>
+        {/* Arch-framed portrait overlapping banner */}
+        <div style={{ marginTop: -70, zIndex: 2, position: 'relative' }}>
+          <div style={{
+            width: 130, height: 160, borderRadius: '65px 65px 65px 65px',
+            overflow: 'hidden', border: `3px solid ${cardBgCol}`,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+          }}>
+            <img src={SAMPLE_AVATAR} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+        </div>
+        {/* Name section */}
+        <div style={{ textAlign: 'center', marginTop: 14, padding: '0 28px' }}>
+          <div style={{ fontSize: 12, fontWeight: 400, color: txtSec }}>HI <span style={{ fontSize: 24, fontWeight: 800, color: txtCol, letterSpacing: -0.5 }}>I&apos;M JANE,</span></div>
+          <div style={{ fontSize: 12, color: txtSec, marginTop: 4, textTransform: 'uppercase' as const, letterSpacing: 2, fontWeight: 500 }}>YOUR LOCAL REALTOR</div>
+        </div>
+        {/* Link buttons */}
+        <div style={{ width: '82%', display: 'flex', flexDirection: 'column', gap: 10, marginTop: 18 }}>
+          {SAMPLE_DATA.realtorLinks.map(l => (
+            <div key={l} style={{
+              width: '100%', height: 44, borderRadius: 4, background: btnBg,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: btnTxt, letterSpacing: 1.5, textTransform: 'uppercase' as const }}>{l}</span>
+            </div>
+          ))}
+        </div>
+        {/* Social icons row */}
+        <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 16 }}>
+          {SAMPLE_DATA.realtorSocials.map(s => (
+            <div key={s} style={{ width: 36, height: 36, borderRadius: '50%', background: accentCol, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <PreviewSocialIcon platform={s} size={16} color="#fff" />
+            </div>
+          ))}
+        </div>
+        {/* Company footer bar */}
+        <div style={{ width: '100%', padding: '10px 0', marginTop: 16, borderTop: `2px solid ${accentCol}`, textAlign: 'center' }}>
+          <span style={{ fontSize: 10, fontWeight: 600, color: accentCol, letterSpacing: 2, textTransform: 'uppercase' as const }}>YOUR COMPANY NAME HERE</span>
+        </div>
+      </div>
+    );
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     6. PRO CREATIVE — Arianne / A.Rich Culture style
+     Reference: Digital-Business-Card-3.jpg
+     Purple/colored gradient top with large photo, company logo,
+     white bottom with name, title, company, bio, contact rows
+     with colored circle icons
+     ═══════════════════════════════════════════════════════════ */
+  if (tmpl.layout === 'pro-creative') {
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Colored gradient top with photo */}
+        <div style={{ position: 'relative', padding: '28px 24px 60px', display: 'flex', justifyContent: 'center' }}>
+          {/* Company logo in top-right */}
+          <div style={{ position: 'absolute', top: 16, right: 20, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: 10, fontWeight: 800, color: '#fff' }}>CS</span>
+            </div>
+          </div>
+          {/* Large circle photo */}
+          <PhotoAvatar size={140} border="4px solid rgba(255,255,255,0.3)" shadow="0 8px 32px rgba(0,0,0,0.25)" />
+        </div>
+        {/* White bottom section */}
+        <div style={{ background: cardBgCol, padding: '20px 28px 28px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: '#1a1a1a' }}>{SAMPLE_DATA.name}</div>
+          <div style={{ fontSize: 14, color: '#555', fontWeight: 500 }}>Founder &amp; Principal Consultant</div>
+          <div style={{ fontSize: 13, color: accentCol, fontStyle: 'italic', marginTop: 2 }}>{SAMPLE_DATA.company}</div>
+          <div style={{ fontSize: 12, color: '#777', lineHeight: 1.5, marginTop: 8 }}>
+            Business Consulting &amp; Talent Management for Creative Professionals
+          </div>
+          {/* Contact rows with colored circle icons */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
+            {[
+              { icon: <PreviewEmailIcon size={16} />, text: SAMPLE_DATA.email, bg: '#FF6B35' },
+              { icon: <PreviewPhoneIcon size={16} />, text: SAMPLE_DATA.phone, bg: '#4CAF50' },
+              { icon: <PreviewMsgIcon size={16} />, text: '+1 (555) 987-6543', bg: '#2196F3' },
+              { icon: <PreviewGlobeIcon size={16} />, text: SAMPLE_DATA.website, bg: accentCol },
+            ].map((row, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: row.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ color: '#fff' }}>{row.icon}</span>
+                </div>
+                <span style={{ fontSize: 13, color: '#444' }}>{row.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     7. PRO CORPORATE — Arch Gleason / Blue corporate style
+     Reference: qrcc_dbc_key_benefits.png.webp
+     Blue gradient top with abstract shapes, circle photo,
+     name + title centered, action icon circles, Schedule Meeting
+     section with CTA buttons
+     ═══════════════════════════════════════════════════════════ */
+  if (tmpl.layout === 'pro-corporate') {
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Blue gradient top with decorative shapes */}
+        <div style={{ position: 'relative', padding: '24px 24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
+          {/* Decorative circle */}
+          <div style={{ position: 'absolute', top: -20, left: -30, width: 100, height: 100, borderRadius: '50%', background: `${accentCol}40`, zIndex: 0 }} />
+          <div style={{ position: 'absolute', top: 10, right: -10, width: 60, height: 60, borderRadius: '50%', background: `${accentCol}20`, zIndex: 0 }} />
+          {/* Photo */}
+          <div style={{ zIndex: 1, marginTop: 16 }}>
+            <PhotoAvatar size={100} border="4px solid rgba(255,255,255,0.9)" shadow="0 4px 20px rgba(0,0,0,0.2)" />
+          </div>
+        </div>
+        {/* Name section on white */}
+        <div style={{ background: cardBgCol, padding: '16px 24px 8px', textAlign: 'center' }}>
+          <div style={{ fontSize: 24, fontWeight: 700, color: '#1a1a1a' }}>{SAMPLE_DATA.name}</div>
+          <div style={{ fontSize: 14, color: '#777', marginTop: 4 }}>Sr. Sales Manager</div>
+        </div>
+        {/* Action icons */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 12, padding: '12px 0', background: cardBgCol }}>
+          {[PreviewPhoneIcon, PreviewEmailIcon, PreviewMsgIcon, PreviewWhatsAppIcon].map((Icon, i) => (
+            <div key={i} style={{ width: 44, height: 44, borderRadius: '50%', background: '#fff', border: '1.5px solid #e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' }}>
+              <span style={{ color: '#555' }}><Icon size={18} /></span>
+            </div>
+          ))}
+        </div>
+        {/* Schedule Meeting section */}
+        <div style={{ background: cardBgCol, padding: '12px 28px 28px' }}>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#1a1a1a', marginBottom: 6 }}>Schedule Meeting</div>
+          <div style={{ fontSize: 12, color: '#888', lineHeight: 1.5, marginBottom: 14 }}>
+            Schedule a meeting to discuss potential opportunities for collaboration
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ width: '100%', height: 44, borderRadius: 22, background: accentCol, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>Book on Calendly</span>
+            </div>
+            <div style={{ width: '100%', height: 44, borderRadius: 22, background: '#fff', border: `2px solid ${accentCol}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: 14, fontWeight: 600, color: accentCol }}>Add to Calendar</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     8. PRO CARD — Craft Media / Aisha Khan style
+     Reference: eCardBusinessCard.webp
+     Dark navy top with company logo, left-aligned name + pronouns
+     + title + company, large circle photo on right with decorative
+     ring, diagonal split to white bottom, bio, contact rows with
+     icon circles, "Add to Contacts" button
+     ═══════════════════════════════════════════════════════════ */
+  if (tmpl.layout === 'pro-card') {
+    const darkBg = primary;
+    const goldAccent = accentCol;
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Dark top section */}
+        <div style={{ background: darkBg, padding: '24px 28px 0', position: 'relative', minHeight: 280 }}>
+          {/* Company logo + name */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
+            <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill={goldAccent}><path d="M2 21l10-9L2 3v18zm10 0l10-9L12 3v18z" opacity="0.8"/></svg>
+            </div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{SAMPLE_DATA.company}</div>
+              <div style={{ fontSize: 8, color: goldAccent, letterSpacing: 2, textTransform: 'uppercase' as const, fontWeight: 600 }}>CREATIVE AGENCY</div>
+            </div>
+          </div>
+          {/* Name + details (left) and photo (right) */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div style={{ flex: 1, paddingRight: 16 }}>
+              <div style={{ fontSize: 26, fontWeight: 700, color: goldAccent, lineHeight: 1.2 }}>Ms. {SAMPLE_DATA.name.split(' ')[0]}<br/>{SAMPLE_DATA.name.split(' ')[1] || 'Smith'}</div>
+              <div style={{ fontSize: 12, color: `${goldAccent}99`, fontStyle: 'italic', marginTop: 4 }}>{SAMPLE_DATA.pronouns}</div>
+              <div style={{ fontSize: 14, color: goldAccent, fontWeight: 600, marginTop: 10 }}>Creative Director</div>
+              <div style={{ fontSize: 12, color: goldAccent, opacity: 0.7, marginTop: 2 }}>{SAMPLE_DATA.company}</div>
+            </div>
+            {/* Large photo with decorative ring */}
+            <div style={{ position: 'relative', flexShrink: 0 }}>
+              <div style={{
+                width: 130, height: 130, borderRadius: '50%',
+                border: `2px solid ${goldAccent}40`,
+                padding: 4,
+                position: 'relative',
+              }}>
+                <div style={{
+                  width: '100%', height: '100%', borderRadius: '50%',
+                  border: `2px dashed ${goldAccent}30`,
+                  padding: 3,
+                }}>
+                  <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden' }}>
+                    <img src={SAMPLE_AVATAR} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Angled transition */}
+        <div style={{ position: 'relative', height: 40 }}>
+          <div style={{ position: 'absolute', inset: 0, background: darkBg }} />
+          <svg viewBox="0 0 400 40" style={{ width: '100%', height: 40, display: 'block', position: 'relative', zIndex: 1 }} preserveAspectRatio="none">
+            <path d="M0 40 L400 0 L400 40 Z" fill={cardBgCol} />
+          </svg>
+        </div>
+        {/* White bottom section */}
+        <div style={{ background: cardBgCol, padding: '8px 28px 28px' }}>
+          <div style={{ fontSize: 13, color: '#555', lineHeight: 1.6, marginBottom: 16 }}>
+            Passionate creative director with a love for storytelling and brand strategy.
+          </div>
+          {/* Divider */}
+          <div style={{ height: 1, background: '#e5e5e5', marginBottom: 16 }} />
+          {/* Contact rows */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {[
+              { icon: <PreviewPhoneIcon size={16} />, text: SAMPLE_DATA.phone, label: 'Work' },
+              { icon: <PreviewEmailIcon size={16} />, text: SAMPLE_DATA.email, label: 'Work' },
+              { icon: <PreviewGlobeIcon size={16} />, text: SAMPLE_DATA.website, label: 'Company' },
+            ].map((row, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{ width: 40, height: 40, borderRadius: '50%', background: darkBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <span style={{ color: goldAccent }}>{row.icon}</span>
+                </div>
+                <div>
+                  <div style={{ fontSize: 13, color: '#333', fontWeight: 500 }}>{row.text}</div>
+                  <div style={{ fontSize: 10, color: '#999' }}>{row.label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Add to Contacts button */}
+          <div style={{ width: '100%', height: 48, borderRadius: 10, background: darkBg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
+            <span style={{ fontSize: 15, fontWeight: 600, color: '#fff' }}>+ Add to Contacts</span>
+          </div>
         </div>
       </div>
     );
