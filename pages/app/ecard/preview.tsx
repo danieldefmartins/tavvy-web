@@ -343,6 +343,15 @@ export default function ECardPreviewScreen() {
                     );
                   })}
                 </div>
+
+                {/* Tavvy Logo */}
+                <div className="tavvy-branding">
+                  <img 
+                    src={isLightTheme ? '/tavvy-logo-dark.png' : '/tavvy-logo-white.png'}
+                    alt="Tavvy" 
+                    className="tavvy-logo"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -648,6 +657,19 @@ export default function ECardPreviewScreen() {
             display: flex;
             align-items: center;
             justify-content: center;
+          }
+
+          /* Tavvy Branding */
+          .tavvy-branding {
+            display: flex;
+            justify-content: center;
+            margin-top: 24px;
+            padding-top: 16px;
+          }
+
+          .tavvy-logo {
+            height: 18px;
+            opacity: 0.5;
           }
 
           /* Actions */
