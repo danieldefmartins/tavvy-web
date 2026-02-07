@@ -223,6 +223,15 @@ export const getThemeColors = (isDark: boolean = true) => {
     textTertiary: isDark ? colors.text.tertiary.dark : colors.text.tertiary.light,
     border: isDark ? colors.border.dark : colors.border.light,
     accent: colors.brand.universes,
+    // Tab bar colors
+    tabBarBackground: isDark ? '#000000' : '#FFFFFF',
+    tabBarActive: isDark ? '#FFFFFF' : '#000000',
+    tabBarInactive: isDark ? '#6B7280' : '#9CA3AF',
+    // Card backgrounds
+    cardBackground: isDark ? colors.background.surface.dark : colors.background.surface.light,
+    // Primary color
+    primary: colors.brand.universes,
+    primaryLight: isDark ? 'rgba(102, 126, 234, 0.15)' : 'rgba(102, 126, 234, 0.1)',
   };
 };
 
