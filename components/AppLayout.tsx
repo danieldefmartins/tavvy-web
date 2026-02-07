@@ -33,6 +33,7 @@ export default function AppLayout({
   const router = useRouter();
   const { roles, isAuthenticated, loading } = useRoles();
   const [forceReady, setForceReady] = useState(false);
+  const [redirectAttempted, setRedirectAttempted] = useState(false);
 
   // Determine required access level
   const accessLevel = requiredAccess || getRouteAccessLevel(router.pathname);
@@ -58,6 +59,13 @@ export default function AppLayout({
     }
   }, [loading]);
 
+  // If auth resolves with a user after we initially thought there was none, update
+  useEffect(() => {
+    if (isAuthenticated && redirectAttempted) {
+      setRedirectAttempted(false);
+    }
+  }, [isAuthenticated, redirectAttempted]);
+
   const effectivelyLoading = loading && !forceReady;
 
   // Redirect logic — only runs when loading is complete (or forced ready)
@@ -66,14 +74,28 @@ export default function AppLayout({
 
     if (!hasAccess && !isPublicRoute) {
       if (!isAuthenticated) {
-        router.replace(`/app/login?redirect=${encodeURIComponent(router.asPath)}`, undefined, { locale: router.locale });
+        // Prevent redirect loop: if we just came from login, wait longer
+        // Check if referrer is the login page or if we have a recent login timestamp
+        const justLoggedIn = typeof window !== 'undefined' && 
+          sessionStorage.getItem('tavvy_login_ts') && 
+          (Date.now() - parseInt(sessionStorage.getItem('tavvy_login_ts') || '0', 10)) < 10000;
+        
+        if (justLoggedIn) {
+          console.log('[AppLayout] Just logged in — waiting for auth to settle, not redirecting');
+          return;
+        }
+        
+        if (!redirectAttempted) {
+          setRedirectAttempted(true);
+          router.replace(`/app/login?redirect=${encodeURIComponent(router.asPath)}`, undefined, { locale: router.locale });
+        }
       } else if (accessLevel === 'pro' && !roles.includes('pro') && !roles.includes('super_admin')) {
         router.replace('/app/pros', undefined, { locale: router.locale });
       } else if (accessLevel === 'super_admin' && !roles.includes('super_admin')) {
         router.replace('/app', undefined, { locale: router.locale });
       }
     }
-  }, [effectivelyLoading, hasAccess, isAuthenticated, accessLevel, roles, router, isPublicRoute]);
+  }, [effectivelyLoading, hasAccess, isAuthenticated, accessLevel, roles, router, isPublicRoute, redirectAttempted]);
 
   // For public routes, skip the loading gate entirely
   if (effectivelyLoading && !isPublicRoute) {

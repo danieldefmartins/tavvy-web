@@ -39,8 +39,12 @@ export default function LoginScreen() {
     
     try {
       await signIn(email, password);
-      // Redirect to returnUrl if provided (e.g., from eCard create), otherwise go to /app
-      const returnUrl = router.query.returnUrl as string;
+      // Mark login timestamp so AppLayout doesn't redirect back to login
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('tavvy_login_ts', Date.now().toString());
+      }
+      // Redirect to returnUrl or redirect param if provided, otherwise go to /app
+      const returnUrl = (router.query.returnUrl || router.query.redirect) as string;
       router.push(returnUrl || '/app');
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');
@@ -220,7 +224,7 @@ export default function LoginScreen() {
               <span style={{ color: theme.textSecondary }}>
                 Don't have an account?{' '}
               </span>
-              <Link href={`/app/signup${router.query.returnUrl ? `?returnUrl=${encodeURIComponent(router.query.returnUrl as string)}` : ''}`} locale={locale} style={{ color: theme.primary }}>
+              <Link href={`/app/signup${(router.query.returnUrl || router.query.redirect) ? `?returnUrl=${encodeURIComponent((router.query.returnUrl || router.query.redirect) as string)}` : ''}`} locale={locale} style={{ color: theme.primary }}>
                 Sign Up
               </Link>
             </div>

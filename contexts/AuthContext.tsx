@@ -19,45 +19,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const mountedRef = useRef(true);
   const explicitSignOutRef = useRef(false);
+  const resolvedRef = useRef(false);
 
   useEffect(() => {
     mountedRef.current = true;
-
-    // Simple init: get session, set user, done.
-    // If it fails or times out, we just proceed with no user.
-    let resolved = false;
+    resolvedRef.current = false;
 
     const resolve = (s: Session | null) => {
-      if (resolved || !mountedRef.current) return;
-      resolved = true;
+      if (resolvedRef.current || !mountedRef.current) return;
+      resolvedRef.current = true;
       setSession(s);
       setUser(s?.user ?? null);
       setLoading(false);
     };
 
-    // Hard timeout — NEVER let loading hang for more than 3 seconds
-    const timeout = setTimeout(() => {
-      if (!resolved) {
-        console.warn('[Auth] Init timed out after 3s — proceeding without session');
-        resolve(null);
-      }
-    }, 3000);
-
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      resolve(s);
-    }).catch((err) => {
-      console.error('[Auth] getSession error:', err);
-      resolve(null);
-    });
-
-    // Listen for auth state changes AFTER init
+    // Listen for auth state changes — this fires INITIAL_SESSION first,
+    // then SIGNED_IN on login, TOKEN_REFRESHED on refresh, etc.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       if (!mountedRef.current) return;
 
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+      if (event === 'INITIAL_SESSION') {
+        // This is the most reliable way to get the initial session.
+        // It fires even if getSession() is slow or times out.
+        resolve(newSession);
+      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         setSession(newSession);
         setUser(newSession?.user ?? null);
         setLoading(false);
+        resolvedRef.current = true;
       } else if (event === 'SIGNED_OUT') {
         if (explicitSignOutRef.current) {
           // User explicitly clicked sign out
@@ -69,16 +58,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // If not explicit, IGNORE the sign-out event.
         // This prevents spurious logouts from localStorage clearing,
         // tab backgrounding, or Railway deploys.
-        // The user stays "logged in" with stale data until they
-        // refresh or navigate — which will trigger a fresh getSession().
-      } else if (event === 'INITIAL_SESSION') {
-        if (newSession) {
-          setSession(newSession);
-          setUser(newSession?.user ?? null);
-          setLoading(false);
-        }
       }
     });
+
+    // Also call getSession() as a backup — whichever resolves first wins
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      resolve(s);
+    }).catch((err) => {
+      console.error('[Auth] getSession error:', err);
+      // Don't resolve to null here — wait for INITIAL_SESSION or timeout
+    });
+
+    // Hard timeout — NEVER let loading hang for more than 5 seconds
+    // Increased from 3s to 5s to give slow connections more time
+    const timeout = setTimeout(() => {
+      if (!resolvedRef.current) {
+        console.warn('[Auth] Init timed out after 5s — proceeding without session');
+        resolve(null);
+      }
+    }, 5000);
 
     return () => {
       mountedRef.current = false;
