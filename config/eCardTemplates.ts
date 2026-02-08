@@ -27,7 +27,8 @@ export type TemplateLayout =
   | 'pro-creative'   // Bold colored top, wave divider, logo badge, contact rows
   | 'pro-corporate'  // Company logo top, structured professional layout
   | 'pro-card'       // Banner + industry + services grid + service area
-  | 'premium-static'; // Full-width hero photo that scrolls with content (no parallax)
+  | 'premium-static' // Full-width hero photo that scrolls with content (no parallax)
+  | 'cover-card';     // Cover photo top half, white bottom with contact rows
 
 export interface Template {
   id: string;
@@ -345,7 +346,40 @@ export const TEMPLATES: Template[] = [
     },
   },
 
-  // 9. PREMIUM STATIC — Full-width hero photo that scrolls with content (no parallax)
+  // 9. COVER CARD — Cover photo top, white bottom with name/title/contacts
+  {
+    id: 'cover-card',
+    name: 'Cover Card',
+    description: 'Full cover photo on top with logo overlay. Clean white bottom with contact rows.',
+    category: 'paid',
+    previewImage: 'cover-card',
+    isPremium: true,
+    features: ['cover-photo', 'logo-overlay', 'contact-rows', 'wave-accent', 'clean-layout'],
+    layout: 'cover-card',
+    colorSchemes: [
+      // Purple & Orange (matches mockup)
+      { id: 'purple-orange', name: 'Purple & Orange', primary: '#7c3aed', secondary: '#6d28d9', accent: '#f97316', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF', border: '#f97316', isFree: false },
+      // Blue & Coral
+      { id: 'blue-coral', name: 'Blue & Coral', primary: '#1e40af', secondary: '#3b82f6', accent: '#f43f5e', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF', border: '#f43f5e' },
+      // Dark & Gold
+      { id: 'dark-gold', name: 'Dark & Gold', primary: '#0f172a', secondary: '#1e293b', accent: '#d4af37', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF', border: '#d4af37' },
+      // Teal & White
+      { id: 'teal-white', name: 'Teal & White', primary: '#0d9488', secondary: '#14b8a6', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF', border: '#FFFFFF' },
+      // Rose & Blush
+      { id: 'rose-blush', name: 'Rose & Blush', primary: '#be185d', secondary: '#ec4899', accent: '#fce7f3', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF', border: '#fce7f3' },
+    ],
+    layoutConfig: {
+      photoPosition: 'cover',
+      photoSize: 'hero',
+      photoStyle: 'cover',
+      buttonStyle: 'rounded',
+      fontFamily: 'modern',
+      showBorder: false,
+      hasBannerImage: false,
+    },
+  },
+
+  // 10. PREMIUM STATIC — Full-width hero photo that scrolls with content (no parallax)
   {
     id: 'premium-static',
     name: 'Premium Static',
