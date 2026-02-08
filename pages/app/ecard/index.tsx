@@ -11,7 +11,7 @@ import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import AppLayout from '../../../components/AppLayout';
-import { getUserCards, deleteCard, CardData } from '../../../lib/ecard';
+import { getUserCards, deleteCard, duplicateCard, CardData } from '../../../lib/ecard';
 import { 
   IoArrowBack, 
   IoAdd, 
@@ -23,6 +23,7 @@ import {
   IoRefresh,
   IoTrash,
   IoClose,
+  IoCopy,
 } from 'react-icons/io5';
 
 // Brand colors
@@ -40,6 +41,7 @@ export default function ECardHubScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [deleteModalCard, setDeleteModalCard] = useState<CardData | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [duplicating, setDuplicating] = useState<string | null>(null);
 
   const fetchCards = useCallback(async () => {
     // Wait for auth to finish loading before checking user
@@ -99,6 +101,26 @@ export default function ECardHubScreen() {
       alert('Failed to delete card. Please try again.');
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleDuplicateCard = async (card: CardData) => {
+    if (!user || duplicating) return;
+    setDuplicating(card.id);
+    try {
+      const newCard = await duplicateCard(card.id, user.id);
+      if (newCard) {
+        setCards(prev => [newCard, ...prev]);
+        // Navigate to the new card's editor
+        router.push(`/app/ecard/dashboard?cardId=${newCard.id}`);
+      } else {
+        alert('Failed to duplicate card. Please try again.');
+      }
+    } catch (err) {
+      console.error('Error duplicating card:', err);
+      alert('Failed to duplicate card. Please try again.');
+    } finally {
+      setDuplicating(null);
     }
   };
 
@@ -218,6 +240,21 @@ export default function ECardHubScreen() {
                 <div className="card-actions" style={{ backgroundColor: isDark ? '#1E293B' : '#fff' }}>
                   <span style={{ color: isDark ? '#94A3B8' : '#666' }}>Edit Card</span>
                   <div className="card-actions-right">
+                    <button
+                      className="duplicate-btn"
+                      title="Duplicate card"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDuplicateCard(card);
+                      }}
+                      disabled={duplicating === card.id}
+                    >
+                      {duplicating === card.id ? (
+                        <span className="spinner-small" />
+                      ) : (
+                        <IoCopy size={16} color={isDark ? '#94A3B8' : '#666'} />
+                      )}
+                    </button>
                     <button
                       className="delete-btn"
                       title="Delete card"
@@ -533,6 +570,41 @@ export default function ECardHubScreen() {
 
           .delete-btn:hover {
             background: rgba(239, 68, 68, 0.1);
+          }
+
+          .duplicate-btn {
+            background: none;
+            border: none;
+            padding: 6px;
+            cursor: pointer;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+          }
+
+          .duplicate-btn:hover {
+            background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'};
+          }
+
+          .duplicate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+
+          .spinner-small {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid ${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'};
+            border-top-color: ${isDark ? '#94A3B8' : '#666'};
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+          }
+
+          @keyframes spin {
+            to { transform: rotate(360deg); }
           }
 
           /* Create New Tile */

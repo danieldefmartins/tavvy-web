@@ -555,3 +555,87 @@ export function getQRCodeUrl(slug: string): string {
   const cardUrl = getCardUrl(slug);
   return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(cardUrl)}`;
 }
+
+/**
+ * Duplicate an existing card.
+ * Creates a new unpublished card with the same content, style, and links.
+ * The new card gets a fresh slug (original slug + "-copy" + random suffix).
+ * Images (profile, banner, gallery) are referenced by URL — not re-uploaded.
+ */
+export async function duplicateCard(sourceCardId: string, userId: string): Promise<CardData | null> {
+  try {
+    // 1. Fetch the source card
+    const sourceCard = await getCardById(sourceCardId);
+    if (!sourceCard) {
+      console.error('[duplicateCard] Source card not found:', sourceCardId);
+      return null;
+    }
+
+    // 2. Generate a unique slug for the copy
+    const baseName = sourceCard.full_name || 'card';
+    let newSlug = generateSlug(baseName) + '-copy';
+    const suffix = Math.random().toString(36).substring(2, 6);
+    newSlug = `${newSlug}-${suffix}`;
+
+    // 3. Build the new card payload — copy all content/style fields, reset stats
+    const newCardData: Partial<CardData> = {
+      user_id: userId,
+      slug: newSlug,
+      full_name: sourceCard.full_name ? `${sourceCard.full_name} (Copy)` : 'Card Copy',
+      title: sourceCard.title || undefined,
+      company: sourceCard.company || undefined,
+      phone: sourceCard.phone || undefined,
+      email: sourceCard.email || undefined,
+      website: sourceCard.website || undefined,
+      city: sourceCard.city || undefined,
+      state: sourceCard.state || undefined,
+      bio: sourceCard.bio || undefined,
+      profile_photo_url: sourceCard.profile_photo_url || undefined,
+      profile_photo_size: sourceCard.profile_photo_size || undefined,
+      gradient_color_1: sourceCard.gradient_color_1,
+      gradient_color_2: sourceCard.gradient_color_2,
+      theme: sourceCard.theme || undefined,
+      background_type: sourceCard.background_type || undefined,
+      background_image_url: sourceCard.background_image_url || undefined,
+      background_video_url: sourceCard.background_video_url || undefined,
+      button_style: sourceCard.button_style || undefined,
+      font_style: sourceCard.font_style || undefined,
+      template_id: sourceCard.template_id || undefined,
+      color_scheme_id: sourceCard.color_scheme_id || undefined,
+      banner_image_url: sourceCard.banner_image_url || undefined,
+      featured_socials: sourceCard.featured_socials || [],
+      gallery_images: sourceCard.gallery_images || [],
+      videos: sourceCard.videos || [],
+      form_block: sourceCard.form_block || undefined,
+      pro_credentials: sourceCard.pro_credentials || undefined,
+      industry_icons: sourceCard.industry_icons || [],
+      youtube_video_url: sourceCard.youtube_video_url || undefined,
+      qr_style: sourceCard.qr_style || undefined,
+      is_published: false, // Always start unpublished
+      is_active: true,
+      view_count: 0,
+      tap_count: 0,
+      review_count: 0,
+      review_rating: 0,
+    };
+
+    // 4. Create the new card
+    const newCard = await createCard(newCardData);
+    if (!newCard) {
+      console.error('[duplicateCard] Failed to create duplicate card');
+      return null;
+    }
+
+    // 5. Copy links from the source card
+    const sourceLinks = await getCardLinks(sourceCardId);
+    if (sourceLinks.length > 0) {
+      await saveCardLinks(newCard.id, sourceLinks);
+    }
+
+    console.log('[duplicateCard] Successfully duplicated card:', sourceCardId, '->', newCard.id);
+    return newCard;
+  } catch (error) {
+    console.error('[duplicateCard] Error:', error);
+    return null;
+  }
+}

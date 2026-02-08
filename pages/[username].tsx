@@ -542,14 +542,35 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
 
   // Get color scheme from template config
   const activeColorScheme = templateConfig?.colorSchemes.find(cs => cs.id === (cardData as any).colorSchemeId) || templateConfig?.colorSchemes[0];
-  const isLightBg = (hex: string) => {
-    if (hex.includes('gradient') || hex.includes('linear')) return false;
+  // Robust luminance check — works for hex, gradients, and rgba
+  const hexToLuminance = (hex: string): number => {
     const c = hex.replace('#', '');
-    const r = parseInt(c.substring(0, 2), 16) || 0;
-    const g = parseInt(c.substring(2, 4), 16) || 0;
-    const b = parseInt(c.substring(4, 6), 16) || 0;
-    return (r * 299 + g * 587 + b * 114) / 1000 > 128;
+    if (c.length !== 6) return 0;
+    const r = parseInt(c.substring(0, 2), 16) / 255;
+    const g = parseInt(c.substring(2, 4), 16) / 255;
+    const b = parseInt(c.substring(4, 6), 16) / 255;
+    const toLinear = (v: number) => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
   };
+
+  const isLightBg = (hex: string) => {
+    // For gradients, extract hex colors and average their luminance
+    if (hex.includes('gradient') || hex.includes('linear') || hex.includes('radial')) {
+      const hexMatches = hex.match(/#[0-9a-fA-F]{6}/g);
+      if (hexMatches && hexMatches.length > 0) {
+        const avgLum = hexMatches.reduce((sum, h) => sum + hexToLuminance(h), 0) / hexMatches.length;
+        return avgLum > 0.4;
+      }
+      return false;
+    }
+    return hexToLuminance(hex) > 0.4;
+  };
+
+  // Compute whether the actual rendered background is light
+  const bgString = activeColorScheme?.background || `linear-gradient(165deg, ${cardData.gradientColor1} 0%, ${cardData.gradientColor2} 100%)`;
+  const bgIsActuallyLight = isLightBg(bgString) || (
+    hexToLuminance(cardData.gradientColor1) > 0.4 && hexToLuminance(cardData.gradientColor2) > 0.4
+  );
 
   // Get template-specific styles based on resolved template
   const getTemplateStyles = () => {
@@ -692,35 +713,48 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
 
   const rawTemplateStyles = getTemplateStyles();
 
-  // Auto-contrast: compute best text color based on gradient background
-  const getAutoContrastColor = (hex1: string, hex2: string): string => {
-    const hexToRgb = (hex: string) => {
-      const h = hex.replace('#', '');
-      return {
-        r: parseInt(h.substring(0, 2), 16),
-        g: parseInt(h.substring(2, 4), 16),
-        b: parseInt(h.substring(4, 6), 16),
-      };
-    };
-    // Average the two gradient colors
-    const c1 = hexToRgb(hex1);
-    const c2 = hexToRgb(hex2);
-    const avgR = (c1.r + c2.r) / 2;
-    const avgG = (c1.g + c2.g) / 2;
-    const avgB = (c1.b + c2.b) / 2;
-    // Relative luminance (WCAG)
-    const luminance = (0.299 * avgR + 0.587 * avgG + 0.114 * avgB) / 255;
-    return luminance > 0.55 ? '#1f2937' : '#FFFFFF';
+  // Auto-contrast: compute best text color based on ACTUAL background luminance
+  const getAutoContrastColor = (): string => {
+    const lum1 = hexToLuminance(cardData.gradientColor1.startsWith('#') ? cardData.gradientColor1 : '#667eea');
+    const lum2 = hexToLuminance(cardData.gradientColor2.startsWith('#') ? cardData.gradientColor2 : '#764ba2');
+    const avgLum = (lum1 + lum2) / 2;
+    return avgLum > 0.4 ? '#1f2937' : '#FFFFFF';
   };
 
-  // Apply user font color override, or auto-contrast fallback
+  // Validate that a text color has sufficient contrast against the background
+  const ensureContrast = (textColor: string): string => {
+    if (!textColor || textColor === 'transparent') return getAutoContrastColor();
+    // If text color is light and background is also light → force dark text
+    const textLum = hexToLuminance(textColor.startsWith('#') && textColor.length === 7 ? textColor : '#FFFFFF');
+    if (bgIsActuallyLight && textLum > 0.4) {
+      return '#1f2937'; // Force dark text on light bg
+    }
+    // If text color is dark and background is also dark → force light text
+    if (!bgIsActuallyLight && textLum < 0.15) {
+      return '#FFFFFF'; // Force light text on dark bg
+    }
+    return textColor;
+  };
+
+  // Apply user font color override, or auto-contrast with validation
+  const autoTextColor = cardData.fontColor
+    ? cardData.fontColor
+    : ensureContrast(rawTemplateStyles.textColor);
+
+  // Also fix button colors for light backgrounds
+  const autoButtonBg = bgIsActuallyLight
+    ? 'rgba(0,0,0,0.06)'
+    : rawTemplateStyles.buttonBg;
+  const autoButtonBorder = bgIsActuallyLight
+    ? 'rgba(0,0,0,0.1)'
+    : rawTemplateStyles.buttonBorder;
+
   const templateStyles = {
     ...rawTemplateStyles,
-    textColor: cardData.fontColor
-      ? cardData.fontColor
-      : (rawTemplateStyles.textColor === '#FFFFFF' || rawTemplateStyles.textColor === '#1f2937')
-        ? getAutoContrastColor(cardData.gradientColor1, cardData.gradientColor2)
-        : rawTemplateStyles.textColor,
+    textColor: autoTextColor,
+    buttonBg: (rawTemplateStyles.buttonBg && !rawTemplateStyles.buttonBg.includes('255,255,255')) ? rawTemplateStyles.buttonBg : autoButtonBg,
+    buttonBorder: (rawTemplateStyles.buttonBorder && !rawTemplateStyles.buttonBorder.includes('255,255,255')) ? rawTemplateStyles.buttonBorder : autoButtonBorder,
+    isDark: !bgIsActuallyLight,
   };
 
   // Get button style based on cardData.buttonStyle
@@ -765,20 +799,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   const fontStyleOverrides = getFontStyleOverrides();
 
   // Determine if the footer area has a light background (for logo color switching)
-  const isLightFooterBg = (() => {
-    if (templateLayout === 'minimal') return true;
-    const hexToLuminance = (hex: string) => {
-      const h = hex.replace('#', '');
-      if (h.length !== 6) return 0;
-      const r = parseInt(h.substring(0, 2), 16);
-      const g = parseInt(h.substring(2, 4), 16);
-      const b = parseInt(h.substring(4, 6), 16);
-      return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    };
-    const lum1 = hexToLuminance(cardData.gradientColor1);
-    const lum2 = hexToLuminance(cardData.gradientColor2);
-    return (lum1 + lum2) / 2 > 0.55;
-  })();
+  const isLightFooterBg = bgIsActuallyLight;
 
   return (
     <>
@@ -838,11 +859,11 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           }
           .social-btn:hover {
             transform: scale(1.1);
-            background: rgba(255,255,255,0.25) !important;
+            opacity: 0.8;
           }
           .link-btn:hover {
             transform: translateX(4px);
-            background: rgba(255,255,255,0.18) !important;
+            opacity: 0.85;
           }
           .crown-btn:hover:not(:disabled) {
             transform: scale(1.05);
@@ -891,18 +912,35 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
         <div style={{
           ...styles.cardContainer,
           ...(templateLayout === 'blogger' ? {
-            maxWidth: '420px',
+            maxWidth: '400px',
             background: activeColorScheme?.cardBg || '#FFFFFF',
             borderRadius: '28px',
             boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
-            margin: '20px auto',
+            margin: '60px auto 20px',
             minHeight: 'auto',
-            padding: '32px 24px 40px',
+            padding: '0 24px 40px',
+            overflow: 'visible' as const,
           } : {}),
           ...(templateLayout === 'full-width' ? { padding: '0 24px 40px' } : {}),
           ...(templateLayout === 'business-card' ? {
             maxWidth: '420px',
             margin: '20px auto',
+            padding: '0',
+            borderRadius: '20px',
+            overflow: 'hidden' as const,
+            border: `2px solid ${templateStyles.accentColor}40`,
+            boxShadow: `0 20px 60px rgba(0,0,0,0.3), 0 0 0 1px ${templateStyles.accentColor}20`,
+          } : {}),
+          ...(templateLayout === 'pro-card' ? {
+            maxWidth: '420px',
+            margin: '20px auto',
+            padding: '0',
+            borderRadius: '20px',
+            overflow: 'hidden' as const,
+          } : {}),
+          ...(templateLayout === 'pro-corporate' ? {
+            maxWidth: '440px',
+            overflow: 'visible' as const,
           } : {}),
         }}>
           {/* Star Badge - Top Right — Opens Endorsement Popup */}
@@ -911,13 +949,18 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             className="crown-btn"
             style={{
               ...styles.crownButton,
-              ...(cardData.endorsementCount > 0 ? styles.crownButtonTapped : {}),
+              background: bgIsActuallyLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)',
+              borderColor: bgIsActuallyLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)',
+              ...(cardData.endorsementCount > 0 ? {
+                background: bgIsActuallyLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.18)',
+                borderColor: bgIsActuallyLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.3)',
+              } : {}),
             }}
           >
             <span style={{ fontSize: '18px', lineHeight: 1 }}>★</span>
-            <span style={styles.crownCount}>{cardData.endorsementCount || cardData.tapCount || 0}</span>
+            <span style={{...styles.crownCount, color: templateStyles.textColor}}>{cardData.endorsementCount || cardData.tapCount || 0}</span>
             <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ opacity: 0.5 }}>
-              <path d="M1 1L5 5L9 1" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M1 1L5 5L9 1" stroke={templateStyles.textColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
 
@@ -952,7 +995,68 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             <>
               <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '160px', height: '160px', borderRadius: '50%', background: `${templateStyles.accentColor}10`, border: `1px solid ${templateStyles.accentColor}20`, zIndex: 0 }} />
               <div style={{ position: 'absolute', top: '80px', left: '-60px', width: '120px', height: '120px', borderRadius: '50%', background: `${templateStyles.accentColor}08`, border: `1px solid ${templateStyles.accentColor}15`, zIndex: 0 }} />
+              <div style={{ position: 'absolute', bottom: '200px', right: '-30px', width: '100px', height: '100px', borderRadius: '50%', background: `${templateStyles.accentColor}06`, border: `1px solid ${templateStyles.accentColor}10`, zIndex: 0 }} />
             </>
+          )}
+
+          {/* Business Card: Dark Top Section */}
+          {templateLayout === 'business-card' && (
+            <div style={{
+              background: activeColorScheme?.background || `linear-gradient(165deg, ${cardData.gradientColor1} 0%, ${cardData.gradientColor2} 100%)`,
+              padding: '40px 24px 30px',
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column' as const,
+              alignItems: 'center',
+              position: 'relative' as const,
+            }}>
+              {/* Company Badge */}
+              {cardData.company && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: templateStyles.accentColor }} />
+                  <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' as const, color: templateStyles.accentColor }}>{cardData.company}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Pro Card: Dark Top Section with Name LEFT + Photo RIGHT */}
+          {templateLayout === 'pro-card' && (
+            <div style={{
+              background: activeColorScheme?.background || `linear-gradient(165deg, ${cardData.gradientColor1} 0%, ${cardData.gradientColor2} 100%)`,
+              padding: '30px 24px 40px',
+              width: '100%',
+              position: 'relative' as const,
+            }}>
+              {/* Company Row */}
+              {cardData.company && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: 2, background: templateStyles.accentColor }} />
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.7)' }}>{cardData.company}</span>
+                </div>
+              )}
+              {/* Name LEFT + Photo RIGHT */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+                <div style={{ flex: 1 }}>
+                  <h1 style={{ fontSize: 28, fontWeight: 800, color: templateStyles.accentColor, margin: '0 0 6px 0', lineHeight: 1.1 }}>{cardData.fullName}</h1>
+                  {cardData.title && <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', margin: 0, fontWeight: 500 }}>{cardData.title}</p>}
+                </div>
+                {cardData.profilePhotoUrl && (
+                  <div style={{ width: 100, height: 100, borderRadius: '50%', border: `3px solid ${templateStyles.accentColor}`, padding: 3, flexShrink: 0 }}>
+                    <img src={cardData.profilePhotoUrl} alt={cardData.fullName} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Pro Card: Diagonal Transition */}
+          {templateLayout === 'pro-card' && (
+            <div style={{ width: '100%', height: 30, position: 'relative' as const, marginTop: -30 }}>
+              <svg viewBox="0 0 400 30" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
+                <polygon points="0,0 400,30 0,30" fill={bgIsActuallyLight ? '#f8f9fa' : '#1a1a2e'} />
+              </svg>
+            </div>
           )}
 
           {/* Profile Section */}
@@ -961,9 +1065,12 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             ...((templateLayout === 'pro-realtor' || templateLayout === 'pro-card') && cardData.bannerImageUrl ? { zIndex: 3, position: 'relative' as const } : {}),
             ...(templateLayout === 'full-width' ? { marginTop: '40vh', zIndex: 2 } : {}),
             ...(templateLayout === 'pro-creative' || templateLayout === 'pro-card' ? { alignItems: 'flex-start' } : {}),
+            ...(templateLayout === 'business-card' ? { padding: '0 24px 20px', background: '#FFFFFF', color: '#1a1a2e' } : {}),
+            ...(templateLayout === 'pro-card' ? { padding: '20px 24px', background: bgIsActuallyLight ? '#f8f9fa' : '#1a1a2e' } : {}),
+            ...(templateLayout === 'blogger' ? { paddingTop: 0 } : {}),
           }}>
-            {/* Profile Photo - skip for bold template (photo is the background) */}
-            {templateLayout !== 'full-width' && (() => {
+            {/* Profile Photo - skip for full-width (photo IS the bg) and pro-card (photo in dark top section) */}
+            {templateLayout !== 'full-width' && templateLayout !== 'pro-card' && (() => {
               // Photo size configurations
               const photoSizes = {
                 small: { ring: 100, photo: 92, initials: 28, borderRadius: 50 },
@@ -979,12 +1086,25 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               } : {};
               
               return (
-                <div style={styles.photoWrapper}>
+                <div style={{
+                  ...styles.photoWrapper,
+                  ...(templateLayout === 'blogger' ? { marginTop: '-50px', zIndex: 10 } : {}),
+                }}>
                   <div style={{
                     ...styles.photoRing,
                     width: `${sizeConfig.ring}px`,
                     height: `${sizeConfig.ring}px`,
                     borderRadius: `${sizeConfig.borderRadius}px`,
+                    background: templateLayout === 'blogger'
+                      ? `linear-gradient(145deg, ${templateStyles.accentColor}40 0%, ${templateStyles.accentColor}15 100%)`
+                      : bgIsActuallyLight
+                        ? 'linear-gradient(145deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.03) 100%)'
+                        : 'linear-gradient(145deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%)',
+                    boxShadow: templateLayout === 'blogger'
+                      ? `0 12px 40px rgba(0,0,0,0.1), 0 0 0 4px ${activeColorScheme?.cardBg || '#FFFFFF'}`
+                      : bgIsActuallyLight
+                        ? '0 12px 40px rgba(0,0,0,0.1), inset 0 2px 0 rgba(0,0,0,0.05)'
+                        : '0 12px 40px rgba(0,0,0,0.25), inset 0 2px 0 rgba(255,255,255,0.2)',
                     ...neonGlow,
                   }}>
                     {cardData.profilePhotoUrl ? (
@@ -1025,32 +1145,43 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               );
             })()}
 
-            {/* Name & Info */}
-            {/* Pro Realtor: "HI, I'M" intro */}
+            {/* Pro Realtor: 'HI I'M' intro text */}
             {templateLayout === 'pro-realtor' && (
-              <p style={{ fontSize: '13px', fontWeight: '600', letterSpacing: '3px', textTransform: 'uppercase' as const, color: templateStyles.accentColor, margin: '0 0 4px 0', textAlign: 'center' as const, opacity: 0.8 }}>HI, I&apos;M</p>
+              <p style={{ fontSize: '12px', fontWeight: '600', letterSpacing: '3px', textTransform: 'uppercase' as const, color: templateStyles.accentColor || templateStyles.textColor, margin: '8px 0 4px 0', textAlign: 'center' as const, opacity: 0.7 }}>HI, I&apos;M</p>
             )}
-            <h1 style={{
+
+            {/* Name & Info */}
+            {/* Name (skip for pro-card — rendered in dark top section) */}
+            {templateLayout !== 'pro-card' && <h1 style={{
               ...styles.name,
               color: templateStyles.textColor,
               ...fontStyleOverrides,
               ...(templateLayout === 'pro-creative' ? { textAlign: 'left' as const, width: '100%' } : {}),
-              ...(templateLayout === 'pro-card' ? { textAlign: 'left' as const, width: '100%' } : {}),
-              ...(templateLayout === 'blogger' ? { fontFamily: "'Georgia', serif", fontWeight: '700', fontStyle: 'italic' as const } : {}),
-            }}>{cardData.fullName}</h1>
-            {cardData.title && <p style={{
+              ...(templateLayout === 'blogger' ? { fontFamily: "'Georgia', 'Times New Roman', serif", fontWeight: '700', fontStyle: 'italic' as const, fontSize: '28px' } : {}),
+              ...(templateLayout === 'business-card' ? { color: '#1a1a2e', fontWeight: '800' } : {}),
+              ...(templateLayout === 'pro-realtor' ? { fontSize: '26px', fontWeight: '800', letterSpacing: '-0.5px' } : {}),
+            }}>{cardData.fullName}</h1>}
+            {/* Title (skip for pro-card) */}
+            {cardData.title && templateLayout !== 'pro-card' && <p style={{
               ...styles.title,
               color: templateStyles.textColor,
               opacity: 0.9,
               ...fontStyleOverrides,
-              ...(templateLayout === 'pro-creative' || templateLayout === 'pro-card' ? { textAlign: 'left' as const, width: '100%' } : {}),
+              ...(templateLayout === 'pro-creative' ? { textAlign: 'left' as const, width: '100%' } : {}),
+              ...(templateLayout === 'blogger' ? { fontSize: '10px', fontWeight: '600', letterSpacing: '2.5px', textTransform: 'uppercase' as const, opacity: 0.6, color: '#666' } : {}),
+              ...(templateLayout === 'business-card' ? { color: '#555', fontWeight: '600' } : {}),
+              ...(templateLayout === 'pro-realtor' ? { fontWeight: '600', letterSpacing: '0.5px' } : {}),
             }}>{cardData.title}</p>}
-            {cardData.company && <p style={{
+            {/* Company (skip for pro-card) */}
+            {cardData.company && templateLayout !== 'pro-card' && <p style={{
               ...styles.company,
               color: templateStyles.textColor,
               opacity: 0.7,
               ...fontStyleOverrides,
-              ...(templateLayout === 'pro-creative' || templateLayout === 'pro-card' ? { textAlign: 'left' as const, width: '100%' } : {}),
+              ...(templateLayout === 'pro-creative' ? { textAlign: 'left' as const, width: '100%' } : {}),
+              ...(templateLayout === 'blogger' ? { fontSize: '11px', letterSpacing: '1px', color: templateStyles.accentColor, fontWeight: '600' } : {}),
+              ...(templateLayout === 'business-card' ? { color: '#888' } : {}),
+              ...(templateLayout === 'pro-realtor' ? { fontSize: '13px', fontWeight: '500' } : {}),
             }}>{cardData.company}</p>}
             
             {/* Bio */}
@@ -1058,7 +1189,10 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               <p style={{
                 ...styles.bio,
                 color: templateStyles.textColor,
-                ...(templateLayout === 'pro-creative' || templateLayout === 'pro-card' ? { textAlign: 'left' as const, width: '100%', padding: '0' } : {}),
+                ...(templateLayout === 'pro-creative' ? { textAlign: 'left' as const, width: '100%', padding: '0' } : {}),
+                ...(templateLayout === 'pro-card' ? { textAlign: 'left' as const, width: '100%', padding: '0', color: bgIsActuallyLight ? '#555' : 'rgba(255,255,255,0.7)' } : {}),
+                ...(templateLayout === 'business-card' ? { color: '#555', fontSize: '14px' } : {}),
+                ...(templateLayout === 'blogger' ? { color: '#555', fontSize: '14px', lineHeight: '1.6' } : {}),
               }}>
                 {cardData.bio}
               </p>
@@ -1112,10 +1246,103 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 <span>{location}</span>
               </div>
             )}
+
+            {/* Pro Corporate: Industry & Services Tags */}
+            {templateLayout === 'pro-corporate' && cardData.title && (
+              <div style={{ width: '100%', marginTop: 16, zIndex: 1, position: 'relative' as const }}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' as const, color: templateStyles.accentColor, marginBottom: 8 }}>Industry</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 6 }}>
+                  <span style={{ padding: '6px 14px', borderRadius: 20, background: `${templateStyles.accentColor}15`, border: `1px solid ${templateStyles.accentColor}25`, fontSize: 13, fontWeight: 600, color: templateStyles.textColor }}>{cardData.title}</span>
+                </div>
+              </div>
+            )}
+            {templateLayout === 'pro-corporate' && cardData.bio && (
+              <div style={{ width: '100%', marginTop: 14, zIndex: 1, position: 'relative' as const }}>
+                <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' as const, color: templateStyles.accentColor, marginBottom: 8 }}>Services</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 6 }}>
+                  {cardData.bio.split(/[,.]/).filter(Boolean).slice(0, 5).map((service, i) => (
+                    <span key={i} style={{ padding: '6px 14px', borderRadius: 20, background: `${templateStyles.accentColor}10`, border: `1px solid ${templateStyles.accentColor}18`, fontSize: 12, fontWeight: 500, color: templateStyles.textColor }}>{service.trim()}</span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Action Buttons */}
-          {cardData.showContactInfo && <div style={styles.actionButtons}>
+          {/* Business Card: Contact Rows with Labels (replaces grid action buttons) */}
+          {templateLayout === 'business-card' && cardData.showContactInfo && (
+            <div style={{ width: '100%', padding: '0 24px 20px', background: '#FFFFFF' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' as const, color: '#999', marginBottom: 12 }}>Contact</div>
+              {cardData.phone && (
+                <a href={`tel:${cardData.phone}`} style={{ display: 'flex', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: '#1a1a2e' }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: `${templateStyles.accentColor}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, color: templateStyles.accentColor }}>
+                    <PhoneIcon />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 15, fontWeight: 600 }}>{cardData.phone}</div>
+                    <div style={{ fontSize: 11, color: '#999', fontWeight: 500 }}>Phone</div>
+                  </div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+              )}
+              {cardData.email && (
+                <a href={`mailto:${cardData.email}`} style={{ display: 'flex', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: '#1a1a2e' }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: `${templateStyles.accentColor}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, color: templateStyles.accentColor }}>
+                    <EmailIcon />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 15, fontWeight: 600, wordBreak: 'break-all' as const }}>{cardData.email}</div>
+                    <div style={{ fontSize: 11, color: '#999', fontWeight: 500 }}>Email</div>
+                  </div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+              )}
+              {cardData.website && (
+                <a href={cardData.website.startsWith('http') ? cardData.website : `https://${cardData.website}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: '#1a1a2e' }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: `${templateStyles.accentColor}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, color: templateStyles.accentColor }}>
+                    <GlobeIcon />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 15, fontWeight: 600 }}>Website</div>
+                    <div style={{ fontSize: 11, color: '#999', fontWeight: 500 }}>Visit</div>
+                  </div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+              )}
+            </div>
+          )}
+
+          {/* Pro Card: Colored Contact Icons Row */}
+          {templateLayout === 'pro-card' && cardData.showContactInfo && (
+            <div style={{ width: '100%', padding: '10px 24px 20px', background: bgIsActuallyLight ? '#f8f9fa' : '#1a1a2e', display: 'flex', gap: 12, justifyContent: 'flex-start' }}>
+              {cardData.phone && (
+                <a href={`tel:${cardData.phone}`} style={{ width: 48, height: 48, borderRadius: 12, background: templateStyles.accentColor, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', textDecoration: 'none' }}>
+                  <PhoneIcon />
+                </a>
+              )}
+              {cardData.phone && (
+                <a href={`sms:${cardData.phone}`} style={{ width: 48, height: 48, borderRadius: 12, background: '#34D399', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', textDecoration: 'none' }}>
+                  <MessageIcon />
+                </a>
+              )}
+              {cardData.email && (
+                <a href={`mailto:${cardData.email}`} style={{ width: 48, height: 48, borderRadius: 12, background: '#60A5FA', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', textDecoration: 'none' }}>
+                  <EmailIcon />
+                </a>
+              )}
+              {cardData.website && (
+                <a href={cardData.website.startsWith('http') ? cardData.website : `https://${cardData.website}`} target="_blank" rel="noopener noreferrer" style={{ width: 48, height: 48, borderRadius: 12, background: '#A78BFA', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', textDecoration: 'none' }}>
+                  <GlobeIcon />
+                </a>
+              )}
+            </div>
+          )}
+
+          {/* Standard Action Buttons (for all other templates) */}
+          {templateLayout !== 'business-card' && templateLayout !== 'pro-card' && cardData.showContactInfo && <div style={{
+            ...styles.actionButtons,
+            ...(templateLayout === 'blogger' ? { padding: '0 0 10px', gap: '10px' } : {}),
+            ...(templateLayout === 'pro-realtor' ? { gap: '10px' } : {}),
+          }}>
             {cardData.phone && (
               <a href={`tel:${cardData.phone}`} className="action-btn" style={{
                 ...styles.actionButton,
@@ -1239,10 +1466,10 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   target="_blank"
                   rel="noopener noreferrer"
                   className="social-btn"
-                  style={styles.socialButton}
+                  style={{...styles.socialButton, background: templateStyles.buttonBg, borderColor: templateStyles.buttonBorder}}
                   title="Instagram"
                 >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill={templateStyles.textColor}>
                     <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                   </svg>
                 </a>
@@ -1253,10 +1480,10 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   target="_blank"
                   rel="noopener noreferrer"
                   className="social-btn"
-                  style={styles.socialButton}
+                  style={{...styles.socialButton, background: templateStyles.buttonBg, borderColor: templateStyles.buttonBorder}}
                   title="Facebook"
                 >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill={templateStyles.textColor}>
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                   </svg>
                 </a>
@@ -1267,10 +1494,10 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   target="_blank"
                   rel="noopener noreferrer"
                   className="social-btn"
-                  style={styles.socialButton}
+                  style={{...styles.socialButton, background: templateStyles.buttonBg, borderColor: templateStyles.buttonBorder}}
                   title="LinkedIn"
                 >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill={templateStyles.textColor}>
                     <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
                   </svg>
                 </a>
@@ -1281,10 +1508,10 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   target="_blank"
                   rel="noopener noreferrer"
                   className="social-btn"
-                  style={styles.socialButton}
+                  style={{...styles.socialButton, background: templateStyles.buttonBg, borderColor: templateStyles.buttonBorder}}
                   title="X (Twitter)"
                 >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill={templateStyles.textColor}>
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                   </svg>
                 </a>
@@ -1295,10 +1522,10 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   target="_blank"
                   rel="noopener noreferrer"
                   className="social-btn"
-                  style={styles.socialButton}
+                  style={{...styles.socialButton, background: templateStyles.buttonBg, borderColor: templateStyles.buttonBorder}}
                   title="TikTok"
                 >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill={templateStyles.textColor}>
                     <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
                   </svg>
                 </a>
@@ -1309,10 +1536,10 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   target="_blank"
                   rel="noopener noreferrer"
                   className="social-btn"
-                  style={styles.socialButton}
+                  style={{...styles.socialButton, background: templateStyles.buttonBg, borderColor: templateStyles.buttonBorder}}
                   title="YouTube"
                 >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill={templateStyles.textColor}>
                     <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                   </svg>
                 </a>
@@ -1323,10 +1550,10 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   target="_blank"
                   rel="noopener noreferrer"
                   className="social-btn"
-                  style={styles.socialButton}
+                  style={{...styles.socialButton, background: templateStyles.buttonBg, borderColor: templateStyles.buttonBorder}}
                   title="Snapchat"
                 >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill={templateStyles.textColor}>
                     <path d="M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.299 4.847l-.003.06c-.012.18-.022.345-.03.51.075.045.203.09.401.09.3-.016.659-.12 1.033-.301.165-.088.344-.104.464-.104.182 0 .359.029.509.09.45.149.734.479.734.838.015.449-.39.839-1.213 1.168-.089.029-.209.075-.344.119-.45.135-1.139.36-1.333.81-.09.224-.061.524.12.868l.015.015c.06.136 1.526 3.475 4.791 4.014.255.044.435.27.42.509 0 .075-.015.149-.045.225-.24.569-1.273.988-3.146 1.271-.059.091-.12.375-.164.57-.029.179-.074.36-.134.553-.076.271-.27.405-.555.405h-.03c-.135 0-.313-.031-.538-.074-.36-.075-.765-.135-1.273-.135-.3 0-.599.015-.913.074-.6.104-1.123.464-1.723.884-.853.599-1.826 1.288-3.294 1.288-.06 0-.119-.015-.18-.015h-.149c-1.468 0-2.427-.675-3.279-1.288-.599-.42-1.107-.779-1.707-.884-.314-.045-.629-.074-.928-.074-.54 0-.958.089-1.272.149-.211.043-.391.074-.54.074-.374 0-.523-.224-.583-.42-.061-.192-.09-.389-.135-.567-.046-.181-.105-.494-.166-.57-1.918-.222-2.95-.642-3.189-1.226-.031-.063-.052-.15-.055-.225-.015-.243.165-.465.42-.509 3.264-.54 4.73-3.879 4.791-4.02l.016-.029c.18-.345.224-.645.119-.869-.195-.434-.884-.658-1.332-.809-.121-.029-.24-.074-.346-.119-1.107-.435-1.257-.93-1.197-1.273.09-.479.674-.793 1.168-.793.146 0 .27.029.383.074.42.194.789.3 1.104.3.234 0 .384-.06.465-.105l-.046-.569c-.098-1.626-.225-3.651.307-4.837C7.392 1.077 10.739.807 11.727.807l.419-.015h.06z"/>
                   </svg>
                 </a>
@@ -1337,10 +1564,10 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   target="_blank"
                   rel="noopener noreferrer"
                   className="social-btn"
-                  style={styles.socialButton}
+                  style={{...styles.socialButton, background: templateStyles.buttonBg, borderColor: templateStyles.buttonBorder}}
                   title="Pinterest"
                 >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill={templateStyles.textColor}>
                     <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/>
                   </svg>
                 </a>
@@ -1351,10 +1578,10 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   target="_blank"
                   rel="noopener noreferrer"
                   className="social-btn"
-                  style={styles.socialButton}
+                  style={{...styles.socialButton, background: templateStyles.buttonBg, borderColor: templateStyles.buttonBorder}}
                   title="WhatsApp"
                 >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="white">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill={templateStyles.textColor}>
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                   </svg>
                 </a>
@@ -1363,7 +1590,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           )}
 
           {/* Divider */}
-          <div style={styles.divider} />
+          <div style={{...styles.divider, background: bgIsActuallyLight ? 'linear-gradient(90deg, transparent, rgba(0,0,0,0.15), transparent)' : 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)'}} />
 
           {/* Links Section - always visible */}
 
@@ -1680,7 +1907,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                           <polygon points="23 7 16 12 23 17 23 7"/>
                           <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
                         </svg>
-                        <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>Tavvy Short</span>
+                        <span style={{ fontSize: 12, color: bgIsActuallyLight ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.7)', fontWeight: 500 }}>Tavvy Short</span>
                       </div>
                     </div>
                   );
@@ -1715,17 +1942,17 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                       rel="noopener noreferrer"
                       style={{
                         display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px',
-                        backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 14,
-                        border: '1px solid rgba(255,255,255,0.12)', marginBottom: 10,
-                        textDecoration: 'none', color: 'white',
+                        backgroundColor: templateStyles.buttonBg, borderRadius: 14,
+                        border: `1px solid ${templateStyles.buttonBorder}`, marginBottom: 10,
+                        textDecoration: 'none', color: templateStyles.textColor,
                       }}
                     >
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={templateStyles.textColor} strokeWidth="2">
                         <polygon points="23 7 16 12 23 17 23 7"/>
                         <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
                       </svg>
                       <span style={{ fontSize: 14, fontWeight: 500, flex: 1 }}>Video</span>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={bgIsActuallyLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.5)'} strokeWidth="2">
                         <polyline points="9 18 15 12 9 6"/>
                       </svg>
                     </a>
@@ -1753,19 +1980,42 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                     className="link-btn"
                     style={{
                       ...styles.linkButton,
+                      background: templateStyles.buttonBg,
+                      borderColor: templateStyles.buttonBorder,
                       animationDelay: `${index * 0.05}s`,
+                      ...(templateLayout === 'blogger' ? {
+                        background: `${templateStyles.accentColor}15`,
+                        borderColor: `${templateStyles.accentColor}30`,
+                        borderRadius: '16px',
+                        textTransform: 'uppercase' as const,
+                        letterSpacing: '1px',
+                        fontSize: '12px',
+                      } : {}),
+                      ...(templateLayout === 'business-card' ? {
+                        background: '#f8f9fa',
+                        borderColor: '#e5e7eb',
+                        borderRadius: '12px',
+                      } : {}),
+                      ...(templateLayout === 'pro-card' ? {
+                        background: bgIsActuallyLight ? '#f0f0f0' : '#2a2a3e',
+                        borderColor: bgIsActuallyLight ? '#e0e0e0' : '#3a3a4e',
+                        borderRadius: '12px',
+                      } : {}),
                     }}
                     onClick={() => handleLinkClick(link)}
                   >
-                    <div style={styles.linkIconContainer}>
+                    <div style={{...styles.linkIconContainer, 
+                      background: templateLayout === 'business-card' ? `${templateStyles.accentColor}15` : templateLayout === 'blogger' ? `${templateStyles.accentColor}20` : bgIsActuallyLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)', 
+                      color: templateLayout === 'business-card' ? templateStyles.accentColor : templateLayout === 'blogger' ? templateStyles.accentColor : templateStyles.textColor
+                    }}>
                       {link.icon === 'website' || link.icon === 'link' ? (
                         <GlobeIcon />
                       ) : (
                         <LinkIcon />
                       )}
                     </div>
-                    <span style={styles.linkButtonText}>{link.title}</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" strokeWidth="2">
+                    <span style={{...styles.linkButtonText, color: templateLayout === 'business-card' ? '#1a1a2e' : templateLayout === 'blogger' ? '#333' : templateStyles.textColor}}>{link.title}</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={bgIsActuallyLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.5)'} strokeWidth="2">
                       <polyline points="9 18 15 12 9 6"/>
                     </svg>
                   </a>
@@ -1810,13 +2060,40 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             </div>
           )}
 
+          {/* Business Card: Add to Contacts CTA */}
+          {templateLayout === 'business-card' && (
+            <div style={{ width: '100%', padding: '16px 24px', background: '#FFFFFF' }}>
+              <button onClick={handleSaveContact} style={{
+                width: '100%', padding: '14px', borderRadius: 12,
+                background: templateStyles.accentColor, border: 'none',
+                color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                + Add to Contacts
+              </button>
+            </div>
+          )}
+
           {/* Bottom Actions */}
-          <div style={styles.bottomActions}>
-            <button onClick={handleSaveContact} style={styles.saveButton}>
+          <div style={{
+            ...styles.bottomActions,
+            ...(templateLayout === 'business-card' ? { background: '#FFFFFF', padding: '0 24px 20px' } : {}),
+            ...(templateLayout === 'pro-card' ? { background: bgIsActuallyLight ? '#f8f9fa' : '#1a1a2e', padding: '10px 24px 20px' } : {}),
+          }}>
+            {templateLayout !== 'business-card' && <button onClick={handleSaveContact} style={{
+              ...styles.saveButton,
+              background: bgIsActuallyLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.15)',
+              borderColor: bgIsActuallyLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)',
+              color: templateStyles.textColor,
+            }}>
               <SaveIcon />
               <span>Save Contact</span>
-            </button>
-            <button onClick={handleShare} style={styles.shareButton}>
+            </button>}
+            <button onClick={handleShare} style={{
+              ...styles.shareButton,
+              ...(templateLayout === 'business-card' ? { background: '#f0f0f0', color: '#1a1a2e', borderColor: '#e0e0e0' } : {}),
+            }}>
               <ShareIcon />
               <span>Share</span>
             </button>
@@ -1886,6 +2163,13 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               <span>Google Wallet</span>
             </button>
           </div>
+
+          {/* Pro Realtor: Company Footer Bar */}
+          {templateLayout === 'pro-realtor' && cardData.company && (
+            <div style={{ width: '100%', padding: '16px 20px', background: `${templateStyles.accentColor}15`, borderRadius: 14, marginTop: 16, textAlign: 'center' as const }}>
+              <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' as const, color: templateStyles.accentColor }}>{cardData.company}</span>
+            </div>
+          )}
 
           {/* Tavvy Branding Footer — clean & minimal */}
           <div style={styles.poweredBy}>
