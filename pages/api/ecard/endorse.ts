@@ -108,13 +108,48 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Don't fail the whole request, endorsement was created
     }
 
-    // Update tap count on the card
+    // Update tap count on the card (proper read-then-increment)
+    const { data: currentCard } = await supabase
+      .from('digital_cards')
+      .select('tap_count')
+      .eq('id', cardId)
+      .single();
+    const newTapCount = (currentCard?.tap_count || 0) + 1;
     await supabase
       .from('digital_cards')
-      .update({ tap_count: (await supabase.from('digital_cards').select('tap_count').eq('id', cardId).single()).data?.tap_count + 1 || 1 })
+      .update({ tap_count: newTapCount })
       .eq('id', cardId);
 
-    return res.status(200).json({ success: true, endorsementId: endorsement.id });
+    // Get the actual endorsement count from the endorsements table
+    const { count: newEndorsementCount } = await supabase
+      .from('ecard_endorsements')
+      .select('*', { count: 'exact', head: true })
+      .eq('card_id', cardId);
+
+    // Get updated top endorsement tags
+    const { data: allSignalTaps } = await supabase
+      .from('ecard_endorsement_signals')
+      .select('signal_id, review_items(label, icon_emoji)')
+      .eq('card_id', cardId);
+    let updatedTags: { label: string; emoji: string; count: number }[] = [];
+    if (allSignalTaps && allSignalTaps.length > 0) {
+      const tagCounts: Record<string, { label: string; emoji: string; count: number }> = {};
+      allSignalTaps.forEach((tap: any) => {
+        const ri = tap.review_items;
+        if (ri) {
+          if (!tagCounts[tap.signal_id]) tagCounts[tap.signal_id] = { label: ri.label, emoji: ri.icon_emoji || '⭐', count: 0 };
+          tagCounts[tap.signal_id].count++;
+        }
+      });
+      updatedTags = Object.values(tagCounts).sort((a, b) => b.count - a.count).slice(0, 8);
+    }
+
+    return res.status(200).json({
+      success: true,
+      endorsementId: endorsement.id,
+      endorsementCount: newEndorsementCount || 0,
+      topEndorsementTags: updatedTags,
+    });
   } catch (err) {
     console.error('Endorsement API error:', err);
     return res.status(500).json({ error: 'Internal server error' });

@@ -260,6 +260,14 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           });
           if (res.ok) {
             localStorage.removeItem('tavvy_pending_endorsement');
+            const resData = await res.json();
+            // Update the displayed count and tags immediately
+            setCardData(prev => prev ? {
+              ...prev,
+              endorsementCount: resData.endorsementCount ?? (prev.endorsementCount + 1),
+              tapCount: (prev.tapCount || 0) + 1,
+              topEndorsementTags: resData.topEndorsementTags ?? prev.topEndorsementTags,
+            } : prev);
             setEndorsementSubmitted(true);
             setShowEndorsementPopup(true);
           } else {
@@ -2537,13 +2545,20 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ cardId: cardData.id, signals: signalIds, intensities: signalTaps, note: endorseNote }),
                   });
+                  const resData = await res.json();
                   if (res.ok) {
+                    // Update the displayed count and tags immediately
+                    setCardData(prev => prev ? {
+                      ...prev,
+                      endorsementCount: resData.endorsementCount ?? (prev.endorsementCount + 1),
+                      tapCount: (prev.tapCount || 0) + 1,
+                      topEndorsementTags: resData.topEndorsementTags ?? prev.topEndorsementTags,
+                    } : prev);
                     setEndorsementSubmitted(true);
                     setShowEndorseFlow(false);
                     setShowEndorsementPopup(true);
                   } else {
-                    const data = await res.json();
-                    if (data?.requireLogin) {
+                    if (resData?.requireLogin) {
                       // Save endorsement data to localStorage so it persists through login
                       localStorage.setItem('tavvy_pending_endorsement', JSON.stringify({
                         cardId: cardData.id,
@@ -2556,7 +2571,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                       const currentPath = `/${cardData.slug}`;
                       window.location.href = `/app/login?returnUrl=${encodeURIComponent(currentPath)}`;
                     } else {
-                      alert(data?.error || 'Failed to submit endorsement.');
+                      alert(resData?.error || 'Failed to submit endorsement.');
                     }
                   }
                 } catch (err) {
