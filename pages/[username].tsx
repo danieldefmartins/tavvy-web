@@ -17,6 +17,7 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
 import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabaseClient';
 import { getTemplateByIdWithMigration, resolveTemplateId, TemplateLayout } from '../config/eCardTemplates';
 
 interface CardLink {
@@ -249,13 +250,32 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
       const data = JSON.parse(pending);
       // Only auto-submit if this is the same card the endorsement was for
       if (data.cardId !== cardData.id) return;
-      // Attempt to submit
+      // Wait for Supabase auth to initialize, then submit with the session token
       const submitPending = async () => {
+        // Give Supabase auth time to restore the session from localStorage
+        // The login page redirects here, but the auth state listener needs a moment
+        let accessToken: string | undefined;
+        for (let attempt = 0; attempt < 10; attempt++) {
+          const { data: { session: currentSession } } = await supabase.auth.getSession();
+          if (currentSession?.access_token) {
+            accessToken = currentSession.access_token;
+            break;
+          }
+          // Wait 500ms before retrying (total max wait: 5 seconds)
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        if (!accessToken) {
+          // Still no session after waiting — user may not have completed login
+          return;
+        }
         setIsSubmittingEndorsement(true);
         try {
           const res = await fetch('/api/ecard/endorse', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`,
+            },
             body: JSON.stringify({ cardId: data.cardId, signals: data.signals, intensities: data.intensities, note: data.note }),
           });
           if (res.ok) {
@@ -2540,9 +2560,16 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 try {
                   // Convert signalTaps to array of signal IDs
                   const signalIds = Object.keys(signalTaps);
+                  // Get the current Supabase session token
+                  const { data: { session: currentSession } } = await supabase.auth.getSession();
+                  const accessToken = currentSession?.access_token;
+                  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+                  if (accessToken) {
+                    headers['Authorization'] = `Bearer ${accessToken}`;
+                  }
                   const res = await fetch('/api/ecard/endorse', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers,
                     body: JSON.stringify({ cardId: cardData.id, signals: signalIds, intensities: signalTaps, note: endorseNote }),
                   });
                   const resData = await res.json();
