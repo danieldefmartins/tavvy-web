@@ -284,8 +284,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             // Update the displayed count and tags immediately
             setCardData(prev => prev ? {
               ...prev,
-              endorsementCount: resData.endorsementCount ?? (prev.endorsementCount + 1),
-              tapCount: (prev.tapCount || 0) + 1,
+              endorsementCount: resData.endorsementCount ?? (prev.endorsementCount + (data.signals?.length || 1)),
+              tapCount: (prev.tapCount || 0) + (data.signals?.length || 1),
               topEndorsementTags: resData.topEndorsementTags ?? prev.topEndorsementTags,
             } : prev);
             setEndorsementSubmitted(true);
@@ -2577,8 +2577,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                     // Update the displayed count and tags immediately
                     setCardData(prev => prev ? {
                       ...prev,
-                      endorsementCount: resData.endorsementCount ?? (prev.endorsementCount + 1),
-                      tapCount: (prev.tapCount || 0) + 1,
+                      endorsementCount: resData.endorsementCount ?? (prev.endorsementCount + signalIds.length),
+                      tapCount: (prev.tapCount || 0) + signalIds.length,
                       topEndorsementTags: resData.topEndorsementTags ?? prev.topEndorsementTags,
                     } : prev);
                     setEndorsementSubmitted(true);
@@ -3717,9 +3717,9 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
     let endorsementSignals: { id: string; label: string; emoji: string; category: string }[] = [];
 
     try {
-      // Get endorsement count
+      // Get endorsement count (each signal tap = +1)
       const { count } = await serverSupabase
-        .from('ecard_endorsements')
+        .from('ecard_endorsement_signals')
         .select('*', { count: 'exact', head: true })
         .eq('card_id', data.id);
       endorsementCount = count || 0;

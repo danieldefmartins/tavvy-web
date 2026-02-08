@@ -120,9 +120,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .update({ tap_count: newTapCount })
       .eq('id', cardId);
 
-    // Get the actual endorsement count from the endorsements table
+    // Get the actual endorsement count (each signal tap = +1)
     const { count: newEndorsementCount } = await supabase
-      .from('ecard_endorsements')
+      .from('ecard_endorsement_signals')
       .select('*', { count: 'exact', head: true })
       .eq('card_id', cardId);
 
