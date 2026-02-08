@@ -232,6 +232,14 @@ export const getThemeColors = (isDark: boolean = true) => {
     // Primary color
     primary: colors.brand.universes,
     primaryLight: isDark ? 'rgba(102, 126, 234, 0.15)' : 'rgba(102, 126, 234, 0.1)',
+    // Input fields — always white background with dark text for readability
+    inputBackground: '#FFFFFF',
+    inputBorder: isDark ? '#374151' : '#E5E7EB',
+    inputText: '#1a1a2e',
+    inputPlaceholder: '#9CA3AF',
+    // Error colors
+    error: colors.status.error,
+    errorLight: isDark ? 'rgba(239, 68, 68, 0.15)' : 'rgba(239, 68, 68, 0.1)',
   };
 };
 

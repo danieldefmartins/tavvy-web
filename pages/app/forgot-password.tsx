@@ -139,7 +139,7 @@ export default function ForgotPasswordScreen() {
                         style={{
                           backgroundColor: theme.inputBackground,
                           borderColor: theme.inputBorder,
-                          color: theme.text,
+                          color: theme.inputText,
                         }}
                       />
                     </div>

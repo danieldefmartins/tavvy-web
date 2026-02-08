@@ -122,7 +122,7 @@ export default function LoginScreen() {
                     style={{ 
                       backgroundColor: theme.inputBackground,
                       borderColor: theme.inputBorder,
-                      color: theme.text,
+                      color: theme.inputText,
                     }}
                   />
                 </div>
@@ -144,7 +144,7 @@ export default function LoginScreen() {
                     style={{ 
                       backgroundColor: theme.inputBackground,
                       borderColor: theme.inputBorder,
-                      color: theme.text,
+                      color: theme.inputText,
                     }}
                   />
                   <button 
