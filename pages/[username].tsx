@@ -905,7 +905,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             margin: '20px auto',
           } : {}),
         }}>
-          {/* Crown Button - Top Right — Opens Endorsement Popup */}
+          {/* Thumbs Up Button - Top Right — Opens Endorsement Popup */}
           <button 
             onClick={() => setShowEndorsementPopup(true)}
             className="crown-btn"
@@ -915,26 +915,31 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             }}
           >
             <svg 
-              width="24" 
-              height="24" 
+              width="32" 
+              height="32" 
               viewBox="0 0 24 24" 
+              fill="none"
               style={{
                 animation: isAnimating ? 'crownPulse 0.6s ease' : 'none',
               }}
             >
               <defs>
-                <linearGradient id="crownGold" x1="0%" y1="0%" x2="100%" y2="100%">
+                <linearGradient id="thumbGold" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="#FFE066" />
                   <stop offset="50%" stopColor="#FFD700" />
                   <stop offset="100%" stopColor="#FFA500" />
                 </linearGradient>
               </defs>
               <path 
-                d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" 
-                fill="url(#crownGold)"
+                d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3m7-2V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z" 
+                fill="url(#thumbGold)"
+                stroke="#FFA500"
+                strokeWidth="1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
-            <span style={styles.crownCount}>{cardData.endorsementCount || cardData.tapCount || 0}</span>
+            <span style={styles.crownCount}>x{cardData.endorsementCount || cardData.tapCount || 0}</span>
           </button>
 
           {/* Banner Image (for banner, modern, executive templates) */}
@@ -1942,7 +1947,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <svg width="28" height="28" viewBox="0 0 24 24"><defs><linearGradient id="crownGold2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#FFE066" /><stop offset="50%" stopColor="#FFD700" /><stop offset="100%" stopColor="#FFA500" /></linearGradient></defs><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" fill="url(#crownGold2)" /></svg>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="thumbGold2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#FFE066" /><stop offset="50%" stopColor="#FFD700" /><stop offset="100%" stopColor="#FFA500" /></linearGradient></defs><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3m7-2V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z" fill="url(#thumbGold2)" stroke="#FFA500" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg>
                 <div>
                   <div style={{ fontSize: 20, fontWeight: 800 }}>Endorsements</div>
                   <div style={{ fontSize: 13, color: '#888' }}>{cardData.endorsementCount || cardData.tapCount || 0} total endorsements</div>
