@@ -166,7 +166,7 @@ export default function RidesScreen() {
       // Use ilike for case-insensitive matching
       let query = supabase
         .from('places')
-        .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos, description, short_description, min_height_inches, duration_minutes, thrill_level, gets_wet, single_rider, child_swap, lightning_lane, indoor_outdoor')
+        .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos, description, short_description, min_height_inches, duration_minutes, thrill_level, gets_wet, single_rider, child_swap, lightning_lane, indoor_outdoor, park_name')
         .eq('tavvy_category', 'attraction')
         .order('name', { ascending: true })
         .limit(100);
@@ -175,7 +175,7 @@ export default function RidesScreen() {
       if (filterBy !== 'all') {
         query = supabase
           .from('places')
-          .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos, description, short_description, min_height_inches, duration_minutes, thrill_level, gets_wet, single_rider, child_swap, lightning_lane, indoor_outdoor')
+          .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos, description, short_description, min_height_inches, duration_minutes, thrill_level, gets_wet, single_rider, child_swap, lightning_lane, indoor_outdoor, park_name')
           .eq('tavvy_category', 'attraction')
           .eq('tavvy_subcategory', filterBy)
           .order('name', { ascending: true })
@@ -195,7 +195,7 @@ export default function RidesScreen() {
           name: place.name,
           category: place.tavvy_category || 'attraction',
           subcategory: place.tavvy_subcategory,
-          park_name: place.city,
+          park_name: place.park_name || place.city,
           city: place.city,
           region: place.region,
           cover_image_url: place.cover_image_url,
@@ -256,7 +256,7 @@ export default function RidesScreen() {
           // Get the places that are attractions
           const { data: placesData } = await supabase
             .from('places')
-            .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos, description, short_description, min_height_inches, duration_minutes, thrill_level, gets_wet, single_rider, child_swap, lightning_lane, indoor_outdoor')
+            .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos, description, short_description, min_height_inches, duration_minutes, thrill_level, gets_wet, single_rider, child_swap, lightning_lane, indoor_outdoor, park_name')
             .in('id', placeIds)
             .eq('tavvy_category', 'attraction')
             .order('name', { ascending: true });
@@ -267,7 +267,7 @@ export default function RidesScreen() {
               name: place.name,
               category: place.tavvy_category || 'attraction',
               subcategory: place.tavvy_subcategory,
-              park_name: universeName,
+              park_name: place.park_name || universeName,
               universe_name: universeName,
               city: place.city,
               region: place.region,
@@ -297,7 +297,7 @@ export default function RidesScreen() {
       setSearchingByPark(false);
       const { data, error: queryError } = await supabase
         .from('places')
-        .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos, description, short_description, min_height_inches, duration_minutes, thrill_level, gets_wet, single_rider, child_swap, lightning_lane, indoor_outdoor')
+        .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos, description, short_description, min_height_inches, duration_minutes, thrill_level, gets_wet, single_rider, child_swap, lightning_lane, indoor_outdoor, park_name')
         .eq('tavvy_category', 'attraction')
         .ilike('name', `%${query}%`)
         .order('name', { ascending: true })
@@ -312,7 +312,7 @@ export default function RidesScreen() {
           name: place.name,
           category: place.tavvy_category || 'attraction',
           subcategory: place.tavvy_subcategory,
-          park_name: place.city,
+          park_name: place.park_name || place.city,
           city: place.city,
           region: place.region,
           cover_image_url: place.cover_image_url,

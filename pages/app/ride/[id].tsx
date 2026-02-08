@@ -242,7 +242,7 @@ export default function RideDetailsScreen() {
       // First try to fetch from Supabase places table
       const { data: placeData, error: placeError } = await supabase
         .from('places')
-        .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos, description, duration_minutes, min_height_inches, thrill_level, gets_wet, single_rider, child_swap, lightning_lane, indoor_outdoor, accessibility, age_recommendation, motion_sickness')
+        .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos, description, duration_minutes, min_height_inches, thrill_level, gets_wet, single_rider, child_swap, lightning_lane, indoor_outdoor, accessibility, age_recommendation, motion_sickness, park_name')
         .eq('id', id)
         .single();
 
@@ -262,8 +262,8 @@ export default function RideDetailsScreen() {
         rideData = {
           id: placeData.id,
           name: placeData.name?.toUpperCase() || 'RIDE',
-          parkName: (park as string) || placeData.city || 'Theme Park',
-          description: placeData.description || `Experience ${placeData.name}, a ${rideType.toLowerCase()} at ${placeData.city || 'this theme park'}.`,
+          parkName: placeData.park_name || (park as string) || placeData.city || 'Theme Park',
+          description: placeData.description || `Experience ${placeData.name}, a ${rideType.toLowerCase()} at ${placeData.park_name || placeData.city || 'this theme park'}.`,
           image: placeData.cover_image_url || getDefaultImage(placeData.tavvy_subcategory),
           thumbnails: extractPhotos(placeData.photos),
           keyInfo: {
