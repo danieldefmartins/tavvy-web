@@ -823,6 +823,20 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
       };
     }
 
+    // Premium Static — Same as full-width but photo scrolls with content
+    if (templateLayout === 'premium-static') {
+      return {
+        isLuxury: false,
+        isDark: true,
+        hasOrnate: false,
+        accentColor: cs?.accent || '#FFFFFF',
+        textColor: '#FFFFFF',
+        buttonBg: 'rgba(255,255,255,0.15)',
+        buttonBorder: 'rgba(255,255,255,0.2)',
+        photoStyle: 'cover',
+      };
+    }
+
     // Pro Realtor — Arch photo, intro text
     if (templateLayout === 'pro-realtor') {
       const bgIsLight = isLightBg(cs?.background || '#f5f0eb');
@@ -1063,12 +1077,14 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
         <div 
           style={{
             ...styles.backgroundGradient,
-            ...(templateLayout === 'full-width' && (cardData.bannerImageUrl || cardData.profilePhotoUrl)
+            ...((templateLayout === 'full-width') && (cardData.bannerImageUrl || cardData.profilePhotoUrl)
               ? {
                   backgroundImage: `url(${cardData.bannerImageUrl || cardData.profilePhotoUrl})`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
                 }
+              : templateLayout === 'premium-static'
+                ? { background: activeColorScheme?.background || `linear-gradient(165deg, ${cardData.gradientColor1} 0%, ${cardData.gradientColor2} 50%, #0a0f1e 100%)` }
               : templateLayout === 'blogger'
                 ? { background: activeColorScheme?.background || cardData.gradientColor1 }
                 : cardData.backgroundType === 'solid' 
@@ -1092,6 +1108,26 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           }} />
         )}
 
+        {/* Premium Static — Inline hero photo that scrolls with content */}
+        {templateLayout === 'premium-static' && (cardData.bannerImageUrl || cardData.profilePhotoUrl) && (
+          <div style={{
+            position: 'relative', width: '100%', maxWidth: '100%', zIndex: 1,
+          }}>
+            <img
+              src={cardData.bannerImageUrl || cardData.profilePhotoUrl}
+              alt={cardData.fullName}
+              style={{
+                width: '100%', height: '60vh', objectFit: 'cover', objectPosition: 'center top', display: 'block',
+              }}
+            />
+            {/* Gradient overlay on the photo */}
+            <div style={{
+              position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%',
+              background: `linear-gradient(to bottom, transparent 0%, ${cardData.gradientColor1}cc 60%, ${cardData.gradientColor2} 100%)`,
+            }} />
+          </div>
+        )}
+
         {/* Main Card Container */}
         <div style={{
           ...styles.cardContainer,
@@ -1106,6 +1142,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             overflow: 'visible' as const,
           } : {}),
           ...(templateLayout === 'full-width' ? { padding: '0 24px 40px' } : {}),
+          ...(templateLayout === 'premium-static' ? { padding: '0 24px 40px', marginTop: '-80px', position: 'relative' as const, zIndex: 2 } : {}),
           ...(templateLayout === 'business-card' ? {
             maxWidth: '420px',
             margin: '20px auto',
@@ -1261,13 +1298,14 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             ...styles.profileSection,
             ...((templateLayout === 'pro-realtor' || templateLayout === 'pro-card') && cardData.bannerImageUrl ? { zIndex: 3, position: 'relative' as const } : {}),
             ...(templateLayout === 'full-width' ? { marginTop: '40vh', zIndex: 2 } : {}),
+            ...(templateLayout === 'premium-static' ? { zIndex: 2 } : {}),
             ...(templateLayout === 'pro-creative' || templateLayout === 'pro-card' ? { alignItems: 'flex-start' } : {}),
             ...(templateLayout === 'business-card' ? { padding: '0 24px 20px', background: '#FFFFFF', color: '#1a1a2e' } : {}),
             ...(templateLayout === 'pro-card' ? { padding: '20px 24px', background: bgIsActuallyLight ? '#f8f9fa' : '#1a1a2e' } : {}),
             ...(templateLayout === 'blogger' ? { paddingTop: 0 } : {}),
           }}>
-            {/* Profile Photo - skip for full-width (photo IS the bg) and pro-card (photo in dark top section) */}
-            {templateLayout !== 'full-width' && templateLayout !== 'pro-card' && (() => {
+            {/* Profile Photo - skip for full-width, premium-static (photo IS the hero) and pro-card (photo in dark top section) */}
+            {templateLayout !== 'full-width' && templateLayout !== 'premium-static' && templateLayout !== 'pro-card' && (() => {
               // Photo size configurations
               const photoSizes = {
                 small: { ring: 100, photo: 92, initials: 28, borderRadius: 50 },

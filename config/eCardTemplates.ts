@@ -26,7 +26,8 @@ export type TemplateLayout =
   | 'pro-realtor'    // Arch photo, intro text, link buttons with accent tabs
   | 'pro-creative'   // Bold colored top, wave divider, logo badge, contact rows
   | 'pro-corporate'  // Company logo top, structured professional layout
-  | 'pro-card';      // Banner + industry + services grid + service area
+  | 'pro-card'       // Banner + industry + services grid + service area
+  | 'premium-static'; // Full-width hero photo that scrolls with content (no parallax)
 
 export interface Template {
   id: string;
@@ -341,6 +342,42 @@ export const TEMPLATES: Template[] = [
       hasIndustrySection: true,
       hasServicesGrid: true,
       hasServiceArea: true,
+    },
+  },
+
+  // 9. PREMIUM STATIC — Full-width hero photo that scrolls with content (no parallax)
+  {
+    id: 'premium-static',
+    name: 'Premium Static',
+    description: 'Full-width hero photo that scrolls with content. Same premium feel, no parallax.',
+    category: 'paid',
+    previewImage: 'premium-static',
+    isPremium: true,
+    features: ['hero-photo', 'gradient-overlay', 'inline-photo', 'about-me-card', 'company-logo', 'action-icons'],
+    layout: 'premium-static',
+    colorSchemes: [
+      // Dark (B&W photo feel)
+      { id: 'dark', name: 'Dark', primary: '#000000', secondary: '#1a1a1a', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.8)', background: '#0a0a0a', cardBg: '#1a1a1a', isFree: false },
+      // Blue
+      { id: 'blue', name: 'Blue', primary: '#1e40af', secondary: '#3b82f6', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: 'linear-gradient(to bottom, #1e40af 0%, #0f172a 100%)', cardBg: '#0f172a' },
+      // Purple
+      { id: 'purple', name: 'Purple', primary: '#581c87', secondary: '#9333ea', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: 'linear-gradient(to bottom, #581c87 0%, #1e1b4b 100%)', cardBg: '#1e1b4b' },
+      // Warm
+      { id: 'warm', name: 'Warm', primary: '#7c2d12', secondary: '#c2410c', accent: '#fef3c7', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: 'linear-gradient(to bottom, #7c2d12 0%, #451a03 100%)', cardBg: '#451a03' },
+      // Emerald
+      { id: 'emerald', name: 'Emerald', primary: '#065f46', secondary: '#10b981', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: 'linear-gradient(to bottom, #065f46 0%, #022c22 100%)', cardBg: '#022c22' },
+      // Navy & Gold
+      { id: 'navy-gold', name: 'Navy & Gold', primary: '#0f172a', secondary: '#1e293b', accent: '#d4af37', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: 'linear-gradient(to bottom, #0f172a 0%, #020617 100%)', cardBg: '#0f172a', border: '#d4af37' },
+    ],
+    layoutConfig: {
+      photoPosition: 'cover',
+      photoSize: 'hero',
+      photoStyle: 'cover',
+      buttonStyle: 'frosted',
+      fontFamily: 'modern',
+      showBorder: false,
+      hasGradientOverlay: true,
+      hasBannerImage: true,
     },
   },
 ];
