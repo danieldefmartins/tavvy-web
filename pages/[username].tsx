@@ -905,7 +905,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             margin: '20px auto',
           } : {}),
         }}>
-          {/* Thumbs Up Button - Top Right — Opens Endorsement Popup */}
+          {/* Star Badge - Top Right — Opens Endorsement Popup */}
           <button 
             onClick={() => setShowEndorsementPopup(true)}
             className="crown-btn"
@@ -914,32 +914,11 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               ...(cardData.endorsementCount > 0 ? styles.crownButtonTapped : {}),
             }}
           >
-            <svg 
-              width="32" 
-              height="32" 
-              viewBox="0 0 24 24" 
-              fill="none"
-              style={{
-                animation: isAnimating ? 'crownPulse 0.6s ease' : 'none',
-              }}
-            >
-              <defs>
-                <linearGradient id="thumbGold" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#FFE066" />
-                  <stop offset="50%" stopColor="#FFD700" />
-                  <stop offset="100%" stopColor="#FFA500" />
-                </linearGradient>
-              </defs>
-              <path 
-                d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3m7-2V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z" 
-                fill="url(#thumbGold)"
-                stroke="#FFA500"
-                strokeWidth="1"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+            <span style={{ fontSize: '18px', lineHeight: 1 }}>★</span>
+            <span style={styles.crownCount}>{cardData.endorsementCount || cardData.tapCount || 0}</span>
+            <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ opacity: 0.5 }}>
+              <path d="M1 1L5 5L9 1" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            <span style={styles.crownCount}>x{cardData.endorsementCount || cardData.tapCount || 0}</span>
           </button>
 
           {/* Banner Image (for banner, modern, executive templates) */}
@@ -1947,7 +1926,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><defs><linearGradient id="thumbGold2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#FFE066" /><stop offset="50%" stopColor="#FFD700" /><stop offset="100%" stopColor="#FFA500" /></linearGradient></defs><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3m7-2V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z" fill="url(#thumbGold2)" stroke="#FFA500" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                <span style={{ fontSize: '28px', lineHeight: 1 }}>★</span>
                 <div>
                   <div style={{ fontSize: 20, fontWeight: 800 }}>Endorsements</div>
                   <div style={{ fontSize: 13, color: '#888' }}>{cardData.endorsementCount || cardData.tapCount || 0} total endorsements</div>
@@ -2212,28 +2191,30 @@ const styles: { [key: string]: React.CSSProperties } = {
     top: '20px',
     right: '20px',
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: '2px',
-    padding: '10px 14px 8px',
-    background: 'linear-gradient(145deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 165, 0, 0.1) 100%)',
-    border: '1px solid rgba(255, 215, 0, 0.3)',
-    borderRadius: '14px',
+    gap: '6px',
+    padding: '8px 14px',
+    background: 'rgba(255, 255, 255, 0.12)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    borderRadius: '24px',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
-    backdropFilter: 'blur(10px)',
-    boxShadow: '0 4px 16px rgba(255, 215, 0, 0.15), inset 0 1px 0 rgba(255,255,255,0.1)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255,255,255,0.1)',
+    zIndex: 10,
   },
   crownButtonTapped: {
-    background: 'linear-gradient(145deg, rgba(255, 215, 0, 0.25) 0%, rgba(255, 165, 0, 0.2) 100%)',
-    borderColor: 'rgba(255, 215, 0, 0.5)',
-    boxShadow: '0 6px 24px rgba(255, 215, 0, 0.25), inset 0 1px 0 rgba(255,255,255,0.15)',
+    background: 'rgba(255, 255, 255, 0.18)',
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    boxShadow: '0 6px 24px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255,255,255,0.15)',
   },
   crownCount: {
-    fontSize: '13px',
+    fontSize: '16px',
     fontWeight: '700',
-    color: '#FFD700',
-    textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+    color: '#fff',
+    textShadow: '0 1px 3px rgba(0,0,0,0.3)',
     letterSpacing: '0.3px',
   },
   profileSection: {
