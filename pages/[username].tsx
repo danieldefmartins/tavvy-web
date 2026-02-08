@@ -13,7 +13,7 @@
  * - "Powered by Tavvy" branding
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
 import { createClient } from '@supabase/supabase-js';
@@ -313,8 +313,9 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
     }
   }, [cardData.profilePhotoUrl, cardData.bannerImageUrl, cardData.gradientColor1, cardData.gradientColor2]);
 
-  // Resolved badge contrast: true = light bg (use dark text), false = dark bg (use white text)
-  const badgeIsLight = badgeOnLightBg ?? bgIsActuallyLight;
+  // Resolved badge contrast — badgeOnLightBg is set by useEffect after image loads.
+  // Default to false (dark bg / white text) until detection completes.
+  // bgIsActuallyLight is defined later in the component, so we can't reference it here.
 
   const handleSignalTap = (signalId: string) => {
     setSignalTaps(prev => {
@@ -1019,33 +1020,38 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           } : {}),
         }}>
           {/* Star Badge - Top Right — Opens Endorsement Popup */}
-          {/* Pixel-sampled contrast: badgeIsLight detects actual image/gradient behind badge */}
-          <button 
-            onClick={() => setShowEndorsementPopup(true)}
-            className="crown-btn"
-            style={{
-              ...styles.crownButton,
-              background: badgeIsLight ? 'rgba(255, 255, 255, 0.85)' : 'rgba(0, 0, 0, 0.45)',
-              border: badgeIsLight ? '1px solid rgba(0, 0, 0, 0.08)' : '1px solid rgba(255, 255, 255, 0.2)',
-              boxShadow: badgeIsLight
-                ? '0 2px 12px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08)'
-                : '0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-            }}
-          >
-            <span style={{ fontSize: '20px', lineHeight: 1, color: badgeIsLight ? '#d97706' : '#facc15' }}>★</span>
-            <span style={{
-              ...styles.crownCount,
-              color: badgeIsLight ? '#1a1a1a' : '#ffffff',
-              textShadow: badgeIsLight ? 'none' : '0 1px 3px rgba(0,0,0,0.3)',
-              fontSize: '17px',
-              fontWeight: '700',
-            }}>{cardData.endorsementCount || cardData.tapCount || 0}</span>
-            <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ opacity: 0.6 }}>
-              <path d="M1 1L5 5L9 1" stroke={badgeIsLight ? '#333333' : '#ffffff'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
+          {/* Pixel-sampled contrast: detects actual image/gradient behind badge */}
+          {(() => {
+            const isLight = badgeOnLightBg ?? bgIsActuallyLight;
+            return (
+              <button 
+                onClick={() => setShowEndorsementPopup(true)}
+                className="crown-btn"
+                style={{
+                  ...styles.crownButton,
+                  background: isLight ? 'rgba(255, 255, 255, 0.85)' : 'rgba(0, 0, 0, 0.45)',
+                  border: isLight ? '1px solid rgba(0, 0, 0, 0.08)' : '1px solid rgba(255, 255, 255, 0.2)',
+                  boxShadow: isLight
+                    ? '0 2px 12px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08)'
+                    : '0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                }}
+              >
+                <span style={{ fontSize: '20px', lineHeight: 1, color: isLight ? '#d97706' : '#facc15' }}>★</span>
+                <span style={{
+                  ...styles.crownCount,
+                  color: isLight ? '#1a1a1a' : '#ffffff',
+                  textShadow: isLight ? 'none' : '0 1px 3px rgba(0,0,0,0.3)',
+                  fontSize: '17px',
+                  fontWeight: '700',
+                }}>{cardData.endorsementCount || cardData.tapCount || 0}</span>
+                <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ opacity: 0.6 }}>
+                  <path d="M1 1L5 5L9 1" stroke={isLight ? '#333333' : '#ffffff'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            );
+          })()}
 
           {/* Banner Image (for banner, modern, executive templates) */}
           {(templateLayout === 'pro-realtor' || templateLayout === 'pro-card' || templateLayout === 'pro-creative') && cardData.bannerImageUrl && (
