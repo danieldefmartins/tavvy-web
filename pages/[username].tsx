@@ -2216,20 +2216,28 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               <button onClick={handleAppleWallet} title="Apple Wallet" style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 width: 52, height: 52, borderRadius: 14,
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer', padding: 0, overflow: 'hidden',
+                background: bgIsActuallyLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)',
+                border: `1px solid ${bgIsActuallyLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)'}`,
+                cursor: 'pointer', padding: 0,
               }}>
-                <img src="/brand/apple-wallet-icon.png" alt="Apple Wallet" style={{ width: 52, height: 52, borderRadius: 14, objectFit: 'cover' }} />
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={bgIsActuallyLight ? '#1a1a2e' : '#ffffff'} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="5" width="20" height="14" rx="3" ry="3"/>
+                  <path d="M2 10h20"/>
+                  <path d="M7 15h4"/>
+                </svg>
               </button>
               <button onClick={handleGoogleWallet} title="Google Wallet" style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 width: 52, height: 52, borderRadius: 14,
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer', padding: 0, overflow: 'hidden',
+                background: bgIsActuallyLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)',
+                border: `1px solid ${bgIsActuallyLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)'}`,
+                cursor: 'pointer', padding: 0,
               }}>
-                <img src="/brand/google-wallet-icon.png" alt="Google Wallet" style={{ width: 52, height: 52, borderRadius: 14, objectFit: 'cover' }} />
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={bgIsActuallyLight ? '#1a1a2e' : '#ffffff'} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="1" y="4" width="22" height="16" rx="3" ry="3"/>
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M1 8h22"/>
+                </svg>
               </button>
             </div>
 
