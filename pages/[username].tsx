@@ -949,28 +949,19 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             className="crown-btn"
             style={{
               ...styles.crownButton,
-              ...(bgIsActuallyLight ? {
-                background: 'rgba(20, 20, 35, 0.85)',
-                borderColor: 'rgba(255, 255, 255, 0.15)',
-                boxShadow: '0 2px 12px rgba(0, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.15)',
-              } : {
-                background: 'rgba(255, 255, 255, 0.12)',
-                borderColor: 'rgba(255, 255, 255, 0.2)',
-              }),
-              ...(cardData.endorsementCount > 0 ? (bgIsActuallyLight ? {
-                background: 'rgba(20, 20, 35, 0.9)',
-                borderColor: 'rgba(255, 255, 255, 0.2)',
-                boxShadow: '0 3px 16px rgba(0, 0, 0, 0.3), 0 1px 4px rgba(0, 0, 0, 0.15)',
-              } : {
-                background: 'rgba(255, 255, 255, 0.18)',
-                borderColor: 'rgba(255, 255, 255, 0.3)',
-              }) : {}),
+              background: '#1a1a2e',
+              border: '2px solid rgba(255, 255, 255, 0.25)',
+              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2)',
+              padding: '10px 18px',
+              gap: '8px',
+              backdropFilter: 'none',
+              WebkitBackdropFilter: 'none',
             }}
           >
-            <span style={{ fontSize: '18px', lineHeight: 1, color: bgIsActuallyLight ? '#facc15' : '#facc15' }}>★</span>
-            <span style={{...styles.crownCount, color: bgIsActuallyLight ? '#ffffff' : '#ffffff', textShadow: '0 1px 3px rgba(0,0,0,0.3)'}}>{cardData.endorsementCount || cardData.tapCount || 0}</span>
-            <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ opacity: 0.6 }}>
-              <path d="M1 1L5 5L9 1" stroke="#ffffff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            <span style={{ fontSize: '22px', lineHeight: 1, color: '#facc15' }}>★</span>
+            <span style={{ fontSize: '18px', fontWeight: '800', color: '#ffffff', letterSpacing: '0.5px' }}>{cardData.endorsementCount || cardData.tapCount || 0}</span>
+            <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ opacity: 0.7 }}>
+              <path d="M1 1L5 5L9 1" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
 
