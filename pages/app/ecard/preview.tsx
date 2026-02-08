@@ -1,10 +1,10 @@
 /**
  * eCard Preview Screen
- * Full preview of the card as it appears to viewers
- * Ported from tavvy-mobile/screens/ecard/ECardPreviewScreen.tsx
+ * Shows the actual public card in an iframe so it always matches what visitors see.
+ * Keeps QR code, share, copy link, and edit actions outside the iframe.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
@@ -12,15 +12,10 @@ import { useAuth } from '../../../contexts/AuthContext';
 import AppLayout from '../../../components/AppLayout';
 import { 
   getCardById, 
-  getCardLinks, 
   CardData, 
-  LinkItem,
-  PLATFORM_ICONS,
-  PHOTO_SIZES,
   getCardUrl,
-  getQRCodeUrl,
 } from '../../../lib/ecard';
-import StyledQRCode, { QR_STYLE_PRESETS, QRStyleConfig, DEFAULT_QR_STYLE } from '../../../components/ecard/StyledQRCode';
+import StyledQRCode, { QR_STYLE_PRESETS, QRStyleConfig } from '../../../components/ecard/StyledQRCode';
 import { 
   IoArrowBack, 
   IoShare,
@@ -28,75 +23,28 @@ import {
   IoCopy,
   IoCheckmark,
   IoClose,
-  IoCall,
   IoDownload,
-  IoMail,
-  IoGlobe,
-  IoLogoInstagram,
-  IoLogoTiktok,
-  IoLogoYoutube,
-  IoLogoTwitter,
-  IoLogoLinkedin,
-  IoLogoFacebook,
-  IoLogoWhatsapp,
-  IoLink,
-  IoStar,
-  IoShieldCheckmark,
-  IoRibbon,
-  IoDocument,
+  IoCreate,
 } from 'react-icons/io5';
 
 const ACCENT_GREEN = '#00C853';
 const BG_LIGHT = '#FAFAFA';
 const BG_DARK = '#000000';
 
-// Light background themes that need dark text
-const LIGHT_THEMES = ['minimal'];
-
-// Helper: compute perceived brightness from a hex color (0=black, 255=white)
-function hexBrightness(hex: string): number {
-  const c = hex.replace('#', '');
-  if (c.length < 6) return 128;
-  const r = parseInt(c.substring(0, 2), 16);
-  const g = parseInt(c.substring(2, 4), 16);
-  const b = parseInt(c.substring(4, 6), 16);
-  return (r * 299 + g * 587 + b * 114) / 1000;
-}
-
-function isLightBackground(color1?: string, color2?: string): boolean {
-  const b1 = color1 ? hexBrightness(color1) : 128;
-  const b2 = color2 ? hexBrightness(color2) : b1;
-  return (b1 + b2) / 2 > 160;
-}
-
-// Platform icon components mapping
-const PlatformIcons: Record<string, React.ComponentType<{ size: number; color: string }>> = {
-  instagram: IoLogoInstagram,
-  tiktok: IoLogoTiktok,
-  youtube: IoLogoYoutube,
-  twitter: IoLogoTwitter,
-  linkedin: IoLogoLinkedin,
-  facebook: IoLogoFacebook,
-  whatsapp: IoLogoWhatsapp,
-  phone: IoCall,
-  email: IoMail,
-  website: IoGlobe,
-};
-
 export default function ECardPreviewScreen() {
   const router = useRouter();
   const { cardId: queryCardId } = router.query;
-  const { theme, isDark } = useThemeContext();
+  const { isDark } = useThemeContext();
   const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [cardData, setCardData] = useState<CardData | null>(null);
-  const [links, setLinks] = useState<LinkItem[]>([]);
   const [showQRModal, setShowQRModal] = useState(false);
   const [qrStyle, setQrStyle] = useState<Partial<QRStyleConfig>>({});
   const qrContainerRef = React.useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [cardId, setCardId] = useState<string | null>(null);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
 
   const bgColor = isDark ? BG_DARK : BG_LIGHT;
 
@@ -107,7 +55,7 @@ export default function ECardPreviewScreen() {
     }
   }, [router.isReady, queryCardId]);
 
-  // Load card data
+  // Load card data (just for slug, name, and ownership check)
   useEffect(() => {
     const loadCard = async () => {
       if (!cardId) {
@@ -119,13 +67,6 @@ export default function ECardPreviewScreen() {
         const card = await getCardById(cardId);
         if (card) {
           setCardData(card);
-          const cardLinks = await getCardLinks(cardId);
-          setLinks(cardLinks.map(l => ({
-            id: l.id,
-            platform: l.icon || l.platform || 'other',
-            value: l.url,
-            title: l.title,
-          })));
         }
       } catch (error) {
         console.error('Error loading card:', error);
@@ -136,21 +77,6 @@ export default function ECardPreviewScreen() {
 
     loadCard();
   }, [cardId]);
-
-  // Determine text color based on actual background brightness
-  const isLightTheme = (cardData?.theme && LIGHT_THEMES.includes(cardData.theme)) || 
-    isLightBackground(cardData?.gradient_color_1, cardData?.gradient_color_2);
-  const textColor = isLightTheme ? '#1A1A1A' : '#FFFFFF';
-  const secondaryTextColor = isLightTheme ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.8)';
-
-  // Get photo size
-  const getPhotoSize = () => {
-    const sizeConfig = PHOTO_SIZES.find(s => s.id === cardData?.profile_photo_size);
-    return sizeConfig?.size || 110;
-  };
-
-  const isCoverPhoto = cardData?.profile_photo_size === 'cover';
-  const photoSize = getPhotoSize();
 
   // Copy card URL
   const copyCardUrl = () => {
@@ -179,28 +105,6 @@ export default function ECardPreviewScreen() {
     } else {
       copyCardUrl();
     }
-  };
-
-  // Open link
-  const openLink = (link: LinkItem) => {
-    let url = link.value;
-    
-    // Format URL based on platform
-    if (link.platform === 'email' && !url.startsWith('mailto:')) {
-      url = `mailto:${url}`;
-    } else if (link.platform === 'phone' && !url.startsWith('tel:')) {
-      url = `tel:${url}`;
-    } else if (!url.startsWith('http') && !url.startsWith('mailto:') && !url.startsWith('tel:')) {
-      url = `https://${url}`;
-    }
-
-    window.open(url, '_blank');
-  };
-
-  // Get platform icon
-  const getPlatformIcon = (platform: string) => {
-    const IconComponent = PlatformIcons[platform] || IoLink;
-    return IconComponent;
   };
 
   if (loading) {
@@ -239,6 +143,11 @@ export default function ECardPreviewScreen() {
     );
   }
 
+  // Build the public card URL for the iframe
+  const publicCardUrl = cardData.slug ? getCardUrl(cardData.slug) : null;
+  // For draft cards without a public slug, show a message
+  const isDraft = !cardData.is_published;
+
   return (
     <>
       <Head>
@@ -259,119 +168,42 @@ export default function ECardPreviewScreen() {
             </button>
           </header>
 
-          {/* Card Container */}
-          <div className="card-container">
-            <div 
-              className={`card ${isCoverPhoto ? 'cover-layout' : ''}`}
-              style={{ 
-                background: `linear-gradient(135deg, ${cardData.gradient_color_1 || '#667eea'}, ${cardData.gradient_color_2 || '#764ba2'})`,
-                border: isLightTheme ? '1px solid #E5E7EB' : 'none',
-              }}
-            >
-              {/* Cover Photo Layout */}
-              {isCoverPhoto && cardData.profile_photo_url && (
-                <div className="cover-photo-container">
-                  <img src={cardData.profile_photo_url} alt={cardData.full_name} className="cover-photo" />
-                  <div className="cover-gradient" />
-                </div>
-              )}
-
-              {/* Standard Photo Layout */}
-              {!isCoverPhoto && cardData.profile_photo_url && (
-                <div className="photo-container" style={{ width: photoSize, height: photoSize }}>
-                  <img src={cardData.profile_photo_url} alt={cardData.full_name} className="profile-photo" />
-                </div>
-              )}
-
-              {/* Card Content */}
-              <div className={`card-content ${isCoverPhoto ? 'cover-content' : ''}`}>
-                <h2 className="name" style={{ color: textColor }}>{cardData.full_name}</h2>
-                {cardData.title && (
-                  <p className="title" style={{ color: secondaryTextColor }}>{cardData.title}</p>
-                )}
-                {cardData.company && (
-                  <p className="company" style={{ color: secondaryTextColor }}>{cardData.company}</p>
-                )}
-                {(cardData.city || cardData.state) && (
-                  <p className="location" style={{ color: secondaryTextColor }}>
-                    {[cardData.city, cardData.state].filter(Boolean).join(', ')}
-                  </p>
-                )}
-                {cardData.bio && (
-                  <p className="bio" style={{ color: secondaryTextColor }}>{cardData.bio}</p>
-                )}
-
-                {/* Pro Credentials */}
-                {cardData.pro_credentials && (
-                  <div className="credentials">
-                    {cardData.pro_credentials.isTavvyVerified && (
-                      <div className="credential-badge verified">
-                        <IoShieldCheckmark size={14} />
-                        <span>Tavvy Verified</span>
-                      </div>
-                    )}
-                    {cardData.pro_credentials.isLicensed && (
-                      <div className="credential-badge">
-                        <IoDocument size={14} />
-                        <span>Licensed</span>
-                      </div>
-                    )}
-                    {cardData.pro_credentials.isInsured && (
-                      <div className="credential-badge">
-                        <IoRibbon size={14} />
-                        <span>Insured</span>
-                      </div>
-                    )}
+          {/* Card Preview — Embedded Public Card */}
+          <div className="card-iframe-container">
+            {publicCardUrl ? (
+              <>
+                {!iframeLoaded && (
+                  <div className="iframe-loading">
+                    <div className="spinner" />
+                    <p style={{ color: isDark ? '#94A3B8' : '#6B7280', marginTop: 12, fontSize: 14 }}>Loading preview...</p>
                   </div>
                 )}
-
-                {/* Reviews */}
-                {cardData.review_count && cardData.review_count > 0 && (
-                  <div className="reviews" style={{ color: secondaryTextColor }}>
-                    <IoStar size={16} color="#FFD700" />
-                    <span>{cardData.review_rating?.toFixed(1)} ({cardData.review_count} reviews)</span>
-                  </div>
-                )}
-
-                {/* Links */}
-                <div className="links-container">
-                  {links.map((link) => {
-                    const IconComponent = getPlatformIcon(link.platform);
-                    const platformInfo = PLATFORM_ICONS[link.platform] || PLATFORM_ICONS.other;
-                    
-                    return (
-                      <button
-                        key={link.id}
-                        className="link-button"
-                        onClick={() => openLink(link)}
-                        style={{
-                          backgroundColor: isLightTheme ? '#F3F4F6' : 'rgba(255,255,255,0.15)',
-                          color: textColor,
-                        }}
-                      >
-                        <div 
-                          className="link-icon"
-                          style={{ backgroundColor: platformInfo.bgColor }}
-                        >
-                          <IconComponent size={18} color={platformInfo.color} />
-                        </div>
-                        <span>{link.title || link.platform}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Tavvy Logo */}
-                <div className="tavvy-branding">
-                  <img 
-                    src={isLightTheme ? '/tavvy-logo-dark.png' : '/tavvy-logo-white.png'}
-                    alt="Tavvy" 
-                    className="tavvy-logo"
-                  />
-                </div>
+                <iframe
+                  src={`${publicCardUrl}?preview=true`}
+                  className="card-iframe"
+                  style={{ opacity: iframeLoaded ? 1 : 0 }}
+                  onLoad={() => setIframeLoaded(true)}
+                  title={`${cardData.full_name}'s Card Preview`}
+                  scrolling="yes"
+                />
+              </>
+            ) : (
+              <div className="draft-notice">
+                <div className="draft-icon">📝</div>
+                <h3 style={{ color: isDark ? '#fff' : '#333', margin: '0 0 8px' }}>Draft Card</h3>
+                <p style={{ color: isDark ? '#94A3B8' : '#6B7280', margin: 0, fontSize: 14, textAlign: 'center' }}>
+                  Publish your card to see a live preview. You can still edit and share after publishing.
+                </p>
               </div>
-            </div>
+            )}
           </div>
+
+          {/* Status Badge */}
+          {isDraft && publicCardUrl && (
+            <div className="draft-banner">
+              <span>⚠️ This card is not published yet. Publish to make it visible to others.</span>
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="actions">
@@ -395,7 +227,8 @@ export default function ECardPreviewScreen() {
               className="edit-btn"
               onClick={() => router.push(`/app/ecard/dashboard?cardId=${cardId}`)}
             >
-              Edit Card
+              <IoCreate size={18} />
+              <span>Edit Card</span>
             </button>
           )}
 
@@ -431,7 +264,7 @@ export default function ECardPreviewScreen() {
                         fontSize: 11,
                         fontWeight: 600,
                         color: isDark ? '#E2E8F0' : '#374151',
-                        textAlign: 'center',
+                        textAlign: 'center' as const,
                       }}
                     >
                       <div style={{
@@ -516,184 +349,78 @@ export default function ECardPreviewScreen() {
             margin: 0;
           }
 
-          /* Card Container */
-          .card-container {
-            padding: 0 20px;
-            margin-bottom: 20px;
-          }
-
-          .card {
+          /* Card Iframe Container */
+          .card-iframe-container {
+            margin: 0 16px 20px;
             border-radius: 20px;
-            padding: 32px 24px;
-            text-align: center;
             overflow: hidden;
             position: relative;
+            background: ${isDark ? '#1E293B' : '#fff'};
+            border: 1px solid ${isDark ? '#334155' : '#E5E7EB'};
+            min-height: 500px;
           }
 
-          .card.cover-layout {
-            padding: 0;
-          }
-
-          /* Cover Photo */
-          .cover-photo-container {
-            position: relative;
-            height: 200px;
-            overflow: hidden;
-          }
-
-          .cover-photo {
+          .card-iframe {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            height: 70vh;
+            min-height: 500px;
+            border: none;
+            display: block;
+            transition: opacity 0.3s ease;
           }
 
-          .cover-gradient {
+          .iframe-loading {
             position: absolute;
-            bottom: 0;
+            top: 0;
             left: 0;
             right: 0;
-            height: 100px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.5));
-          }
-
-          .cover-content {
-            padding: 24px;
-          }
-
-          /* Standard Photo */
-          .photo-container {
-            margin: 0 auto 16px;
-            border-radius: 50%;
-            overflow: hidden;
-            border: 3px solid rgba(255,255,255,0.3);
-          }
-
-          .profile-photo {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-
-          /* Card Content */
-          .card-content {
-            position: relative;
-            z-index: 1;
-          }
-
-          .name {
-            font-size: 24px;
-            font-weight: 700;
-            margin: 0 0 4px;
-          }
-
-          .title {
-            font-size: 16px;
-            margin: 0 0 4px;
-          }
-
-          .company {
-            font-size: 14px;
-            margin: 0 0 4px;
-          }
-
-          .location {
-            font-size: 13px;
-            margin: 0 0 12px;
-          }
-
-          .bio {
-            font-size: 14px;
-            line-height: 1.5;
-            margin: 0 0 16px;
-          }
-
-          /* Credentials */
-          .credentials {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 16px;
-          }
-
-          .credential-badge {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            padding: 6px 12px;
-            background: ${isLightTheme ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.2)'};
-            border-radius: 16px;
-            font-size: 12px;
-            color: ${textColor};
-          }
-
-          .credential-badge.verified {
-            background: rgba(0, 200, 83, 0.3);
-          }
-
-          /* Reviews */
-          .reviews {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            margin-bottom: 16px;
-            font-size: 14px;
-          }
-
-          /* Links */
-          .links-container {
+            bottom: 0;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-top: 20px;
+            align-items: center;
+            justify-content: center;
           }
 
-          .link-button {
+          .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid ${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'};
+            border-top-color: ${ACCENT_GREEN};
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
+
+          @keyframes spin { to { transform: rotate(360deg); } }
+
+          .draft-notice {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 12px;
-            padding: 14px 16px;
-            border: none;
+            justify-content: center;
+            padding: 60px 24px;
+          }
+
+          .draft-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+          }
+
+          .draft-banner {
+            margin: 0 16px 16px;
+            padding: 12px 16px;
+            background: ${isDark ? 'rgba(255, 193, 7, 0.15)' : 'rgba(255, 193, 7, 0.1)'};
+            border: 1px solid ${isDark ? 'rgba(255, 193, 7, 0.3)' : 'rgba(255, 193, 7, 0.3)'};
             border-radius: 12px;
-            cursor: pointer;
-            transition: transform 0.2s, opacity 0.2s;
-            font-size: 15px;
-            font-weight: 500;
-          }
-
-          .link-button:hover {
-            transform: scale(1.02);
-            opacity: 0.9;
-          }
-
-          .link-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-
-          /* Tavvy Branding */
-          .tavvy-branding {
-            display: flex;
-            justify-content: center;
-            margin-top: 24px;
-            padding-top: 16px;
-          }
-
-          .tavvy-logo {
-            height: 18px;
-            opacity: 0.5;
+            color: ${isDark ? '#FFC107' : '#856404'};
+            font-size: 13px;
+            text-align: center;
           }
 
           /* Actions */
           .actions {
             display: flex;
             gap: 12px;
-            padding: 0 20px;
+            padding: 0 16px;
             margin-bottom: 16px;
           }
 
@@ -724,9 +451,12 @@ export default function ECardPreviewScreen() {
           }
 
           .edit-btn {
-            display: block;
-            width: calc(100% - 40px);
-            margin: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: calc(100% - 32px);
+            margin: 0 16px;
             padding: 14px;
             background: transparent;
             border: 1px solid ${isDark ? '#334155' : '#E5E7EB'};
@@ -735,6 +465,10 @@ export default function ECardPreviewScreen() {
             font-size: 15px;
             font-weight: 500;
             cursor: pointer;
+          }
+
+          .edit-btn:hover {
+            background: ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.02)'};
           }
 
           /* Modal */
@@ -781,17 +515,6 @@ export default function ECardPreviewScreen() {
             padding: 16px;
             border-radius: 12px;
             margin-bottom: 16px;
-          }
-
-          .qr-code {
-            width: 200px;
-            height: 200px;
-          }
-
-          .modal p {
-            font-size: 13px;
-            margin: 0 0 16px;
-            word-break: break-all;
           }
 
           .download-btn {

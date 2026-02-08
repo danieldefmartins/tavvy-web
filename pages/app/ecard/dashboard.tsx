@@ -54,6 +54,12 @@ import {
   IoCreate,
   IoImage,
   IoGrid,
+  IoCall,
+  IoMail,
+  IoGlobe,
+  IoPlayForward,
+  IoPersonAdd,
+  IoRefresh,
 } from 'react-icons/io5';
 
 const ACCENT_GREEN = '#00C853';
@@ -342,6 +348,33 @@ export default function ECardDashboardScreen() {
     }
   };
 
+  // Reset card - clears all content fields back to defaults
+  const handleResetCard = () => {
+    if (!confirm('Are you sure you want to reset this card? This will clear all content (name, title, bio, photo, banner, links, gallery, videos). This cannot be undone.')) return;
+    // Clear content fields
+    setFullName('');
+    setTitleRole('');
+    setBio('');
+    setEmailField('');
+    setPhoneField('');
+    setWebsiteField('');
+    setAddressField('');
+    // Clear media
+    setProfilePhotoUrl(null);
+    setProfilePhotoFile(null);
+    setBannerImageUrl(null);
+    setBannerImageFile(null);
+    setGalleryImages([]);
+    setVideos([]);
+    setVideoFile(null);
+    // Clear links
+    setLinks([]);
+    setFeaturedIcons([]);
+    // Reset appearance to defaults
+    setShowContactInfo(true);
+    setShowSocialIcons(true);
+  };
+
   // Photo handlers
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -572,25 +605,238 @@ export default function ECardDashboardScreen() {
 
           {/* Card Preview */}
           <div className="preview-section">
-            <div 
-              className="card-preview"
-              style={{ background: `linear-gradient(135deg, ${gradientColors[0]}, ${gradientColors[1]})` }}
-            >
-              {profilePhotoUrl ? (
+            {(() => {
+              const currentTpl = getTemplateById(selectedTemplateId);
+              const layout = currentTpl?.layout || 'basic';
+              const bgGrad = `linear-gradient(135deg, ${gradientColors[0]}, ${gradientColors[1]})`;
+              // Compute if background is light for text contrast
+              const hexToLum = (hex: string) => {
+                const c = hex.replace('#', '');
+                if (c.length < 6) return 0.5;
+                const r = parseInt(c.substring(0,2),16)/255;
+                const g = parseInt(c.substring(2,4),16)/255;
+                const b = parseInt(c.substring(4,6),16)/255;
+                const toL = (v: number) => v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4);
+                return 0.2126*toL(r) + 0.7152*toL(g) + 0.0722*toL(b);
+              };
+              const bgLight = (hexToLum(gradientColors[0]) + hexToLum(gradientColors[1])) / 2 > 0.35;
+              const txtColor = bgLight ? '#1a1a1a' : '#ffffff';
+              const txtSecondary = bgLight ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)';
+
+              const statusBadge = (
+                <div className={`status-badge ${cardData?.is_published ? 'published' : 'draft'}`}>
+                  {cardData?.is_published ? 'Live' : 'Draft'}
+                </div>
+              );
+
+              const photoEl = profilePhotoUrl ? (
                 <img src={profilePhotoUrl} alt="" className="preview-photo" onClick={() => photoInputRef.current?.click()} />
               ) : (
                 <div className="preview-photo-placeholder" onClick={() => photoInputRef.current?.click()}>
-                  <IoCamera size={24} color="rgba(255,255,255,0.5)" />
+                  <IoCamera size={24} color={bgLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.5)'} />
                 </div>
-              )}
-              <h3 className="preview-name">{fullName || 'Your Name'}</h3>
-              {titleRole && <p className="preview-title">{titleRole}</p>}
-              
-              {/* Status Badge */}
-              <div className={`status-badge ${cardData?.is_published ? 'published' : 'draft'}`}>
-                {cardData?.is_published ? 'Live' : 'Draft'}
-              </div>
-            </div>
+              );
+
+              // ===== BLOGGER =====
+              if (layout === 'blogger') {
+                return (
+                  <div className="card-preview blogger-preview" style={{ background: bgGrad, padding: 0 }}>
+                    {statusBadge}
+                    <div style={{ paddingTop: 40 }} />
+                    <div style={{ background: '#fff', borderRadius: '20px 20px 16px 16px', margin: '0 12px 12px', padding: '48px 16px 20px', position: 'relative', textAlign: 'center' }}>
+                      <div style={{ position: 'absolute', top: -36, left: '50%', transform: 'translateX(-50%)' }}>
+                        {profilePhotoUrl ? (
+                          <img src={profilePhotoUrl} alt="" style={{ width: 72, height: 72, borderRadius: 36, objectFit: 'cover', border: '3px solid #fff', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }} onClick={() => photoInputRef.current?.click()} />
+                        ) : (
+                          <div style={{ width: 72, height: 72, borderRadius: 36, background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '3px solid #fff' }} onClick={() => photoInputRef.current?.click()}>
+                            <IoCamera size={24} color="#ccc" />
+                          </div>
+                        )}
+                      </div>
+                      <h3 style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: 18, fontWeight: 600, color: '#333', margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
+                      {titleRole && <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1.5, textTransform: 'uppercase', color: '#999', margin: 0 }}>{titleRole}</p>}
+                    </div>
+                  </div>
+                );
+              }
+
+              // ===== BUSINESS CARD =====
+              if (layout === 'business-card') {
+                return (
+                  <div className="card-preview" style={{ background: bgGrad, padding: 0, overflow: 'hidden' }}>
+                    {statusBadge}
+                    {/* Dark top section */}
+                    <div style={{ padding: '20px 16px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                      {profilePhotoUrl ? (
+                        <img src={profilePhotoUrl} alt="" style={{ width: 56, height: 56, borderRadius: 28, objectFit: 'cover', border: `2px solid ${currentTpl?.colorSchemes[0]?.accent || '#C9A84C'}` }} onClick={() => photoInputRef.current?.click()} />
+                      ) : (
+                        <div style={{ width: 56, height: 56, borderRadius: 28, background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => photoInputRef.current?.click()}>
+                          <IoCamera size={20} color="rgba(255,255,255,0.5)" />
+                        </div>
+                      )}
+                      <div style={{ textAlign: 'left' }}>
+                        <h3 style={{ color: txtColor, fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
+                        {titleRole && <p style={{ color: txtSecondary, fontSize: 12, margin: 0 }}>{titleRole}</p>}
+                      </div>
+                    </div>
+                    {/* White bottom section */}
+                    <div style={{ background: '#fff', padding: '12px 16px 16px', borderRadius: '12px 12px 0 0' }}>
+                      <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 16, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <IoCall size={14} color="#fff" />
+                        </div>
+                        <div style={{ width: 32, height: 32, borderRadius: 16, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <IoMail size={14} color="#fff" />
+                        </div>
+                        <div style={{ width: 32, height: 32, borderRadius: 16, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <IoGlobe size={14} color="#fff" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              // ===== FULL WIDTH =====
+              if (layout === 'full-width') {
+                return (
+                  <div className="card-preview" style={{ background: bgGrad, padding: 0, overflow: 'hidden', minHeight: 160 }}>
+                    {statusBadge}
+                    {profilePhotoUrl ? (
+                      <div style={{ position: 'relative', height: 120 }}>
+                        <img src={profilePhotoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onClick={() => photoInputRef.current?.click()} />
+                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, background: 'linear-gradient(transparent, rgba(0,0,0,0.6))' }} />
+                      </div>
+                    ) : (
+                      <div style={{ height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => photoInputRef.current?.click()}>
+                        <IoCamera size={32} color="rgba(255,255,255,0.3)" />
+                      </div>
+                    )}
+                    <div style={{ padding: '12px 16px 16px' }}>
+                      <h3 style={{ color: txtColor, fontSize: 18, fontWeight: 700, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
+                      {titleRole && <p style={{ color: txtSecondary, fontSize: 13, margin: 0 }}>{titleRole}</p>}
+                    </div>
+                  </div>
+                );
+              }
+
+              // ===== PRO REALTOR =====
+              if (layout === 'pro-realtor') {
+                return (
+                  <div className="card-preview" style={{ background: bgGrad, padding: '20px 16px', textAlign: 'center' }}>
+                    {statusBadge}
+                    {profilePhotoUrl ? (
+                      <div style={{ width: 72, height: 72, borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%', overflow: 'hidden', margin: '0 auto 10px', border: '3px solid rgba(255,255,255,0.3)' }}>
+                        <img src={profilePhotoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onClick={() => photoInputRef.current?.click()} />
+                      </div>
+                    ) : (
+                      <div style={{ width: 72, height: 72, borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%', background: 'rgba(255,255,255,0.1)', margin: '0 auto 10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => photoInputRef.current?.click()}>
+                        <IoCamera size={24} color="rgba(255,255,255,0.5)" />
+                      </div>
+                    )}
+                    <p style={{ color: txtSecondary, fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', margin: '0 0 2px' }}>HI, I'M</p>
+                    <h3 style={{ color: txtColor, fontSize: 18, fontWeight: 700, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
+                    {titleRole && <p style={{ color: txtSecondary, fontSize: 13, margin: 0 }}>{titleRole}</p>}
+                  </div>
+                );
+              }
+
+              // ===== PRO CREATIVE =====
+              if (layout === 'pro-creative') {
+                return (
+                  <div className="card-preview" style={{ background: bgGrad, padding: 0, overflow: 'hidden' }}>
+                    {statusBadge}
+                    <div style={{ padding: '20px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ flex: 1, textAlign: 'left' }}>
+                        <h3 style={{ color: txtColor, fontSize: 18, fontWeight: 700, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
+                        {titleRole && <p style={{ color: txtSecondary, fontSize: 12, margin: 0 }}>{titleRole}</p>}
+                      </div>
+                      {profilePhotoUrl ? (
+                        <img src={profilePhotoUrl} alt="" style={{ width: 56, height: 56, borderRadius: 28, objectFit: 'cover', border: '2px solid rgba(255,255,255,0.3)' }} onClick={() => photoInputRef.current?.click()} />
+                      ) : (
+                        <div style={{ width: 56, height: 56, borderRadius: 28, background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => photoInputRef.current?.click()}>
+                          <IoCamera size={20} color="rgba(255,255,255,0.5)" />
+                        </div>
+                      )}
+                    </div>
+                    {/* Wave divider */}
+                    <svg viewBox="0 0 400 30" style={{ display: 'block', width: '100%' }}>
+                      <path d="M0,15 Q100,0 200,15 T400,15 L400,30 L0,30 Z" fill="#fff" />
+                    </svg>
+                    <div style={{ background: '#fff', padding: '8px 16px 16px' }}>
+                      <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                        <div style={{ width: 28, height: 28, borderRadius: 14, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <IoCall size={12} color="#fff" />
+                        </div>
+                        <div style={{ width: 28, height: 28, borderRadius: 14, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <IoMail size={12} color="#fff" />
+                        </div>
+                        <div style={{ width: 28, height: 28, borderRadius: 14, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <IoGlobe size={12} color="#fff" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              // ===== PRO CORPORATE =====
+              if (layout === 'pro-corporate') {
+                return (
+                  <div className="card-preview" style={{ background: bgGrad, padding: '20px 16px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+                    {statusBadge}
+                    {/* Decorative circles */}
+                    <div style={{ position: 'absolute', top: -20, left: -20, width: 80, height: 80, borderRadius: 40, border: `2px solid ${bgLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}` }} />
+                    <div style={{ position: 'absolute', top: 10, right: -15, width: 60, height: 60, borderRadius: 30, border: `2px solid ${bgLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)'}` }} />
+                    {photoEl}
+                    <h3 style={{ color: txtColor, fontSize: 18, fontWeight: 700, margin: '0 0 2px', position: 'relative', zIndex: 1 }}>{fullName || 'Your Name'}</h3>
+                    {titleRole && <p style={{ color: txtSecondary, fontSize: 13, margin: 0, position: 'relative', zIndex: 1 }}>{titleRole}</p>}
+                  </div>
+                );
+              }
+
+              // ===== PRO CARD =====
+              if (layout === 'pro-card') {
+                return (
+                  <div className="card-preview" style={{ background: bgGrad, padding: 0, overflow: 'hidden' }}>
+                    {statusBadge}
+                    {/* Banner area */}
+                    {bannerImageUrl ? (
+                      <div style={{ height: 80, position: 'relative' }}>
+                        <img src={bannerImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 40, background: `linear-gradient(transparent, ${gradientColors[0]})` }} />
+                      </div>
+                    ) : (
+                      <div style={{ height: 40 }} />
+                    )}
+                    {/* Photo overlapping */}
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: bannerImageUrl ? -28 : 0, marginBottom: 8, position: 'relative', zIndex: 2 }}>
+                      {profilePhotoUrl ? (
+                        <img src={profilePhotoUrl} alt="" style={{ width: 56, height: 56, borderRadius: 28, objectFit: 'cover', border: `3px solid ${currentTpl?.colorSchemes[0]?.accent || '#C9A84C'}` }} onClick={() => photoInputRef.current?.click()} />
+                      ) : (
+                        <div style={{ width: 56, height: 56, borderRadius: 28, background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `3px solid ${currentTpl?.colorSchemes[0]?.accent || '#C9A84C'}` }} onClick={() => photoInputRef.current?.click()}>
+                          <IoCamera size={20} color="rgba(255,255,255,0.5)" />
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ padding: '0 16px 16px', textAlign: 'center' }}>
+                      <h3 style={{ color: txtColor, fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
+                      {titleRole && <p style={{ color: txtSecondary, fontSize: 12, margin: 0 }}>{titleRole}</p>}
+                    </div>
+                  </div>
+                );
+              }
+
+              // ===== BASIC (default) =====
+              return (
+                <div className="card-preview" style={{ background: bgGrad, padding: '24px 16px', textAlign: 'center' }}>
+                  {statusBadge}
+                  {photoEl}
+                  <h3 style={{ color: txtColor, fontSize: 18, fontWeight: 600, margin: '0 0 4px' }}>{fullName || 'Your Name'}</h3>
+                  {titleRole && <p style={{ color: txtSecondary, fontSize: 14, margin: 0 }}>{titleRole}</p>}
+                </div>
+              );
+            })()}
 
             {/* Action Buttons */}
             <div className="preview-actions">
@@ -609,6 +855,10 @@ export default function ECardDashboardScreen() {
                   <span>Publish</span>
                 </button>
               )}
+              <button className="action-btn reset" onClick={handleResetCard}>
+                <IoRefresh size={18} />
+                <span>Reset</span>
+              </button>
             </div>
           </div>
 
@@ -1581,6 +1831,11 @@ export default function ECardDashboardScreen() {
           .action-btn.publish {
             background: ${ACCENT_GREEN};
             color: #fff;
+          }
+
+          .action-btn.reset {
+            background: ${isDark ? 'rgba(239, 68, 68, 0.15)' : 'rgba(239, 68, 68, 0.08)'};
+            color: #EF4444;
           }
 
           /* Tabs */
