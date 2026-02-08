@@ -963,11 +963,20 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
 
           {/* Minimal template - add white card class to container via CSS */}
 
+          {/* Pro Corporate: Decorative circles */}
+          {templateLayout === 'pro-corporate' && (
+            <>
+              <div style={{ position: 'absolute', top: '-40px', right: '-40px', width: '160px', height: '160px', borderRadius: '50%', background: `${templateStyles.accentColor}10`, border: `1px solid ${templateStyles.accentColor}20`, zIndex: 0 }} />
+              <div style={{ position: 'absolute', top: '80px', left: '-60px', width: '120px', height: '120px', borderRadius: '50%', background: `${templateStyles.accentColor}08`, border: `1px solid ${templateStyles.accentColor}15`, zIndex: 0 }} />
+            </>
+          )}
+
           {/* Profile Section */}
           <div style={{
             ...styles.profileSection,
             ...((templateLayout === 'pro-realtor' || templateLayout === 'pro-card') && cardData.bannerImageUrl ? { zIndex: 3, position: 'relative' as const } : {}),
             ...(templateLayout === 'full-width' ? { marginTop: '40vh', zIndex: 2 } : {}),
+            ...(templateLayout === 'pro-creative' || templateLayout === 'pro-card' ? { alignItems: 'flex-start' } : {}),
           }}>
             {/* Profile Photo - skip for bold template (photo is the background) */}
             {templateLayout !== 'full-width' && (() => {
@@ -1033,18 +1042,56 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             })()}
 
             {/* Name & Info */}
-            <h1 style={{...styles.name, color: templateStyles.textColor, ...fontStyleOverrides}}>{cardData.fullName}</h1>
-            {cardData.title && <p style={{...styles.title, color: templateStyles.textColor, opacity: 0.9, ...fontStyleOverrides}}>{cardData.title}</p>}
-            {cardData.company && <p style={{...styles.company, color: templateStyles.textColor, opacity: 0.7, ...fontStyleOverrides}}>{cardData.company}</p>}
+            {/* Pro Realtor: "HI, I'M" intro */}
+            {templateLayout === 'pro-realtor' && (
+              <p style={{ fontSize: '13px', fontWeight: '600', letterSpacing: '3px', textTransform: 'uppercase' as const, color: templateStyles.accentColor, margin: '0 0 4px 0', textAlign: 'center' as const, opacity: 0.8 }}>HI, I&apos;M</p>
+            )}
+            <h1 style={{
+              ...styles.name,
+              color: templateStyles.textColor,
+              ...fontStyleOverrides,
+              ...(templateLayout === 'pro-creative' ? { textAlign: 'left' as const, width: '100%' } : {}),
+              ...(templateLayout === 'pro-card' ? { textAlign: 'left' as const, width: '100%' } : {}),
+              ...(templateLayout === 'blogger' ? { fontFamily: "'Georgia', serif", fontWeight: '700', fontStyle: 'italic' as const } : {}),
+            }}>{cardData.fullName}</h1>
+            {cardData.title && <p style={{
+              ...styles.title,
+              color: templateStyles.textColor,
+              opacity: 0.9,
+              ...fontStyleOverrides,
+              ...(templateLayout === 'pro-creative' || templateLayout === 'pro-card' ? { textAlign: 'left' as const, width: '100%' } : {}),
+            }}>{cardData.title}</p>}
+            {cardData.company && <p style={{
+              ...styles.company,
+              color: templateStyles.textColor,
+              opacity: 0.7,
+              ...fontStyleOverrides,
+              ...(templateLayout === 'pro-creative' || templateLayout === 'pro-card' ? { textAlign: 'left' as const, width: '100%' } : {}),
+            }}>{cardData.company}</p>}
             
             {/* Bio */}
             {cardData.bio && (
               <p style={{
                 ...styles.bio,
                 color: templateStyles.textColor,
+                ...(templateLayout === 'pro-creative' || templateLayout === 'pro-card' ? { textAlign: 'left' as const, width: '100%', padding: '0' } : {}),
               }}>
                 {cardData.bio}
               </p>
+            )}
+
+            {/* Pro Creative: Wave divider */}
+            {templateLayout === 'pro-creative' && (
+              <div style={{ width: '100%', margin: '8px 0 16px', overflow: 'hidden' }}>
+                <svg viewBox="0 0 400 20" preserveAspectRatio="none" style={{ width: '100%', height: '20px', display: 'block' }}>
+                  <path d="M0 10 Q50 0 100 10 T200 10 T300 10 T400 10 V20 H0 Z" fill={`${templateStyles.accentColor}30`} />
+                </svg>
+              </div>
+            )}
+
+            {/* Business Card: Accent divider line */}
+            {templateLayout === 'business-card' && (
+              <div style={{ width: '60px', height: '3px', background: templateStyles.accentColor, borderRadius: '2px', margin: '8px 0 16px' }} />
             )}
             
             {/* Address Display */}
@@ -2654,6 +2701,9 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: '600',
     color: 'white',
     letterSpacing: '0.2px',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap' as const,
   },
   bottomActions: {
     display: 'flex',
