@@ -13,7 +13,7 @@
  * - "Powered by Tavvy" branding
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import { GetServerSideProps } from 'next';
 import { createClient } from '@supabase/supabase-js';
@@ -240,6 +240,81 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   const [endorseNote, setEndorseNote] = useState('');
   const [isSubmittingEndorsement, setIsSubmittingEndorsement] = useState(false);
   const [endorsementSubmitted, setEndorsementSubmitted] = useState(false);
+
+  // Badge contrast: sample actual pixels behind the badge (top-right of card/photo)
+  const [badgeOnLightBg, setBadgeOnLightBg] = useState<boolean | null>(null);
+  useEffect(() => {
+    // Determine what's behind the badge at position top:20px, right:20px
+    // Priority: banner image > profile photo (if cover/large) > gradient colors
+    const imageUrl = cardData.bannerImageUrl || 
+      (['large', 'xlarge'].includes(cardData.profilePhotoSize) ? cardData.profilePhotoUrl : null);
+    
+    if (imageUrl) {
+      // Sample the top-right region of the image to detect brightness
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          if (!ctx) { fallbackToGradient(); return; }
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          ctx.drawImage(img, 0, 0);
+          // Sample a region in the top-right corner (where the badge sits)
+          const sampleW = Math.max(1, Math.floor(img.naturalWidth * 0.2));
+          const sampleH = Math.max(1, Math.floor(img.naturalHeight * 0.15));
+          const startX = img.naturalWidth - sampleW;
+          const startY = 0;
+          const imageData = ctx.getImageData(startX, startY, sampleW, sampleH);
+          const pixels = imageData.data;
+          let totalR = 0, totalG = 0, totalB = 0, count = 0;
+          // Sample every 4th pixel for performance
+          for (let i = 0; i < pixels.length; i += 16) {
+            totalR += pixels[i];
+            totalG += pixels[i + 1];
+            totalB += pixels[i + 2];
+            count++;
+          }
+          if (count > 0) {
+            const avgR = totalR / count / 255;
+            const avgG = totalG / count / 255;
+            const avgB = totalB / count / 255;
+            const toL = (v: number) => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+            const luminance = 0.2126 * toL(avgR) + 0.7152 * toL(avgG) + 0.0722 * toL(avgB);
+            setBadgeOnLightBg(luminance > 0.3);
+          } else {
+            fallbackToGradient();
+          }
+        } catch (e) {
+          // CORS or canvas error — fall back to gradient check
+          fallbackToGradient();
+        }
+      };
+      img.onerror = () => fallbackToGradient();
+      img.src = imageUrl;
+    } else {
+      fallbackToGradient();
+    }
+
+    function fallbackToGradient() {
+      // No image behind badge — use gradient color luminance
+      const hexToLum = (hex: string): number => {
+        const c = hex.replace('#', '');
+        if (c.length !== 6) return 0;
+        const r = parseInt(c.substring(0, 2), 16) / 255;
+        const g = parseInt(c.substring(2, 4), 16) / 255;
+        const b = parseInt(c.substring(4, 6), 16) / 255;
+        const toL = (v: number) => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+        return 0.2126 * toL(r) + 0.7152 * toL(g) + 0.0722 * toL(b);
+      };
+      const avgLum = (hexToLum(cardData.gradientColor1) + hexToLum(cardData.gradientColor2)) / 2;
+      setBadgeOnLightBg(avgLum > 0.35);
+    }
+  }, [cardData.profilePhotoUrl, cardData.bannerImageUrl, cardData.gradientColor1, cardData.gradientColor2]);
+
+  // Resolved badge contrast: true = light bg (use dark text), false = dark bg (use white text)
+  const badgeIsLight = badgeOnLightBg ?? bgIsActuallyLight;
 
   const handleSignalTap = (signalId: string) => {
     setSignalTaps(prev => {
@@ -944,24 +1019,31 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           } : {}),
         }}>
           {/* Star Badge - Top Right — Opens Endorsement Popup */}
+          {/* Pixel-sampled contrast: badgeIsLight detects actual image/gradient behind badge */}
           <button 
             onClick={() => setShowEndorsementPopup(true)}
             className="crown-btn"
             style={{
               ...styles.crownButton,
-              background: '#1a1a2e',
-              border: '2px solid rgba(255, 255, 255, 0.25)',
-              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2)',
-              padding: '10px 18px',
-              gap: '8px',
-              backdropFilter: 'none',
-              WebkitBackdropFilter: 'none',
+              background: badgeIsLight ? 'rgba(255, 255, 255, 0.85)' : 'rgba(0, 0, 0, 0.45)',
+              border: badgeIsLight ? '1px solid rgba(0, 0, 0, 0.08)' : '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: badgeIsLight
+                ? '0 2px 12px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08)'
+                : '0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
             }}
           >
-            <span style={{ fontSize: '22px', lineHeight: 1, color: '#facc15' }}>★</span>
-            <span style={{ fontSize: '18px', fontWeight: '800', color: '#ffffff', letterSpacing: '0.5px' }}>{cardData.endorsementCount || cardData.tapCount || 0}</span>
-            <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ opacity: 0.7 }}>
-              <path d="M1 1L5 5L9 1" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <span style={{ fontSize: '20px', lineHeight: 1, color: badgeIsLight ? '#d97706' : '#facc15' }}>★</span>
+            <span style={{
+              ...styles.crownCount,
+              color: badgeIsLight ? '#1a1a1a' : '#ffffff',
+              textShadow: badgeIsLight ? 'none' : '0 1px 3px rgba(0,0,0,0.3)',
+              fontSize: '17px',
+              fontWeight: '700',
+            }}>{cardData.endorsementCount || cardData.tapCount || 0}</span>
+            <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ opacity: 0.6 }}>
+              <path d="M1 1L5 5L9 1" stroke={badgeIsLight ? '#333333' : '#ffffff'} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </button>
 
