@@ -241,6 +241,46 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   const [isSubmittingEndorsement, setIsSubmittingEndorsement] = useState(false);
   const [endorsementSubmitted, setEndorsementSubmitted] = useState(false);
 
+  // Auto-submit pending endorsement after login redirect
+  useEffect(() => {
+    const pending = typeof window !== 'undefined' ? localStorage.getItem('tavvy_pending_endorsement') : null;
+    if (!pending || !cardData) return;
+    try {
+      const data = JSON.parse(pending);
+      // Only auto-submit if this is the same card the endorsement was for
+      if (data.cardId !== cardData.id) return;
+      // Attempt to submit
+      const submitPending = async () => {
+        setIsSubmittingEndorsement(true);
+        try {
+          const res = await fetch('/api/ecard/endorse', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cardId: data.cardId, signals: data.signals, intensities: data.intensities, note: data.note }),
+          });
+          if (res.ok) {
+            localStorage.removeItem('tavvy_pending_endorsement');
+            setEndorsementSubmitted(true);
+            setShowEndorsementPopup(true);
+          } else {
+            const resData = await res.json();
+            if (!resData?.requireLogin) {
+              // Auth succeeded but endorsement failed for another reason — clear pending
+              localStorage.removeItem('tavvy_pending_endorsement');
+            }
+          }
+        } catch (err) {
+          // Network error — keep pending for retry
+        } finally {
+          setIsSubmittingEndorsement(false);
+        }
+      };
+      submitPending();
+    } catch (e) {
+      localStorage.removeItem('tavvy_pending_endorsement');
+    }
+  }, [cardData?.id]);
+
   // Badge contrast: sample actual pixels behind the badge (top-right of card/photo)
   const [badgeOnLightBg, setBadgeOnLightBg] = useState<boolean | null>(null);
   useEffect(() => {
@@ -2490,7 +2530,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 if (selectedSignalCount === 0) return;
                 setIsSubmittingEndorsement(true);
                 try {
-                  // Convert signalTaps to array of signal IDs (repeated by intensity)
+                  // Convert signalTaps to array of signal IDs
                   const signalIds = Object.keys(signalTaps);
                   const res = await fetch('/api/ecard/endorse', {
                     method: 'POST',
@@ -2504,7 +2544,17 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   } else {
                     const data = await res.json();
                     if (data?.requireLogin) {
-                      alert('Please create a Tavvy account to endorse. Your endorsement will be saved after login.');
+                      // Save endorsement data to localStorage so it persists through login
+                      localStorage.setItem('tavvy_pending_endorsement', JSON.stringify({
+                        cardId: cardData.id,
+                        signals: signalIds,
+                        intensities: signalTaps,
+                        note: endorseNote,
+                        cardSlug: cardData.slug,
+                      }));
+                      // Redirect to login/signup with return URL back to this card
+                      const currentPath = `/${cardData.slug}`;
+                      window.location.href = `/app/login?returnUrl=${encodeURIComponent(currentPath)}`;
                     } else {
                       alert(data?.error || 'Failed to submit endorsement.');
                     }
