@@ -2113,175 +2113,157 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             </div>
           )}
 
-          {/* External Review Badges */}
-          {(cardData.reviewGoogleUrl || cardData.reviewYelpUrl || cardData.reviewTripadvisorUrl || cardData.reviewFacebookUrl || cardData.reviewBbbUrl) && (
-            <div style={{ width: '100%', display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 8 }}>
-              {cardData.reviewGoogleUrl && (
-                <a href={cardData.reviewGoogleUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, background: 'rgba(66,133,244,0.12)', border: '1px solid rgba(66,133,244,0.25)', textDecoration: 'none', fontSize: 13, fontWeight: 600, color: '#4285F4' }}>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/></svg>
-                  Google Reviews
-                </a>
-              )}
-              {cardData.reviewYelpUrl && (
-                <a href={cardData.reviewYelpUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, background: 'rgba(211,35,35,0.12)', border: '1px solid rgba(211,35,35,0.25)', textDecoration: 'none', fontSize: 13, fontWeight: 600, color: '#D32323' }}>
-                  <span style={{ fontSize: 16 }}>Y</span>
-                  Yelp
-                </a>
-              )}
-              {cardData.reviewTripadvisorUrl && (
-                <a href={cardData.reviewTripadvisorUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, background: 'rgba(0,175,135,0.12)', border: '1px solid rgba(0,175,135,0.25)', textDecoration: 'none', fontSize: 13, fontWeight: 600, color: '#00AF87' }}>
-                  <span style={{ fontSize: 14 }}>🦉</span>
-                  TripAdvisor
-                </a>
-              )}
-              {cardData.reviewFacebookUrl && (
-                <a href={cardData.reviewFacebookUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, background: 'rgba(24,119,242,0.12)', border: '1px solid rgba(24,119,242,0.25)', textDecoration: 'none', fontSize: 13, fontWeight: 600, color: '#1877F2' }}>
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                  Facebook
-                </a>
-              )}
-              {cardData.reviewBbbUrl && (
-                <a href={cardData.reviewBbbUrl} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, background: 'rgba(0,90,140,0.12)', border: '1px solid rgba(0,90,140,0.25)', textDecoration: 'none', fontSize: 13, fontWeight: 600, color: '#005A8C' }}>
-                  <span style={{ fontSize: 14 }}>🏛️</span>
-                  BBB
-                </a>
-              )}
-            </div>
-          )}
+          {/* ═══ CARD FOOTER ═══ */}
+          <div style={{ width: '100%', marginTop: 20, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 12 }}>
 
-          {/* Business Card: Add to Contacts CTA */}
-          {templateLayout === 'business-card' && (
-            <div style={{ width: '100%', padding: '16px 24px', background: '#FFFFFF' }}>
+            {/* Row 1: Review Platforms — icon-only pills */}
+            {(cardData.reviewGoogleUrl || cardData.reviewYelpUrl || cardData.reviewTripadvisorUrl || cardData.reviewFacebookUrl || cardData.reviewBbbUrl) && (
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' as const }}>
+                {cardData.reviewGoogleUrl && (
+                  <a href={cardData.reviewGoogleUrl} target="_blank" rel="noopener noreferrer" title="Google Reviews" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: 12, background: bgIsActuallyLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)', border: `1px solid ${bgIsActuallyLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)'}`, textDecoration: 'none' }}>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/></svg>
+                  </a>
+                )}
+                {cardData.reviewYelpUrl && (
+                  <a href={cardData.reviewYelpUrl} target="_blank" rel="noopener noreferrer" title="Yelp" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: 12, background: bgIsActuallyLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)', border: `1px solid ${bgIsActuallyLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)'}`, textDecoration: 'none' }}>
+                    <span style={{ fontSize: 20, fontWeight: 900, color: '#D32323', lineHeight: 1 }}>Y</span>
+                  </a>
+                )}
+                {cardData.reviewTripadvisorUrl && (
+                  <a href={cardData.reviewTripadvisorUrl} target="_blank" rel="noopener noreferrer" title="TripAdvisor" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: 12, background: bgIsActuallyLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)', border: `1px solid ${bgIsActuallyLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)'}`, textDecoration: 'none' }}>
+                    <span style={{ fontSize: 20, lineHeight: 1 }}>🦉</span>
+                  </a>
+                )}
+                {cardData.reviewFacebookUrl && (
+                  <a href={cardData.reviewFacebookUrl} target="_blank" rel="noopener noreferrer" title="Facebook" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: 12, background: bgIsActuallyLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)', border: `1px solid ${bgIsActuallyLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)'}`, textDecoration: 'none' }}>
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                  </a>
+                )}
+                {cardData.reviewBbbUrl && (
+                  <a href={cardData.reviewBbbUrl} target="_blank" rel="noopener noreferrer" title="BBB" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 44, height: 44, borderRadius: 12, background: bgIsActuallyLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)', border: `1px solid ${bgIsActuallyLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)'}`, textDecoration: 'none' }}>
+                    <span style={{ fontSize: 18, lineHeight: 1 }}>🏛️</span>
+                  </a>
+                )}
+              </div>
+            )}
+
+            {/* Row 2: Save Contact + Share */}
+            <div style={{ width: '100%', display: 'flex', gap: 8 }}>
               <button onClick={handleSaveContact} style={{
-                width: '100%', padding: '14px', borderRadius: 12,
-                background: templateStyles.accentColor, border: 'none',
-                color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                flex: 1, padding: '14px 12px', borderRadius: 14,
+                background: bgIsActuallyLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)',
+                border: `1px solid ${bgIsActuallyLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)'}`,
+                color: templateStyles.textColor, fontSize: 14, fontWeight: 600, cursor: 'pointer',
               }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-                + Add to Contacts
+                <SaveIcon />
+                <span>Save Contact</span>
+              </button>
+              <button onClick={handleShare} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                flex: 1, padding: '14px 12px', borderRadius: 14,
+                background: '#fff', border: '1px solid #E5E7EB',
+                color: '#1a1a2e', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+              }}>
+                <ShareIcon />
+                <span>Share</span>
               </button>
             </div>
-          )}
 
-          {/* Bottom Actions */}
-          <div style={{
-            ...styles.bottomActions,
-            ...(templateLayout === 'business-card' ? { background: '#FFFFFF', padding: '0 24px 20px' } : {}),
-            ...(templateLayout === 'pro-card' ? { background: bgIsActuallyLight ? '#f8f9fa' : '#1a1a2e', padding: '10px 24px 20px' } : {}),
-          }}>
-            {templateLayout !== 'business-card' && <button onClick={handleSaveContact} style={{
-              ...styles.saveButton,
-              background: bgIsActuallyLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.15)',
-              borderColor: bgIsActuallyLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.2)',
-              color: templateStyles.textColor,
-            }}>
-              <SaveIcon />
-              <span>Save Contact</span>
-            </button>}
-            <button onClick={handleShare} style={{
-              ...styles.shareButton,
-              ...(templateLayout === 'business-card' ? { background: '#f0f0f0', color: '#1a1a2e', borderColor: '#e0e0e0' } : {}),
-            }}>
-              <ShareIcon />
-              <span>Share</span>
-            </button>
-          </div>
-
-          {/* Wallet Buttons - compact, side by side */}
-          <div style={{ width: '100%', marginTop: 16, display: 'flex', gap: 8 }}>
-            <button
-              onClick={() => {
-                fetch('/api/ecard/wallet/apple-pass', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ slug: cardData.slug }),
-                }).then(res => {
-                  if (res.status === 503 || !res.ok) {
+            {/* Row 3: Apple Wallet + Google Wallet */}
+            <div style={{ width: '100%', display: 'flex', gap: 8 }}>
+              <button
+                onClick={() => {
+                  fetch('/api/ecard/wallet/apple-pass', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ slug: cardData.slug }),
+                  }).then(res => {
+                    if (res.status === 503 || !res.ok) {
+                      window.open(`/api/ecard/wallet/vcard?slug=${cardData.slug}`, '_blank');
+                      return;
+                    }
+                    return res.blob();
+                  }).then(blob => {
+                    if (blob) {
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url; a.download = `${cardData.slug}.pkpass`; a.click();
+                      URL.revokeObjectURL(url);
+                    }
+                  }).catch(() => {
                     window.open(`/api/ecard/wallet/vcard?slug=${cardData.slug}`, '_blank');
-                    return;
-                  }
-                  return res.blob();
-                }).then(blob => {
-                  if (blob) {
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url; a.download = `${cardData.slug}.pkpass`; a.click();
-                    URL.revokeObjectURL(url);
-                  }
-                }).catch(() => {
-                  window.open(`/api/ecard/wallet/vcard?slug=${cardData.slug}`, '_blank');
-                });
-              }}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                padding: '10px 14px', borderRadius: 10, border: 'none',
-                background: '#000', color: '#fff', fontSize: 13, fontWeight: 600,
-                cursor: 'pointer', flex: 1,
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-              <span>Apple Wallet</span>
-            </button>
-            <button
-              onClick={() => {
-                fetch('/api/ecard/wallet/google-pass', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ slug: cardData.slug }),
-                }).then(res => {
-                  if (res.status === 503 || !res.ok) {
-                    window.open(`/api/ecard/wallet/vcard?slug=${cardData.slug}`, '_blank');
-                    return res.json().catch(() => null);
-                  }
-                  return res.json();
-                }).then(data => {
-                  if (data?.saveUrl) window.open(data.saveUrl, '_blank');
-                }).catch(() => {
-                  window.open(`/api/ecard/wallet/vcard?slug=${cardData.slug}`, '_blank');
-                });
-              }}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                padding: '10px 14px', borderRadius: 10,
-                background: '#fff', color: '#1f2937', fontSize: 13, fontWeight: 600,
-                cursor: 'pointer', flex: 1, border: '1px solid #E5E7EB',
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/></svg>
-              <span>Google Wallet</span>
-            </button>
-          </div>
-
-          {/* Pro Realtor: Company Footer Bar */}
-          {templateLayout === 'pro-realtor' && cardData.company && (
-            <div style={{ width: '100%', padding: '16px 20px', background: `${templateStyles.accentColor}15`, borderRadius: 14, marginTop: 16, textAlign: 'center' as const }}>
-              <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' as const, color: templateStyles.accentColor }}>{cardData.company}</span>
-            </div>
-          )}
-
-          {/* Tavvy Branding Footer — clean & minimal */}
-          <div style={styles.poweredBy}>
-            <a href="https://tavvy.com/ecard" target="_blank" rel="noopener noreferrer" style={styles.tavvyLink}>
-              <img 
-                src={isLightFooterBg ? '/tavvy-logo-dark.png' : '/tavvy-logo-white.png'}
-                alt="Tavvy" 
-                style={styles.tavvyLogo}
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  const span = document.createElement('span');
-                  span.textContent = 'tavvy';
-                  span.style.cssText = `font-size: 20px; font-weight: 700; color: ${isLightFooterBg ? '#2d3e50' : 'white'}; letter-spacing: -0.5px;`;
-                  target.parentElement?.appendChild(span);
+                  });
                 }}
-              />
-            </a>
-            <a href="https://tavvy.com/ecard" target="_blank" rel="noopener noreferrer" style={{
-              ...styles.ctaText,
-              color: isLightFooterBg ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.5)',
-              textDecoration: 'none',
-            }}>Create your free digital card</a>
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  flex: 1, padding: '14px 12px', borderRadius: 14, border: 'none',
+                  background: '#000', color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+                <span>Apple Wallet</span>
+              </button>
+              <button
+                onClick={() => {
+                  fetch('/api/ecard/wallet/google-pass', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ slug: cardData.slug }),
+                  }).then(res => {
+                    if (res.status === 503 || !res.ok) {
+                      window.open(`/api/ecard/wallet/vcard?slug=${cardData.slug}`, '_blank');
+                      return res.json().catch(() => null);
+                    }
+                    return res.json();
+                  }).then(data => {
+                    if (data?.saveUrl) window.open(data.saveUrl, '_blank');
+                  }).catch(() => {
+                    window.open(`/api/ecard/wallet/vcard?slug=${cardData.slug}`, '_blank');
+                  });
+                }}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  flex: 1, padding: '14px 12px', borderRadius: 14,
+                  background: '#fff', color: '#1f2937', fontSize: 14, fontWeight: 600,
+                  cursor: 'pointer', border: '1px solid #E5E7EB',
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/></svg>
+                <span>Google Wallet</span>
+              </button>
+            </div>
+
+            {/* Pro Realtor: Company Footer Bar */}
+            {templateLayout === 'pro-realtor' && cardData.company && (
+              <div style={{ width: '100%', padding: '14px 20px', background: `${templateStyles.accentColor}15`, borderRadius: 14, textAlign: 'center' as const }}>
+                <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' as const, color: templateStyles.accentColor }}>{cardData.company}</span>
+              </div>
+            )}
+
+            {/* Row 4: Tavvy Branding */}
+            <div style={{ width: '100%', textAlign: 'center' as const, paddingTop: 8, paddingBottom: 8 }}>
+              <a href="https://tavvy.com/ecard" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', textDecoration: 'none' }}>
+                <img 
+                  src={isLightFooterBg ? '/tavvy-logo-dark.png' : '/tavvy-logo-white.png'}
+                  alt="Tavvy" 
+                  style={{ height: 22, width: 'auto', objectFit: 'contain' as const, marginBottom: 4 }}
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const span = document.createElement('span');
+                    span.textContent = 'tavvy';
+                    span.style.cssText = `font-size: 20px; font-weight: 700; color: ${isLightFooterBg ? '#2d3e50' : 'white'}; letter-spacing: -0.5px;`;
+                    target.parentElement?.appendChild(span);
+                  }}
+                />
+              </a>
+              <br />
+              <a href="https://tavvy.com/ecard" target="_blank" rel="noopener noreferrer" style={{
+                fontSize: 12, color: isLightFooterBg ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.45)',
+                textDecoration: 'none',
+              }}>Create your free digital card</a>
+            </div>
           </div>
         </div>
       </div>
