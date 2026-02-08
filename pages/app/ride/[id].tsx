@@ -49,6 +49,14 @@ interface RideData {
     duration?: string;
     maxSpeed?: string;
     inversions?: number;
+    getsWet?: string;
+    singleRider?: boolean;
+    childSwap?: boolean;
+    lightningLane?: string;
+    indoorOutdoor?: string;
+    accessibility?: string;
+    ageRecommendation?: string;
+    motionSickness?: string;
   };
 }
 
@@ -69,16 +77,28 @@ interface SignalsByCategory {
 const getThrillLevelLabel = (subcategory: string | undefined): string => {
   if (!subcategory) return 'Moderate';
   const lower = subcategory.toLowerCase();
-  if (lower.includes('thrill') || lower === 'roller_coaster') return 'High Thrill';
-  if (lower.includes('water') || lower === 'simulator') return 'Moderate-High';
-  if (lower === 'dark_ride' || lower === 'boat_ride') return 'Moderate';
-  if (lower === 'carousel' || lower === 'train' || lower === 'show') return 'Mild';
+  if (lower === 'thrill_rides') return 'High Thrill';
+  if (lower === 'simulators' || lower === 'water_rides') return 'Moderate-High';
+  if (lower === 'dark_rides') return 'Moderate';
+  if (lower === 'family_rides' || lower === 'shows' || lower === 'characters' || lower === 'explore' || lower === 'animals' || lower === 'interactive') return 'Mild';
   return 'Moderate';
 };
 
 const formatSubcategory = (subcategory: string | undefined): string => {
   if (!subcategory) return 'Attraction';
-  return subcategory
+  const labels: Record<string, string> = {
+    thrill_rides: 'Thrill Rides',
+    family_rides: 'Family Rides',
+    dark_rides: 'Dark Rides',
+    shows: 'Shows & Entertainment',
+    characters: 'Characters',
+    explore: 'Explore',
+    animals: 'Animals & Nature',
+    water_rides: 'Water Rides',
+    simulators: 'Simulators',
+    interactive: 'Interactive',
+  };
+  return labels[subcategory] || subcategory
     .split('_')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
@@ -87,23 +107,78 @@ const formatSubcategory = (subcategory: string | undefined): string => {
 const getAudienceFromSubcategory = (subcategory: string | undefined): string => {
   if (!subcategory) return 'All Ages';
   const lower = subcategory.toLowerCase();
-  if (lower.includes('thrill') || lower === 'roller_coaster') return 'Teens & Adults';
-  if (lower === 'playground' || lower === 'meet_greet') return 'Kids & Families';
+  if (lower === 'thrill_rides') return 'Teens & Adults';
+  if (lower === 'characters' || lower === 'interactive' || lower === 'family_rides') return 'Kids & Families';
   return 'All Ages';
+};
+
+const formatAgeRecommendation = (age: string | null): string => {
+  if (!age) return 'All Ages';
+  const labels: Record<string, string> = {
+    all_ages: 'All Ages',
+    '3+': 'Ages 3+',
+    '4+': 'Ages 4+',
+    '6+': 'Ages 6+',
+    '8+': 'Ages 8+',
+    '10+': 'Ages 10+',
+    'teens+': 'Teens & Adults',
+  };
+  return labels[age] || 'All Ages';
+};
+
+const formatLightningLane = (ll: string | null): string => {
+  if (!ll) return '';
+  const labels: Record<string, string> = {
+    individual_ll: 'Individual LL',
+    multi_pass: 'Multi Pass',
+    virtual_queue: 'Virtual Queue',
+    standby_only: 'Standby Only',
+    not_applicable: '',
+  };
+  return labels[ll] || '';
+};
+
+const formatGetsWet = (gw: string | null): string => {
+  if (!gw || gw === 'dry') return 'Dry';
+  if (gw === 'light_splash') return 'Light Splash';
+  if (gw === 'soaked') return 'Soaked';
+  return 'Dry';
+};
+
+const formatAccessibility = (acc: string | null): string => {
+  if (!acc) return '';
+  const labels: Record<string, string> = {
+    fully_accessible: 'Fully Accessible',
+    wheelchair_accessible: 'Wheelchair Accessible',
+    ecv_to_wheelchair: 'ECV to Wheelchair',
+    must_transfer: 'Must Transfer',
+  };
+  return labels[acc] || '';
+};
+
+const formatMotionSickness = (ms: string | null): string => {
+  if (!ms || ms === 'none') return '';
+  return ms.charAt(0).toUpperCase() + ms.slice(1);
+};
+
+const formatIndoorOutdoor = (io: string | null): string => {
+  if (!io) return '';
+  const labels: Record<string, string> = {
+    indoor: 'Indoor',
+    outdoor: 'Outdoor',
+    both: 'Indoor & Outdoor',
+  };
+  return labels[io] || '';
 };
 
 const getDefaultImage = (subcategory: string | undefined): string => {
   if (!subcategory) return 'https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?w=800';
   const lower = subcategory.toLowerCase();
-  if (lower.includes('coaster') || lower.includes('thrill')) {
-    return 'https://images.unsplash.com/photo-1560713781-d00f6c18f388?w=800';
-  }
-  if (lower.includes('water') || lower.includes('boat')) {
-    return 'https://images.unsplash.com/photo-1582653291997-079a1c04e5a1?w=800';
-  }
-  if (lower === 'dark_ride') {
-    return 'https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?w=800';
-  }
+  if (lower === 'thrill_rides') return 'https://images.unsplash.com/photo-1560713781-d00f6c18f388?w=800';
+  if (lower === 'water_rides') return 'https://images.unsplash.com/photo-1582653291997-079a1c04e5a1?w=800';
+  if (lower === 'dark_rides') return 'https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?w=800';
+  if (lower === 'animals') return 'https://images.unsplash.com/photo-1474511320723-9a56873571b7?w=800';
+  if (lower === 'shows') return 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?w=800';
   return 'https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?w=800';
 };
 
@@ -167,7 +242,7 @@ export default function RideDetailsScreen() {
       // First try to fetch from Supabase places table
       const { data: placeData, error: placeError } = await supabase
         .from('places')
-        .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos')
+        .select('id, name, tavvy_category, tavvy_subcategory, city, region, cover_image_url, photos, description, duration_minutes, min_height_inches, thrill_level, gets_wet, single_rider, child_swap, lightning_lane, indoor_outdoor, accessibility, age_recommendation, motion_sickness')
         .eq('id', id)
         .single();
 
@@ -175,21 +250,36 @@ export default function RideDetailsScreen() {
 
       if (placeData && !placeError) {
         // Build ride data from Supabase place
-        const thrillLevel = getThrillLevelLabel(placeData.tavvy_subcategory);
+        const thrillLevelRaw = placeData.thrill_level;
+        const thrillLevel = thrillLevelRaw 
+          ? thrillLevelRaw.charAt(0).toUpperCase() + thrillLevelRaw.slice(1)
+          : getThrillLevelLabel(placeData.tavvy_subcategory);
         const rideType = formatSubcategory(placeData.tavvy_subcategory);
-        const audience = getAudienceFromSubcategory(placeData.tavvy_subcategory);
+        const audience = placeData.age_recommendation 
+          ? formatAgeRecommendation(placeData.age_recommendation)
+          : getAudienceFromSubcategory(placeData.tavvy_subcategory);
         
         rideData = {
           id: placeData.id,
           name: placeData.name?.toUpperCase() || 'RIDE',
           parkName: (park as string) || placeData.city || 'Theme Park',
-          description: `Experience ${placeData.name}, a ${rideType.toLowerCase()} at ${placeData.city || 'this theme park'}.`,
+          description: placeData.description || `Experience ${placeData.name}, a ${rideType.toLowerCase()} at ${placeData.city || 'this theme park'}.`,
           image: placeData.cover_image_url || getDefaultImage(placeData.tavvy_subcategory),
           thumbnails: extractPhotos(placeData.photos),
           keyInfo: {
             thrillLevel,
             rideType,
             audience,
+            minHeight: placeData.min_height_inches ? `${placeData.min_height_inches}"` : undefined,
+            duration: placeData.duration_minutes ? `${placeData.duration_minutes} min` : undefined,
+            getsWet: formatGetsWet(placeData.gets_wet),
+            singleRider: placeData.single_rider || false,
+            childSwap: placeData.child_swap || false,
+            lightningLane: formatLightningLane(placeData.lightning_lane),
+            indoorOutdoor: formatIndoorOutdoor(placeData.indoor_outdoor),
+            accessibility: formatAccessibility(placeData.accessibility),
+            ageRecommendation: formatAgeRecommendation(placeData.age_recommendation),
+            motionSickness: formatMotionSickness(placeData.motion_sickness),
           },
         };
       } else {
@@ -378,23 +468,81 @@ export default function RideDetailsScreen() {
             </div>
           )}
 
-          {/* Key Info Cards */}
+          {/* Key Info Cards - Primary Row */}
           <div className="info-cards">
             <div className="info-card" style={{ backgroundColor: surfaceColor }}>
-              <IoFlame size={20} color="#EF4444" />
+              <span className="info-icon">🔥</span>
               <span className="info-label" style={{ color: secondaryTextColor }}>Thrill</span>
               <span className="info-value" style={{ color: textColor }}>{ride.keyInfo.thrillLevel}</span>
             </div>
             <div className="info-card" style={{ backgroundColor: surfaceColor }}>
-              <FiUsers size={20} color="#3B82F6" />
-              <span className="info-label" style={{ color: secondaryTextColor }}>Audience</span>
-              <span className="info-value" style={{ color: textColor }}>{ride.keyInfo.audience}</span>
-            </div>
-            <div className="info-card" style={{ backgroundColor: surfaceColor }}>
-              <FiClock size={20} color="#10B981" />
+              <span className="info-icon">🎢</span>
               <span className="info-label" style={{ color: secondaryTextColor }}>Type</span>
               <span className="info-value" style={{ color: textColor }}>{ride.keyInfo.rideType}</span>
             </div>
+            <div className="info-card" style={{ backgroundColor: surfaceColor }}>
+              <span className="info-icon">👥</span>
+              <span className="info-label" style={{ color: secondaryTextColor }}>Audience</span>
+              <span className="info-value" style={{ color: textColor }}>{ride.keyInfo.audience}</span>
+            </div>
+          </div>
+
+          {/* Key Info Stats Grid */}
+          <div className="stats-grid">
+            {ride.keyInfo.duration && (
+              <div className="stat-item" style={{ backgroundColor: surfaceColor }}>
+                <span className="stat-icon">⏱️</span>
+                <span className="stat-text" style={{ color: textColor }}>{ride.keyInfo.duration}</span>
+              </div>
+            )}
+            {ride.keyInfo.minHeight && (
+              <div className="stat-item" style={{ backgroundColor: surfaceColor }}>
+                <span className="stat-icon">📏</span>
+                <span className="stat-text" style={{ color: textColor }}>{ride.keyInfo.minHeight} min height</span>
+              </div>
+            )}
+            {ride.keyInfo.getsWet && ride.keyInfo.getsWet !== 'Dry' && (
+              <div className="stat-item" style={{ backgroundColor: surfaceColor }}>
+                <span className="stat-icon">💧</span>
+                <span className="stat-text" style={{ color: textColor }}>{ride.keyInfo.getsWet}</span>
+              </div>
+            )}
+            {ride.keyInfo.lightningLane && (
+              <div className="stat-item" style={{ backgroundColor: surfaceColor }}>
+                <span className="stat-icon">⚡</span>
+                <span className="stat-text" style={{ color: textColor }}>{ride.keyInfo.lightningLane}</span>
+              </div>
+            )}
+            {ride.keyInfo.indoorOutdoor && (
+              <div className="stat-item" style={{ backgroundColor: surfaceColor }}>
+                <span className="stat-icon">🏠</span>
+                <span className="stat-text" style={{ color: textColor }}>{ride.keyInfo.indoorOutdoor}</span>
+              </div>
+            )}
+            {ride.keyInfo.singleRider && (
+              <div className="stat-item" style={{ backgroundColor: surfaceColor }}>
+                <span className="stat-icon">🧍</span>
+                <span className="stat-text" style={{ color: textColor }}>Single Rider</span>
+              </div>
+            )}
+            {ride.keyInfo.childSwap && (
+              <div className="stat-item" style={{ backgroundColor: surfaceColor }}>
+                <span className="stat-icon">👶</span>
+                <span className="stat-text" style={{ color: textColor }}>Child Swap</span>
+              </div>
+            )}
+            {ride.keyInfo.accessibility && (
+              <div className="stat-item" style={{ backgroundColor: surfaceColor }}>
+                <span className="stat-icon">♿</span>
+                <span className="stat-text" style={{ color: textColor }}>{ride.keyInfo.accessibility}</span>
+              </div>
+            )}
+            {ride.keyInfo.motionSickness && (
+              <div className="stat-item" style={{ backgroundColor: surfaceColor }}>
+                <span className="stat-icon">🌀</span>
+                <span className="stat-text" style={{ color: textColor }}>Motion: {ride.keyInfo.motionSickness}</span>
+              </div>
+            )}
           </div>
 
           {/* Description */}
@@ -688,6 +836,35 @@ export default function RideDetailsScreen() {
           .info-value {
             font-size: 13px;
             font-weight: 600;
+          }
+          
+          .info-icon {
+            font-size: 20px;
+          }
+          
+          /* Stats Grid */
+          .stats-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 0 16px 16px;
+          }
+          
+          .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 10px;
+          }
+          
+          .stat-icon {
+            font-size: 16px;
+          }
+          
+          .stat-text {
+            font-size: 13px;
+            font-weight: 500;
           }
           
           /* Description */
