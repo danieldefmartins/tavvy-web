@@ -133,6 +133,9 @@ export default function ECardDashboardScreen() {
   const [phoneField, setPhoneField] = useState('');
   const [websiteField, setWebsiteField] = useState('');
   const [addressField, setAddressField] = useState('');
+  const [address1Field, setAddress1Field] = useState('');
+  const [address2Field, setAddress2Field] = useState('');
+  const [zipCodeField, setZipCodeField] = useState('');
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | null>(null);
   const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
   const [featuredIcons, setFeaturedIcons] = useState<FeaturedSocial[]>([]);
@@ -199,6 +202,9 @@ export default function ECardDashboardScreen() {
           setPhoneField(card.phone || '');
           setWebsiteField(card.website || '');
           setAddressField(card.city || '');
+          setAddress1Field(card.address_1 || '');
+          setAddress2Field(card.address_2 || '');
+          setZipCodeField(card.zip_code || '');
           setProfilePhotoUrl(card.profile_photo_url || null);
           // Normalize featured_socials: handle both flat strings ["instagram"] and objects [{platform:"instagram",url:""}]
           const rawSocials = card.featured_socials || [];
@@ -303,6 +309,9 @@ export default function ECardDashboardScreen() {
         phone: phoneField || undefined,
         website: websiteField || undefined,
         city: addressField || undefined,
+        address_1: address1Field || undefined,
+        address_2: address2Field || undefined,
+        zip_code: zipCodeField || undefined,
         profile_photo_url: photoUrl || undefined,
         profile_photo_size: profilePhotoSize,
         gradient_color_1: gradientColors[0],
@@ -332,6 +341,9 @@ export default function ECardDashboardScreen() {
         phone: phoneField,
         website: websiteField,
         city: addressField,
+        address_1: address1Field,
+        address_2: address2Field,
+        zip_code: zipCodeField,
         profile_photo_url: photoUrl || undefined,
         profile_photo_size: profilePhotoSize,
         gradient_color_1: gradientColors[0],
@@ -359,6 +371,9 @@ export default function ECardDashboardScreen() {
     setPhoneField('');
     setWebsiteField('');
     setAddressField('');
+    setAddress1Field('');
+    setAddress2Field('');
+    setZipCodeField('');
     // Clear media
     setProfilePhotoUrl(null);
     setProfilePhotoFile(null);
@@ -1016,6 +1031,43 @@ export default function ECardDashboardScreen() {
                       style={{ backgroundColor: isDark ? '#1E293B' : '#fff', color: isDark ? '#fff' : '#333' }}
                     />
                   </div>
+                  <div className="field-group">
+                    <label style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>Street Address <span style={{ fontSize: 11, opacity: 0.6 }}>(optional — fills in, full address displays on card)</span></label>
+                    <input
+                      type="text"
+                      value={address1Field}
+                      onChange={(e) => setAddress1Field(e.target.value)}
+                      placeholder="123 Main Street"
+                      className="field-input"
+                      style={{ backgroundColor: isDark ? '#1E293B' : '#fff', color: isDark ? '#fff' : '#333' }}
+                    />
+                  </div>
+                  {address1Field && (
+                    <>
+                      <div className="field-group">
+                        <label style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>Apt / Suite <span style={{ fontSize: 11, opacity: 0.6 }}>(optional)</span></label>
+                        <input
+                          type="text"
+                          value={address2Field}
+                          onChange={(e) => setAddress2Field(e.target.value)}
+                          placeholder="Apt 4B"
+                          className="field-input"
+                          style={{ backgroundColor: isDark ? '#1E293B' : '#fff', color: isDark ? '#fff' : '#333' }}
+                        />
+                      </div>
+                      <div className="field-group">
+                        <label style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>Zip Code <span style={{ fontSize: 11, opacity: 0.6 }}>(optional)</span></label>
+                        <input
+                          type="text"
+                          value={zipCodeField}
+                          onChange={(e) => setZipCodeField(e.target.value)}
+                          placeholder="33139"
+                          className="field-input"
+                          style={{ backgroundColor: isDark ? '#1E293B' : '#fff', color: isDark ? '#fff' : '#333' }}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Featured Social Icons */}
