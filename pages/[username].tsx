@@ -2296,19 +2296,17 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             style={{ background: '#fff', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 420, maxHeight: '80vh', overflowY: 'auto', padding: '24px 20px 32px', color: '#1a1a2e' }}
             onClick={e => e.stopPropagation()}
           >
-            {/* Header */}
+            {/* Header — Tavvy logo + Endorsements */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ fontSize: '28px', lineHeight: 1 }}>★</span>
-                <div>
-                  <div style={{ fontSize: 20, fontWeight: 800 }}>Endorsements</div>
-                  <div style={{ fontSize: 13, color: '#888' }}>{cardData.endorsementCount || cardData.tapCount || 0} total endorsements</div>
-                </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <img src="/brand/tavvy-logo-horizontal-light.png" alt="Tavvy" style={{ height: 28, width: 'auto', objectFit: 'contain' }} />
+                <span style={{ fontSize: 20, fontWeight: 800, color: '#2d3a4a', letterSpacing: '-0.3px' }}>Endorsements</span>
               </div>
-              <button onClick={() => setShowEndorsementPopup(false)} style={{ background: '#f0f0f0', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#333' }}>
+              <button onClick={() => setShowEndorsementPopup(false)} style={{ background: '#f0f0f0', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#333', flexShrink: 0 }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
+            <div style={{ fontSize: 13, color: '#888', marginTop: -14, marginBottom: 16 }}>{cardData.endorsementCount || cardData.tapCount || 0} total endorsements</div>
 
             {/* Top Endorsement Tags — shown as rows with ×count */}
             {cardData.topEndorsementTags && cardData.topEndorsementTags.length > 0 ? (
