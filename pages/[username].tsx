@@ -1010,22 +1010,18 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
         ].filter(Boolean).join(' · ') || 'Digital Business Card on Tavvy'} />
         <meta property="og:type" content="profile" />
         <meta property="og:url" content={`https://tavvy.com/${cardData.slug}`} />
-        {cardData.profilePhotoUrl && (
-          <>
-            <meta property="og:image" content={cardData.profilePhotoUrl} />
-            <meta property="og:image:width" content="400" />
-            <meta property="og:image:height" content="400" />
-            <meta property="og:image:alt" content={`${cardData.fullName}'s profile photo`} />
-          </>
-        )}
-        <meta name="twitter:card" content={cardData.profilePhotoUrl ? 'summary_large_image' : 'summary'} />
+        <meta property="og:image" content={`https://tavvy.com/api/og/${cardData.slug}`} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={`${cardData.fullName}'s digital business card on Tavvy`} />
+        <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={`${cardData.fullName}${cardData.title ? ` — ${cardData.title}` : ''}`} />
         <meta name="twitter:description" content={[
           cardData.company || '',
-          cardData.phone || '',
-          cardData.email || '',
+          cardData.city || '',
+          cardData.description || '',
         ].filter(Boolean).join(' · ') || 'Digital Business Card on Tavvy'} />
-        {cardData.profilePhotoUrl && <meta name="twitter:image" content={cardData.profilePhotoUrl} />}
+        <meta name="twitter:image" content={`https://tavvy.com/api/og/${cardData.slug}`} />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
         <style>{`
