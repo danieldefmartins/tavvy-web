@@ -1482,8 +1482,15 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           {/* Biz Traditional: Top accent bar + centered logo + photo + name */}
           {templateLayout === 'biz-traditional' && (
             <div style={{ width: '100%' }}>
-              {/* Top accent bar */}
-              <div style={{ width: '100%', height: 6, background: activeColorScheme?.primary || '#0c1b3a' }} />
+              {/* Top accent bar or banner image */}
+              {cardData.bannerImageUrl ? (
+                <div style={{ position: 'relative', width: '100%', height: 160, overflow: 'hidden' }}>
+                  <img src={cardData.bannerImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 40, background: 'linear-gradient(to top, rgba(255,255,255,1), rgba(255,255,255,0))' }} />
+                </div>
+              ) : (
+                <div style={{ width: '100%', height: 6, background: activeColorScheme?.primary || '#0c1b3a' }} />
+              )}
               {/* Logo area */}
               <div style={{ padding: '20px 28px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
                 {cardData.companyLogoUrl ? (
@@ -1522,39 +1529,50 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           {templateLayout === 'biz-modern' && (
             <div style={{ width: '100%' }}>
               <div style={{
-                background: activeColorScheme?.background || `linear-gradient(135deg, ${activeColorScheme?.primary || '#0f2b5b'} 0%, ${activeColorScheme?.secondary || '#1a3f7a'} 100%)`,
-                padding: '24px 28px 56px',
+                background: cardData.bannerImageUrl ? 'none' : (activeColorScheme?.background || `linear-gradient(135deg, ${activeColorScheme?.primary || '#0f2b5b'} 0%, ${activeColorScheme?.secondary || '#1a3f7a'} 100%)`),
+                padding: cardData.bannerImageUrl ? '0' : '24px 28px 56px',
                 position: 'relative' as const,
+                overflow: 'hidden',
               }}>
-                {/* Logo */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                  {cardData.companyLogoUrl ? (
-                    <img src={cardData.companyLogoUrl} alt="" style={{ width: 28, height: 28, objectFit: 'contain', borderRadius: 6 }} />
-                  ) : (
-                    <div style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+                {/* Banner image background */}
+                {cardData.bannerImageUrl && (
+                  <>
+                    <img src={cardData.bannerImageUrl} alt="" style={{ width: '100%', height: 220, objectFit: 'cover', display: 'block' }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.1) 100%)' }} />
+                  </>
+                )}
+                {/* Content overlay */}
+                <div style={{ position: cardData.bannerImageUrl ? 'absolute' : 'relative' as const, bottom: cardData.bannerImageUrl ? 0 : undefined, left: 0, right: 0, padding: '24px 28px 56px' }}>
+                  {/* Logo */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                    {cardData.companyLogoUrl ? (
+                      <img src={cardData.companyLogoUrl} alt="" style={{ width: 28, height: 28, objectFit: 'contain', borderRadius: 6 }} />
+                    ) : (
+                      <div style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+                      </div>
+                    )}
+                    {cardData.company && <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.9)', letterSpacing: 0.5 }}>{cardData.company}</span>}
+                  </div>
+                  {/* Name + Title (left) */}
+                  <div style={{ paddingRight: 130 }}>
+                    <h1 style={{ fontSize: 26, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.2, ...fontStyleOverrides }}>{cardData.fullName}</h1>
+                    {cardData.pronouns && <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic', margin: '4px 0 0' }}>({cardData.pronouns})</p>}
+                    {cardData.title && <p style={{ fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.85)', margin: '8px 0 0' }}>{cardData.title}</p>}
+                  </div>
+                  {/* Photo (right, overlapping) */}
+                  {cardData.profilePhotoUrl && (
+                    <div style={{ position: 'absolute', right: 28, bottom: -40 }}>
+                      <div style={{ width: 110, height: 110, borderRadius: '50%', border: '4px solid #fff', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}>
+                        <img src={cardData.profilePhotoUrl} alt={cardData.fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
                     </div>
                   )}
-                  {cardData.company && <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.9)', letterSpacing: 0.5 }}>{cardData.company}</span>}
                 </div>
-                {/* Name + Title (left) */}
-                <div style={{ paddingRight: 130 }}>
-                  <h1 style={{ fontSize: 26, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.2, ...fontStyleOverrides }}>{cardData.fullName}</h1>
-                  {cardData.pronouns && <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic', margin: '4px 0 0' }}>({cardData.pronouns})</p>}
-                  {cardData.title && <p style={{ fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.85)', margin: '8px 0 0' }}>{cardData.title}</p>}
-                </div>
-                {/* Photo (right, overlapping) */}
-                {cardData.profilePhotoUrl && (
-                  <div style={{ position: 'absolute', right: 28, bottom: -40 }}>
-                    <div style={{ width: 110, height: 110, borderRadius: '50%', border: '4px solid #fff', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}>
-                      <img src={cardData.profilePhotoUrl} alt={cardData.fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    </div>
-                  </div>
-                )}
               </div>
               {/* Curved transition */}
               <svg viewBox="0 0 400 30" style={{ width: '100%', height: 24, display: 'block', marginTop: -1 }} preserveAspectRatio="none">
-                <path d="M0 0 L400 0 L400 30 C300 0 100 0 0 30 Z" fill={activeColorScheme?.primary || '#0f2b5b'} />
+                <path d="M0 0 L400 0 L400 30 C300 0 100 0 0 30 Z" fill={cardData.bannerImageUrl ? '#ffffff' : (activeColorScheme?.primary || '#0f2b5b')} />
               </svg>
               {/* White bottom: bio */}
               <div style={{ padding: '28px 28px 0', background: '#ffffff' }}>
@@ -1566,6 +1584,12 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           {/* Biz Minimalist: Clean white with small logo + square photo */}
           {templateLayout === 'biz-minimalist' && (
             <div style={{ width: '100%' }}>
+              {/* Banner image if available */}
+              {cardData.bannerImageUrl && (
+                <div style={{ width: '100%', height: 140, borderRadius: '0 0 12px 12px', overflow: 'hidden', marginBottom: 20 }}>
+                  <img src={cardData.bannerImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+              )}
               {/* Small logo */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
                 {cardData.companyLogoUrl ? (
@@ -4526,6 +4550,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       showSocialIcons: data.show_social_icons !== false,
       fontColor: data.font_color || null,
       bannerImageUrl: data.banner_image_url || null,
+      companyLogoUrl: data.company_logo_url || null,
       // Professional category & endorsements
       professionalCategory: data.professional_category || '',
       endorsementCount,

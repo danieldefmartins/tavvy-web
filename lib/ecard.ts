@@ -545,7 +545,7 @@ export async function uploadProfilePhoto(userId: string, file: File): Promise<st
  * Get card URL
  */
 export function getCardUrl(slug: string): string {
-  return `https://tavvy.com/c/${slug}`;
+  return `https://tavvy.com/${slug}`;
 }
 
 /**

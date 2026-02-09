@@ -1228,6 +1228,8 @@ export default function ECardCreateScreen() {
       if (profileImageFile) {
         try { photoUrl = await uploadProfilePhoto(user.id, profileImageFile); } catch (e) { console.warn('Photo upload failed:', e); }
       }
+      // Never save blob: URLs to database
+      if (photoUrl && photoUrl.startsWith('blob:')) { photoUrl = null; }
       const uploadedGallery: { id: string; url: string; caption: string }[] = [];
       for (const img of galleryImages) {
         if (img.file) {
@@ -1244,6 +1246,8 @@ export default function ECardCreateScreen() {
       const slug = `draft_${user.id.substring(0, 8)}_${uniqueId}`;
       let bannerUrl: string | undefined;
       if (bannerImageFile) { try { bannerUrl = await uploadEcardFile(user.id, bannerImageFile, 'banner'); } catch (e) { console.warn('Banner upload failed:', e); } }
+      // Never save blob: URLs to database
+      if (bannerUrl && bannerUrl.startsWith('blob:')) { bannerUrl = undefined; }
 
       const card = await createCard({
         user_id: user.id, slug, full_name: name.trim(),

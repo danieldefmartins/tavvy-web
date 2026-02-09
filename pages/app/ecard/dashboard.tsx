@@ -164,6 +164,11 @@ export default function ECardDashboardScreen() {
   const [bannerImageFile, setBannerImageFile] = useState<File | null>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
+  // Company logo state
+  const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null);
+  const [companyLogoFile, setCompanyLogoFile] = useState<File | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
   // Modals
   const [showAddLink, setShowAddLink] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
@@ -231,6 +236,7 @@ export default function ECardDashboardScreen() {
           setProfilePhotoSize(card.profile_photo_size || 'medium');
           setFontColor(card.font_color || null);
           setBannerImageUrl(card.banner_image_url || null);
+          setCompanyLogoUrl(card.company_logo_url || null);
           // Resolve template ID (handles migration from old template IDs)
           const resolvedTemplate = resolveTemplateId(card.template_id || card.theme || 'classic');
           setSelectedTemplateId(resolvedTemplate);
@@ -272,10 +278,20 @@ export default function ECardDashboardScreen() {
       if (profilePhotoFile && user) {
         try {
           const uploaded = await uploadProfilePhoto(user.id, profilePhotoFile);
-          if (uploaded) photoUrl = uploaded;
+          if (uploaded) {
+            photoUrl = uploaded;
+            setProfilePhotoUrl(uploaded);
+            setProfilePhotoFile(null);
+          } else {
+            console.warn('Photo upload returned null');
+          }
         } catch (e) {
           console.warn('Photo upload failed:', e);
         }
+      }
+      // Never save blob: URLs to database
+      if (photoUrl && photoUrl.startsWith('blob:')) {
+        photoUrl = null;
       }
 
       // Upload new gallery images
@@ -298,10 +314,41 @@ export default function ECardDashboardScreen() {
       if (bannerImageFile && user) {
         try {
           const uploaded = await uploadEcardFile(user.id, bannerImageFile, 'banner');
-          if (uploaded) bannerUrl = uploaded;
+          if (uploaded) {
+            bannerUrl = uploaded;
+            setBannerImageUrl(uploaded);
+            setBannerImageFile(null);
+          } else {
+            console.warn('Banner upload returned null');
+          }
         } catch (e) {
           console.warn('Banner upload failed:', e);
         }
+      }
+      // Never save blob: URLs to database
+      if (bannerUrl && bannerUrl.startsWith('blob:')) {
+        bannerUrl = null;
+      }
+
+      // Upload company logo if changed
+      let logoUrl = companyLogoUrl;
+      if (companyLogoFile && user) {
+        try {
+          const uploaded = await uploadEcardFile(user.id, companyLogoFile, 'logo');
+          if (uploaded) {
+            logoUrl = uploaded;
+            setCompanyLogoUrl(uploaded);
+            setCompanyLogoFile(null);
+          } else {
+            console.warn('Logo upload returned null');
+          }
+        } catch (e) {
+          console.warn('Logo upload failed:', e);
+        }
+      }
+      // Never save blob: URLs to database
+      if (logoUrl && logoUrl.startsWith('blob:')) {
+        logoUrl = null;
       }
 
       await updateCard(cardId, {
@@ -326,6 +373,7 @@ export default function ECardDashboardScreen() {
         font_style: selectedFont,
         font_color: fontColor || null,
         banner_image_url: bannerUrl || null,
+        company_logo_url: logoUrl || null,
         featured_socials: featuredIcons.length > 0 ? featuredIcons : [],
         gallery_images: uploadedGallery,
         videos: videos,
@@ -385,6 +433,8 @@ export default function ECardDashboardScreen() {
     setProfilePhotoFile(null);
     setBannerImageUrl(null);
     setBannerImageFile(null);
+    setCompanyLogoUrl(null);
+    setCompanyLogoFile(null);
     setGalleryImages([]);
     setVideos([]);
     setVideoFile(null);
@@ -410,6 +460,14 @@ export default function ECardDashboardScreen() {
     if (file) {
       setBannerImageFile(file);
       setBannerImageUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCompanyLogoFile(file);
+      setCompanyLogoUrl(URL.createObjectURL(file));
     }
   };
 
@@ -575,7 +633,7 @@ export default function ECardDashboardScreen() {
 
   // Copy card URL
   const copyCardUrl = () => {
-    const url = `https://tavvy.com/c/${cardData?.slug}`;
+    const url = `https://tavvy.com/${cardData?.slug}`;
     navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -611,6 +669,7 @@ export default function ECardDashboardScreen() {
           <input type="file" ref={photoInputRef} accept="image/*" style={{ display: 'none' }} onChange={handlePhotoChange} />
           <input type="file" ref={galleryInputRef} accept="image/*" multiple style={{ display: 'none' }} onChange={handleGalleryAdd} />
           <input type="file" ref={bannerInputRef} accept="image/*" style={{ display: 'none' }} onChange={handleBannerChange} />
+          <input type="file" ref={logoInputRef} accept="image/*" style={{ display: 'none' }} onChange={handleLogoChange} />
           <input type="file" ref={videoInputRef} accept="video/*" style={{ display: 'none' }} onChange={handleVideoFileChange} />
 
           {/* Header */}
@@ -894,8 +953,15 @@ export default function ECardDashboardScreen() {
                 return (
                   <div className="card-preview" style={{ background: '#fff', padding: 0, overflow: 'hidden' }}>
                     {statusBadge}
-                    {/* Colored top with diagonal */}
-                    <div style={{ background: bgGrad, padding: '16px', minHeight: 80, position: 'relative' }}>
+                    {/* Colored top with diagonal or banner image */}
+                    <div style={{ background: bannerImageUrl ? 'none' : bgGrad, padding: bannerImageUrl ? 0 : '16px', minHeight: 80, position: 'relative', overflow: 'hidden' }}>
+                      {bannerImageUrl && (
+                        <>
+                          <img src={bannerImageUrl} alt="" style={{ width: '100%', height: 100, objectFit: 'cover', display: 'block' }} />
+                          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 100%)' }} />
+                        </>
+                      )}
+                      <div style={{ position: bannerImageUrl ? 'absolute' : 'relative' as any, bottom: bannerImageUrl ? 0 : undefined, left: 0, right: 0, padding: '16px' }}>
                       <h3 style={{ color: '#fff', fontSize: 15, fontWeight: 700, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
                       {titleRole && <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, margin: 0 }}>{titleRole}</p>}
                       {/* Photo on right */}
@@ -907,6 +973,7 @@ export default function ECardDashboardScreen() {
                             <IoCamera size={16} color="#9ca3af" />
                           </div>
                         )}
+                      </div>
                       </div>
                     </div>
                     {/* Diagonal transition */}
@@ -1707,6 +1774,40 @@ export default function ECardDashboardScreen() {
                   )}
                 </div>
 
+                {/* Company Logo Upload */}
+                {(selectedTemplateId === 'biz-traditional' || selectedTemplateId === 'biz-modern' || selectedTemplateId === 'biz-minimalist' || selectedTemplateId === 'pro-card' || selectedTemplateId === 'cover-card') && (
+                <div className="section">
+                  <h3 style={{ color: isDark ? '#fff' : '#333' }}>Company Logo</h3>
+                  <p style={{ color: isDark ? '#94A3B8' : '#6B7280', fontSize: '13px', marginBottom: '12px' }}>
+                    Upload your company logo. PNG with transparent background recommended.
+                  </p>
+                  {companyLogoUrl ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                      <div style={{ width: 56, height: 56, borderRadius: 10, overflow: 'hidden', border: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', background: isDark ? '#1E293B' : '#f9fafb' }}>
+                        <img src={companyLogoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 4 }} />
+                      </div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button onClick={() => logoInputRef.current?.click()} className="banner-action-btn">
+                          <IoCamera size={14} /> Change
+                        </button>
+                        <button onClick={() => { setCompanyLogoUrl(null); setCompanyLogoFile(null); }} className="banner-action-btn remove">
+                          <IoClose size={14} /> Remove
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      className="banner-upload-btn"
+                      onClick={() => logoInputRef.current?.click()}
+                      style={{ backgroundColor: isDark ? '#1E293B' : '#F3F4F6', color: isDark ? '#94A3B8' : '#6B7280', height: 60 }}
+                    >
+                      <IoImage size={20} />
+                      <span>Upload Company Logo</span>
+                    </button>
+                  )}
+                </div>
+                )}
+
                 {/* Color Scheme */}
                 <div className="section">
                   <h3 style={{ color: isDark ? '#fff' : '#333' }}>Color</h3>
@@ -1911,7 +2012,7 @@ export default function ECardDashboardScreen() {
 
                 <div className="slug-input-group">
                   <span className="slug-prefix" style={{ color: isDark ? '#64748B' : '#9CA3AF' }}>
-                    tavvy.com/c/
+                    tavvy.com/
                   </span>
                   <input
                     type="text"
