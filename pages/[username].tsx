@@ -67,6 +67,7 @@ interface CardData {
   phone: string;
   email: string;
   website: string;
+  websiteLabel: string;
   // Address fields
   address1: string;
   address2: string;
@@ -1845,8 +1846,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                     <GlobeIcon />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 15, fontWeight: 600 }}>Website</div>
-                    <div style={{ fontSize: 11, color: '#999', fontWeight: 500 }}>Visit</div>
+                    <div style={{ fontSize: 15, fontWeight: 600 }}>{cardData.websiteLabel || 'Website'}</div>
+                    <div style={{ fontSize: 11, color: '#999', fontWeight: 500 }}>{cardData.website.replace(/^https?:\/\//, '')}</div>
                   </div>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
                 </a>
@@ -1899,8 +1900,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                     <GlobeIcon />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 15, fontWeight: 600, color: '#333' }}>Website</div>
-                    <div style={{ fontSize: 11, color: '#999', fontWeight: 500 }}>Visit</div>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: '#333' }}>{cardData.websiteLabel || 'Website'}</div>
+                    <div style={{ fontSize: 11, color: '#999', fontWeight: 500 }}>{cardData.website.replace(/^https?:\/\//, '')}</div>
                   </div>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
                 </a>
@@ -1959,7 +1960,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                     <GlobeIcon />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 14, fontWeight: 500, color: '#333' }}>{cardData.website.replace(/^https?:\/\//, '')}</div>
+                    <div style={{ fontSize: 14, fontWeight: 500, color: '#333' }}>{cardData.websiteLabel || cardData.website.replace(/^https?:\/\//, '')}</div>
+                    {cardData.websiteLabel && <div style={{ fontSize: 11, color: '#999' }}>{cardData.website.replace(/^https?:\/\//, '')}</div>}
                   </div>
                 </a>
               )}
@@ -2009,8 +2011,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                     <GlobeIcon />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 14, fontWeight: 500, color: '#333' }}>{cardData.website.replace(/^https?:\/\//, '')}</div>
-                    <div style={{ fontSize: 11, color: '#999' }}>Website</div>
+                    <div style={{ fontSize: 14, fontWeight: 500, color: '#333' }}>{cardData.websiteLabel || cardData.website.replace(/^https?:\/\//, '')}</div>
+                    <div style={{ fontSize: 11, color: '#999' }}>{cardData.websiteLabel ? cardData.website.replace(/^https?:\/\//, '') : 'Website'}</div>
                   </div>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
                 </a>
@@ -2101,8 +2103,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                     <GlobeIcon />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 15, fontWeight: 600, color: '#333' }}>{cardData.website.replace(/^https?:\/\//, '')}</div>
-                    <div style={{ fontSize: 11, color: '#999', fontWeight: 500 }}>Company</div>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: '#333' }}>{cardData.websiteLabel || cardData.website.replace(/^https?:\/\//, '')}</div>
+                    <div style={{ fontSize: 11, color: '#999', fontWeight: 500 }}>{cardData.websiteLabel ? cardData.website.replace(/^https?:\/\//, '') : 'Company'}</div>
                   </div>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
                 </a>
@@ -2176,7 +2178,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               {cardData.website && (
                 <a href={cardData.website.startsWith('http') ? cardData.website : `https://${cardData.website}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: '#333' }}>
                   <GlobeIcon />
-                  <span style={{ fontSize: 14, color: '#333' }}>{cardData.website.replace(/^https?:\/\//, '')}</span>
+                  <span style={{ fontSize: 14, color: '#333' }}>{cardData.websiteLabel || cardData.website.replace(/^https?:\/\//, '')}</span>
                 </a>
               )}
               {fullAddress && (
@@ -2271,7 +2273,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 <div style={styles.actionIconWrapper}>
                   <GlobeIcon />
                 </div>
-                <span style={{...styles.actionText, color: templateStyles.textColor}}>Website</span>
+                <span style={{...styles.actionText, color: templateStyles.textColor}}>{cardData.websiteLabel || 'Website'}</span>
               </a>
             )}
           </div>}
@@ -4457,6 +4459,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       phone: data.phone || '',
       email: data.email || '',
       website: data.website || '',
+      websiteLabel: data.website_label || '',
       // Address fields
       address1: data.address_1 || data.address1 || '',
       address2: data.address_2 || data.address2 || '',

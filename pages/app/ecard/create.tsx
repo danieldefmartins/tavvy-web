@@ -964,6 +964,7 @@ export default function ECardCreateScreen() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [website, setWebsite] = useState('');
+  const [websiteLabel, setWebsiteLabel] = useState('');
   const [company, setCompany] = useState('');
   const [address, setAddress] = useState('');
   const [profileImage, setProfileImage] = useState<string | null>(null);
@@ -1015,6 +1016,7 @@ export default function ECardCreateScreen() {
     if (card.email) setEmail(card.email);
     if (card.phone) setPhone(card.phone);
     if (card.website) setWebsite(card.website);
+    if (card.website_label) setWebsiteLabel(card.website_label);
     if (card.address) setAddress(card.address);
     if (card.profile_photo_url) setProfileImage(card.profile_photo_url);
     if (card.professional_category) setProfessionalCategory(card.professional_category);
@@ -1063,6 +1065,7 @@ export default function ECardCreateScreen() {
         if (draft.email) setEmail(draft.email);
         if (draft.phone) setPhone(draft.phone);
         if (draft.website) setWebsite(draft.website);
+        if (draft.websiteLabel) setWebsiteLabel(draft.websiteLabel);
         if (draft.address) setAddress(draft.address);
         if (typeof draft.templateIndex === 'number') setTemplateIndex(draft.templateIndex);
         if (typeof draft.colorIndex === 'number') setColorIndex(draft.colorIndex);
@@ -1206,7 +1209,7 @@ export default function ECardCreateScreen() {
   const saveDraftToLocalStorage = () => {
     try {
       localStorage.setItem('ecard_draft', JSON.stringify({
-        name, titleRole, bio, email, phone, website, address,
+        name, titleRole, bio, email, phone, website, websiteLabel, address,
         templateIndex, colorIndex, photoSizeIndex,
         featuredIcons, links, videos: videos.map(v => ({ type: v.type, url: v.url })),
         profileImage, professionalCategory,
@@ -1246,7 +1249,7 @@ export default function ECardCreateScreen() {
         user_id: user.id, slug, full_name: name.trim(),
         title: titleRole || undefined, bio: bio || undefined,
         email: email || undefined, phone: phone || undefined,
-        website: website || undefined, company: company || undefined, city: address || undefined,
+        website: website || undefined, website_label: websiteLabel || undefined, company: company || undefined, city: address || undefined,
         profile_photo_url: photoUrl || undefined,
         banner_image_url: bannerUrl || undefined,
         profile_photo_size: photoSize.id,
@@ -1341,7 +1344,7 @@ export default function ECardCreateScreen() {
       {[
         { icon: <IoMail size={16} />, placeholder: 'Email', value: email, set: setEmail },
         { icon: <IoCall size={16} />, placeholder: 'Phone', value: phone, set: setPhone },
-        { icon: <IoGlobe size={16} />, placeholder: 'Website', value: website, set: setWebsite },
+        { icon: <IoGlobe size={16} />, placeholder: 'Website URL', value: website, set: setWebsite },
         { icon: <IoLocationOutline size={16} />, placeholder: 'Address', value: address, set: setAddress },
       ].map((field, i) => (
         <div key={i} className="contact-row">
@@ -1349,6 +1352,19 @@ export default function ECardCreateScreen() {
           <input style={{ ...cardInputStyle('left'), fontSize: 14, padding: '8px 0' }} placeholder={field.placeholder} value={field.value} onChange={e => field.set(e.target.value)} />
         </div>
       ))}
+      {website.trim() && (
+        <div className="contact-row" style={{ marginTop: -4 }}>
+          <span className="contact-icon" style={{ color: txtSecondary, opacity: 0.5 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </span>
+          <input
+            style={{ ...cardInputStyle('left'), fontSize: 13, padding: '6px 0', fontStyle: websiteLabel ? 'normal' : 'italic' as any, opacity: websiteLabel ? 1 : 0.6 }}
+            placeholder='Website label (e.g. "My Portfolio", "Book Now")'
+            value={websiteLabel}
+            onChange={e => setWebsiteLabel(e.target.value)}
+          />
+        </div>
+      )}
     </div>
   );
 
@@ -1664,7 +1680,7 @@ export default function ECardCreateScreen() {
               {[
                 { icon: <IoMail size={16} />, placeholder: 'Email', value: email, set: setEmail },
                 { icon: <IoCall size={16} />, placeholder: 'Phone', value: phone, set: setPhone },
-                { icon: <IoGlobe size={16} />, placeholder: 'Website', value: website, set: setWebsite },
+                { icon: <IoGlobe size={16} />, placeholder: 'Website URL', value: website, set: setWebsite },
                 { icon: <IoLocationOutline size={16} />, placeholder: 'Address', value: address, set: setAddress },
               ].map((field, i) => (
                 <div key={i} className="contact-row" style={{ borderBottom: `1px solid rgba(0,0,0,0.06)` }}>
@@ -1672,6 +1688,14 @@ export default function ECardCreateScreen() {
                   <input style={{ background: 'transparent', border: 'none', outline: 'none', color: '#333', textAlign: 'left', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 13 }} placeholder={field.placeholder} value={field.value} onChange={e => field.set(e.target.value)} />
                 </div>
               ))}
+              {website.trim() && (
+                <div className="contact-row" style={{ borderBottom: `1px solid rgba(0,0,0,0.06)`, marginTop: -2 }}>
+                  <span style={{ color: accentC, flexShrink: 0, opacity: 0.5 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </span>
+                  <input style={{ background: 'transparent', border: 'none', outline: 'none', color: '#333', textAlign: 'left', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 12, fontStyle: websiteLabel ? 'normal' : 'italic', opacity: websiteLabel ? 1 : 0.5 }} placeholder='Website label (e.g. "My Portfolio")' value={websiteLabel} onChange={e => setWebsiteLabel(e.target.value)} />
+                </div>
+              )}
             </div>
             {renderLinksSection()}
             {renderCategoryPicker()}
@@ -1823,7 +1847,7 @@ export default function ECardCreateScreen() {
               {[
                 { icon: <IoMail size={16} />, placeholder: 'Email', value: email, set: setEmail },
                 { icon: <IoCall size={16} />, placeholder: 'Phone', value: phone, set: setPhone },
-                { icon: <IoGlobe size={16} />, placeholder: 'Website', value: website, set: setWebsite },
+                { icon: <IoGlobe size={16} />, placeholder: 'Website URL', value: website, set: setWebsite },
                 { icon: <IoLocationOutline size={16} />, placeholder: 'Address', value: address, set: setAddress },
               ].map((field, i) => (
                 <div key={i} className="contact-row" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
@@ -1831,6 +1855,14 @@ export default function ECardCreateScreen() {
                   <input style={{ background: 'transparent', border: 'none', outline: 'none', color: '#333', textAlign: 'left', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 13 }} placeholder={field.placeholder} value={field.value} onChange={e => field.set(e.target.value)} />
                 </div>
               ))}
+              {website.trim() && (
+                <div className="contact-row" style={{ borderBottom: '1px solid rgba(0,0,0,0.06)', marginTop: -2 }}>
+                  <span style={{ color: color?.accent || '#f97316', flexShrink: 0, opacity: 0.5 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                  </span>
+                  <input style={{ background: 'transparent', border: 'none', outline: 'none', color: '#333', textAlign: 'left', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 12, fontStyle: websiteLabel ? 'normal' : 'italic', opacity: websiteLabel ? 1 : 0.5 }} placeholder='Website label (e.g. "My Portfolio")' value={websiteLabel} onChange={e => setWebsiteLabel(e.target.value)} />
+                </div>
+              )}
             </div>
             {renderLinksSection()}
             {renderCategoryPicker()}

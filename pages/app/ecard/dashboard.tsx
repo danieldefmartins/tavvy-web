@@ -60,6 +60,7 @@ import {
   IoPlayForward,
   IoPersonAdd,
   IoRefresh,
+  IoBusinessOutline,
 } from 'react-icons/io5';
 
 const ACCENT_GREEN = '#00C853';
@@ -132,6 +133,7 @@ export default function ECardDashboardScreen() {
   const [emailField, setEmailField] = useState('');
   const [phoneField, setPhoneField] = useState('');
   const [websiteField, setWebsiteField] = useState('');
+  const [websiteLabelField, setWebsiteLabelField] = useState('');
   const [addressField, setAddressField] = useState('');
   const [address1Field, setAddress1Field] = useState('');
   const [address2Field, setAddress2Field] = useState('');
@@ -201,6 +203,7 @@ export default function ECardDashboardScreen() {
           setEmailField(card.email || '');
           setPhoneField(card.phone || '');
           setWebsiteField(card.website || '');
+          setWebsiteLabelField(card.website_label || '');
           setAddressField(card.city || '');
           setAddress1Field(card.address_1 || '');
           setAddress2Field(card.address_2 || '');
@@ -308,6 +311,7 @@ export default function ECardDashboardScreen() {
         email: emailField || undefined,
         phone: phoneField || undefined,
         website: websiteField || undefined,
+        website_label: websiteLabelField || undefined,
         city: addressField || undefined,
         address_1: address1Field || undefined,
         address_2: address2Field || undefined,
@@ -340,6 +344,7 @@ export default function ECardDashboardScreen() {
         email: emailField,
         phone: phoneField,
         website: websiteField,
+        website_label: websiteLabelField,
         city: addressField,
         address_1: address1Field,
         address_2: address2Field,
@@ -370,6 +375,7 @@ export default function ECardDashboardScreen() {
     setEmailField('');
     setPhoneField('');
     setWebsiteField('');
+    setWebsiteLabelField('');
     setAddressField('');
     setAddress1Field('');
     setAddress2Field('');
@@ -842,6 +848,177 @@ export default function ECardDashboardScreen() {
                 );
               }
 
+              // ===== BIZ TRADITIONAL =====
+              if (layout === 'biz-traditional') {
+                return (
+                  <div className="card-preview" style={{ background: '#fff', padding: 0, overflow: 'hidden' }}>
+                    {statusBadge}
+                    {/* Colored header band */}
+                    <div style={{ background: bgGrad, padding: '16px 16px 24px', position: 'relative' }}>
+                      <div style={{ width: 28, height: 28, borderRadius: 4, background: 'rgba(255,255,255,0.2)', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <IoBusinessOutline size={14} color="rgba(255,255,255,0.8)" />
+                      </div>
+                      <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
+                      {titleRole && <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, margin: 0 }}>{titleRole}</p>}
+                      {/* Photo circle on right */}
+                      <div style={{ position: 'absolute', bottom: -20, right: 16 }}>
+                        {profilePhotoUrl ? (
+                          <img src={profilePhotoUrl} alt="" style={{ width: 48, height: 48, borderRadius: 24, objectFit: 'cover', border: '3px solid #fff' }} onClick={() => photoInputRef.current?.click()} />
+                        ) : (
+                          <div style={{ width: 48, height: 48, borderRadius: 24, background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '3px solid #fff' }} onClick={() => photoInputRef.current?.click()}>
+                            <IoCamera size={16} color="#9ca3af" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {/* White bottom */}
+                    <div style={{ padding: '28px 16px 16px' }}>
+                      <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
+                        <div style={{ width: 28, height: 28, borderRadius: 14, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <IoCall size={12} color="#fff" />
+                        </div>
+                        <div style={{ width: 28, height: 28, borderRadius: 14, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <IoMail size={12} color="#fff" />
+                        </div>
+                        <div style={{ width: 28, height: 28, borderRadius: 14, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <IoGlobe size={12} color="#fff" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              // ===== BIZ MODERN =====
+              if (layout === 'biz-modern') {
+                return (
+                  <div className="card-preview" style={{ background: '#fff', padding: 0, overflow: 'hidden' }}>
+                    {statusBadge}
+                    {/* Colored top with diagonal */}
+                    <div style={{ background: bgGrad, padding: '16px', minHeight: 80, position: 'relative' }}>
+                      <h3 style={{ color: '#fff', fontSize: 15, fontWeight: 700, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
+                      {titleRole && <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, margin: 0 }}>{titleRole}</p>}
+                      {/* Photo on right */}
+                      <div style={{ position: 'absolute', bottom: -16, right: 16 }}>
+                        {profilePhotoUrl ? (
+                          <img src={profilePhotoUrl} alt="" style={{ width: 48, height: 48, borderRadius: 24, objectFit: 'cover', border: '3px solid #fff' }} onClick={() => photoInputRef.current?.click()} />
+                        ) : (
+                          <div style={{ width: 48, height: 48, borderRadius: 24, background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '3px solid #fff' }} onClick={() => photoInputRef.current?.click()}>
+                            <IoCamera size={16} color="#9ca3af" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {/* Diagonal transition */}
+                    <svg viewBox="0 0 400 20" style={{ display: 'block', width: '100%', marginTop: -1 }}>
+                      <path d="M0,0 L400,0 L400,20 L0,0 Z" fill={gradientColors[0]} />
+                    </svg>
+                    {/* White bottom */}
+                    <div style={{ padding: '12px 16px 16px' }}>
+                      <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
+                        <div style={{ width: 28, height: 28, borderRadius: 14, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <IoCall size={12} color="#fff" />
+                        </div>
+                        <div style={{ width: 28, height: 28, borderRadius: 14, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <IoMail size={12} color="#fff" />
+                        </div>
+                        <div style={{ width: 28, height: 28, borderRadius: 14, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <IoGlobe size={12} color="#fff" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              // ===== BIZ MINIMALIST =====
+              if (layout === 'biz-minimalist') {
+                return (
+                  <div className="card-preview" style={{ background: '#fff', padding: '20px 16px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+                    {statusBadge}
+                    {/* Thin accent line */}
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: bgGrad }} />
+                    {profilePhotoUrl ? (
+                      <img src={profilePhotoUrl} alt="" style={{ width: 48, height: 48, borderRadius: 12, objectFit: 'cover', marginBottom: 8 }} onClick={() => photoInputRef.current?.click()} />
+                    ) : (
+                      <div style={{ width: 48, height: 48, borderRadius: 12, background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8, margin: '0 auto 8px' }} onClick={() => photoInputRef.current?.click()}>
+                        <IoCamera size={16} color="#9ca3af" />
+                      </div>
+                    )}
+                    <h3 style={{ color: '#1f2937', fontSize: 16, fontWeight: 600, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
+                    {titleRole && <p style={{ color: '#6b7280', fontSize: 12, margin: 0 }}>{titleRole}</p>}
+                  </div>
+                );
+              }
+
+              // ===== COVER CARD =====
+              if (layout === 'cover-card') {
+                return (
+                  <div className="card-preview" style={{ background: '#fff', padding: 0, overflow: 'hidden' }}>
+                    {statusBadge}
+                    {/* Cover photo area */}
+                    {bannerImageUrl ? (
+                      <div style={{ height: 100, position: 'relative' }}>
+                        <img src={bannerImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      </div>
+                    ) : profilePhotoUrl ? (
+                      <div style={{ height: 100, position: 'relative' }}>
+                        <img src={profilePhotoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onClick={() => photoInputRef.current?.click()} />
+                      </div>
+                    ) : (
+                      <div style={{ height: 80, background: bgGrad, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <IoCamera size={28} color="rgba(255,255,255,0.4)" />
+                      </div>
+                    )}
+                    {/* Wave transition */}
+                    <svg viewBox="0 0 400 20" style={{ display: 'block', width: '100%', marginTop: -10 }}>
+                      <path d="M0,20 Q100,0 200,10 T400,0 L400,20 Z" fill="#fff" />
+                    </svg>
+                    <div style={{ padding: '4px 16px 16px' }}>
+                      <h3 style={{ color: '#1f2937', fontSize: 15, fontWeight: 700, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
+                      {titleRole && <p style={{ color: '#6b7280', fontSize: 11, margin: 0 }}>{titleRole}</p>}
+                    </div>
+                  </div>
+                );
+              }
+
+              // ===== PREMIUM STATIC =====
+              if (layout === 'premium-static') {
+                return (
+                  <div className="card-preview" style={{ background: bgGrad, padding: 0, overflow: 'hidden', minHeight: 160 }}>
+                    {statusBadge}
+                    {bannerImageUrl ? (
+                      <div style={{ position: 'relative', height: 120 }}>
+                        <img src={bannerImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, background: 'linear-gradient(transparent, rgba(0,0,0,0.6))' }} />
+                        <div style={{ position: 'absolute', bottom: 8, left: 12 }}>
+                          <h3 style={{ color: '#fff', fontSize: 14, fontWeight: 700, margin: 0, textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>{fullName || 'Your Name'}</h3>
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ padding: '24px 16px', textAlign: 'center' }}>
+                        {photoEl}
+                        <h3 style={{ color: txtColor, fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
+                        {titleRole && <p style={{ color: txtSecondary, fontSize: 12, margin: 0 }}>{titleRole}</p>}
+                      </div>
+                    )}
+                    <div style={{ padding: '8px 16px 16px' }}>
+                      <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
+                        <div style={{ width: 28, height: 28, borderRadius: 14, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <IoCall size={12} color="#fff" />
+                        </div>
+                        <div style={{ width: 28, height: 28, borderRadius: 14, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <IoMail size={12} color="#fff" />
+                        </div>
+                        <div style={{ width: 28, height: 28, borderRadius: 14, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <IoGlobe size={12} color="#fff" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
               // ===== BASIC (default) =====
               return (
                 <div className="card-preview" style={{ background: bgGrad, padding: '24px 16px', textAlign: 'center' }}>
@@ -1020,6 +1197,19 @@ export default function ECardDashboardScreen() {
                       style={{ backgroundColor: isDark ? '#1E293B' : '#fff', color: isDark ? '#fff' : '#333' }}
                     />
                   </div>
+                  {websiteField && (
+                    <div className="field-group">
+                      <label style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>Website Label <span style={{ fontSize: 11, opacity: 0.7 }}>(optional)</span></label>
+                      <input
+                        type="text"
+                        value={websiteLabelField}
+                        onChange={(e) => setWebsiteLabelField(e.target.value)}
+                        placeholder="e.g. My Portfolio, Book Appointment"
+                        className="field-input"
+                        style={{ backgroundColor: isDark ? '#1E293B' : '#fff', color: isDark ? '#fff' : '#333' }}
+                      />
+                    </div>
+                  )}
                   <div className="field-group">
                     <label style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>Location</label>
                     <input
@@ -1393,6 +1583,75 @@ export default function ECardDashboardScreen() {
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, margin: '0 5px', flex: 1 }}>
                                   <div style={{ background: `${template.colorSchemes[0]?.accent || '#fbbf24'}30`, borderRadius: 2 }} />
                                   <div style={{ background: `${template.colorSchemes[0]?.accent || '#fbbf24'}25`, borderRadius: 2 }} />
+                                </div>
+                              </>
+                            )}
+                            {/* BIZ TRADITIONAL */}
+                            {template.layout === 'biz-traditional' && (
+                              <>
+                                <div style={{ background: template.colorSchemes[0]?.primary || '#1e3a5f', padding: '6px 5px 10px', borderRadius: '4px 4px 0 0', position: 'relative' }}>
+                                  <div style={{ width: 10, height: 10, borderRadius: 2, background: 'rgba(255,255,255,0.25)', marginBottom: 4 }} />
+                                  <div style={{ width: '55%', height: 3, background: 'rgba(255,255,255,0.7)', borderRadius: 2, marginBottom: 2 }} />
+                                  <div style={{ width: '35%', height: 2, background: 'rgba(255,255,255,0.4)', borderRadius: 2 }} />
+                                  <div style={{ position: 'absolute', bottom: -6, right: 6, width: 16, height: 16, borderRadius: 8, background: '#e5e7eb', border: '2px solid #fff' }} />
+                                </div>
+                                <div style={{ background: '#fff', padding: '10px 5px 5px', flex: 1, display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
+                                  <div style={{ display: 'flex', gap: 3 }}>
+                                    {[1,2,3].map(i => <div key={i} style={{ width: 8, height: 8, borderRadius: 4, background: template.colorSchemes[0]?.primary || '#1e3a5f' }} />)}
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                            {/* BIZ MODERN */}
+                            {template.layout === 'biz-modern' && (
+                              <>
+                                <div style={{ background: template.colorSchemes[0]?.primary || '#1e40af', padding: '8px 5px', minHeight: 28, position: 'relative' }}>
+                                  <div style={{ width: '55%', height: 3, background: 'rgba(255,255,255,0.7)', borderRadius: 2, marginBottom: 2 }} />
+                                  <div style={{ width: '35%', height: 2, background: 'rgba(255,255,255,0.4)', borderRadius: 2 }} />
+                                  <div style={{ position: 'absolute', bottom: -6, right: 6, width: 16, height: 16, borderRadius: 8, background: '#e5e7eb', border: '2px solid #fff' }} />
+                                </div>
+                                <svg viewBox="0 0 60 8" style={{ display: 'block', width: '100%', marginTop: -1 }}>
+                                  <path d="M0,0 L60,0 L60,8 L0,0 Z" fill={template.colorSchemes[0]?.primary || '#1e40af'} />
+                                </svg>
+                                <div style={{ background: '#fff', padding: '6px 5px 5px', flex: 1, display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
+                                  <div style={{ display: 'flex', gap: 3 }}>
+                                    {[1,2,3].map(i => <div key={i} style={{ width: 8, height: 8, borderRadius: 4, background: template.colorSchemes[0]?.primary || '#1e40af' }} />)}
+                                  </div>
+                                </div>
+                              </>
+                            )}
+                            {/* BIZ MINIMALIST */}
+                            {template.layout === 'biz-minimalist' && (
+                              <>
+                                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: template.colorSchemes[0]?.primary || '#374151' }} />
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, padding: '8px 5px' }}>
+                                  <div style={{ width: 16, height: 16, borderRadius: 4, background: '#f3f4f6', marginBottom: 4 }} />
+                                  <div style={{ width: '50%', height: 2, background: '#374151', borderRadius: 2, marginBottom: 2 }} />
+                                  <div style={{ width: '35%', height: 2, background: '#9ca3af', borderRadius: 2 }} />
+                                </div>
+                              </>
+                            )}
+                            {/* COVER CARD */}
+                            {template.layout === 'cover-card' && (
+                              <>
+                                <div style={{ height: '45%', background: `linear-gradient(135deg, ${template.colorSchemes[0]?.primary || '#6366f1'}, ${template.colorSchemes[0]?.accent || '#f97316'})`, position: 'relative' }} />
+                                <svg viewBox="0 0 60 8" style={{ display: 'block', width: '100%', marginTop: -4 }}>
+                                  <path d="M0,8 Q15,0 30,4 T60,0 L60,8 Z" fill="#fff" />
+                                </svg>
+                                <div style={{ background: '#fff', padding: '4px 5px 5px', flex: 1 }}>
+                                  <div style={{ width: '55%', height: 2, background: '#374151', borderRadius: 2, marginBottom: 2 }} />
+                                  <div style={{ width: '35%', height: 2, background: '#9ca3af', borderRadius: 2 }} />
+                                </div>
+                              </>
+                            )}
+                            {/* PREMIUM STATIC */}
+                            {template.layout === 'premium-static' && (
+                              <>
+                                <div style={{ height: '55%', background: `linear-gradient(135deg, ${template.colorSchemes[0]?.primary || '#0f172a'}, ${template.colorSchemes[0]?.accent || '#C9A84C'})`, position: 'relative', display: 'flex', alignItems: 'flex-end', padding: '0 5px 4px' }}>
+                                  <div style={{ width: '50%', height: 2, background: 'rgba(255,255,255,0.8)', borderRadius: 2 }} />
+                                </div>
+                                <div style={{ padding: '4px 5px', flex: 1, display: 'flex', gap: 3, justifyContent: 'center', alignItems: 'center' }}>
+                                  {[1,2,3].map(i => <div key={i} style={{ width: 8, height: 8, borderRadius: 4, background: 'rgba(0,0,0,0.15)' }} />)}
                                 </div>
                               </>
                             )}
