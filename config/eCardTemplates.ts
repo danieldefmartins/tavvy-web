@@ -1,5 +1,6 @@
-// Tavvy eCard Templates Configuration v3.0
-// 8 real layout-based templates: 3 free + 5 paid (pro/premium)
+// Tavvy eCard Templates Configuration v4.0
+// 13 templates: 6 free + 7 paid (pro/premium)
+// Business cards first, then link pages, then premium
 // Step 1: Choose template layout
 // Step 2: Choose color/style variation
 // Step 3: Card editor
@@ -28,7 +29,10 @@ export type TemplateLayout =
   | 'pro-corporate'  // Company logo top, structured professional layout
   | 'pro-card'       // Banner + industry + services grid + service area
   | 'premium-static' // Full-width hero photo that scrolls with content (no parallax)
-  | 'cover-card';     // Cover photo top half, white bottom with contact rows
+  | 'cover-card'      // Cover photo top half, white bottom with contact rows
+  | 'biz-traditional' // Traditional business card: logo, photo, contact info, social
+  | 'biz-modern'      // Modern business card: split layout, colored header, clean contact
+  | 'biz-minimalist';  // Minimalist business card: ultra-clean, lots of whitespace
 
 export interface Template {
   id: string;
@@ -60,12 +64,110 @@ export interface Template {
 }
 
 export const TEMPLATES: Template[] = [
-  // ============ FREE TEMPLATES (3) ============
+  // ============ FREE TEMPLATES (6) — Business cards first ============
 
-  // 1. BASIC TAVVY eCARD — Linktree-style link page
+  // 1. CLASSIC CARD — Traditional business card with centered layout
+  {
+    id: 'biz-traditional',
+    name: 'Classic Card',
+    description: 'Traditional business card. Logo, photo, name, title, company, and all contact details.',
+    category: 'free',
+    previewImage: 'biz-traditional',
+    isPremium: false,
+    features: ['company-logo', 'profile-photo', 'contact-rows', 'social-icons', 'full-address', 'save-contact'],
+    layout: 'biz-traditional',
+    colorSchemes: [
+      // Navy & Gold
+      { id: 'navy-gold', name: 'Navy & Gold', primary: '#0c1b3a', secondary: '#1a2d5a', accent: '#c9a84c', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.8)', background: '#f5f5f0', cardBg: '#FFFFFF', border: '#c9a84c', isFree: true },
+      // Charcoal & Silver
+      { id: 'charcoal-silver', name: 'Charcoal & Silver', primary: '#2d2d2d', secondary: '#444444', accent: '#a0a0a0', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.8)', background: '#f5f5f5', cardBg: '#FFFFFF', border: '#a0a0a0', isFree: true },
+      // Burgundy & Tan
+      { id: 'burgundy-tan', name: 'Burgundy & Tan', primary: '#5a1a1a', secondary: '#7a2e2e', accent: '#c8a87c', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.8)', background: '#f5f0eb', cardBg: '#FFFFFF', border: '#c8a87c', isFree: true },
+      // Forest & Cream
+      { id: 'forest-cream', name: 'Forest & Cream', primary: '#1a3c2a', secondary: '#2d5a3f', accent: '#d4c5a0', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.8)', background: '#f0f5f0', cardBg: '#FFFFFF', border: '#d4c5a0' },
+      // Classic Black
+      { id: 'classic-black', name: 'Classic Black', primary: '#111111', secondary: '#222222', accent: '#e0e0e0', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.8)', background: '#f5f5f5', cardBg: '#FFFFFF', border: '#e0e0e0' },
+    ],
+    layoutConfig: {
+      photoPosition: 'center',
+      photoSize: 'medium',
+      photoStyle: 'circle',
+      buttonStyle: 'rounded',
+      fontFamily: 'classic',
+      showBorder: true,
+      borderStyle: 'solid',
+    },
+  },
+
+  // 2. MODERN CARD — Modern split business card
+  {
+    id: 'biz-modern',
+    name: 'Modern Card',
+    description: 'Modern split layout. Colored header with logo and name, white bottom with contacts.',
+    category: 'free',
+    previewImage: 'biz-modern',
+    isPremium: false,
+    features: ['company-logo', 'split-layout', 'profile-photo', 'contact-rows', 'social-icons', 'full-address', 'save-contact'],
+    layout: 'biz-modern',
+    colorSchemes: [
+      // Deep Blue
+      { id: 'deep-blue', name: 'Deep Blue', primary: '#0f2b5b', secondary: '#1a3f7a', accent: '#3b82f6', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF', border: '#3b82f6', isFree: true },
+      // Slate & Amber
+      { id: 'slate-amber', name: 'Slate & Amber', primary: '#1e293b', secondary: '#334155', accent: '#f59e0b', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF', border: '#f59e0b', isFree: true },
+      // Teal & Gold
+      { id: 'teal-gold', name: 'Teal & Gold', primary: '#134e4a', secondary: '#0d9488', accent: '#d4af37', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF', border: '#d4af37', isFree: true },
+      // Purple & Coral
+      { id: 'purple-coral', name: 'Purple & Coral', primary: '#4c1d95', secondary: '#6d28d9', accent: '#f43f5e', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF', border: '#f43f5e' },
+      // Emerald & Ivory
+      { id: 'emerald-ivory', name: 'Emerald & Ivory', primary: '#064e3b', secondary: '#059669', accent: '#fef3c7', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF', border: '#fef3c7' },
+    ],
+    layoutConfig: {
+      photoPosition: 'right',
+      photoSize: 'large',
+      photoStyle: 'circle',
+      buttonStyle: 'rounded',
+      fontFamily: 'modern',
+      showBorder: false,
+      hasSplitLayout: true,
+    },
+  },
+
+  // 3. CLEAN CARD — Ultra-clean minimalist business card
+  {
+    id: 'biz-minimalist',
+    name: 'Clean Card',
+    description: 'Ultra-clean design. Lots of whitespace, thin typography, subtle accents.',
+    category: 'free',
+    previewImage: 'biz-minimalist',
+    isPremium: false,
+    features: ['company-logo', 'profile-photo', 'contact-rows', 'social-handles', 'full-address', 'save-contact'],
+    layout: 'biz-minimalist',
+    colorSchemes: [
+      // White & Black
+      { id: 'white-black', name: 'White & Black', primary: '#111111', secondary: '#333333', accent: '#111111', text: '#111111', textSecondary: '#666666', background: '#fafafa', cardBg: '#FFFFFF', border: '#e5e5e5', isFree: true },
+      // Warm Gray
+      { id: 'warm-gray', name: 'Warm Gray', primary: '#44403c', secondary: '#57534e', accent: '#78716c', text: '#292524', textSecondary: '#78716c', background: '#fafaf9', cardBg: '#FFFFFF', border: '#d6d3d1', isFree: true },
+      // Cream & Navy
+      { id: 'cream-navy', name: 'Cream & Navy', primary: '#1e3a5f', secondary: '#2d5a87', accent: '#1e3a5f', text: '#1e3a5f', textSecondary: '#64748b', background: '#faf8f5', cardBg: '#FFFFFF', border: '#e2e0db', isFree: true },
+      // Snow & Sage
+      { id: 'snow-sage', name: 'Snow & Sage', primary: '#3f6b5e', secondary: '#5a8f7e', accent: '#3f6b5e', text: '#2d3b36', textSecondary: '#6b8f82', background: '#f8faf9', cardBg: '#FFFFFF', border: '#d4e0da' },
+      // Pearl & Slate
+      { id: 'pearl-slate', name: 'Pearl & Slate', primary: '#475569', secondary: '#64748b', accent: '#475569', text: '#334155', textSecondary: '#94a3b8', background: '#f8fafc', cardBg: '#FFFFFF', border: '#e2e8f0' },
+    ],
+    layoutConfig: {
+      photoPosition: 'center',
+      photoSize: 'medium',
+      photoStyle: 'rounded',
+      buttonStyle: 'minimal',
+      fontFamily: 'modern',
+      showBorder: false,
+    },
+  },
+
+  // 4. LINK PAGE — Linktree-style link page
   {
     id: 'basic',
-    name: 'Basic Tavvy eCard',
+    name: 'Link Page',
     description: 'Simple link-in-bio style. Profile photo, name, and stacked link buttons.',
     category: 'free',
     previewImage: 'basic',
@@ -100,10 +202,10 @@ export const TEMPLATES: Template[] = [
     },
   },
 
-  // 2. BLOGGER eCARD — Soft/creative with script font
+  // 5. CREATIVE PAGE — Soft/creative with script font
   {
     id: 'blogger',
-    name: 'Blogger eCard',
+    name: 'Creative Page',
     description: 'Elegant creative style. Script name, soft colors, perfect for personal brands.',
     category: 'free',
     previewImage: 'blogger',
@@ -137,10 +239,10 @@ export const TEMPLATES: Template[] = [
     },
   },
 
-  // 3. TAVVY BUSINESS CARD — Real digital business card
+  // 6. EXECUTIVE CARD — Corporate split business card
   {
     id: 'business-card',
-    name: 'Tavvy Business Card',
+    name: 'Executive Card',
     description: 'A real digital business card. Company logo, contact info, professional layout.',
     category: 'free',
     previewImage: 'business-card',
@@ -173,146 +275,12 @@ export const TEMPLATES: Template[] = [
     },
   },
 
-  // ============ PAID / PRO TEMPLATES (5) ============
+  // ============ PAID / PRO TEMPLATES (7) ============
 
-  // 4. FULL WIDTH PREMIUM — Hero photo with gradient overlay
-  {
-    id: 'full-width',
-    name: 'Full Width Premium',
-    description: 'Full-screen hero photo with your name overlaid. Bold and premium.',
-    category: 'paid',
-    previewImage: 'full-width',
-    isPremium: true,
-    features: ['hero-photo', 'gradient-overlay', 'text-on-image', 'about-me-card', 'company-logo', 'action-icons'],
-    layout: 'full-width',
-    colorSchemes: [
-      // Dark (B&W photo feel)
-      { id: 'dark', name: 'Dark', primary: '#000000', secondary: '#1a1a1a', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.8)', background: '#0a0a0a', cardBg: '#1a1a1a', isFree: false },
-      // Blue
-      { id: 'blue', name: 'Blue', primary: '#1e40af', secondary: '#3b82f6', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: 'linear-gradient(to bottom, transparent 0%, #1e40af 100%)', cardBg: '#0f172a' },
-      // Purple
-      { id: 'purple', name: 'Purple', primary: '#581c87', secondary: '#9333ea', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: 'linear-gradient(to bottom, transparent 0%, #581c87 100%)', cardBg: '#1e1b4b' },
-      // Warm
-      { id: 'warm', name: 'Warm', primary: '#7c2d12', secondary: '#c2410c', accent: '#fef3c7', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: 'linear-gradient(to bottom, transparent 0%, #7c2d12 100%)', cardBg: '#451a03' },
-      // Emerald
-      { id: 'emerald', name: 'Emerald', primary: '#065f46', secondary: '#10b981', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: 'linear-gradient(to bottom, transparent 0%, #065f46 100%)', cardBg: '#022c22' },
-      // Navy & Gold
-      { id: 'navy-gold', name: 'Navy & Gold', primary: '#0f172a', secondary: '#1e293b', accent: '#d4af37', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: 'linear-gradient(to bottom, transparent 0%, #0f172a 100%)', cardBg: '#0f172a', border: '#d4af37' },
-    ],
-    layoutConfig: {
-      photoPosition: 'cover',
-      photoSize: 'hero',
-      photoStyle: 'cover',
-      buttonStyle: 'frosted',
-      fontFamily: 'modern',
-      showBorder: false,
-      hasGradientOverlay: true,
-      hasBannerImage: true,
-    },
-  },
-
-  // 5. PROS: REALTOR — Arch photo, intro text, link buttons
-  {
-    id: 'pro-realtor',
-    name: 'Pros: Realtor',
-    description: 'Arch-framed photo with intro text. Perfect for realtors and agents.',
-    category: 'paid',
-    previewImage: 'pro-realtor',
-    isPremium: true,
-    features: ['arch-photo', 'intro-text', 'accent-tab-buttons', 'social-icons', 'company-name'],
-    layout: 'pro-realtor',
-    colorSchemes: [
-      // Warm Neutral
-      { id: 'warm-neutral', name: 'Warm Neutral', primary: '#f5f0eb', secondary: '#ede5db', accent: '#c8a87c', text: '#2d2d2d', textSecondary: '#666666', background: '#f5f0eb', cardBg: '#FFFFFF', border: '#c8a87c', isFree: false },
-      // Navy Professional
-      { id: 'navy', name: 'Navy', primary: '#0f172a', secondary: '#1e293b', accent: '#d4af37', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.8)', background: '#0f172a', cardBg: 'rgba(255,255,255,0.05)', border: '#d4af37' },
-      // Forest
-      { id: 'forest', name: 'Forest', primary: '#1a3c2a', secondary: '#2d5a3f', accent: '#d4c5a0', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.8)', background: '#1a3c2a', cardBg: 'rgba(255,255,255,0.05)', border: '#d4c5a0' },
-      // Modern White
-      { id: 'modern-white', name: 'Modern White', primary: '#FFFFFF', secondary: '#f8f9fa', accent: '#1e40af', text: '#1f2937', textSecondary: '#6b7280', background: '#FFFFFF', cardBg: '#f8f9fa', border: '#1e40af' },
-      // Burgundy
-      { id: 'burgundy', name: 'Burgundy', primary: '#450a0a', secondary: '#7f1d1d', accent: '#fef3c7', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.8)', background: '#450a0a', cardBg: 'rgba(255,255,255,0.05)', border: '#fef3c7' },
-    ],
-    layoutConfig: {
-      photoPosition: 'arch',
-      photoSize: 'large',
-      photoStyle: 'arch',
-      buttonStyle: 'accent-tab',
-      fontFamily: 'elegant',
-      showBorder: false,
-      hasBannerImage: true,
-    },
-  },
-
-  // 6. PROS: CREATIVE — Bold colored top, wave divider, contact rows
-  {
-    id: 'pro-creative',
-    name: 'Pros: Creative',
-    description: 'Bold colors with wave divider. Great for consultants and creatives.',
-    category: 'paid',
-    previewImage: 'pro-creative',
-    isPremium: true,
-    features: ['wave-divider', 'logo-badge', 'contact-rows', 'colored-icons', 'bold-colors'],
-    layout: 'pro-creative',
-    colorSchemes: [
-      // Purple & Orange
-      { id: 'purple-orange', name: 'Purple & Orange', primary: '#6b21a8', secondary: '#7c3aed', accent: '#f97316', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#6b21a8', cardBg: '#FFFFFF', border: '#f97316', isFree: false },
-      // Blue & Teal
-      { id: 'blue-teal', name: 'Blue & Teal', primary: '#1e40af', secondary: '#3b82f6', accent: '#14b8a6', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#1e40af', cardBg: '#FFFFFF', border: '#14b8a6' },
-      // Red & Gold
-      { id: 'red-gold', name: 'Red & Gold', primary: '#991b1b', secondary: '#dc2626', accent: '#d4af37', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#991b1b', cardBg: '#FFFFFF', border: '#d4af37' },
-      // Dark & Neon
-      { id: 'dark-neon', name: 'Dark & Neon', primary: '#0a0a0a', secondary: '#1a1a1a', accent: '#22d3ee', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#0a0a0a', cardBg: '#1a1a1a', border: '#22d3ee' },
-      // Green & White
-      { id: 'green-white', name: 'Green & White', primary: '#166534', secondary: '#22c55e', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#166534', cardBg: '#FFFFFF', border: '#22c55e' },
-    ],
-    layoutConfig: {
-      photoPosition: 'top',
-      photoSize: 'large',
-      photoStyle: 'rounded',
-      buttonStyle: 'rounded',
-      fontFamily: 'modern',
-      showBorder: false,
-      hasWaveDivider: true,
-    },
-  },
-
-  // 7. PROS: CORPORATE — Company logo top, structured layout
-  {
-    id: 'pro-corporate',
-    name: 'Pros: Corporate',
-    description: 'Structured corporate layout. Company logo, action icons, about section.',
-    category: 'paid',
-    previewImage: 'pro-corporate',
-    isPremium: true,
-    features: ['company-logo', 'action-icons', 'about-section', 'structured-layout', 'pronouns'],
-    layout: 'pro-corporate',
-    colorSchemes: [
-      // Navy Blue
-      { id: 'navy', name: 'Navy Blue', primary: '#1e3a5f', secondary: '#2d5a87', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#1e3a5f', cardBg: 'transparent', isFree: false },
-      // Charcoal
-      { id: 'charcoal', name: 'Charcoal', primary: '#374151', secondary: '#4b5563', accent: '#10b981', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#374151', cardBg: 'transparent' },
-      // Burgundy
-      { id: 'burgundy', name: 'Burgundy', primary: '#7f1d1d', secondary: '#991b1b', accent: '#fcd34d', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#7f1d1d', cardBg: 'transparent' },
-      // Slate
-      { id: 'slate', name: 'Slate', primary: '#1e293b', secondary: '#334155', accent: '#f8fafc', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#1e293b', cardBg: 'transparent' },
-      // Royal Blue
-      { id: 'royal', name: 'Royal Blue', primary: '#1e40af', secondary: '#2563eb', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#1e40af', cardBg: 'transparent' },
-    ],
-    layoutConfig: {
-      photoPosition: 'center',
-      photoSize: 'medium',
-      photoStyle: 'circle',
-      buttonStyle: 'outline',
-      fontFamily: 'executive',
-      showBorder: false,
-    },
-  },
-
-  // 8. TAVVY PRO CARD — Banner + industry + services + service area
+  // 7. PRO CARD — The ultimate pro card
   {
     id: 'pro-card',
-    name: 'Tavvy Pro Card',
+    name: 'Pro Card',
     description: 'The ultimate pro card. Industry, services, service area — all in one.',
     category: 'paid',
     previewImage: 'pro-card',
@@ -346,7 +314,7 @@ export const TEMPLATES: Template[] = [
     },
   },
 
-  // 9. COVER CARD — Cover photo top, white bottom with name/title/contacts
+  // 8. COVER CARD — Cover photo with contact rows
   {
     id: 'cover-card',
     name: 'Cover Card',
@@ -379,10 +347,144 @@ export const TEMPLATES: Template[] = [
     },
   },
 
-  // 10. PREMIUM STATIC — Full-width hero photo that scrolls with content (no parallax)
+  // 9. SPOTLIGHT — Hero photo with gradient overlay
+  {
+    id: 'full-width',
+    name: 'Spotlight',
+    description: 'Full-screen hero photo with your name overlaid. Bold and premium.',
+    category: 'paid',
+    previewImage: 'full-width',
+    isPremium: true,
+    features: ['hero-photo', 'gradient-overlay', 'text-on-image', 'about-me-card', 'company-logo', 'action-icons'],
+    layout: 'full-width',
+    colorSchemes: [
+      // Dark (B&W photo feel)
+      { id: 'dark', name: 'Dark', primary: '#000000', secondary: '#1a1a1a', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.8)', background: '#0a0a0a', cardBg: '#1a1a1a', isFree: false },
+      // Blue
+      { id: 'blue', name: 'Blue', primary: '#1e40af', secondary: '#3b82f6', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: 'linear-gradient(to bottom, transparent 0%, #1e40af 100%)', cardBg: '#0f172a' },
+      // Purple
+      { id: 'purple', name: 'Purple', primary: '#581c87', secondary: '#9333ea', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: 'linear-gradient(to bottom, transparent 0%, #581c87 100%)', cardBg: '#1e1b4b' },
+      // Warm
+      { id: 'warm', name: 'Warm', primary: '#7c2d12', secondary: '#c2410c', accent: '#fef3c7', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: 'linear-gradient(to bottom, transparent 0%, #7c2d12 100%)', cardBg: '#451a03' },
+      // Emerald
+      { id: 'emerald', name: 'Emerald', primary: '#065f46', secondary: '#10b981', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: 'linear-gradient(to bottom, transparent 0%, #065f46 100%)', cardBg: '#022c22' },
+      // Navy & Gold
+      { id: 'navy-gold', name: 'Navy & Gold', primary: '#0f172a', secondary: '#1e293b', accent: '#d4af37', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: 'linear-gradient(to bottom, transparent 0%, #0f172a 100%)', cardBg: '#0f172a', border: '#d4af37' },
+    ],
+    layoutConfig: {
+      photoPosition: 'cover',
+      photoSize: 'hero',
+      photoStyle: 'cover',
+      buttonStyle: 'frosted',
+      fontFamily: 'modern',
+      showBorder: false,
+      hasGradientOverlay: true,
+      hasBannerImage: true,
+    },
+  },
+
+  // 10. AGENT CARD — Arch photo, perfect for agents
+  {
+    id: 'pro-realtor',
+    name: 'Agent Card',
+    description: 'Arch-framed photo with intro text. Perfect for realtors and agents.',
+    category: 'paid',
+    previewImage: 'pro-realtor',
+    isPremium: true,
+    features: ['arch-photo', 'intro-text', 'accent-tab-buttons', 'social-icons', 'company-name'],
+    layout: 'pro-realtor',
+    colorSchemes: [
+      // Warm Neutral
+      { id: 'warm-neutral', name: 'Warm Neutral', primary: '#f5f0eb', secondary: '#ede5db', accent: '#c8a87c', text: '#2d2d2d', textSecondary: '#666666', background: '#f5f0eb', cardBg: '#FFFFFF', border: '#c8a87c', isFree: false },
+      // Navy Professional
+      { id: 'navy', name: 'Navy', primary: '#0f172a', secondary: '#1e293b', accent: '#d4af37', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.8)', background: '#0f172a', cardBg: 'rgba(255,255,255,0.05)', border: '#d4af37' },
+      // Forest
+      { id: 'forest', name: 'Forest', primary: '#1a3c2a', secondary: '#2d5a3f', accent: '#d4c5a0', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.8)', background: '#1a3c2a', cardBg: 'rgba(255,255,255,0.05)', border: '#d4c5a0' },
+      // Modern White
+      { id: 'modern-white', name: 'Modern White', primary: '#FFFFFF', secondary: '#f8f9fa', accent: '#1e40af', text: '#1f2937', textSecondary: '#6b7280', background: '#FFFFFF', cardBg: '#f8f9fa', border: '#1e40af' },
+      // Burgundy
+      { id: 'burgundy', name: 'Burgundy', primary: '#450a0a', secondary: '#7f1d1d', accent: '#fef3c7', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.8)', background: '#450a0a', cardBg: 'rgba(255,255,255,0.05)', border: '#fef3c7' },
+    ],
+    layoutConfig: {
+      photoPosition: 'arch',
+      photoSize: 'large',
+      photoStyle: 'arch',
+      buttonStyle: 'accent-tab',
+      fontFamily: 'elegant',
+      showBorder: false,
+      hasBannerImage: true,
+    },
+  },
+
+  // 11. BOLD CARD — Bold colors with wave divider
+  {
+    id: 'pro-creative',
+    name: 'Bold Card',
+    description: 'Bold colors with wave divider. Great for consultants and creatives.',
+    category: 'paid',
+    previewImage: 'pro-creative',
+    isPremium: true,
+    features: ['wave-divider', 'logo-badge', 'contact-rows', 'colored-icons', 'bold-colors'],
+    layout: 'pro-creative',
+    colorSchemes: [
+      // Purple & Orange
+      { id: 'purple-orange', name: 'Purple & Orange', primary: '#6b21a8', secondary: '#7c3aed', accent: '#f97316', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#6b21a8', cardBg: '#FFFFFF', border: '#f97316', isFree: false },
+      // Blue & Teal
+      { id: 'blue-teal', name: 'Blue & Teal', primary: '#1e40af', secondary: '#3b82f6', accent: '#14b8a6', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#1e40af', cardBg: '#FFFFFF', border: '#14b8a6' },
+      // Red & Gold
+      { id: 'red-gold', name: 'Red & Gold', primary: '#991b1b', secondary: '#dc2626', accent: '#d4af37', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#991b1b', cardBg: '#FFFFFF', border: '#d4af37' },
+      // Dark & Neon
+      { id: 'dark-neon', name: 'Dark & Neon', primary: '#0a0a0a', secondary: '#1a1a1a', accent: '#22d3ee', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#0a0a0a', cardBg: '#1a1a1a', border: '#22d3ee' },
+      // Green & White
+      { id: 'green-white', name: 'Green & White', primary: '#166534', secondary: '#22c55e', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#166534', cardBg: '#FFFFFF', border: '#22c55e' },
+    ],
+    layoutConfig: {
+      photoPosition: 'top',
+      photoSize: 'large',
+      photoStyle: 'rounded',
+      buttonStyle: 'rounded',
+      fontFamily: 'modern',
+      showBorder: false,
+      hasWaveDivider: true,
+    },
+  },
+
+  // 12. CORPORATE CARD — Structured corporate layout
+  {
+    id: 'pro-corporate',
+    name: 'Corporate Card',
+    description: 'Structured corporate layout. Company logo, action icons, about section.',
+    category: 'paid',
+    previewImage: 'pro-corporate',
+    isPremium: true,
+    features: ['company-logo', 'action-icons', 'about-section', 'structured-layout', 'pronouns'],
+    layout: 'pro-corporate',
+    colorSchemes: [
+      // Navy Blue
+      { id: 'navy', name: 'Navy Blue', primary: '#1e3a5f', secondary: '#2d5a87', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#1e3a5f', cardBg: 'transparent', isFree: false },
+      // Charcoal
+      { id: 'charcoal', name: 'Charcoal', primary: '#374151', secondary: '#4b5563', accent: '#10b981', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#374151', cardBg: 'transparent' },
+      // Burgundy
+      { id: 'burgundy', name: 'Burgundy', primary: '#7f1d1d', secondary: '#991b1b', accent: '#fcd34d', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#7f1d1d', cardBg: 'transparent' },
+      // Slate
+      { id: 'slate', name: 'Slate', primary: '#1e293b', secondary: '#334155', accent: '#f8fafc', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#1e293b', cardBg: 'transparent' },
+      // Royal Blue
+      { id: 'royal', name: 'Royal Blue', primary: '#1e40af', secondary: '#2563eb', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#1e40af', cardBg: 'transparent' },
+    ],
+    layoutConfig: {
+      photoPosition: 'center',
+      photoSize: 'medium',
+      photoStyle: 'circle',
+      buttonStyle: 'outline',
+      fontFamily: 'executive',
+      showBorder: false,
+    },
+  },
+
+  // 13. PREMIUM HERO — Full-width hero photo
   {
     id: 'premium-static',
-    name: 'Premium Static',
+    name: 'Premium Hero',
     description: 'Full-width hero photo that scrolls with content. Same premium feel, no parallax.',
     category: 'paid',
     previewImage: 'premium-static',
@@ -450,7 +552,6 @@ export const TEMPLATE_MIGRATION_MAP: Record<string, string> = {
   'creator': 'blogger',
   'kids-fun': 'basic',
   'modern-professional': 'business-card',
-  'business-card': 'business-card',
   'gradient-wave': 'basic',
   'photo-focus': 'full-width',
   'bold': 'full-width',

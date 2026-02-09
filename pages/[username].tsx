@@ -900,6 +900,48 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
       };
     }
 
+    // Biz Traditional — Classic centered business card
+    if (templateLayout === 'biz-traditional') {
+      return {
+        isLuxury: false,
+        isDark: false,
+        hasOrnate: false,
+        accentColor: cs?.accent || '#c9a84c',
+        textColor: '#1a1a2e',
+        buttonBg: '#f8f9fa',
+        buttonBorder: '#e8e8e8',
+        photoStyle: 'circle',
+      };
+    }
+
+    // Biz Modern — Split layout modern business card
+    if (templateLayout === 'biz-modern') {
+      return {
+        isLuxury: false,
+        isDark: false,
+        hasOrnate: false,
+        accentColor: cs?.accent || '#3b82f6',
+        textColor: '#1a1a2e',
+        buttonBg: '#f8f9fa',
+        buttonBorder: '#e8e8e8',
+        photoStyle: 'circle',
+      };
+    }
+
+    // Biz Minimalist — Ultra-clean minimal business card
+    if (templateLayout === 'biz-minimalist') {
+      return {
+        isLuxury: false,
+        isDark: false,
+        hasOrnate: false,
+        accentColor: cs?.accent || '#111111',
+        textColor: cs?.text || '#111111',
+        buttonBg: '#f8f9fa',
+        buttonBorder: '#e8e8e8',
+        photoStyle: 'rounded',
+      };
+    }
+
     // Cover Card — Cover photo top, white bottom with contact rows
     if (templateLayout === 'cover-card') {
       return {
@@ -1016,7 +1058,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
 
   // Determine if the footer area has a light background (for logo color switching)
   // pro-card always has a white bottom section, so footer is always on light bg
-  const isLightFooterBg = (templateLayout === 'pro-card' || templateLayout === 'cover-card') ? true : bgIsActuallyLight;
+  const isLightFooterBg = (templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist') ? true : bgIsActuallyLight;
 
   return (
     <>
@@ -1102,8 +1144,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 ? { background: activeColorScheme?.background || `linear-gradient(165deg, ${cardData.gradientColor1} 0%, ${cardData.gradientColor2} 50%, #0a0f1e 100%)` }
               : templateLayout === 'blogger'
                 ? { background: activeColorScheme?.background || cardData.gradientColor1 }
-                : templateLayout === 'pro-card' || templateLayout === 'cover-card'
-                  ? { background: '#f0f2f5' }
+                : templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist'
+                  ? { background: activeColorScheme?.background || '#f0f2f5' }
                 : cardData.backgroundType === 'solid' 
                   ? { background: cardData.gradientColor1 }
                   : cardData.backgroundType === 'image' && cardData.backgroundImageUrl
@@ -1189,6 +1231,33 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             borderRadius: '20px',
             overflow: 'hidden' as const,
             boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+            background: '#ffffff',
+          } : {}),
+          ...(templateLayout === 'biz-traditional' ? {
+            maxWidth: '420px',
+            margin: '20px auto',
+            padding: '0',
+            borderRadius: '16px',
+            overflow: 'hidden' as const,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.12)',
+            background: '#ffffff',
+          } : {}),
+          ...(templateLayout === 'biz-modern' ? {
+            maxWidth: '420px',
+            margin: '20px auto',
+            padding: '0',
+            borderRadius: '16px',
+            overflow: 'hidden' as const,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+            background: '#ffffff',
+          } : {}),
+          ...(templateLayout === 'biz-minimalist' ? {
+            maxWidth: '420px',
+            margin: '20px auto',
+            padding: '28px 28px 24px',
+            borderRadius: '16px',
+            overflow: 'hidden' as const,
+            boxShadow: '0 8px 40px rgba(0,0,0,0.08)',
             background: '#ffffff',
           } : {}),
         }}>
@@ -1386,6 +1455,121 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             </div>
           )}
 
+          {/* Biz Traditional: Top accent bar + centered logo + photo + name */}
+          {templateLayout === 'biz-traditional' && (
+            <div style={{ width: '100%' }}>
+              {/* Top accent bar */}
+              <div style={{ width: '100%', height: 6, background: activeColorScheme?.primary || '#0c1b3a' }} />
+              {/* Logo area */}
+              <div style={{ padding: '20px 28px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
+                {cardData.companyLogoUrl ? (
+                  <img src={cardData.companyLogoUrl} alt="" style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 8 }} />
+                ) : (
+                  <div style={{ width: 36, height: 36, borderRadius: 8, background: activeColorScheme?.primary || '#0c1b3a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill={templateStyles.accentColor}><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+                  </div>
+                )}
+                {cardData.company && <span style={{ fontSize: 14, fontWeight: 700, color: activeColorScheme?.primary || '#0c1b3a', letterSpacing: 0.5 }}>{cardData.company}</span>}
+              </div>
+              {/* Gold accent line */}
+              <div style={{ width: 50, height: 2, background: templateStyles.accentColor, margin: '16px auto' }} />
+              {/* Centered photo */}
+              {cardData.profilePhotoUrl && (
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+                  <div style={{ width: 110, height: 110, borderRadius: '50%', border: `3px solid ${templateStyles.accentColor}`, overflow: 'hidden' }}>
+                    <img src={cardData.profilePhotoUrl} alt={cardData.fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                </div>
+              )}
+              {/* Name + Title centered */}
+              <div style={{ textAlign: 'center' as const, padding: '0 28px' }}>
+                <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1a1a2e', margin: '0 0 4px', ...fontStyleOverrides }}>{cardData.fullName}</h1>
+                {cardData.pronouns && <p style={{ fontSize: 12, color: '#999', fontStyle: 'italic', margin: '2px 0 0' }}>({cardData.pronouns})</p>}
+                {cardData.title && <p style={{ fontSize: 14, fontWeight: 600, color: activeColorScheme?.primary || '#0c1b3a', margin: '6px 0 0' }}>{cardData.title}</p>}
+              </div>
+              {/* Divider */}
+              <div style={{ width: '80%', height: 1, background: '#e5e5e5', margin: '16px auto' }} />
+              {/* Bio */}
+              {cardData.bio && <p style={{ fontSize: 13, color: '#555', lineHeight: 1.6, textAlign: 'center' as const, padding: '0 28px 8px', margin: 0 }}>{cardData.bio}</p>}
+            </div>
+          )}
+
+          {/* Biz Modern: Dark gradient top with name LEFT + photo RIGHT */}
+          {templateLayout === 'biz-modern' && (
+            <div style={{ width: '100%' }}>
+              <div style={{
+                background: activeColorScheme?.background || `linear-gradient(135deg, ${activeColorScheme?.primary || '#0f2b5b'} 0%, ${activeColorScheme?.secondary || '#1a3f7a'} 100%)`,
+                padding: '24px 28px 56px',
+                position: 'relative' as const,
+              }}>
+                {/* Logo */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                  {cardData.companyLogoUrl ? (
+                    <img src={cardData.companyLogoUrl} alt="" style={{ width: 28, height: 28, objectFit: 'contain', borderRadius: 6 }} />
+                  ) : (
+                    <div style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+                    </div>
+                  )}
+                  {cardData.company && <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.9)', letterSpacing: 0.5 }}>{cardData.company}</span>}
+                </div>
+                {/* Name + Title (left) */}
+                <div style={{ paddingRight: 130 }}>
+                  <h1 style={{ fontSize: 26, fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.2, ...fontStyleOverrides }}>{cardData.fullName}</h1>
+                  {cardData.pronouns && <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic', margin: '4px 0 0' }}>({cardData.pronouns})</p>}
+                  {cardData.title && <p style={{ fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.85)', margin: '8px 0 0' }}>{cardData.title}</p>}
+                </div>
+                {/* Photo (right, overlapping) */}
+                {cardData.profilePhotoUrl && (
+                  <div style={{ position: 'absolute', right: 28, bottom: -40 }}>
+                    <div style={{ width: 110, height: 110, borderRadius: '50%', border: '4px solid #fff', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}>
+                      <img src={cardData.profilePhotoUrl} alt={cardData.fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                  </div>
+                )}
+              </div>
+              {/* Curved transition */}
+              <svg viewBox="0 0 400 30" style={{ width: '100%', height: 24, display: 'block', marginTop: -1 }} preserveAspectRatio="none">
+                <path d="M0 0 L400 0 L400 30 C300 0 100 0 0 30 Z" fill={activeColorScheme?.primary || '#0f2b5b'} />
+              </svg>
+              {/* White bottom: bio */}
+              <div style={{ padding: '28px 28px 0', background: '#ffffff' }}>
+                {cardData.bio && <p style={{ fontSize: 14, color: '#555', lineHeight: 1.6, margin: '0 0 8px' }}>{cardData.bio}</p>}
+              </div>
+            </div>
+          )}
+
+          {/* Biz Minimalist: Clean white with small logo + square photo */}
+          {templateLayout === 'biz-minimalist' && (
+            <div style={{ width: '100%' }}>
+              {/* Small logo */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
+                {cardData.companyLogoUrl ? (
+                  <img src={cardData.companyLogoUrl} alt="" style={{ width: 28, height: 28, objectFit: 'contain', borderRadius: 6 }} />
+                ) : (
+                  <div style={{ width: 28, height: 28, borderRadius: 6, border: `1.5px solid ${activeColorScheme?.primary || '#111'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill={activeColorScheme?.primary || '#111'}><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+                  </div>
+                )}
+                {cardData.company && <span style={{ fontSize: 11, fontWeight: 500, color: '#999', letterSpacing: 1, textTransform: 'uppercase' as const }}>{cardData.company}</span>}
+              </div>
+              {/* Square photo */}
+              {cardData.profilePhotoUrl && (
+                <div style={{ width: 120, height: 120, borderRadius: 12, overflow: 'hidden', boxShadow: '0 2px 12px rgba(0,0,0,0.06)', marginBottom: 18 }}>
+                  <img src={cardData.profilePhotoUrl} alt={cardData.fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+              )}
+              {/* Name */}
+              <h1 style={{ fontSize: 28, fontWeight: 300, color: activeColorScheme?.primary || '#111', margin: '0 0 4px', letterSpacing: -0.5, ...fontStyleOverrides }}>{cardData.fullName}</h1>
+              {cardData.pronouns && <p style={{ fontSize: 11, color: '#999', fontStyle: 'italic', margin: '2px 0 0' }}>({cardData.pronouns})</p>}
+              {cardData.title && <p style={{ fontSize: 11, fontWeight: 500, color: '#999', textTransform: 'uppercase' as const, letterSpacing: 2, margin: '6px 0 0' }}>{cardData.title}</p>}
+              {/* Thin line */}
+              <div style={{ width: 40, height: 1, background: '#e0e0e0', margin: '18px 0' }} />
+              {/* Bio */}
+              {cardData.bio && <p style={{ fontSize: 14, color: '#555', lineHeight: 1.6, margin: '0 0 8px' }}>{cardData.bio}</p>}
+            </div>
+          )}
+
           {/* Profile Section */}
           <div style={{
             ...styles.profileSection,
@@ -1396,10 +1580,13 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             ...(templateLayout === 'business-card' ? { padding: '0 24px 20px', background: '#FFFFFF', color: '#1a1a2e' } : {}),
             ...(templateLayout === 'pro-card' ? { padding: '8px 28px 20px', background: activeColorScheme?.cardBg || '#ffffff', color: '#333' } : {}),
             ...(templateLayout === 'cover-card' ? { padding: '4px 28px 16px', background: '#ffffff', color: '#1a1a2e', alignItems: 'flex-start' } : {}),
+            ...(templateLayout === 'biz-traditional' ? { padding: '0', display: 'none' } : {}),
+            ...(templateLayout === 'biz-modern' ? { padding: '0', display: 'none' } : {}),
+            ...(templateLayout === 'biz-minimalist' ? { padding: '0', display: 'none' } : {}),
             ...(templateLayout === 'blogger' ? { paddingTop: 0 } : {}),
           }}>
-            {/* Profile Photo - skip for full-width, premium-static (photo IS the hero) and pro-card (photo in dark top section) */}
-            {templateLayout !== 'full-width' && templateLayout !== 'premium-static' && templateLayout !== 'pro-card' && templateLayout !== 'cover-card' && (() => {
+            {/* Profile Photo - skip for full-width, premium-static (photo IS the hero), pro-card, cover-card, and biz templates (photo in their own sections) */}
+            {templateLayout !== 'full-width' && templateLayout !== 'premium-static' && templateLayout !== 'pro-card' && templateLayout !== 'cover-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && (() => {
               // Photo size configurations
               const photoSizes = {
                 small: { ring: 100, photo: 92, initials: 28, borderRadius: 50 },
@@ -1480,8 +1667,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             )}
 
             {/* Name & Info */}
-            {/* Name (skip for pro-card — rendered in dark top section) */}
-            {templateLayout !== 'pro-card' && <h1 style={{
+            {/* Name (skip for pro-card and biz templates — rendered in their own sections) */}
+            {templateLayout !== 'pro-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && <h1 style={{
               ...styles.name,
               color: templateStyles.textColor,
               ...fontStyleOverrides,
@@ -1491,8 +1678,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               ...(templateLayout === 'pro-realtor' ? { fontSize: '26px', fontWeight: '800', letterSpacing: '-0.5px' } : {}),
               ...(templateLayout === 'cover-card' ? { textAlign: 'left' as const, width: '100%', color: '#1a1a2e', fontWeight: '700', fontSize: '24px' } : {}),
             }}>{cardData.fullName}</h1>}
-            {/* Title (skip for pro-card) */}
-            {cardData.title && templateLayout !== 'pro-card' && <p style={{
+            {/* Title (skip for pro-card and biz templates) */}
+            {cardData.title && templateLayout !== 'pro-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && <p style={{
               ...styles.title,
               color: templateStyles.textColor,
               opacity: 0.9,
@@ -1503,8 +1690,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               ...(templateLayout === 'pro-realtor' ? { fontWeight: '600', letterSpacing: '0.5px' } : {}),
               ...(templateLayout === 'cover-card' ? { textAlign: 'left' as const, width: '100%', color: '#444', fontWeight: '600', fontSize: '14px' } : {}),
             }}>{cardData.title}</p>}
-            {/* Company (skip for pro-card) */}
-            {cardData.company && templateLayout !== 'pro-card' && <p style={{
+            {/* Company (skip for pro-card and biz templates) */}
+            {cardData.company && templateLayout !== 'pro-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && <p style={{
               ...styles.company,
               color: templateStyles.textColor,
               opacity: 0.7,
@@ -1516,8 +1703,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               ...(templateLayout === 'cover-card' ? { textAlign: 'left' as const, width: '100%', color: '#888', fontStyle: 'italic', fontSize: '13px' } : {}),
             }}>{cardData.company}</p>}
             
-            {/* Bio */}
-            {cardData.bio && (
+            {/* Bio (skip for biz templates — rendered in their own sections) */}
+            {cardData.bio && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && (
               <p style={{
                 ...styles.bio,
                 color: templateStyles.textColor,
@@ -1766,8 +1953,148 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             </div>
           )}
 
+          {/* Biz Traditional: Contact rows with accent-colored icons */}
+          {templateLayout === 'biz-traditional' && cardData.showContactInfo && (
+            <div style={{ width: '100%', padding: '0 28px 16px', background: '#ffffff' }}>
+              {cardData.phone && (
+                <a href={`tel:${cardData.phone}`} style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: '#333' }}>
+                  <div style={{ width: 38, height: 38, borderRadius: '50%', background: `${activeColorScheme?.primary || '#0c1b3a'}10`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, flexShrink: 0 }}>
+                    <PhoneIcon />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14, fontWeight: 500, color: '#333' }}>{cardData.phone}</div>
+                    <div style={{ fontSize: 11, color: '#999' }}>Phone</div>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+              )}
+              {cardData.email && (
+                <a href={`mailto:${cardData.email}`} style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: '#333' }}>
+                  <div style={{ width: 38, height: 38, borderRadius: '50%', background: `${activeColorScheme?.primary || '#0c1b3a'}10`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, flexShrink: 0 }}>
+                    <EmailIcon />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14, fontWeight: 500, color: '#333', wordBreak: 'break-all' as const }}>{cardData.email}</div>
+                    <div style={{ fontSize: 11, color: '#999' }}>Email</div>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+              )}
+              {cardData.website && (
+                <a href={cardData.website.startsWith('http') ? cardData.website : `https://${cardData.website}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: '#333' }}>
+                  <div style={{ width: 38, height: 38, borderRadius: '50%', background: `${activeColorScheme?.primary || '#0c1b3a'}10`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, flexShrink: 0 }}>
+                    <GlobeIcon />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14, fontWeight: 500, color: '#333' }}>{cardData.website.replace(/^https?:\/\//, '')}</div>
+                    <div style={{ fontSize: 11, color: '#999' }}>Website</div>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+              )}
+              {cardData.location && (
+                <a href={`https://maps.google.com/?q=${encodeURIComponent(cardData.location)}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: '#333' }}>
+                  <div style={{ width: 38, height: 38, borderRadius: '50%', background: `${activeColorScheme?.primary || '#0c1b3a'}10`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, flexShrink: 0 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14, fontWeight: 500, color: '#333' }}>{cardData.location}</div>
+                    <div style={{ fontSize: 11, color: '#999' }}>Address</div>
+                  </div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+              )}
+              {/* Bottom accent bar */}
+              <div style={{ width: '100%', height: 4, background: templateStyles.accentColor, marginTop: 16 }} />
+            </div>
+          )}
+
+          {/* Biz Modern: Contact rows with rounded icon backgrounds */}
+          {templateLayout === 'biz-modern' && cardData.showContactInfo && (
+            <div style={{ width: '100%', padding: '0 28px 16px', background: '#ffffff' }}>
+              {cardData.phone && (
+                <a href={`tel:${cardData.phone}`} style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: '#333' }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: `${activeColorScheme?.primary || '#0f2b5b'}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, color: activeColorScheme?.primary || '#0f2b5b', flexShrink: 0 }}>
+                    <PhoneIcon />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: '#333' }}>{cardData.phone}</div>
+                    <div style={{ fontSize: 11, color: '#999', fontWeight: 500 }}>Work</div>
+                  </div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+              )}
+              {cardData.email && (
+                <a href={`mailto:${cardData.email}`} style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: '#333' }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: `${activeColorScheme?.primary || '#0f2b5b'}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, color: activeColorScheme?.primary || '#0f2b5b', flexShrink: 0 }}>
+                    <EmailIcon />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: '#333', wordBreak: 'break-all' as const }}>{cardData.email}</div>
+                    <div style={{ fontSize: 11, color: '#999', fontWeight: 500 }}>Work</div>
+                  </div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+              )}
+              {cardData.website && (
+                <a href={cardData.website.startsWith('http') ? cardData.website : `https://${cardData.website}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: '#333' }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: `${activeColorScheme?.primary || '#0f2b5b'}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, color: activeColorScheme?.primary || '#0f2b5b', flexShrink: 0 }}>
+                    <GlobeIcon />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: '#333' }}>{cardData.website.replace(/^https?:\/\//, '')}</div>
+                    <div style={{ fontSize: 11, color: '#999', fontWeight: 500 }}>Company</div>
+                  </div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+              )}
+              {cardData.location && (
+                <a href={`https://maps.google.com/?q=${encodeURIComponent(cardData.location)}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: '#333' }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: `${activeColorScheme?.primary || '#0f2b5b'}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, color: activeColorScheme?.primary || '#0f2b5b', flexShrink: 0 }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: '#333' }}>{cardData.location}</div>
+                    <div style={{ fontSize: 11, color: '#999', fontWeight: 500 }}>Location</div>
+                  </div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+                </a>
+              )}
+            </div>
+          )}
+
+          {/* Biz Minimalist: Ultra-clean contact rows with thin icons */}
+          {templateLayout === 'biz-minimalist' && cardData.showContactInfo && (
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column' as const, gap: 12 }}>
+              {cardData.phone && (
+                <a href={`tel:${cardData.phone}`} style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: '#333' }}>
+                  <PhoneIcon />
+                  <span style={{ fontSize: 14, color: '#333' }}>{cardData.phone}</span>
+                </a>
+              )}
+              {cardData.email && (
+                <a href={`mailto:${cardData.email}`} style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: '#333' }}>
+                  <EmailIcon />
+                  <span style={{ fontSize: 14, color: '#333', wordBreak: 'break-all' as const }}>{cardData.email}</span>
+                </a>
+              )}
+              {cardData.website && (
+                <a href={cardData.website.startsWith('http') ? cardData.website : `https://${cardData.website}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: '#333' }}>
+                  <GlobeIcon />
+                  <span style={{ fontSize: 14, color: '#333' }}>{cardData.website.replace(/^https?:\/\//, '')}</span>
+                </a>
+              )}
+              {cardData.location && (
+                <a href={`https://maps.google.com/?q=${encodeURIComponent(cardData.location)}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', color: '#333' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <span style={{ fontSize: 14, color: '#333' }}>{cardData.location}</span>
+                </a>
+              )}
+            </div>
+          )}
+
           {/* Standard Action Buttons (for all other templates) */}
-          {templateLayout !== 'business-card' && templateLayout !== 'pro-card' && templateLayout !== 'cover-card' && cardData.showContactInfo && <div style={{
+          {templateLayout !== 'business-card' && templateLayout !== 'pro-card' && templateLayout !== 'cover-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && cardData.showContactInfo && <div style={{
             ...styles.actionButtons,
             ...(templateLayout === 'blogger' ? { padding: '0 0 10px', gap: '10px' } : {}),
             ...(templateLayout === 'pro-realtor' ? { gap: '10px' } : {}),
@@ -2020,7 +2347,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           )}
 
           {/* Divider */}
-          <div style={{...styles.divider, background: templateLayout === 'pro-card' || templateLayout === 'cover-card' || bgIsActuallyLight ? 'linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent)' : 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)'}} />
+          <div style={{...styles.divider, background: templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || bgIsActuallyLight ? 'linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent)' : 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)'}} />
 
           {/* Links Section - always visible */}
 
@@ -2435,7 +2762,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                     onClick={() => handleLinkClick(link)}
                   >
                     <div style={{...styles.linkIconContainer, 
-                      background: templateLayout === 'business-card' || templateLayout === 'pro-card' || templateLayout === 'cover-card' ? `${templateStyles.accentColor}15` : templateLayout === 'blogger' ? `${templateStyles.accentColor}20` : bgIsActuallyLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)', 
+                      background: templateLayout === 'business-card' || templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' ? `${templateStyles.accentColor}15` : templateLayout === 'blogger' ? `${templateStyles.accentColor}20` : bgIsActuallyLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)', 
                       color: templateLayout === 'business-card' || templateLayout === 'pro-card' || templateLayout === 'cover-card' ? templateStyles.accentColor : templateLayout === 'blogger' ? templateStyles.accentColor : templateStyles.textColor
                     }}>
                       {link.icon === 'website' || link.icon === 'link' ? (
@@ -2445,7 +2772,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                       )}
                     </div>
                     <span style={{...styles.linkButtonText, color: templateLayout === 'business-card' || templateLayout === 'pro-card' || templateLayout === 'cover-card' ? '#1a1a2e' : templateLayout === 'blogger' ? '#333' : templateStyles.textColor}}>{link.title}</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={templateLayout === 'pro-card' || templateLayout === 'cover-card' || bgIsActuallyLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.5)'} strokeWidth="2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || bgIsActuallyLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.5)'} strokeWidth="2">
                       <polyline points="9 18 15 12 9 6"/>
                     </svg>
                   </a>
@@ -2568,11 +2895,11 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               <button onClick={handleSaveContact} title="Save Contact" style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 width: 52, height: 52, borderRadius: 14,
-                background: templateLayout === 'pro-card' || templateLayout === 'cover-card' || bgIsActuallyLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)',
-                border: `1px solid ${templateLayout === 'pro-card' || templateLayout === 'cover-card' || bgIsActuallyLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)'}`,
+                background: templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || bgIsActuallyLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)',
+                border: `1px solid ${templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || bgIsActuallyLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)'}`,
                 cursor: 'pointer', padding: 0,
               }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={templateLayout === 'pro-card' || templateLayout === 'cover-card' || bgIsActuallyLight ? '#1a1a2e' : '#ffffff'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || bgIsActuallyLight ? '#1a1a2e' : '#ffffff'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
                   <circle cx="9" cy="7" r="4"/>
                   <line x1="19" y1="8" x2="19" y2="14"/>
@@ -2582,11 +2909,11 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               <button onClick={handleShare} title="Share" style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 width: 52, height: 52, borderRadius: 14,
-                background: templateLayout === 'pro-card' || templateLayout === 'cover-card' || bgIsActuallyLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)',
-                border: `1px solid ${templateLayout === 'pro-card' || templateLayout === 'cover-card' || bgIsActuallyLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)'}`,
+                background: templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || bgIsActuallyLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.12)',
+                border: `1px solid ${templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || bgIsActuallyLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)'}`,
                 cursor: 'pointer', padding: 0,
               }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={templateLayout === 'pro-card' || templateLayout === 'cover-card' || bgIsActuallyLight ? '#1a1a2e' : '#ffffff'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || bgIsActuallyLight ? '#1a1a2e' : '#ffffff'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="22" y1="2" x2="11" y2="13"/>
                   <polygon points="22 2 15 22 11 13 2 9 22 2"/>
                 </svg>

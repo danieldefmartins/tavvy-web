@@ -717,6 +717,202 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
     );
   }
 
+  /* ═══════════════════════════════════════════════════════════
+     10. BIZ TRADITIONAL — Classic centered business card
+     White card, logo top, circle photo, name/title/company centered,
+     thin divider, contact rows with icons, social row at bottom
+     ═══════════════════════════════════════════════════════════ */
+  if (tmpl.layout === 'biz-traditional') {
+    const darkBg = primary;
+    const accentC = accentCol;
+    const borderC = cs?.border || '#c9a84c';
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', background: '#fff', overflow: 'hidden' }}>
+        {/* Colored accent bar at top */}
+        <div style={{ width: '100%', height: 6, background: darkBg }} />
+        {/* Logo area */}
+        <div style={{ padding: '24px 28px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 8, background: darkBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill={accentC}><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+          </div>
+          <span style={{ fontSize: 14, fontWeight: 700, color: darkBg, letterSpacing: 0.5 }}>{SAMPLE_DATA.company}</span>
+        </div>
+        {/* Thin accent line */}
+        <div style={{ width: 50, height: 2, background: accentC, margin: '16px auto' }} />
+        {/* Circle photo */}
+        <PhotoAvatar size={100} border={`3px solid ${borderC}`} shadow="0 4px 16px rgba(0,0,0,0.1)" />
+        {/* Name / Title / Company */}
+        <div style={{ textAlign: 'center', padding: '14px 28px 0' }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: '#1a1a2e' }}>{SAMPLE_DATA.name}</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: darkBg, marginTop: 4 }}>Solutions Manager</div>
+          <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>{SAMPLE_DATA.company}</div>
+        </div>
+        {/* Divider */}
+        <div style={{ width: '80%', height: 1, background: '#e5e5e5', margin: '16px auto' }} />
+        {/* Contact rows */}
+        <div style={{ width: '100%', padding: '0 28px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {[
+            { icon: <PreviewPhoneIcon size={14} />, text: SAMPLE_DATA.phone },
+            { icon: <PreviewEmailIcon size={14} />, text: SAMPLE_DATA.email },
+            { icon: <PreviewGlobeIcon size={14} />, text: SAMPLE_DATA.website },
+            { icon: <PreviewLocationIcon size={14} />, text: '123 Main St, Los Angeles, CA 90001' },
+          ].map((row, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 32, height: 32, borderRadius: '50%', border: `1.5px solid ${darkBg}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: darkBg }}>{row.icon}</div>
+              <span style={{ fontSize: 12, color: '#444', fontWeight: 500 }}>{row.text}</span>
+            </div>
+          ))}
+        </div>
+        {/* Social icons */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 14, padding: '18px 0 6px' }}>
+          {['instagram', 'tiktok', 'linkedin'].map(s => (
+            <div key={s} style={{ width: 32, height: 32, borderRadius: '50%', background: darkBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <PreviewSocialIcon platform={s} size={14} color="#fff" />
+            </div>
+          ))}
+        </div>
+        {/* Save Contact button */}
+        <div style={{ width: 'calc(100% - 56px)', margin: '12px 28px 24px', height: 44, borderRadius: 8, background: darkBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>+ Save Contact</span>
+        </div>
+        {/* Bottom accent bar */}
+        <div style={{ width: '100%', height: 4, background: accentC }} />
+      </div>
+    );
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     11. BIZ MODERN — Split layout modern business card
+     Colored top with logo + name + title, photo overlapping,
+     curved transition, white bottom with contact rows + social
+     ═══════════════════════════════════════════════════════════ */
+  if (tmpl.layout === 'biz-modern') {
+    const darkBg = primary;
+    const accentC = accentCol;
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Colored top section */}
+        <div style={{ background: `linear-gradient(135deg, ${primary} 0%, ${secondary} 100%)`, padding: '28px 24px 60px', position: 'relative' }}>
+          {/* Logo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+            </div>
+            <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.9)', letterSpacing: 0.5 }}>{SAMPLE_DATA.company}</span>
+          </div>
+          {/* Name + Title (left) */}
+          <div style={{ paddingRight: 120 }}>
+            <div style={{ fontSize: 24, fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>{SAMPLE_DATA.name}</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.8)', marginTop: 6 }}>Solutions Manager</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', marginTop: 2 }}>{SAMPLE_DATA.company}</div>
+          </div>
+          {/* Photo (right, overlapping) */}
+          <div style={{ position: 'absolute', right: 24, bottom: -40 }}>
+            <PhotoAvatar size={110} border="4px solid #fff" shadow="0 4px 20px rgba(0,0,0,0.2)" />
+          </div>
+        </div>
+        {/* Curved transition */}
+        <svg viewBox="0 0 400 30" style={{ width: '100%', height: 24, display: 'block', marginTop: -1 }} preserveAspectRatio="none">
+          <path d="M0 0 L400 0 L400 30 C300 0 100 0 0 30 Z" fill={`url(#modernGrad_${tmpl.id})`} />
+          <defs><linearGradient id={`modernGrad_${tmpl.id}`} x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor={primary}/><stop offset="100%" stopColor={secondary}/></linearGradient></defs>
+        </svg>
+        {/* White bottom */}
+        <div style={{ background: '#fff', padding: '28px 24px 24px' }}>
+          {/* Contact rows */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {[
+              { icon: <PreviewPhoneIcon size={14} />, text: SAMPLE_DATA.phone, label: 'Work' },
+              { icon: <PreviewEmailIcon size={14} />, text: SAMPLE_DATA.email, label: 'Work' },
+              { icon: <PreviewGlobeIcon size={14} />, text: SAMPLE_DATA.website, label: 'Company' },
+              { icon: <PreviewLocationIcon size={14} />, text: '123 Main St, LA, CA 90001', label: 'Office' },
+            ].map((row, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: darkBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#fff' }}>{row.icon}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, color: '#333', fontWeight: 500 }}>{row.text}</div>
+                  <div style={{ fontSize: 10, color: '#999' }}>{row.label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Social icons */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 20 }}>
+            {['instagram', 'tiktok', 'linkedin'].map(s => (
+              <div key={s} style={{ width: 34, height: 34, borderRadius: '50%', background: accentC, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PreviewSocialIcon platform={s} size={14} color="#fff" />
+              </div>
+            ))}
+          </div>
+          {/* Save Contact button */}
+          <div style={{ width: '100%', height: 44, borderRadius: 8, background: darkBg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 16 }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>+ Save Contact</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     12. BIZ MINIMALIST — Ultra-clean minimal business card
+     Lots of whitespace, small logo, square photo, thin type,
+     minimal contact rows, text-style social handles
+     ═══════════════════════════════════════════════════════════ */
+  if (tmpl.layout === 'biz-minimalist') {
+    const accentC = accentCol;
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', background: '#fff', padding: '32px 28px 28px' }}>
+        {/* Small logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 28 }}>
+          <div style={{ width: 28, height: 28, borderRadius: 6, border: `1.5px solid ${accentC}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill={accentC}><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+          </div>
+          <span style={{ fontSize: 11, fontWeight: 500, color: '#999', letterSpacing: 1, textTransform: 'uppercase' as const }}>{SAMPLE_DATA.company}</span>
+        </div>
+        {/* Square photo */}
+        <PhotoAvatar size={120} borderRadius="12px" border="none" shadow="0 2px 12px rgba(0,0,0,0.06)" />
+        {/* Name */}
+        <div style={{ fontSize: 26, fontWeight: 300, color: primary, marginTop: 20, letterSpacing: -0.5 }}>{SAMPLE_DATA.name}</div>
+        {/* Title */}
+        <div style={{ fontSize: 11, fontWeight: 500, color: '#999', marginTop: 4, textTransform: 'uppercase' as const, letterSpacing: 2 }}>Solutions Manager</div>
+        {/* Company */}
+        <div style={{ fontSize: 12, color: '#bbb', marginTop: 2 }}>{SAMPLE_DATA.company}</div>
+        {/* Thin line */}
+        <div style={{ width: 40, height: 1, background: '#e0e0e0', margin: '20px 0' }} />
+        {/* Contact info — minimal style */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {[
+            { label: 'Phone', text: SAMPLE_DATA.phone },
+            { label: 'Email', text: SAMPLE_DATA.email },
+            { label: 'Web', text: SAMPLE_DATA.website },
+            { label: 'Address', text: '123 Main St, Los Angeles, CA 90001' },
+          ].map((row, i) => (
+            <div key={i} style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: 9, fontWeight: 600, color: '#bbb', textTransform: 'uppercase' as const, letterSpacing: 1.5 }}>{row.label}</span>
+              <span style={{ fontSize: 13, color: '#444', fontWeight: 400, marginTop: 1 }}>{row.text}</span>
+            </div>
+          ))}
+        </div>
+        {/* Social handles as text */}
+        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
+          {[
+            { platform: 'Instagram', handle: '@janesmith' },
+            { platform: 'TikTok', handle: '@janesmith' },
+            { platform: 'LinkedIn', handle: 'in/janesmith' },
+          ].map((s, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: '#bbb', width: 60 }}>{s.platform}</span>
+              <span style={{ fontSize: 12, color: accentC, fontWeight: 500 }}>{s.handle}</span>
+            </div>
+          ))}
+        </div>
+        {/* Save Contact — minimal */}
+        <div style={{ width: '100%', height: 40, borderRadius: 6, border: `1.5px solid ${primary}`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 24 }}>
+          <span style={{ fontSize: 13, fontWeight: 500, color: primary }}>Save Contact</span>
+        </div>
+      </div>
+    );
+  }
+
   return null;
 }
 
@@ -1812,6 +2008,178 @@ export default function ECardCreateScreen() {
       );
     }
 
+    // ─── BIZ TRADITIONAL ─── (classic centered business card)
+    if (templateLayout === 'biz-traditional') {
+      const darkBg = color?.primary || '#0c1b3a';
+      const accentC = color?.accent || '#c9a84c';
+      const borderC = color?.border || '#c9a84c';
+      const whiteBg = color?.cardBg || '#FFFFFF';
+      return (
+        <div className="live-card" style={{ fontFamily: font, position: 'relative', padding: 0, overflow: 'hidden', background: whiteBg }}>
+          {/* Colored accent bar */}
+          <div style={{ width: '100%', height: 6, background: darkBg }} />
+          {/* Logo area */}
+          <div style={{ padding: '20px 24px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 8, background: darkBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <IoBusinessOutline size={18} color={accentC} />
+            </div>
+            <input style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 14, fontWeight: 700, color: darkBg, letterSpacing: 0.5, flex: 1 }} placeholder="Company Name" value={company} onChange={e => setCompany(e.target.value)} />
+          </div>
+          {/* Accent line */}
+          <div style={{ width: 50, height: 2, background: accentC, margin: '14px auto' }} />
+          {/* Photo */}
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <div onClick={() => fileInputRef.current?.click()} style={{ width: 100, height: 100, borderRadius: '50%', border: `3px solid ${borderC}`, overflow: 'hidden', cursor: 'pointer', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {profileImage ? <img src={profileImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <IoCamera size={28} color="#ccc" />}
+            </div>
+          </div>
+          {/* Name / Title / Company */}
+          <div style={{ textAlign: 'center', padding: '12px 24px 0' }}>
+            <input style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 22, fontWeight: 700, color: '#1a1a2e', width: '100%', textAlign: 'center' }} placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} />
+            <input style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 14, fontWeight: 600, color: darkBg, width: '100%', textAlign: 'center', marginTop: 2 }} placeholder="Your Title" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+          </div>
+          {/* Divider */}
+          <div style={{ width: '80%', height: 1, background: '#e5e5e5', margin: '14px auto' }} />
+          {/* Contact fields + bio */}
+          <div style={{ padding: '0 24px 8px' }}>
+            <textarea style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 13, color: '#555', resize: 'none', minHeight: 36, lineHeight: 1.5, width: '100%', textAlign: 'center' }} placeholder="Short bio..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
+          </div>
+          <div style={{ padding: '0 24px 16px' }}>
+            <div className="editor-section" style={{ borderTop: 'none' }}>
+              <div className="editor-section-label" style={{ color: 'rgba(0,0,0,0.4)' }}>
+                <IoMail size={14} /> Contact Information
+              </div>
+              {renderContactFields()}
+            </div>
+            <div className="editor-section" style={{ alignItems: 'center' }}>
+              {renderFeaturedIcons()}
+            </div>
+            <div className="editor-section">
+              <div className="editor-section-label" style={{ color: 'rgba(0,0,0,0.4)' }}>
+                <IoLink size={14} /> Links
+              </div>
+              {renderLinksSection()}
+            </div>
+            {renderCategoryPicker()}
+            {renderExternalReviews()}
+            {renderGallerySection()}
+            {renderVideoSection()}
+          </div>
+          {/* Bottom accent bar */}
+          <div style={{ width: '100%', height: 4, background: accentC }} />
+        </div>
+      );
+    }
+
+    // ─── BIZ MODERN ─── (split layout modern business card)
+    if (templateLayout === 'biz-modern') {
+      const darkBg = color?.primary || '#0f2b5b';
+      const secondaryBg = color?.secondary || '#1a3f7a';
+      const accentC = color?.accent || '#3b82f6';
+      const whiteBg = color?.cardBg || '#FFFFFF';
+      return (
+        <div className="live-card" style={{ fontFamily: font, position: 'relative', padding: 0, overflow: 'hidden', background: whiteBg }}>
+          {/* Colored top section */}
+          <div style={{ background: `linear-gradient(135deg, ${darkBg} 0%, ${secondaryBg} 100%)`, padding: '24px 24px 56px', position: 'relative' }}>
+            {/* Logo */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <IoBusinessOutline size={14} color="#fff" />
+              </div>
+              <input style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.9)', letterSpacing: 0.5, flex: 1 }} placeholder="Company Name" value={company} onChange={e => setCompany(e.target.value)} />
+            </div>
+            {/* Name + Title (left) */}
+            <div style={{ paddingRight: 120 }}>
+              <input style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 24, fontWeight: 700, color: '#fff', width: '100%', lineHeight: 1.2 }} placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} />
+              <input style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.8)', width: '100%', marginTop: 4 }} placeholder="Your Title" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+            </div>
+            {/* Photo (right, overlapping) */}
+            <div onClick={() => fileInputRef.current?.click()} style={{ position: 'absolute', right: 24, bottom: -40, cursor: 'pointer' }}>
+              <div style={{ width: 110, height: 110, borderRadius: '50%', border: '4px solid #fff', overflow: 'hidden', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.2)' }}>
+                {profileImage ? <img src={profileImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <IoCamera size={28} color="rgba(255,255,255,0.4)" />}
+              </div>
+            </div>
+          </div>
+          {/* Curved transition */}
+          <svg viewBox="0 0 400 30" style={{ width: '100%', height: 24, display: 'block', marginTop: -1 }} preserveAspectRatio="none">
+            <path d="M0 0 L400 0 L400 30 C300 0 100 0 0 30 Z" fill={darkBg} />
+          </svg>
+          {/* White bottom */}
+          <div style={{ background: whiteBg, padding: '28px 24px 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <textarea style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 13, color: '#555', resize: 'none', minHeight: 36, lineHeight: 1.5, width: '100%' }} placeholder="Short bio..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
+            <div className="editor-section" style={{ borderTop: 'none' }}>
+              <div className="editor-section-label" style={{ color: 'rgba(0,0,0,0.4)' }}>
+                <IoMail size={14} /> Contact Information
+              </div>
+              {renderContactFields()}
+            </div>
+            <div className="editor-section" style={{ alignItems: 'center' }}>
+              {renderFeaturedIcons()}
+            </div>
+            <div className="editor-section">
+              <div className="editor-section-label" style={{ color: 'rgba(0,0,0,0.4)' }}>
+                <IoLink size={14} /> Links
+              </div>
+              {renderLinksSection()}
+            </div>
+            {renderCategoryPicker()}
+            {renderExternalReviews()}
+            {renderGallerySection()}
+            {renderVideoSection()}
+          </div>
+        </div>
+      );
+    }
+
+    // ─── BIZ MINIMALIST ─── (ultra-clean minimal business card)
+    if (templateLayout === 'biz-minimalist') {
+      const accentC = color?.accent || '#111111';
+      const whiteBg = color?.cardBg || '#FFFFFF';
+      return (
+        <div className="live-card" style={{ fontFamily: font, position: 'relative', padding: '28px 24px 24px', overflow: 'hidden', background: whiteBg }}>
+          {/* Small logo */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 6, border: `1.5px solid ${accentC}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <IoBusinessOutline size={14} color={accentC} />
+            </div>
+            <input style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 11, fontWeight: 500, color: '#999', letterSpacing: 1, textTransform: 'uppercase' as const, flex: 1 }} placeholder="COMPANY NAME" value={company} onChange={e => setCompany(e.target.value)} />
+          </div>
+          {/* Square photo */}
+          <div onClick={() => fileInputRef.current?.click()} style={{ width: 120, height: 120, borderRadius: 12, overflow: 'hidden', cursor: 'pointer', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+            {profileImage ? <img src={profileImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <IoCamera size={28} color="#ccc" />}
+          </div>
+          {/* Name */}
+          <input style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 26, fontWeight: 300, color: color?.primary || '#111', width: '100%', marginTop: 18, letterSpacing: -0.5 }} placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} />
+          {/* Title */}
+          <input style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 11, fontWeight: 500, color: '#999', width: '100%', marginTop: 4, textTransform: 'uppercase' as const, letterSpacing: 2 }} placeholder="YOUR TITLE" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+          {/* Thin line */}
+          <div style={{ width: 40, height: 1, background: '#e0e0e0', margin: '18px 0' }} />
+          {/* Bio */}
+          <textarea style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 13, color: '#555', resize: 'none', minHeight: 36, lineHeight: 1.5, width: '100%' }} placeholder="Short bio..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
+          {/* Contact fields */}
+          <div className="editor-section" style={{ borderTop: 'none', marginTop: 8 }}>
+            <div className="editor-section-label" style={{ color: 'rgba(0,0,0,0.35)' }}>
+              <IoMail size={14} /> Contact
+            </div>
+            {renderContactFields()}
+          </div>
+          <div className="editor-section" style={{ alignItems: 'center' }}>
+            {renderFeaturedIcons()}
+          </div>
+          <div className="editor-section">
+            <div className="editor-section-label" style={{ color: 'rgba(0,0,0,0.35)' }}>
+              <IoLink size={14} /> Links
+            </div>
+            {renderLinksSection()}
+          </div>
+          {renderCategoryPicker()}
+          {renderExternalReviews()}
+          {renderGallerySection()}
+          {renderVideoSection()}
+        </div>
+      );
+    }
+
     // Fallback — basic layout
     return (
       <div className="live-card" style={{ background: cardBg, fontFamily: font, position: 'relative' }}>
@@ -1912,7 +2280,8 @@ export default function ECardCreateScreen() {
                 const isBloggerLayout = currentTmpl.layout === 'blogger';
                 const isProCardLayout = currentTmpl.layout === 'pro-card';
                 const isCoverCardLayout = currentTmpl.layout === 'cover-card';
-                const hasOwnBg = isProCardLayout || isCoverCardLayout;
+                const isBizLayout = currentTmpl.layout === 'biz-traditional' || currentTmpl.layout === 'biz-modern' || currentTmpl.layout === 'biz-minimalist';
+                const hasOwnBg = isProCardLayout || isCoverCardLayout || isBizLayout;
                 return (
                   <div
                     className="swiper-card"
