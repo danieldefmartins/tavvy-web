@@ -61,6 +61,28 @@ function App({ Component, pageProps }: AppProps) {
         <meta name="theme-color" content="#0F1233" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+        {/* Primary Meta Tags */}
+        <title>Tavvy - Find your perfect spot in seconds</title>
+        <meta name="title" content="Tavvy - Find your perfect spot in seconds" />
+        <meta name="description" content="Discover restaurants, cafes, bars, and more near you. Real reviews from real people. Find your perfect spot in seconds, not hours." />
+
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://tavvy.com/" />
+        <meta property="og:title" content="Tavvy - Find your perfect spot in seconds" />
+        <meta property="og:description" content="Discover restaurants, cafes, bars, and more near you. Real reviews from real people. Find your perfect spot in seconds, not hours." />
+        <meta property="og:image" content="https://files.manuscdn.com/user_upload_by_module/session_file/310519663313028198/pEArRnkfvMgPUjOQ.png" />
+        <meta property="og:image:width" content="2752" />
+        <meta property="og:image:height" content="1536" />
+        <meta property="og:site_name" content="Tavvy" />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://tavvy.com/" />
+        <meta property="twitter:title" content="Tavvy - Find your perfect spot in seconds" />
+        <meta property="twitter:description" content="Discover restaurants, cafes, bars, and more near you. Real reviews from real people. Find your perfect spot in seconds, not hours." />
+        <meta property="twitter:image" content="https://files.manuscdn.com/user_upload_by_module/session_file/310519663313028198/pEArRnkfvMgPUjOQ.png" />
       </Head>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
