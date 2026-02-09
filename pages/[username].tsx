@@ -1089,29 +1089,29 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           cardData.company ? `at ${cardData.company}` : '',
           cardData.phone ? `\u260E ${cardData.phone}` : '',
           cardData.email ? `\u2709 ${cardData.email}` : '',
-        ].filter(Boolean).join(' · ')} />
+        ].filter(Boolean).join(' · ')} key="description" />
         <meta property="og:site_name" content="Tavvy" />
-        <meta property="og:title" content={`${cardData.fullName}${cardData.title ? ` — ${cardData.title}` : ''}`} />
+        <meta property="og:title" content={`${cardData.fullName}${cardData.title ? ` — ${cardData.title}` : ''}`} key="og:title" />
         <meta property="og:description" content={[
           cardData.company || '',
           cardData.phone || '',
           cardData.email || '',
           cardData.city || '',
-        ].filter(Boolean).join(' · ') || 'Digital Business Card on Tavvy'} />
-        <meta property="og:type" content="profile" />
-        <meta property="og:url" content={`https://tavvy.com/${cardData.slug}`} />
-        <meta property="og:image" content={`https://tavvy.com/api/og/${cardData.slug}`} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
+        ].filter(Boolean).join(' · ') || 'Digital Business Card on Tavvy'} key="og:description" />
+        <meta property="og:type" content="profile" key="og:type" />
+        <meta property="og:url" content={`https://tavvy.com/${cardData.slug}`} key="og:url" />
+        <meta property="og:image" content={`https://tavvy.com/api/og/${cardData.slug}`} key="og:image" />
+        <meta property="og:image:width" content="1200" key="og:image:width" />
+        <meta property="og:image:height" content="630" key="og:image:height" />
         <meta property="og:image:alt" content={`${cardData.fullName}'s digital business card on Tavvy`} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${cardData.fullName}${cardData.title ? ` — ${cardData.title}` : ''}`} />
+        <meta name="twitter:card" content="summary_large_image" key="twitter:card" />
+        <meta name="twitter:title" content={`${cardData.fullName}${cardData.title ? ` — ${cardData.title}` : ''}`} key="twitter:title" />
         <meta name="twitter:description" content={[
           cardData.company || '',
           cardData.city || '',
           cardData.description || '',
-        ].filter(Boolean).join(' · ') || 'Digital Business Card on Tavvy'} />
-        <meta name="twitter:image" content={`https://tavvy.com/api/og/${cardData.slug}`} />
+        ].filter(Boolean).join(' · ') || 'Digital Business Card on Tavvy'} key="twitter:description" />
+        <meta name="twitter:image" content={`https://tavvy.com/api/og/${cardData.slug}`} key="twitter:image" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
         <style>{`
