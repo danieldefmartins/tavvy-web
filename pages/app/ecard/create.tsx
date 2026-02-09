@@ -61,6 +61,7 @@ import {
   IoStar,
   IoChevronDown,
   IoLogoGoogle,
+  IoBusinessOutline,
 } from 'react-icons/io5';
 
 const ACCENT_GREEN = '#00C853';
@@ -674,6 +675,48 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
     );
   }
 
+  // ─── COVER CARD ─── Cover photo top, white bottom
+  if (tmpl.layout === 'cover-card') {
+    const accentC = accentCol;
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Cover photo */}
+        <div style={{ width: '100%', height: 200, position: 'relative', overflow: 'hidden' }}>
+          <img src={SAMPLE_BANNER} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          {/* Logo overlay */}
+          <div style={{ position: 'absolute', top: 14, right: 14, background: 'rgba(255,255,255,0.9)', borderRadius: 10, padding: '6px 10px', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill={primary}><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+            <span style={{ fontSize: 10, fontWeight: 600, color: primary }}>Logo</span>
+          </div>
+        </div>
+        {/* Wavy accent */}
+        <svg viewBox="0 0 400 20" style={{ width: '100%', height: 16, display: 'block', marginTop: -12 }} preserveAspectRatio="none">
+          <path d="M0 20 C100 0 200 18 300 4 C350 -2 380 8 400 0 L400 20 Z" fill={cardBgCol} />
+          <path d="M0 20 C80 6 160 20 260 6 C320 -1 370 12 400 4 L400 20 Z" fill={accentC} opacity="0.12" />
+        </svg>
+        {/* White bottom */}
+        <div style={{ background: cardBgCol, padding: '4px 28px 28px' }}>
+          <div style={{ fontSize: 22, fontWeight: 700, color: '#1a1a2e', marginBottom: 2 }}>Arianne S. Richardson</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: '#444', marginBottom: 2 }}>Founder & Principal Consultant</div>
+          <div style={{ fontSize: 12, color: '#888', fontStyle: 'italic', marginBottom: 8 }}>A.Rich Culture</div>
+          <div style={{ fontSize: 12, color: '#555', lineHeight: 1.6, marginBottom: 12 }}>Business Consulting & Talent Management for Caribbean Creatives</div>
+          {/* Contact rows */}
+          {[
+            { icon: <PreviewEmailIcon size={14} />, text: 'mail@arichculture.com', bg: primary },
+            { icon: <PreviewPhoneIcon size={14} />, text: '+1 561 485 7408', bg: accentC },
+            { icon: <PreviewMsgIcon size={14} />, text: 'Send a Text', bg: primary },
+            { icon: <PreviewGlobeIcon size={14} />, text: 'www.arichculture.com', bg: accentC },
+          ].map((row, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: row.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#fff' }}>{row.icon}</div>
+              <span style={{ fontSize: 13, color: '#333', fontWeight: 500 }}>{row.text}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return null;
 }
 
@@ -725,6 +768,7 @@ export default function ECardCreateScreen() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [website, setWebsite] = useState('');
+  const [company, setCompany] = useState('');
   const [address, setAddress] = useState('');
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
@@ -1006,7 +1050,7 @@ export default function ECardCreateScreen() {
         user_id: user.id, slug, full_name: name.trim(),
         title: titleRole || undefined, bio: bio || undefined,
         email: email || undefined, phone: phone || undefined,
-        website: website || undefined, city: address || undefined,
+        website: website || undefined, company: company || undefined, city: address || undefined,
         profile_photo_url: photoUrl || undefined,
         banner_image_url: bannerUrl || undefined,
         profile_photo_size: photoSize.id,
@@ -1643,46 +1687,118 @@ export default function ECardCreateScreen() {
       );
     }
 
-    // ─── PRO CARD ───
+    // ─── PRO CARD ─── (dark top with name/photo, diagonal, white bottom)
     if (templateLayout === 'pro-card') {
+      const darkBg = `linear-gradient(135deg, ${color?.primary || '#1e40af'}, ${color?.secondary || '#3b82f6'})`;
+      const goldAccent = color?.accent || '#fbbf24';
+      const whiteBg = color?.cardBg || '#FFFFFF';
       return (
-        <div className="live-card" style={{ background: cardBg, fontFamily: font, position: 'relative', padding: 0, overflow: 'hidden' }}>
-          {/* Banner */}
-          <div onClick={() => bannerInputRef.current?.click()} style={{ height: 120, cursor: 'pointer', background: isLight ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '20px 20px 0 0', overflow: 'hidden' }}>
-            {bannerImage ? <img src={bannerImage} alt="Banner" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                <IoImage size={24} color={isLight ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.2)'} />
-                <span style={{ fontSize: 11, color: isLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.3)' }}>Add banner</span>
+        <div className="live-card" style={{ fontFamily: font, position: 'relative', padding: 0, overflow: 'hidden', background: whiteBg }}>
+          {/* Dark top section */}
+          <div style={{ background: darkBg, padding: '24px 24px 50px', position: 'relative', minHeight: 200 }}>
+            {/* Company badge */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: goldAccent, flexShrink: 0 }} />
+              <input style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' as const, color: goldAccent, width: '100%' }} placeholder="COMPANY NAME" value={company} onChange={e => setCompany(e.target.value)} />
+            </div>
+            {/* Name (left) + Photo (right) */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div style={{ flex: 1, paddingRight: 12 }}>
+                <input style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 24, fontWeight: 700, color: goldAccent, width: '100%', lineHeight: 1.2 }} placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} />
+                <input style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 14, fontWeight: 600, color: goldAccent, width: '100%', marginTop: 8 }} placeholder="Your Title" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
               </div>
-            )}
-          </div>
-          {/* Overlapping photo */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: -40 }}>
-            <div onClick={() => fileInputRef.current?.click()} style={{
-              width: 80, height: 80, borderRadius: '50%', cursor: 'pointer',
-              border: `3px solid ${color?.accent || '#fbbf24'}`, overflow: 'hidden',
-              background: isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.1)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2,
-            }}>
-              {profileImage ? <img src={profileImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <IoCamera size={24} color={isLight ? 'rgba(0,0,0,0.25)' : 'rgba(255,255,255,0.3)'} />}
+              {/* Photo with decorative ring */}
+              <div onClick={() => fileInputRef.current?.click()} style={{ position: 'relative', flexShrink: 0, cursor: 'pointer' }}>
+                <div style={{ width: 120, height: 120, borderRadius: '50%', border: `2px solid ${goldAccent}40`, padding: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: '100%', height: '100%', borderRadius: '50%', border: `1px dashed ${goldAccent}30`, padding: 3, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {profileImage ? <img src={profileImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <IoCamera size={28} color="rgba(255,255,255,0.4)" />}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          {/* Content */}
-          <div style={{ padding: '8px 20px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+          {/* Diagonal transition */}
+          <div style={{ position: 'relative', height: 30, marginTop: -1 }}>
+            <div style={{ position: 'absolute', inset: 0, background: color?.primary || '#1e40af' }} />
+            <svg viewBox="0 0 400 30" style={{ width: '100%', height: 30, display: 'block', position: 'relative', zIndex: 1 }} preserveAspectRatio="none">
+              <path d="M0 30 L400 0 L400 30 Z" fill={whiteBg} />
+            </svg>
+          </div>
+          {/* White bottom section */}
+          <div style={{ background: whiteBg, padding: '4px 24px 28px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <textarea style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 14, color: '#555', resize: 'none', minHeight: 44, lineHeight: 1.6, width: '100%' }} placeholder="Short bio about yourself..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
+            <div style={{ height: 1, background: '#e5e5e5' }} />
             <div className="editor-section" style={{ borderTop: 'none' }}>
-              {renderNameFields()}
+              <div className="editor-section-label" style={{ color: 'rgba(0,0,0,0.4)' }}>
+                <IoMail size={14} /> Contact Information
+              </div>
+              {renderContactFields()}
             </div>
             <div className="editor-section" style={{ alignItems: 'center' }}>
               {renderFeaturedIcons()}
             </div>
             <div className="editor-section">
-              <div className="editor-section-label" style={{ color: txtSecondary }}>
+              <div className="editor-section-label" style={{ color: 'rgba(0,0,0,0.4)' }}>
+                <IoLink size={14} /> Links
+              </div>
+              {renderLinksSection()}
+            </div>
+            {renderCategoryPicker()}
+            {renderExternalReviews()}
+            {renderGallerySection()}
+            {renderVideoSection()}
+          </div>
+        </div>
+      );
+    }
+
+    // ─── COVER CARD ─── (cover photo top, white bottom)
+    if (templateLayout === 'cover-card') {
+      const primaryCol = color?.primary || '#7c3aed';
+      const accentCol = color?.accent || '#f97316';
+      const whiteBg = color?.cardBg || '#FFFFFF';
+      return (
+        <div className="live-card" style={{ fontFamily: font, position: 'relative', padding: 0, overflow: 'hidden', background: whiteBg }}>
+          {/* Cover photo section */}
+          <div onClick={() => fileInputRef.current?.click()} style={{ width: '100%', height: 220, cursor: 'pointer', background: `linear-gradient(135deg, ${primaryCol}, ${color?.secondary || primaryCol})`, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+            {profileImage ? <img src={profileImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                <IoImage size={40} color="rgba(255,255,255,0.4)" />
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>Add Cover Photo</span>
+              </div>
+            )}
+            {/* Logo overlay placeholder */}
+            <div style={{ position: 'absolute', top: 14, right: 14, background: 'rgba(255,255,255,0.85)', borderRadius: 10, padding: '6px 10px', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <IoBusinessOutline size={16} color={primaryCol} />
+              <span style={{ fontSize: 10, color: primaryCol, fontWeight: 600 }}>Logo</span>
+            </div>
+          </div>
+          {/* Wavy accent transition */}
+          <svg viewBox="0 0 400 20" style={{ width: '100%', height: 16, display: 'block', marginTop: -12 }} preserveAspectRatio="none">
+            <path d="M0 20 C100 0 200 18 300 4 C350 -2 380 8 400 0 L400 20 Z" fill={whiteBg} />
+            <path d="M0 20 C80 6 160 20 260 6 C320 -1 370 12 400 4 L400 20 Z" fill={accentCol} opacity="0.12" />
+          </svg>
+          {/* White bottom section */}
+          <div style={{ background: whiteBg, padding: '4px 24px 28px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div className="card-fields">
+              <input style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 22, fontWeight: 700, color: '#1a1a2e', width: '100%' }} placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} />
+              <input style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 14, fontWeight: 600, color: '#444', width: '100%' }} placeholder="Your Title" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+              <input style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 13, color: '#888', fontStyle: 'italic', width: '100%' }} placeholder="Company Name" value={company} onChange={e => setCompany(e.target.value)} />
+              <textarea style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 14, color: '#555', resize: 'none', minHeight: 44, lineHeight: 1.6, width: '100%' }} placeholder="Short bio..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
+            </div>
+            <div className="editor-section">
+              <div className="editor-section-label" style={{ color: 'rgba(0,0,0,0.4)' }}>
                 <IoMail size={14} /> Contact Information
               </div>
               {renderContactFields()}
             </div>
+            <div className="editor-section" style={{ alignItems: 'center' }}>
+              {renderFeaturedIcons()}
+            </div>
             <div className="editor-section">
-              <div className="editor-section-label" style={{ color: txtSecondary }}>
+              <div className="editor-section-label" style={{ color: 'rgba(0,0,0,0.4)' }}>
                 <IoLink size={14} /> Links
               </div>
               {renderLinksSection()}
@@ -1794,11 +1910,15 @@ export default function ECardCreateScreen() {
                 const cs = currentTmpl.colorSchemes[0];
                 const bg = cs?.background?.includes('gradient') ? cs.background : `linear-gradient(135deg, ${cs?.primary || '#333'}, ${cs?.secondary || '#555'})`;
                 const isBloggerLayout = currentTmpl.layout === 'blogger';
+                const isProCardLayout = currentTmpl.layout === 'pro-card';
+                const isCoverCardLayout = currentTmpl.layout === 'cover-card';
+                const hasOwnBg = isProCardLayout || isCoverCardLayout;
                 return (
                   <div
                     className="swiper-card"
                     style={{
-                      background: isBloggerLayout ? (cs?.background || '#f8e8ee') : bg,
+                      background: hasOwnBg ? 'transparent' : isBloggerLayout ? (cs?.background || '#f8e8ee') : bg,
+                      overflow: hasOwnBg ? 'hidden' : undefined,
                       borderColor: currentTmpl.layout === 'business-card' ? (cs?.border || 'transparent') : 'transparent',
                       borderWidth: currentTmpl.layout === 'business-card' ? 1 : 0,
                       borderStyle: 'solid',
