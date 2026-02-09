@@ -13,9 +13,12 @@ import AppLayout from '../../../components/AppLayout';
 import { 
   getCardById, 
   updateCard,
+  getCardLinks,
   CardData, 
+  LinkItem,
   getCardUrl,
 } from '../../../lib/ecard';
+import CardPreview from '../../../components/ecard/CardPreview';
 import StyledQRCode, { QR_STYLE_PRESETS, QRStyleConfig } from '../../../components/ecard/StyledQRCode';
 import { 
   IoArrowBack, 
@@ -47,20 +50,18 @@ export default function ECardPreviewScreen() {
 
   const [loading, setLoading] = useState(true);
   const [cardData, setCardData] = useState<CardData | null>(null);
+  const [cardLinks, setCardLinks] = useState<LinkItem[]>([]);
   const [showQRModal, setShowQRModal] = useState(false);
   const [qrStyle, setQrStyle] = useState<Partial<QRStyleConfig>>({});
   const qrContainerRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [cardId, setCardId] = useState<string | null>(null);
-  const [iframeLoaded, setIframeLoaded] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   // Quick editor state
   const [showToolbar, setShowToolbar] = useState(false);
   const [toolbarTab, setToolbarTab] = useState<'visibility' | 'colors'>('visibility');
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  const [iframeKey, setIframeKey] = useState(0);
 
   // Editable fields (local state for live editing)
   const [showContactInfo, setShowContactInfo] = useState(true);
@@ -86,9 +87,13 @@ export default function ECardPreviewScreen() {
       }
 
       try {
-        const card = await getCardById(cardId);
+        const [card, links] = await Promise.all([
+          getCardById(cardId),
+          getCardLinks(cardId),
+        ]);
         if (card) {
           setCardData(card);
+          setCardLinks(links || []);
           // Initialize editable fields from card data
           setShowContactInfo((card as any).show_contact_info !== false);
           setShowSocialIcons((card as any).show_social_icons !== false);
@@ -116,10 +121,15 @@ export default function ECardPreviewScreen() {
         gradient_color_1: gradientColor1,
         gradient_color_2: gradientColor2,
       } as any);
+      // Update local card data to reflect changes instantly
+      setCardData(prev => prev ? {
+        ...prev,
+        show_contact_info: showContactInfo,
+        show_social_icons: showSocialIcons,
+        gradient_color_1: gradientColor1,
+        gradient_color_2: gradientColor2,
+      } as any : prev);
       setHasChanges(false);
-      // Refresh the iframe to show updated card
-      setIframeLoaded(false);
-      setIframeKey(prev => prev + 1);
     } catch (error) {
       console.error('Error saving changes:', error);
     } finally {
@@ -180,10 +190,21 @@ export default function ECardPreviewScreen() {
     }
   };
 
-  // Refresh preview
-  const refreshPreview = () => {
-    setIframeLoaded(false);
-    setIframeKey(prev => prev + 1);
+  // Refresh preview by reloading card data
+  const refreshPreview = async () => {
+    if (!cardId) return;
+    try {
+      const [card, links] = await Promise.all([
+        getCardById(cardId),
+        getCardLinks(cardId),
+      ]);
+      if (card) {
+        setCardData(card);
+        setCardLinks(links || []);
+      }
+    } catch (error) {
+      console.error('Error refreshing preview:', error);
+    }
   };
 
   if (loading) {
@@ -222,10 +243,17 @@ export default function ECardPreviewScreen() {
     );
   }
 
-  // Build the public card URL for the iframe
-  const publicCardUrl = cardData.slug ? getCardUrl(cardData.slug) : null;
   const isDraft = !cardData.is_published;
   const isOwner = user && cardData.user_id === user.id;
+
+  // Build a preview-ready version of card data with live edits applied
+  const previewCard: CardData = {
+    ...cardData,
+    gradient_color_1: gradientColor1,
+    gradient_color_2: gradientColor2,
+    show_contact_info: showContactInfo,
+    show_social_icons: showSocialIcons,
+  } as any;
 
   return (
     <>
@@ -256,42 +284,13 @@ export default function ECardPreviewScreen() {
             </div>
           </header>
 
-          {/* Card Preview — Embedded Public Card */}
-          <div className="card-iframe-container">
-            {publicCardUrl ? (
-              <>
-                {!iframeLoaded && (
-                  <div className="iframe-loading">
-                    <div className="spinner" />
-                    <p style={{ color: isDark ? '#94A3B8' : '#6B7280', marginTop: 12, fontSize: 14 }}>Loading preview...</p>
-                  </div>
-                )}
-                <iframe
-                  ref={iframeRef}
-                  key={`preview-${iframeKey}`}
-                  src={`${publicCardUrl}?preview=true&t=${iframeKey}`}
-                  className="card-iframe"
-                  style={{ opacity: iframeLoaded ? 1 : 0 }}
-                  onLoad={() => setIframeLoaded(true)}
-                  title={`${cardData.full_name}'s Card Preview`}
-                  scrolling="yes"
-                  sandbox="allow-scripts allow-same-origin allow-popups allow-top-navigation"
-                  loading="eager"
-                />
-              </>
-            ) : (
-              <div className="draft-notice">
-                <div className="draft-icon">📝</div>
-                <h3 style={{ color: isDark ? '#fff' : '#333', margin: '0 0 8px' }}>Draft Card</h3>
-                <p style={{ color: isDark ? '#94A3B8' : '#6B7280', margin: 0, fontSize: 14, textAlign: 'center' }}>
-                  Publish your card to see a live preview. You can still edit and share after publishing.
-                </p>
-              </div>
-            )}
+          {/* Card Preview — Direct Render (no iframe) */}
+          <div className="card-preview-container">
+            <CardPreview card={previewCard} links={cardLinks} />
           </div>
 
           {/* Status Badge */}
-          {isDraft && publicCardUrl && (
+          {isDraft && (
             <div className="draft-banner">
               <span>This card is not published yet. Publish to make it visible to others.</span>
             </div>
@@ -392,7 +391,7 @@ export default function ECardPreviewScreen() {
               {hasChanges && (
                 <button className="save-btn" onClick={saveChanges} disabled={saving}>
                   <IoSave size={16} />
-                  <span>{saving ? 'Saving...' : 'Save & Refresh'}</span>
+                  <span>{saving ? 'Saving...' : 'Save Changes'}</span>
                 </button>
               )}
             </div>
@@ -591,36 +590,15 @@ export default function ECardPreviewScreen() {
             margin: 0;
           }
 
-          /* Card Iframe Container */
-          .card-iframe-container {
+          /* Card Preview Container */
+          .card-preview-container {
             margin: 0 16px 16px;
             border-radius: 20px;
             overflow: hidden;
             position: relative;
             background: ${isDark ? '#1E293B' : '#fff'};
             border: 1px solid ${isDark ? '#334155' : '#E5E7EB'};
-            min-height: 500px;
-          }
-
-          .card-iframe {
-            width: 100%;
-            height: 70vh;
-            min-height: 500px;
-            border: none;
-            display: block;
-            transition: opacity 0.3s ease;
-          }
-
-          .iframe-loading {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
           }
 
           .spinner {
