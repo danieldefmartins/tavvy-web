@@ -1017,6 +1017,23 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
     isDark: !bgIsActuallyLight,
   };
 
+  // Compute the best icon color for social buttons:
+  // If the button background is light (e.g. #f8f9fa, rgba with low alpha on white), icons should be dark.
+  // If the button background is dark, icons should be light.
+  const getSocialIconColor = (): string => {
+    const btnBg = templateStyles.buttonBg;
+    // For templates with white card sections, the social buttons sit on a light background
+    const isOnLightSection = templateLayout === 'pro-card' || templateLayout === 'cover-card' || 
+      templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || 
+      templateLayout === 'biz-minimalist' || templateLayout === 'pro-realtor' || 
+      templateLayout === 'blogger';
+    if (isOnLightSection) return '#333333';
+    // For templates with dark gradient backgrounds
+    if (bgIsActuallyLight) return '#333333';
+    return templateStyles.textColor;
+  };
+  const socialIconColor = getSocialIconColor();
+
   // Get button style based on cardData.buttonStyle
   const getButtonStyleOverrides = () => {
     const buttonStyle = cardData.buttonStyle || 'fill';
@@ -2352,10 +2369,25 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             </div>
           )}
 
-          {/* Social Links */}
-          {cardData.showSocialIcons && hasSocialLinks && (
+          {/* Social Links — skip platforms already shown in Featured Socials */}
+          {cardData.showSocialIcons && hasSocialLinks && (() => {
+            const featuredPlatforms = new Set(
+              (cardData.featuredSocials || []).map((item: any) => typeof item === 'string' ? item : item.platform)
+            );
+            const showInstagram = cardData.socialInstagram && !featuredPlatforms.has('instagram');
+            const showFacebook = cardData.socialFacebook && !featuredPlatforms.has('facebook');
+            const showLinkedin = cardData.socialLinkedin && !featuredPlatforms.has('linkedin');
+            const showTwitter = cardData.socialTwitter && !featuredPlatforms.has('twitter');
+            const showTiktok = cardData.socialTiktok && !featuredPlatforms.has('tiktok');
+            const showYoutube = cardData.socialYoutube && !featuredPlatforms.has('youtube');
+            const showSnapchat = cardData.socialSnapchat && !featuredPlatforms.has('snapchat');
+            const showPinterest = cardData.socialPinterest && !featuredPlatforms.has('pinterest');
+            const showWhatsapp = cardData.socialWhatsapp && !featuredPlatforms.has('whatsapp');
+            const hasAny = showInstagram || showFacebook || showLinkedin || showTwitter || showTiktok || showYoutube || showSnapchat || showPinterest || showWhatsapp;
+            if (!hasAny) return null;
+            return (
             <div style={styles.socialLinks}>
-              {cardData.socialInstagram && (
+              {showInstagram && (
                 <a 
                   href={`https://instagram.com/${cardData.socialInstagram}`}
                   target="_blank"
@@ -2364,12 +2396,12 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   style={{...styles.socialButton, background: templateStyles.buttonBg, borderColor: templateStyles.buttonBorder}}
                   title="Instagram"
                 >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill={templateStyles.textColor}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill={socialIconColor}>
                     <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                   </svg>
                 </a>
               )}
-              {cardData.socialFacebook && (
+              {showFacebook && (
                 <a 
                   href={cardData.socialFacebook.startsWith('http') ? cardData.socialFacebook : `https://facebook.com/${cardData.socialFacebook}`}
                   target="_blank"
@@ -2378,12 +2410,12 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   style={{...styles.socialButton, background: templateStyles.buttonBg, borderColor: templateStyles.buttonBorder}}
                   title="Facebook"
                 >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill={templateStyles.textColor}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill={socialIconColor}>
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                   </svg>
                 </a>
               )}
-              {cardData.socialLinkedin && (
+              {showLinkedin && (
                 <a 
                   href={cardData.socialLinkedin.startsWith('http') ? cardData.socialLinkedin : `https://linkedin.com/in/${cardData.socialLinkedin}`}
                   target="_blank"
@@ -2392,12 +2424,12 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   style={{...styles.socialButton, background: templateStyles.buttonBg, borderColor: templateStyles.buttonBorder}}
                   title="LinkedIn"
                 >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill={templateStyles.textColor}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill={socialIconColor}>
                     <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
                   </svg>
                 </a>
               )}
-              {cardData.socialTwitter && (
+              {showTwitter && (
                 <a 
                   href={`https://twitter.com/${cardData.socialTwitter}`}
                   target="_blank"
@@ -2406,12 +2438,12 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   style={{...styles.socialButton, background: templateStyles.buttonBg, borderColor: templateStyles.buttonBorder}}
                   title="X (Twitter)"
                 >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill={templateStyles.textColor}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill={socialIconColor}>
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                   </svg>
                 </a>
               )}
-              {cardData.socialTiktok && (
+              {showTiktok && (
                 <a 
                   href={`https://tiktok.com/@${cardData.socialTiktok}`}
                   target="_blank"
@@ -2420,12 +2452,12 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   style={{...styles.socialButton, background: templateStyles.buttonBg, borderColor: templateStyles.buttonBorder}}
                   title="TikTok"
                 >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill={templateStyles.textColor}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill={socialIconColor}>
                     <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
                   </svg>
                 </a>
               )}
-              {cardData.socialYoutube && (
+              {showYoutube && (
                 <a 
                   href={cardData.socialYoutube.startsWith('http') ? cardData.socialYoutube : `https://youtube.com/@${cardData.socialYoutube}`}
                   target="_blank"
@@ -2434,12 +2466,12 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   style={{...styles.socialButton, background: templateStyles.buttonBg, borderColor: templateStyles.buttonBorder}}
                   title="YouTube"
                 >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill={templateStyles.textColor}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill={socialIconColor}>
                     <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                   </svg>
                 </a>
               )}
-              {cardData.socialSnapchat && (
+              {showSnapchat && (
                 <a 
                   href={`https://snapchat.com/add/${cardData.socialSnapchat}`}
                   target="_blank"
@@ -2448,12 +2480,12 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   style={{...styles.socialButton, background: templateStyles.buttonBg, borderColor: templateStyles.buttonBorder}}
                   title="Snapchat"
                 >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill={templateStyles.textColor}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill={socialIconColor}>
                     <path d="M12.206.793c.99 0 4.347.276 5.93 3.821.529 1.193.403 3.219.299 4.847l-.003.06c-.012.18-.022.345-.03.51.075.045.203.09.401.09.3-.016.659-.12 1.033-.301.165-.088.344-.104.464-.104.182 0 .359.029.509.09.45.149.734.479.734.838.015.449-.39.839-1.213 1.168-.089.029-.209.075-.344.119-.45.135-1.139.36-1.333.81-.09.224-.061.524.12.868l.015.015c.06.136 1.526 3.475 4.791 4.014.255.044.435.27.42.509 0 .075-.015.149-.045.225-.24.569-1.273.988-3.146 1.271-.059.091-.12.375-.164.57-.029.179-.074.36-.134.553-.076.271-.27.405-.555.405h-.03c-.135 0-.313-.031-.538-.074-.36-.075-.765-.135-1.273-.135-.3 0-.599.015-.913.074-.6.104-1.123.464-1.723.884-.853.599-1.826 1.288-3.294 1.288-.06 0-.119-.015-.18-.015h-.149c-1.468 0-2.427-.675-3.279-1.288-.599-.42-1.107-.779-1.707-.884-.314-.045-.629-.074-.928-.074-.54 0-.958.089-1.272.149-.211.043-.391.074-.54.074-.374 0-.523-.224-.583-.42-.061-.192-.09-.389-.135-.567-.046-.181-.105-.494-.166-.57-1.918-.222-2.95-.642-3.189-1.226-.031-.063-.052-.15-.055-.225-.015-.243.165-.465.42-.509 3.264-.54 4.73-3.879 4.791-4.02l.016-.029c.18-.345.224-.645.119-.869-.195-.434-.884-.658-1.332-.809-.121-.029-.24-.074-.346-.119-1.107-.435-1.257-.93-1.197-1.273.09-.479.674-.793 1.168-.793.146 0 .27.029.383.074.42.194.789.3 1.104.3.234 0 .384-.06.465-.105l-.046-.569c-.098-1.626-.225-3.651.307-4.837C7.392 1.077 10.739.807 11.727.807l.419-.015h.06z"/>
                   </svg>
                 </a>
               )}
-              {cardData.socialPinterest && (
+              {showPinterest && (
                 <a 
                   href={`https://pinterest.com/${cardData.socialPinterest}`}
                   target="_blank"
@@ -2462,12 +2494,12 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   style={{...styles.socialButton, background: templateStyles.buttonBg, borderColor: templateStyles.buttonBorder}}
                   title="Pinterest"
                 >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill={templateStyles.textColor}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill={socialIconColor}>
                     <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/>
                   </svg>
                 </a>
               )}
-              {cardData.socialWhatsapp && (
+              {showWhatsapp && (
                 <a 
                   href={`https://wa.me/${cardData.socialWhatsapp.replace(/[^0-9]/g, '')}`}
                   target="_blank"
@@ -2476,14 +2508,15 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   style={{...styles.socialButton, background: templateStyles.buttonBg, borderColor: templateStyles.buttonBorder}}
                   title="WhatsApp"
                 >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill={templateStyles.textColor}>
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill={socialIconColor}>
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                   </svg>
                 </a>
               )}
 
             </div>
-          )}
+            );
+          })()}
 
           {/* Divider */}
           <div style={{...styles.divider, background: templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || bgIsActuallyLight ? 'linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent)' : 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)'}} />
@@ -3017,7 +3050,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   }}
                 >
                   <div style={{...styles.linkIconContainer, background: bgIsActuallyLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)', color: templateStyles.textColor}}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill={templateStyles.textColor}><path d="M3.5 3h5.914c1.398 0 2.513.362 3.344 1.087.831.725 1.247 1.687 1.247 2.888 0 .9-.225 1.65-.675 2.25-.45.6-1.05 1.012-1.8 1.237v.05c.975.175 1.725.6 2.25 1.275.525.675.787 1.5.787 2.475 0 1.35-.462 2.4-1.387 3.15-.925.75-2.175 1.125-3.75 1.125H3.5V3zm3 4.5h2.5c.55 0 .987-.15 1.312-.45.325-.3.488-.7.488-1.2 0-.5-.163-.887-.488-1.162-.325-.275-.762-.413-1.312-.413H6.5v3.225zm0 5h2.75c.6 0 1.075-.162 1.425-.487.35-.325.525-.775.525-1.35 0-.575-.175-1.025-.525-1.35-.35-.325-.825-.488-1.425-.488H6.5V12.5zM16 3h5c1.35 0 2.4.362 3.15 1.087.75.725 1.125 1.7 1.125 2.925 0 .9-.225 1.65-.675 2.25-.45.6-1.05 1.012-1.8 1.237v.05c.975.175 1.725.6 2.25 1.275.525.675.787 1.5.787 2.475 0 1.35-.462 2.4-1.387 3.15-.925.75-2.175 1.125-3.75 1.125H16V3zm3 4.5h2c.55 0 .987-.15 1.312-.45.325-.3.488-.7.488-1.2 0-.5-.163-.887-.488-1.162-.325-.275-.762-.413-1.312-.413H19v3.225zm0 5h2.25c.6 0 1.075-.162 1.425-.487.35-.325.525-.775.525-1.35 0-.575-.175-1.025-.525-1.35-.35-.325-.825-.488-1.425-.488H19V12.5z"/></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill={socialIconColor}><path d="M3.5 3h5.914c1.398 0 2.513.362 3.344 1.087.831.725 1.247 1.687 1.247 2.888 0 .9-.225 1.65-.675 2.25-.45.6-1.05 1.012-1.8 1.237v.05c.975.175 1.725.6 2.25 1.275.525.675.787 1.5.787 2.475 0 1.35-.462 2.4-1.387 3.15-.925.75-2.175 1.125-3.75 1.125H3.5V3zm3 4.5h2.5c.55 0 .987-.15 1.312-.45.325-.3.488-.7.488-1.2 0-.5-.163-.887-.488-1.162-.325-.275-.762-.413-1.312-.413H6.5v3.225zm0 5h2.75c.6 0 1.075-.162 1.425-.487.35-.325.525-.775.525-1.35 0-.575-.175-1.025-.525-1.35-.35-.325-.825-.488-1.425-.488H6.5V12.5zM16 3h5c1.35 0 2.4.362 3.15 1.087.75.725 1.125 1.7 1.125 2.925 0 .9-.225 1.65-.675 2.25-.45.6-1.05 1.012-1.8 1.237v.05c.975.175 1.725.6 2.25 1.275.525.675.787 1.5.787 2.475 0 1.35-.462 2.4-1.387 3.15-.925.75-2.175 1.125-3.75 1.125H16V3zm3 4.5h2c.55 0 .987-.15 1.312-.45.325-.3.488-.7.488-1.2 0-.5-.163-.887-.488-1.162-.325-.275-.762-.413-1.312-.413H19v3.225zm0 5h2.25c.6 0 1.075-.162 1.425-.487.35-.325.525-.775.525-1.35 0-.575-.175-1.025-.525-1.35-.35-.325-.825-.488-1.425-.488H19V12.5z"/></svg>
                   </div>
                   <span style={{...styles.linkButtonText, color: templateStyles.textColor}}>BBB</span>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={bgIsActuallyLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.5)'} strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>

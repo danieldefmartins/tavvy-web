@@ -1,10 +1,10 @@
 /**
- * eCard Preview Screen
- * Shows the actual public card in an iframe so it always matches what visitors see.
- * Keeps QR code, share, copy link, and edit actions outside the iframe.
+ * eCard Interactive Preview Screen
+ * Shows the actual public card with a floating quick-edit toolbar.
+ * Users can toggle sections, change colors, and see live updates.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
@@ -12,6 +12,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import AppLayout from '../../../components/AppLayout';
 import { 
   getCardById, 
+  updateCard,
   CardData, 
   getCardUrl,
 } from '../../../lib/ecard';
@@ -25,6 +26,13 @@ import {
   IoClose,
   IoDownload,
   IoCreate,
+  IoColorPalette,
+  IoEye,
+  IoEyeOff,
+  IoChevronDown,
+  IoChevronUp,
+  IoRefresh,
+  IoSave,
 } from 'react-icons/io5';
 
 const ACCENT_GREEN = '#00C853';
@@ -41,10 +49,24 @@ export default function ECardPreviewScreen() {
   const [cardData, setCardData] = useState<CardData | null>(null);
   const [showQRModal, setShowQRModal] = useState(false);
   const [qrStyle, setQrStyle] = useState<Partial<QRStyleConfig>>({});
-  const qrContainerRef = React.useRef<HTMLDivElement>(null);
+  const qrContainerRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [cardId, setCardId] = useState<string | null>(null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Quick editor state
+  const [showToolbar, setShowToolbar] = useState(false);
+  const [toolbarTab, setToolbarTab] = useState<'visibility' | 'colors'>('visibility');
+  const [saving, setSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [iframeKey, setIframeKey] = useState(0);
+
+  // Editable fields (local state for live editing)
+  const [showContactInfo, setShowContactInfo] = useState(true);
+  const [showSocialIcons, setShowSocialIcons] = useState(true);
+  const [gradientColor1, setGradientColor1] = useState('#1E90FF');
+  const [gradientColor2, setGradientColor2] = useState('#00BFFF');
 
   const bgColor = isDark ? BG_DARK : BG_LIGHT;
 
@@ -55,7 +77,7 @@ export default function ECardPreviewScreen() {
     }
   }, [router.isReady, queryCardId]);
 
-  // Load card data (just for slug, name, and ownership check)
+  // Load card data
   useEffect(() => {
     const loadCard = async () => {
       if (!cardId) {
@@ -67,6 +89,11 @@ export default function ECardPreviewScreen() {
         const card = await getCardById(cardId);
         if (card) {
           setCardData(card);
+          // Initialize editable fields from card data
+          setShowContactInfo((card as any).show_contact_info !== false);
+          setShowSocialIcons((card as any).show_social_icons !== false);
+          setGradientColor1((card as any).gradient_color_1 || '#1E90FF');
+          setGradientColor2((card as any).gradient_color_2 || '#00BFFF');
         }
       } catch (error) {
         console.error('Error loading card:', error);
@@ -77,6 +104,52 @@ export default function ECardPreviewScreen() {
 
     loadCard();
   }, [cardId]);
+
+  // Save changes to database and refresh iframe
+  const saveChanges = useCallback(async () => {
+    if (!cardId || !hasChanges) return;
+    setSaving(true);
+    try {
+      await updateCard(cardId, {
+        show_contact_info: showContactInfo,
+        show_social_icons: showSocialIcons,
+        gradient_color_1: gradientColor1,
+        gradient_color_2: gradientColor2,
+      } as any);
+      setHasChanges(false);
+      // Refresh the iframe to show updated card
+      setIframeLoaded(false);
+      setIframeKey(prev => prev + 1);
+    } catch (error) {
+      console.error('Error saving changes:', error);
+    } finally {
+      setSaving(false);
+    }
+  }, [cardId, hasChanges, showContactInfo, showSocialIcons, gradientColor1, gradientColor2]);
+
+  // Auto-save after a short delay when changes are made
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    if (!hasChanges) return;
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    saveTimeoutRef.current = setTimeout(() => {
+      saveChanges();
+    }, 1500);
+    return () => {
+      if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    };
+  }, [hasChanges, saveChanges]);
+
+  // Mark changes
+  const handleToggle = (setter: React.Dispatch<React.SetStateAction<boolean>>, value: boolean) => {
+    setter(value);
+    setHasChanges(true);
+  };
+
+  const handleColorChange = (setter: React.Dispatch<React.SetStateAction<string>>, value: string) => {
+    setter(value);
+    setHasChanges(true);
+  };
 
   // Copy card URL
   const copyCardUrl = () => {
@@ -105,6 +178,12 @@ export default function ECardPreviewScreen() {
     } else {
       copyCardUrl();
     }
+  };
+
+  // Refresh preview
+  const refreshPreview = () => {
+    setIframeLoaded(false);
+    setIframeKey(prev => prev + 1);
   };
 
   if (loading) {
@@ -145,8 +224,8 @@ export default function ECardPreviewScreen() {
 
   // Build the public card URL for the iframe
   const publicCardUrl = cardData.slug ? getCardUrl(cardData.slug) : null;
-  // For draft cards without a public slug, show a message
   const isDraft = !cardData.is_published;
+  const isOwner = user && cardData.user_id === user.id;
 
   return (
     <>
@@ -162,10 +241,19 @@ export default function ECardPreviewScreen() {
             <button className="back-btn" onClick={() => router.back()}>
               <IoArrowBack size={24} color={isDark ? '#fff' : '#333'} />
             </button>
-            <h1 style={{ color: isDark ? '#fff' : '#333' }}>Preview</h1>
-            <button className="share-btn" onClick={shareCard}>
-              <IoShare size={20} color={isDark ? '#fff' : '#333'} />
-            </button>
+            <div className="header-center">
+              <h1 style={{ color: isDark ? '#fff' : '#333' }}>Preview</h1>
+              {saving && <span className="saving-badge">Saving...</span>}
+              {!saving && hasChanges && <span className="unsaved-badge">Unsaved</span>}
+            </div>
+            <div className="header-right">
+              <button className="icon-btn" onClick={refreshPreview} title="Refresh">
+                <IoRefresh size={20} color={isDark ? '#fff' : '#333'} />
+              </button>
+              <button className="icon-btn" onClick={shareCard} title="Share">
+                <IoShare size={20} color={isDark ? '#fff' : '#333'} />
+              </button>
+            </div>
           </header>
 
           {/* Card Preview — Embedded Public Card */}
@@ -179,12 +267,16 @@ export default function ECardPreviewScreen() {
                   </div>
                 )}
                 <iframe
-                  src={`${publicCardUrl}?preview=true`}
+                  ref={iframeRef}
+                  key={`preview-${iframeKey}`}
+                  src={`${publicCardUrl}?preview=true&t=${iframeKey}`}
                   className="card-iframe"
                   style={{ opacity: iframeLoaded ? 1 : 0 }}
                   onLoad={() => setIframeLoaded(true)}
                   title={`${cardData.full_name}'s Card Preview`}
                   scrolling="yes"
+                  sandbox="allow-scripts allow-same-origin allow-popups allow-top-navigation"
+                  loading="eager"
                 />
               </>
             ) : (
@@ -201,7 +293,108 @@ export default function ECardPreviewScreen() {
           {/* Status Badge */}
           {isDraft && publicCardUrl && (
             <div className="draft-banner">
-              <span>⚠️ This card is not published yet. Publish to make it visible to others.</span>
+              <span>This card is not published yet. Publish to make it visible to others.</span>
+            </div>
+          )}
+
+          {/* Quick Edit Toolbar Toggle */}
+          {isOwner && (
+            <button 
+              className={`toolbar-toggle ${showToolbar ? 'active' : ''}`}
+              onClick={() => setShowToolbar(!showToolbar)}
+            >
+              <IoColorPalette size={18} />
+              <span>Quick Edit</span>
+              {showToolbar ? <IoChevronDown size={16} /> : <IoChevronUp size={16} />}
+            </button>
+          )}
+
+          {/* Quick Edit Toolbar */}
+          {isOwner && showToolbar && (
+            <div className="quick-edit-toolbar">
+              {/* Tab Selector */}
+              <div className="toolbar-tabs">
+                <button 
+                  className={`tab-btn ${toolbarTab === 'visibility' ? 'active' : ''}`}
+                  onClick={() => setToolbarTab('visibility')}
+                >
+                  <IoEye size={16} />
+                  <span>Show / Hide</span>
+                </button>
+                <button 
+                  className={`tab-btn ${toolbarTab === 'colors' ? 'active' : ''}`}
+                  onClick={() => setToolbarTab('colors')}
+                >
+                  <IoColorPalette size={16} />
+                  <span>Colors</span>
+                </button>
+              </div>
+
+              {/* Visibility Toggles */}
+              {toolbarTab === 'visibility' && (
+                <div className="toolbar-content">
+                  <div className="toggle-row">
+                    <span className="toggle-label">Contact Info</span>
+                    <button 
+                      className={`toggle-switch ${showContactInfo ? 'on' : 'off'}`}
+                      onClick={() => handleToggle(setShowContactInfo, !showContactInfo)}
+                    >
+                      <div className="toggle-knob" />
+                    </button>
+                  </div>
+                  <div className="toggle-row">
+                    <span className="toggle-label">Social Icons</span>
+                    <button 
+                      className={`toggle-switch ${showSocialIcons ? 'on' : 'off'}`}
+                      onClick={() => handleToggle(setShowSocialIcons, !showSocialIcons)}
+                    >
+                      <div className="toggle-knob" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Color Pickers */}
+              {toolbarTab === 'colors' && (
+                <div className="toolbar-content">
+                  <div className="color-row">
+                    <span className="color-label">Primary Color</span>
+                    <div className="color-picker-wrapper">
+                      <div className="color-swatch" style={{ background: gradientColor1 }} />
+                      <input
+                        type="color"
+                        value={gradientColor1}
+                        onChange={(e) => handleColorChange(setGradientColor1, e.target.value)}
+                        className="color-input"
+                      />
+                      <span className="color-hex">{gradientColor1}</span>
+                    </div>
+                  </div>
+                  <div className="color-row">
+                    <span className="color-label">Secondary Color</span>
+                    <div className="color-picker-wrapper">
+                      <div className="color-swatch" style={{ background: gradientColor2 }} />
+                      <input
+                        type="color"
+                        value={gradientColor2}
+                        onChange={(e) => handleColorChange(setGradientColor2, e.target.value)}
+                        className="color-input"
+                      />
+                      <span className="color-hex">{gradientColor2}</span>
+                    </div>
+                  </div>
+                  {/* Color preview bar */}
+                  <div className="color-preview-bar" style={{ background: `linear-gradient(135deg, ${gradientColor1}, ${gradientColor2})` }} />
+                </div>
+              )}
+
+              {/* Save button (manual, in case auto-save hasn't fired) */}
+              {hasChanges && (
+                <button className="save-btn" onClick={saveChanges} disabled={saving}>
+                  <IoSave size={16} />
+                  <span>{saving ? 'Saving...' : 'Save & Refresh'}</span>
+                </button>
+              )}
             </div>
           )}
 
@@ -222,13 +415,13 @@ export default function ECardPreviewScreen() {
           </div>
 
           {/* Edit Button (for owner) */}
-          {user && cardData.user_id === user.id && (
+          {isOwner && (
             <button 
               className="edit-btn"
               onClick={() => router.push(`/app/ecard/dashboard?cardId=${cardId}`)}
             >
               <IoCreate size={18} />
-              <span>Edit Card</span>
+              <span>Full Editor</span>
             </button>
           )}
 
@@ -336,6 +529,55 @@ export default function ECardPreviewScreen() {
             padding-top: max(16px, env(safe-area-inset-top));
           }
 
+          .header-center {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+
+          .header-right {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+          }
+
+          .icon-btn {
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background 0.2s;
+          }
+
+          .icon-btn:hover {
+            background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'};
+          }
+
+          .saving-badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: ${ACCENT_GREEN}33;
+            color: ${ACCENT_GREEN};
+            font-weight: 600;
+            animation: pulse 1.5s ease-in-out infinite;
+          }
+
+          .unsaved-badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: rgba(255, 193, 7, 0.2);
+            color: #FFC107;
+            font-weight: 600;
+          }
+
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+          }
+
           .back-btn, .share-btn {
             background: none;
             border: none;
@@ -351,7 +593,7 @@ export default function ECardPreviewScreen() {
 
           /* Card Iframe Container */
           .card-iframe-container {
-            margin: 0 16px 20px;
+            margin: 0 16px 16px;
             border-radius: 20px;
             overflow: hidden;
             position: relative;
@@ -414,6 +656,223 @@ export default function ECardPreviewScreen() {
             color: ${isDark ? '#FFC107' : '#856404'};
             font-size: 13px;
             text-align: center;
+          }
+
+          /* Quick Edit Toolbar Toggle */
+          .toolbar-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: calc(100% - 32px);
+            margin: 0 16px 8px;
+            padding: 12px;
+            background: ${isDark ? '#1E293B' : '#fff'};
+            border: 1px solid ${isDark ? '#334155' : '#E5E7EB'};
+            border-radius: 12px;
+            color: ${isDark ? '#E2E8F0' : '#374151'};
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+          }
+
+          .toolbar-toggle:hover {
+            background: ${isDark ? '#334155' : '#F3F4F6'};
+          }
+
+          .toolbar-toggle.active {
+            border-color: ${ACCENT_GREEN};
+            color: ${ACCENT_GREEN};
+          }
+
+          /* Quick Edit Toolbar */
+          .quick-edit-toolbar {
+            margin: 0 16px 16px;
+            background: ${isDark ? '#1E293B' : '#fff'};
+            border: 1px solid ${isDark ? '#334155' : '#E5E7EB'};
+            border-radius: 16px;
+            overflow: hidden;
+            animation: slideDown 0.2s ease;
+          }
+
+          @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+
+          .toolbar-tabs {
+            display: flex;
+            border-bottom: 1px solid ${isDark ? '#334155' : '#E5E7EB'};
+          }
+
+          .tab-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 12px;
+            background: none;
+            border: none;
+            color: ${isDark ? '#94A3B8' : '#6B7280'};
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 2px solid transparent;
+          }
+
+          .tab-btn.active {
+            color: ${ACCENT_GREEN};
+            border-bottom-color: ${ACCENT_GREEN};
+            background: ${isDark ? 'rgba(0, 200, 83, 0.05)' : 'rgba(0, 200, 83, 0.05)'};
+          }
+
+          .toolbar-content {
+            padding: 16px;
+          }
+
+          /* Toggle Rows */
+          .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+          }
+
+          .toggle-row + .toggle-row {
+            border-top: 1px solid ${isDark ? '#334155' : '#F3F4F6'};
+          }
+
+          .toggle-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: ${isDark ? '#E2E8F0' : '#374151'};
+          }
+
+          .toggle-switch {
+            width: 48px;
+            height: 28px;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: background 0.3s;
+            padding: 0;
+          }
+
+          .toggle-switch.on {
+            background: ${ACCENT_GREEN};
+          }
+
+          .toggle-switch.off {
+            background: ${isDark ? '#475569' : '#D1D5DB'};
+          }
+
+          .toggle-knob {
+            width: 22px;
+            height: 22px;
+            border-radius: 11px;
+            background: #fff;
+            position: absolute;
+            top: 3px;
+            transition: left 0.3s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+          }
+
+          .toggle-switch.on .toggle-knob {
+            left: 23px;
+          }
+
+          .toggle-switch.off .toggle-knob {
+            left: 3px;
+          }
+
+          /* Color Rows */
+          .color-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+          }
+
+          .color-row + .color-row {
+            border-top: 1px solid ${isDark ? '#334155' : '#F3F4F6'};
+          }
+
+          .color-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: ${isDark ? '#E2E8F0' : '#374151'};
+          }
+
+          .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+
+          .color-swatch {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            border: 2px solid ${isDark ? '#475569' : '#D1D5DB'};
+          }
+
+          .color-input {
+            width: 28px;
+            height: 28px;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+            padding: 0;
+            opacity: 0;
+            position: absolute;
+            left: 0;
+            top: 0;
+          }
+
+          .color-picker-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+
+          .color-hex {
+            font-size: 12px;
+            font-family: monospace;
+            color: ${isDark ? '#94A3B8' : '#6B7280'};
+            min-width: 60px;
+          }
+
+          .color-preview-bar {
+            height: 8px;
+            border-radius: 4px;
+            margin-top: 12px;
+          }
+
+          /* Save Button */
+          .save-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px;
+            background: ${ACCENT_GREEN};
+            border: none;
+            border-top: 1px solid ${isDark ? '#334155' : '#E5E7EB'};
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+          }
+
+          .save-btn:disabled {
+            opacity: 0.6;
           }
 
           /* Actions */
