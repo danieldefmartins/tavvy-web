@@ -207,59 +207,24 @@ export default function ECardPreviewScreen() {
     }
   };
 
-  if (loading) {
-    return (
-      <>
-        <Head><title>Preview eCard | TavvY</title></Head>
-        <AppLayout>
-          <div className="loading" style={{ backgroundColor: bgColor }}>
-            <div className="spinner" />
-          </div>
-          <style jsx>{`
-            .loading { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-            .spinner { width: 40px; height: 40px; border: 3px solid ${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}; border-top-color: ${ACCENT_GREEN}; border-radius: 50%; animation: spin 1s linear infinite; }
-            @keyframes spin { to { transform: rotate(360deg); } }
-          `}</style>
-        </AppLayout>
-      </>
-    );
-  }
-
-  if (!cardData) {
-    return (
-      <>
-        <Head><title>Card Not Found | TavvY</title></Head>
-        <AppLayout>
-          <div className="not-found" style={{ backgroundColor: bgColor }}>
-            <h2 style={{ color: isDark ? '#fff' : '#333' }}>Card not found</h2>
-            <button onClick={() => router.push('/app/ecard')}>Go Back</button>
-          </div>
-          <style jsx>{`
-            .not-found { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
-            button { background: ${ACCENT_GREEN}; border: none; padding: 12px 24px; border-radius: 8px; color: #fff; font-weight: 600; cursor: pointer; }
-          `}</style>
-        </AppLayout>
-      </>
-    );
-  }
-
-  const isDraft = !cardData.is_published;
-  const isOwner = user && cardData.user_id === user.id;
+  // Derived state — safe even when cardData is null
+  const isDraft = cardData ? !cardData.is_published : false;
+  const isOwner = user && cardData && cardData.user_id === user.id;
 
   // Build a preview-ready version of card data with live edits applied
-  const previewCard: CardData = {
+  const previewCard: CardData | null = cardData ? {
     ...cardData,
     gradient_color_1: gradientColor1,
     gradient_color_2: gradientColor2,
     show_contact_info: showContactInfo,
     show_social_icons: showSocialIcons,
-  } as any;
+  } as any : null;
 
   return (
     <>
       <Head>
-        <title>{cardData.full_name}'s Card | TavvY</title>
-        <meta name="description" content={cardData.bio || `${cardData.full_name}'s digital business card`} />
+        <title>{cardData ? `${cardData.full_name}'s Card` : 'Preview'} | TavvY</title>
+        <meta name="description" content={cardData?.bio || 'Digital business card preview'} />
       </Head>
 
       <AppLayout hideTabBar>
@@ -285,9 +250,32 @@ export default function ECardPreviewScreen() {
           </header>
 
           {/* Card Preview — Direct Render (no iframe) */}
-          <div className="card-preview-container">
-            <CardPreview card={previewCard} links={cardLinks} />
-          </div>
+          {loading ? (
+            <div className="card-preview-container">
+              <div className="skeleton-card">
+                <div className="skeleton-header" />
+                <div className="skeleton-body">
+                  <div className="skeleton-line wide" />
+                  <div className="skeleton-line medium" />
+                  <div className="skeleton-line short" />
+                  <div className="skeleton-line wide" style={{ marginTop: 24 }} />
+                  <div className="skeleton-line wide" />
+                  <div className="skeleton-line wide" />
+                </div>
+              </div>
+            </div>
+          ) : !cardData || !previewCard ? (
+            <div className="card-preview-container">
+              <div style={{ padding: 40, textAlign: 'center' }}>
+                <h3 style={{ color: isDark ? '#fff' : '#333' }}>Card not found</h3>
+                <button onClick={() => router.push('/app/ecard')} style={{ marginTop: 16, background: ACCENT_GREEN, border: 'none', padding: '12px 24px', borderRadius: 8, color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Go Back</button>
+              </div>
+            </div>
+          ) : (
+            <div className="card-preview-container">
+              <CardPreview card={previewCard} links={cardLinks} />
+            </div>
+          )}
 
           {/* Status Badge */}
           {isDraft && (
@@ -297,7 +285,7 @@ export default function ECardPreviewScreen() {
           )}
 
           {/* Quick Edit Toolbar Toggle */}
-          {isOwner && (
+          {isOwner && cardData && (
             <button 
               className={`toolbar-toggle ${showToolbar ? 'active' : ''}`}
               onClick={() => setShowToolbar(!showToolbar)}
@@ -425,7 +413,7 @@ export default function ECardPreviewScreen() {
           )}
 
           {/* QR Code Modal */}
-          {showQRModal && cardData.slug && (
+          {showQRModal && cardData?.slug && (
             <div className="modal-overlay" onClick={() => setShowQRModal(false)}>
               <div className="modal qr-modal" onClick={e => e.stopPropagation()} style={{ backgroundColor: isDark ? '#1E293B' : '#fff', maxWidth: 420 }}>
                 <button className="modal-close" onClick={() => setShowQRModal(false)}>
@@ -599,6 +587,36 @@ export default function ECardPreviewScreen() {
             background: ${isDark ? '#1E293B' : '#fff'};
             border: 1px solid ${isDark ? '#334155' : '#E5E7EB'};
             box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+          }
+
+          /* Skeleton Loading */
+          .skeleton-card {
+            animation: shimmer 1.5s ease-in-out infinite;
+          }
+
+          .skeleton-header {
+            height: 160px;
+            background: ${isDark ? '#334155' : '#E5E7EB'};
+          }
+
+          .skeleton-body {
+            padding: 24px;
+          }
+
+          .skeleton-line {
+            height: 14px;
+            border-radius: 7px;
+            background: ${isDark ? '#334155' : '#E5E7EB'};
+            margin-bottom: 12px;
+          }
+
+          .skeleton-line.wide { width: 100%; }
+          .skeleton-line.medium { width: 60%; }
+          .skeleton-line.short { width: 35%; }
+
+          @keyframes shimmer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
           }
 
           .spinner {
