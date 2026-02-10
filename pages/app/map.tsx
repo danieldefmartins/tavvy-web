@@ -205,9 +205,77 @@ export default function MapScreen() {
   const [loading, setLoading] = useState(true);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   
-  // Bottom sheet states - always partial, no expand/collapse
-  const [sheetHeight] = useState<'partial'>('partial');
+  // Bottom sheet states - draggable with 3 snap points matching iOS
+  // Snap points: collapsed (60px), half (50vh), expanded (85vh)
+  const SNAP_COLLAPSED = 60;
+  const SNAP_HALF = typeof window !== 'undefined' ? window.innerHeight * 0.5 : 400;
+  const SNAP_EXPANDED = typeof window !== 'undefined' ? window.innerHeight * 0.85 : 680;
+  const [sheetHeightPx, setSheetHeightPx] = useState(SNAP_HALF);
   const sheetRef = useRef<HTMLDivElement>(null);
+  const dragStartY = useRef<number>(0);
+  const dragStartHeight = useRef<number>(0);
+  const isDragging = useRef(false);
+
+  // Snap to nearest snap point
+  const snapToNearest = (height: number) => {
+    const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
+    const snapPoints = [SNAP_COLLAPSED, vh * 0.5, vh * 0.85];
+    let closest = snapPoints[0];
+    let minDist = Math.abs(height - closest);
+    for (const sp of snapPoints) {
+      const dist = Math.abs(height - sp);
+      if (dist < minDist) {
+        minDist = dist;
+        closest = sp;
+      }
+    }
+    setSheetHeightPx(closest);
+  };
+
+  // Touch handlers for dragging
+  const handleTouchStart = (e: React.TouchEvent) => {
+    isDragging.current = true;
+    dragStartY.current = e.touches[0].clientY;
+    dragStartHeight.current = sheetHeightPx;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging.current) return;
+    const deltaY = dragStartY.current - e.touches[0].clientY;
+    const newHeight = Math.max(SNAP_COLLAPSED, Math.min(dragStartHeight.current + deltaY, SNAP_EXPANDED));
+    setSheetHeightPx(newHeight);
+  };
+
+  const handleTouchEnd = () => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    snapToNearest(sheetHeightPx);
+  };
+
+  // Mouse handlers for desktop dragging
+  const handleMouseDown = (e: React.MouseEvent) => {
+    isDragging.current = true;
+    dragStartY.current = e.clientY;
+    dragStartHeight.current = sheetHeightPx;
+    document.addEventListener('mousemove', handleMouseMoveGlobal);
+    document.addEventListener('mouseup', handleMouseUpGlobal);
+  };
+
+  const handleMouseMoveGlobal = (e: MouseEvent) => {
+    if (!isDragging.current) return;
+    const deltaY = dragStartY.current - e.clientY;
+    const vh = window.innerHeight;
+    const newHeight = Math.max(SNAP_COLLAPSED, Math.min(dragStartHeight.current + deltaY, vh * 0.85));
+    setSheetHeightPx(newHeight);
+  };
+
+  const handleMouseUpGlobal = () => {
+    if (!isDragging.current) return;
+    isDragging.current = false;
+    snapToNearest(sheetHeightPx);
+    document.removeEventListener('mousemove', handleMouseMoveGlobal);
+    document.removeEventListener('mouseup', handleMouseUpGlobal);
+  };
   
   // Popup states for map controls
   const [showWeatherPopup, setShowWeatherPopup] = useState(false);
@@ -300,13 +368,13 @@ export default function MapScreen() {
       
       console.log(`[Map] Fetching places via API near [${centerLat}, ${centerLng}]`);
       
-      // Map category names to match Typesense data (singular form)
+      // Map category names to match iOS Typesense search queries
       const categoryMap: Record<string, string> = {
-        'restaurants': 'Restaurant',
-        'cafes': 'Cafe',
-        'bars': 'Bar',
-        'gas': 'Gas Station',
-        'shopping': 'Shop'
+        'restaurants': 'restaurant',
+        'cafes': 'coffee cafe',
+        'bars': 'bar pub',
+        'gas': 'gas station fuel',
+        'shopping': 'shop store'
       };
       
       const categoryFilter = selectedCategory !== 'all' ? 
@@ -357,9 +425,9 @@ export default function MapScreen() {
   // Handle category selection
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId);
-    if (categoryId !== 'all') {
-      setSheetHeight('partial');
-    }
+    // Expand sheet to half when selecting a category
+    const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
+    setSheetHeightPx(vh * 0.5);
   };
 
   // Handle suggestion selection
@@ -416,11 +484,12 @@ export default function MapScreen() {
     router.push('/app');
   };
 
-  // No toggle needed - sheet is always at partial height with scrollable content
-
-  // Fixed sheet height - always partial with scrollable content
+  // Dynamic sheet height based on drag state
   const getSheetStyle = () => {
-    return { height: '50vh' }; // Fixed at 50% viewport height
+    return { 
+      height: `${sheetHeightPx}px`,
+      transition: isDragging.current ? 'none' : 'height 0.3s ease',
+    };
   };
 
   // Format distance for display (distance is in meters from API)
@@ -776,8 +845,14 @@ export default function MapScreen() {
           ref={sheetRef}
           style={getSheetStyle()}
         >
-          {/* Visual Handle - no click action, just visual indicator */}
-          <div className="sheet-handle">
+          {/* Draggable Handle */}
+          <div 
+            className="sheet-handle"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onMouseDown={handleMouseDown}
+          >
             <div className="handle-bar" />
           </div>
 
@@ -1162,11 +1237,12 @@ export default function MapScreen() {
         .map-controls-bottom {
           position: absolute;
           right: 16px;
-          bottom: 280px;
+          bottom: calc(${sheetHeightPx}px + 16px);
           z-index: 1000;
           display: flex;
           flex-direction: column;
           gap: 8px;
+          transition: bottom 0.3s ease;
         }
 
         .map-control-btn {
@@ -1198,7 +1274,7 @@ export default function MapScreen() {
         .info-btn {
           position: absolute;
           left: 16px;
-          bottom: 280px;
+          bottom: calc(${sheetHeightPx}px + 16px);
           z-index: 1000;
           width: 40px;
           height: 40px;
@@ -1227,7 +1303,7 @@ export default function MapScreen() {
         /* Control Popups */
         .control-popup {
           position: absolute;
-          bottom: 340px;
+          bottom: calc(${sheetHeightPx}px + 76px);
           z-index: 1002;
           background: rgba(0, 0, 0, 0.9);
           border-radius: 16px;
@@ -1384,25 +1460,28 @@ export default function MapScreen() {
           right: 0;
           background: #fff;
           border-radius: 20px 20px 0 0;
-          box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+          box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
           z-index: 1001;
-          transition: height 0.3s ease;
           display: flex;
           flex-direction: column;
+          will-change: height;
+          overflow: hidden;
         }
 
         .sheet-handle {
-          padding: 12px;
+          padding: 14px 12px 10px;
           display: flex;
           flex-direction: column;
           align-items: center;
           gap: 4px;
-          cursor: pointer;
+          cursor: grab;
           user-select: none;
+          touch-action: none;
+          flex-shrink: 0;
         }
 
         .sheet-handle:hover {
-          background: rgba(0,0,0,0.02);
+          background: rgba(0,0,0,0.03);
         }
 
         .sheet-handle:active {
@@ -1428,6 +1507,7 @@ export default function MapScreen() {
           justify-content: space-between;
           align-items: center;
           padding: 0 20px 12px;
+          flex-shrink: 0;
         }
 
         .sheet-title {

@@ -98,23 +98,24 @@ function transformTypesensePlace(doc: any, distance?: number): PlaceSearchResult
     ? doc.categories[0].split('>').pop()?.trim()
     : undefined;
 
-  // Determine ID prefix based on source
-  const idPrefix = doc.id?.startsWith('tavvy:') ? 'tavvy:' : 'fsq:';
-  const placeId = doc.id?.replace(/^(tavvy:|fsq:)/, '') || doc.fsq_place_id;
+    // Determine ID prefix based on source
+  const isTavvy = doc.id?.startsWith('tavvy:');
+  const idPrefix = isTavvy ? 'tavvy:' : 'fsq-';
+  const placeId = doc.id?.replace(/^(tavvy:|fsq:)/, '') || doc.fsq_id || doc.fsq_place_id;
 
   return {
     id: `${idPrefix}${placeId}`,
-    fsq_place_id: doc.fsq_place_id || placeId,
+    fsq_place_id: doc.fsq_id || doc.fsq_place_id || placeId,
     name: doc.name,
     category,
     subcategory,
-    address: doc.address,
-    locality: doc.locality,
-    region: doc.region,
-    country: doc.country,
-    postcode: doc.postcode,
-    latitude: doc.latitude,
-    longitude: doc.longitude,
+    address: doc.location_address || doc.address,
+    locality: doc.location_locality || doc.locality,
+    region: doc.location_region || doc.region,
+    country: doc.location_country || doc.country,
+    postcode: doc.location_postcode || doc.postcode,
+    latitude: doc.geocodes_lat || doc.latitude,
+    longitude: doc.geocodes_lng || doc.longitude,
     tel: doc.tel,
     website: doc.website,
     email: doc.email,
@@ -154,7 +155,7 @@ export async function searchPlaces(options: SearchOptions): Promise<SearchResult
       q: query || '*',
       // ENHANCED: Search tap_signals field (if it exists) with higher weight!
       // Note: tap_signals field will be added when first tap data is synced
-      query_by: 'name,locality,region,categories',
+      query_by: 'name,location_locality,location_region,categories',
       query_by_weights: '3,1,1,2',
       
       // ENHANCED: Sort by popularity for now (will use tap_quality_score after first sync)
@@ -170,9 +171,9 @@ export async function searchPlaces(options: SearchOptions): Promise<SearchResult
 
     // Add country/region/locality filters
     const filters = [];
-    if (country) filters.push(`country:=${country}`);
-    if (region) filters.push(`region:=${region}`);
-    if (locality) filters.push(`locality:=${locality}`);
+    if (country) filters.push(`location_country:=${country}`);
+    if (region) filters.push(`location_region:=${region}`);
+    if (locality) filters.push(`location_locality:=${locality}`);
     
     // Add category filter (if provided)
     if (categories && categories.length > 0) {
@@ -247,7 +248,7 @@ export async function searchPlacesInBounds(options: {
       // ENHANCED: Sort by popularity (will use tap_quality_score after sync)
       sort_by: 'popularity:desc',
       
-      filter_by: `latitude:[${minLat}..${maxLat}] && longitude:[${minLng}..${maxLng}]`,
+      filter_by: `geocodes_lat:[${minLat}..${maxLat}] && geocodes_lng:[${minLng}..${maxLng}]`,
       per_page: limit,
     };
 

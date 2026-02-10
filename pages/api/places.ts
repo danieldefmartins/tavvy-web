@@ -108,7 +108,7 @@ export default async function handler(
   }
 
   try {
-    const { minLat, maxLat, minLng, maxLng, userLat, userLng, category, limit = '150' } = req.query;
+    const { minLat, maxLat, minLng, maxLng, userLat, userLng, category, canonicalCategory, limit = '150' } = req.query;
 
     // Validate required params
     if (!minLat || !maxLat || !minLng || !maxLng) {
@@ -150,8 +150,19 @@ export default async function handler(
         .eq('status', 'active')
         .limit(limitNum);
 
-      if (category && category !== 'All') {
-        query = query.ilike('tavvy_category', `%${category}%`);
+      // For canonical places, use the canonicalCategory param (or derive from category)
+      const canonCat = canonicalCategory || category;
+      if (canonCat && canonCat !== 'All') {
+        // Map search terms to canonical category patterns
+        const canonicalMap: Record<string, string> = {
+          'restaurant': 'Restaurant',
+          'coffee cafe': 'Cafe',
+          'bar pub': 'Bar',
+          'gas station fuel': 'Gas Station',
+          'shop store': 'Retail',
+        };
+        const catFilter = canonicalMap[canonCat as string] || canonCat;
+        query = query.ilike('tavvy_category', `%${catFilter}%`);
       }
 
       const { data: placesData, error: placesError } = await query;
@@ -179,20 +190,21 @@ export default async function handler(
 
       // Try Typesense
       try {
-        const typesenseResults = await searchPlacesInBounds(
-          {
-            ne: [bounds.maxLng, bounds.maxLat],
-            sw: [bounds.minLng, bounds.minLat]
-          },
-          category && category !== 'All' ? category as string : undefined,
-          limitNum - placesFromCanonical.length
-        );
+        const typesenseResult = await searchPlacesInBounds({
+          minLat: bounds.minLat,
+          maxLat: bounds.maxLat,
+          minLng: bounds.minLng,
+          maxLng: bounds.maxLng,
+          category: category && category !== 'All' ? category as string : undefined,
+          limit: limitNum - placesFromCanonical.length,
+        });
+
+        const typesenseResults = typesenseResult?.places || [];
 
         if (typesenseResults && typesenseResults.length > 0) {
           const newTypesensePlaces = typesenseResults
             .filter(p => {
-              const isTavvy = p.id.startsWith('tavvy:');
-              const sourceId = isTavvy ? p.id.replace('tavvy:', '') : p.fsq_place_id;
+              const sourceId = p.fsq_place_id || p.id;
               return !existingSourceIds.has(sourceId);
             })
             .map(p => {
@@ -200,7 +212,7 @@ export default async function handler(
               return {
                 id: p.id,
                 source: (isTavvy ? 'places' : 'fsq_raw') as 'places' | 'fsq_raw',
-                source_id: isTavvy ? p.id.replace('tavvy:', '') : p.fsq_place_id,
+                source_id: p.fsq_place_id || p.id,
                 name: p.name,
                 latitude: p.latitude!,
                 longitude: p.longitude!,
@@ -240,7 +252,15 @@ export default async function handler(
           .limit(Math.min(200, limitNum - placesFromCanonical.length)); // Optimized limit
 
         if (category && category !== 'All') {
-          query = query.ilike('category_name', `%${category}%`);
+          const fsqCatMap: Record<string, string> = {
+            'restaurant': 'Restaurant',
+            'coffee cafe': 'Cafe',
+            'bar pub': 'Bar',
+            'gas station fuel': 'Gas Station',
+            'shop store': 'Store',
+          };
+          const fsqCatFilter = fsqCatMap[category as string] || category;
+          query = query.ilike('category_name', `%${fsqCatFilter}%`);
         }
 
         const { data: fsqData, error: fsqError } = await query;
