@@ -1,18 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { createClient } from '@supabase/supabase-js';
-import { parseSearchQuery } from '../../lib/smartQueryParser';
-
-// Server-side Supabase client
-const getServerSupabase = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
-  
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Supabase credentials not configured');
-  }
-  
-  return createClient(supabaseUrl, supabaseAnonKey);
-};
+import { searchPlaces } from '../../lib/typesenseService';
 
 interface SearchSuggestion {
   id: string;
@@ -25,22 +12,6 @@ interface SearchSuggestion {
   longitude: number;
 }
 
-// Calculate distance between two points (Haversine formula)
-const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-  const R = 6371e3; // Earth's radius in meters
-  const φ1 = lat1 * Math.PI / 180;
-  const φ2 = lat2 * Math.PI / 180;
-  const Δφ = (lat2 - lat1) * Math.PI / 180;
-  const Δλ = (lon2 - lon1) * Math.PI / 180;
-
-  const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-            Math.cos(φ1) * Math.cos(φ2) *
-            Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-  return R * c;
-};
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -50,121 +21,49 @@ export default async function handler(
   }
 
   try {
-    const { q, userLat, userLng, limit = '10' } = req.query;
+    const { q, userLat, userLng, limit = '8' } = req.query;
 
-    if (!q || typeof q !== 'string' || q.length < 2) {
+    if (!q || typeof q !== 'string' || q.length < 1) {
       return res.status(200).json({ suggestions: [] });
     }
-
-    const userLocation = userLat && userLng ? {
-      lat: parseFloat(userLat as string),
-      lng: parseFloat(userLng as string),
-    } : null;
 
     const limitNum = parseInt(limit as string, 10);
     const searchTerm = q.trim();
 
-    console.log('[API/search] Searching for:', searchTerm);
+    console.log('[API/search] Searching Typesense for:', searchTerm);
 
-    // SMART PARSING: Parse natural language query
-    const parsed = parseSearchQuery(searchTerm);
-    console.log('[API/search] Parsed query:', parsed);
+    const userLocation = userLat && userLng ? {
+      latitude: parseFloat(userLat as string),
+      longitude: parseFloat(userLng as string),
+    } : undefined;
 
-    const supabase = getServerSupabase();
+    // Use Typesense for fast full-text search (same as iOS)
+    const result = await searchPlaces({
+      query: searchTerm,
+      latitude: userLocation?.latitude,
+      longitude: userLocation?.longitude,
+      radiusKm: userLocation ? 50 : undefined,
+      limit: limitNum,
+    });
 
-    let suggestions: SearchSuggestion[] = [];
+    const suggestions: SearchSuggestion[] = result.places.map(place => ({
+      id: place.id,
+      name: place.name,
+      category: place.subcategory || place.category || 'Place',
+      city: place.locality,
+      address: [place.address, place.locality, place.region].filter(Boolean).join(', '),
+      distance: place.distance,
+      latitude: place.latitude,
+      longitude: place.longitude,
+    }));
 
-    // Search in fsq_places_raw table (has more data)
-    try {
-      let query = supabase
-        .from('fsq_places_raw')
-        .select('fsq_place_id, name, fsq_category_labels, locality, address, latitude, longitude');
-      
-      // Apply smart parsing filters if available
-      if (parsed.isParsed) {
-        query = query.ilike('name', `%${parsed.placeName}%`);
-        
-        if (parsed.city) {
-          query = query.ilike('locality', `%${parsed.city}%`);
-        }
-        
-        if (parsed.region) {
-          query = query.eq('region', parsed.region);
-        }
-        
-        if (parsed.country) {
-          query = query.eq('country', parsed.country);
-        }
-      } else {
-        // Fallback to simple name search
-        query = query.ilike('name', `%${searchTerm}%`);
-      }
-      
-      query = query.limit(limitNum * 2); // Fetch more to filter later
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.warn('[API/search] Error searching fsq_places_raw:', error);
-      } else if (data) {
-        suggestions = data
-          .filter((place: any) => place.latitude && place.longitude)
-          .map((place: any) => {
-            // Parse category from fsq_category_labels (JSON array of label strings)
-            let category = 'Place';
-            try {
-              const labels = typeof place.fsq_category_labels === 'string' 
-                ? JSON.parse(place.fsq_category_labels) 
-                : place.fsq_category_labels;
-              if (Array.isArray(labels) && labels.length > 0) {
-                // Take the first label, which is the primary category
-                const firstLabel = labels[0];
-                // Labels are like "Dining and Drinking > Restaurant > American Restaurant"
-                // Take the last part for a clean display
-                const parts = typeof firstLabel === 'string' ? firstLabel.split(' > ') : [firstLabel];
-                category = parts[parts.length - 1] || parts[0] || 'Place';
-              }
-            } catch (e) {
-              // Keep default
-            }
-            return {
-              id: `fsq-${place.fsq_place_id}`,
-              name: place.name,
-              category,
-              city: place.locality,
-              address: [place.address, place.locality].filter(Boolean).join(', '),
-              latitude: place.latitude,
-              longitude: place.longitude,
-            };
-          });
-      }
-    } catch (error) {
-      console.error('[API/search] Exception searching:', error);
-    }
-
-    // Calculate distances if user location provided
-    if (userLocation) {
-      suggestions.forEach(suggestion => {
-        suggestion.distance = calculateDistance(
-          userLocation.lat,
-          userLocation.lng,
-          suggestion.latitude,
-          suggestion.longitude
-        );
-      });
-
-      // Sort by distance (closest first)
-      suggestions.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
-    }
-
-    // Limit results
-    suggestions = suggestions.slice(0, limitNum);
-
-    console.log(`[API/search] Returning ${suggestions.length} suggestions`);
+    console.log(`[API/search] Returning ${suggestions.length} suggestions from Typesense (${result.searchTimeMs}ms)`);
 
     return res.status(200).json({ suggestions });
   } catch (error: any) {
-    console.error('[API/search] Error:', error);
-    return res.status(500).json({ error: error.message || 'Internal server error' });
+    console.error('[API/search] Typesense error:', error.message);
+    
+    // Return empty results instead of error to avoid breaking the UI
+    return res.status(200).json({ suggestions: [] });
   }
 }
