@@ -14,6 +14,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { fetchPlaceById } from '../../lib/placeService';
 import { Place } from '../../types';
+import { fetchPlaceSignals, SignalAggregate, SIGNAL_LABELS } from '../../lib/signalService';
 
 // Category-based fallback images (from iOS codebase)
 const getCategoryFallbackImage = (category: string): string => {
@@ -93,12 +94,40 @@ export default function PlaceDetailsScreen() {
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('reviews');
+  
+  // Living Score signals (matches iOS)
+  const [livingSignals, setLivingSignals] = useState<{
+    best_for: SignalAggregate[];
+    vibe: SignalAggregate[];
+    heads_up: SignalAggregate[];
+    medals: string[];
+  }>({ best_for: [], vibe: [], heads_up: [], medals: [] });
+  const [signalsLoading, setSignalsLoading] = useState(false);
 
   useEffect(() => {
     if (id) {
       loadPlace(id as string);
     }
   }, [id]);
+
+  // Load Living Score signals when place is loaded
+  useEffect(() => {
+    if (place?.id) {
+      loadLivingSignals(place.id);
+    }
+  }, [place?.id]);
+
+  const loadLivingSignals = async (placeId: string) => {
+    setSignalsLoading(true);
+    try {
+      const result = await fetchPlaceSignals(placeId);
+      setLivingSignals(result);
+    } catch (error) {
+      console.error('Error loading living signals:', error);
+    } finally {
+      setSignalsLoading(false);
+    }
+  };
 
   const loadPlace = async (placeId: string) => {
     setLoading(true);
@@ -178,8 +207,7 @@ export default function PlaceDetailsScreen() {
 
   const coverImage = place.cover_image_url || getCategoryFallbackImage(place.category || '');
   const photos = place.photos || [];
-  const signals = place.signals || [];
-  const hasSignals = signals.length > 0;
+  const hasLivingSignals = livingSignals.best_for.length > 0 || livingSignals.vibe.length > 0 || livingSignals.heads_up.length > 0;
   const fullAddress = [place.address_line1, place.city, place.state_region].filter(Boolean).join(', ');
   const isOpen = place.current_status === 'open_accessible' || place.current_status === 'active';
   const distanceMiles = place.distance ? (place.distance / 1609.34).toFixed(1) : undefined;
@@ -286,33 +314,83 @@ export default function PlaceDetailsScreen() {
           {/* Reviews Tab */}
           {activeTab === 'reviews' && (
             <div className="pd-tab-content">
+              {/* Medals */}
+              {livingSignals.medals.length > 0 && (
+                <div className="pd-medals">
+                  {livingSignals.medals.includes('vibe_check') && (
+                    <span className="pd-medal">🏆 Vibe Check</span>
+                  )}
+                  {livingSignals.medals.includes('speed_demon') && (
+                    <span className="pd-medal">⚡ Speed Demon</span>
+                  )}
+                  {livingSignals.medals.includes('hidden_gem') && (
+                    <span className="pd-medal">💎 Hidden Gem</span>
+                  )}
+                </div>
+              )}
+
               <div className="pd-card">
                 <h2 className="pd-card-title">Community Signals</h2>
 
-                {hasSignals ? (
+                {signalsLoading ? (
+                  <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                    <div className="pd-spinner" style={{ width: 24, height: 24, margin: '0 auto' }} />
+                  </div>
+                ) : hasLivingSignals ? (
                   <>
-                    {/* Render actual signals grouped by type */}
-                    {signals.filter(s => s.bucket === 'best_for' || s.bucket === 'the_good').length > 0 && (
+                    {/* The Good signals with Living Score */}
+                    {livingSignals.best_for.map((signal) => (
+                      <div key={signal.signal_id} className={`pd-signal-bar pd-signal-blue ${signal.is_ghost ? 'pd-signal-ghost' : ''}`}>
+                        <span className="pd-signal-icon">{signal.icon || '👍'}</span>
+                        <span className="pd-signal-text">
+                          {signal.label} · {signal.review_count} {signal.review_count === 1 ? 'tap' : 'taps'}
+                        </span>
+                        <span className="pd-signal-score">Score: {signal.current_score}</span>
+                      </div>
+                    ))}
+                    {livingSignals.best_for.length === 0 && (
                       <div className="pd-signal-bar pd-signal-blue">
                         <span className="pd-signal-icon">👍</span>
-                        <span className="pd-signal-text">
-                          The Good · {signals.filter(s => s.bucket === 'best_for' || s.bucket === 'the_good').reduce((sum, s) => sum + s.tap_total, 0)} taps
+                        <span className="pd-signal-text pd-signal-italic">
+                          The Good · Be the first to tap!
                         </span>
                       </div>
                     )}
-                    {signals.filter(s => s.bucket === 'vibe' || s.bucket === 'the_vibe').length > 0 && (
+
+                    {/* The Vibe signals with Living Score */}
+                    {livingSignals.vibe.map((signal) => (
+                      <div key={signal.signal_id} className={`pd-signal-bar pd-signal-purple ${signal.is_ghost ? 'pd-signal-ghost' : ''}`}>
+                        <span className="pd-signal-icon">{signal.icon || '✨'}</span>
+                        <span className="pd-signal-text">
+                          {signal.label} · {signal.review_count} {signal.review_count === 1 ? 'tap' : 'taps'}
+                        </span>
+                        <span className="pd-signal-score">Score: {signal.current_score}</span>
+                      </div>
+                    ))}
+                    {livingSignals.vibe.length === 0 && (
                       <div className="pd-signal-bar pd-signal-purple">
                         <span className="pd-signal-icon">✨</span>
-                        <span className="pd-signal-text">
-                          The Vibe · {signals.filter(s => s.bucket === 'vibe' || s.bucket === 'the_vibe').reduce((sum, s) => sum + s.tap_total, 0)} taps
+                        <span className="pd-signal-text pd-signal-italic">
+                          The Vibe · Be the first to tap!
                         </span>
                       </div>
                     )}
-                    {signals.filter(s => s.bucket === 'heads_up').length > 0 && (
+
+                    {/* Heads Up signals with Living Score */}
+                    {livingSignals.heads_up.map((signal) => (
+                      <div key={signal.signal_id} className={`pd-signal-bar pd-signal-orange ${signal.is_ghost ? 'pd-signal-ghost' : ''}`}>
+                        <span className="pd-signal-icon">{signal.icon || '⚠️'}</span>
+                        <span className="pd-signal-text">
+                          {signal.label} · {signal.review_count} {signal.review_count === 1 ? 'tap' : 'taps'}
+                        </span>
+                        <span className="pd-signal-score">Score: {signal.current_score}</span>
+                      </div>
+                    ))}
+                    {livingSignals.heads_up.length === 0 && (
                       <div className="pd-signal-bar pd-signal-orange">
                         <span className="pd-signal-icon">⚠️</span>
-                        <span className="pd-signal-text">
-                          Heads Up · {signals.filter(s => s.bucket === 'heads_up').reduce((sum, s) => sum + s.tap_total, 0)} taps
+                        <span className="pd-signal-text pd-signal-italic">
+                          Heads Up · Be the first to tap!
                         </span>
                       </div>
                     )}
@@ -346,7 +424,18 @@ export default function PlaceDetailsScreen() {
               <div className="pd-card">
                 <h2 className="pd-card-title">Been here?</h2>
                 <p className="pd-card-subtitle">Share your experience with the community</p>
-                <button className="pd-add-review-btn">
+                <button 
+                  className="pd-add-review-btn"
+                  onClick={() => router.push({
+                    pathname: '/app/add-review',
+                    query: {
+                      placeId: place.id,
+                      placeName: place.name,
+                      primaryCategory: place.tavvy_category || place.category || '',
+                      subcategory: place.tavvy_subcategory || '',
+                    },
+                  })}
+                >
                   ✏️ Add Your Signal
                 </button>
               </div>
@@ -714,6 +803,35 @@ const pageStyles = `
   .pd-signal-italic {
     font-style: italic;
     opacity: 0.9;
+  }
+  .pd-signal-ghost {
+    opacity: 0.5;
+  }
+  .pd-signal-score {
+    color: rgba(255,255,255,0.7);
+    font-size: 12px;
+    margin-left: auto;
+    padding-left: 8px;
+    white-space: nowrap;
+  }
+
+  /* ===== MEDALS ===== */
+  .pd-medals {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .pd-medal {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #1a1a1a;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(255, 165, 0, 0.3);
   }
 
   /* ===== ADD REVIEW BUTTON ===== */
