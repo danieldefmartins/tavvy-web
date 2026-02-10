@@ -78,7 +78,7 @@ export default async function handler(
     try {
       let query = supabase
         .from('fsq_places_raw')
-        .select('fsq_id, name, category_name, city, address, latitude, longitude');
+        .select('fsq_place_id, name, fsq_category_labels, locality, address, latitude, longitude');
       
       // Apply smart parsing filters if available
       if (parsed.isParsed) {
@@ -107,15 +107,36 @@ export default async function handler(
       if (error) {
         console.warn('[API/search] Error searching fsq_places_raw:', error);
       } else if (data) {
-        suggestions = data.map((place: any) => ({
-          id: `fsq-${place.fsq_id}`,
-          name: place.name,
-          category: place.category_name,
-          city: place.city,
-          address: [place.address, place.city].filter(Boolean).join(', '),
-          latitude: place.latitude,
-          longitude: place.longitude,
-        }));
+        suggestions = data
+          .filter((place: any) => place.latitude && place.longitude)
+          .map((place: any) => {
+            // Parse category from fsq_category_labels (JSON array of label strings)
+            let category = 'Place';
+            try {
+              const labels = typeof place.fsq_category_labels === 'string' 
+                ? JSON.parse(place.fsq_category_labels) 
+                : place.fsq_category_labels;
+              if (Array.isArray(labels) && labels.length > 0) {
+                // Take the first label, which is the primary category
+                const firstLabel = labels[0];
+                // Labels are like "Dining and Drinking > Restaurant > American Restaurant"
+                // Take the last part for a clean display
+                const parts = typeof firstLabel === 'string' ? firstLabel.split(' > ') : [firstLabel];
+                category = parts[parts.length - 1] || parts[0] || 'Place';
+              }
+            } catch (e) {
+              // Keep default
+            }
+            return {
+              id: `fsq-${place.fsq_place_id}`,
+              name: place.name,
+              category,
+              city: place.locality,
+              address: [place.address, place.locality].filter(Boolean).join(', '),
+              latitude: place.latitude,
+              longitude: place.longitude,
+            };
+          });
       }
     } catch (error) {
       console.error('[API/search] Exception searching:', error);

@@ -344,7 +344,7 @@ export default function MapScreen() {
       clearTimeout(searchDebounceRef.current);
     }
 
-    if (searchQuery.trim().length >= 1) {
+    if (searchQuery.trim().length >= 2) {
       setIsSearching(true);
       searchDebounceRef.current = setTimeout(async () => {
         try {
