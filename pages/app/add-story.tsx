@@ -108,9 +108,14 @@ export default function AddStoryPage() {
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+    if (!file) return;
+    
+    try {
+      // Validate file type — be lenient for iOS which may report unusual MIME types
+      const isImage = file.type.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|heic|heif)$/i.test(file.name);
+      const isVideo = file.type.startsWith('video/') || /\.(mp4|mov|m4v|avi|quicktime)$/i.test(file.name);
+      
+      if (!isImage && !isVideo) {
         setError('Please select an image or video file');
         return;
       }
@@ -121,10 +126,21 @@ export default function AddStoryPage() {
         return;
       }
 
+      // Clean up previous preview URL
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+
       setSelectedFile(file);
       setPreviewUrl(URL.createObjectURL(file));
       setError(null);
+    } catch (err) {
+      console.error('Error selecting file:', err);
+      setError('Failed to load the selected file. Please try again.');
     }
+    
+    // Reset the input value so the same file can be re-selected
+    e.target.value = '';
   };
 
   const handleUpload = async () => {
@@ -137,25 +153,28 @@ export default function AddStoryPage() {
       setUploading(true);
       setError(null);
 
-      // Upload file to Supabase Storage
-      const fileExt = selectedFile.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      // Upload file to Supabase Storage (bucket: place-stories, matching iOS)
+      const fileExt = selectedFile.name.split('.').pop() || (selectedFile.type.startsWith('video/') ? 'mp4' : 'jpg');
+      const fileName = `${user.id}/${selectedPlace.id}/${Date.now()}.${fileExt}`;
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('stories')
-        .upload(fileName, selectedFile);
+        .from('place-stories')
+        .upload(fileName, selectedFile, {
+          contentType: selectedFile.type,
+          upsert: false,
+        });
 
       if (uploadError) throw uploadError;
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('stories')
+        .from('place-stories')
         .getPublicUrl(fileName);
 
       // Calculate expiration (24 hours from now)
       const expiresAt = new Date();
       expiresAt.setHours(expiresAt.getHours() + 24);
 
-      // Create story record
+      // Create story record (matching iOS schema exactly)
       const { error: insertError } = await supabase
         .from('place_stories')
         .insert({
@@ -166,7 +185,8 @@ export default function AddStoryPage() {
           caption: caption || null,
           expires_at: expiresAt.toISOString(),
           status: 'active',
-          universe_id: universeId,
+          is_permanent: false,
+          universe_id: universeId || null,
         });
 
       if (insertError) throw insertError;
@@ -419,17 +439,20 @@ export default function AddStoryPage() {
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*,video/*"
+              accept="image/jpeg,image/png,image/gif,image/webp,image/heic,video/mp4,video/quicktime,video/mov,video/*"
               onChange={handleFileSelect}
               style={{ display: 'none' }}
             />
 
             {previewUrl ? (
               <div style={{ position: 'relative' }}>
-                {selectedFile?.type.startsWith('video/') ? (
+                {(selectedFile?.type.startsWith('video/') || /\.(mp4|mov|m4v|quicktime)$/i.test(selectedFile?.name || '')) ? (
                   <video
                     src={previewUrl}
                     controls
+                    playsInline
+                    muted
+                    autoPlay
                     style={{
                       width: '100%',
                       maxHeight: '400px',
