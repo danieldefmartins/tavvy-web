@@ -252,6 +252,19 @@ export default function AddReviewPage() {
       </Head>
       
       <div className="review-page">
+        {/* Close bar */}
+        <div className="close-bar">
+          <div className="close-bar-inner">
+            <button className="close-btn" onClick={() => router.back()} aria-label="Close">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            </button>
+            <span className="close-bar-title">{placeName ? String(placeName) : 'Add Review'}</span>
+            <div style={{ width: 36 }} />
+          </div>
+        </div>
+
         <div className="review-container">
           
           {/* Header */}
@@ -435,6 +448,57 @@ export default function AddReviewPage() {
           min-height: 100vh;
           background-color: ${isDark ? '#000' : '#F5F5F7'};
           padding-bottom: 40px;
+        }
+
+        /* Close bar */
+        .close-bar {
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          background: ${isDark ? 'rgba(0,0,0,0.85)' : 'rgba(245,245,247,0.85)'};
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border-bottom: 1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'};
+        }
+
+        .close-bar-inner {
+          max-width: 480px;
+          margin: 0 auto;
+          padding: 12px 16px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .close-btn {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          border: none;
+          background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)'};
+          color: ${isDark ? '#fff' : '#333'};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: background 0.15s;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        .close-btn:active {
+          background: ${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.12)'};
+        }
+
+        .close-bar-title {
+          font-size: 15px;
+          font-weight: 600;
+          color: ${isDark ? '#ccc' : '#444'};
+          text-align: center;
+          flex: 1;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          padding: 0 8px;
         }
 
         .review-container {
