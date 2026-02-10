@@ -905,19 +905,19 @@ export default function MapScreen() {
                     </p>
                   </div>
                   <div className="signal-buttons">
-                    <button className="signal-btn good">
+                    <button className="signal-btn the-good">
                       <IoThumbsUp size={14} />
                       <span>Be the first to tap!</span>
                     </button>
-                    <button className="signal-btn vibe">
+                    <button className="signal-btn the-good">
                       <IoThumbsUp size={14} />
                       <span>Be the first to tap!</span>
                     </button>
-                    <button className="signal-btn trend">
+                    <button className="signal-btn the-vibe">
                       <IoTrendingUp size={14} />
                       <span>Be the first to tap!</span>
                     </button>
-                    <button className="signal-btn alert">
+                    <button className="signal-btn heads-up">
                       <IoWarning size={14} />
                       <span>Be the first to tap!</span>
                     </button>
@@ -1662,8 +1662,8 @@ export default function MapScreen() {
 
         /* Signal Buttons */
         .signal-buttons {
-          display: flex;
-          flex-wrap: wrap;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
           gap: 8px;
           padding: 0 16px 16px;
         }
@@ -1685,23 +1685,18 @@ export default function MapScreen() {
           opacity: 0.9;
         }
 
-        .signal-btn.good {
-          background: #10B981;
+        .signal-btn.the-good {
+          background: #0A84FF;
           color: #fff;
         }
 
-        .signal-btn.vibe {
-          background: ${BLUE};
+        .signal-btn.the-vibe {
+          background: #8B5CF6;
           color: #fff;
         }
 
-        .signal-btn.trend {
-          background: #F59E0B;
-          color: #fff;
-        }
-
-        .signal-btn.alert {
-          background: #EF4444;
+        .signal-btn.heads-up {
+          background: #FF9500;
           color: #fff;
         }
       `}</style>
