@@ -1237,12 +1237,11 @@ export default function MapScreen() {
         .map-controls-bottom {
           position: absolute;
           right: 16px;
-          bottom: calc(${sheetHeightPx}px + 16px);
+          bottom: 16px;
           z-index: 1000;
           display: flex;
           flex-direction: column;
           gap: 8px;
-          transition: bottom 0.3s ease;
         }
 
         .map-control-btn {
@@ -1274,7 +1273,7 @@ export default function MapScreen() {
         .info-btn {
           position: absolute;
           left: 16px;
-          bottom: calc(${sheetHeightPx}px + 16px);
+          bottom: 16px;
           z-index: 1000;
           width: 40px;
           height: 40px;
@@ -1303,7 +1302,7 @@ export default function MapScreen() {
         /* Control Popups */
         .control-popup {
           position: absolute;
-          bottom: calc(${sheetHeightPx}px + 76px);
+          bottom: 76px;
           z-index: 1002;
           background: rgba(0, 0, 0, 0.9);
           border-radius: 16px;
