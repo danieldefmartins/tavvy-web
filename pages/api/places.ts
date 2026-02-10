@@ -39,6 +39,29 @@ interface PlaceCard {
   status?: string;
 }
 
+// Clean category string: remove brackets, quotes, extract top-level category
+const cleanCategory = (raw: string | null | undefined): string => {
+  if (!raw) return 'Place';
+  // Remove brackets, quotes, and leading/trailing whitespace
+  let cleaned = raw.replace(/^\[?'?/g, '').replace(/'?\]?$/g, '').trim();
+  // Take the top-level category (before first >)
+  if (cleaned.includes('>')) {
+    cleaned = cleaned.split('>')[0].trim();
+  }
+  return cleaned || 'Place';
+};
+
+// Extract subcategory from raw category string
+const extractSubcategory = (raw: string | null | undefined): string | undefined => {
+  if (!raw) return undefined;
+  const cleaned = raw.replace(/^\[?'?/g, '').replace(/'?\]?$/g, '').trim();
+  const parts = cleaned.split('>');
+  if (parts.length >= 2) {
+    return parts[parts.length - 1].trim();
+  }
+  return undefined;
+};
+
 // Transform canonical place to PlaceCard
 const transformCanonicalPlace = (place: any): PlaceCard => ({
   id: `places-${place.id}`,
@@ -52,8 +75,8 @@ const transformCanonicalPlace = (place: any): PlaceCard => ({
   region: place.region,
   country: place.country,
   postcode: place.postcode,
-  category: place.tavvy_category,
-  subcategory: place.tavvy_subcategory,
+  category: cleanCategory(place.tavvy_category),
+  subcategory: extractSubcategory(place.tavvy_category) || place.tavvy_subcategory,
   phone: place.phone,
   website: place.website,
   cover_image_url: place.cover_image_url,
@@ -74,7 +97,7 @@ const transformFsqRawPlace = (place: any): PlaceCard => ({
   region: place.region,
   country: place.country,
   postcode: place.postcode,
-  category: place.category_name,
+  category: cleanCategory(place.category_name),
   subcategory: place.subcategory_name,
   phone: place.phone,
   website: place.website,
@@ -280,8 +303,24 @@ export default async function handler(
       }
     }
 
-    // Combine and deduplicate
-    const allPlaces = [...placesFromCanonical, ...placesFromFsqRaw];
+    // Combine all sources
+    const rawPlaces = [...placesFromCanonical, ...placesFromFsqRaw];
+
+    // Clean Typesense categories too
+    rawPlaces.forEach(place => {
+      if (place.category) {
+        place.category = cleanCategory(place.category);
+      }
+    });
+
+    // Deduplicate by name (case-insensitive) — keep first occurrence
+    const seenNames = new Set<string>();
+    const allPlaces = rawPlaces.filter(place => {
+      const key = place.name.toLowerCase().trim();
+      if (seenNames.has(key)) return false;
+      seenNames.add(key);
+      return true;
+    });
 
     // Calculate distances if user location provided
     if (userLocation) {
@@ -298,7 +337,7 @@ export default async function handler(
       allPlaces.sort((a, b) => (a.distance || 0) - (b.distance || 0));
     }
 
-    console.log(`[API/places] Returning ${allPlaces.length} total places`);
+    console.log(`[API/places] Returning ${allPlaces.length} total places (deduped from ${rawPlaces.length})`);
 
     return res.status(200).json({
       places: allPlaces,
