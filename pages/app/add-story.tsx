@@ -107,21 +107,33 @@ export default function AddStoryPage() {
   }, [universeId, initialPlaceId]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    // Copy the file reference immediately before any DOM manipulation
+    const file = files[0];
+    const fileName = file.name;
+    const fileType = file.type;
+    const fileSize = file.size;
+    
+    console.log('[Story Upload] File selected:', { name: fileName, type: fileType, size: fileSize });
     
     try {
       // Validate file type — be lenient for iOS which may report unusual MIME types
-      const isImage = file.type.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|heic|heif)$/i.test(file.name);
-      const isVideo = file.type.startsWith('video/') || /\.(mp4|mov|m4v|avi|quicktime)$/i.test(file.name);
+      const isImage = fileType.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|heic|heif)$/i.test(fileName);
+      const isVideo = fileType.startsWith('video/') || /\.(mp4|mov|m4v|avi|quicktime)$/i.test(fileName);
       
-      if (!isImage && !isVideo) {
-        setError('Please select an image or video file');
+      // On iOS, file.type can be empty string for some video formats
+      const isUnknownMedia = !fileType && /\.(mp4|mov|m4v|heic|heif|jpg|jpeg|png)$/i.test(fileName);
+      
+      if (!isImage && !isVideo && !isUnknownMedia) {
+        console.log('[Story Upload] Invalid file type:', fileType, fileName);
+        setError(`Unsupported file type. Please select an image or video. (detected: ${fileType || 'unknown'})`);
         return;
       }
       
       // Validate file size (max 50MB)
-      if (file.size > 50 * 1024 * 1024) {
+      if (fileSize > 50 * 1024 * 1024) {
         setError('File size must be less than 50MB');
         return;
       }
@@ -131,16 +143,20 @@ export default function AddStoryPage() {
         URL.revokeObjectURL(previewUrl);
       }
 
+      // Create object URL for preview
+      const url = URL.createObjectURL(file);
+      console.log('[Story Upload] Preview URL created:', url);
+      
       setSelectedFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
+      setPreviewUrl(url);
       setError(null);
     } catch (err) {
-      console.error('Error selecting file:', err);
+      console.error('[Story Upload] Error selecting file:', err);
       setError('Failed to load the selected file. Please try again.');
     }
     
-    // Reset the input value so the same file can be re-selected
-    e.target.value = '';
+    // NOTE: Do NOT reset e.target.value here — it can cause iOS Safari to
+    // garbage-collect the File object before state updates complete.
   };
 
   const handleUpload = async () => {
@@ -191,8 +207,9 @@ export default function AddStoryPage() {
 
       if (insertError) throw insertError;
 
-      // Success - go back to universe page
-      router.push(`/app/universe/${router.query.universeSlug || ''}`);
+      // Success - go back to previous page (universe page)
+      alert('Story uploaded successfully! It will be visible for 24 hours.');
+      router.back();
       
     } catch (err: any) {
       console.error('Error uploading story:', err);
@@ -436,23 +453,26 @@ export default function AddStoryPage() {
               Photo or Video
             </label>
 
+            {/* Use label instead of button+hidden input for better iOS Safari compatibility */}
             <input
+              id="story-file-input"
               ref={fileInputRef}
               type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp,image/heic,video/mp4,video/quicktime,video/mov,video/*"
+              accept="image/*,video/*"
               onChange={handleFileSelect}
-              style={{ display: 'none' }}
+              style={{ position: 'absolute', width: 0, height: 0, opacity: 0, overflow: 'hidden' }}
             />
 
             {previewUrl ? (
               <div style={{ position: 'relative' }}>
-                {(selectedFile?.type.startsWith('video/') || /\.(mp4|mov|m4v|quicktime)$/i.test(selectedFile?.name || '')) ? (
+                {(selectedFile?.type?.startsWith('video/') || /\.(mp4|mov|m4v|quicktime)$/i.test(selectedFile?.name || '')) ? (
                   <video
+                    key={previewUrl}
                     src={previewUrl}
                     controls
                     playsInline
                     muted
-                    autoPlay
+                    preload="metadata"
                     style={{
                       width: '100%',
                       maxHeight: '400px',
@@ -463,6 +483,7 @@ export default function AddStoryPage() {
                   />
                 ) : (
                   <img
+                    key={previewUrl}
                     src={previewUrl}
                     alt="Preview"
                     style={{
@@ -476,15 +497,18 @@ export default function AddStoryPage() {
                 )}
                 <button
                   onClick={() => {
+                    if (previewUrl) URL.revokeObjectURL(previewUrl);
                     setSelectedFile(null);
                     setPreviewUrl(null);
+                    // Reset file input so same file can be re-selected
+                    if (fileInputRef.current) fileInputRef.current.value = '';
                   }}
                   style={{
                     position: 'absolute',
                     top: '12px',
                     right: '12px',
-                    width: '32px',
-                    height: '32px',
+                    width: '40px',
+                    height: '40px',
                     borderRadius: '50%',
                     backgroundColor: 'rgba(0,0,0,0.6)',
                     border: 'none',
@@ -498,21 +522,22 @@ export default function AddStoryPage() {
                 </button>
               </div>
             ) : (
-              <button
-                onClick={() => fileInputRef.current?.click()}
+              <label
+                htmlFor="story-file-input"
                 style={{
+                  display: 'flex',
                   width: '100%',
                   aspectRatio: '9/16',
                   maxHeight: '400px',
                   backgroundColor: colors.card,
                   border: `2px dashed ${colors.border}`,
                   borderRadius: '12px',
-                  display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '12px',
                   cursor: 'pointer',
+                  WebkitTapHighlightColor: 'transparent',
                 }}
               >
                 <div style={{
@@ -532,7 +557,7 @@ export default function AddStoryPage() {
                 <p style={{ margin: 0, color: colors.textSecondary, fontSize: '12px' }}>
                   Max 50MB
                 </p>
-              </button>
+              </label>
             )}
           </div>
 
