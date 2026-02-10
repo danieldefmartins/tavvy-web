@@ -17,6 +17,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
 import { useThemeContext } from '../../contexts/ThemeContext';
+import AppLayout from '../../components/AppLayout';
 // Using API routes instead of direct Supabase calls for runtime env var support
 import { PlaceCard as PlaceCardType, SearchResult } from '../../lib/placeService';
 import { useTranslation } from 'next-i18next';
@@ -238,8 +239,8 @@ export default function MapScreen() {
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   
   // Bottom sheet states - draggable with 3 snap points matching iOS
-  // Snap points: collapsed (60px), half (50vh), expanded (85vh)
-  const SNAP_COLLAPSED = 60;
+  // Snap points: collapsed (120px peek), half (50vh), expanded (85vh)
+  const SNAP_COLLAPSED = 120;
   const SNAP_HALF = typeof window !== 'undefined' ? window.innerHeight * 0.5 : 400;
   const SNAP_EXPANDED = typeof window !== 'undefined' ? window.innerHeight * 0.85 : 680;
   const [sheetHeightPx, setSheetHeightPx] = useState(SNAP_HALF);
@@ -752,7 +753,7 @@ export default function MapScreen() {
   const categoryName = categories.find(c => c.id === selectedCategory)?.name || 'Places';
 
   return (
-    <>
+    <AppLayout>
       <Head>
         <title>Map | TavvY</title>
         <meta name="description" content="Explore places on the map" />
@@ -1135,15 +1136,24 @@ export default function MapScreen() {
           ref={sheetRef}
           style={getSheetStyle()}
         >
-          {/* Draggable Handle */}
+          {/* Draggable Handle — tap to toggle between collapsed/half */}
           <div 
             className="sheet-handle"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             onMouseDown={handleMouseDown}
+            onClick={() => {
+              // Tap to toggle: if collapsed → expand to half, if half/expanded → collapse
+              if (sheetHeightPx <= SNAP_COLLAPSED + 20) {
+                setSheetHeightPx(SNAP_HALF);
+              } else {
+                setSheetHeightPx(SNAP_COLLAPSED);
+              }
+            }}
           >
             <div className="handle-bar" />
+            <span className="handle-hint">{sheetHeightPx <= SNAP_COLLAPSED + 20 ? 'Swipe up for places' : ''}</span>
           </div>
 
           {/* Sheet Header */}
@@ -1305,8 +1315,13 @@ export default function MapScreen() {
           top: 0;
           left: 0;
           right: 0;
-          bottom: 0;
+          bottom: 85px;
           background: ${bgColor};
+        }
+        @media (max-width: 768px) {
+          .map-screen {
+            bottom: 70px;
+          }
         }
 
         /* Top Controls */
@@ -2240,7 +2255,7 @@ export default function MapScreen() {
           opacity: 0.8;
         }
       `}</style>
-    </>
+    </AppLayout>
   );
 }
 

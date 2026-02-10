@@ -11,6 +11,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import AppLayout from '../../components/AppLayout';
 import { 
   fetchSignalsForPlace, 
   SignalsByCategory, 
@@ -261,7 +262,7 @@ export default function AddReviewPage() {
   }
 
   return (
-    <>
+    <AppLayout>
       <Head>
         <title>Add Review | TavvY</title>
       </Head>
@@ -612,6 +613,6 @@ export default function AddReviewPage() {
           to { transform: rotate(360deg); }
         }
       `}</style>
-    </>
+    </AppLayout>
   );
 }

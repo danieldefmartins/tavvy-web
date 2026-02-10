@@ -12,6 +12,7 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import AppLayout from '../../components/AppLayout';
 import { fetchPlaceById } from '../../lib/placeService';
 import { Place } from '../../types';
 import { fetchPlaceSignals, SignalAggregate, SIGNAL_LABELS } from '../../lib/signalService';
@@ -180,20 +181,20 @@ export default function PlaceDetailsScreen() {
   // Loading state
   if (loading) {
     return (
-      <>
+      <AppLayout>
         <style jsx global>{pageStyles}</style>
         <div className="pd-loading">
           <div className="pd-spinner" />
           <p>Loading place...</p>
         </div>
-      </>
+      </AppLayout>
     );
   }
 
   // Error state
   if (!place) {
     return (
-      <>
+      <AppLayout>
         <style jsx global>{pageStyles}</style>
         <div className="pd-error">
           <span className="pd-error-icon">😕</span>
@@ -201,7 +202,7 @@ export default function PlaceDetailsScreen() {
           <p>This place may have been removed or doesn&apos;t exist.</p>
           <button onClick={() => router.push('/app')}>Go Home</button>
         </div>
-      </>
+      </AppLayout>
     );
   }
 
@@ -215,7 +216,7 @@ export default function PlaceDetailsScreen() {
   const categoryEmoji = getCategoryEmoji(place.category || '');
 
   return (
-    <>
+    <AppLayout>
       <Head>
         <title>{place.name} | TavvY</title>
         <meta name="description" content={`${place.name} - ${place.category} in ${place.city || ''}`} />
@@ -535,7 +536,7 @@ export default function PlaceDetailsScreen() {
           )}
         </div>
       </div>
-    </>
+    </AppLayout>
   );
 }
 
