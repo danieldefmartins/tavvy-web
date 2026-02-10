@@ -602,6 +602,12 @@ export async function searchSuggestions(
 
 /**
  * Fetch a single place by ID
+ * 
+ * Matches iOS fetchPlaceById logic exactly:
+ * 1. Strip web-specific prefixes (fsq-, places-, fsq:, tavvy:)
+ * 2. Try canonical `places` table with or(id, source_id) — catches promoted FSQ places
+ * 3. Fallback to `fsq_places_raw` with limit(1) — handles duplicate rows
+ * 4. Last resort: `places_unified` view
  */
 export async function fetchPlaceById(placeId: string): Promise<Place | null> {
   try {
@@ -610,149 +616,156 @@ export async function fetchPlaceById(placeId: string): Promise<Place | null> {
     }
 
     // Strip known prefixes to get the raw ID
-    // API route adds: places-UUID, fsq-FSQID
-    // Typesense adds: fsq:FSQID, tavvy:UUID
+    // Web adds: places-UUID, fsq-FSQID, fsq:FSQID, tavvy:UUID
+    // iOS passes raw IDs without prefixes
     let cleanId = placeId;
-    let isFsqId = false;
 
     if (placeId.startsWith('places-')) {
       cleanId = placeId.replace('places-', '');
-      isFsqId = false;
-      if (DEBUG_PLACES) {
-        console.log('[fetchPlaceById] Stripped places- prefix, clean ID:', cleanId);
-      }
     } else if (placeId.startsWith('fsq-')) {
       cleanId = placeId.replace('fsq-', '');
-      isFsqId = true;
-      if (DEBUG_PLACES) {
-        console.log('[fetchPlaceById] Stripped fsq- prefix, clean ID:', cleanId);
-      }
     } else if (placeId.startsWith('fsq:')) {
       cleanId = placeId.replace('fsq:', '');
-      isFsqId = true;
-      if (DEBUG_PLACES) {
-        console.log('[fetchPlaceById] Stripped fsq: prefix, clean ID:', cleanId);
-      }
     } else if (placeId.startsWith('tavvy:')) {
       cleanId = placeId.replace('tavvy:', '');
-      isFsqId = false;
-      if (DEBUG_PLACES) {
-        console.log('[fetchPlaceById] Stripped tavvy: prefix, clean ID:', cleanId);
-      }
-    } else if (placeId.length === 24 && !placeId.includes('-')) {
-      // Looks like a raw FSQ ID (24-char hex string without dashes)
-      isFsqId = true;
-      if (DEBUG_PLACES) {
-        console.log('[fetchPlaceById] Detected raw FSQ ID (24 chars):', cleanId);
-      }
-    }
-    
-    if (isFsqId) {
-      if (DEBUG_PLACES) {
-        console.log('[fetchPlaceById] Looking up FSQ place:', cleanId);
-      }
-      
-      // Try fsq_place_id column first (used in placeService transforms)
-      // Use .limit(1) instead of .single() because fsq_places_raw has duplicate rows
-      let { data: fsqPlaces, error } = await supabase
-        .from('fsq_places_raw')
-        .select('*')
-        .eq('fsq_place_id', cleanId)
-        .limit(1);
-      let fsqPlace = fsqPlaces?.[0] || null;
-
-      // If not found, try fsq_id column (used in API route)
-      if ((error || !fsqPlace) && cleanId) {
-        const result2 = await supabase
-          .from('fsq_places_raw')
-          .select('*')
-          .eq('fsq_id', cleanId)
-          .limit(1);
-        fsqPlace = result2.data?.[0] || null;
-        error = result2.error;
-      }
-
-      if (error || !fsqPlace) {
-        console.error('Error fetching FSQ place:', error);
-        return null;
-      }
-
-      if (DEBUG_PLACES) {
-        console.log('[fetchPlaceById] Found FSQ place:', fsqPlace.name);
-      }
-
-      return transformFsqRawPlace(fsqPlace) as any;
-    }
-
-    // Try regular place ID from places table first
-    const { data: place, error } = await supabase
-      .from('places')
-      .select('*')
-      .eq('id', cleanId)
-      .single();
-
-    if (error || !place) {
-      if (DEBUG_PLACES) {
-        console.log('[fetchPlaceById] Not found in places table, trying places_unified:', cleanId);
-      }
-      
-      // Fallback: Try places_unified view
-      const { data: unifiedPlace, error: unifiedError } = await supabase
-        .from('places_unified')
-        .select('*')
-        .eq('id', cleanId)
-        .single();
-      
-      if (unifiedError || !unifiedPlace) {
-        console.error('Error fetching place from places_unified:', unifiedError);
-        return null;
-      }
-      
-      if (DEBUG_PLACES) {
-        console.log('[fetchPlaceById] Found in places_unified:', unifiedPlace.name);
-      }
-      
-      // Transform unified place to expected format
-      return {
-        id: unifiedPlace.id,
-        name: unifiedPlace.name,
-        latitude: unifiedPlace.latitude || unifiedPlace.lat,
-        longitude: unifiedPlace.longitude || unifiedPlace.lng,
-        address: unifiedPlace.address || unifiedPlace.address_line1,
-        city: unifiedPlace.city || unifiedPlace.locality,
-        state_region: unifiedPlace.state_region || unifiedPlace.region,
-        country: unifiedPlace.country,
-        phone: unifiedPlace.phone || unifiedPlace.tel,
-        website: unifiedPlace.website,
-        category: unifiedPlace.category || unifiedPlace.primary_category,
-        cover_image_url: unifiedPlace.cover_image_url || unifiedPlace.photo_url,
-        signals: [],
-        photos: [],
-      } as any;
     }
 
     if (DEBUG_PLACES) {
-      console.log('[fetchPlaceById] Found in places table:', place.name);
+      console.log('[fetchPlaceById] Clean ID:', cleanId);
     }
 
-    // Fetch signals
-    const { data: signals } = await supabase
-      .from('place_signals_aggregated')
-      .select('bucket, tap_total')
-      .eq('place_id', cleanId);
+    // ============================================
+    // STEP 1: Try canonical `places` table (matches iOS)
+    // iOS uses: .or(`id.eq.${placeId},source_id.eq.${placeId}`)
+    // This catches both UUID-based IDs and FSQ IDs that have been promoted
+    // ============================================
+    const { data: canonicalData, error: canonicalError } = await supabase
+      .from('places')
+      .select('*')
+      .or(`id.eq.${cleanId},source_id.eq.${cleanId}`)
+      .limit(1);
+    
+    const canonicalPlace = canonicalData?.[0] || null;
 
-    // Fetch photos
-    const { data: photos } = await supabase
-      .from('place_photos')
-      .select('photo_url')
-      .eq('place_id', cleanId)
-      .order('created_at', { ascending: false });
+    if (canonicalPlace && !canonicalError) {
+      if (DEBUG_PLACES) {
+        console.log('[fetchPlaceById] Found in places table:', canonicalPlace.name);
+      }
 
-    return {
-      ...transformCanonicalPlace(place),
-      signals: signals || [],
-      photos: photos?.map((p) => p.photo_url) || [],
-    } as any;
+      // Fetch signals for canonical place from tap_activity
+      // (place_signals_aggregated view doesn't exist, tap_activity has the raw data)
+      let signals: { bucket: string; tap_total: number }[] = [];
+      try {
+        const { data: tapData } = await supabase
+          .from('tap_activity')
+          .select('signal_name')
+          .eq('place_id', canonicalPlace.id);
+        
+        if (tapData && tapData.length > 0) {
+          // Aggregate: count taps per signal_name
+          const counts = new Map<string, number>();
+          for (const tap of tapData) {
+            counts.set(tap.signal_name, (counts.get(tap.signal_name) || 0) + 1);
+          }
+          signals = Array.from(counts.entries())
+            .map(([name, count]) => ({ bucket: name, tap_total: count }))
+            .sort((a, b) => b.tap_total - a.tap_total);
+        }
+      } catch (e) {
+        console.warn('[fetchPlaceById] Error fetching signals:', e);
+      }
+
+      // Fetch photos for canonical place
+      const { data: photos } = await supabase
+        .from('place_photos')
+        .select('photo_url')
+        .eq('place_id', canonicalPlace.id)
+        .order('created_at', { ascending: false });
+
+      return {
+        ...transformCanonicalPlace(canonicalPlace),
+        signals: signals || [],
+        photos: photos?.map((p) => p.photo_url) || [],
+      } as any;
+    }
+
+    // ============================================
+    // STEP 2: Fallback to `fsq_places_raw` (matches iOS)
+    // Use .limit(1) instead of .single() because fsq_places_raw has duplicate rows
+    // ============================================
+    if (DEBUG_PLACES) {
+      console.log('[fetchPlaceById] Not in places table, trying fsq_places_raw:', cleanId);
+    }
+
+    let { data: fsqPlaces, error: fsqError } = await supabase
+      .from('fsq_places_raw')
+      .select('*')
+      .eq('fsq_place_id', cleanId)
+      .limit(1);
+    let fsqPlace = fsqPlaces?.[0] || null;
+
+    // If not found by fsq_place_id, try fsq_id column
+    if (!fsqPlace) {
+      const result2 = await supabase
+        .from('fsq_places_raw')
+        .select('*')
+        .eq('fsq_id', cleanId)
+        .limit(1);
+      fsqPlace = result2.data?.[0] || null;
+      fsqError = result2.error;
+    }
+
+    if (fsqPlace && !fsqError) {
+      if (DEBUG_PLACES) {
+        console.log('[fetchPlaceById] Found FSQ place:', fsqPlace.name);
+      }
+      return transformFsqRawPlace(fsqPlace) as any;
+    }
+
+    // ============================================
+    // STEP 3: Last resort — `places_unified` view (matches iOS)
+    // ============================================
+    if (DEBUG_PLACES) {
+      console.log('[fetchPlaceById] Not in fsq_places_raw, trying places_unified:', cleanId);
+    }
+
+    const { data: unifiedData, error: unifiedError } = await supabase
+      .from('places_unified')
+      .select('*')
+      .eq('id', cleanId)
+      .limit(1);
+    
+    const unifiedPlace = unifiedData?.[0] || null;
+
+    if (unifiedPlace && !unifiedError) {
+      if (DEBUG_PLACES) {
+        console.log('[fetchPlaceById] Found in places_unified:', unifiedPlace.name);
+      }
+      return {
+        id: unifiedPlace.id,
+        name: unifiedPlace.name || 'Unknown',
+        latitude: unifiedPlace.latitude || unifiedPlace.lat,
+        longitude: unifiedPlace.longitude || unifiedPlace.lng,
+        address: unifiedPlace.address || unifiedPlace.address_line1,
+        address_line1: unifiedPlace.address || unifiedPlace.address_line1,
+        city: unifiedPlace.city || unifiedPlace.locality,
+        state_region: unifiedPlace.state_region || unifiedPlace.region,
+        region: unifiedPlace.region,
+        country: unifiedPlace.country,
+        postcode: unifiedPlace.postcode,
+        phone: unifiedPlace.phone || unifiedPlace.tel,
+        website: unifiedPlace.website,
+        email: unifiedPlace.email,
+        category: unifiedPlace.category || unifiedPlace.primary_category,
+        cover_image_url: unifiedPlace.cover_image_url || unifiedPlace.photo_url,
+        signals: [],
+        photos: unifiedPlace.photos || [],
+        status: 'active',
+      } as any;
+    }
+
+    console.warn('[fetchPlaceById] Place not found:', cleanId);
+    return null;
   } catch (error) {
     console.error('Error in fetchPlaceById:', error);
     return null;

@@ -17,6 +17,11 @@ const getServerSupabase = () => {
   return createClient(supabaseUrl, supabaseAnonKey);
 };
 
+interface Signal {
+  bucket: string;
+  tap_total: number;
+}
+
 interface PlaceCard {
   id: string;
   source: 'places' | 'fsq_raw';
@@ -37,6 +42,7 @@ interface PlaceCard {
   cover_image_url?: string;
   photos?: string[];
   status?: string;
+  signals?: Signal[];
 }
 
 // Clean category string: remove brackets, quotes, extract top-level category
@@ -347,15 +353,85 @@ export default async function handler(
       allPlaces.sort((a, b) => (a.distance || 0) - (b.distance || 0));
     }
 
-    console.log(`[API/places] Returning ${allPlaces.length} total places (deduped from ${rawPlaces.length})`);
+    // ============================================
+    // STEP: Fetch signal aggregates for all places (matches iOS)
+    // iOS queries place_signal_aggregates with place_id IN (all source_ids)
+    // ============================================
+    const placeSourceIds = allPlaces
+      .map(p => p.source_id)
+      .filter(Boolean);
+
+    let signalMap = new Map<string, Signal[]>();
+    
+    if (placeSourceIds.length > 0) {
+      try {
+        // First try place_signal_aggregates (pre-computed)
+        const { data: aggData } = await supabase
+          .from('place_signal_aggregates')
+          .select('place_id, bucket, tap_total')
+          .in('place_id', placeSourceIds);
+        
+        if (aggData && aggData.length > 0) {
+          for (const s of aggData) {
+            const existing = signalMap.get(s.place_id) || [];
+            existing.push({
+              bucket: s.bucket || 'Unknown',
+              tap_total: s.tap_total || 0,
+            });
+            signalMap.set(s.place_id, existing);
+          }
+          console.log(`[API/places] Fetched signals from aggregates for ${signalMap.size} places`);
+        } else {
+          // Fallback: aggregate from tap_activity directly
+          // This handles the case where place_signal_aggregates is empty
+          const { data: tapData } = await supabase
+            .from('tap_activity')
+            .select('place_id, signal_name')
+            .in('place_id', placeSourceIds);
+          
+          if (tapData && tapData.length > 0) {
+            // Manually aggregate: count taps per place_id + signal_name
+            const tapCounts = new Map<string, Map<string, number>>();
+            for (const tap of tapData) {
+              if (!tapCounts.has(tap.place_id)) {
+                tapCounts.set(tap.place_id, new Map());
+              }
+              const placeMap = tapCounts.get(tap.place_id)!;
+              placeMap.set(tap.signal_name, (placeMap.get(tap.signal_name) || 0) + 1);
+            }
+            
+            for (const [placeId, signals] of tapCounts) {
+              const signalArray: Signal[] = [];
+              for (const [name, count] of signals) {
+                signalArray.push({ bucket: name, tap_total: count });
+              }
+              // Sort by tap_total descending
+              signalArray.sort((a, b) => b.tap_total - a.tap_total);
+              signalMap.set(placeId, signalArray);
+            }
+            console.log(`[API/places] Aggregated signals from tap_activity for ${signalMap.size} places`);
+          }
+        }
+      } catch (e) {
+        console.log('[API/places] Error fetching signals:', e);
+      }
+    }
+
+    // Attach signals to places
+    const placesWithSignals = allPlaces.map(place => ({
+      ...place,
+      signals: signalMap.get(place.source_id) || [],
+    }));
+
+    console.log(`[API/places] Returning ${placesWithSignals.length} total places (deduped from ${rawPlaces.length})`);
 
     return res.status(200).json({
-      places: allPlaces,
+      places: placesWithSignals,
       metrics: {
         fromPlaces: placesFromCanonical.length,
         fromFsqRaw: placesFromFsqRaw.length,
         fallbackTriggered,
-        total: allPlaces.length,
+        total: placesWithSignals.length,
       },
     });
   } catch (error: any) {

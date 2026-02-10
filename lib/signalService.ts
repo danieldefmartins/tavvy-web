@@ -436,8 +436,49 @@ export async function fetchPlaceSignals(placeId: string): Promise<{
 
     if (error) {
       console.error('Error fetching signal taps:', error);
-      return { best_for: [], vibe: [], heads_up: [], medals: [] };
     }
+
+    // Fallback to tap_activity if place_review_signal_taps is empty
+    // tap_activity has 1600+ rows of real signal data
+    if (!taps || taps.length === 0) {
+      const { data: tapActivity, error: tapError } = await supabase
+        .from('tap_activity')
+        .select('signal_id, signal_name, created_at')
+        .eq('place_id', placeId);
+
+      if (tapError || !tapActivity || tapActivity.length === 0) {
+        return { best_for: [], vibe: [], heads_up: [], medals: [] };
+      }
+
+      // Convert tap_activity to the same format as place_review_signal_taps
+      const convertedTaps = tapActivity.map(t => ({
+        signal_id: t.signal_id,
+        intensity: 1, // Default intensity for tap_activity
+        place_reviews: { created_at: t.created_at },
+      }));
+
+      // Use convertedTaps instead of empty taps
+      return processTaps(convertedTaps, placeId);
+    }
+
+    return processTaps(taps, placeId);
+  } catch (error) {
+    console.error('Error fetching place signals:', error);
+    return { best_for: [], vibe: [], heads_up: [], medals: [] };
+  }
+}
+
+// Extracted tap processing logic for reuse
+function processTaps(
+  taps: any[],
+  placeId: string
+): {
+  best_for: SignalAggregate[];
+  vibe: SignalAggregate[];
+  heads_up: SignalAggregate[];
+  medals: string[];
+} {
+  try {
 
     // Aggregate taps by signal_id with time decay
     const aggregated: Record<string, { 
@@ -551,7 +592,7 @@ export async function fetchPlaceSignals(placeId: string): Promise<{
     return result;
 
   } catch (error) {
-    console.error('Error fetching place signals:', error);
+    console.error('Error processing taps:', error);
     return { best_for: [], vibe: [], heads_up: [], medals: [] };
   }
 }

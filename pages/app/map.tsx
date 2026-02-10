@@ -606,6 +606,80 @@ export default function MapScreen() {
     return `${distanceMiles.toFixed(1)} mi`;
   };
 
+  // ============================================
+  // SIGNAL DISPLAY HELPERS (matches iOS HomeScreen.tsx exactly)
+  // ============================================
+  type SignalType = 'positive' | 'neutral' | 'negative';
+
+  const getSignalType = (bucket: string): SignalType => {
+    const bucketLower = bucket.toLowerCase();
+    if (bucketLower === 'the good' || bucketLower.includes('the good')) return 'positive';
+    if (bucketLower === 'the vibe' || bucketLower.includes('the vibe')) return 'neutral';
+    if (bucketLower === 'heads up' || bucketLower.includes('heads up')) return 'negative';
+    // Keyword detection for actual signal names
+    if (bucketLower.includes('great') || bucketLower.includes('excellent') || 
+        bucketLower.includes('amazing') || bucketLower.includes('affordable') ||
+        bucketLower.includes('good') || bucketLower.includes('friendly') ||
+        bucketLower.includes('fast') || bucketLower.includes('clean') ||
+        bucketLower.includes('fresh') || bucketLower.includes('delicious')) return 'positive';
+    if (bucketLower.includes('pricey') || bucketLower.includes('expensive') || 
+        bucketLower.includes('crowded') || bucketLower.includes('loud') ||
+        bucketLower.includes('slow') || bucketLower.includes('dirty') ||
+        bucketLower.includes('rude') || bucketLower.includes('limited') ||
+        bucketLower.includes('wait') || bucketLower.includes('noisy') ||
+        bucketLower.includes('heads')) return 'negative';
+    return 'neutral';
+  };
+
+  const getSignalColor = (bucket: string): string => {
+    const type = getSignalType(bucket);
+    if (type === 'positive') return '#0A84FF'; // Blue - The Good
+    if (type === 'negative') return '#FF9500'; // Orange - Heads Up
+    return '#8B5CF6'; // Purple - The Vibe
+  };
+
+  const getSignalIcon = (type: SignalType) => {
+    if (type === 'positive') return <IoThumbsUp size={12} />;
+    if (type === 'negative') return <IoWarning size={12} />;
+    return <IoTrendingUp size={12} />;
+  };
+
+  // Always returns exactly 4 signals: 2 "The Good" (top row), 1 "The Vibe" + 1 "Heads Up" (bottom row)
+  const getDisplaySignals = (signals?: { bucket: string; tap_total: number }[]) => {
+    const positive = signals?.filter(s => getSignalType(s.bucket) === 'positive') || [];
+    const neutral = signals?.filter(s => getSignalType(s.bucket) === 'neutral') || [];
+    const negative = signals?.filter(s => getSignalType(s.bucket) === 'negative') || [];
+
+    const result: { bucket: string; tap_total: number; isEmpty: boolean; type: SignalType }[] = [];
+
+    // TOP ROW: 2 positive signals
+    if (positive.length >= 2) {
+      result.push({ ...positive[0], isEmpty: false, type: 'positive' });
+      result.push({ ...positive[1], isEmpty: false, type: 'positive' });
+    } else if (positive.length === 1) {
+      result.push({ ...positive[0], isEmpty: false, type: 'positive' });
+      result.push({ bucket: 'The Good', tap_total: 0, isEmpty: true, type: 'positive' });
+    } else {
+      result.push({ bucket: 'The Good', tap_total: 0, isEmpty: true, type: 'positive' });
+      result.push({ bucket: 'The Good', tap_total: 0, isEmpty: true, type: 'positive' });
+    }
+
+    // BOTTOM ROW: 1 neutral + 1 negative
+    if (neutral.length > 0) {
+      result.push({ ...neutral[0], isEmpty: false, type: 'neutral' });
+    } else {
+      result.push({ bucket: 'The Vibe', tap_total: 0, isEmpty: true, type: 'neutral' });
+    }
+
+    if (negative.length > 0) {
+      result.push({ ...negative[0], isEmpty: false, type: 'negative' });
+    } else {
+      result.push({ bucket: 'Heads Up', tap_total: 0, isEmpty: true, type: 'negative' });
+    }
+
+    return result;
+  };
+
   const bgColor = isDark ? BG_DARK : BG_LIGHT;
   const categoryName = categories.find(c => c.id === selectedCategory)?.name || 'Places';
 
@@ -1126,22 +1200,22 @@ export default function MapScreen() {
                     </p>
                   </div>
                   <div className="signal-buttons">
-                    <button className="signal-btn the-good">
-                      <IoThumbsUp size={14} />
-                      <span>Be the first to tap!</span>
-                    </button>
-                    <button className="signal-btn the-good">
-                      <IoThumbsUp size={14} />
-                      <span>Be the first to tap!</span>
-                    </button>
-                    <button className="signal-btn the-vibe">
-                      <IoTrendingUp size={14} />
-                      <span>Be the first to tap!</span>
-                    </button>
-                    <button className="signal-btn heads-up">
-                      <IoWarning size={14} />
-                      <span>Be the first to tap!</span>
-                    </button>
+                    {getDisplaySignals(place.signals as any).map((signal, idx) => (
+                      <div key={`${place.id}-sig-${idx}`} className="signal-pill-wrapper">
+                        <button 
+                          className={`signal-btn ${signal.type === 'positive' ? 'the-good' : signal.type === 'neutral' ? 'the-vibe' : 'heads-up'}`}
+                          style={{ opacity: signal.isEmpty ? 0.6 : 1 }}
+                        >
+                          {getSignalIcon(signal.type)}
+                          <span className={signal.isEmpty ? 'signal-empty' : ''}>
+                            {signal.isEmpty ? 'Be the first to tap!' : signal.bucket}
+                          </span>
+                        </button>
+                        {!signal.isEmpty && signal.tap_total > 0 && (
+                          <span className="signal-tap-count">x{signal.tap_total}</span>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))
@@ -2071,6 +2145,24 @@ export default function MapScreen() {
         .signal-btn.heads-up {
           background: #FF9500;
           color: #fff;
+        }
+
+        .signal-pill-wrapper {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        }
+
+        .signal-tap-count {
+          font-size: 11px;
+          font-weight: 600;
+          color: ${isDark ? '#999' : '#666'};
+          white-space: nowrap;
+        }
+
+        .signal-empty {
+          font-style: italic;
+          opacity: 0.8;
         }
       `}</style>
     </>
