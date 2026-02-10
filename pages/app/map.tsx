@@ -525,28 +525,96 @@ export default function MapScreen() {
     }
   };
 
-  // Handle suggestion selection
+  // Handle suggestion selection — show on map (matching iOS behavior)
   const handleSuggestionSelect = (suggestion: SearchResult) => {
     setSearchQuery(suggestion.name);
     setShowSuggestions(false);
     setShowSearchOverlay(false);
     
-    // Navigate to place if it has coordinates
     if (suggestion.latitude && suggestion.longitude) {
+      // Center map on the selected place
       setMapCenter([suggestion.latitude, suggestion.longitude]);
-      // Navigate to place detail
-      console.log('[MapScreen] Navigating to place:', suggestion.id);
-      router.push(`/place/${suggestion.id}`);
+      setMapZoom(16); // Zoom in closer for a single place
+      
+      // Convert suggestion to PlaceCardType and show as the only card
+      const placeCard: PlaceCardType = {
+        id: (suggestion as any).id || `search-${Date.now()}`,
+        name: suggestion.name,
+        latitude: suggestion.latitude,
+        longitude: suggestion.longitude,
+        category: (suggestion as any).category || 'Place',
+        city: (suggestion as any).city || '',
+        address: (suggestion as any).address || '',
+        signals: [],
+      };
+      
+      setPlaces([placeCard]);
+      setSelectedPlaceId(placeCard.id);
+      
+      // Expand bottom sheet to show the result
+      const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
+      setSheetHeightPx(vh * 0.5);
+      
+      console.log('[MapScreen] Showing place on map:', placeCard.name, placeCard.id);
     }
   };
 
-  // Handle search submit (Enter key)
-  const handleSearch = () => {
+  // Handle search submit (Enter key) — search and show results on map
+  const handleSearch = async () => {
     if (searchQuery.trim()) {
       setShowSuggestions(false);
       setShowSearchOverlay(false);
-      // Trigger a full search and show results on map
-      fetchPlaces();
+      setLoading(true);
+      
+      try {
+        // Search via API (same endpoint as autocomplete, but with higher limit)
+        const params = new URLSearchParams({
+          q: searchQuery.trim(),
+          userLat: userLocation[0].toString(),
+          userLng: userLocation[1].toString(),
+          limit: '30',
+        });
+        
+        const response = await fetch(`/api/search?${params}`);
+        const data = await response.json();
+        
+        if (data.suggestions && data.suggestions.length > 0) {
+          // Convert search suggestions to PlaceCardType for the map
+          const searchPlaces: PlaceCardType[] = data.suggestions
+            .filter((s: any) => s.latitude && s.longitude)
+            .map((s: any) => ({
+              id: s.id || `search-${Date.now()}-${Math.random()}`,
+              name: s.name,
+              latitude: s.latitude,
+              longitude: s.longitude,
+              category: s.category || 'Place',
+              city: s.city || '',
+              address: s.address || '',
+              distance: s.distance,
+              signals: [],
+            }));
+          
+          setPlaces(searchPlaces);
+          
+          // Center map on first result
+          if (searchPlaces[0]) {
+            setMapCenter([searchPlaces[0].latitude, searchPlaces[0].longitude]);
+            setMapZoom(14);
+            setSelectedPlaceId(searchPlaces[0].id);
+          }
+          
+          console.log(`[MapScreen] Search "${searchQuery}" returned ${searchPlaces.length} places on map`);
+        } else {
+          console.log(`[MapScreen] Search "${searchQuery}" returned no results`);
+          setPlaces([]);
+        }
+      } catch (error) {
+        console.error('[MapScreen] Search error:', error);
+        setPlaces([]);
+      } finally {
+        setLoading(false);
+      }
+      
       // Expand bottom sheet to show results
       const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
       setSheetHeightPx(vh * 0.5);
@@ -721,6 +789,8 @@ export default function MapScreen() {
                   setSearchQuery('');
                   setSearchSuggestionsList([]);
                   setShowSuggestions(false);
+                  // Re-fetch nearby places when clearing search
+                  fetchPlaces();
                 }}>
                   <FiX size={18} />
                 </button>
@@ -1154,7 +1224,12 @@ export default function MapScreen() {
 
           {/* Places Count */}
           {selectedCategory === 'all' && (
-            <p className="places-count">{places.length} places nearby</p>
+            <p className="places-count">
+              {searchQuery 
+                ? `${places.length} result${places.length !== 1 ? 's' : ''} for "${searchQuery}"`
+                : `${places.length} places nearby`
+              }
+            </p>
           )}
 
           {/* Place Cards */}
