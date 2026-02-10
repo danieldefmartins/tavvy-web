@@ -85,26 +85,36 @@ const transformCanonicalPlace = (place: any): PlaceCard => ({
 });
 
 // Transform FSQ raw place to PlaceCard
-const transformFsqRawPlace = (place: any): PlaceCard => ({
-  id: `fsq-${place.fsq_id}`,
-  source: 'fsq_raw',
-  source_id: place.fsq_id,
-  name: place.name || 'Unknown',
-  latitude: place.latitude,
-  longitude: place.longitude,
-  address: place.address,
-  city: place.city,
-  region: place.region,
-  country: place.country,
-  postcode: place.postcode,
-  category: cleanCategory(place.category_name),
-  subcategory: place.subcategory_name,
-  phone: place.phone,
-  website: place.website,
-  cover_image_url: place.cover_image_url,
-  photos: place.photos,
-  status: 'active',
-});
+// fsq_places_raw columns: fsq_place_id, name, latitude, longitude, address, locality, region, country, postcode, tel, website, email, fsq_category_labels
+const transformFsqRawPlace = (place: any): PlaceCard => {
+  // Parse category from fsq_category_labels (e.g., "[Dining and Drinking > Restaurant > American Restaurant]")
+  const rawCat = Array.isArray(place.fsq_category_labels) 
+    ? place.fsq_category_labels[0] 
+    : place.fsq_category_labels;
+  const category = rawCat ? cleanCategory(rawCat) : 'Place';
+  const subcategory = rawCat ? rawCat.split('>').pop()?.trim()?.replace(/[\[\]]/g, '') : undefined;
+  
+  return {
+    id: `fsq-${place.fsq_place_id}`,
+    source: 'fsq_raw',
+    source_id: place.fsq_place_id,
+    name: place.name || 'Unknown',
+    latitude: place.latitude,
+    longitude: place.longitude,
+    address: place.address,
+    city: place.locality,
+    region: place.region,
+    country: place.country,
+    postcode: place.postcode,
+    category,
+    subcategory,
+    phone: place.tel,
+    website: place.website,
+    cover_image_url: undefined,
+    photos: undefined,
+    status: 'active',
+  };
+};
 
 // Calculate distance between two points (Haversine formula)
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
@@ -266,7 +276,7 @@ export default async function handler(
         try {
         let query = supabase
           .from('fsq_places_raw')
-          .select('fsq_id, name, latitude, longitude, address, city, region, country, postcode, category_name, subcategory_name, phone, website, cover_image_url, photos')
+          .select('fsq_place_id, name, latitude, longitude, address, locality, region, country, postcode, fsq_category_labels, tel, website, email')
           .gte('latitude', bounds.minLat)
           .lte('latitude', bounds.maxLat)
           .gte('longitude', bounds.minLng)
@@ -283,7 +293,7 @@ export default async function handler(
             'shop store': 'Store',
           };
           const fsqCatFilter = fsqCatMap[category as string] || category;
-          query = query.ilike('category_name', `%${fsqCatFilter}%`);
+          query = query.ilike('fsq_category_labels', `%${fsqCatFilter}%`);
         }
 
         const { data: fsqData, error: fsqError } = await query;
@@ -292,7 +302,7 @@ export default async function handler(
           console.warn('[API/places] Error querying fsq_places_raw:', fsqError);
         } else if (fsqData) {
           const newFsqPlaces = fsqData
-            .filter((p: any) => !existingSourceIds.has(p.fsq_id))
+            .filter((p: any) => !existingSourceIds.has(p.fsq_place_id))
             .map(transformFsqRawPlace);
           placesFromFsqRaw = newFsqPlaces;
           console.log(`[API/places] Fetched ${placesFromFsqRaw.length} places from fsq_places_raw`);

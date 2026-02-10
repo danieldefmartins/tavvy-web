@@ -100,8 +100,17 @@ function transformTypesensePlace(doc: any, distance?: number): PlaceSearchResult
 
     // Determine ID prefix based on source
   const isTavvy = doc.id?.startsWith('tavvy:');
-  const idPrefix = isTavvy ? 'tavvy:' : 'fsq-';
-  const placeId = doc.id?.replace(/^(tavvy:|fsq:)/, '') || doc.fsq_id || doc.fsq_place_id;
+  let placeId: string;
+  let idPrefix: string;
+  if (isTavvy) {
+    idPrefix = 'tavvy:';
+    placeId = doc.id.replace(/^tavvy:/, '');
+  } else {
+    idPrefix = 'fsq-';
+    // CRITICAL: Use fsq_id (hex format) not doc.id (numeric Typesense auto-ID)
+    // fsq_id matches fsq_places_raw.fsq_place_id in Supabase
+    placeId = doc.fsq_id || doc.fsq_place_id || doc.id;
+  }
 
   return {
     id: `${idPrefix}${placeId}`,
@@ -166,7 +175,7 @@ export async function searchPlaces(options: SearchOptions): Promise<SearchResult
 
     // Add location filter
     if (latitude && longitude) {
-      searchParams.filter_by = `location:(${latitude}, ${longitude}, ${radiusKm * 1000} m)`;
+      searchParams.filter_by = `location:(${latitude}, ${longitude}, ${radiusKm} km)`;
     }
 
     // Add country/region/locality filters
@@ -182,7 +191,10 @@ export async function searchPlaces(options: SearchOptions): Promise<SearchResult
     }
     
     if (filters.length > 0) {
-      searchParams.filter_by = filters.join(' && ');
+      const extraFilters = filters.join(' && ');
+      searchParams.filter_by = searchParams.filter_by 
+        ? `${searchParams.filter_by} && ${extraFilters}` 
+        : extraFilters;
     }
 
     const url = `${TYPESENSE_PROTOCOL}://${TYPESENSE_HOST}:${TYPESENSE_PORT}/collections/places/documents/search`;
