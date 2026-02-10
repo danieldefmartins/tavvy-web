@@ -103,14 +103,82 @@ export default function PlaceDetailScreen() {
   const loadPlace = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('places')
-        .select('*')
-        .eq('id', id)
-        .single();
+      const rawId = id as string;
+      
+      // Determine source and extract real ID from prefixed format
+      let source: 'places' | 'fsq_raw' | 'typesense' = 'places';
+      let realId = rawId;
+      
+      if (rawId.startsWith('places-')) {
+        source = 'places';
+        realId = rawId.replace('places-', '');
+      } else if (rawId.startsWith('fsq-')) {
+        source = 'fsq_raw';
+        realId = rawId.replace('fsq-', '');
+      } else if (rawId.startsWith('tavvy:')) {
+        source = 'places';
+        realId = rawId.replace('tavvy:', '');
+      }
+      
+      console.log(`[PlaceDetail] Loading place: source=${source}, realId=${realId}, rawId=${rawId}`);
+      
+      if (source === 'places') {
+        // Query canonical places table
+        const { data, error } = await supabase
+          .from('places')
+          .select('*')
+          .eq('id', realId)
+          .single();
 
-      if (data) {
-        setPlace(data);
+        if (data) {
+          setPlace(data);
+        } else if (error) {
+          console.warn('[PlaceDetail] Not found in places table, trying fsq_places_raw...');
+          // Fallback: try fsq_places_raw with the ID
+          const { data: fsqData } = await supabase
+            .from('fsq_places_raw')
+            .select('fsq_id, name, latitude, longitude, address, city, region, country, postcode, category_name, subcategory_name, phone, website, cover_image_url, photos')
+            .eq('fsq_id', realId)
+            .single();
+          if (fsqData) {
+            setPlace({
+              id: fsqData.fsq_id,
+              name: fsqData.name,
+              latitude: fsqData.latitude,
+              longitude: fsqData.longitude,
+              address_line_1: fsqData.address,
+              city: fsqData.city,
+              state: fsqData.region,
+              category: fsqData.category_name,
+              phone: fsqData.phone,
+              website: fsqData.website,
+              cover_image_url: fsqData.cover_image_url,
+            });
+          }
+        }
+      } else if (source === 'fsq_raw') {
+        // Query FSQ raw table
+        const { data, error } = await supabase
+          .from('fsq_places_raw')
+          .select('fsq_id, name, latitude, longitude, address, city, region, country, postcode, category_name, subcategory_name, phone, website, cover_image_url, photos')
+          .eq('fsq_id', realId)
+          .single();
+
+        if (data) {
+          setPlace({
+            id: data.fsq_id,
+            name: data.name,
+            latitude: data.latitude,
+            longitude: data.longitude,
+            address_line_1: data.address,
+            city: data.city,
+            state: data.region,
+            category: data.category_name,
+            phone: data.phone,
+            website: data.website,
+            cover_image_url: data.cover_image_url,
+          });
+        }
       }
     } catch (error) {
       console.error('Error loading place:', error);
