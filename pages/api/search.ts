@@ -19,6 +19,7 @@ interface SearchSuggestion {
   name: string;
   category?: string;
   city?: string;
+  address?: string;
   distance?: number;
   latitude: number;
   longitude: number;
@@ -77,7 +78,7 @@ export default async function handler(
     try {
       let query = supabase
         .from('fsq_places_raw')
-        .select('fsq_id, name, category_name, city, latitude, longitude');
+        .select('fsq_id, name, category_name, city, address, latitude, longitude');
       
       // Apply smart parsing filters if available
       if (parsed.isParsed) {
@@ -111,6 +112,7 @@ export default async function handler(
           name: place.name,
           category: place.category_name,
           city: place.city,
+          address: [place.address, place.city].filter(Boolean).join(', '),
           latitude: place.latitude,
           longitude: place.longitude,
         }));

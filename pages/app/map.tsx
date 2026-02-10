@@ -12,7 +12,7 @@
  * - Signal-based review buttons
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
@@ -23,11 +23,11 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { 
   FiArrowLeft, FiSearch, FiX, FiInfo, FiLayers, FiNavigation,
-  FiCloud, FiFilter, FiChevronDown, FiMapPin
+  FiCloud, FiFilter, FiChevronDown, FiMapPin, FiArrowRight, FiRefreshCw
 } from 'react-icons/fi';
 import { 
   IoRestaurant, IoCafe, IoBeer, IoCarSport, IoStorefront,
-  IoThumbsUp, IoTrendingUp, IoWarning, IoClose, IoLocationSharp
+  IoThumbsUp, IoTrendingUp, IoWarning, IoClose, IoLocationSharp, IoRefresh
 } from 'react-icons/io5';
 // Leaflet is imported dynamically in useEffect to avoid SSR issues
 let L: typeof import('leaflet') | null = null;
@@ -172,6 +172,33 @@ const MapCenterUpdater = dynamic(
   { ssr: false }
 );
 
+// MapEvents component - detects map pan/zoom to show "Search this area" button
+const MapEvents = dynamic(
+  () => import('react-leaflet').then((mod) => {
+    const { useMapEvents } = mod;
+    return {
+      default: function InnerMapEvents({ onMoveEnd }: { onMoveEnd: (bounds: { minLat: number; maxLat: number; minLng: number; maxLng: number; center: [number, number] }) => void }) {
+        useMapEvents({
+          moveend: (e) => {
+            const map = e.target;
+            const bounds = map.getBounds();
+            const center = map.getCenter();
+            onMoveEnd({
+              minLat: bounds.getSouth(),
+              maxLat: bounds.getNorth(),
+              minLng: bounds.getWest(),
+              maxLng: bounds.getEast(),
+              center: [center.lat, center.lng],
+            });
+          },
+        });
+        return null;
+      }
+    };
+  }),
+  { ssr: false }
+);
+
 export default function MapScreen() {
   const router = useRouter();
   const { t } = useTranslation('common');
@@ -190,7 +217,12 @@ export default function MapScreen() {
   const [searchSuggestionsList, setSearchSuggestionsList] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showSearchOverlay, setShowSearchOverlay] = useState(false);
+  const [showSearchThisArea, setShowSearchThisArea] = useState(false);
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const mapBoundsRef = useRef<{ minLat: number; maxLat: number; minLng: number; maxLng: number; center: [number, number] } | null>(null);
+  const initialLoadDone = useRef(false);
   
   // Filter states
   const [showFilters, setShowFilters] = useState(false);
@@ -430,10 +462,74 @@ export default function MapScreen() {
     setSheetHeightPx(vh * 0.5);
   };
 
+  // Handle map move end - show "Search this area" button
+  const onMapMoveEnd = useCallback((bounds: { minLat: number; maxLat: number; minLng: number; maxLng: number; center: [number, number] }) => {
+    mapBoundsRef.current = bounds;
+    // Only show "Search this area" after initial load
+    if (initialLoadDone.current) {
+      setShowSearchThisArea(true);
+    } else {
+      initialLoadDone.current = true;
+    }
+  }, []);
+
+  // Search this area - fetch places for current map bounds
+  const searchThisArea = async () => {
+    setShowSearchThisArea(false);
+    if (!mapBoundsRef.current) return;
+    
+    const { minLat, maxLat, minLng, maxLng, center } = mapBoundsRef.current;
+    setLoading(true);
+    try {
+      const categoryMap: Record<string, string> = {
+        'restaurants': 'restaurant',
+        'cafes': 'coffee cafe',
+        'bars': 'bar pub',
+        'gas': 'gas station fuel',
+        'shopping': 'shop store'
+      };
+      const categoryFilter = selectedCategory !== 'all' ? categoryMap[selectedCategory] : undefined;
+      
+      const params = new URLSearchParams({
+        minLat: minLat.toString(),
+        maxLat: maxLat.toString(),
+        minLng: minLng.toString(),
+        maxLng: maxLng.toString(),
+        userLat: center[0].toString(),
+        userLng: center[1].toString(),
+        ...(categoryFilter && { category: categoryFilter }),
+      });
+      
+      const response = await fetch(`/api/places?${params}`);
+      const data = await response.json();
+      
+      if (data.error) {
+        console.error('[Map] API error:', data.error);
+        setPlaces([]);
+      } else {
+        const fetchedPlaces = data.places || [];
+        const seenIds = new Set<string>();
+        const uniquePlaces = fetchedPlaces.filter((place: PlaceCardType) => {
+          if (seenIds.has(place.id)) return false;
+          seenIds.add(place.id);
+          return true;
+        });
+        console.log(`[Map] Search this area: ${uniquePlaces.length} places`);
+        setPlaces(uniquePlaces);
+      }
+    } catch (error) {
+      console.error('Error searching area:', error);
+      setPlaces([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Handle suggestion selection
   const handleSuggestionSelect = (suggestion: SearchResult) => {
     setSearchQuery(suggestion.name);
     setShowSuggestions(false);
+    setShowSearchOverlay(false);
     
     // Navigate to place if it has coordinates
     if (suggestion.latitude && suggestion.longitude) {
@@ -444,12 +540,16 @@ export default function MapScreen() {
     }
   };
 
-  // Handle search submit
+  // Handle search submit (Enter key)
   const handleSearch = () => {
     if (searchQuery.trim()) {
       setShowSuggestions(false);
-      // Could trigger a full search here
+      setShowSearchOverlay(false);
+      // Trigger a full search and show results on map
       fetchPlaces();
+      // Expand bottom sheet to show results
+      const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
+      setSheetHeightPx(vh * 0.5);
     }
   };
 
@@ -530,31 +630,20 @@ export default function MapScreen() {
             <button className="back-btn" onClick={handleBack}>
               <FiArrowLeft size={24} />
             </button>
-            <div className={`search-bar ${isSearchFocused ? 'focused' : ''}`}>
+            <div 
+              className={`search-bar ${isSearchFocused ? 'focused' : ''}`}
+              onClick={() => {
+                setShowSearchOverlay(true);
+                setTimeout(() => searchInputRef.current?.focus(), 100);
+              }}
+            >
               <FiSearch size={18} className="search-icon" />
-              <input
-                type="text"
-                placeholder="Search places or locations"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => {
-                  setIsSearchFocused(true);
-                  if (searchSuggestionsList.length > 0) {
-                    setShowSuggestions(true);
-                  }
-                }}
-                onBlur={() => {
-                  setIsSearchFocused(false);
-                  // Delay hiding suggestions to allow click
-                  setTimeout(() => setShowSuggestions(false), 200);
-                }}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              />
-              {isSearching && (
-                <div className="search-spinner" />
-              )}
-              {searchQuery && !isSearching && (
-                <button className="clear-btn" onClick={() => {
+              <span className="search-placeholder-text">
+                {searchQuery || 'Search places or locations'}
+              </span>
+              {searchQuery && (
+                <button className="clear-btn" onClick={(e) => {
+                  e.stopPropagation();
                   setSearchQuery('');
                   setSearchSuggestionsList([]);
                   setShowSuggestions(false);
@@ -564,31 +653,6 @@ export default function MapScreen() {
               )}
             </div>
           </div>
-
-          {/* Autocomplete Suggestions Dropdown */}
-          {showSuggestions && searchSuggestionsList.length > 0 && (
-            <div className="suggestions-dropdown">
-              {searchSuggestionsList.map((suggestion) => (
-                <button
-                  key={suggestion.id}
-                  className="suggestion-item"
-                  onClick={() => handleSuggestionSelect(suggestion)}
-                >
-                  <div className="suggestion-icon">
-                    <IoLocationSharp size={20} color={BLUE} />
-                  </div>
-                  <div className="suggestion-content">
-                    <span className="suggestion-name">{suggestion.name}</span>
-                    <span className="suggestion-detail">
-                      {suggestion.category || 'Place'} 
-                      {suggestion.city && ` • ${suggestion.city}`}
-                      {suggestion.distance && ` • ${formatDistance(suggestion.distance)}`}
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
 
           {/* Category Pills */}
           <div className="category-pills">
@@ -613,6 +677,86 @@ export default function MapScreen() {
           </div>
         </div>
 
+        {/* Search This Area Button */}
+        {showSearchThisArea && (
+          <button className="search-this-area-btn" onClick={searchThisArea}>
+            <FiRefreshCw size={16} />
+            <span>Search this area</span>
+          </button>
+        )}
+
+        {/* Full-Screen Search Overlay */}
+        {showSearchOverlay && (
+          <div className="search-overlay">
+            <div className="search-overlay-header">
+              <button className="overlay-back-btn" onClick={() => {
+                setShowSearchOverlay(false);
+                setShowSuggestions(false);
+              }}>
+                <FiArrowLeft size={24} />
+              </button>
+              <div className="overlay-search-bar">
+                <FiSearch size={18} className="search-icon" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search places or locations"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch();
+                    }
+                  }}
+                  autoFocus
+                />
+                {isSearching && <div className="search-spinner" />}
+                {searchQuery && !isSearching && (
+                  <button className="clear-btn" onClick={() => {
+                    setSearchQuery('');
+                    setSearchSuggestionsList([]);
+                    setShowSuggestions(false);
+                  }}>
+                    <FiX size={18} />
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="search-overlay-results">
+              {searchSuggestionsList.length > 0 ? (
+                searchSuggestionsList.map((suggestion) => (
+                  <button
+                    key={suggestion.id}
+                    className="overlay-suggestion-item"
+                    onClick={() => handleSuggestionSelect(suggestion)}
+                  >
+                    <div className="overlay-suggestion-icon">
+                      <FiMapPin size={18} />
+                    </div>
+                    <div className="overlay-suggestion-content">
+                      <span className="overlay-suggestion-name">{suggestion.name}</span>
+                      <span className="overlay-suggestion-address">
+                        {(suggestion as any).address || suggestion.city || suggestion.category || 'Place'}
+                      </span>
+                    </div>
+                    <FiArrowRight size={18} className="overlay-suggestion-arrow" />
+                  </button>
+                ))
+              ) : searchQuery.length >= 2 && !isSearching ? (
+                <div className="overlay-no-results">
+                  <p>No results found</p>
+                  <p className="overlay-no-results-hint">Try a different search term</p>
+                </div>
+              ) : !searchQuery ? (
+                <div className="overlay-hint">
+                  <FiSearch size={24} />
+                  <p>Search for places, restaurants, cafes...</p>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        )}
+
         {/* Map Container */}
         <div className="map-container">
           {mapReady && typeof window !== 'undefined' && (
@@ -626,6 +770,8 @@ export default function MapScreen() {
                 attribution={MAP_STYLES[selectedMapStyle].attribution}
                 url={MAP_STYLES[selectedMapStyle].url}
               />
+              {/* Map Events - detect pan/zoom */}
+              <MapEvents onMoveEnd={onMapMoveEnd} />
               {/* User location blue dot */}
               <Circle
                 center={userLocation}
@@ -1102,62 +1248,172 @@ export default function MapScreen() {
           animation: spin 0.8s linear infinite;
         }
 
-        /* Autocomplete Suggestions */
-        .suggestions-dropdown {
-          position: absolute;
-          top: calc(max(12px, env(safe-area-inset-top)) + 52px);
-          left: 68px;
-          right: 16px;
-          background: ${isDark ? 'rgba(0,0,0,0.95)' : '#fff'};
-          border-radius: 12px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-          z-index: 1002;
+        /* Search placeholder text in the bar */
+        .search-placeholder-text {
+          flex: 1;
+          font-size: 15px;
+          color: ${isDark ? '#666' : '#A0A0A0'};
+          white-space: nowrap;
           overflow: hidden;
-          max-height: 400px;
-          overflow-y: auto;
-          backdrop-filter: blur(16px);
+          text-overflow: ellipsis;
+          cursor: text;
         }
 
-        .suggestion-item {
+        /* Search This Area Button */
+        .search-this-area-btn {
+          position: absolute;
+          top: calc(max(12px, env(safe-area-inset-top)) + 100px);
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 1002;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 20px;
+          background: rgba(0, 122, 255, 0.9);
+          color: #fff;
+          border: none;
+          border-radius: 24px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          box-shadow: 0 4px 16px rgba(0, 122, 255, 0.4);
+          backdrop-filter: blur(12px);
+          transition: all 0.2s;
+          animation: fadeInDown 0.3s ease;
+        }
+
+        .search-this-area-btn:hover {
+          background: rgba(0, 122, 255, 1);
+          box-shadow: 0 6px 24px rgba(0, 122, 255, 0.5);
+        }
+
+        .search-this-area-btn:active {
+          transform: translateX(-50%) scale(0.95);
+        }
+
+        @keyframes fadeInDown {
+          from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+          }
+        }
+
+        /* Full-Screen Search Overlay */
+        .search-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: ${isDark ? 'rgba(0,0,0,0.97)' : 'rgba(255,255,255,0.98)'};
+          z-index: 2000;
+          display: flex;
+          flex-direction: column;
+          animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        .search-overlay-header {
           display: flex;
           align-items: center;
           gap: 12px;
-          padding: 14px 16px;
+          padding: max(16px, env(safe-area-inset-top)) 16px 12px;
+          border-bottom: 1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#E5E5EA'};
+        }
+
+        .overlay-back-btn {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: ${isDark ? 'rgba(255,255,255,0.1)' : '#F2F2F7'};
+          border: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          color: ${isDark ? '#fff' : '#333'};
+          flex-shrink: 0;
+        }
+
+        .overlay-search-bar {
+          flex: 1;
+          display: flex;
+          align-items: center;
+          background: ${isDark ? 'rgba(255,255,255,0.08)' : '#F2F2F7'};
+          border-radius: 10px;
+          padding: 10px 14px;
+          gap: 10px;
+        }
+
+        .overlay-search-bar input {
+          flex: 1;
+          border: none;
+          background: transparent;
+          font-size: 16px;
+          color: ${isDark ? '#fff' : '#111'};
+          outline: none;
+        }
+
+        .overlay-search-bar input::placeholder {
+          color: ${isDark ? '#666' : '#A0A0A0'};
+        }
+
+        .search-overlay-results {
+          flex: 1;
+          overflow-y: auto;
+          padding: 0;
+        }
+
+        .overlay-suggestion-item {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 16px 20px;
           border: none;
           background: none;
           width: 100%;
           text-align: left;
           cursor: pointer;
-          transition: background 0.2s;
+          transition: background 0.15s;
         }
 
-        .suggestion-item:hover {
-          background: ${isDark ? 'rgba(255,255,255,0.1)' : '#F5F5F7'};
+        .overlay-suggestion-item:hover {
+          background: ${isDark ? 'rgba(255,255,255,0.06)' : '#F5F5F7'};
         }
 
-        .suggestion-item:not(:last-child) {
-          border-bottom: 1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#F2F2F7'};
+        .overlay-suggestion-item:not(:last-child) {
+          border-bottom: 1px solid ${isDark ? 'rgba(255,255,255,0.06)' : '#F2F2F7'};
         }
 
-        .suggestion-icon {
-          width: 36px;
-          height: 36px;
+        .overlay-suggestion-icon {
+          width: 40px;
+          height: 40px;
           border-radius: 50%;
-          background: ${isDark ? 'rgba(34, 211, 238, 0.2)' : '#E8F4FF'};
+          background: ${isDark ? 'rgba(0, 122, 255, 0.2)' : '#E8F4FF'};
           display: flex;
           align-items: center;
           justify-content: center;
           flex-shrink: 0;
+          color: ${BLUE};
         }
 
-        .suggestion-content {
+        .overlay-suggestion-content {
           flex: 1;
           min-width: 0;
         }
 
-        .suggestion-name {
+        .overlay-suggestion-name {
           display: block;
-          font-size: 15px;
+          font-size: 16px;
           font-weight: 500;
           color: ${isDark ? '#fff' : '#111'};
           white-space: nowrap;
@@ -1165,14 +1421,52 @@ export default function MapScreen() {
           text-overflow: ellipsis;
         }
 
-        .suggestion-detail {
+        .overlay-suggestion-address {
           display: block;
-          font-size: 12px;
+          font-size: 13px;
           color: ${isDark ? '#888' : '#666'};
-          margin-top: 2px;
+          margin-top: 3px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+        }
+
+        .overlay-suggestion-arrow {
+          flex-shrink: 0;
+          color: ${isDark ? '#555' : '#C7C7CC'};
+        }
+
+        .overlay-no-results {
+          text-align: center;
+          padding: 60px 20px;
+          color: ${isDark ? '#888' : '#666'};
+        }
+
+        .overlay-no-results p:first-child {
+          font-size: 18px;
+          font-weight: 600;
+          margin: 0 0 8px;
+        }
+
+        .overlay-no-results-hint {
+          font-size: 14px;
+          color: ${isDark ? '#555' : '#999'};
+          margin: 0;
+        }
+
+        .overlay-hint {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 80px 20px;
+          color: ${isDark ? '#555' : '#C7C7CC'};
+          gap: 12px;
+        }
+
+        .overlay-hint p {
+          font-size: 15px;
+          margin: 0;
         }
 
         /* Category Pills - Compact filter bar */
