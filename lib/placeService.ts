@@ -653,11 +653,13 @@ export async function fetchPlaceById(placeId: string): Promise<Place | null> {
       }
       
       // Try fsq_place_id column first (used in placeService transforms)
-      let { data: fsqPlace, error } = await supabase
+      // Use .limit(1) instead of .single() because fsq_places_raw has duplicate rows
+      let { data: fsqPlaces, error } = await supabase
         .from('fsq_places_raw')
         .select('*')
         .eq('fsq_place_id', cleanId)
-        .single();
+        .limit(1);
+      let fsqPlace = fsqPlaces?.[0] || null;
 
       // If not found, try fsq_id column (used in API route)
       if ((error || !fsqPlace) && cleanId) {
@@ -665,8 +667,8 @@ export async function fetchPlaceById(placeId: string): Promise<Place | null> {
           .from('fsq_places_raw')
           .select('*')
           .eq('fsq_id', cleanId)
-          .single();
-        fsqPlace = result2.data;
+          .limit(1);
+        fsqPlace = result2.data?.[0] || null;
         error = result2.error;
       }
 
