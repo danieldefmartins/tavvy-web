@@ -609,20 +609,66 @@ export async function fetchPlaceById(placeId: string): Promise<Place | null> {
       console.log('[fetchPlaceById] Looking up place:', placeId);
     }
 
-    // Check if it's an FSQ ID (with or without prefix)
-    const isFsqId = placeId.startsWith('fsq:') || placeId.length === 24;
+    // Strip known prefixes to get the raw ID
+    // API route adds: places-UUID, fsq-FSQID
+    // Typesense adds: fsq:FSQID, tavvy:UUID
+    let cleanId = placeId;
+    let isFsqId = false;
+
+    if (placeId.startsWith('places-')) {
+      cleanId = placeId.replace('places-', '');
+      isFsqId = false;
+      if (DEBUG_PLACES) {
+        console.log('[fetchPlaceById] Stripped places- prefix, clean ID:', cleanId);
+      }
+    } else if (placeId.startsWith('fsq-')) {
+      cleanId = placeId.replace('fsq-', '');
+      isFsqId = true;
+      if (DEBUG_PLACES) {
+        console.log('[fetchPlaceById] Stripped fsq- prefix, clean ID:', cleanId);
+      }
+    } else if (placeId.startsWith('fsq:')) {
+      cleanId = placeId.replace('fsq:', '');
+      isFsqId = true;
+      if (DEBUG_PLACES) {
+        console.log('[fetchPlaceById] Stripped fsq: prefix, clean ID:', cleanId);
+      }
+    } else if (placeId.startsWith('tavvy:')) {
+      cleanId = placeId.replace('tavvy:', '');
+      isFsqId = false;
+      if (DEBUG_PLACES) {
+        console.log('[fetchPlaceById] Stripped tavvy: prefix, clean ID:', cleanId);
+      }
+    } else if (placeId.length === 24 && !placeId.includes('-')) {
+      // Looks like a raw FSQ ID (24-char hex string without dashes)
+      isFsqId = true;
+      if (DEBUG_PLACES) {
+        console.log('[fetchPlaceById] Detected raw FSQ ID (24 chars):', cleanId);
+      }
+    }
     
     if (isFsqId) {
-      const fsqId = placeId.replace('fsq:', '');
       if (DEBUG_PLACES) {
-        console.log('[fetchPlaceById] Detected FSQ ID:', fsqId);
+        console.log('[fetchPlaceById] Looking up FSQ place:', cleanId);
       }
       
-      const { data: fsqPlace, error } = await supabase
+      // Try fsq_place_id column first (used in placeService transforms)
+      let { data: fsqPlace, error } = await supabase
         .from('fsq_places_raw')
         .select('*')
-        .eq('fsq_place_id', fsqId)
+        .eq('fsq_place_id', cleanId)
         .single();
+
+      // If not found, try fsq_id column (used in API route)
+      if ((error || !fsqPlace) && cleanId) {
+        const result2 = await supabase
+          .from('fsq_places_raw')
+          .select('*')
+          .eq('fsq_id', cleanId)
+          .single();
+        fsqPlace = result2.data;
+        error = result2.error;
+      }
 
       if (error || !fsqPlace) {
         console.error('Error fetching FSQ place:', error);
@@ -640,19 +686,19 @@ export async function fetchPlaceById(placeId: string): Promise<Place | null> {
     const { data: place, error } = await supabase
       .from('places')
       .select('*')
-      .eq('id', placeId)
+      .eq('id', cleanId)
       .single();
 
     if (error || !place) {
       if (DEBUG_PLACES) {
-        console.log('[fetchPlaceById] Not found in places table, trying places_unified:', placeId);
+        console.log('[fetchPlaceById] Not found in places table, trying places_unified:', cleanId);
       }
       
       // Fallback: Try places_unified view
       const { data: unifiedPlace, error: unifiedError } = await supabase
         .from('places_unified')
         .select('*')
-        .eq('id', placeId)
+        .eq('id', cleanId)
         .single();
       
       if (unifiedError || !unifiedPlace) {
@@ -691,13 +737,13 @@ export async function fetchPlaceById(placeId: string): Promise<Place | null> {
     const { data: signals } = await supabase
       .from('place_signals_aggregated')
       .select('bucket, tap_total')
-      .eq('place_id', placeId);
+      .eq('place_id', cleanId);
 
     // Fetch photos
     const { data: photos } = await supabase
       .from('place_photos')
       .select('photo_url')
-      .eq('place_id', placeId)
+      .eq('place_id', cleanId)
       .order('created_at', { ascending: false });
 
     return {
