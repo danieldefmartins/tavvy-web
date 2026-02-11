@@ -230,11 +230,16 @@ export default function NewProjectPage() {
     }
     setAddressLoading(true);
     try {
+      // Note: Do NOT set User-Agent header — it triggers CORS preflight which Nominatim blocks
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(text)}&format=json&addressdetails=1&limit=5&countrycodes=us`,
-        { headers: { 'User-Agent': 'Tavvy-Web-App' } }
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(text)}&format=json&addressdetails=1&limit=5&countrycodes=us`
       );
+      if (!response.ok) {
+        console.error('Address search HTTP error:', response.status);
+        return;
+      }
       const data = await response.json();
+      console.log('[Address] Results for', text, ':', data.length);
       setAddressSuggestions(data);
       setShowSuggestions(data.length > 0);
     } catch (err) {
@@ -351,15 +356,67 @@ export default function NewProjectPage() {
 
   // Category icon mapping
   const getCategoryIcon = (icon?: string | null, name?: string) => {
-    if (icon) return icon;
-    const iconMap: Record<string, string> = {
-      'home': '🏠', 'auto': '🚗', 'marine': '⛵', 'events': '🎉',
-      'business': '💼', 'creative': '🎨', 'health': '🏥', 'tech': '💻',
-      'education': '📚', 'fitness': '💪', 'beauty': '💅', 'food': '🍽️',
-      'other': '⋯',
+    // Map Ionicons names (from database) to emoji equivalents
+    const ioniconsToEmoji: Record<string, string> = {
+      'settings': '⚙️', 'settings-outline': '⚙️',
+      'sparkles': '✨', 'sparkles-outline': '✨',
+      'flash': '⚡', 'flash-outline': '⚡',
+      'hammer': '🔨', 'hammer-outline': '🔨',
+      'home': '🏠', 'home-outline': '🏠',
+      'car': '🚗', 'car-outline': '🚗',
+      'thermometer': '🌡️', 'thermometer-outline': '🌡️',
+      'grid': '🏗️', 'grid-outline': '🏗️',
+      'construct': '🔧', 'construct-outline': '🔧',
+      'water': '💧', 'water-outline': '💧',
+      'leaf': '🌿', 'leaf-outline': '🌿',
+      'color-palette': '🎨', 'color-palette-outline': '🎨',
+      'brush': '🖌️', 'brush-outline': '🖌️',
+      'fitness': '💪', 'fitness-outline': '💪',
+      'cut': '✂️', 'cut-outline': '✂️',
+      'restaurant': '🍽️', 'restaurant-outline': '🍽️',
+      'camera': '📷', 'camera-outline': '📷',
+      'musical-notes': '🎵', 'musical-notes-outline': '🎵',
+      'paw': '🐾', 'paw-outline': '🐾',
+      'shield': '🛡️', 'shield-outline': '🛡️',
+      'desktop': '💻', 'desktop-outline': '💻',
+      'laptop': '💻', 'laptop-outline': '💻',
+      'boat': '⛵', 'boat-outline': '⛵',
+      'business': '💼', 'business-outline': '💼',
+      'school': '📚', 'school-outline': '📚',
+      'medkit': '🏥', 'medkit-outline': '🏥',
+      'build': '🔧', 'build-outline': '🔧',
+      'key': '🔑', 'key-outline': '🔑',
+      'lock-closed': '🔒', 'lock-closed-outline': '🔒',
+      'bulb': '💡', 'bulb-outline': '💡',
+      'sunny': '☀️', 'sunny-outline': '☀️',
+      'snow': '❄️', 'snow-outline': '❄️',
+      'wifi': '📶', 'wifi-outline': '📶',
+      'tv': '📺', 'tv-outline': '📺',
+      'cube': '📦', 'cube-outline': '📦',
+      'people': '👥', 'people-outline': '👥',
+      'person': '👤', 'person-outline': '👤',
+      'calendar': '📅', 'calendar-outline': '📅',
+      'star': '⭐', 'star-outline': '⭐',
+      'heart': '❤️', 'heart-outline': '❤️',
+      'car-sport': '🚗', 'car-sport-outline': '🚗',
+      'bug': '🐛', 'bug-outline': '🐛',
+      'ellipsis-horizontal': '⋯',
+    };
+    
+    // First try to map the icon name from database
+    if (icon && ioniconsToEmoji[icon]) return ioniconsToEmoji[icon];
+    
+    // Fallback: try to match by category name
+    const nameMap: Record<string, string> = {
+      'appliance': '⚙️', 'cleaning': '✨', 'electrical': '⚡', 'electrician': '⚡',
+      'flooring': '🏗️', 'garage': '🚗', 'handyman': '🔨', 'home improvement': '🏠',
+      'house cleaning': '✨', 'hvac': '🌡️', 'landscaping': '🌿', 'lawn': '🌿',
+      'locksmith': '🔑', 'moving': '📦', 'painting': '🎨', 'pest': '🛡️',
+      'plumbing': '💧', 'pool': '🏊', 'roofing': '🏠', 'solar': '☀️',
+      'tree': '🌳', 'window': '🪟', 'other': '⋯',
     };
     const slug = name?.toLowerCase() || '';
-    for (const [key, emoji] of Object.entries(iconMap)) {
+    for (const [key, emoji] of Object.entries(nameMap)) {
       if (slug.includes(key)) return emoji;
     }
     return '🔧';
@@ -828,11 +885,14 @@ export default function NewProjectPage() {
                     type="text"
                     value={formData.address}
                     onChange={e => handleAddressTextChange(e.target.value)}
-                    onFocus={() => formData.address.length >= 3 && setShowSuggestions(true)}
+                    onFocus={() => { if (formData.address.length >= 3 && addressSuggestions.length > 0) setShowSuggestions(true); }}
+                    onBlur={() => { setTimeout(() => setShowSuggestions(false), 200); }}
                     placeholder="Start typing your address..."
+                    autoComplete="off"
+                    autoCorrect="off"
                     style={{
                       flex: 1, padding: '12px 0', fontSize: '16px', border: 'none',
-                      background: 'transparent', outline: 'none',
+                      background: 'transparent', outline: 'none', color: ProsColors.textPrimary,
                     }}
                   />
                   {addressLoading && <FiLoader style={{ animation: 'spin 1s linear infinite' }} />}

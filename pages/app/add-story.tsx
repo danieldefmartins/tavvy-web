@@ -1,9 +1,11 @@
 /**
  * Add Story Page - Web Version
  * Allows users to upload stories to places within a universe
+ * Place selector: search-based input that queries places from Supabase
+ * When placeId is passed via URL (from a place page), the place is pre-selected
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../contexts/ThemeContext';
@@ -11,8 +13,9 @@ import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
 import {
   IoArrowBack, IoClose, IoCamera, IoImage, IoCheckmark,
-  IoLocation, IoChevronDown
+  IoLocation, IoSearch
 } from 'react-icons/io5';
+import { FiLoader } from 'react-icons/fi';
 
 interface Place {
   id: string;
@@ -23,14 +26,17 @@ interface Place {
 
 export default function AddStoryPage() {
   const router = useRouter();
-  const { universeId, universeName, placeId: initialPlaceId } = router.query;
+  const { universeId, universeName, placeId: initialPlaceId, placeName: initialPlaceName } = router.query;
   const { theme } = useThemeContext();
   const isDark = theme === 'dark';
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const searchTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const [places, setPlaces] = useState<Place[]>([]);
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
-  const [showPlaceSelector, setShowPlaceSelector] = useState(false);
+  const [placeSearchText, setPlaceSearchText] = useState('');
+  const [placeSearchResults, setPlaceSearchResults] = useState<Place[]>([]);
+  const [placeSearchLoading, setPlaceSearchLoading] = useState(false);
+  const [showPlaceResults, setShowPlaceResults] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [fileSelected, setFileSelected] = useState(false);
@@ -62,71 +68,161 @@ export default function AddStoryPage() {
     checkUser();
   }, []);
 
+  // If initialPlaceId is provided (coming from a place page), fetch that place
   useEffect(() => {
-    const fetchPlaces = async () => {
-      if (!universeId) return;
+    const fetchInitialPlace = async () => {
+      if (!initialPlaceId) {
+        setLoading(false);
+        return;
+      }
+      
+      try {
+        setLoading(true);
+        const pid = String(initialPlaceId);
+        
+        // Try canonical places table first (match by id or source_id)
+        const { data: placeData } = await supabase
+          .from('places')
+          .select('id, name, cover_image_url, category')
+          .or(`id.eq.${pid},source_id.eq.${pid}`)
+          .limit(1)
+          .single();
+
+        if (placeData) {
+          setSelectedPlace(placeData);
+        } else {
+          // Try fsq_places_raw
+          const { data: fsqPlace } = await supabase
+            .from('fsq_places_raw')
+            .select('fsq_id, name, category')
+            .eq('fsq_id', pid)
+            .single();
+          if (fsqPlace) {
+            setSelectedPlace({
+              id: fsqPlace.fsq_id,
+              name: fsqPlace.name,
+              cover_image_url: null,
+              category: fsqPlace.category,
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching initial place:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInitialPlace();
+  }, [initialPlaceId]);
+
+  // If no initialPlaceId but we have a universeId, try to auto-select first place
+  useEffect(() => {
+    const fetchUniversePlaces = async () => {
+      if (initialPlaceId || !universeId) return;
       
       try {
         setLoading(true);
         
-        // Get place IDs for this universe
         const { data: placeLinks } = await supabase
           .from('atlas_universe_places')
           .select('place_id')
           .eq('universe_id', universeId);
         
         if (!placeLinks || placeLinks.length === 0) {
-          setPlaces([]);
+          setLoading(false);
           return;
         }
 
         const placeIds = placeLinks.map(link => link.place_id);
 
-        // Fetch place details
         const { data: placesData } = await supabase
           .from('places')
           .select('id, name, cover_image_url, category')
           .in('id', placeIds)
-          .order('name');
+          .order('name')
+          .limit(1);
 
         if (placesData && placesData.length > 0) {
-          setPlaces(placesData);
-          
-          // If initialPlaceId is provided, select that place
-          if (initialPlaceId) {
-            const place = placesData.find(p => p.id === initialPlaceId);
-            if (place) setSelectedPlace(place);
-          } else {
-            // Auto-select the first place (or only place)
-            setSelectedPlace(placesData[0]);
-          }
-        } else {
-          // No places found in canonical table — try fsq_places_raw
-          const { data: fsqPlaces } = await supabase
-            .from('fsq_places_raw')
-            .select('fsq_id, name, category')
-            .in('fsq_id', placeIds)
-            .limit(50);
-          if (fsqPlaces && fsqPlaces.length > 0) {
-            const mapped = fsqPlaces.map(p => ({
-              id: p.fsq_id,
-              name: p.name,
-              cover_image_url: null,
-              category: p.category,
-            }));
-            setPlaces(mapped);
-            setSelectedPlace(mapped[0]);
-          }
+          setSelectedPlace(placesData[0]);
         }
       } catch (err) {
-        console.error('Error fetching places:', err);
+        console.error('Error fetching universe places:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPlaces();
+    fetchUniversePlaces();
   }, [universeId, initialPlaceId]);
+
+  // Search places in Supabase
+  const searchPlaces = useCallback(async (query: string) => {
+    if (query.length < 2) {
+      setPlaceSearchResults([]);
+      setShowPlaceResults(false);
+      return;
+    }
+    setPlaceSearchLoading(true);
+    try {
+      // Search canonical places table using ilike
+      const { data: placesData, error: placesError } = await supabase
+        .from('places')
+        .select('id, name, cover_image_url, category')
+        .ilike('name', `%${query}%`)
+        .order('name')
+        .limit(10);
+
+      let results: Place[] = placesData || [];
+
+      // Also search fsq_places_raw if we got few results
+      if (results.length < 5) {
+        const { data: fsqData } = await supabase
+          .from('fsq_places_raw')
+          .select('fsq_id, name, category')
+          .ilike('name', `%${query}%`)
+          .limit(10);
+        
+        if (fsqData && fsqData.length > 0) {
+          const existingIds = new Set(results.map(r => r.id));
+          const fsqMapped = fsqData
+            .filter(p => !existingIds.has(p.fsq_id))
+            .map(p => ({
+              id: p.fsq_id,
+              name: p.name,
+              cover_image_url: null,
+              category: p.category,
+            }));
+          results = [...results, ...fsqMapped];
+        }
+      }
+
+      setPlaceSearchResults(results);
+      setShowPlaceResults(results.length > 0);
+    } catch (err) {
+      console.error('Place search error:', err);
+    } finally {
+      setPlaceSearchLoading(false);
+    }
+  }, []);
+
+  const handlePlaceSearchChange = (text: string) => {
+    setPlaceSearchText(text);
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(() => searchPlaces(text), 400);
+  };
+
+  const handleSelectPlace = (place: Place) => {
+    setSelectedPlace(place);
+    setPlaceSearchText('');
+    setPlaceSearchResults([]);
+    setShowPlaceResults(false);
+  };
+
+  const handleClearPlace = () => {
+    setSelectedPlace(null);
+    setPlaceSearchText('');
+  };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -152,7 +248,6 @@ export default function AddStoryPage() {
     const isLikelyImage = !fileType && /\.(jpg|jpeg|png|heic|heif)$/i.test(fileName);
     
     if (!isVideo && !isImage && !isLikelyVideo && !isLikelyImage) {
-      // Be very lenient — if we can't determine type, still accept it
       console.log('[Story Upload] Unknown type, accepting anyway:', fileType, fileName);
     }
     
@@ -180,7 +275,6 @@ export default function AddStoryPage() {
       setPreviewUrl(url);
     } catch (err) {
       console.error('[Story Upload] createObjectURL failed:', err);
-      // Even if preview fails, the file is still selected for upload
       setPreviewUrl(null);
     }
   };
@@ -359,128 +453,206 @@ export default function AddStoryPage() {
             </div>
           )}
 
-          {/* Place Selector */}
-          <div style={{ marginBottom: '24px' }}>
+          {/* Place Selector - Search Based */}
+          <div style={{ marginBottom: '24px', position: 'relative' }}>
             <label style={{
               display: 'block',
               fontSize: '14px',
               fontWeight: '500',
-              color: colors.text,
+              color: colors.primary,
               marginBottom: '8px',
             }}>
               Select a Place
             </label>
             
-            <button
-              onClick={() => setShowPlaceSelector(!showPlaceSelector)}
-              style={{
+            {/* Show selected place or search input */}
+            {selectedPlace ? (
+              <div style={{
                 width: '100%',
                 padding: '12px 16px',
-                backgroundColor: colors.card,
-                border: `1px solid ${colors.border}`,
+                backgroundColor: isDark ? '#1A2E2E' : '#E0F7FA',
+                border: `2px solid ${colors.primary}`,
                 borderRadius: '12px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                cursor: 'pointer',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                {selectedPlace ? (
-                  <>
-                    {selectedPlace.cover_image_url && (
-                      <img
-                        src={selectedPlace.cover_image_url}
-                        alt={selectedPlace.name}
-                        style={{
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '8px',
-                          objectFit: 'cover',
-                        }}
-                      />
-                    )}
-                    <div style={{ textAlign: 'left' }}>
-                      <p style={{ margin: 0, color: colors.text, fontWeight: '500' }}>
-                        {selectedPlace.name}
-                      </p>
-                      {selectedPlace.category && (
-                        <p style={{ margin: 0, fontSize: '12px', color: colors.textSecondary }}>
-                          {selectedPlace.category}
-                        </p>
-                      )}
-                    </div>
-                  </>
-                ) : (
-                  <span style={{ color: colors.textSecondary }}>
-                    {loading ? 'Loading places...' : 'Choose a place'}
-                  </span>
-                )}
-              </div>
-              <IoChevronDown size={20} color={colors.textSecondary} />
-            </button>
-
-            {/* Place Dropdown */}
-            {showPlaceSelector && (
-              <div style={{
-                marginTop: '8px',
-                backgroundColor: colors.card,
-                border: `1px solid ${colors.border}`,
-                borderRadius: '12px',
-                maxHeight: '300px',
-                overflowY: 'auto',
               }}>
-                {places.length === 0 ? (
-                  <div style={{ padding: '16px', textAlign: 'center', color: colors.textSecondary, fontSize: '14px' }}>
-                    No places found in this universe.
-                  </div>
-                ) : places.map(place => (
-                  <button
-                    key={place.id}
-                    onClick={() => {
-                      setSelectedPlace(place);
-                      setShowPlaceSelector(false);
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      backgroundColor: selectedPlace?.id === place.id ? (isDark ? '#2A2A3E' : '#E0F7FA') : 'transparent',
-                      border: 'none',
-                      borderBottom: `1px solid ${colors.border}`,
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
+                  {selectedPlace.cover_image_url ? (
+                    <img
+                      src={selectedPlace.cover_image_url}
+                      alt={selectedPlace.name}
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '8px',
+                        objectFit: 'cover',
+                        flexShrink: 0,
+                      }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '8px',
+                      backgroundColor: isDark ? '#2A3A3E' : '#B2EBF2',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '12px',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                    }}
-                  >
-                    {place.cover_image_url && (
-                      <img
-                        src={place.cover_image_url}
-                        alt={place.name}
-                        style={{
-                          width: '40px',
-                          height: '40px',
-                          borderRadius: '8px',
-                          objectFit: 'cover',
-                        }}
-                      />
-                    )}
-                    <div>
-                      <p style={{ margin: 0, color: colors.text, fontWeight: '500' }}>
-                        {place.name}
-                      </p>
-                      {place.category && (
-                        <p style={{ margin: 0, fontSize: '12px', color: colors.textSecondary }}>
-                          {place.category}
-                        </p>
-                      )}
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}>
+                      <IoLocation size={20} color={colors.primary} />
                     </div>
-                  </button>
-                ))}
+                  )}
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ margin: 0, color: colors.text, fontWeight: '600', fontSize: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {selectedPlace.name}
+                    </p>
+                    {selectedPlace.category && (
+                      <p style={{ margin: 0, fontSize: '12px', color: colors.textSecondary }}>
+                        {selectedPlace.category}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={handleClearPlace}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <IoClose size={20} color={colors.textSecondary} />
+                </button>
               </div>
+            ) : (
+              <>
+                {/* Search input */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: '12px',
+                  padding: '0 12px',
+                  backgroundColor: colors.card,
+                }}>
+                  <IoSearch size={18} color={colors.textSecondary} style={{ flexShrink: 0, marginRight: '8px' }} />
+                  <input
+                    type="text"
+                    value={placeSearchText}
+                    onChange={e => handlePlaceSearchChange(e.target.value)}
+                    onFocus={() => { if (placeSearchResults.length > 0) setShowPlaceResults(true); }}
+                    onBlur={() => { setTimeout(() => setShowPlaceResults(false), 200); }}
+                    placeholder="Search for a place..."
+                    autoComplete="off"
+                    autoCorrect="off"
+                    style={{
+                      flex: 1,
+                      padding: '14px 0',
+                      fontSize: '16px',
+                      border: 'none',
+                      background: 'transparent',
+                      outline: 'none',
+                      color: colors.text,
+                    }}
+                  />
+                  {placeSearchLoading && (
+                    <FiLoader size={18} color={colors.textSecondary} style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }} />
+                  )}
+                </div>
+
+                {/* Search results dropdown */}
+                {showPlaceResults && placeSearchResults.length > 0 && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    zIndex: 50,
+                    backgroundColor: isDark ? '#1A1A2E' : 'white',
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+                    marginTop: '4px',
+                    maxHeight: '280px',
+                    overflowY: 'auto',
+                    WebkitOverflowScrolling: 'touch',
+                  }}>
+                    {placeSearchResults.map((place, i) => (
+                      <button
+                        key={place.id}
+                        onMouseDown={(e) => { e.preventDefault(); handleSelectPlace(place); }}
+                        style={{
+                          width: '100%',
+                          padding: '12px 16px',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          borderBottom: i < placeSearchResults.length - 1 ? `1px solid ${colors.border}` : 'none',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                        }}
+                      >
+                        {place.cover_image_url ? (
+                          <img
+                            src={place.cover_image_url}
+                            alt={place.name}
+                            style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '8px',
+                              objectFit: 'cover',
+                              flexShrink: 0,
+                            }}
+                          />
+                        ) : (
+                          <div style={{
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '8px',
+                            backgroundColor: isDark ? '#2A2A3E' : '#F0F0F0',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexShrink: 0,
+                          }}>
+                            <IoLocation size={16} color={colors.textSecondary} />
+                          </div>
+                        )}
+                        <div style={{ minWidth: 0 }}>
+                          <p style={{ margin: 0, color: colors.text, fontWeight: '500', fontSize: '14px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {place.name}
+                          </p>
+                          {place.category && (
+                            <p style={{ margin: 0, fontSize: '12px', color: colors.textSecondary }}>
+                              {place.category}
+                            </p>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Empty state hint */}
+                {!placeSearchText && !loading && (
+                  <p style={{ margin: '8px 0 0', fontSize: '13px', color: colors.textSecondary }}>
+                    Type at least 2 characters to search for a place
+                  </p>
+                )}
+              </>
             )}
           </div>
+
+          <div style={{ height: '1px', backgroundColor: colors.border, marginBottom: '20px' }} />
 
           {/* Media Upload */}
           <div style={{ marginBottom: '24px' }}>
@@ -544,7 +716,7 @@ export default function AddStoryPage() {
                 ) : mediaType === 'video' ? (
                   <video
                     key={previewUrl}
-                    src={previewUrl}
+                    src={previewUrl!}
                     controls
                     playsInline
                     muted
@@ -561,14 +733,13 @@ export default function AddStoryPage() {
                     }}
                     onError={(e) => {
                       console.error('[Story Upload] Video preview error:', e);
-                      // If video preview fails, show a fallback
                       setError('Video preview not available, but the file is selected. You can still upload it.');
                     }}
                   />
                 ) : (
                   <img
                     key={previewUrl}
-                    src={previewUrl}
+                    src={previewUrl!}
                     alt="Preview"
                     style={{
                       width: '100%',
@@ -705,6 +876,14 @@ export default function AddStoryPage() {
           </div>
         </div>
       </div>
+
+      {/* Spinner animation */}
+      <style jsx global>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </AppLayout>
   );
 }
