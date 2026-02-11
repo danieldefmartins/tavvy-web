@@ -89,13 +89,33 @@ export default function AddStoryPage() {
           .in('id', placeIds)
           .order('name');
 
-        if (placesData) {
+        if (placesData && placesData.length > 0) {
           setPlaces(placesData);
           
           // If initialPlaceId is provided, select that place
           if (initialPlaceId) {
             const place = placesData.find(p => p.id === initialPlaceId);
             if (place) setSelectedPlace(place);
+          } else {
+            // Auto-select the first place (or only place)
+            setSelectedPlace(placesData[0]);
+          }
+        } else {
+          // No places found in canonical table — try fsq_places_raw
+          const { data: fsqPlaces } = await supabase
+            .from('fsq_places_raw')
+            .select('fsq_id, name, category')
+            .in('fsq_id', placeIds)
+            .limit(50);
+          if (fsqPlaces && fsqPlaces.length > 0) {
+            const mapped = fsqPlaces.map(p => ({
+              id: p.fsq_id,
+              name: p.name,
+              cover_image_url: null,
+              category: p.category,
+            }));
+            setPlaces(mapped);
+            setSelectedPlace(mapped[0]);
           }
         }
       } catch (err) {
@@ -410,7 +430,11 @@ export default function AddStoryPage() {
                 maxHeight: '300px',
                 overflowY: 'auto',
               }}>
-                {places.map(place => (
+                {places.length === 0 ? (
+                  <div style={{ padding: '16px', textAlign: 'center', color: colors.textSecondary, fontSize: '14px' }}>
+                    No places found in this universe.
+                  </div>
+                ) : places.map(place => (
                   <button
                     key={place.id}
                     onClick={() => {
