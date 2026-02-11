@@ -33,6 +33,8 @@ export default function AddStoryPage() {
   const [showPlaceSelector, setShowPlaceSelector] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [fileSelected, setFileSelected] = useState(false);
+  const [mediaType, setMediaType] = useState<'video' | 'image'>('image');
   const [caption, setCaption] = useState('');
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -108,55 +110,59 @@ export default function AddStoryPage() {
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files || files.length === 0) return;
+    console.log('[Story Upload] onChange fired, files:', files?.length);
+    if (!files || files.length === 0) {
+      console.log('[Story Upload] No files in input');
+      return;
+    }
     
-    // Copy the file reference immediately before any DOM manipulation
+    // Copy the file reference immediately
     const file = files[0];
-    const fileName = file.name;
-    const fileType = file.type;
-    const fileSize = file.size;
+    const fileName = file.name || 'unknown';
+    const fileType = file.type || '';
+    const fileSize = file.size || 0;
     
     console.log('[Story Upload] File selected:', { name: fileName, type: fileType, size: fileSize });
     
-    try {
-      // Validate file type — be lenient for iOS which may report unusual MIME types
-      const isImage = fileType.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|heic|heif)$/i.test(fileName);
-      const isVideo = fileType.startsWith('video/') || /\.(mp4|mov|m4v|avi|quicktime)$/i.test(fileName);
-      
-      // On iOS, file.type can be empty string for some video formats
-      const isUnknownMedia = !fileType && /\.(mp4|mov|m4v|heic|heif|jpg|jpeg|png)$/i.test(fileName);
-      
-      if (!isImage && !isVideo && !isUnknownMedia) {
-        console.log('[Story Upload] Invalid file type:', fileType, fileName);
-        setError(`Unsupported file type. Please select an image or video. (detected: ${fileType || 'unknown'})`);
-        return;
-      }
-      
-      // Validate file size (max 50MB)
-      if (fileSize > 50 * 1024 * 1024) {
-        setError('File size must be less than 50MB');
-        return;
-      }
-
-      // Clean up previous preview URL
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
-
-      // Create object URL for preview
-      const url = URL.createObjectURL(file);
-      console.log('[Story Upload] Preview URL created:', url);
-      
-      setSelectedFile(file);
-      setPreviewUrl(url);
-      setError(null);
-    } catch (err) {
-      console.error('[Story Upload] Error selecting file:', err);
-      setError('Failed to load the selected file. Please try again.');
+    // Determine media type from MIME or extension
+    const isVideo = fileType.startsWith('video/') || /\.(mp4|mov|m4v|avi|quicktime|3gp)$/i.test(fileName);
+    const isImage = fileType.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|heic|heif)$/i.test(fileName);
+    // iOS sometimes gives empty type for .mov files
+    const isLikelyVideo = !fileType && /\.(mp4|mov|m4v)$/i.test(fileName);
+    const isLikelyImage = !fileType && /\.(jpg|jpeg|png|heic|heif)$/i.test(fileName);
+    
+    if (!isVideo && !isImage && !isLikelyVideo && !isLikelyImage) {
+      // Be very lenient — if we can't determine type, still accept it
+      console.log('[Story Upload] Unknown type, accepting anyway:', fileType, fileName);
     }
     
-    // NOTE: Do NOT reset e.target.value here — it can cause iOS Safari to
-    // garbage-collect the File object before state updates complete.
+    // Validate file size (max 50MB)
+    if (fileSize > 50 * 1024 * 1024) {
+      setError('File size must be less than 50MB');
+      return;
+    }
+
+    // Clean up previous preview URL
+    if (previewUrl) {
+      try { URL.revokeObjectURL(previewUrl); } catch(e) {}
+    }
+
+    const detectedType = (isVideo || isLikelyVideo) ? 'video' : 'image';
+    setMediaType(detectedType);
+    setSelectedFile(file);
+    setFileSelected(true);
+    setError(null);
+
+    // Try to create preview URL
+    try {
+      const url = URL.createObjectURL(file);
+      console.log('[Story Upload] Preview URL created:', url, 'type:', detectedType);
+      setPreviewUrl(url);
+    } catch (err) {
+      console.error('[Story Upload] createObjectURL failed:', err);
+      // Even if preview fails, the file is still selected for upload
+      setPreviewUrl(null);
+    }
   };
 
   const handleUpload = async () => {
@@ -170,12 +176,23 @@ export default function AddStoryPage() {
       setError(null);
 
       // Upload file to Supabase Storage (bucket: place-stories, matching iOS)
-      const fileExt = selectedFile.name.split('.').pop() || (selectedFile.type.startsWith('video/') ? 'mp4' : 'jpg');
+      const fileExt = selectedFile.name.split('.').pop() || (mediaType === 'video' ? 'mp4' : 'jpg');
       const fileName = `${user.id}/${selectedPlace.id}/${Date.now()}.${fileExt}`;
+      // Determine content type — iOS Safari may give empty type for .mov
+      let contentType = selectedFile.type;
+      if (!contentType) {
+        if (/\.mov$/i.test(selectedFile.name)) contentType = 'video/quicktime';
+        else if (/\.mp4$/i.test(selectedFile.name)) contentType = 'video/mp4';
+        else if (/\.(jpg|jpeg)$/i.test(selectedFile.name)) contentType = 'image/jpeg';
+        else if (/\.png$/i.test(selectedFile.name)) contentType = 'image/png';
+        else if (/\.heic$/i.test(selectedFile.name)) contentType = 'image/heic';
+        else contentType = 'application/octet-stream';
+      }
+      
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('place-stories')
         .upload(fileName, selectedFile, {
-          contentType: selectedFile.type,
+          contentType,
           upsert: false,
         });
 
@@ -197,7 +214,7 @@ export default function AddStoryPage() {
           place_id: selectedPlace.id,
           user_id: user.id,
           media_url: publicUrl,
-          media_type: selectedFile.type.startsWith('video/') ? 'video' : 'image',
+          media_type: mediaType,
           caption: caption || null,
           expires_at: expiresAt.toISOString(),
           status: 'active',
@@ -273,13 +290,13 @@ export default function AddStoryPage() {
           
           <button
             onClick={handleUpload}
-            disabled={!selectedFile || !selectedPlace || uploading}
+            disabled={!fileSelected || !selectedPlace || uploading}
             style={{
-              background: selectedFile && selectedPlace ? colors.primary : colors.border,
+              background: fileSelected && selectedPlace ? colors.primary : colors.border,
               border: 'none',
               borderRadius: '20px',
               padding: '8px 16px',
-              cursor: selectedFile && selectedPlace ? 'pointer' : 'not-allowed',
+              cursor: fileSelected && selectedPlace ? 'pointer' : 'not-allowed',
               opacity: uploading ? 0.7 : 1,
             }}
           >
@@ -453,32 +470,75 @@ export default function AddStoryPage() {
               Photo or Video
             </label>
 
-            {/* Use label instead of button+hidden input for better iOS Safari compatibility */}
+            {/* File input - use sr-only pattern that works on iOS Safari */}
             <input
               id="story-file-input"
               ref={fileInputRef}
               type="file"
               accept="image/*,video/*"
+              capture={undefined}
               onChange={handleFileSelect}
-              style={{ position: 'absolute', width: 0, height: 0, opacity: 0, overflow: 'hidden' }}
+              style={{
+                position: 'absolute',
+                width: '1px',
+                height: '1px',
+                padding: 0,
+                margin: '-1px',
+                overflow: 'hidden',
+                clip: 'rect(0, 0, 0, 0)',
+                whiteSpace: 'nowrap',
+                borderWidth: 0,
+              }}
             />
 
-            {previewUrl ? (
+            {(previewUrl || fileSelected) ? (
               <div style={{ position: 'relative' }}>
-                {(selectedFile?.type?.startsWith('video/') || /\.(mp4|mov|m4v|quicktime)$/i.test(selectedFile?.name || '')) ? (
+                {!previewUrl && fileSelected ? (
+                  /* Fallback when preview URL couldn't be created */
+                  <div style={{
+                    width: '100%',
+                    height: '200px',
+                    borderRadius: '12px',
+                    backgroundColor: isDark ? '#1A1A2E' : '#F0F0F0',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                  }}>
+                    <span style={{ fontSize: '48px' }}>{mediaType === 'video' ? '🎬' : '📷'}</span>
+                    <p style={{ margin: 0, color: colors.text, fontWeight: '500' }}>
+                      {selectedFile?.name || 'File selected'}
+                    </p>
+                    <p style={{ margin: 0, color: colors.textSecondary, fontSize: '12px' }}>
+                      {selectedFile ? `${(selectedFile.size / (1024 * 1024)).toFixed(1)} MB` : ''}
+                    </p>
+                    <p style={{ margin: 0, color: colors.primary, fontSize: '13px' }}>
+                      Ready to upload ✓
+                    </p>
+                  </div>
+                ) : mediaType === 'video' ? (
                   <video
                     key={previewUrl}
                     src={previewUrl}
                     controls
                     playsInline
                     muted
-                    preload="metadata"
+                    autoPlay={false}
+                    preload="auto"
+                    webkit-playsinline="true"
+                    x-webkit-airplay="allow"
                     style={{
                       width: '100%',
                       maxHeight: '400px',
                       borderRadius: '12px',
                       objectFit: 'contain',
                       backgroundColor: '#000',
+                    }}
+                    onError={(e) => {
+                      console.error('[Story Upload] Video preview error:', e);
+                      // If video preview fails, show a fallback
+                      setError('Video preview not available, but the file is selected. You can still upload it.');
                     }}
                   />
                 ) : (
@@ -493,6 +553,9 @@ export default function AddStoryPage() {
                       objectFit: 'contain',
                       backgroundColor: colors.card,
                     }}
+                    onError={(e) => {
+                      console.error('[Story Upload] Image preview error:', e);
+                    }}
                   />
                 )}
                 <button
@@ -500,6 +563,8 @@ export default function AddStoryPage() {
                     if (previewUrl) URL.revokeObjectURL(previewUrl);
                     setSelectedFile(null);
                     setPreviewUrl(null);
+                    setFileSelected(false);
+                    setMediaType('image');
                     // Reset file input so same file can be re-selected
                     if (fileInputRef.current) fileInputRef.current.value = '';
                   }}
