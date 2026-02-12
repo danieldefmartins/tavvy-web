@@ -21,8 +21,10 @@ import {
   IoSearch, IoExitOutline, IoRestaurantOutline, IoWaterOutline,
   IoCarOutline, IoSparkles, IoClose, IoAdd, IoMap, IoInformationCircle,
   IoChatbubbles, IoThumbsUp, IoAlertCircle, IoCreate, IoRocket,
-  IoStorefront, IoTicket, IoEllipsisHorizontal, IoNavigate
+  IoStorefront, IoTicket, IoEllipsisHorizontal, IoNavigate,
+  IoFlash, IoPeople, IoMusicalNotes, IoStar, IoCalendar, IoGameController
 } from 'react-icons/io5';
+
 
 const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800';
 
@@ -103,6 +105,7 @@ export default function UniverseLandingScreen() {
   const [activeTab, setActiveTab] = useState('Places');
   const [activeZone, setActiveZone] = useState('All Zones');
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
   
   // Modal states
   const [showAddPlaceModal, setShowAddPlaceModal] = useState(false);
@@ -236,12 +239,57 @@ export default function UniverseLandingScreen() {
 
   const zones = ['All Zones', ...subUniverses.map(s => s.name)];
 
+  // Category filter definitions
+  const RIDE_SUBCATEGORIES = ['water_rides', 'thrill_rides', 'dark_rides', 'family_rides', 'simulators'];
+  const ATTRACTION_SUBCATEGORIES = ['explore', 'interactive', 'animals'];
+
   const filteredPlaces = places.filter(p => {
     const matchesSearch = !searchQuery || 
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.tavvy_category || '').toLowerCase().includes(searchQuery.toLowerCase());
+      (p.tavvy_category || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.tavvy_subcategory || '').toLowerCase().includes(searchQuery.toLowerCase());
     const matchesZone = activeZone === 'All Zones' || true;
-    return matchesSearch && matchesZone;
+    
+    // Category filter
+    let matchesFilter = true;
+    if (activeFilter) {
+      const cat = (p.tavvy_category || '').toLowerCase();
+      const sub = (p.tavvy_subcategory || '').toLowerCase();
+      switch (activeFilter) {
+        case 'rides':
+          matchesFilter = RIDE_SUBCATEGORIES.includes(sub);
+          break;
+        case 'attractions':
+          matchesFilter = ATTRACTION_SUBCATEGORIES.includes(sub) || (cat === 'attraction' && !RIDE_SUBCATEGORIES.includes(sub) && sub !== 'shows' && sub !== 'characters');
+          break;
+        case 'characters':
+          matchesFilter = sub === 'characters';
+          break;
+        case 'shows':
+          matchesFilter = sub === 'shows';
+          break;
+        case 'fireworks':
+          matchesFilter = sub === 'fireworks' || p.name.toLowerCase().includes('firework');
+          break;
+        case 'special_events':
+          matchesFilter = sub === 'special_events' || cat === 'special_events';
+          break;
+        case 'entrance':
+          matchesFilter = cat === 'entrance' || p.name.toLowerCase().includes('entrance');
+          break;
+        case 'dining':
+          matchesFilter = cat === 'restaurant' || cat === 'dining' || p.name.toLowerCase().includes('dining') || p.name.toLowerCase().includes('restaurant');
+          break;
+        case 'restroom':
+          matchesFilter = cat === 'restroom' || p.name.toLowerCase().includes('restroom');
+          break;
+        case 'parking':
+          matchesFilter = cat === 'parking' || p.name.toLowerCase().includes('parking');
+          break;
+      }
+    }
+    
+    return matchesSearch && matchesZone && matchesFilter;
   });
 
   function formatNumber(num: number): string {
@@ -429,7 +477,7 @@ export default function UniverseLandingScreen() {
             type="text"
             placeholder="Search places..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => { setSearchQuery(e.target.value); if (e.target.value) setActiveFilter(null); }}
             style={{
               flex: 1,
               marginLeft: '8px',
@@ -511,38 +559,64 @@ export default function UniverseLandingScreen() {
         </div>
       )}
 
-      {/* Quick Actions */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', padding: '16px', marginBottom: '16px' }}>
-        {[
-          { icon: IoExitOutline, label: "Entrances", type: "entrance", action: () => setSearchQuery('entrance') },
-          { icon: IoRestaurantOutline, label: "Dining", type: "dining", action: () => setShowFoodSearchModal(true) },
-          { icon: IoWaterOutline, label: "Restrooms", type: "restroom", action: () => setSearchQuery('restroom') },
-          { icon: IoCarOutline, label: "Parking", type: "parking", action: () => setSearchQuery('parking') }
-        ].map((actionItem, i) => {
-          const Icon = actionItem.icon;
-          return (
-            <button
-              key={i}
-              onClick={actionItem.action}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                padding: '14px',
-                backgroundColor: colors.surface,
-                border: 'none',
-                borderRadius: '12px',
-                cursor: 'pointer',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-              }}
-            >
-              <Icon size={24} color="#374151" />
-              <span style={{ fontSize: '11px', color: colors.textSecondary, marginTop: '6px', fontWeight: '500' }}>
-                {actionItem.label}
-              </span>
-            </button>
-          );
-        })}
+      {/* Category Filter Icons */}
+      <div style={{ padding: '0 16px', marginBottom: '16px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
+        <div style={{ display: 'flex', gap: '8px', minWidth: 'min-content' }}>
+          {[
+            { icon: IoRocket, label: "Rides", filter: "rides", color: '#EF4444' },
+            { icon: IoStar, label: "Attractions", filter: "attractions", color: '#F59E0B' },
+            { icon: IoPeople, label: "Characters", filter: "characters", color: '#8B5CF6' },
+            { icon: IoMusicalNotes, label: "Shows", filter: "shows", color: '#EC4899' },
+            { icon: IoFlash, label: "Fireworks", filter: "fireworks", color: '#F97316' },
+            { icon: IoCalendar, label: "Events", filter: "special_events", color: '#06B6D4' },
+            { icon: IoExitOutline, label: "Entrances", filter: "entrance", color: '#6366F1' },
+            { icon: IoRestaurantOutline, label: "Dining", filter: "dining", color: '#10B981' },
+            { icon: IoWaterOutline, label: "Restrooms", filter: "restroom", color: '#3B82F6' },
+            { icon: IoCarOutline, label: "Parking", filter: "parking", color: '#6B7280' },
+          ].map((item, i) => {
+            const Icon = item.icon;
+            const isActive = activeFilter === item.filter;
+            return (
+              <button
+                key={i}
+                onClick={() => {
+                  if (item.filter === 'dining' && !isActive) {
+                    setActiveFilter('dining');
+                  } else if (isActive) {
+                    setActiveFilter(null);
+                  } else {
+                    setActiveFilter(item.filter);
+                  }
+                }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '10px 14px',
+                  backgroundColor: isActive ? item.color : colors.surface,
+                  border: isActive ? 'none' : `1px solid ${colors.border || '#E5E7EB'}`,
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  boxShadow: isActive ? '0 2px 8px rgba(0,0,0,0.15)' : '0 1px 2px rgba(0,0,0,0.05)',
+                  minWidth: '68px',
+                  transition: 'all 0.2s ease',
+                  flexShrink: 0
+                }}
+              >
+                <Icon size={22} color={isActive ? '#FFFFFF' : item.color} />
+                <span style={{ 
+                  fontSize: '10px', 
+                  color: isActive ? '#FFFFFF' : colors.textSecondary, 
+                  marginTop: '4px', 
+                  fontWeight: '600',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {item.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Places List */}
