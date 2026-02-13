@@ -111,7 +111,8 @@
     "greeting": {
       "morning": "Bom dia",
       "afternoon": "Boa tarde",
-      "evening": "Boa noite"
+      "evening": "Boa noite",
+      "night": "Boa noite"
     },
     "tagline": "Encontre seu lugar perfeito em segundos. Não em horas.",
     "nearMe": "Perto de Mim",
@@ -140,7 +141,9 @@
     "experiences": "Experiências",
     "cities": "Cidades",
     "discoverCities": "Descobrir Cidades",
-    "exploreCities": "Explore cidades ao redor do mundo"
+    "exploreCities": "Explore cidades ao redor do mundo",
+    "greetingName": "olá",
+    "curatedWorlds": "Mundos selecionados de experiências"
   },
   "places": {
     "title": "Lugares",
@@ -213,7 +216,7 @@
     "fitness": "Fitness",
     "education": "Educação",
     "automotive": "Automotivo",
-    "pets": "Pets",
+    "pets": "Animais",
     "financial": "Serviços Financeiros"
   },
   "atlas": {
@@ -411,7 +414,7 @@
     "defaultMapLayer": "Camada de Mapa Padrão",
     "helpSection": "AJUDA E SUPORTE",
     "contactSupport": "Contatar Suporte",
-    "legalSection": "LEGAL",
+    "legalSection": "JURÍDICO",
     "termsOfService": "Termos de Serviço",
     "privacyPolicy": "Política de Privacidade",
     "faq": "Perguntas Frequentes",
@@ -443,7 +446,10 @@
     "priceRange": "Faixa de Preço",
     "openNow": "Aberto Agora",
     "applyFilters": "Aplicar Filtros",
-    "clearFilters": "Limpar Filtros"
+    "clearFilters": "Limpar Filtros",
+    "category": "Categoria",
+    "place": "Local",
+    "nearby": "Próximo"
   },
   "errors": {
     "generic": "Algo deu errado",
@@ -616,7 +622,7 @@
     "rollerCoasters": "Montanhas-Russas",
     "waterRides": "Atrações Aquáticas",
     "familyRides": "Atrações Familiares",
-    "shows": "Shows",
+    "shows": "Espetáculos",
     "dining": "Restaurantes",
     "waitTime": "Tempo de Espera",
     "height": "Requisito de Altura",
@@ -755,5 +761,30 @@
     "offline": "Desconectado",
     "lastSeen": "Visto por último",
     "typing": "Digitando..."
+  },
+  "apps": {
+    "subtitle": "Ferramentas e atalhos",
+    "searchApps": "Buscar apps...",
+    "featured": "Destaques",
+    "allApps": "Todos os Apps",
+    "appearance": "Aparência",
+    "light": "Claro",
+    "dark": "Escuro",
+    "pros": "Profissionais",
+    "atlas": "Atlas",
+    "ecard": "eCard",
+    "universes": "Universos",
+    "onTheGo": "Em Movimento",
+    "rides": "Transporte",
+    "rvCamping": "RV e Camping",
+    "messages": "Mensagens",
+    "wallet": "Carteira",
+    "cities": "Cidades",
+    "saved": "Salvos",
+    "account": "Conta",
+    "create": "Criar",
+    "realtors": "Imobiliárias",
+    "happening": "Acontecendo",
+    "settingsApp": "Configurações"
   }
 }

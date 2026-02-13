@@ -52,14 +52,14 @@ const TEAL = '#14B8A6';
 const GREEN = '#10B981';
 
 // Categories for filtering - matching mobile app with icons
-const categories = [
-  { id: 'restaurants', name: 'Restaurants', icon: IoRestaurant, color: '#EF4444' },
-  { id: 'cafes', name: 'Cafes', icon: IoCafe, color: '#8B5CF6' },
-  { id: 'bars', name: 'Bars', icon: IoBeer, color: '#F59E0B' },
-  { id: 'gas', name: 'Gas', icon: IoCarSport, color: '#3B82F6' },
-  { id: 'shopping', name: 'Shopping', icon: IoStorefront, color: '#EC4899' },
-  { id: 'hotels', name: 'Hotels', icon: IoBed, color: '#6366F1' },
-  { id: 'rv-camping', name: 'RV & Camping', icon: IoBonfire, color: '#F97316' },
+const categoriesDef = [
+  { id: 'restaurants', nameKey: 'categories.restaurants', apiName: 'Restaurants', icon: IoRestaurant, color: '#EF4444' },
+  { id: 'cafes', nameKey: 'categories.cafes', apiName: 'Cafes', icon: IoCafe, color: '#8B5CF6' },
+  { id: 'bars', nameKey: 'categories.bars', apiName: 'Bars', icon: IoBeer, color: '#F59E0B' },
+  { id: 'gas', nameKey: 'categories.gas', apiName: 'Gas Stations', icon: IoCarSport, color: '#3B82F6' },
+  { id: 'shopping', nameKey: 'categories.shopping', apiName: 'Shopping', icon: IoStorefront, color: '#EC4899' },
+  { id: 'hotels', nameKey: 'categories.hotels', apiName: 'Hotels', icon: IoBed, color: '#6366F1' },
+  { id: 'rv-camping', nameKey: 'categories.rvCamping', apiName: 'RV & Camping', icon: IoBonfire, color: '#F97316' },
 ];
 
 // Searchable categories for autocomplete
@@ -157,9 +157,9 @@ export default function HomeScreen() {
     } else if (hour >= 17 && hour < 21) {
       setGreeting(t('home.greeting.evening'));
     } else {
-      setGreeting('Good night');
+      setGreeting(t('home.greeting.night'));
     }
-  }, []);
+  }, [t]);
 
   // Get location from IP address as fallback
   const getLocationFromIP = async (): Promise<{ coords: [number, number]; city: string } | null> => {
@@ -287,7 +287,7 @@ export default function HomeScreen() {
       };
       
       const categoryFilter = selectedCategory ? 
-        categories.find(c => c.id === selectedCategory)?.name : undefined;
+        categoriesDef.find(c => c.id === selectedCategory)?.apiName : undefined;
       
       console.log('[Places] Bounds:', bounds, 'Category:', categoryFilter);
       
@@ -333,7 +333,7 @@ export default function HomeScreen() {
           id: `category-${cat.name}`,
           type: 'category',
           title: cat.name,
-          subtitle: 'Category',
+          subtitle: t('search.category'),
           icon: cat.icon,
           data: cat,
         });
@@ -354,7 +354,7 @@ export default function HomeScreen() {
             id: `place-${place.fsq_place_id}`,
             type: 'place',
             title: place.name,
-            subtitle: `${place.category || 'Place'} • ${place.locality || 'Nearby'}`,
+            subtitle: `${place.category || t('search.place')} • ${place.locality || t('search.nearby')}`,
             icon: 'location',
             data: place,
           });
@@ -454,7 +454,7 @@ export default function HomeScreen() {
               <div className="greeting-row">
                 <div>
                   <div className="greeting-text">{greeting}</div>
-                  <h1 className="greeting-name">there 👋</h1>
+                  <h1 className="greeting-name">{t('home.greetingName')} 👋</h1>
                 </div>
                 <button 
                   className="theme-toggle-btn"
@@ -475,7 +475,7 @@ export default function HomeScreen() {
                 <IoSearch size={20} className="search-icon" />
                 <input
                   type="text"
-                  placeholder="What are you in the mood for?"
+                  placeholder={t('home.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchFocused(true)}
@@ -596,7 +596,7 @@ export default function HomeScreen() {
               <div className="section-header">
                 <h2>{t('home.liveNow')}</h2>
                 <Link href="/app/explore" locale={locale} className="see-all">
-                  See All <IoChevronForward size={16} />
+                  {t('common.seeMore')} <IoChevronForward size={16} />
                 </Link>
               </div>
               <div className="happening-scroll">
@@ -629,12 +629,12 @@ export default function HomeScreen() {
             {/* Explore Tavvy */}
             <section className="section explore-section" style={{ display: 'none' }}>
               <div className="section-header">
-                <h2>Explore Tavvy</h2>
+                <h2>{t('home.exploreTavvy')}</h2>
                 <Link href="/app/explore" locale={locale} className="see-all">
-                  See All <IoChevronForward size={16} />
+                  {t('common.seeMore')} <IoChevronForward size={16} />
                 </Link>
               </div>
-              <p className="section-subtitle">Curated worlds of experiences</p>
+              <p className="section-subtitle">{t('home.curatedWorlds')}</p>
               <div className="explore-scroll">
                 {exploreItems.map((item) => (
                   <Link key={item.id} href={item.route} className="explore-card" locale={locale}>
@@ -675,7 +675,7 @@ export default function HomeScreen() {
             {/* Top Contributors */}
             <section className="section">
               <div className="section-header">
-                <h2>🏆 Top Contributors</h2>
+                <h2>🏆 {t('home.topContributors')}</h2>
                 {/* See All button removed - LeaderboardScreen not yet implemented */}
               </div>
               <p className="section-subtitle">{t('home.communityMembers')}</p>

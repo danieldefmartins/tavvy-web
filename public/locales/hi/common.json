@@ -111,7 +111,8 @@
     "greeting": {
       "morning": "सुप्रभात",
       "afternoon": "नमस्ते",
-      "evening": "शुभ संध्या"
+      "evening": "शुभ संध्या",
+      "night": "शुभ रात्रि"
     },
     "tagline": "सही जगह सेकंडों में खोजें। घंटों में नहीं।",
     "nearMe": "मेरे पास",
@@ -140,7 +141,9 @@
     "experiences": "अनुभव",
     "cities": "शहर",
     "discoverCities": "शहर खोजें",
-    "exploreCities": "दुनिया भर के शहर एक्सप्लोर करें"
+    "exploreCities": "दुनिया भर के शहर एक्सप्लोर करें",
+    "greetingName": "नमस्ते",
+    "curatedWorlds": "अनुभवों की चयनित दुनिया"
   },
   "places": {
     "title": "जगहें",
@@ -443,7 +446,10 @@
     "priceRange": "मूल्य सीमा",
     "openNow": "अभी खुला",
     "applyFilters": "फ़िल्टर लागू करें",
-    "clearFilters": "फ़िल्टर साफ़ करें"
+    "clearFilters": "फ़िल्टर साफ़ करें",
+    "category": "श्रेणी",
+    "place": "स्थान",
+    "nearby": "पास में"
   },
   "errors": {
     "generic": "कुछ गलत हो गया",
@@ -755,5 +761,30 @@
     "offline": "ऑफ़लाइन",
     "lastSeen": "अंतिम बार देखा",
     "typing": "टाइप कर रहा है..."
+  },
+  "apps": {
+    "subtitle": "उपकरण और शॉर्टकट",
+    "searchApps": "ऐप्स खोजें...",
+    "featured": "विशेष",
+    "allApps": "सभी ऐप्स",
+    "appearance": "दिखावट",
+    "light": "लाइट",
+    "dark": "डार्क",
+    "pros": "पेशेवर",
+    "atlas": "एटलस",
+    "ecard": "ई-कार्ड",
+    "universes": "यूनिवर्स",
+    "onTheGo": "चलते-फिरते",
+    "rides": "सवारी",
+    "rvCamping": "आरवी और कैम्पिंग",
+    "messages": "संदेश",
+    "wallet": "वॉलेट",
+    "cities": "शहर",
+    "saved": "सहेजे गए",
+    "account": "खाता",
+    "create": "बनाएं",
+    "realtors": "रियल एस्टेट",
+    "happening": "हो रहा है",
+    "settingsApp": "सेटिंग्स"
   }
 }

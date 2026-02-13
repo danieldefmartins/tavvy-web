@@ -111,7 +111,8 @@
     "greeting": {
       "morning": "早上好",
       "afternoon": "下午好",
-      "evening": "晚上好"
+      "evening": "晚上好",
+      "night": "晚安"
     },
     "tagline": "几秒钟找到完美的地方。而不是几小时。",
     "nearMe": "附近",
@@ -140,7 +141,9 @@
     "experiences": "体验",
     "cities": "城市",
     "discoverCities": "发现城市",
-    "exploreCities": "探索世界各地的城市"
+    "exploreCities": "探索世界各地的城市",
+    "greetingName": "你好",
+    "curatedWorlds": "精选体验世界"
   },
   "places": {
     "title": "地点",
@@ -443,7 +446,10 @@
     "priceRange": "价格范围",
     "openNow": "营业中",
     "applyFilters": "应用筛选",
-    "clearFilters": "清除筛选"
+    "clearFilters": "清除筛选",
+    "category": "分类",
+    "place": "地点",
+    "nearby": "附近"
   },
   "errors": {
     "generic": "出了点问题",
@@ -571,7 +577,7 @@
     "profilePhoto": "头像",
     "uploadPhoto": "上传照片",
     "removePhoto": "删除照片",
-    "logo": "Logo",
+    "logo": "标志",
     "uploadLogo": "上传Logo",
     "qrCode": "二维码",
     "downloadQR": "下载二维码",
@@ -755,5 +761,30 @@
     "offline": "离线",
     "lastSeen": "最后在线",
     "typing": "正在输入..."
+  },
+  "apps": {
+    "subtitle": "工具和快捷方式",
+    "searchApps": "搜索应用...",
+    "featured": "精选",
+    "allApps": "所有应用",
+    "appearance": "外观",
+    "light": "浅色",
+    "dark": "深色",
+    "pros": "专业人士",
+    "atlas": "地图集",
+    "ecard": "电子名片",
+    "universes": "宇宙",
+    "onTheGo": "出行",
+    "rides": "出行",
+    "rvCamping": "房车和露营",
+    "messages": "消息",
+    "wallet": "钱包",
+    "cities": "城市",
+    "saved": "已保存",
+    "account": "账户",
+    "create": "创建",
+    "realtors": "房产",
+    "happening": "正在发生",
+    "settingsApp": "设置"
   }
 }

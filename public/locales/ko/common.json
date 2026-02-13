@@ -111,7 +111,8 @@
     "greeting": {
       "morning": "좋은 아침이에요",
       "afternoon": "안녕하세요",
-      "evening": "좋은 저녁이에요"
+      "evening": "좋은 저녁이에요",
+      "night": "안녕히 주무세요"
     },
     "tagline": "몇 초 만에 완벽한 장소를 찾으세요. 몇 시간이 아닌.",
     "nearMe": "내 근처",
@@ -140,7 +141,9 @@
     "experiences": "체험",
     "cities": "도시",
     "discoverCities": "도시 발견",
-    "exploreCities": "전 세계 도시를 탐색하세요"
+    "exploreCities": "전 세계 도시를 탐색하세요",
+    "greetingName": "안녕하세요",
+    "curatedWorlds": "엄선된 경험의 세계"
   },
   "places": {
     "title": "장소",
@@ -443,7 +446,10 @@
     "priceRange": "가격대",
     "openNow": "영업 중",
     "applyFilters": "필터 적용",
-    "clearFilters": "필터 초기화"
+    "clearFilters": "필터 초기화",
+    "category": "카테고리",
+    "place": "장소",
+    "nearby": "근처"
   },
   "errors": {
     "generic": "문제가 발생했습니다",
@@ -732,7 +738,7 @@
   "legal": {
     "termsOfService": "이용약관",
     "privacyPolicy": "개인정보처리방침",
-    "copyright": "© {{year}} Tavvy, Inc. All rights reserved.",
+    "copyright": "© {{year}} Tavvy, Inc. 판권 소유.",
     "cookiePolicy": "쿠키 정책",
     "disclaimer": "면책 조항"
   },
@@ -755,5 +761,30 @@
     "offline": "오프라인",
     "lastSeen": "마지막 접속",
     "typing": "입력 중..."
+  },
+  "apps": {
+    "subtitle": "도구 및 바로가기",
+    "searchApps": "앱 검색...",
+    "featured": "추천",
+    "allApps": "모든 앱",
+    "appearance": "외관",
+    "light": "라이트",
+    "dark": "다크",
+    "pros": "전문가",
+    "atlas": "아틀라스",
+    "ecard": "e카드",
+    "universes": "유니버스",
+    "onTheGo": "이동 중",
+    "rides": "교통",
+    "rvCamping": "RV & 캠핑",
+    "messages": "메시지",
+    "wallet": "지갑",
+    "cities": "도시",
+    "saved": "저장됨",
+    "account": "계정",
+    "create": "만들기",
+    "realtors": "부동산",
+    "happening": "진행 중",
+    "settingsApp": "설정"
   }
 }

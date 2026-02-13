@@ -111,7 +111,8 @@
     "greeting": {
       "morning": "صباح الخير",
       "afternoon": "مساء الخير",
-      "evening": "مساء الخير"
+      "evening": "مساء الخير",
+      "night": "تصبح على خير"
     },
     "tagline": "اعثر على المكان المثالي في ثوانٍ. وليس ساعات.",
     "nearMe": "بالقرب مني",
@@ -140,7 +141,9 @@
     "experiences": "تجارب",
     "cities": "مدن",
     "discoverCities": "اكتشف المدن",
-    "exploreCities": "استكشف مدن حول العالم"
+    "exploreCities": "استكشف مدن حول العالم",
+    "greetingName": "مرحباً",
+    "curatedWorlds": "عوالم منتقاة من التجارب"
   },
   "places": {
     "title": "الأماكن",
@@ -443,7 +446,10 @@
     "priceRange": "نطاق السعر",
     "openNow": "مفتوح الآن",
     "applyFilters": "تطبيق التصفيات",
-    "clearFilters": "مسح التصفيات"
+    "clearFilters": "مسح التصفيات",
+    "category": "فئة",
+    "place": "مكان",
+    "nearby": "قريب"
   },
   "errors": {
     "generic": "حدث خطأ ما",
@@ -755,5 +761,30 @@
     "offline": "غير متصل",
     "lastSeen": "آخر ظهور",
     "typing": "يكتب..."
+  },
+  "apps": {
+    "subtitle": "أدوات واختصارات",
+    "searchApps": "البحث في التطبيقات...",
+    "featured": "مميز",
+    "allApps": "جميع التطبيقات",
+    "appearance": "المظهر",
+    "light": "فاتح",
+    "dark": "داكن",
+    "pros": "محترفون",
+    "atlas": "أطلس",
+    "ecard": "بطاقة إلكترونية",
+    "universes": "عوالم",
+    "onTheGo": "أثناء التنقل",
+    "rides": "رحلات",
+    "rvCamping": "عربات التخييم",
+    "messages": "رسائل",
+    "wallet": "المحفظة",
+    "cities": "مدن",
+    "saved": "المحفوظات",
+    "account": "الحساب",
+    "create": "إنشاء",
+    "realtors": "عقارات",
+    "happening": "يحدث الآن",
+    "settingsApp": "الإعدادات"
   }
 }

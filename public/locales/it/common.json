@@ -111,7 +111,8 @@
     "greeting": {
       "morning": "Buongiorno",
       "afternoon": "Buon pomeriggio",
-      "evening": "Buonasera"
+      "evening": "Buonasera",
+      "night": "Buonanotte"
     },
     "tagline": "Trova il tuo posto perfetto in secondi. Non in ore.",
     "nearMe": "Vicino a Me",
@@ -140,7 +141,9 @@
     "experiences": "Esperienze",
     "cities": "Città",
     "discoverCities": "Scopri Città",
-    "exploreCities": "Esplora città in tutto il mondo"
+    "exploreCities": "Esplora città in tutto il mondo",
+    "greetingName": "ciao",
+    "curatedWorlds": "Mondi curati di esperienze"
   },
   "places": {
     "title": "Luoghi",
@@ -212,7 +215,7 @@
     "beauty": "Bellezza e Spa",
     "fitness": "Fitness",
     "education": "Istruzione",
-    "automotive": "Automotive",
+    "automotive": "Automobilistico",
     "pets": "Animali",
     "financial": "Servizi Finanziari"
   },
@@ -418,7 +421,7 @@
     "miles": "Miglia",
     "kilometers": "Chilometri",
     "standard": "Standard",
-    "satellite": "Satellite",
+    "satellite": "Satellitare",
     "hybrid": "Ibrido",
     "terrain": "Terreno",
     "selectLanguage": "Seleziona Lingua",
@@ -443,7 +446,10 @@
     "priceRange": "Fascia di Prezzo",
     "openNow": "Aperto Ora",
     "applyFilters": "Applica Filtri",
-    "clearFilters": "Cancella Filtri"
+    "clearFilters": "Cancella Filtri",
+    "category": "Categoria",
+    "place": "Luogo",
+    "nearby": "Vicino"
   },
   "errors": {
     "generic": "Qualcosa è andato storto",
@@ -667,7 +673,7 @@
   },
   "map": {
     "title": "Mappa",
-    "satellite": "Satellite",
+    "satellite": "Satellitare",
     "standard": "Standard",
     "terrain": "Terreno",
     "hybrid": "Ibrido",
@@ -755,5 +761,30 @@
     "offline": "Offline",
     "lastSeen": "Ultimo accesso",
     "typing": "Sta scrivendo..."
+  },
+  "apps": {
+    "subtitle": "Strumenti e scorciatoie",
+    "searchApps": "Cerca app...",
+    "featured": "In evidenza",
+    "allApps": "Tutte le App",
+    "appearance": "Aspetto",
+    "light": "Chiaro",
+    "dark": "Scuro",
+    "pros": "Professionisti",
+    "atlas": "Atlas",
+    "ecard": "eCard",
+    "universes": "Universi",
+    "onTheGo": "In Movimento",
+    "rides": "Trasporti",
+    "rvCamping": "Camper e Campeggio",
+    "messages": "Messaggi",
+    "wallet": "Portafoglio",
+    "cities": "Città",
+    "saved": "Salvati",
+    "account": "Account",
+    "create": "Crea",
+    "realtors": "Immobiliare",
+    "happening": "In corso",
+    "settingsApp": "Impostazioni"
   }
 }

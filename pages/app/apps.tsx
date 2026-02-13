@@ -33,21 +33,21 @@ import {
 const FEATURED_APPS = [
   {
     id: 'pros',
-    name: 'Pros',
+    nameKey: 'apps.pros',
     icon: IoConstruct,
     gradient: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
     href: '/app/pros',
   },
   {
     id: 'atlas',
-    name: 'Atlas',
+    nameKey: 'apps.atlas',
     icon: IoBook,
     gradient: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
     href: '/app/atlas',
   },
   {
     id: 'ecard',
-    name: 'eCard',
+    nameKey: 'apps.ecard',
     icon: IoHeart,
     gradient: 'linear-gradient(135deg, #EC4899 0%, #DB2777 100%)',
     href: '/app/ecard',
@@ -58,91 +58,91 @@ const FEATURED_APPS = [
 const ALL_APPS = [
   {
     id: 'universes',
-    name: 'Universes',
+    nameKey: 'apps.universes',
     icon: IoPlanet,
     color: '#14B8A6',
     href: '/app/explore',
   },
   {
     id: 'onthego',
-    name: 'On The Go',
+    nameKey: 'apps.onTheGo',
     icon: IoCar,
     color: '#10B981',
     href: '/app/onthego',
   },
   {
     id: 'rides',
-    name: 'Rides',
+    nameKey: 'apps.rides',
     icon: IoTrain,
     color: '#EF4444',
     href: '/app/rides',
   },
   {
     id: 'rv-camping',
-    name: 'RV & Cam...',
+    nameKey: 'apps.rvCamping',
     icon: IoCar,
     color: '#F97316',
     href: '/app/rv-camping',
   },
   {
     id: 'messages',
-    name: 'Messages',
+    nameKey: 'apps.messages',
     icon: IoHeart,
     color: '#EF4444',
     href: '/app/messages',
   },
   {
     id: 'wallet',
-    name: 'Wallet',
+    nameKey: 'apps.wallet',
     icon: IoWallet,
     color: '#8B5CF6',
     href: '/app/wallet',
   },
   {
     id: 'cities',
-    name: 'Cities',
+    nameKey: 'apps.cities',
     icon: IoBusinessOutline,
     color: '#3B82F6',
     href: '/app/cities',
   },
   {
     id: 'saved',
-    name: 'Saved',
+    nameKey: 'apps.saved',
     icon: IoHeart,
     color: '#EC4899',
     href: '/app/saved',
   },
   {
     id: 'account',
-    name: 'Account',
+    nameKey: 'apps.account',
     icon: IoPersonOutline,
     color: '#94A3B8',
     href: '/app/profile',
   },
   {
     id: 'create',
-    name: 'Create',
+    nameKey: 'apps.create',
     icon: IoAddCircle,
     color: '#10B981',
     href: '/app/create',
   },
   {
     id: 'realtors',
-    name: 'Realtors',
+    nameKey: 'apps.realtors',
     icon: IoHome,
     color: '#14B8A6',
     href: '/app/realtors',
   },
   {
     id: 'happening',
-    name: 'Happening',
+    nameKey: 'apps.happening',
     icon: IoSparkles,
     color: '#EC4899',
     href: '/app/happening-now',
   },
   {
     id: 'settings',
-    name: 'Settings',
+    nameKey: 'apps.settingsApp',
     icon: IoSettings,
     color: '#64748B',
     href: '/app/settings',
@@ -168,13 +168,13 @@ export default function AppsScreen() {
   };
 
   const filteredApps = ALL_APPS.filter(app =>
-    app.name.toLowerCase().includes(searchQuery.toLowerCase())
+    t(app.nameKey).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <>
       <Head>
-        <title>Apps | TavvY</title>
+        <title>{t('navigation.apps')} | TavvY</title>
         <meta name="description" content="TavvY apps and tools" />
       </Head>
 
@@ -182,7 +182,7 @@ export default function AppsScreen() {
         <div className="apps-screen">
           {/* Header */}
           <header className="header">
-            <h1>Apps</h1>
+            <h1>{t('navigation.apps')}</h1>
             <button className="profile-btn" onClick={handleProfileClick}>
               <div className="profile-icon">
                 {user ? (
@@ -195,14 +195,14 @@ export default function AppsScreen() {
           </header>
 
           {/* Subtitle */}
-          <p className="subtitle">Tools & shortcuts</p>
+          <p className="subtitle">{t('apps.subtitle')}</p>
 
           {/* Search Bar */}
           <div className="search-container">
             <FiSearch className="search-icon" size={18} />
             <input
               type="text"
-              placeholder="Search apps..."
+              placeholder={t('apps.searchApps')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="search-input"
@@ -212,7 +212,7 @@ export default function AppsScreen() {
           {/* Featured Section */}
           {!searchQuery && (
             <>
-              <h2 className="section-title">Featured</h2>
+              <h2 className="section-title">{t('apps.featured')}</h2>
               <div className="featured-scroll">
                 {FEATURED_APPS.map((app) => {
                   const Icon = app.icon;
@@ -221,7 +221,7 @@ export default function AppsScreen() {
                       <div className="featured-icon" style={{ background: app.gradient }}>
                         <Icon size={48} color="#fff" />
                       </div>
-                      <span className="featured-name">{app.name}</span>
+                      <span className="featured-name">{t(app.nameKey)}</span>
                     </Link>
                   );
                 })}
@@ -230,7 +230,7 @@ export default function AppsScreen() {
           )}
 
           {/* All Apps Section */}
-          <h2 className="section-title">All Apps</h2>
+          <h2 className="section-title">{t('apps.allApps')}</h2>
           <div className="apps-grid">
             {filteredApps.map((app) => {
               const Icon = app.icon;
@@ -239,28 +239,28 @@ export default function AppsScreen() {
                   <div className="app-icon" style={{ backgroundColor: app.color }}>
                     <Icon size={32} color="#fff" />
                   </div>
-                  <span className="app-name">{app.name}</span>
+                  <span className="app-name">{t(app.nameKey)}</span>
                 </Link>
               );
             })}
           </div>
 
           {/* Appearance Section */}
-          <h2 className="section-title appearance-title">Appearance</h2>
+          <h2 className="section-title appearance-title">{t('apps.appearance')}</h2>
           <div className="appearance-toggle">
             <button
               className={`theme-btn ${!isDark ? 'active' : ''}`}
               onClick={() => setThemeMode('light')}
             >
               <FiSun size={18} />
-              <span>Light</span>
+              <span>{t('apps.light')}</span>
             </button>
             <button
               className={`theme-btn ${isDark ? 'active' : ''}`}
               onClick={() => setThemeMode('dark')}
             >
               <FiMoon size={18} />
-              <span>Dark</span>
+              <span>{t('apps.dark')}</span>
             </button>
           </div>
 
@@ -367,8 +367,6 @@ export default function AppsScreen() {
             overflow-x: auto;
             margin-bottom: 32px;
             padding-bottom: 4px;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
           }
 
           .featured-scroll::-webkit-scrollbar {
@@ -376,49 +374,42 @@ export default function AppsScreen() {
           }
 
           .featured-card {
-            flex-shrink: 0;
-            width: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
             text-decoration: none;
-            cursor: pointer;
+            flex-shrink: 0;
           }
 
           .featured-icon {
-            width: 160px;
-            height: 160px;
+            width: 100px;
+            height: 100px;
             border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 12px;
-            transition: transform 0.2s;
-          }
-
-          .featured-card:hover .featured-icon {
-            transform: scale(1.02);
           }
 
           .featured-name {
-            display: block;
-            font-size: 17px;
+            font-size: 14px;
             font-weight: 600;
             color: ${isDark ? '#FFFFFF' : '#000000'};
-            text-align: center;
           }
 
-          /* All Apps Grid */
+          /* Apps Grid */
           .apps-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 20px 16px;
-            margin-bottom: 32px;
+            gap: 20px 12px;
           }
 
           .app-item {
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 8px;
             text-decoration: none;
-            cursor: pointer;
           }
 
           .app-icon {
@@ -428,30 +419,20 @@ export default function AppsScreen() {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 8px;
-            transition: transform 0.2s;
-          }
-
-          .app-item:hover .app-icon {
-            transform: scale(1.05);
           }
 
           .app-name {
             font-size: 12px;
             font-weight: 500;
-            color: ${isDark ? '#CCCCCC' : '#666666'};
+            color: ${isDark ? '#FFFFFF' : '#000000'};
             text-align: center;
-            max-width: 80px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            line-height: 1.2;
           }
 
           /* Appearance Toggle */
           .appearance-toggle {
             display: flex;
             gap: 12px;
-            margin-bottom: 32px;
           }
 
           .theme-btn {
@@ -460,57 +441,29 @@ export default function AppsScreen() {
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 16px;
-            background-color: ${isDark ? '#2A2A2A' : '#F5F5F5'};
+            padding: 14px;
+            border-radius: 12px;
             border: none;
-            border-radius: 16px;
             font-size: 16px;
             font-weight: 600;
-            color: ${isDark ? '#CCCCCC' : '#666666'};
             cursor: pointer;
             transition: all 0.2s;
+            background-color: ${isDark ? '#2A2A2A' : '#F5F5F5'};
+            color: ${isDark ? '#FFFFFF' : '#000000'};
           }
 
           .theme-btn.active {
-            background-color: ${isDark ? '#3B82F6' : '#3B82F6'};
+            background-color: #3B82F6;
             color: #FFFFFF;
           }
 
-          .theme-btn:hover:not(.active) {
-            background-color: ${isDark ? '#333333' : '#EEEEEE'};
-          }
-
-          /* Bottom Spacing */
           .bottom-spacing {
             height: 40px;
           }
 
-          /* Responsive */
-          @media (max-width: 640px) {
+          @media (max-width: 380px) {
             .apps-grid {
-              grid-template-columns: repeat(4, 1fr);
-              gap: 16px 12px;
-            }
-
-            .app-icon {
-              width: 56px;
-              height: 56px;
-            }
-
-            .featured-card {
-              width: 140px;
-            }
-
-            .featured-icon {
-              width: 140px;
-              height: 140px;
-            }
-          }
-
-          @media (min-width: 768px) {
-            .apps-screen {
-              max-width: 600px;
-              margin: 0 auto;
+              grid-template-columns: repeat(3, 1fr);
             }
           }
         `}</style>
@@ -519,10 +472,10 @@ export default function AppsScreen() {
   );
 }
 
-export async function getStaticProps({ locale }: { locale: string }) {
+export async function getServerSideProps({ locale }: { locale: string }) {
   return {
     props: {
-      ...(await serverSideTranslations(locale, ['common'])),
+      ...(await serverSideTranslations(locale || 'en', ['common'])),
     },
   };
 }

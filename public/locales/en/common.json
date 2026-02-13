@@ -111,7 +111,8 @@
     "greeting": {
       "morning": "Good morning",
       "afternoon": "Good afternoon",
-      "evening": "Good evening"
+      "evening": "Good evening",
+      "night": "Good night"
     },
     "tagline": "Find your perfect spot in seconds. Not hours.",
     "nearMe": "Near Me",
@@ -140,7 +141,9 @@
     "experiences": "Experiences",
     "cities": "Cities",
     "discoverCities": "Discover Cities",
-    "exploreCities": "Explore cities around the world"
+    "exploreCities": "Explore cities around the world",
+    "greetingName": "there",
+    "curatedWorlds": "Curated worlds of experiences"
   },
   "places": {
     "title": "Places",
@@ -443,7 +446,10 @@
     "priceRange": "Price Range",
     "openNow": "Open Now",
     "applyFilters": "Apply Filters",
-    "clearFilters": "Clear Filters"
+    "clearFilters": "Clear Filters",
+    "category": "Category",
+    "place": "Place",
+    "nearby": "Nearby"
   },
   "errors": {
     "generic": "Something went wrong",
@@ -755,5 +761,30 @@
     "offline": "Offline",
     "lastSeen": "Last seen",
     "typing": "Typing..."
+  },
+  "apps": {
+    "subtitle": "Tools & shortcuts",
+    "searchApps": "Search apps...",
+    "featured": "Featured",
+    "allApps": "All Apps",
+    "appearance": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "pros": "Pros",
+    "atlas": "Atlas",
+    "ecard": "eCard",
+    "universes": "Universes",
+    "onTheGo": "On The Go",
+    "rides": "Rides",
+    "rvCamping": "RV & Camping",
+    "messages": "Messages",
+    "wallet": "Wallet",
+    "cities": "Cities",
+    "saved": "Saved",
+    "account": "Account",
+    "create": "Create",
+    "realtors": "Realtors",
+    "happening": "Happening",
+    "settingsApp": "Settings"
   }
 }

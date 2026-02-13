@@ -111,7 +111,8 @@
     "greeting": {
       "morning": "Günaydın",
       "afternoon": "İyi günler",
-      "evening": "İyi akşamlar"
+      "evening": "İyi akşamlar",
+      "night": "İyi geceler"
     },
     "tagline": "Mükemmel mekanı saniyeler içinde bulun. Saatler değil.",
     "nearMe": "Yakınımda",
@@ -140,7 +141,9 @@
     "experiences": "Deneyimler",
     "cities": "Şehirler",
     "discoverCities": "Şehirleri Keşfet",
-    "exploreCities": "Dünya genelinde şehirleri keşfedin"
+    "exploreCities": "Dünya genelinde şehirleri keşfedin",
+    "greetingName": "merhaba",
+    "curatedWorlds": "Seçilmiş deneyim dünyaları"
   },
   "places": {
     "title": "Mekanlar",
@@ -443,7 +446,10 @@
     "priceRange": "Fiyat Aralığı",
     "openNow": "Şu An Açık",
     "applyFilters": "Filtreleri Uygula",
-    "clearFilters": "Filtreleri Temizle"
+    "clearFilters": "Filtreleri Temizle",
+    "category": "Kategori",
+    "place": "Yer",
+    "nearby": "Yakında"
   },
   "errors": {
     "generic": "Bir şeyler ters gitti",
@@ -755,5 +761,30 @@
     "offline": "Çevrimdışı",
     "lastSeen": "Son görülme",
     "typing": "Yazıyor..."
+  },
+  "apps": {
+    "subtitle": "Araçlar ve kısayollar",
+    "searchApps": "Uygulama ara...",
+    "featured": "Öne Çıkan",
+    "allApps": "Tüm Uygulamalar",
+    "appearance": "Görünüm",
+    "light": "Açık",
+    "dark": "Koyu",
+    "pros": "Profesyoneller",
+    "atlas": "Atlas",
+    "ecard": "eKart",
+    "universes": "Evrenler",
+    "onTheGo": "Hareket Halinde",
+    "rides": "Ulaşım",
+    "rvCamping": "Karavan ve Kamp",
+    "messages": "Mesajlar",
+    "wallet": "Cüzdan",
+    "cities": "Şehirler",
+    "saved": "Kaydedilenler",
+    "account": "Hesap",
+    "create": "Oluştur",
+    "realtors": "Emlak",
+    "happening": "Olan Biten",
+    "settingsApp": "Ayarlar"
   }
 }

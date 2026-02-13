@@ -111,7 +111,8 @@
     "greeting": {
       "morning": "Guten Morgen",
       "afternoon": "Guten Tag",
-      "evening": "Guten Abend"
+      "evening": "Guten Abend",
+      "night": "Gute Nacht"
     },
     "tagline": "Finde deinen perfekten Ort in Sekunden. Nicht in Stunden.",
     "nearMe": "In meiner Nähe",
@@ -140,7 +141,9 @@
     "experiences": "Erlebnisse",
     "cities": "Städte",
     "discoverCities": "Städte Entdecken",
-    "exploreCities": "Entdecke Städte auf der ganzen Welt"
+    "exploreCities": "Entdecke Städte auf der ganzen Welt",
+    "greetingName": "hallo",
+    "curatedWorlds": "Kuratierte Erlebniswelten"
   },
   "places": {
     "title": "Orte",
@@ -336,7 +339,7 @@
     "myLists": "Meine Listen",
     "contributions": "Beiträge",
     "badges": "Abzeichen",
-    "level": "Level",
+    "level": "Stufe",
     "points": "Punkte",
     "streak": "Serie",
     "joined": "Beigetreten",
@@ -443,7 +446,10 @@
     "priceRange": "Preisklasse",
     "openNow": "Jetzt Geöffnet",
     "applyFilters": "Filter Anwenden",
-    "clearFilters": "Filter Löschen"
+    "clearFilters": "Filter Löschen",
+    "category": "Kategorie",
+    "place": "Ort",
+    "nearby": "In der Nähe"
   },
   "errors": {
     "generic": "Etwas ist schiefgelaufen",
@@ -534,7 +540,7 @@
     "social": "Soziale Medien",
     "analytics": "Analysen",
     "views": "Aufrufe",
-    "taps": "Taps",
+    "taps": "Antippen",
     "saves": "Speicherungen",
     "dashboard": "eCard-Dashboard",
     "myCards": "Meine Karten",
@@ -603,8 +609,8 @@
     "electric": "Strom",
     "sewer": "Abwasser",
     "fullHookup": "Vollanschluss",
-    "pullThrough": "Durchfahrt",
-    "backIn": "Rückwärts",
+    "pullThrough": "Durchfahrtsplatz",
+    "backIn": "Rückwärtsplatz",
     "tentSites": "Zeltplätze",
     "cabins": "Hütten",
     "glamping": "Glamping",
@@ -625,7 +631,7 @@
     "duration": "Dauer",
     "capacity": "Kapazität",
     "minutes": "Minuten",
-    "tickets": "Tickets",
+    "tickets": "Eintrittskarten",
     "parking": "Parken",
     "souvenirs": "Souvenirs",
     "tours": "Touren",
@@ -643,7 +649,7 @@
     "soldHomes": "Verkaufte Immobilien",
     "contact": "Makler Kontaktieren",
     "residential": "Wohnimmobilien",
-    "commercial": "Gewerbeimmobilien",
+    "commercial": "Gewerbe",
     "luxury": "Luxus",
     "investment": "Investition",
     "firstTimeBuyer": "Erstkäufer",
@@ -677,7 +683,7 @@
     "zoomOut": "Verkleinern",
     "layers": "Ebenen",
     "traffic": "Verkehr",
-    "transit": "ÖPNV",
+    "transit": "Nahverkehr",
     "biking": "Radfahren",
     "walking": "Zu Fuß",
     "driving": "Auto",
@@ -723,7 +729,7 @@
     "contactUs": "Kontaktiere Uns",
     "reportBug": "Fehler Melden",
     "featureRequest": "Funktionswunsch",
-    "community": "Community",
+    "community": "Gemeinschaft",
     "documentation": "Dokumentation",
     "gettingStarted": "Erste Schritte",
     "accountHelp": "Kontohilfe",
@@ -755,5 +761,30 @@
     "offline": "Offline",
     "lastSeen": "Zuletzt gesehen",
     "typing": "Schreibt..."
+  },
+  "apps": {
+    "subtitle": "Werkzeuge und Verknüpfungen",
+    "searchApps": "Apps suchen...",
+    "featured": "Empfohlen",
+    "allApps": "Alle Apps",
+    "appearance": "Erscheinungsbild",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "pros": "Profis",
+    "atlas": "Atlas",
+    "ecard": "eCard",
+    "universes": "Universen",
+    "onTheGo": "Unterwegs",
+    "rides": "Fahrten",
+    "rvCamping": "Wohnmobil & Camping",
+    "messages": "Nachrichten",
+    "wallet": "Geldbörse",
+    "cities": "Städte",
+    "saved": "Gespeichert",
+    "account": "Konto",
+    "create": "Erstellen",
+    "realtors": "Immobilien",
+    "happening": "Aktuell",
+    "settingsApp": "Einstellungen"
   }
 }

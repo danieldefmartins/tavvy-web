@@ -111,7 +111,8 @@
     "greeting": {
       "morning": "おはようございます",
       "afternoon": "こんにちは",
-      "evening": "こんばんは"
+      "evening": "こんばんは",
+      "night": "おやすみなさい"
     },
     "tagline": "数秒で完璧な場所を見つけよう。何時間もかけずに。",
     "nearMe": "近くの場所",
@@ -140,7 +141,9 @@
     "experiences": "体験",
     "cities": "都市",
     "discoverCities": "都市を発見",
-    "exploreCities": "世界中の都市を探索"
+    "exploreCities": "世界中の都市を探索",
+    "greetingName": "こんにちは",
+    "curatedWorlds": "厳選された体験の世界"
   },
   "places": {
     "title": "場所",
@@ -443,7 +446,10 @@
     "priceRange": "価格帯",
     "openNow": "営業中",
     "applyFilters": "フィルターを適用",
-    "clearFilters": "フィルターをクリア"
+    "clearFilters": "フィルターをクリア",
+    "category": "カテゴリー",
+    "place": "場所",
+    "nearby": "近く"
   },
   "errors": {
     "generic": "エラーが発生しました",
@@ -732,7 +738,7 @@
   "legal": {
     "termsOfService": "利用規約",
     "privacyPolicy": "プライバシーポリシー",
-    "copyright": "© {{year}} Tavvy, Inc. All rights reserved.",
+    "copyright": "© {{year}} Tavvy株式会社。全著作権所有。",
     "cookiePolicy": "Cookieポリシー",
     "disclaimer": "免責事項"
   },
@@ -755,5 +761,30 @@
     "offline": "オフライン",
     "lastSeen": "最終ログイン",
     "typing": "入力中..."
+  },
+  "apps": {
+    "subtitle": "ツールとショートカット",
+    "searchApps": "アプリを検索...",
+    "featured": "注目",
+    "allApps": "すべてのアプリ",
+    "appearance": "外観",
+    "light": "ライト",
+    "dark": "ダーク",
+    "pros": "プロ",
+    "atlas": "アトラス",
+    "ecard": "eカード",
+    "universes": "ユニバース",
+    "onTheGo": "外出先で",
+    "rides": "乗り物",
+    "rvCamping": "RV＆キャンプ",
+    "messages": "メッセージ",
+    "wallet": "ウォレット",
+    "cities": "都市",
+    "saved": "保存済み",
+    "account": "アカウント",
+    "create": "作成",
+    "realtors": "不動産",
+    "happening": "今起きていること",
+    "settingsApp": "設定"
   }
 }

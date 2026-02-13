@@ -7,7 +7,7 @@
     "cancel": "Batal",
     "save": "Simpan",
     "delete": "Hapus",
-    "edit": "Edit",
+    "edit": "Sunting",
     "close": "Tutup",
     "back": "Kembali",
     "next": "Berikutnya",
@@ -46,7 +46,7 @@
     "confirm": "Konfirmasi",
     "submit": "Kirim",
     "apply": "Terapkan",
-    "reset": "Reset",
+    "reset": "Atur Ulang",
     "clear": "Hapus",
     "select": "Pilih",
     "upload": "Unggah",
@@ -84,7 +84,7 @@
     "explore": "Jelajahi",
     "apps": "Aplikasi",
     "atlas": "Atlas",
-    "universes": "Universes",
+    "universes": "Alam Semesta",
     "pros": "Profesional",
     "saved": "Tersimpan",
     "profile": "Profil",
@@ -100,7 +100,7 @@
     "subtitle": "Temukan tempat dari sinyal nyata, bukan bintang",
     "searchPlaceholder": "Apa yang kamu cari sekarang?",
     "nearYou": "Di Dekatmu",
-    "trending": "Trending",
+    "trending": "Tren",
     "happeningNow": "Sedang Berlangsung",
     "exploreTavvy": "Jelajahi Tavvy",
     "topContributors": "Kontributor Teratas",
@@ -111,7 +111,8 @@
     "greeting": {
       "morning": "Selamat pagi",
       "afternoon": "Selamat siang",
-      "evening": "Selamat malam"
+      "evening": "Selamat malam",
+      "night": "Selamat malam"
     },
     "tagline": "Temukan tempat sempurna dalam hitungan detik. Bukan jam.",
     "nearMe": "Dekat Saya",
@@ -140,7 +141,9 @@
     "experiences": "Pengalaman",
     "cities": "Kota",
     "discoverCities": "Temukan Kota",
-    "exploreCities": "Jelajahi kota di seluruh dunia"
+    "exploreCities": "Jelajahi kota di seluruh dunia",
+    "greetingName": "halo",
+    "curatedWorlds": "Dunia pengalaman pilihan"
   },
   "places": {
     "title": "Tempat",
@@ -236,7 +239,7 @@
     "readMore": "Baca Selengkapnya"
   },
   "universes": {
-    "title": "Universes",
+    "title": "Alam Semesta",
     "subtitle": "Jelajahi koleksi bertema",
     "airports": "Bandara",
     "themeParks": "Taman Hiburan",
@@ -292,7 +295,7 @@
     "projectTitle": "Judul Proyek",
     "projectDescription": "Deskripsi Proyek",
     "projectBudget": "Anggaran",
-    "projectTimeline": "Timeline",
+    "projectTimeline": "Garis Waktu",
     "projectLocation": "Lokasi",
     "submitProject": "Kirim Proyek",
     "projectSubmitted": "Proyek Terkirim!",
@@ -325,7 +328,7 @@
     "noSaved": "Belum ada tempat tersimpan",
     "startSaving": "Mulai simpan tempat favoritmu",
     "pros": "Profesional",
-    "universes": "Universes",
+    "universes": "Alam Semesta",
     "events": "Acara"
   },
   "profile": {
@@ -368,7 +371,7 @@
     "termsAgree": "Dengan mendaftar, Anda menyetujui",
     "and": "dan",
     "fullName": "Nama Lengkap",
-    "username": "Username",
+    "username": "Nama Pengguna",
     "phone": "Telepon",
     "verificationCode": "Kode Verifikasi",
     "sendCode": "Kirim Kode",
@@ -443,7 +446,10 @@
     "priceRange": "Kisaran Harga",
     "openNow": "Buka Sekarang",
     "applyFilters": "Terapkan Filter",
-    "clearFilters": "Hapus Filter"
+    "clearFilters": "Hapus Filter",
+    "category": "Kategori",
+    "place": "Tempat",
+    "nearby": "Dekat"
   },
   "errors": {
     "generic": "Terjadi kesalahan",
@@ -596,7 +602,7 @@
     "petFriendly": "Ramah Hewan",
     "wifi": "WiFi",
     "showers": "Kamar Mandi",
-    "laundry": "Laundry",
+    "laundry": "Laundri",
     "store": "Toko",
     "pool": "Kolam Renang",
     "water": "Air",
@@ -662,7 +668,7 @@
     "renting": "Menyewa",
     "budget": "Anggaran",
     "preferredArea": "Area Pilihan",
-    "timeline": "Timeline",
+    "timeline": "Garis Waktu",
     "contactInfo": "Info Kontak"
   },
   "map": {
@@ -734,7 +740,7 @@
     "privacyPolicy": "Kebijakan Privasi",
     "copyright": "© {{year}} Tavvy, Inc. Semua hak dilindungi.",
     "cookiePolicy": "Kebijakan Cookie",
-    "disclaimer": "Disclaimer"
+    "disclaimer": "Penafian"
   },
   "notifications": {
     "title": "Notifikasi",
@@ -755,5 +761,30 @@
     "offline": "Offline",
     "lastSeen": "Terakhir dilihat",
     "typing": "Mengetik..."
+  },
+  "apps": {
+    "subtitle": "Alat dan pintasan",
+    "searchApps": "Cari aplikasi...",
+    "featured": "Unggulan",
+    "allApps": "Semua Aplikasi",
+    "appearance": "Tampilan",
+    "light": "Terang",
+    "dark": "Gelap",
+    "pros": "Profesional",
+    "atlas": "Atlas",
+    "ecard": "eKartu",
+    "universes": "Semesta",
+    "onTheGo": "Dalam Perjalanan",
+    "rides": "Transportasi",
+    "rvCamping": "RV & Kemah",
+    "messages": "Pesan",
+    "wallet": "Dompet",
+    "cities": "Kota",
+    "saved": "Tersimpan",
+    "account": "Akun",
+    "create": "Buat",
+    "realtors": "Properti",
+    "happening": "Sedang Terjadi",
+    "settingsApp": "Pengaturan"
   }
 }
