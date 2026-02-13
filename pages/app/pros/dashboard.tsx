@@ -53,7 +53,7 @@ export default function ProDashboardScreen() {
   // Redirect if not a Pro user
   useEffect(() => {
     if (!rolesLoading && !subLoading && !isPro && !isActivePro) {
-      router.push('/app/pros');
+      router.push('/app/pros', undefined, { locale });
     }
   }, [rolesLoading, subLoading, isPro, isActivePro, router]);
 

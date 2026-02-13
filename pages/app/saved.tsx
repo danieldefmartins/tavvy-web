@@ -190,7 +190,7 @@ export default function SavedScreen() {
               <div className="places-list">
                 {filteredPlaces.map((saved) => (
                   <div key={saved.id} className="saved-item">
-                    <Link href={`/place/${saved.place?.slug || saved.place_id}`} className="place-link">
+                    <Link href={`/place/${saved.place?.slug || saved.place_id}`} className="place-link" locale={locale}>
                       <PlaceCard
                         place={{
                           id: saved.place?.id || saved.place_id,

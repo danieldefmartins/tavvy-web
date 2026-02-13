@@ -29,7 +29,7 @@ export default function MatchContactScreen() {
       };
       await supabase.from('realtor_match_requests').insert([matchData]);
       sessionStorage.clear();
-      router.push('/app/realtors/match/complete');
+      router.push('/app/realtors/match/complete', undefined, { locale });
     } catch (error) {
       alert('Failed to submit. Please try again.');
     } finally {

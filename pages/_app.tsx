@@ -1,7 +1,7 @@
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { appWithTranslation } from 'next-i18next';
 import { AuthProvider } from '../contexts/AuthContext';
@@ -21,33 +21,88 @@ const queryClient = new QueryClient({
   },
 });
 
-// LocaleManager component to handle locale persistence
+// Supported locale codes (must match next-i18next.config.js)
+const SUPPORTED_LOCALES = ['en', 'es', 'pt', 'fr', 'de', 'it', 'ja', 'ko', 'zh', 'ru', 'ar', 'tr', 'hi', 'id', 'th', 'vi', 'nl'];
+
+/**
+ * Detect the browser/device language.
+ * Checks navigator.languages (ordered by user preference) and returns
+ * the first one Tavvy supports.
+ * 
+ * Example: A user in Brazil with browser set to Portuguese → returns "pt"
+ * Example: A user in the US with browser set to Spanish → returns "es"
+ */
+function detectBrowserLanguage(): string {
+  try {
+    // navigator.languages gives all preferred languages in order
+    const browserLangs = navigator.languages || [navigator.language];
+    for (const lang of browserLangs) {
+      if (!lang) continue;
+      const code = lang.split('-')[0].toLowerCase();
+      if (SUPPORTED_LOCALES.includes(code)) {
+        return code;
+      }
+    }
+  } catch (e) {
+    // Ignore errors in SSR or restricted environments
+  }
+  return 'en';
+}
+
+/**
+ * LocaleManager - Handles locale persistence and auto-detection.
+ * 
+ * Priority:
+ * 1. User's manual selection (saved in localStorage as 'tavvy-locale')
+ * 2. Browser/device language (auto-detected on first visit)
+ * 3. English (fallback)
+ * 
+ * On first visit (no saved locale):
+ *   - Detects browser language
+ *   - Saves it to localStorage
+ *   - Redirects to that locale
+ * 
+ * On subsequent visits:
+ *   - Restores saved locale from localStorage
+ *   - If user manually changes language in Settings, that takes priority
+ */
 function LocaleManager() {
   const router = useRouter();
   const { locale, pathname, asPath, query } = router;
+  const hasProcessedRef = useRef(false);
 
+  // Save locale to localStorage whenever it changes (from navigation or manual selection)
   useEffect(() => {
-    // Save locale to localStorage when it changes
     if (locale && typeof window !== 'undefined') {
       localStorage.setItem('tavvy-locale', locale);
     }
   }, [locale]);
 
+  // On initial load: restore saved locale OR auto-detect browser language
   useEffect(() => {
-    // On initial load, check if there's a saved locale and redirect if needed
-    if (typeof window !== 'undefined') {
-      const savedLocale = localStorage.getItem('tavvy-locale');
-      
-      // Only redirect if:
-      // 1. There's a saved locale
-      // 2. It's different from the current locale
-      // 3. We're on the default locale (en)
-      // 4. The URL doesn't already have a locale prefix
-      if (savedLocale && savedLocale !== locale && locale === 'en' && !asPath.startsWith(`/${savedLocale}`)) {
+    if (typeof window === 'undefined' || hasProcessedRef.current) return;
+    hasProcessedRef.current = true;
+
+    const savedLocale = localStorage.getItem('tavvy-locale');
+
+    if (savedLocale && SUPPORTED_LOCALES.includes(savedLocale)) {
+      // User has a saved preference (manual or previous auto-detect)
+      if (savedLocale !== locale) {
         router.replace({ pathname, query }, asPath, { locale: savedLocale });
       }
+      return;
     }
-  }, []); // Only run once on mount
+
+    // No saved preference — first visit
+    // Auto-detect browser/device language
+    const detectedLang = detectBrowserLanguage();
+    localStorage.setItem('tavvy-locale', detectedLang);
+    console.log(`[i18n] First visit: auto-detected browser language "${detectedLang}"`);
+
+    if (detectedLang !== locale) {
+      router.replace({ pathname, query }, asPath, { locale: detectedLang });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return null;
 }

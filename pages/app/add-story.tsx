@@ -63,7 +63,7 @@ export default function AddStoryPage() {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
       if (!user) {
-        router.push('/app/login?redirect=' + encodeURIComponent(router.asPath));
+        router.push('/app/login?redirect=' + encodeURIComponent(router.asPath, undefined, { locale }));
       }
     };
     checkUser();

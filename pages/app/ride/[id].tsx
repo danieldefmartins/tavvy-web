@@ -346,7 +346,7 @@ export default function RideDetailsScreen() {
 
   const handleAddReview = () => {
     if (!ride) return;
-    router.push(`/app/review/add?placeId=${ride.id}&placeName=${encodeURIComponent(ride.name)}&category=attraction`);
+    router.push(`/app/review/add?placeId=${ride.id}&placeName=${encodeURIComponent(ride.name, undefined, { locale })}&category=attraction`);
   };
 
   const handleBack = () => {

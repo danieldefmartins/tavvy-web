@@ -272,7 +272,7 @@ export default function NewProjectPage() {
   // Cancel handler
   const handleCancel = () => {
     if (confirm('Are you sure you want to cancel? Your progress will not be saved.')) {
-      router.push('/app/pros');
+      router.push('/app/pros', undefined, { locale });
     }
   };
 
@@ -344,7 +344,7 @@ export default function NewProjectPage() {
       return;
     }
     if (step === 0) {
-      router.push('/app/pros');
+      router.push('/app/pros', undefined, { locale });
       return;
     }
     // If going back from step 3 and there were no questions, go to step 1
@@ -1142,7 +1142,7 @@ export default function NewProjectPage() {
                     Your request has been sent to local pros. You'll receive notifications when pros respond.
                   </p>
                   <button
-                    onClick={() => router.push('/app/pros')}
+                    onClick={() => router.push('/app/pros', undefined, { locale })}
                     style={{
                       width: '100%', padding: '18px', background: ProsColors.primary,
                       color: 'white', border: 'none', borderRadius: '14px',
@@ -1152,7 +1152,7 @@ export default function NewProjectPage() {
                     Browse Pros
                   </button>
                   <button
-                    onClick={() => router.push('/app')}
+                    onClick={() => router.push('/app', undefined, { locale })}
                     style={{
                       width: '100%', padding: '15px', background: 'transparent',
                       color: ProsColors.textSecondary, border: 'none',
@@ -1168,7 +1168,7 @@ export default function NewProjectPage() {
                     Sign up now to get real-time notifications and chat directly with pros who respond to your request.
                   </p>
                   <button
-                    onClick={() => router.push(`/app/signup?email=${encodeURIComponent(formData.email)}`)}
+                    onClick={() => router.push(`/app/signup?email=${encodeURIComponent(formData.email, undefined, { locale })}`)}
                     style={{
                       width: '100%', padding: '18px', background: ProsColors.primary,
                       color: 'white', border: 'none', borderRadius: '14px',
@@ -1178,7 +1178,7 @@ export default function NewProjectPage() {
                     Sign Up Now
                   </button>
                   <button
-                    onClick={() => router.push('/app')}
+                    onClick={() => router.push('/app', undefined, { locale })}
                     style={{
                       width: '100%', padding: '15px', background: 'transparent',
                       color: ProsColors.textSecondary, border: 'none',

@@ -423,7 +423,8 @@
     "terrain": "Gelände",
     "selectLanguage": "Sprache Auswählen",
     "selectDistanceUnit": "Entfernungseinheit Auswählen",
-    "selectMapLayer": "Kartenansicht Auswählen"
+    "selectMapLayer": "Kartenansicht Auswählen",
+    "languageDescription": "Wähle deine bevorzugte Sprache. Die App zeigt Inhalte in der gewählten Sprache an, sofern Übersetzungen verfügbar sind."
   },
   "search": {
     "title": "Suchen",

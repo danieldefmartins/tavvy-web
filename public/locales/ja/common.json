@@ -423,7 +423,8 @@
     "terrain": "地形",
     "selectLanguage": "言語を選択",
     "selectDistanceUnit": "距離の単位を選択",
-    "selectMapLayer": "マップレイヤーを選択"
+    "selectMapLayer": "マップレイヤーを選択",
+    "languageDescription": "ご希望の言語を選択してください。翻訳が利用可能な場合、アプリは選択した言語でコンテンツを表示します。"
   },
   "search": {
     "title": "検索",

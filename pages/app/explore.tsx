@@ -160,6 +160,7 @@ export default function ExploreScreen() {
             
             <Link
               href="/app/profile"
+              locale={locale}
               style={{
                 color: '#FFFFFF',
                 padding: 8,
@@ -243,6 +244,7 @@ export default function ExploreScreen() {
                     <Link
                       key={u.id}
                       href={`/app/universe/${u.slug || u.id}`}
+                      locale={locale}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -273,6 +275,7 @@ export default function ExploreScreen() {
               {featuredUniverse && (
                 <Link
                   href={`/app/universe/${featuredUniverse.slug || featuredUniverse.id}`}
+                  locale={locale}
                   style={{
                     display: 'block',
                     margin: '0 16px 16px',
@@ -388,6 +391,7 @@ export default function ExploreScreen() {
                       <Link
                         key={u.id}
                         href={`/app/universe/${u.slug || u.id}`}
+                        locale={locale}
                         style={{
                           display: 'flex',
                           alignItems: 'center',

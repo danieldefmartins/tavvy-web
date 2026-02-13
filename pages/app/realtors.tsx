@@ -134,7 +134,7 @@ export default function RealtorsHubScreen() {
 
           {/* Smart Match CTA */}
           <section className="smart-match-section">
-            <div className="smart-match-card" onClick={() => router.push('/app/realtors/match/start')}>
+            <div className="smart-match-card" onClick={() => router.push('/app/realtors/match/start', undefined, { locale })}>
               <div className="smart-match-icon">
                 <FiZap size={24} color="#C9A227" />
               </div>
@@ -150,7 +150,7 @@ export default function RealtorsHubScreen() {
           {featuredRealtor && !searchQuery && (
             <section className="featured-section">
               <h2>Featured Realtor</h2>
-              <Link href={`/app/realtor/${featuredRealtor.id}`} className="featured-card">
+              <Link href={`/app/realtor/${featuredRealtor.id}`} className="featured-card" locale={locale}>
                 <div className="featured-badge">TOP RATED</div>
                 <div className="featured-image">
                   {featuredRealtor.photo_url ? (
@@ -196,6 +196,7 @@ export default function RealtorsHubScreen() {
                   <Link 
                     key={realtor.id}
                     href={`/app/realtor/${realtor.id}`}
+                    locale={locale}
                     className="realtor-card"
                   >
                     <div className="realtor-image">

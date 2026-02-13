@@ -246,6 +246,7 @@ export default function CategoryBrowseScreen() {
                   <Link
                     key={article.id}
                     href={`/app/article/${article.slug || article.id}`}
+                    locale={locale}
                     className="article-card"
                   >
                     <img

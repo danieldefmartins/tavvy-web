@@ -48,7 +48,7 @@ export default function LoginScreen() {
       // Redirect to returnUrl or redirect param if provided, otherwise go to /app
       // Use replace to prevent back-button returning to login page
       const returnUrl = (router.query.returnUrl || router.query.redirect) as string;
-      router.replace(returnUrl || '/app');
+      router.replace(returnUrl || '/app', undefined, { locale });
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');
     } finally {

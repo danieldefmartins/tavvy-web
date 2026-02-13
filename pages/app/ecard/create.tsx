@@ -1221,7 +1221,7 @@ export default function ECardCreateScreen() {
 
   // Save card
   const handleSave = async () => {
-    if (!user) { saveDraftToLocalStorage(); router.push('/app/login?returnUrl=/app/ecard/create'); return; }
+    if (!user) { saveDraftToLocalStorage(); router.push('/app/login?returnUrl=/app/ecard/create', undefined, { locale }); return; }
     if (!name.trim()) { alert('Please enter your name.'); return; }
     setIsCreating(true);
     try {
@@ -1284,7 +1284,7 @@ export default function ECardCreateScreen() {
           })));
         } catch (e) { console.warn('Links save failed:', e); }
       }
-      router.push(`/app/ecard/dashboard?cardId=${card.id}`);
+      router.push(`/app/ecard/dashboard?cardId=${card.id}`, undefined, { locale });
     } catch (err: any) {
       console.error('Error creating card:', err);
       alert(`Error: ${err?.message || 'Unknown error'}. Please try again.`);

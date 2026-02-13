@@ -21,7 +21,7 @@ export default function MatchCompleteScreen() {
           <h1 style={{fontSize:'32px',fontWeight:700,color:'#FFFFFF',margin:'0 0 12px'}}>You're All Set!</h1>
           <p style={{fontSize:'16px',color:'#9CA3AF',margin:'0 0 40px',maxWidth:'400px',lineHeight:1.5}}>We've received your request and are matching you with the best realtors in your area. Expect to hear from them within 24 hours.</p>
           <div style={{display:'flex',flexDirection:'column',gap:'16px',width:'100%',maxWidth:'300px'}}>
-            <button onClick={() => router.push('/app/realtors')} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',background:'linear-gradient(90deg, #3B82F6 0%, #2563EB 100%)',color:'#FFFFFF',fontSize:'16px',fontWeight:600,padding:'16px',border:'none',borderRadius:'12px',cursor:'pointer'}}>
+            <button onClick={() => router.push('/app/realtors', undefined, { locale })} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',background:'linear-gradient(90deg, #3B82F6 0%, #2563EB 100%)',color:'#FFFFFF',fontSize:'16px',fontWeight:600,padding:'16px',border:'none',borderRadius:'12px',cursor:'pointer'}}>
               <FiHome size={20} /> Back to Realtors
             </button>
           </div>

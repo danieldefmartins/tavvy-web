@@ -84,7 +84,7 @@ export default function ProsRegisterScreen() {
       if (error) throw error;
 
       // Success - redirect to success page or dashboard
-      router.push('/app/pros/register-success');
+      router.push('/app/pros/register-success', undefined, { locale });
     } catch (error) {
       console.error('Error registering:', error);
       alert('There was an error submitting your registration. Please try again.');

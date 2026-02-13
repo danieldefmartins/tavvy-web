@@ -43,7 +43,7 @@ export default function ProLoginScreen() {
     
     try {
       await signIn(email, password);
-      router.push('/app/pros/dashboard');
+      router.push('/app/pros/dashboard', undefined, { locale });
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');
     } finally {

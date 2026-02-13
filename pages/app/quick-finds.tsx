@@ -61,6 +61,7 @@ export default function QuickFindsScreen() {
                 <Link
                   key={category.id}
                   href={`/app/search?category=${category.id}`}
+                  locale={locale}
                   className="category-card"
                   style={{ backgroundColor: theme.cardBackground }}
                 >
@@ -93,6 +94,7 @@ export default function QuickFindsScreen() {
                 <Link
                   key={index}
                   href={`/app/search?q=${encodeURIComponent(item.query)}`}
+                  locale={locale}
                   className="popular-item"
                   style={{ backgroundColor: theme.surface }}
                 >

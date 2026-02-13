@@ -13,6 +13,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useTranslation } from 'next-i18next';
 import { useThemeContext } from '../contexts/ThemeContext';
 import { spacing } from '../constants/Colors';
 import { 
@@ -24,7 +25,7 @@ import {
 } from 'react-icons/fi';
 
 interface TabItem {
-  name: string;
+  nameKey: string;
   href: string;
   icon: React.ReactNode;
   activeIcon: React.ReactNode;
@@ -33,32 +34,32 @@ interface TabItem {
 
 const tabs: TabItem[] = [
   {
-    name: 'Home',
+    nameKey: 'navigation.home',
     href: '/app',
     icon: <FiHome size={24} />,
     activeIcon: <FiHome size={24} strokeWidth={2.5} />,
   },
   {
-    name: 'Universes',
+    nameKey: 'navigation.universes',
     href: '/app/explore',
     icon: <FiGlobe size={24} />,
     activeIcon: <FiGlobe size={24} strokeWidth={2.5} />,
   },
   {
-    name: '',
+    nameKey: '',
     href: '/app/add',
     icon: <FiPlus size={28} color="#000000" />,
     activeIcon: <FiPlus size={28} color="#000000" />,
     isCenter: true,
   },
   {
-    name: 'Pros',
+    nameKey: 'navigation.pros',
     href: '/app/pros',
     icon: <FiTool size={24} />,
     activeIcon: <FiTool size={24} strokeWidth={2.5} />,
   },
   {
-    name: 'Apps',
+    nameKey: 'navigation.apps',
     href: '/app/apps',
     icon: <FiGrid size={24} />,
     activeIcon: <FiGrid size={24} strokeWidth={2.5} />,
@@ -128,6 +129,7 @@ const styles = {
 export default function TabBar() {
   const router = useRouter();
   const { theme } = useThemeContext();
+  const { t } = useTranslation('common');
   const { locale } = router;
   
   const isActive = (href: string) => {
@@ -147,6 +149,7 @@ export default function TabBar() {
     >
       {tabs.map((tab) => {
         const active = isActive(tab.href);
+        const label = tab.nameKey ? t(tab.nameKey) : '';
         
         if (tab.isCenter) {
           return (
@@ -165,7 +168,7 @@ export default function TabBar() {
         
         return (
           <Link
-            key={tab.name}
+            key={tab.nameKey}
             href={tab.href}
             locale={locale}
             style={{ 
@@ -180,7 +183,7 @@ export default function TabBar() {
             <span style={{
               ...styles.tabLabel,
               fontWeight: active ? 600 : 500,
-            }}>{tab.name}</span>
+            }}>{label}</span>
           </Link>
         );
       })}

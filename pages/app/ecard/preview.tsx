@@ -269,7 +269,7 @@ export default function ECardPreviewScreen() {
             <div className="card-preview-container">
               <div style={{ padding: 40, textAlign: 'center' }}>
                 <h3 style={{ color: isDark ? '#fff' : '#333' }}>Card not found</h3>
-                <button onClick={() => router.push('/app/ecard')} style={{ marginTop: 16, background: ACCENT_GREEN, border: 'none', padding: '12px 24px', borderRadius: 8, color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Go Back</button>
+                <button onClick={() => router.push('/app/ecard', undefined, { locale })} style={{ marginTop: 16, background: ACCENT_GREEN, border: 'none', padding: '12px 24px', borderRadius: 8, color: '#fff', fontWeight: 600, cursor: 'pointer' }}>Go Back</button>
               </div>
             </div>
           ) : (
@@ -406,7 +406,7 @@ export default function ECardPreviewScreen() {
           {isOwner && (
             <button 
               className="edit-btn"
-              onClick={() => router.push(`/app/ecard/dashboard?cardId=${cardId}`)}
+              onClick={() => router.push(`/app/ecard/dashboard?cardId=${cardId}`, undefined, { locale })}
             >
               <IoCreate size={18} />
               <span>Full Editor</span>

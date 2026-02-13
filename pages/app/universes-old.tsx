@@ -160,7 +160,7 @@ export default function UniverseDiscoveryScreen() {
   };
 
   const handleUniversePress = (universe: Universe) => {
-    router.push(`/app/universe/${universe.slug || universe.id}`);
+    router.push(`/app/universe/${universe.slug || universe.id}`, undefined, { locale });
   };
 
   const backgroundColor = isDark ? '#000000' : '#FAFAFA';

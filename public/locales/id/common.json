@@ -423,7 +423,8 @@
     "terrain": "Medan",
     "selectLanguage": "Pilih Bahasa",
     "selectDistanceUnit": "Pilih Satuan Jarak",
-    "selectMapLayer": "Pilih Lapisan Peta"
+    "selectMapLayer": "Pilih Lapisan Peta",
+    "languageDescription": "Pilih bahasa yang Anda inginkan. Aplikasi akan menampilkan konten dalam bahasa yang dipilih jika terjemahan tersedia."
   },
   "search": {
     "title": "Cari",

@@ -27,7 +27,7 @@ export default function MatchQ2Screen() {
   const handleNext = () => {
     if (selected) {
       sessionStorage.setItem('match_property_type', selected);
-      router.push('/app/realtors/match/contact');
+      router.push('/app/realtors/match/contact', undefined, { locale });
     }
   };
 

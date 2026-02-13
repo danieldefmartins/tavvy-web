@@ -423,7 +423,8 @@
     "terrain": "地形",
     "selectLanguage": "选择语言",
     "selectDistanceUnit": "选择距离单位",
-    "selectMapLayer": "选择地图图层"
+    "selectMapLayer": "选择地图图层",
+    "languageDescription": "选择您的首选语言。当翻译可用时，应用将以您选择的语言显示内容。"
   },
   "search": {
     "title": "搜索",

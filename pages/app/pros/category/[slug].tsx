@@ -141,7 +141,7 @@ export default function ProsCategoryScreen() {
               <h3 style={{ color: theme.text }}>Need a {category.name} Pro?</h3>
               <p style={{ color: theme.textSecondary }}>Get free quotes from top-rated professionals</p>
             </div>
-            <Link href={`/app/pros/request?category=${slug}`} className="cta-button" style={{ backgroundColor: theme.primary }}>
+            <Link href={`/app/pros/request?category=${slug}`} className="cta-button" style={{ backgroundColor: theme.primary }} locale={locale}>
               Get Quotes
             </Link>
           </div>
@@ -173,6 +173,7 @@ export default function ProsCategoryScreen() {
                   <Link 
                     key={provider.id}
                     href={`/app/pros/provider/${provider.slug || provider.id}`}
+                    locale={locale}
                     className="provider-card"
                     style={{ backgroundColor: theme.cardBackground }}
                   >

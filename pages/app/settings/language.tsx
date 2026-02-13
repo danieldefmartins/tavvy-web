@@ -1,7 +1,11 @@
 /**
  * Language Settings Page
  * Allows users to change the app language
- * Following Tavvy V2 design system
+ * 
+ * - Auto-detects browser language on first visit
+ * - Manual selection persists to localStorage
+ * - All text on this page is translated using t()
+ * - Flags represent country/culture associations
  */
 
 import React, { useState, useEffect } from 'react';
@@ -18,30 +22,31 @@ interface Language {
   name: string;
   nativeName: string;
   flag: string;
+  rtl: boolean;
 }
 
 const languages: Language[] = [
-  { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸' },
-  { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
-  { code: 'pt', name: 'Portuguese', nativeName: 'Português', flag: '🇧🇷' },
-  { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
-  { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪' },
-  { code: 'it', name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹' },
-  { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵' },
-  { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷' },
-  { code: 'zh', name: 'Chinese', nativeName: '中文', flag: '🇨🇳' },
-  { code: 'ru', name: 'Russian', nativeName: 'Русский', flag: '🇷🇺' },
-  { code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦' },
-  { code: 'tr', name: 'Turkish', nativeName: 'Türkçe', flag: '🇹🇷' },
-  { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', flag: '🇮🇳' },
-  { code: 'id', name: 'Indonesian', nativeName: 'Bahasa Indonesia', flag: '🇮🇩' },
-  { code: 'th', name: 'Thai', nativeName: 'ไทย', flag: '🇹🇭' },
-  { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', flag: '🇻🇳' },
-  { code: 'nl', name: 'Dutch', nativeName: 'Nederlands', flag: '🇳🇱' },
+  { code: 'en', name: 'English', nativeName: 'English', flag: '🇺🇸', rtl: false },
+  { code: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸', rtl: false },
+  { code: 'pt', name: 'Portuguese', nativeName: 'Português', flag: '🇧🇷', rtl: false },
+  { code: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷', rtl: false },
+  { code: 'de', name: 'German', nativeName: 'Deutsch', flag: '🇩🇪', rtl: false },
+  { code: 'it', name: 'Italian', nativeName: 'Italiano', flag: '🇮🇹', rtl: false },
+  { code: 'ja', name: 'Japanese', nativeName: '日本語', flag: '🇯🇵', rtl: false },
+  { code: 'ko', name: 'Korean', nativeName: '한국어', flag: '🇰🇷', rtl: false },
+  { code: 'zh', name: 'Chinese', nativeName: '中文', flag: '🇨🇳', rtl: false },
+  { code: 'ru', name: 'Russian', nativeName: 'Русский', flag: '🇷🇺', rtl: false },
+  { code: 'ar', name: 'Arabic', nativeName: 'العربية', flag: '🇸🇦', rtl: true },
+  { code: 'tr', name: 'Turkish', nativeName: 'Türkçe', flag: '🇹🇷', rtl: false },
+  { code: 'hi', name: 'Hindi', nativeName: 'हिन्दी', flag: '🇮🇳', rtl: false },
+  { code: 'id', name: 'Indonesian', nativeName: 'Bahasa Indonesia', flag: '🇮🇩', rtl: false },
+  { code: 'th', name: 'Thai', nativeName: 'ไทย', flag: '🇹🇭', rtl: false },
+  { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', flag: '🇻🇳', rtl: false },
+  { code: 'nl', name: 'Dutch', nativeName: 'Nederlands', flag: '🇳🇱', rtl: false },
 ];
 
 export default function LanguageSettingsPage() {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
   const router = useRouter();
   const { themeMode } = useThemeContext();
   const isDark = themeMode === 'dark';
@@ -57,12 +62,12 @@ export default function LanguageSettingsPage() {
   }, [router.locale]);
 
   const handleLanguageChange = async (languageCode: string) => {
-    if (languageCode === selectedLanguage) return;
+    if (languageCode === selectedLanguage || isChanging) return;
     
     setIsChanging(true);
     setSelectedLanguage(languageCode);
     
-    // Store preference in localStorage
+    // Store preference in localStorage (this is the "manual selection" that takes priority)
     localStorage.setItem('tavvy-locale', languageCode);
     
     // Navigate to the same page with new locale
@@ -72,27 +77,31 @@ export default function LanguageSettingsPage() {
     setIsChanging(false);
   };
 
+  const handleBack = () => {
+    router.push('/app/settings', '/app/settings', { locale: router.locale });
+  };
+
   return (
     <>
       <Head>
-        <title>Language | TavvY Settings</title>
-        <meta name="description" content="Change your language preference" />
+        <title>{t('settings.language')} | TavvY</title>
+        <meta name="description" content={t('settings.languageDescription')} />
       </Head>
 
       <AppLayout>
         <div className="language-settings">
           {/* Header */}
           <header className="header">
-            <button className="back-btn" onClick={() => router.back()}>
+            <button className="back-btn" onClick={handleBack}>
               <FiArrowLeft size={24} />
             </button>
-            <h1>Language</h1>
+            <h1>{t('settings.language')}</h1>
             <div style={{ width: 24 }} />
           </header>
 
           <div className="content">
             <p className="description">
-              Select your preferred language. The app will display content in your chosen language where translations are available.
+              {t('settings.languageDescription')}
             </p>
 
             <div className="languages-list">
@@ -102,6 +111,7 @@ export default function LanguageSettingsPage() {
                   className={`language-item ${selectedLanguage === language.code ? 'selected' : ''}`}
                   onClick={() => handleLanguageChange(language.code)}
                   disabled={isChanging}
+                  dir={language.rtl ? 'rtl' : 'ltr'}
                 >
                   <div className="language-info">
                     <span className="flag">{language.flag}</span>

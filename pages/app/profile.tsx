@@ -74,7 +74,7 @@ export default function ProfileScreen() {
 
   const handleSignOut = async () => {
     await signOut();
-    router.push('/app');
+    router.push('/app', undefined, { locale });
   };
 
   const formatDate = (dateString?: string) => {

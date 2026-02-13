@@ -120,7 +120,7 @@ export default function CityDetailScreen() {
         <div className="error-screen" style={{ backgroundColor: theme.background }}>
           <span>🏙️</span>
           <h1 style={{ color: theme.text }}>City not found</h1>
-          <button onClick={() => router.push('/app/cities')} style={{ color: theme.primary }}>
+          <button onClick={() => router.push('/app/cities', undefined, { locale })} style={{ color: theme.primary }}>
             Browse Cities
           </button>
           <style jsx>{`
@@ -245,7 +245,7 @@ export default function CityDetailScreen() {
             ) : (
               <div className={`places-${viewMode}`}>
                 {filteredPlaces.map((place) => (
-                  <Link key={place.id} href={`/place/${place.slug || place.id}`}>
+                  <Link key={place.id} href={`/place/${place.slug || place.id}`} locale={locale}>
                     <PlaceCard
                       place={{
                         id: place.id,

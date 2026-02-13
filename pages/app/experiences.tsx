@@ -142,6 +142,7 @@ export default function ExperiencesScreen() {
                   <Link
                     key={exp.id}
                     href={`/app/experience/${exp.slug || exp.id}`}
+                    locale={locale}
                     className="experience-card"
                     style={{ backgroundColor: theme.cardBackground }}
                   >

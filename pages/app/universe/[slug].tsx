@@ -308,7 +308,7 @@ export default function UniverseLandingScreen() {
 
   // Handle add place
   const handleAddPlace = (type: string) => {
-    router.push(`/app/add-place?universeId=${universe?.id}&universeName=${encodeURIComponent(universe?.name || '')}&placeType=${type}`);
+    router.push(`/app/add-place?universeId=${universe?.id}&universeName=${encodeURIComponent(universe?.name || '', undefined, { locale })}&placeType=${type}`);
     setShowAddPlaceModal(false);
   };
 
@@ -533,7 +533,7 @@ export default function UniverseLandingScreen() {
             {subUniverses.map((subUniverse) => (
               <div
                 key={subUniverse.id}
-                onClick={() => router.push(`/app/universe/${subUniverse.slug || subUniverse.id}`)}
+                onClick={() => router.push(`/app/universe/${subUniverse.slug || subUniverse.id}`, undefined, { locale })}
                 style={{
                   minWidth: '140px',
                   borderRadius: '12px',
@@ -634,7 +634,7 @@ export default function UniverseLandingScreen() {
             {filteredPlaces.map((place) => (
               <div
                 key={place.id}
-                onClick={() => router.push(`/app/place/${place.id}`)}
+                onClick={() => router.push(`/app/place/${place.id}`, undefined, { locale })}
                 style={{
                   display: 'flex',
                   backgroundColor: colors.surface,
@@ -753,7 +753,7 @@ export default function UniverseLandingScreen() {
         
         {/* The Good - Blue */}
         <button
-          onClick={() => router.push(`/app/add-review?universeId=${universe?.id}&universeName=${encodeURIComponent(universe?.name || '')}&type=good`)}
+          onClick={() => router.push(`/app/add-review?universeId=${universe?.id}&universeName=${encodeURIComponent(universe?.name || '', undefined, { locale })}&type=good`)}
           style={{
             width: '100%',
             display: 'flex',
@@ -774,7 +774,7 @@ export default function UniverseLandingScreen() {
         
         {/* The Vibe - Purple */}
         <button
-          onClick={() => router.push(`/app/add-review?universeId=${universe?.id}&universeName=${encodeURIComponent(universe?.name || '')}&type=vibe`)}
+          onClick={() => router.push(`/app/add-review?universeId=${universe?.id}&universeName=${encodeURIComponent(universe?.name || '', undefined, { locale })}&type=vibe`)}
           style={{
             width: '100%',
             display: 'flex',
@@ -795,7 +795,7 @@ export default function UniverseLandingScreen() {
         
         {/* Heads Up - Orange */}
         <button
-          onClick={() => router.push(`/app/add-review?universeId=${universe?.id}&universeName=${encodeURIComponent(universe?.name || '')}&type=heads_up`)}
+          onClick={() => router.push(`/app/add-review?universeId=${universe?.id}&universeName=${encodeURIComponent(universe?.name || '', undefined, { locale })}&type=heads_up`)}
           style={{
             width: '100%',
             display: 'flex',
@@ -861,7 +861,7 @@ export default function UniverseLandingScreen() {
         <h3 style={{ fontSize: '20px', fontWeight: '700', color: colors.text, marginBottom: '4px' }}>Been here?</h3>
         <p style={{ fontSize: '14px', color: colors.textSecondary, marginBottom: '16px' }}>Share your experience with the community</p>
         <button
-          onClick={() => router.push(`/app/add-review?universeId=${universe?.id}&universeName=${encodeURIComponent(universe?.name || '')}`)}
+          onClick={() => router.push(`/app/add-review?universeId=${universe?.id}&universeName=${encodeURIComponent(universe?.name || '', undefined, { locale })}`)}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -1140,7 +1140,7 @@ export default function UniverseLandingScreen() {
           <StoriesRow
             universeId={universe.id}
             isDark={isDark}
-            onAddStoryPress={() => router.push(`/app/add-story?universeId=${universe.id}&universeName=${encodeURIComponent(universe.name)}`)}
+            onAddStoryPress={() => router.push(`/app/add-story?universeId=${universe.id}&universeName=${encodeURIComponent(universe.name, undefined, { locale })}`)}
           />
 
           {/* Tab Navigation */}
@@ -1449,7 +1449,7 @@ export default function UniverseLandingScreen() {
                       {foodSearchResults.map((item) => (
                         <div
                           key={item.id}
-                          onClick={() => router.push(`/app/place/${item.place_id}`)}
+                          onClick={() => router.push(`/app/place/${item.place_id}`, undefined, { locale })}
                           style={{
                             display: 'flex',
                             backgroundColor: colors.inputBg,

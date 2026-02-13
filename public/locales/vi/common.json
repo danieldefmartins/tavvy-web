@@ -423,7 +423,8 @@
     "terrain": "Terrain",
     "selectLanguage": "Select Language",
     "selectDistanceUnit": "Select Distance Unit",
-    "selectMapLayer": "Select Map Layer"
+    "selectMapLayer": "Select Map Layer",
+    "languageDescription": "Chọn ngôn ngữ ưa thích của bạn. Ứng dụng sẽ hiển thị nội dung bằng ngôn ngữ đã chọn khi có bản dịch."
   },
   "search": {
     "title": "Tìm kiếm",

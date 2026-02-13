@@ -423,7 +423,8 @@
     "terrain": "Terreno",
     "selectLanguage": "Selecionar Idioma",
     "selectDistanceUnit": "Selecionar Unidade de Distância",
-    "selectMapLayer": "Selecionar Camada de Mapa"
+    "selectMapLayer": "Selecionar Camada de Mapa",
+    "languageDescription": "Selecione seu idioma preferido. O aplicativo exibirá o conteúdo no idioma escolhido quando as traduções estiverem disponíveis."
   },
   "search": {
     "title": "Buscar",

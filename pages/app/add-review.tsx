@@ -420,7 +420,7 @@ export default function AddReviewPage() {
               className="auth-btn auth-btn-primary"
               onClick={() => {
                 const returnUrl = router.asPath;
-                router.push(`/app/signup?redirect=${encodeURIComponent(returnUrl)}`);
+                router.push(`/app/signup?redirect=${encodeURIComponent(returnUrl, undefined, { locale })}`);
               }}
             >
               Create Account
@@ -430,7 +430,7 @@ export default function AddReviewPage() {
               className="auth-btn auth-btn-secondary"
               onClick={() => {
                 const returnUrl = router.asPath;
-                router.push(`/app/login?redirect=${encodeURIComponent(returnUrl)}`);
+                router.push(`/app/login?redirect=${encodeURIComponent(returnUrl, undefined, { locale })}`);
               }}
             >
               Log In

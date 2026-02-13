@@ -320,6 +320,7 @@ export default function UniverseDetailScreen() {
                         <Link
                           key={sub.id}
                           href={`/app/atlas/universe/${sub.slug}`}
+                          locale={locale}
                           className="sub-universe-card"
                         >
                           <img
@@ -344,6 +345,7 @@ export default function UniverseDetailScreen() {
                         <Link
                           key={article.id}
                           href={`/app/article/${article.slug || article.id}`}
+                          locale={locale}
                           className="article-card"
                         >
                           <img
@@ -378,6 +380,7 @@ export default function UniverseDetailScreen() {
                       <Link
                         key={place.id}
                         href={`/place/${place.id}`}
+                        locale={locale}
                         className="place-card"
                       >
                         <img
@@ -412,6 +415,7 @@ export default function UniverseDetailScreen() {
                       <Link
                         key={article.id}
                         href={`/app/article/${article.slug || article.id}`}
+                        locale={locale}
                         className="article-card"
                       >
                         <img

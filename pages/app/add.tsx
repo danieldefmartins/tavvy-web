@@ -421,7 +421,7 @@ export default function UniversalAddScreen() {
     const result = await submitDraft();
     if (result.success) {
       alert('Place submitted successfully!');
-      router.push('/app');
+      router.push('/app', undefined, { locale });
     } else {
       alert(`Error: ${result.error}`);
     }

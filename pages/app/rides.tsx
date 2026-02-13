@@ -350,11 +350,11 @@ export default function RidesScreen() {
   }, [filterBy, searchQuery]);
 
   const handleRidePress = (ride: Ride) => {
-    router.push(`/app/ride/${ride.id}?name=${encodeURIComponent(ride.name)}&park=${encodeURIComponent(ride.park_name || ride.universe_name || ride.city || '')}`);
+    router.push(`/app/ride/${ride.id}?name=${encodeURIComponent(ride.name, undefined, { locale })}&park=${encodeURIComponent(ride.park_name || ride.universe_name || ride.city || '')}`);
   };
 
   const handleBack = () => {
-    router.push('/app');
+    router.push('/app', undefined, { locale });
   };
 
   const backgroundColor = isDark ? COLORS.background : COLORS.backgroundLight;

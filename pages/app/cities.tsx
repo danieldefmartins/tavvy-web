@@ -99,6 +99,7 @@ export default function CitiesBrowseScreen() {
                   <Link 
                     key={city.id}
                     href={`/app/city/${city.id}`}
+                    locale={locale}
                     className="featured-card"
                   >
                     <img 
@@ -137,6 +138,7 @@ export default function CitiesBrowseScreen() {
                   <Link 
                     key={city.id}
                     href={`/app/city/${city.id}`}
+                    locale={locale}
                     className="city-item"
                     style={{ backgroundColor: theme.cardBackground }}
                   >

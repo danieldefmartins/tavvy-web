@@ -88,7 +88,7 @@ export default function ECardPremiumScreen() {
 
   const handleSubscribe = async () => {
     if (!user) {
-      router.push('/app/login');
+      router.push('/app/login', undefined, { locale });
       return;
     }
 
@@ -120,7 +120,7 @@ export default function ECardPremiumScreen() {
 
   const handleRestore = async () => {
     if (!user) {
-      router.push('/app/login');
+      router.push('/app/login', undefined, { locale });
       return;
     }
 

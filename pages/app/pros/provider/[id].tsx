@@ -142,7 +142,7 @@ export default function ProviderProfileScreen() {
         <div className="error-screen" style={{ backgroundColor: theme.background }}>
           <span>🔧</span>
           <h1 style={{ color: theme.text }}>Provider not found</h1>
-          <button onClick={() => router.push('/app/pros')} style={{ color: theme.primary }}>
+          <button onClick={() => router.push('/app/pros', undefined, { locale })} style={{ color: theme.primary }}>
             Back to Pros
           </button>
           <style jsx>{`
@@ -247,7 +247,7 @@ export default function ProviderProfileScreen() {
             </div>
 
             {/* Get Quote Button */}
-            <Link href={`/app/pros/request?provider=${provider.id}`} className="quote-button" style={{ backgroundColor: theme.primary }}>
+            <Link href={`/app/pros/request?provider=${provider.id}`} className="quote-button" style={{ backgroundColor: theme.primary }} locale={locale}>
               Request a Quote
             </Link>
           </div>

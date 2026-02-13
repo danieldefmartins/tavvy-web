@@ -423,7 +423,8 @@
     "terrain": "Arazi",
     "selectLanguage": "Dil Seçin",
     "selectDistanceUnit": "Mesafe Birimi Seçin",
-    "selectMapLayer": "Harita Katmanı Seçin"
+    "selectMapLayer": "Harita Katmanı Seçin",
+    "languageDescription": "Tercih ettiğiniz dili seçin. Çeviriler mevcut olduğunda uygulama içeriği seçtiğiniz dilde gösterecektir."
   },
   "search": {
     "title": "Ara",

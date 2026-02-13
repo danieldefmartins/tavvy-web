@@ -112,7 +112,7 @@ export default function SearchScreen() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/app/search?q=${encodeURIComponent(searchQuery)}`, undefined, { shallow: true });
+      router.push(`/app/search?q=${encodeURIComponent(searchQuery, undefined, { locale })}`, undefined, { shallow: true });
       performSearch(searchQuery);
     }
   };
@@ -122,19 +122,19 @@ export default function SearchScreen() {
     setResults([]);
     setHasSearched(false);
     setShowSuggestions(false);
-    router.push('/app/search', undefined, { shallow: true });
+    router.push('/app/search', undefined, { shallow: true, locale });
   };
 
   const handlePopularSearch = (term: string) => {
     setSearchQuery(term);
-    router.push(`/app/search?q=${encodeURIComponent(term)}`, undefined, { shallow: true });
+    router.push(`/app/search?q=${encodeURIComponent(term, undefined, { locale })}`, undefined, { shallow: true });
     performSearch(term);
   };
 
   const handleSuggestionClick = (suggestion: string) => {
     setSearchQuery(suggestion);
     setShowSuggestions(false);
-    router.push(`/app/search?q=${encodeURIComponent(suggestion)}`, undefined, { shallow: true });
+    router.push(`/app/search?q=${encodeURIComponent(suggestion, undefined, { locale })}`, undefined, { shallow: true });
     performSearch(suggestion);
   };
 

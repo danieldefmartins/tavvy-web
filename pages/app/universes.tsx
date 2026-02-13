@@ -309,7 +309,7 @@ export default function UniversesScreen() {
 
             {/* Login/Profile Icon */}
             <button
-              onClick={() => router.push('/app/profile')}
+              onClick={() => router.push('/app/profile', undefined, { locale })}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -427,6 +427,7 @@ export default function UniversesScreen() {
                       <Link
                         key={universe.id}
                         href={`/app/universe/${universe.slug || universe.id}`}
+                        locale={locale}
                         style={{ textDecoration: 'none' }}
                       >
                         <div style={{
@@ -489,7 +490,7 @@ export default function UniversesScreen() {
                       aspectRatio: '16 / 9',
                       cursor: 'pointer'
                     }}
-                    onClick={() => router.push(`/app/universe/${featuredUniverse.slug || featuredUniverse.id}`)}
+                    onClick={() => router.push(`/app/universe/${featuredUniverse.slug || featuredUniverse.id}`, undefined, { locale })}
                   >
                     {/* Background Image - Full 16:9 */}
                     <img
@@ -654,6 +655,7 @@ export default function UniversesScreen() {
                       <Link
                         key={universe.id}
                         href={`/app/universe/${universe.slug || universe.id}`}
+                        locale={locale}
                         style={{ textDecoration: 'none' }}
                       >
                         <div style={{

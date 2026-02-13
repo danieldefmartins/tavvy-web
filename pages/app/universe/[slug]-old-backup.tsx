@@ -346,6 +346,7 @@ export default function UniverseDetailScreen() {
                   <Link 
                     key={subUniverse.id} 
                     href={`/app/universe/${subUniverse.slug || subUniverse.id}`}
+                    locale={locale}
                     className="sub-universe-card"
                     style={{ backgroundColor: surfaceColor, borderColor }}
                   >
@@ -393,6 +394,7 @@ export default function UniverseDetailScreen() {
                   <Link 
                     key={place.id} 
                     href={`/place/${place.id}`}
+                    locale={locale}
                     className="place-card"
                     style={{ backgroundColor: surfaceColor, borderColor }}
                   >

@@ -335,7 +335,7 @@ export default function ArticleDetailScreen() {
         <div className="error-screen" style={{ backgroundColor: colors.background }}>
           <span className="error-icon">📖</span>
           <h1 style={{ color: colors.text }}>Article not found</h1>
-          <button onClick={() => router.push('/app/atlas')} style={{ color: TEAL_PRIMARY }}>
+          <button onClick={() => router.push('/app/atlas', undefined, { locale })} style={{ color: TEAL_PRIMARY }}>
             Back to Atlas
           </button>
           <style jsx>{`
@@ -502,6 +502,7 @@ export default function ArticleDetailScreen() {
                     <Link 
                       key={related.id}
                       href={`/app/article/${related.slug || related.id}`}
+                      locale={locale}
                       className="related-card"
                       style={{ backgroundColor: colors.cardBg }}
                     >

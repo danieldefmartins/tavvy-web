@@ -27,12 +27,12 @@ export default function MatchQ1Screen() {
   const handleNext = () => {
     if (selected) {
       sessionStorage.setItem('match_goal', selected);
-      router.push('/app/realtors/match/q2');
+      router.push('/app/realtors/match/q2', undefined, { locale });
     }
   };
 
   const handleClose = () => {
-    router.push('/app/realtors');
+    router.push('/app/realtors', undefined, { locale });
   };
 
   return (

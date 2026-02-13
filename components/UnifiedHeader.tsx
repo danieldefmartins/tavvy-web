@@ -43,6 +43,7 @@ export const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   onRightIconPress,
 }) => {
   const router = useRouter();
+  const { locale } = router;
   const colors = SCREEN_COLORS[screenKey];
   const [searchValue, setSearchValue] = useState('');
 
@@ -56,7 +57,7 @@ export const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
     } else if (onRightIconPress) {
       onRightIconPress();
     } else {
-      router.push('/profile');
+      router.push('/profile', undefined, { locale });
     }
   };
 

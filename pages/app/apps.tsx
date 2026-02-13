@@ -161,9 +161,9 @@ export default function AppsScreen() {
 
   const handleProfileClick = () => {
     if (user) {
-      router.push('/app/profile');
+      router.push('/app/profile', undefined, { locale });
     } else {
-      router.push('/app/login');
+      router.push('/app/login', undefined, { locale });
     }
   };
 
@@ -217,7 +217,7 @@ export default function AppsScreen() {
                 {FEATURED_APPS.map((app) => {
                   const Icon = app.icon;
                   return (
-                    <Link key={app.id} href={app.href} className="featured-card">
+                    <Link key={app.id} href={app.href} className="featured-card" locale={locale}>
                       <div className="featured-icon" style={{ background: app.gradient }}>
                         <Icon size={48} color="#fff" />
                       </div>
@@ -235,7 +235,7 @@ export default function AppsScreen() {
             {filteredApps.map((app) => {
               const Icon = app.icon;
               return (
-                <Link key={app.id} href={app.href} className="app-item">
+                <Link key={app.id} href={app.href} className="app-item" locale={locale}>
                   <div className="app-icon" style={{ backgroundColor: app.color }}>
                     <Icon size={32} color="#fff" />
                   </div>

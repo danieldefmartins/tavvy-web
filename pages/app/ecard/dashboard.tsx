@@ -615,7 +615,7 @@ export default function ECardDashboardScreen() {
   // Link handlers
   const addLink = (platform: string) => {
     if (!canAddMoreLinks) {
-      router.push('/app/ecard/premium');
+      router.push('/app/ecard/premium', undefined, { locale });
       return;
     }
     setLinks([...links, { id: Date.now().toString(), platform, value: '', url: '', title: platform }]);
@@ -677,7 +677,7 @@ export default function ECardDashboardScreen() {
 
           {/* Header */}
           <header className="header">
-            <button className="back-btn" onClick={() => router.push('/app/ecard')}>
+            <button className="back-btn" onClick={() => router.push('/app/ecard', undefined, { locale })}>
               <IoArrowBack size={24} color={isDark ? '#fff' : '#333'} />
             </button>
             <h1 style={{ color: isDark ? '#fff' : '#333' }}>Edit Card</h1>
@@ -1102,7 +1102,7 @@ export default function ECardDashboardScreen() {
 
             {/* Action Buttons */}
             <div className="preview-actions">
-              <button className="action-btn" onClick={() => router.push(`/app/ecard/preview?cardId=${cardId}`)}>
+              <button className="action-btn" onClick={() => router.push(`/app/ecard/preview?cardId=${cardId}`, undefined, { locale })}>
                 <IoEye size={18} />
                 <span>Preview</span>
               </button>
@@ -1487,7 +1487,7 @@ export default function ECardDashboardScreen() {
                 {!showAddLink ? (
                   <button 
                     className="add-link-btn"
-                    onClick={() => canAddMoreLinks ? setShowAddLink(true) : router.push('/app/ecard/premium')}
+                    onClick={() => canAddMoreLinks ? setShowAddLink(true) : router.push('/app/ecard/premium', undefined, { locale })}
                     style={{ borderColor: isDark ? '#334155' : '#E5E7EB' }}
                   >
                     <IoAdd size={20} color={ACCENT_GREEN} />
@@ -1519,7 +1519,7 @@ export default function ECardDashboardScreen() {
 
                 {!isPro && (
                   <p className="link-limit" style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>
-                    {links.length}/{FREE_LINK_LIMIT} links used • <a onClick={() => router.push('/app/ecard/premium')}>Upgrade for unlimited</a>
+                    {links.length}/{FREE_LINK_LIMIT} links used • <a onClick={() => router.push('/app/ecard/premium', undefined, { locale })}>Upgrade for unlimited</a>
                   </p>
                 )}
               </div>
@@ -1544,7 +1544,7 @@ export default function ECardDashboardScreen() {
                           className={`template-card ${isSelected ? 'selected' : ''} ${isLocked ? 'locked' : ''}`}
                           onClick={() => {
                             if (isLocked) {
-                              router.push('/app/ecard/premium');
+                              router.push('/app/ecard/premium', undefined, { locale });
                               return;
                             }
                             setSelectedTemplateId(template.id);
@@ -1995,7 +1995,7 @@ export default function ECardDashboardScreen() {
                     <p style={{ color: isDark ? '#94A3B8' : '#6B7280' }}>
                       See detailed click tracking, visitor locations, and more with Pro
                     </p>
-                    <button onClick={() => router.push('/app/ecard/premium')}>
+                    <button onClick={() => router.push('/app/ecard/premium', undefined, { locale })}>
                       Upgrade to Pro
                     </button>
                   </div>

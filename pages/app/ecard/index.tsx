@@ -75,15 +75,15 @@ export default function ECardHubScreen() {
   };
 
   const handleEditCard = (card: CardData) => {
-    router.push(`/app/ecard/dashboard?cardId=${card.id}`);
+    router.push(`/app/ecard/dashboard?cardId=${card.id}`, undefined, { locale });
   };
 
   const handleCreateNew = () => {
-    router.push('/app/ecard/create');
+    router.push('/app/ecard/create', undefined, { locale });
   };
 
   const handleViewCard = (card: CardData) => {
-    router.push(`/app/ecard/preview?cardId=${card.id}`);
+    router.push(`/app/ecard/preview?cardId=${card.id}`, undefined, { locale });
   };
 
   const handleDeleteCard = async () => {
@@ -113,7 +113,7 @@ export default function ECardHubScreen() {
       if (newCard) {
         setCards(prev => [newCard, ...prev]);
         // Navigate to the new card's editor
-        router.push(`/app/ecard/dashboard?cardId=${newCard.id}`);
+        router.push(`/app/ecard/dashboard?cardId=${newCard.id}`, undefined, { locale });
       } else {
         alert('Failed to duplicate card. Please try again.');
       }

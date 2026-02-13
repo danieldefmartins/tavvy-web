@@ -650,7 +650,7 @@ export default function MapScreen() {
 
   // Handle back navigation
   const handleBack = () => {
-    router.push('/app');
+    router.push('/app', undefined, { locale });
   };
 
   // Dynamic sheet height based on drag state
@@ -1262,7 +1262,7 @@ export default function MapScreen() {
                   className={`place-card ${selectedPlaceId === place.id ? 'selected' : ''}`}
                   onClick={() => {
                     console.log('[MapScreen] Place card clicked:', place.id);
-                    router.push(`/place/${place.id}`);
+                    router.push(`/place/${place.id}`, undefined, { locale });
                   }}
                 >
                   <div className="place-image">

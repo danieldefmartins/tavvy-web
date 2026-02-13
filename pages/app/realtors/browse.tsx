@@ -92,7 +92,7 @@ export default function RealtorsBrowseScreen() {
             ) : (
               <div style={{display:'grid',gridTemplateColumns:'repeat(2, 1fr)',gap:'16px'}}>
                 {filteredRealtors.map((realtor) => (
-                  <Link key={realtor.id} href={`/app/realtor/${realtor.id}`} style={{background:'#1A1A24',borderRadius:'16px',overflow:'hidden',textDecoration:'none'}}>
+                  <Link key={realtor.id} href={`/app/realtor/${realtor.id}`} style={{background:'#1A1A24',borderRadius:'16px',overflow:'hidden',textDecoration:'none'}} locale={locale}>
                     <div style={{position:'relative',width:'100%',aspectRatio:'4/3',overflow:'hidden',background:'linear-gradient(135deg, #1E3A5F 0%, #2D4A6F 100%)',display:'flex',alignItems:'center',justifyContent:'center'}}>
                       {realtor.is_verified && <div style={{position:'absolute',top:'8px',right:'8px',background:'rgba(239, 68, 68, 0.9)',color:'#FFFFFF',fontSize:'11px',fontWeight:600,padding:'4px 8px',borderRadius:'6px'}}>🔥 Trending</div>}
                       {realtor.photo_url ? <img src={realtor.photo_url} alt={realtor.business_name} style={{width:'100%',height:'100%',objectFit:'cover'}} /> : <span style={{color:'#FFFFFF',fontSize:'48px',fontWeight:600}}>{(realtor.contact_name || realtor.business_name).charAt(0)}</span>}

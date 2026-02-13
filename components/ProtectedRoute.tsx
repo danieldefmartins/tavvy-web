@@ -19,12 +19,13 @@ export function ProtectedRoute({
   fallbackUrl 
 }: ProtectedRouteProps) {
   const router = useRouter();
+  const { locale } = router;
   const { hasAccess, loading, redirectTo } = useAccess(requiredLevel);
 
   useEffect(() => {
     if (!loading && !hasAccess && redirectTo) {
       const destination = fallbackUrl || redirectTo;
-      router.replace(destination);
+      router.replace(destination, undefined, { locale });
     }
   }, [loading, hasAccess, redirectTo, fallbackUrl, router]);
 

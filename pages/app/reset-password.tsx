@@ -156,7 +156,7 @@ export default function ResetPasswordScreen() {
           padding: '24px 20px 0',
         }}>
           <button
-            onClick={() => router.push('/app/login')}
+            onClick={() => router.push('/app/login', undefined, { locale })}
             style={{
               background: 'none',
               border: 'none',
@@ -211,7 +211,7 @@ export default function ResetPasswordScreen() {
                 Your password has been successfully reset. You can now log in with your new password.
               </p>
               <button
-                onClick={() => router.push('/app/login')}
+                onClick={() => router.push('/app/login', undefined, { locale })}
                 style={{
                   width: '100%',
                   padding: '16px',
@@ -237,7 +237,7 @@ export default function ResetPasswordScreen() {
                 This password reset link is no longer valid. Please request a new one.
               </p>
               <button
-                onClick={() => router.push('/app/forgot-password')}
+                onClick={() => router.push('/app/forgot-password', undefined, { locale })}
                 style={{
                   width: '100%',
                   padding: '16px',

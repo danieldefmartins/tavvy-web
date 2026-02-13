@@ -223,7 +223,7 @@ export default function OnTheGoScreen() {
             </h1>
 
             <button
-              onClick={() => router.push('/app/profile')}
+              onClick={() => router.push('/app/profile', undefined, { locale })}
               style={{
                 width: '40px',
                 height: '40px',
@@ -574,7 +574,7 @@ export default function OnTheGoScreen() {
                     {filteredSessions.map((session) => (
                       <div
                         key={session.session_id || session.tavvy_place_id}
-                        onClick={() => router.push(`/app/place/${session.tavvy_place_id}`)}
+                        onClick={() => router.push(`/app/place/${session.tavvy_place_id}`, undefined, { locale })}
                         style={{
                           display: 'flex',
                           gap: '12px',

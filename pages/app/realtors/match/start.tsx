@@ -16,11 +16,11 @@ export default function SmartMatchStartScreen() {
   const router = useRouter();
 
   const handleStart = () => {
-    router.push('/app/realtors/match/q1');
+    router.push('/app/realtors/match/q1', undefined, { locale });
   };
 
   const handleClose = () => {
-    router.push('/app/realtors');
+    router.push('/app/realtors', undefined, { locale });
   };
 
   const benefits = [

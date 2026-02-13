@@ -160,6 +160,7 @@ export default function AtlasSearchScreen() {
                       <Link
                         key={article.id}
                         href={`/app/article/${article.slug || article.id}`}
+                        locale={locale}
                         className="result-card"
                       >
                         <img

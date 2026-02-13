@@ -423,7 +423,8 @@
     "terrain": "تضاريس",
     "selectLanguage": "اختر اللغة",
     "selectDistanceUnit": "اختر وحدة المسافة",
-    "selectMapLayer": "اختر طبقة الخريطة"
+    "selectMapLayer": "اختر طبقة الخريطة",
+    "languageDescription": "اختر لغتك المفضلة. سيعرض التطبيق المحتوى باللغة التي اخترتها عندما تكون الترجمات متاحة."
   },
   "search": {
     "title": "بحث",

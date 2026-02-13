@@ -38,6 +38,7 @@ export default function LanguageSelector({
   showNativeName = true 
 }: LanguageSelectorProps) {
   const router = useRouter();
+  const { locale } = router;
   const { i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 

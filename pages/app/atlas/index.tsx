@@ -151,9 +151,9 @@ export default function AtlasHomeScreen() {
 
   const navigateToArticle = (article: AtlasArticle) => {
     if (article.article_template_type === 'owner_spotlight') {
-      router.push(`/app/atlas/owner-spotlight/${article.slug}`);
+      router.push(`/app/atlas/owner-spotlight/${article.slug}`, undefined, { locale });
     } else {
-      router.push(`/app/article/${article.slug}`);
+      router.push(`/app/article/${article.slug}`, undefined, { locale });
     }
   };
 

@@ -413,16 +413,16 @@ export default function HomeScreen() {
         if (place.fsq_place_id) {
           // Use fsq: prefix for consistency
           console.log('[HomeScreen] Navigating to place:', place.fsq_place_id);
-          router.push(`/place/fsq:${place.fsq_place_id}`);
+          router.push(`/place/fsq:${place.fsq_place_id}`, undefined, { locale });
         } else if (place.id) {
           console.log('[HomeScreen] Navigating to place by ID:', place.id);
-          router.push(`/place/${place.id}`);
+          router.push(`/place/${place.id}`, undefined, { locale });
         }
         break;
       case 'category':
         // Navigate to map with category filter
         const categoryName = suggestion.data.name;
-        router.push(`/app/map?category=${encodeURIComponent(categoryName)}`);
+        router.push(`/app/map?category=${encodeURIComponent(categoryName, undefined, { locale })}`);
         break;
       case 'recent':
         setSearchQuery(suggestion.title);
@@ -433,7 +433,7 @@ export default function HomeScreen() {
 
   // Switch to map mode
   const switchToMapMode = () => {
-    router.push('/app/map');
+    router.push('/app/map', undefined, { locale });
   };
 
   // Render
@@ -562,7 +562,7 @@ export default function HomeScreen() {
               <div className="mood-cards">
                 <button 
                   className="mood-card mood-card-hungry"
-                  onClick={() => router.push('/app/map?category=Restaurants')}
+                  onClick={() => router.push('/app/map?category=Restaurants', undefined, { locale })}
                 >
                   <div className="mood-badge">
                     <span className="mood-badge-icon">🔥</span>
@@ -576,7 +576,7 @@ export default function HomeScreen() {
                 </button>
                 <button 
                   className="mood-card mood-card-thirsty"
-                  onClick={() => router.push('/app/map?category=Bars')}
+                  onClick={() => router.push('/app/map?category=Bars', undefined, { locale })}
                 >
                   <div className="mood-badge">
                     <span className="mood-badge-icon">📈</span>
@@ -637,7 +637,7 @@ export default function HomeScreen() {
               <p className="section-subtitle">Curated worlds of experiences</p>
               <div className="explore-scroll">
                 {exploreItems.map((item) => (
-                  <Link key={item.id} href={item.route} className="explore-card">
+                  <Link key={item.id} href={item.route} className="explore-card" locale={locale}>
                     <div 
                       className="explore-image"
                       style={{ backgroundColor: item.color }}

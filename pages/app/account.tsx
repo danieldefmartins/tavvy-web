@@ -27,7 +27,7 @@ export default function AccountScreen() {
 
   const handleSignOut = async () => {
     await signOut();
-    router.push('/app');
+    router.push('/app', undefined, { locale });
   };
 
   if (!user) {
@@ -147,6 +147,7 @@ export default function AccountScreen() {
                   <Link 
                     key={index}
                     href={item.href}
+                    locale={locale}
                     className="section-item"
                   >
                     <div className="item-left">

@@ -423,7 +423,8 @@
     "terrain": "Terrain",
     "selectLanguage": "Select Language",
     "selectDistanceUnit": "Select Distance Unit",
-    "selectMapLayer": "Select Map Layer"
+    "selectMapLayer": "Select Map Layer",
+    "languageDescription": "Selecteer je voorkeurstaal. De app toont inhoud in de gekozen taal wanneer vertalingen beschikbaar zijn."
   },
   "search": {
     "title": "Zoeken",
