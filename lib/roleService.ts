@@ -63,7 +63,7 @@ export async function fetchProStatus(userId?: string): Promise<boolean> {
     const uid = userId || (await supabase.auth.getSession()).data.session?.user?.id;
     if (!uid) return false;
 
-    // First get the provider_id for this user
+    // Check if user is a registered Pro provider — all providers get Pro eCard access
     const { data: provider, error: providerError } = await supabase
       .from('pro_providers')
       .select('id')
@@ -71,24 +71,39 @@ export async function fetchProStatus(userId?: string): Promise<boolean> {
       .maybeSingle();
     
     if (providerError || !provider) {
-      // User is not a provider
-      return false;
+      // Not a provider — check if they have a direct eCard Pro subscription
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_pro')
+        .eq('user_id', uid)
+        .maybeSingle();
+      return profile?.is_pro === true;
     }
 
-    // Check if the provider has an active subscription
-    const { data: subscription, error: subError } = await supabase
+    // User is a Pro provider — automatically grant Pro eCard access
+    // Also ensure their subscription record exists (auto-create if missing)
+    const { data: subscription } = await supabase
       .from('pro_subscriptions')
       .select('status')
       .eq('provider_id', provider.id)
       .eq('status', 'active')
       .maybeSingle();
     
-    if (subError) {
-      console.error('Error fetching pro subscription:', subError);
-      return false;
+    if (!subscription) {
+      // Auto-create active subscription for Pro provider
+      await supabase.from('pro_subscriptions').insert({
+        provider_id: provider.id,
+        tier: 'early_adopter',
+        status: 'active',
+        price_per_year: 0,
+        start_date: new Date().toISOString(),
+        end_date: new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000).toISOString(),
+      });
+      // Also update profile
+      await supabase.from('profiles').update({ is_pro: true, subscription_status: 'active', subscription_plan: 'pro' }).eq('user_id', uid);
     }
     
-    return subscription !== null;
+    return true;
   } catch (error) {
     console.error('Error in fetchProStatus:', error);
     return false;
