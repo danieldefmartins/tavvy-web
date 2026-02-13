@@ -12,6 +12,8 @@ import AppLayout from '../../../../components/AppLayout';
 import { supabase } from '../../../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../../../constants/Colors';
 import { FiArrowLeft, FiStar, FiMapPin, FiPhone, FiMail, FiGlobe, FiClock, FiCheck, FiShare2 } from 'react-icons/fi';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 interface Provider {
   id: string;
@@ -44,6 +46,7 @@ interface Review {
 }
 
 export default function ProviderProfileScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { locale } = router;
   const { id } = router.query;
@@ -640,3 +643,10 @@ export default function ProviderProfileScreen() {
     </>
   );
 }
+
+
+export const getServerSideProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

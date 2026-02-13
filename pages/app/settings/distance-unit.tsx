@@ -10,6 +10,8 @@ import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import AppLayout from '../../../components/AppLayout';
 import { FiArrowLeft, FiCheck } from 'react-icons/fi';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 interface DistanceUnit {
   id: string;
@@ -24,6 +26,7 @@ const distanceUnits: DistanceUnit[] = [
 ];
 
 export default function DistanceUnitSettingsPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { themeMode } = useThemeContext();
   const isDark = themeMode === 'dark';
@@ -195,3 +198,10 @@ export default function DistanceUnitSettingsPage() {
     </>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

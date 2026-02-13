@@ -13,6 +13,8 @@ import AppLayout from '../../../components/AppLayout';
 import { supabase } from '../../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../../constants/Colors';
 import { FiArrowLeft, FiCheck, FiChevronRight } from 'react-icons/fi';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 const SERVICE_CATEGORIES = [
   { id: 'home-services', name: 'Home Services', icon: '🏠' },
@@ -30,6 +32,7 @@ const SERVICE_CATEGORIES = [
 ];
 
 export default function ProsRegisterScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { locale } = router;
   const { theme } = useThemeContext();
@@ -466,3 +469,10 @@ export default function ProsRegisterScreen() {
     </>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

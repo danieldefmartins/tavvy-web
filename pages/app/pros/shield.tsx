@@ -24,8 +24,11 @@ import {
   IoPeople, IoBriefcase, IoChevronDown, IoChevronUp, IoArrowForward,
   IoInformationCircle, IoAnalytics
 } from 'react-icons/io5';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 export default function TavvyShieldScreen() {
+  const { t } = useTranslation();
   const { theme, isDark } = useThemeContext();
   const router = useRouter();
   const { locale } = router;
@@ -704,3 +707,10 @@ export default function TavvyShieldScreen() {
     </>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

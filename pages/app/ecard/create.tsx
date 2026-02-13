@@ -920,6 +920,7 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
    MAIN COMPONENT
    ============================================================ */
 export default function ECardCreateScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { isDark } = useThemeContext();
   const { user } = useAuth();
@@ -3443,6 +3444,8 @@ export default function ECardCreateScreen() {
 
         @keyframes slideUp {
           from { opacity: 0; transform: translateY(20px); }
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
           to { opacity: 1; transform: translateY(0); }
         }
 
@@ -3692,3 +3695,10 @@ export default function ECardCreateScreen() {
     </AppLayout>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

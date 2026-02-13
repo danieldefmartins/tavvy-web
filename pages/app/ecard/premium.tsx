@@ -22,6 +22,8 @@ import {
   IoCheckmark,
   IoStar,
 } from 'react-icons/io5';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 const ACCENT_GREEN = '#00C853';
 const BG_DARK = '#000000';
@@ -74,6 +76,7 @@ const PLANS = {
 };
 
 export default function ECardPremiumScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { feature, themeName } = router.query;
   const { theme, isDark } = useThemeContext();
@@ -562,3 +565,10 @@ export default function ECardPremiumScreen() {
     </>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

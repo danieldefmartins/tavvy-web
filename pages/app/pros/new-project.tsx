@@ -102,6 +102,7 @@ function ProgressBar({ step }: { step: number }) {
 }
 
 export default function NewProjectPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<FormData>({
@@ -1200,9 +1201,18 @@ export default function NewProjectPage() {
       <style jsx global>{`
         @keyframes spin {
           from { transform: rotate(0deg); }
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
           to { transform: rotate(360deg); }
         }
       `}</style>
     </AppLayout>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

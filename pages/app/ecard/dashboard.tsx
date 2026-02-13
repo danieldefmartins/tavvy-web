@@ -62,6 +62,8 @@ import {
   IoRefresh,
   IoBusinessOutline,
 } from 'react-icons/io5';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 const ACCENT_GREEN = '#00C853';
 const BG_LIGHT = '#FAFAFA';
@@ -106,6 +108,7 @@ const FEATURED_PLATFORMS = [
 ];
 
 export default function ECardDashboardScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { cardId: queryCardId, isNew, openAppearance } = router.query;
   const { theme, isDark } = useThemeContext();
@@ -3097,3 +3100,10 @@ export default function ECardDashboardScreen() {
     </>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

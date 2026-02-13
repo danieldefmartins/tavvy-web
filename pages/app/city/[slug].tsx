@@ -13,6 +13,8 @@ import { supabase } from '../../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../../constants/Colors';
 import PlaceCard from '../../../components/PlaceCard';
 import { FiArrowLeft, FiSearch, FiMapPin, FiGrid, FiList } from 'react-icons/fi';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 interface City {
   id: string;
@@ -38,6 +40,7 @@ interface Place {
 }
 
 export default function CityDetailScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { locale } = router;
   const { slug } = router.query;
@@ -457,3 +460,10 @@ export default function CityDetailScreen() {
     </>
   );
 }
+
+
+export const getServerSideProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

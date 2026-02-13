@@ -4,8 +4,11 @@ import { useRouter } from 'next/router';
 import AppLayout from '../../../../components/AppLayout';
 import { FiArrowLeft, FiArrowRight, FiUser, FiMail, FiPhone, FiMapPin } from 'react-icons/fi';
 import { supabase } from '../../../../lib/supabaseClient';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 export default function MatchContactScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', phone: '', location: '' });
@@ -65,3 +68,10 @@ export default function MatchContactScreen() {
     </>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

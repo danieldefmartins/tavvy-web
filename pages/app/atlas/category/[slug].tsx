@@ -16,6 +16,8 @@ import { useThemeContext } from '../../../../contexts/ThemeContext';
 import AppLayout from '../../../../components/AppLayout';
 import { supabase } from '../../../../lib/supabaseClient';
 import { IoArrowBack, IoHeart, IoTime, IoFlame } from 'react-icons/io5';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 type SortOption = 'popular' | 'recent' | 'most_loved';
 
@@ -44,6 +46,7 @@ interface Article {
 const TEAL_PRIMARY = '#14b8a6';
 
 export default function CategoryBrowseScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { locale } = router;
   const { slug } = router.query;
@@ -533,3 +536,10 @@ export default function CategoryBrowseScreen() {
     </>
   );
 }
+
+
+export const getServerSideProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

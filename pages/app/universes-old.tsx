@@ -20,6 +20,8 @@ import { FiSearch, FiX } from 'react-icons/fi';
 import { 
   IoRocket, IoAirplane, IoLeaf, IoBusiness
 } from 'react-icons/io5';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // Design System Colors
 const COLORS = {
@@ -64,6 +66,7 @@ interface Category {
 }
 
 export default function UniverseDiscoveryScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { theme, isDark } = useThemeContext();
   
@@ -614,3 +617,10 @@ export default function UniverseDiscoveryScreen() {
     </>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

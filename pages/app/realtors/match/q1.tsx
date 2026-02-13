@@ -8,6 +8,8 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import AppLayout from '../../../../components/AppLayout';
 import { FiX, FiArrowRight, FiHome, FiDollarSign, FiKey, FiTrendingUp, FiHelpCircle } from 'react-icons/fi';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 const options = [
   { id: 'buy', label: 'Buy a home', icon: FiHome, color: '#3B82F6' },
@@ -18,6 +20,7 @@ const options = [
 ];
 
 export default function MatchQ1Screen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -237,3 +240,10 @@ export default function MatchQ1Screen() {
     </>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

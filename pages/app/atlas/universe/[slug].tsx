@@ -17,6 +17,8 @@ import { useThemeContext } from '../../../../contexts/ThemeContext';
 import AppLayout from '../../../../components/AppLayout';
 import { supabase } from '../../../../lib/supabaseClient';
 import { IoArrowBack, IoShareOutline, IoLocationOutline, IoGlobeOutline, IoDocumentTextOutline, IoStarOutline } from 'react-icons/io5';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 type TabType = 'overview' | 'places' | 'articles' | 'guides';
 
@@ -87,6 +89,7 @@ const getCategoryFallbackImage = (category: string): string => {
 };
 
 export default function UniverseDetailScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { locale } = router;
   const { slug } = router.query;
@@ -782,3 +785,10 @@ export default function UniverseDetailScreen() {
     </>
   );
 }
+
+
+export const getServerSideProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

@@ -25,6 +25,7 @@ interface Place {
 }
 
 export default function AddStoryPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { universeId, universeName, placeId: initialPlaceId, placeName: initialPlaceName } = router.query;
   const { theme } = useThemeContext();
@@ -881,9 +882,18 @@ export default function AddStoryPage() {
       <style jsx global>{`
         @keyframes spin {
           from { transform: rotate(0deg); }
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
           to { transform: rotate(360deg); }
         }
       `}</style>
     </AppLayout>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

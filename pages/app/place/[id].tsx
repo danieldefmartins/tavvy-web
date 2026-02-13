@@ -23,6 +23,8 @@ import {
   IoTimeOutline, IoCashOutline, IoLocationOutline, IoChevronBack,
   IoHeartOutline, IoHeart, IoCheckmarkCircle
 } from 'react-icons/io5';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // Design System Colors
 const COLORS = {
@@ -85,6 +87,7 @@ const getCategoryEmoji = (category: string): string => {
 };
 
 export default function PlaceDetailScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { id } = router.query;
   const { isDark } = useThemeContext();
@@ -671,3 +674,10 @@ export default function PlaceDetailScreen() {
     </>
   );
 }
+
+
+export const getServerSideProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

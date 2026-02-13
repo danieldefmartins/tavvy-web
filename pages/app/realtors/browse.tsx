@@ -5,6 +5,8 @@ import { useRouter } from 'next/router';
 import AppLayout from '../../../components/AppLayout';
 import { supabase } from '../../../lib/supabaseClient';
 import { FiSearch, FiMapPin, FiStar, FiArrowLeft } from 'react-icons/fi';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 interface Realtor {
   id: string;
@@ -30,6 +32,7 @@ const SAMPLE_REALTORS: Realtor[] = [
 const SPECIALTIES = ['All', 'Luxury', 'First-Time', 'Investment', 'Relocation', 'Commercial', 'Waterfront'];
 
 export default function RealtorsBrowseScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { locale } = router;
   const [realtors, setRealtors] = useState<Realtor[]>(SAMPLE_REALTORS);
@@ -109,3 +112,10 @@ export default function RealtorsBrowseScreen() {
     </>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

@@ -24,6 +24,8 @@ import {
   IoStorefront, IoTicket, IoEllipsisHorizontal, IoNavigate,
   IoFlash, IoPeople, IoMusicalNotes, IoStar, IoCalendar, IoGameController
 } from 'react-icons/io5';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 
 const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800';
@@ -93,6 +95,7 @@ interface MenuItem {
 }
 
 export default function UniverseLandingScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { slug } = router.query;
   const { isDark } = useThemeContext();
@@ -1527,3 +1530,10 @@ export default function UniverseLandingScreen() {
     </>
   );
 }
+
+
+export const getServerSideProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

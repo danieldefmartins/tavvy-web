@@ -12,6 +12,8 @@ import AppLayout from '../../../../components/AppLayout';
 import { supabase } from '../../../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../../../constants/Colors';
 import { FiArrowLeft, FiSearch, FiStar, FiMapPin, FiPhone, FiChevronRight } from 'react-icons/fi';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 interface Provider {
   id: string;
@@ -47,6 +49,7 @@ const CATEGORY_DATA: Record<string, Category> = {
 };
 
 export default function ProsCategoryScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { locale } = router;
   const { slug } = router.query;
@@ -468,3 +471,10 @@ export default function ProsCategoryScreen() {
     </>
   );
 }
+
+
+export const getServerSideProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

@@ -18,6 +18,8 @@ import AppLayout from '../../../components/AppLayout';
 import { supabase } from '../../../lib/supabaseClient';
 // Image utils removed - using direct URLs
 import { IoSearch, IoCloseCircle, IoDocumentTextOutline } from 'react-icons/io5';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // V2 Design System Colors
 const COLORS = {
@@ -58,6 +60,7 @@ interface AtlasArticle {
 }
 
 export default function AtlasHomeScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { theme, isDark } = useThemeContext();
   const [loading, setLoading] = useState(true);
@@ -620,3 +623,10 @@ export default function AtlasHomeScreen() {
   );
 }
 // Force rebuild Thu Jan 29 17:21:18 EST 2026
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

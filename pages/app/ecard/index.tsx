@@ -32,6 +32,7 @@ const BG_LIGHT = '#FAFAFA';
 const BG_DARK = '#000000';
 
 export default function ECardHubScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { theme, isDark } = useThemeContext();
   const { user, loading: authLoading } = useAuth();
@@ -788,6 +789,8 @@ export default function ECardHubScreen() {
 
           @keyframes slideUp {
             from { transform: translateY(20px); opacity: 0; }
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
             to { transform: translateY(0); opacity: 1; }
           }
 
@@ -869,3 +872,10 @@ export default function ECardHubScreen() {
     </>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

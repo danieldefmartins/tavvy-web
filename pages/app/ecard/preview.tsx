@@ -43,6 +43,7 @@ const BG_LIGHT = '#FAFAFA';
 const BG_DARK = '#000000';
 
 export default function ECardPreviewScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { cardId: queryCardId } = router.query;
   const { isDark } = useThemeContext();
@@ -694,6 +695,8 @@ export default function ECardPreviewScreen() {
 
           @keyframes slideDown {
             from { opacity: 0; transform: translateY(-8px); }
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
             to { opacity: 1; transform: translateY(0); }
           }
 
@@ -991,3 +994,10 @@ export default function ECardPreviewScreen() {
     </>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

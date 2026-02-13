@@ -9,8 +9,11 @@ import { useRouter } from 'next/router';
 import AppLayout from '../../../components/AppLayout';
 import { Colors } from '../../../constants/Colors';
 import { FiCheck, FiMail, FiMessageCircle } from 'react-icons/fi';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 export default function ProjectSubmittedPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { locale } = router;
   return (
@@ -192,3 +195,10 @@ export default function ProjectSubmittedPage() {
     </AppLayout>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

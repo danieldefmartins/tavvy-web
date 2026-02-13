@@ -8,8 +8,11 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import AppLayout from '../../../../components/AppLayout';
 import { FiX, FiShield, FiClock, FiUsers, FiLock, FiArrowRight, FiZap } from 'react-icons/fi';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 export default function SmartMatchStartScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
 
   const handleStart = () => {
@@ -226,3 +229,10 @@ export default function SmartMatchStartScreen() {
     </>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

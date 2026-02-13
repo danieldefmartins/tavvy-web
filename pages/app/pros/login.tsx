@@ -12,8 +12,11 @@ import { useThemeContext } from '../../../contexts/ThemeContext';
 import { useProAuth } from '../../../contexts/ProAuthContext';
 import AppLayout from '../../../components/AppLayout';
 import { spacing, borderRadius } from '../../../constants/Colors';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 export default function ProLoginScreen() {
+  const { t } = useTranslation();
   const { theme } = useThemeContext();
   const { signIn } = useProAuth();
   const router = useRouter();
@@ -465,3 +468,10 @@ export default function ProLoginScreen() {
     </>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

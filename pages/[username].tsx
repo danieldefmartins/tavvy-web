@@ -222,6 +222,7 @@ const DEFAULT_FORM_FIELDS: FormField[] = [
 ];
 
 export default function PublicCardPage({ cardData: initialCardData, error: initialError }: PageProps) {
+  const { t } = useTranslation();
   const [cardData, setCardData] = useState<CardData | null>(initialCardData);
   const [error] = useState<string | null>(initialError);
   const [showMore, setShowMore] = useState(false);
@@ -1125,6 +1126,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           }
           @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
             to { opacity: 1; transform: translateY(0); }
           }
           .action-btn:hover {

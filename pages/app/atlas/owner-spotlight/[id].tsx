@@ -27,6 +27,8 @@ import {
   IoCallOutline,
   IoGlobeOutline
 } from 'react-icons/io5';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // Tavvy brand colors
 const TEAL_PRIMARY = '#0D9488';
@@ -85,6 +87,7 @@ const PLACEHOLDER_AVATAR = 'https://images.unsplash.com/photo-1472099645785-5658
 const PLACEHOLDER_POST = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300';
 
 export default function OwnerSpotlightScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { locale } = router;
   const { id } = router.query;
@@ -720,3 +723,10 @@ export default function OwnerSpotlightScreen() {
     </>
   );
 }
+
+
+export const getServerSideProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

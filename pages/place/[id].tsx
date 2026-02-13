@@ -16,6 +16,8 @@ import AppLayout from '../../components/AppLayout';
 import { fetchPlaceById } from '../../lib/placeService';
 import { Place } from '../../types';
 import { fetchPlaceSignals, SignalAggregate, SIGNAL_LABELS } from '../../lib/signalService';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // Category-based fallback images (from iOS codebase)
 const getCategoryFallbackImage = (category: string): string => {
@@ -88,6 +90,7 @@ const getDriveTime = (distanceMiles?: number): string => {
 type TabType = 'reviews' | 'info' | 'photos';
 
 export default function PlaceDetailsScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { id } = router.query;
 
@@ -942,3 +945,10 @@ const pageStyles = `
     }
   }
 `;
+
+
+export const getServerSideProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

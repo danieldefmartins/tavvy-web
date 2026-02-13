@@ -25,6 +25,8 @@ import {
   IoSearch, IoExitOutline, IoRestaurantOutline, IoWaterOutline,
   IoCarOutline, IoLocationOutline, IoSparkles
 } from 'react-icons/io5';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // V2 Design System Colors
 const COLORS = {
@@ -87,6 +89,7 @@ interface Place {
 }
 
 export default function UniverseDetailScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { locale } = router;
   const { slug } = router.query;
@@ -852,3 +855,10 @@ export default function UniverseDetailScreen() {
     </>
   );
 }
+
+
+export const getServerSideProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

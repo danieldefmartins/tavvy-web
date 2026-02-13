@@ -16,6 +16,8 @@ import { useThemeContext } from '../../../contexts/ThemeContext';
 import AppLayout from '../../../components/AppLayout';
 import { supabase } from '../../../lib/supabaseClient';
 import { IoArrowBack, IoClose, IoSearch, IoHeart } from 'react-icons/io5';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // Design colors
 const TEAL_PRIMARY = '#14b8a6';
@@ -36,6 +38,7 @@ interface Article {
 }
 
 export default function AtlasSearchScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { locale } = router;
   const { theme, isDark } = useThemeContext();
@@ -443,3 +446,10 @@ export default function AtlasSearchScreen() {
     </>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

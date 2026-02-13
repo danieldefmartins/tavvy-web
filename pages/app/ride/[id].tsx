@@ -18,6 +18,8 @@ import {
   IoThumbsUp, IoSparkles, IoAlertCircle, IoFlame,
   IoChevronDown, IoChevronUp, IoAdd
 } from 'react-icons/io5';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // Category colors matching the universal review system
 const CATEGORY_COLORS = {
@@ -216,6 +218,7 @@ const SAMPLE_RIDES: Record<string, RideData> = {
 };
 
 export default function RideDetailsScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { id, name, park } = router.query;
   const { theme, isDark } = useThemeContext();
@@ -982,3 +985,10 @@ export default function RideDetailsScreen() {
     </>
   );
 }
+
+
+export const getServerSideProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

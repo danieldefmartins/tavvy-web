@@ -25,6 +25,8 @@ import {
 import { submitReview, updateReview, fetchUserReview } from '../../lib/reviews';
 import { useAuth } from '../../contexts/AuthContext';
 import { useThemeContext } from '../../contexts/ThemeContext';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // Category config
 const CATEGORIES = [
@@ -54,6 +56,7 @@ const CATEGORIES = [
 type CategoryId = typeof CATEGORIES[number]['id'];
 
 export default function AddReviewPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { user } = useAuth();
   const { isDark } = useThemeContext();
@@ -830,3 +833,10 @@ export default function AddReviewPage() {
     </AppLayout>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

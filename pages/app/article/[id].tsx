@@ -31,6 +31,8 @@ import {
   IoMoon
 } from 'react-icons/io5';
 import { ContentBlockRenderer, ContentBlock } from '../../../components/atlas/ContentBlockRenderer';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // Tavvy brand colors
 const TEAL_PRIMARY = '#0D9488';
@@ -108,6 +110,7 @@ const PLACEHOLDER_ARTICLE = 'https://images.unsplash.com/photo-1506905925346-21b
 const PLACEHOLDER_AVATAR = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100';
 
 export default function ArticleDetailScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { locale } = router;
   const { id } = router.query;
@@ -964,3 +967,10 @@ export default function ArticleDetailScreen() {
     </>
   );
 }
+
+
+export const getServerSideProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

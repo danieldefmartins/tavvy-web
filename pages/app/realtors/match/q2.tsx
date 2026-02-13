@@ -7,6 +7,8 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import AppLayout from '../../../../components/AppLayout';
 import { FiX, FiArrowRight, FiArrowLeft } from 'react-icons/fi';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 const options = [
   { id: 'single_family', label: 'Single Family Home', emoji: '🏠' },
@@ -18,6 +20,7 @@ const options = [
 ];
 
 export default function MatchQ2Screen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -83,3 +86,10 @@ export default function MatchQ2Screen() {
     </>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

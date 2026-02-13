@@ -24,11 +24,14 @@ import {
   FiCalendar,
   FiExternalLink
 } from 'react-icons/fi';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // Stripe publishable key - should be in env
 const STRIPE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '';
 
 export default function ProDashboardScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { locale } = router;
   const { theme } = useThemeContext();
@@ -398,3 +401,10 @@ export default function ProDashboardScreen() {
     </>
   );
 }
+
+
+export const getStaticProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});
