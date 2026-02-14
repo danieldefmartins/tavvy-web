@@ -1,12 +1,13 @@
 /**
- * New Project Page - Customer Quote Request (Matches iOS 6-Step Flow)
+ * New Project Page - Customer Quote Request (Matches iOS 7-Step Flow)
  * 
  * Step 0: Customer Info (name, email, phone, privacy preference)
- * Step 1: Service Category Selection (from Supabase service_categories)
- * Step 2: Dynamic Category Questions (from Supabase service_category_questions)
- * Step 3: Project Description
- * Step 4: Location / Address (with OpenStreetMap autocomplete)
- * Step 5: Review & Submit
+ * Step 1: Parent Category Selection (Construction, Cleaning, Repair, etc.)
+ * Step 2: Sub-Service Selection (specific services within the parent category)
+ * Step 3: Dynamic Category Questions (from Supabase service_category_questions)
+ * Step 4: Project Description
+ * Step 5: Location / Address (with OpenStreetMap autocomplete)
+ * Step 6: Review & Submit
  */
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
@@ -17,7 +18,7 @@ import { supabase } from '../../../lib/supabaseClient';
 import {
   FiArrowLeft, FiArrowRight, FiX, FiCheck, FiSearch,
   FiUser, FiMail, FiPhone, FiShield, FiMessageSquare,
-  FiMapPin, FiSend, FiLoader, FiAlertCircle
+  FiMapPin, FiSend, FiLoader, FiAlertCircle, FiChevronRight
 } from 'react-icons/fi';
 
 // Pros brand colors (matching iOS ProsColors)
@@ -44,7 +45,9 @@ type ServiceCategory = {
   slug: string;
   name: string;
   icon?: string | null;
-  order?: number | null;
+  color?: string | null;
+  parent_id?: string | null;
+  display_order?: number | null;
 };
 
 type ServiceQuestion = {
@@ -64,21 +67,97 @@ type FormData = {
   email: string;
   phone: string;
   privacyPreference: 'share' | 'app_only';
-  // Step 1
+  // Step 1 (parent category)
+  parentCategoryId: string;
+  parentCategoryName: string;
+  // Step 2 (sub-service)
   categoryId: string;
   categoryName: string;
-  // Step 2
-  dynamicAnswers: Record<string, any>;
   // Step 3
-  description: string;
+  dynamicAnswers: Record<string, any>;
   // Step 4
+  description: string;
+  // Step 5
   address: string;
   city: string;
   state: string;
   zipCode: string;
 };
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 7;
+
+// Parent category emoji mapping
+const parentCategoryEmoji: Record<string, string> = {
+  'construction': '🏗️',
+  'cleaning': '🧹',
+  'repair': '🔧',
+  'mechanic': '🔩',
+  'handyman': '🛠️',
+  'realtor': '🏠',
+  'landscaping': '🌿',
+  'electrical': '⚡',
+  'plumbing': '💧',
+  'painting': '🎨',
+  'pest-control': '🛡️',
+  'moving': '📦',
+};
+
+// Sub-category emoji mapping
+const getCategoryIcon = (icon?: string | null, name?: string) => {
+  const ioniconsToEmoji: Record<string, string> = {
+    'settings': '⚙️', 'settings-outline': '⚙️',
+    'sparkles': '✨', 'sparkles-outline': '✨',
+    'flash': '⚡', 'flash-outline': '⚡',
+    'hammer': '🔨', 'hammer-outline': '🔨',
+    'home': '🏠', 'home-outline': '🏠',
+    'car': '🚗', 'car-outline': '🚗',
+    'car-sport-outline': '🚗',
+    'thermometer': '🌡️', 'thermometer-outline': '🌡️',
+    'grid': '🏗️', 'grid-outline': '🏗️',
+    'construct': '🏗️', 'construct-outline': '🏗️',
+    'water': '💧', 'water-outline': '💧',
+    'leaf': '🌿', 'leaf-outline': '🌿',
+    'brush': '🖌️', 'brush-outline': '🖌️',
+    'bug': '🐛', 'bug-outline': '🐛',
+    'business': '💼', 'business-outline': '💼',
+    'key': '🔑', 'key-outline': '🔑',
+    'cube': '📦', 'cube-outline': '📦',
+    'boat': '⛵', 'boat-outline': '⛵',
+    'airplane': '✈️', 'airplane-outline': '✈️',
+    'sunny': '☀️', 'sunny-outline': '☀️',
+    'bulb': '💡', 'bulb-outline': '💡',
+    'paw': '🐾', 'paw-outline': '🐾',
+  };
+  if (icon && ioniconsToEmoji[icon]) return ioniconsToEmoji[icon];
+
+  const nameMap: Record<string, string> = {
+    'appliance': '⚙️', 'cleaning': '✨', 'electrical': '⚡', 'electrician': '⚡',
+    'flooring': '🏗️', 'garage': '🚗', 'handyman': '🔨', 'home improvement': '🏠',
+    'house cleaning': '✨', 'hvac': '🌡️', 'landscaping': '🌿', 'lawn': '🌿',
+    'locksmith': '🔑', 'moving': '📦', 'painting': '🎨', 'pest': '🛡️',
+    'plumbing': '💧', 'pool': '🏊', 'roofing': '🏠', 'solar': '☀️',
+    'tree': '🌳', 'window': '🪟', 'mechanic': '🔩', 'boat': '⛵',
+    'rv': '🚐', 'motorcycle': '🏍️', 'diesel': '⛽', 'engine': '⚙️',
+    'car wash': '🚿', 'detailing': '✨', 'pressure': '💦',
+    'furniture': '🪑', 'drywall': '🧱', 'door': '🚪', 'deck': '🏡',
+    'real estate': '🏘️', 'property': '🏢', 'staging': '🛋️', 'inspection': '🔍',
+    'drain': '🚿', 'water heater': '🔥', 'sewer': '🕳️', 'fixture': '🚰',
+    'interior': '🎨', 'exterior': '🖌️', 'cabinet': '🗄️', 'staining': '🪵',
+    'termite': '🪲', 'wildlife': '🦝', 'mosquito': '🦟',
+    'local moving': '🚚', 'long distance': '🛣️', 'packing': '📦', 'junk': '🗑️', 'storage': '📦',
+    'lighting': '💡', 'generator': '🔋', 'ev charger': '🔌',
+    'garden': '🌺', 'irrigation': '💦', 'hardscaping': '🧱',
+    'concrete': '🏗️', 'masonry': '🧱', 'fiberglass': '🏊',
+    'general construction': '🏗️', 'general handyman': '🔨',
+    'general pest': '🛡️',
+    'other': '⋯',
+  };
+  const slug = name?.toLowerCase() || '';
+  for (const [key, emoji] of Object.entries(nameMap)) {
+    if (slug.includes(key)) return emoji;
+  }
+  return '🔧';
+};
 
 // Progress bar component
 function ProgressBar({ step }: { step: number }) {
@@ -110,6 +189,8 @@ export default function NewProjectPage() {
     email: '',
     phone: '',
     privacyPreference: 'app_only',
+    parentCategoryId: '',
+    parentCategoryName: '',
     categoryId: '',
     categoryName: '',
     dynamicAnswers: {},
@@ -120,23 +201,24 @@ export default function NewProjectPage() {
     zipCode: '',
   });
 
-  // Step 1: Categories
-  const [categories, setCategories] = useState<ServiceCategory[]>([]);
+  // Step 1: Parent categories
+  const [allCategories, setAllCategories] = useState<ServiceCategory[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
-  const [categorySearch, setCategorySearch] = useState('');
+  const [parentSearch, setParentSearch] = useState('');
+  const [subSearch, setSubSearch] = useState('');
 
-  // Step 2: Dynamic questions
+  // Step 3: Dynamic questions
   const [questions, setQuestions] = useState<ServiceQuestion[]>([]);
   const [questionsLoading, setQuestionsLoading] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
-  // Step 4: Address autocomplete
+  // Step 5: Address autocomplete
   const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
   const [addressLoading, setAddressLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // Step 5: Submit
+  // Step 6: Submit
   const [submitting, setSubmitting] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [user, setUser] = useState<any>(null);
@@ -146,16 +228,16 @@ export default function NewProjectPage() {
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
   }, []);
 
-  // Fetch categories when on step 1
+  // Fetch all categories once when entering step 1
   useEffect(() => {
-    if (step === 1 && categories.length === 0) {
+    if (step === 1 && allCategories.length === 0) {
       fetchCategories();
     }
   }, [step]);
 
-  // Fetch questions when category is selected and moving to step 2
+  // Fetch questions when sub-category is selected and moving to step 3
   useEffect(() => {
-    if (step === 2 && formData.categoryId) {
+    if (step === 3 && formData.categoryId) {
       fetchQuestions(formData.categoryId);
     }
   }, [step, formData.categoryId]);
@@ -165,11 +247,12 @@ export default function NewProjectPage() {
     try {
       const { data, error } = await supabase
         .from('service_categories')
-        .select('id, slug, name, icon, "order"')
-        .order('order', { ascending: true })
+        .select('id, slug, name, icon, color, parent_id, display_order')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true })
         .order('name', { ascending: true });
       if (error) throw error;
-      setCategories(data || []);
+      setAllCategories(data || []);
     } catch (err) {
       console.error('Error fetching categories:', err);
     } finally {
@@ -192,25 +275,43 @@ export default function NewProjectPage() {
       }));
       setQuestions(parsed);
       setCurrentQuestionIndex(0);
-      // If no questions, skip to step 3
+      // If no questions, skip to step 4
       if (parsed.length === 0) {
-        setStep(3);
+        setStep(4);
       }
     } catch (err) {
       console.error('Error fetching questions:', err);
-      setStep(3); // Skip on error
+      setStep(4); // Skip on error
     } finally {
       setQuestionsLoading(false);
     }
   };
 
-  // Filtered categories for search
-  const filteredCategories = useMemo(() => {
-    const all = [...categories, { id: 'other', slug: 'other', name: 'Other', icon: '⋯' } as ServiceCategory];
-    if (!categorySearch.trim()) return all;
-    const q = categorySearch.toLowerCase();
+  // Derived: parent categories (no parent_id)
+  const parentCategories = useMemo(() => {
+    return allCategories.filter(c => !c.parent_id);
+  }, [allCategories]);
+
+  // Derived: sub-categories for selected parent
+  const subCategories = useMemo(() => {
+    if (!formData.parentCategoryId) return [];
+    return allCategories.filter(c => c.parent_id === formData.parentCategoryId);
+  }, [allCategories, formData.parentCategoryId]);
+
+  // Filtered parent categories for search
+  const filteredParentCategories = useMemo(() => {
+    if (!parentSearch.trim()) return parentCategories;
+    const q = parentSearch.toLowerCase();
+    return parentCategories.filter(c => c.name.toLowerCase().includes(q));
+  }, [parentCategories, parentSearch]);
+
+  // Filtered sub-categories for search
+  const filteredSubCategories = useMemo(() => {
+    const all = [...subCategories, { id: 'other', slug: 'other', name: 'Other', icon: '⋯', parent_id: formData.parentCategoryId } as ServiceCategory];
+    if (!subSearch.trim()) return all;
+    const q = subSearch.toLowerCase();
     return all.filter(c => c.name.toLowerCase().includes(q));
-  }, [categories, categorySearch]);
+  }, [subCategories, subSearch, formData.parentCategoryId]);
 
   // Visible questions (two-tier logic)
   const visibleQuestions = useMemo(() => {
@@ -231,7 +332,6 @@ export default function NewProjectPage() {
     }
     setAddressLoading(true);
     try {
-      // Note: Do NOT set User-Agent header — it triggers CORS preflight which Nominatim blocks
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(text)}&format=json&addressdetails=1&limit=5&countrycodes=us`
       );
@@ -240,7 +340,6 @@ export default function NewProjectPage() {
         return;
       }
       const data = await response.json();
-      console.log('[Address] Results for', text, ':', data.length);
       setAddressSuggestions(data);
       setShowSuggestions(data.length > 0);
     } catch (err) {
@@ -314,21 +413,22 @@ export default function NewProjectPage() {
   const canProceed = () => {
     switch (step) {
       case 0: return formData.fullName.trim() && formData.email.trim() && formData.phone.trim();
-      case 1: return !!formData.categoryId;
-      case 2: {
+      case 1: return !!formData.parentCategoryId;
+      case 2: return !!formData.categoryId;
+      case 3: {
         const current = visibleQuestions[currentQuestionIndex];
         if (!current) return true;
         if (current.is_required && !formData.dynamicAnswers[current.id]) return false;
         return true;
       }
-      case 3: return formData.description.trim().length >= 10;
-      case 4: return formData.address.trim() && formData.city.trim() && formData.state.trim() && formData.zipCode.trim();
+      case 4: return formData.description.trim().length >= 10;
+      case 5: return formData.address.trim() && formData.city.trim() && formData.state.trim() && formData.zipCode.trim();
       default: return true;
     }
   };
 
   const handleNext = () => {
-    if (step === 2) {
+    if (step === 3) {
       // Handle question-by-question navigation
       if (currentQuestionIndex < visibleQuestions.length - 1) {
         setCurrentQuestionIndex(prev => prev + 1);
@@ -339,7 +439,7 @@ export default function NewProjectPage() {
   };
 
   const handleBack = () => {
-    if (step === 2 && currentQuestionIndex > 0) {
+    if (step === 3 && currentQuestionIndex > 0) {
       setCurrentQuestionIndex(prev => prev - 1);
       return;
     }
@@ -347,80 +447,40 @@ export default function NewProjectPage() {
       router.push('/app/pros', undefined, { locale });
       return;
     }
-    // If going back from step 3 and there were no questions, go to step 1
-    if (step === 3 && questions.length === 0) {
-      setStep(1);
+    // If going back from step 4 and there were no questions, go to step 2
+    if (step === 4 && questions.length === 0) {
+      setStep(2);
       return;
+    }
+    // If going back from step 2, clear sub-category selection
+    if (step === 2) {
+      setFormData(prev => ({ ...prev, categoryId: '', categoryName: '' }));
+      setSubSearch('');
     }
     setStep(prev => prev - 1);
   };
 
-  // Category icon mapping
-  const getCategoryIcon = (icon?: string | null, name?: string) => {
-    // Map Ionicons names (from database) to emoji equivalents
-    const ioniconsToEmoji: Record<string, string> = {
-      'settings': '⚙️', 'settings-outline': '⚙️',
-      'sparkles': '✨', 'sparkles-outline': '✨',
-      'flash': '⚡', 'flash-outline': '⚡',
-      'hammer': '🔨', 'hammer-outline': '🔨',
-      'home': '🏠', 'home-outline': '🏠',
-      'car': '🚗', 'car-outline': '🚗',
-      'thermometer': '🌡️', 'thermometer-outline': '🌡️',
-      'grid': '🏗️', 'grid-outline': '🏗️',
-      'construct': '🔧', 'construct-outline': '🔧',
-      'water': '💧', 'water-outline': '💧',
-      'leaf': '🌿', 'leaf-outline': '🌿',
-      'color-palette': '🎨', 'color-palette-outline': '🎨',
-      'brush': '🖌️', 'brush-outline': '🖌️',
-      'fitness': '💪', 'fitness-outline': '💪',
-      'cut': '✂️', 'cut-outline': '✂️',
-      'restaurant': '🍽️', 'restaurant-outline': '🍽️',
-      'camera': '📷', 'camera-outline': '📷',
-      'musical-notes': '🎵', 'musical-notes-outline': '🎵',
-      'paw': '🐾', 'paw-outline': '🐾',
-      'shield': '🛡️', 'shield-outline': '🛡️',
-      'desktop': '💻', 'desktop-outline': '💻',
-      'laptop': '💻', 'laptop-outline': '💻',
-      'boat': '⛵', 'boat-outline': '⛵',
-      'business': '💼', 'business-outline': '💼',
-      'school': '📚', 'school-outline': '📚',
-      'medkit': '🏥', 'medkit-outline': '🏥',
-      'build': '🔧', 'build-outline': '🔧',
-      'key': '🔑', 'key-outline': '🔑',
-      'lock-closed': '🔒', 'lock-closed-outline': '🔒',
-      'bulb': '💡', 'bulb-outline': '💡',
-      'sunny': '☀️', 'sunny-outline': '☀️',
-      'snow': '❄️', 'snow-outline': '❄️',
-      'wifi': '📶', 'wifi-outline': '📶',
-      'tv': '📺', 'tv-outline': '📺',
-      'cube': '📦', 'cube-outline': '📦',
-      'people': '👥', 'people-outline': '👥',
-      'person': '👤', 'person-outline': '👤',
-      'calendar': '📅', 'calendar-outline': '📅',
-      'star': '⭐', 'star-outline': '⭐',
-      'heart': '❤️', 'heart-outline': '❤️',
-      'car-sport': '🚗', 'car-sport-outline': '🚗',
-      'bug': '🐛', 'bug-outline': '🐛',
-      'ellipsis-horizontal': '⋯',
-    };
-    
-    // First try to map the icon name from database
-    if (icon && ioniconsToEmoji[icon]) return ioniconsToEmoji[icon];
-    
-    // Fallback: try to match by category name
-    const nameMap: Record<string, string> = {
-      'appliance': '⚙️', 'cleaning': '✨', 'electrical': '⚡', 'electrician': '⚡',
-      'flooring': '🏗️', 'garage': '🚗', 'handyman': '🔨', 'home improvement': '🏠',
-      'house cleaning': '✨', 'hvac': '🌡️', 'landscaping': '🌿', 'lawn': '🌿',
-      'locksmith': '🔑', 'moving': '📦', 'painting': '🎨', 'pest': '🛡️',
-      'plumbing': '💧', 'pool': '🏊', 'roofing': '🏠', 'solar': '☀️',
-      'tree': '🌳', 'window': '🪟', 'other': '⋯',
-    };
-    const slug = name?.toLowerCase() || '';
-    for (const [key, emoji] of Object.entries(nameMap)) {
-      if (slug.includes(key)) return emoji;
-    }
-    return '🔧';
+  // Handle parent category selection — auto-advance to step 2
+  const handleSelectParent = (cat: ServiceCategory) => {
+    setFormData(prev => ({
+      ...prev,
+      parentCategoryId: cat.id,
+      parentCategoryName: cat.name,
+      categoryId: '',
+      categoryName: '',
+      dynamicAnswers: {},
+    }));
+    setSubSearch('');
+    setStep(2);
+  };
+
+  // Handle sub-category selection
+  const handleSelectSubCategory = (cat: ServiceCategory) => {
+    setFormData(prev => ({
+      ...prev,
+      categoryId: cat.id,
+      categoryName: cat.name,
+    }));
   };
 
   return (
@@ -453,7 +513,7 @@ export default function NewProjectPage() {
             <FiArrowLeft size={24} color={ProsColors.textPrimary} />
           </button>
           <span style={{ fontSize: '18px', fontWeight: '600', color: ProsColors.textPrimary }}>
-            {step === 5 ? 'Review & Submit' : 'Start a Project'}
+            {step === 6 ? 'Review & Submit' : 'Start a Project'}
           </span>
           <button onClick={handleCancel} style={{
             background: 'none', border: 'none', cursor: 'pointer', padding: '8px',
@@ -551,70 +611,69 @@ export default function NewProjectPage() {
               </div>
 
               {/* Privacy Preference */}
-              <div style={{ marginBottom: '24px' }}>
+              <div style={{ marginBottom: '20px' }}>
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: ProsColors.textPrimary, marginBottom: '12px' }}>
-                  Privacy Preference
+                  Communication Preference
                 </label>
-                {[
-                  { id: 'share' as const, icon: <FiPhone size={16} />, title: 'Share my contact info', desc: 'Pros can contact you directly via phone or email' },
-                  { id: 'app_only' as const, icon: <FiMessageSquare size={16} />, title: 'In-app messaging only', desc: 'Communicate with pros through our secure in-app messaging' },
-                ].map(opt => (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <button
-                    key={opt.id}
                     type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, privacyPreference: opt.id }))}
+                    onClick={() => setFormData(prev => ({ ...prev, privacyPreference: 'app_only' }))}
                     style={{
-                      display: 'flex', alignItems: 'flex-start', width: '100%',
-                      padding: '16px 12px', border: `1px solid ${formData.privacyPreference === opt.id ? ProsColors.primary : ProsColors.border}`,
-                      borderRadius: '8px', marginBottom: '12px', cursor: 'pointer', textAlign: 'left',
-                      background: formData.privacyPreference === opt.id ? `${ProsColors.primary}10` : ProsColors.sectionBg,
+                      display: 'flex', alignItems: 'center', gap: '12px',
+                      padding: '14px 16px', border: `2px solid ${formData.privacyPreference === 'app_only' ? ProsColors.primary : ProsColors.border}`,
+                      borderRadius: '10px', background: formData.privacyPreference === 'app_only' ? `${ProsColors.primary}10` : 'white',
+                      cursor: 'pointer', textAlign: 'left',
                     }}
                   >
-                    <div style={{
-                      width: '20px', height: '20px', borderRadius: '50%',
-                      border: `2px solid ${formData.privacyPreference === opt.id ? ProsColors.primary : '#D1D5DB'}`,
-                      marginRight: '12px', marginTop: '2px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      flexShrink: 0,
-                    }}>
-                      {formData.privacyPreference === opt.id && (
-                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: ProsColors.primary }} />
-                      )}
-                    </div>
+                    <FiShield size={20} color={formData.privacyPreference === 'app_only' ? ProsColors.primary : ProsColors.textMuted} />
                     <div>
-                      <div style={{ fontSize: '14px', fontWeight: '600', color: ProsColors.textPrimary, marginBottom: '4px' }}>
-                        {opt.title}
-                      </div>
-                      <div style={{ fontSize: '13px', color: ProsColors.textSecondary, lineHeight: '18px' }}>
-                        {opt.desc}
-                      </div>
+                      <div style={{ fontSize: '15px', fontWeight: '600', color: ProsColors.textPrimary }}>In-app messaging only</div>
+                      <div style={{ fontSize: '13px', color: ProsColors.textSecondary }}>Pros contact you through the app</div>
                     </div>
                   </button>
-                ))}
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, privacyPreference: 'share' }))}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: '12px',
+                      padding: '14px 16px', border: `2px solid ${formData.privacyPreference === 'share' ? ProsColors.primary : ProsColors.border}`,
+                      borderRadius: '10px', background: formData.privacyPreference === 'share' ? `${ProsColors.primary}10` : 'white',
+                      cursor: 'pointer', textAlign: 'left',
+                    }}
+                  >
+                    <FiMessageSquare size={20} color={formData.privacyPreference === 'share' ? ProsColors.primary : ProsColors.textMuted} />
+                    <div>
+                      <div style={{ fontSize: '15px', fontWeight: '600', color: ProsColors.textPrimary }}>Share my contact info</div>
+                      <div style={{ fontSize: '13px', color: ProsColors.textSecondary }}>Pros can call, text, or email you directly</div>
+                    </div>
+                  </button>
+                </div>
               </div>
 
-              {/* Info box */}
               <div style={{
-                display: 'flex', alignItems: 'flex-start', gap: '8px',
-                padding: '12px', background: `${ProsColors.primary}10`, borderRadius: '8px', marginBottom: '24px',
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '12px', background: '#F0F9FF', borderRadius: '8px',
+                marginTop: '12px',
               }}>
-                <FiShield style={{ color: ProsColors.primary, flexShrink: 0, marginTop: '2px' }} />
-                <span style={{ fontSize: '13px', color: '#374151', lineHeight: '18px' }}>
+                <FiShield size={16} color="#3B82F6" />
+                <span style={{ fontSize: '13px', color: '#3B82F6' }}>
                   Your information is secure and will only be shared with pros who bid on your project.
                 </span>
               </div>
             </div>
           )}
 
-          {/* ===== STEP 1: Category Selection ===== */}
+          {/* ===== STEP 1: Parent Category Selection ===== */}
           {step === 1 && (
             <div>
               <div style={{ marginBottom: '24px' }}>
                 <span style={{ fontSize: '14px', fontWeight: '600', color: ProsColors.primary }}>Step 2 of {TOTAL_STEPS}</span>
                 <h2 style={{ fontSize: '28px', fontWeight: '700', color: ProsColors.textPrimary, marginTop: '4px' }}>
-                  What do you need?
+                  What type of service?
                 </h2>
                 <p style={{ fontSize: '16px', color: ProsColors.textSecondary }}>
-                  Select a service category
+                  Choose a category to get started
                 </p>
               </div>
 
@@ -626,9 +685,9 @@ export default function NewProjectPage() {
                 <FiSearch style={{ color: ProsColors.textMuted, marginRight: '8px' }} />
                 <input
                   type="text"
-                  value={categorySearch}
-                  onChange={e => setCategorySearch(e.target.value)}
-                  placeholder="Search services..."
+                  value={parentSearch}
+                  onChange={e => setParentSearch(e.target.value)}
+                  placeholder="Search categories..."
                   style={{
                     flex: 1, padding: '12px 0', fontSize: '16px', border: 'none',
                     background: 'transparent', outline: 'none',
@@ -642,35 +701,39 @@ export default function NewProjectPage() {
                   <p style={{ marginTop: '12px', color: ProsColors.textSecondary }}>Loading categories...</p>
                 </div>
               ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
-                  {filteredCategories.map(cat => (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {filteredParentCategories.map(cat => (
                     <button
                       key={cat.id}
                       type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, categoryId: cat.id, categoryName: cat.name }))}
+                      onClick={() => handleSelectParent(cat)}
                       style={{
-                        padding: '20px 16px', border: `2px solid ${formData.categoryId === cat.id ? ProsColors.primary : ProsColors.border}`,
-                        borderRadius: '12px', cursor: 'pointer', textAlign: 'center',
-                        background: formData.categoryId === cat.id ? `${ProsColors.primary}10` : 'white',
+                        display: 'flex', alignItems: 'center', gap: '16px',
+                        padding: '18px 16px',
+                        border: `2px solid ${formData.parentCategoryId === cat.id ? ProsColors.primary : ProsColors.border}`,
+                        borderRadius: '14px', cursor: 'pointer', textAlign: 'left',
+                        background: formData.parentCategoryId === cat.id ? `${ProsColors.primary}10` : 'white',
                         transition: 'all 0.2s',
-                        position: 'relative',
+                        width: '100%',
                       }}
                     >
-                      {formData.categoryId === cat.id && (
-                        <div style={{
-                          position: 'absolute', top: '8px', right: '8px',
-                          width: '20px', height: '20px', borderRadius: '50%',
-                          background: ProsColors.primary, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}>
-                          <FiCheck size={12} color="white" />
+                      <div style={{
+                        width: '48px', height: '48px', borderRadius: '12px',
+                        background: cat.color ? `${cat.color}15` : '#F3F4F6',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '24px', flexShrink: 0,
+                      }}>
+                        {parentCategoryEmoji[cat.slug] || getCategoryIcon(cat.icon, cat.name)}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '16px', fontWeight: '600', color: ProsColors.textPrimary }}>
+                          {cat.name}
                         </div>
-                      )}
-                      <div style={{ fontSize: '32px', marginBottom: '8px' }}>
-                        {getCategoryIcon(cat.icon, cat.name)}
+                        <div style={{ fontSize: '13px', color: ProsColors.textSecondary, marginTop: '2px' }}>
+                          {allCategories.filter(c => c.parent_id === cat.id).length} services
+                        </div>
                       </div>
-                      <div style={{ fontSize: '14px', fontWeight: '600', color: ProsColors.textPrimary }}>
-                        {cat.name}
-                      </div>
+                      <FiChevronRight size={20} color={ProsColors.textMuted} />
                     </button>
                   ))}
                 </div>
@@ -678,11 +741,77 @@ export default function NewProjectPage() {
             </div>
           )}
 
-          {/* ===== STEP 2: Dynamic Questions ===== */}
+          {/* ===== STEP 2: Sub-Service Selection ===== */}
           {step === 2 && (
             <div>
               <div style={{ marginBottom: '24px' }}>
                 <span style={{ fontSize: '14px', fontWeight: '600', color: ProsColors.primary }}>Step 3 of {TOTAL_STEPS}</span>
+                <h2 style={{ fontSize: '28px', fontWeight: '700', color: ProsColors.textPrimary, marginTop: '4px' }}>
+                  What do you need?
+                </h2>
+                <p style={{ fontSize: '16px', color: ProsColors.textSecondary }}>
+                  Select a specific service under <strong style={{ color: ProsColors.primary }}>{formData.parentCategoryName}</strong>
+                </p>
+              </div>
+
+              {/* Search */}
+              <div style={{
+                display: 'flex', alignItems: 'center', border: `1px solid ${ProsColors.border}`,
+                borderRadius: '8px', padding: '0 12px', marginBottom: '20px', background: ProsColors.sectionBg,
+              }}>
+                <FiSearch style={{ color: ProsColors.textMuted, marginRight: '8px' }} />
+                <input
+                  type="text"
+                  value={subSearch}
+                  onChange={e => setSubSearch(e.target.value)}
+                  placeholder="Search services..."
+                  style={{
+                    flex: 1, padding: '12px 0', fontSize: '16px', border: 'none',
+                    background: 'transparent', outline: 'none',
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+                {filteredSubCategories.map(cat => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => handleSelectSubCategory(cat)}
+                    style={{
+                      padding: '20px 16px', border: `2px solid ${formData.categoryId === cat.id ? ProsColors.primary : ProsColors.border}`,
+                      borderRadius: '12px', cursor: 'pointer', textAlign: 'center',
+                      background: formData.categoryId === cat.id ? `${ProsColors.primary}10` : 'white',
+                      transition: 'all 0.2s',
+                      position: 'relative',
+                    }}
+                  >
+                    {formData.categoryId === cat.id && (
+                      <div style={{
+                        position: 'absolute', top: '8px', right: '8px',
+                        width: '20px', height: '20px', borderRadius: '50%',
+                        background: ProsColors.primary, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <FiCheck size={12} color="white" />
+                      </div>
+                    )}
+                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>
+                      {getCategoryIcon(cat.icon, cat.name)}
+                    </div>
+                    <div style={{ fontSize: '14px', fontWeight: '600', color: ProsColors.textPrimary }}>
+                      {cat.name}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ===== STEP 3: Dynamic Questions ===== */}
+          {step === 3 && (
+            <div>
+              <div style={{ marginBottom: '24px' }}>
+                <span style={{ fontSize: '14px', fontWeight: '600', color: ProsColors.primary }}>Step 4 of {TOTAL_STEPS}</span>
                 <h2 style={{ fontSize: '28px', fontWeight: '700', color: ProsColors.textPrimary, marginTop: '4px' }}>
                   A few more details
                 </h2>
@@ -726,11 +855,12 @@ export default function NewProjectPage() {
                                   dynamicAnswers: { ...prev.dynamicAnswers, [q.id]: opt }
                                 }))}
                                 style={{
-                                  padding: '14px 16px', border: `2px solid ${formData.dynamicAnswers[q.id] === opt ? ProsColors.primary : ProsColors.border}`,
+                                  padding: '14px 16px',
+                                  border: `2px solid ${formData.dynamicAnswers[q.id] === opt ? ProsColors.primary : ProsColors.border}`,
                                   borderRadius: '10px', cursor: 'pointer', textAlign: 'left',
                                   background: formData.dynamicAnswers[q.id] === opt ? `${ProsColors.primary}10` : 'white',
-                                  fontSize: '16px', fontWeight: formData.dynamicAnswers[q.id] === opt ? '600' : '400',
-                                  color: ProsColors.textPrimary,
+                                  fontSize: '15px', fontWeight: '500', color: ProsColors.textPrimary,
+                                  transition: 'all 0.2s',
                                 }}
                               >
                                 {opt}
@@ -743,13 +873,13 @@ export default function NewProjectPage() {
                         {q.question_type === 'multiple_choice' && q.options && (
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             {q.options.map((opt, i) => {
-                              const selected = (formData.dynamicAnswers[q.id] || []).includes(opt);
+                              const selected = Array.isArray(formData.dynamicAnswers[q.id]) && formData.dynamicAnswers[q.id].includes(opt);
                               return (
                                 <button
                                   key={i}
                                   type="button"
                                   onClick={() => {
-                                    const current = formData.dynamicAnswers[q.id] || [];
+                                    const current = Array.isArray(formData.dynamicAnswers[q.id]) ? formData.dynamicAnswers[q.id] : [];
                                     const updated = selected ? current.filter((x: string) => x !== opt) : [...current, opt];
                                     setFormData(prev => ({
                                       ...prev,
@@ -757,16 +887,18 @@ export default function NewProjectPage() {
                                     }));
                                   }}
                                   style={{
-                                    padding: '14px 16px', border: `2px solid ${selected ? ProsColors.primary : ProsColors.border}`,
+                                    padding: '14px 16px',
+                                    border: `2px solid ${selected ? ProsColors.primary : ProsColors.border}`,
                                     borderRadius: '10px', cursor: 'pointer', textAlign: 'left',
                                     background: selected ? `${ProsColors.primary}10` : 'white',
-                                    fontSize: '16px', display: 'flex', alignItems: 'center', gap: '10px',
-                                    color: ProsColors.textPrimary,
+                                    fontSize: '15px', fontWeight: '500', color: ProsColors.textPrimary,
+                                    display: 'flex', alignItems: 'center', gap: '10px',
+                                    transition: 'all 0.2s',
                                   }}
                                 >
                                   <div style={{
                                     width: '20px', height: '20px', borderRadius: '4px',
-                                    border: `2px solid ${selected ? ProsColors.primary : '#D1D5DB'}`,
+                                    border: `2px solid ${selected ? ProsColors.primary : ProsColors.border}`,
                                     background: selected ? ProsColors.primary : 'white',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     flexShrink: 0,
@@ -822,11 +954,11 @@ export default function NewProjectPage() {
             </div>
           )}
 
-          {/* ===== STEP 3: Project Description ===== */}
-          {step === 3 && (
+          {/* ===== STEP 4: Project Description ===== */}
+          {step === 4 && (
             <div>
               <div style={{ marginBottom: '24px' }}>
-                <span style={{ fontSize: '14px', fontWeight: '600', color: ProsColors.primary }}>Step 4 of {TOTAL_STEPS}</span>
+                <span style={{ fontSize: '14px', fontWeight: '600', color: ProsColors.primary }}>Step 5 of {TOTAL_STEPS}</span>
                 <h2 style={{ fontSize: '28px', fontWeight: '700', color: ProsColors.textPrimary, marginTop: '4px' }}>
                   Describe your project
                 </h2>
@@ -859,11 +991,11 @@ export default function NewProjectPage() {
             </div>
           )}
 
-          {/* ===== STEP 4: Location ===== */}
-          {step === 4 && (
+          {/* ===== STEP 5: Location ===== */}
+          {step === 5 && (
             <div>
               <div style={{ marginBottom: '24px' }}>
-                <span style={{ fontSize: '14px', fontWeight: '600', color: ProsColors.primary }}>Step 5 of {TOTAL_STEPS}</span>
+                <span style={{ fontSize: '14px', fontWeight: '600', color: ProsColors.primary }}>Step 6 of {TOTAL_STEPS}</span>
                 <h2 style={{ fontSize: '28px', fontWeight: '700', color: ProsColors.textPrimary, marginTop: '4px' }}>
                   Where is the project?
                 </h2>
@@ -978,11 +1110,11 @@ export default function NewProjectPage() {
             </div>
           )}
 
-          {/* ===== STEP 5: Review & Submit ===== */}
-          {step === 5 && (
+          {/* ===== STEP 6: Review & Submit ===== */}
+          {step === 6 && (
             <div>
               <div style={{ marginBottom: '24px' }}>
-                <span style={{ fontSize: '14px', fontWeight: '600', color: ProsColors.primary }}>Step 6 of {TOTAL_STEPS}</span>
+                <span style={{ fontSize: '14px', fontWeight: '600', color: ProsColors.primary }}>Step 7 of {TOTAL_STEPS}</span>
                 <h2 style={{ fontSize: '28px', fontWeight: '700', color: ProsColors.textPrimary, marginTop: '4px' }}>
                   Review your request
                 </h2>
@@ -1001,7 +1133,7 @@ export default function NewProjectPage() {
                     Service
                   </span>
                   <div style={{ fontSize: '18px', fontWeight: '700', color: ProsColors.textPrimary, marginTop: '4px' }}>
-                    {formData.categoryName || 'Other'}
+                    {formData.parentCategoryName} &rsaquo; {formData.categoryName || 'Other'}
                   </div>
                 </div>
 
@@ -1097,8 +1229,8 @@ export default function NewProjectPage() {
             </div>
           )}
 
-          {/* ===== Navigation Buttons (Steps 0-4) ===== */}
-          {step < 5 && (
+          {/* ===== Navigation Buttons (Steps 0-5, not step 1 since it auto-advances) ===== */}
+          {step < 6 && step !== 1 && (
             <div style={{ marginTop: '32px', paddingBottom: '20px' }}>
               <button
                 type="button"
