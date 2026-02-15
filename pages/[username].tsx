@@ -4443,6 +4443,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       props: {
         cardData: null,
         error: 'Configuration error',
+        ...(await serverSideTranslations(context.locale ?? 'en', ['common'])),
       },
     };
   }
@@ -4482,6 +4483,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
         props: {
           cardData: null,
           error: 'Card not found',
+          ...(await serverSideTranslations(context.locale ?? 'en', ['common'])),
         },
       };
     }
@@ -4782,6 +4784,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       props: {
         cardData,
         error: null,
+        ...(await serverSideTranslations(context.locale ?? 'en', ['common'])),
       },
     };
   } catch (err) {
@@ -4790,6 +4793,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       props: {
         cardData: null,
         error: 'Failed to load card',
+        ...(await serverSideTranslations(context.locale ?? 'en', ['common'])),
       },
     };
   }
