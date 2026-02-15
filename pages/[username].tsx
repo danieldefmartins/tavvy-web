@@ -19,6 +19,7 @@ import { GetServerSideProps } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { getTemplateByIdWithMigration, resolveTemplateId, TemplateLayout } from '../config/eCardTemplates';
+import CivicCardSection from '../components/CivicCardSection';
 
 interface CardLink {
   id: string;
@@ -128,6 +129,17 @@ interface CardData {
   reviewTripadvisorUrl: string;
   reviewFacebookUrl: string;
   reviewBbbUrl: string;
+  // Civic Card fields (political santinho)
+  ballotNumber: string;
+  partyName: string;
+  officeRunningFor: string;
+  electionYear: string;
+  campaignSlogan: string;
+  region: string;
+  civicProposals: { id: string; title: string; description: string; sortOrder: number; reactions: { support: number; needs_improvement: number; disagree: number } }[];
+  civicQuestions: { id: string; questionText: string; upvoteCount: number; answerText: string | null; answeredAt: string | null; createdAt: string }[];
+  civicCommitments: { id: string; title: string; description: string; status: 'planned' | 'in_progress' | 'completed'; sortOrder: number }[];
+  companyLogoUrl: string | null;
 }
 
 interface PageProps {
@@ -959,6 +971,19 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
       };
     }
 
+    // Civic Card — Brazilian Political Santinho
+    if (templateLayout === 'civic-card') {
+      return {
+        isLuxury: false,
+        isDark: false,
+        hasOrnate: false,
+        accentColor: cs?.primary || '#CC0000',
+        textColor: '#1a1a2e',
+        buttonBg: cs?.primary ? `${cs.primary}15` : 'rgba(204,0,0,0.08)',
+        buttonBorder: cs?.primary ? `${cs.primary}40` : 'rgba(204,0,0,0.25)',
+        photoStyle: 'rounded',
+      };
+    }
     // Default fallback
     return {
       isLuxury: false,
@@ -1027,7 +1052,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
     const isOnLightSection = templateLayout === 'pro-card' || templateLayout === 'cover-card' || 
       templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || 
       templateLayout === 'biz-minimalist' || templateLayout === 'pro-realtor' || 
-      templateLayout === 'blogger';
+      templateLayout === 'blogger' || templateLayout === 'civic-card';
     if (isOnLightSection) return '#333333';
     // For templates with dark gradient backgrounds
     if (bgIsActuallyLight) return '#333333';
@@ -1078,7 +1103,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
 
   // Determine if the footer area has a light background (for logo color switching)
   // pro-card always has a white bottom section, so footer is always on light bg
-  const isLightFooterBg = (templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist') ? true : bgIsActuallyLight;
+  const isLightFooterBg = (templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || templateLayout === 'civic-card') ? true : bgIsActuallyLight;
 
   return (
     <>
@@ -1166,7 +1191,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
                 ? { background: activeColorScheme?.background || `linear-gradient(165deg, ${cardData.gradientColor1} 0%, ${cardData.gradientColor2} 50%, #0a0f1e 100%)` }
               : templateLayout === 'blogger'
                 ? { background: activeColorScheme?.background || cardData.gradientColor1 }
-                : templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist'
+                : templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || templateLayout === 'civic-card'
                   ? { background: activeColorScheme?.background || '#f0f2f5' }
                 : cardData.backgroundType === 'solid' 
                   ? { background: cardData.gradientColor1 }
@@ -3062,6 +3087,26 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
             </div>
           )}
 
+          {/* ═══ CIVIC CARD SECTION ═══ */}
+          {templateLayout === 'civic-card' && (
+            <CivicCardSection
+              cardId={cardData.id}
+              cardSlug={cardData.slug}
+              fullName={cardData.fullName}
+              ballotNumber={cardData.ballotNumber || ''}
+              partyName={cardData.partyName || ''}
+              officeRunningFor={cardData.officeRunningFor || ''}
+              electionYear={cardData.electionYear || ''}
+              campaignSlogan={cardData.campaignSlogan || ''}
+              region={cardData.region || ''}
+              profilePhotoUrl={cardData.profilePhotoUrl}
+              accentColor={activeColorScheme?.primary || templateStyles.accentColor}
+              secondaryColor={activeColorScheme?.secondary || templateStyles.accentColor}
+              proposals={cardData.civicProposals || []}
+              questions={cardData.civicQuestions || []}
+              commitments={cardData.civicCommitments || []}
+            />
+          )}
           {/* ═══ CARD FOOTER ═══ */}
           <div style={{ width: '100%', marginTop: 20, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 12 }}>
 
@@ -4506,7 +4551,96 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
     } catch (endorseErr) {
       console.error('[Card SSR] Endorsement fetch error:', endorseErr);
     }
-    
+
+    // Fetch civic card data if this is a civic-card template
+    let civicProposals: any[] = [];
+    let civicQuestions: any[] = [];
+    let civicCommitments: any[] = [];
+    const resolvedTemplate = resolveTemplateId(data.template_id || 'classic-blue');
+    if (resolvedTemplate === 'civic-card') {
+      try {
+        // Fetch proposals
+        const { data: proposalsData } = await serverSupabase
+          .from('civic_proposals')
+          .select('*')
+          .eq('card_id', data.id)
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true });
+
+        if (proposalsData) {
+          // Fetch reaction counts for each proposal
+          for (const p of proposalsData) {
+            const { data: reactions } = await serverSupabase
+              .from('civic_reactions')
+              .select('reaction_type')
+              .eq('proposal_id', p.id);
+            const counts = { support: 0, needs_improvement: 0, disagree: 0 };
+            (reactions || []).forEach((r: any) => {
+              if (r.reaction_type in counts) counts[r.reaction_type as keyof typeof counts]++;
+            });
+            civicProposals.push({
+              id: p.id,
+              title: p.title,
+              description: p.description || '',
+              sortOrder: p.sort_order || 0,
+              reactions: counts,
+            });
+          }
+        }
+
+        // Fetch questions
+        const { data: questionsData } = await serverSupabase
+          .from('civic_questions')
+          .select('*')
+          .eq('card_id', data.id)
+          .order('upvote_count', { ascending: false })
+          .limit(50);
+
+        civicQuestions = (questionsData || []).map((q: any) => ({
+          id: q.id,
+          questionText: q.question_text,
+          upvoteCount: q.upvote_count || 0,
+          answerText: q.answer_text || null,
+          answeredAt: q.answered_at || null,
+          createdAt: q.created_at,
+        }));
+
+        // Fetch commitments
+        const { data: commitmentsData } = await serverSupabase
+          .from('civic_commitments')
+          .select('*')
+          .eq('card_id', data.id)
+          .order('sort_order', { ascending: true });
+
+        civicCommitments = (commitmentsData || []).map((c: any) => ({
+          id: c.id,
+          title: c.title,
+          description: c.description || '',
+          status: c.status || 'planned',
+          sortOrder: c.sort_order || 0,
+        }));
+
+        // For civic cards, also load political endorsement signals
+        const { data: politicalSignals } = await serverSupabase
+          .from('review_items')
+          .select('id, label, icon_emoji, sort_order, category')
+          .eq('signal_type', 'pro_endorsement')
+          .eq('is_active', true)
+          .eq('category', 'politics')
+          .order('sort_order', { ascending: true });
+        if (politicalSignals && politicalSignals.length > 0) {
+          endorsementSignals = politicalSignals.map((s: any) => ({
+            id: s.id,
+            label: s.label,
+            emoji: s.icon_emoji || '\u2B50',
+            category: s.category || 'politics',
+          }));
+        }
+      } catch (civicErr) {
+        console.error('[Card SSR] Civic data fetch error:', civicErr);
+      }
+    }
+
     const cardData: CardData = {
       id: data.id,
       slug: data.slug,
@@ -4599,6 +4733,16 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       reviewTripadvisorUrl: data.review_tripadvisor_url || '',
       reviewFacebookUrl: data.review_facebook_url || '',
       reviewBbbUrl: data.review_bbb_url || '',
+      // Civic card fields
+      ballotNumber: data.ballot_number || '',
+      partyName: data.party_name || '',
+      officeRunningFor: data.office_running_for || '',
+      electionYear: data.election_year || '',
+      campaignSlogan: data.campaign_slogan || '',
+      region: data.region || '',
+      civicProposals,
+      civicQuestions,
+      civicCommitments,
     };
     
     return {

@@ -32,7 +32,8 @@ export type TemplateLayout =
   | 'cover-card'      // Cover photo top half, white bottom with contact rows
   | 'biz-traditional' // Traditional business card: logo, photo, contact info, social
   | 'biz-modern'      // Modern business card: split layout, colored header, clean contact
-  | 'biz-minimalist';  // Minimalist business card: ultra-clean, lots of whitespace
+  | 'biz-minimalist'  // Minimalist business card: ultra-clean, lots of whitespace
+  | 'civic-card';      // Brazilian political santinho: candidate photo, ballot number, proposals, civic engagement
 
 export interface Template {
   id: string;
@@ -514,6 +515,43 @@ export const TEMPLATES: Template[] = [
       showBorder: false,
       hasGradientOverlay: true,
       hasBannerImage: true,
+    },
+  },
+
+  // 14. CIVIC CARD — Brazilian Political Santinho
+  {
+    id: 'civic-card',
+    name: 'Civic Card',
+    description: 'Brazilian political e-Card. Candidate photo, ballot number, party identity, interactive proposals, and civic engagement.',
+    category: 'paid',
+    previewImage: 'civic-card',
+    isPremium: true,
+    features: ['candidate-photo', 'ballot-number', 'party-identity', 'proposals', 'community-feedback', 'qa', 'commitments', 'endorsements'],
+    layout: 'civic-card',
+    colorSchemes: [
+      // PT Red
+      { id: 'pt-red', name: 'Vermelho', primary: '#CC0000', secondary: '#990000', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f5f5f5', cardBg: '#FFFFFF' },
+      // PSDB Blue
+      { id: 'psdb-blue', name: 'Azul', primary: '#003399', secondary: '#002266', accent: '#FFD700', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF' },
+      // MDB Green
+      { id: 'mdb-green', name: 'Verde', primary: '#006633', secondary: '#004D26', accent: '#FFD700', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f5f0', cardBg: '#FFFFFF' },
+      // PL Blue & Yellow
+      { id: 'pl-blue-yellow', name: 'Azul & Amarelo', primary: '#003366', secondary: '#002244', accent: '#FFD700', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF' },
+      // PDT Orange
+      { id: 'pdt-orange', name: 'Laranja', primary: '#E65100', secondary: '#BF360C', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#fff8f0', cardBg: '#FFFFFF' },
+      // PSOL Purple
+      { id: 'psol-purple', name: 'Roxo', primary: '#6A1B9A', secondary: '#4A148C', accent: '#FFD700', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f5f0fa', cardBg: '#FFFFFF' },
+      // Brasil (Green & Yellow)
+      { id: 'brasil', name: 'Brasil', primary: '#009739', secondary: '#006B2B', accent: '#FEDD00', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f5f0', cardBg: '#FFFFFF' },
+    ],
+    layoutConfig: {
+      photoPosition: 'center',
+      photoSize: 'large',
+      photoStyle: 'rounded',
+      buttonStyle: 'rounded',
+      fontFamily: 'modern',
+      showBorder: false,
+      hasBannerImage: false,
     },
   },
 ];
