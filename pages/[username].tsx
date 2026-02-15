@@ -3259,22 +3259,31 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
           onClick={() => setShowEndorseFlow(false)}
         >
           <div
-            style={{ background: '#fff', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 420, maxHeight: '90vh', overflowY: 'auto', padding: '24px 20px 32px', color: '#1a1a2e' }}
+            style={{ background: '#fff', borderRadius: '20px 20px 0 0', width: '100%', maxWidth: 420, maxHeight: '85vh', display: 'flex', flexDirection: 'column' as const, color: '#1a1a2e' }}
             onClick={e => e.stopPropagation()}
           >
-            {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-              <div style={{ fontSize: 22, fontWeight: 800 }}>What Stood Out?</div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#3B9FD9' }}>{selectedSignalCount} selected</div>
+            {/* Header - fixed at top */}
+            <div style={{ padding: '24px 20px 0', flexShrink: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                <div style={{ fontSize: 22, fontWeight: 800 }}>What Stood Out?</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#3B9FD9' }}>{selectedSignalCount} selected</div>
+                  <button onClick={() => setShowEndorseFlow(false)} style={{ background: '#f0f0f0', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#333', flexShrink: 0 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div style={{ fontSize: 13, color: '#888', marginBottom: 16 }}>Tap to select · Tap again to make it stronger</div>
             </div>
-            <div style={{ fontSize: 13, color: '#888', marginBottom: 20 }}>Tap to select · Tap again to make it stronger</div>
+            {/* Scrollable content area */}
+            <div style={{ overflowY: 'auto', padding: '0 20px', flex: 1, minHeight: 0 }}>
 
             {/* Group signals by category */}
             {(() => {
               const signals = cardData.endorsementSignals || [];
               const categories = [...new Set(signals.map(s => s.category))];
-              const catColors: Record<string, string> = { universal: '#3B9FD9', sales: '#E87D3E', real_estate: '#6B7280', food_dining: '#E53E3E', health_wellness: '#38A169', beauty: '#D53F8C', home_services: '#DD6B20', legal_finance: '#2B6CB0', creative_marketing: '#8B5CF6', education_coaching: '#D69E2E', tech_it: '#319795', automotive: '#718096', events_entertainment: '#9F7AEA', pets: '#ED8936' };
-              const catLabels: Record<string, string> = { universal: 'Strengths', sales: 'Sales Skills', real_estate: 'Real Estate', food_dining: 'Food & Dining', health_wellness: 'Health & Wellness', beauty: 'Beauty', home_services: 'Home Services', legal_finance: 'Legal & Finance', creative_marketing: 'Creative & Marketing', education_coaching: 'Education & Coaching', tech_it: 'Tech & IT', automotive: 'Automotive', events_entertainment: 'Events & Entertainment', pets: 'Pets' };
+              const catColors: Record<string, string> = { universal: '#3B9FD9', politics: '#1B5E20', sales: '#E87D3E', real_estate: '#6B7280', food_dining: '#E53E3E', health_wellness: '#38A169', beauty: '#D53F8C', home_services: '#DD6B20', legal_finance: '#2B6CB0', creative_marketing: '#8B5CF6', education_coaching: '#D69E2E', tech_it: '#319795', automotive: '#718096', events_entertainment: '#9F7AEA', pets: '#ED8936' };
+              const catLabels: Record<string, string> = { universal: 'Strengths', politics: 'Politics', sales: 'Sales Skills', real_estate: 'Real Estate', food_dining: 'Food & Dining', health_wellness: 'Health & Wellness', beauty: 'Beauty', home_services: 'Home Services', legal_finance: 'Legal & Finance', creative_marketing: 'Creative & Marketing', education_coaching: 'Education & Coaching', tech_it: 'Tech & IT', automotive: 'Automotive', events_entertainment: 'Events & Entertainment', pets: 'Pets' };
               return categories.map(cat => (
                 <div key={cat} style={{ marginBottom: 16 }}>
                   <div style={{ display: 'inline-block', padding: '4px 12px', borderRadius: 12, background: catColors[cat] || '#3B9FD9', color: '#fff', fontSize: 12, fontWeight: 700, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>
@@ -3326,8 +3335,10 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
                 rows={2}
               />
             </div>
+            </div>{/* end scrollable content area */}
 
-            {/* Continue Button */}
+            {/* Continue Button - sticky at bottom */}
+            <div style={{ padding: '12px 20px 32px', flexShrink: 0, borderTop: '1px solid #f0f0f0', background: '#fff' }}>
             <button
               onClick={async () => {
                 if (selectedSignalCount === 0) return;
@@ -3394,6 +3405,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
             >
               {isSubmittingEndorsement ? 'Submitting...' : 'Continue →'}
             </button>
+            </div>{/* end sticky bottom */}
           </div>
         </div>
       )}
