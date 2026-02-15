@@ -20,6 +20,8 @@ import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { getTemplateByIdWithMigration, resolveTemplateId, TemplateLayout } from '../config/eCardTemplates';
 import CivicCardSection from '../components/CivicCardSection';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 interface CardLink {
   id: string;
@@ -1151,8 +1153,6 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           }
           @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
             to { opacity: 1; transform: translateY(0); }
           }
           .action-btn:hover {
