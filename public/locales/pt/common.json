@@ -811,7 +811,15 @@
     "planned": "Planejado",
     "votes": "votos",
     "questionSubmitted": "Pergunta enviada! O candidato será notificado.",
-    "candidateAnswer": "Resposta de {{name}}"
+    "candidateAnswer": "Resposta de {{name}}",
+    "whoIRecommend": "Quem Eu Recomendo",
+    "questionPending": "Sua pergunta foi enviada e está aguardando aprovação.",
+    "pendingQuestions": "Perguntas Pendentes",
+    "noPendingQuestions": "Nenhuma pergunta pendente para revisar",
+    "approve": "Aprovar",
+    "reject": "Rejeitar",
+    "approveAndAnswer": "Aprovar & Responder",
+    "typeAnswer": "Digite sua resposta (opcional)..."
   },
   "endorsement": {
     "title": "Endossos",
@@ -917,5 +925,27 @@
     "signalGentle": "Gentil",
     "signalCleanFacility": "Local limpo",
     "signalFriendly": "Amigável"
+  },
+  "messaging": {
+    "sendMessage": "Enviar Mensagem",
+    "messageTo": "Mensagem para {{name}}",
+    "privateConversation": "Conversa privada",
+    "startConversation": "Inicie uma conversa com {{name}}",
+    "yourMessagePrivate": "Sua mensagem será enviada de forma privada",
+    "typeMessage": "Digite uma mensagem...",
+    "loading": "Carregando mensagens...",
+    "justNow": "Agora mesmo",
+    "loginRequired": "Faça login para enviar uma mensagem"
+  },
+  "inbox": {
+    "title": "Caixa de Entrada",
+    "primary": "Principal",
+    "spam": "Spam",
+    "questions": "Perguntas",
+    "noMessages": "Nenhuma mensagem ainda",
+    "noSpam": "Nenhuma mensagem de spam",
+    "markSpam": "Spam",
+    "notSpam": "Não é Spam",
+    "typeReply": "Digite uma resposta..."
   }
 }

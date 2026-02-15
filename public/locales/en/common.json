@@ -811,7 +811,15 @@
     "planned": "Planned",
     "votes": "votes",
     "questionSubmitted": "Question submitted! The candidate will be notified.",
-    "candidateAnswer": "{{name}}'s Answer"
+    "candidateAnswer": "{{name}}'s Answer",
+    "whoIRecommend": "Who I Recommend",
+    "questionPending": "Your question has been submitted and is pending approval.",
+    "pendingQuestions": "Pending Questions",
+    "noPendingQuestions": "No pending questions to review",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approveAndAnswer": "Approve & Answer",
+    "typeAnswer": "Type your answer (optional)..."
   },
   "endorsement": {
     "title": "Endorsements",
@@ -917,5 +925,27 @@
     "signalGentle": "Gentle",
     "signalCleanFacility": "Clean Facility",
     "signalFriendly": "Friendly"
+  },
+  "messaging": {
+    "sendMessage": "Send Message",
+    "messageTo": "Message {{name}}",
+    "privateConversation": "Private conversation",
+    "startConversation": "Start a conversation with {{name}}",
+    "yourMessagePrivate": "Your message will be sent privately",
+    "typeMessage": "Type a message...",
+    "loading": "Loading messages...",
+    "justNow": "Just now",
+    "loginRequired": "Log in to send a message"
+  },
+  "inbox": {
+    "title": "Inbox",
+    "primary": "Primary",
+    "spam": "Spam",
+    "questions": "Q&A",
+    "noMessages": "No messages yet",
+    "noSpam": "No spam messages",
+    "markSpam": "Spam",
+    "notSpam": "Not Spam",
+    "typeReply": "Type a reply..."
   }
 }

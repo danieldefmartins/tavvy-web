@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Head from 'next/head';
+import ECardInbox from '../../../components/ECardInbox';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -69,7 +70,7 @@ const ACCENT_GREEN = '#00C853';
 const BG_LIGHT = '#FAFAFA';
 const BG_DARK = '#000000';
 
-type Tab = 'content' | 'links' | 'appearance' | 'analytics';
+type Tab = 'content' | 'links' | 'appearance' | 'analytics' | 'inbox';
 
 const SOCIAL_PLATFORMS = [
   { id: 'instagram', name: 'Instagram', placeholder: '@username or URL' },
@@ -1154,6 +1155,13 @@ export default function ECardDashboardScreen() {
               <IoBarChart size={16} />
               <span>Stats</span>
             </button>
+            <button 
+              className={`tab ${activeTab === 'inbox' ? 'active' : ''}`}
+              onClick={() => setActiveTab('inbox')}
+            >
+              <IoMail size={16} />
+              <span>Inbox</span>
+            </button>
           </div>
 
           {/* Tab Content */}
@@ -2001,6 +2009,10 @@ export default function ECardDashboardScreen() {
                   </div>
                 )}
               </div>
+            )}
+            {/* ── Inbox Tab ── */}
+            {activeTab === 'inbox' && cardId && (
+              <ECardInbox cardId={cardId} isDark={isDark} />
             )}
           </div>
 

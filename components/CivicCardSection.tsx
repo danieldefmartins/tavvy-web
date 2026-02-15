@@ -33,6 +33,21 @@ interface CivicCommitment {
   sortOrder: number;
 }
 
+interface CivicRecommendation {
+  id: string;
+  endorsementNote: string | null;
+  card: {
+    id: string;
+    slug: string;
+    fullName: string;
+    title: string;
+    profilePhotoUrl: string | null;
+    partyName: string | null;
+    officeRunningFor: string | null;
+    region: string | null;
+  };
+}
+
 interface CivicCardSectionProps {
   cardId: string;
   cardSlug: string;
@@ -49,6 +64,7 @@ interface CivicCardSectionProps {
   proposals: CivicProposal[];
   questions: CivicQuestion[];
   commitments: CivicCommitment[];
+  recommendations: CivicRecommendation[];
   showVoteCounts: boolean;
 }
 
@@ -68,6 +84,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
   proposals: initialProposals,
   questions: initialQuestions,
   commitments,
+  recommendations,
   showVoteCounts = true,
 }) => {
   const { t } = useTranslation('common');
@@ -162,24 +179,10 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
 
       const data = await res.json();
       if (res.ok) {
-        setQuestions(prev => [data.question ? {
-          id: data.question.id,
-          questionText: data.question.question_text,
-          upvoteCount: 0,
-          answerText: null,
-          answeredAt: null,
-          createdAt: data.question.created_at,
-        } : {
-          id: 'temp-' + Date.now(),
-          questionText: newQuestion.trim(),
-          upvoteCount: 0,
-          answerText: null,
-          answeredAt: null,
-          createdAt: new Date().toISOString(),
-        }, ...prev]);
+        // Question is now pending approval — do NOT add to visible list
         setNewQuestion('');
         setQuestionSubmitted(true);
-        setTimeout(() => setQuestionSubmitted(false), 3000);
+        setTimeout(() => setQuestionSubmitted(false), 5000);
       } else if (data.requireLogin) {
         localStorage.setItem('tavvy_pending_civic_question', JSON.stringify({
           cardId, questionText: newQuestion.trim(), cardSlug,
@@ -538,8 +541,8 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
               </button>
             </div>
             {questionSubmitted && (
-              <div style={{ marginTop: 8, padding: '8px 12px', background: '#f0fdf4', borderRadius: 8, fontSize: 13, color: '#16a34a' }}>
-                ✅ {t('civic.questionSubmitted')}
+              <div style={{ marginTop: 8, padding: '10px 14px', background: '#fffbeb', borderRadius: 8, fontSize: 13, color: '#b45309', border: '1px solid #fde68a' }}>
+                ⏳ {t('civic.questionPendingApproval', { defaultValue: 'Your question has been submitted and is pending approval by the card owner.' })}
               </div>
             )}
           </div>
@@ -675,6 +678,116 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
               ))}
             </>
           )}
+        </div>
+      )}
+
+      {/* ═══ WHO I RECOMMEND ═══ */}
+      {recommendations.length > 0 && (
+        <div style={{ marginTop: 24 }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14,
+            padding: '0 4px',
+          }}>
+            <span style={{ fontSize: 20 }}>🤝</span>
+            <h3 style={{
+              fontSize: 16, fontWeight: 700, color: '#1a1a2e', margin: 0,
+              letterSpacing: '-0.01em',
+            }}>
+              {t('civic.whoIRecommend', { defaultValue: 'Who I Recommend' })}
+            </h3>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {recommendations.map((rec) => (
+              <a
+                key={rec.id}
+                href={`/${rec.card.slug}`}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 14,
+                  background: '#FFFFFF', borderRadius: 16, padding: '14px 16px',
+                  border: '1px solid #f0f0f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                  textDecoration: 'none', color: 'inherit',
+                  transition: 'all 0.2s ease',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)';
+                  (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
+                  (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
+                }}
+              >
+                {/* Profile Photo */}
+                <div style={{
+                  width: 52, height: 52, borderRadius: 14, overflow: 'hidden',
+                  flexShrink: 0, background: accentColor + '15',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  border: `2px solid ${accentColor}30`,
+                }}>
+                  {rec.card.profilePhotoUrl ? (
+                    <img
+                      src={rec.card.profilePhotoUrl}
+                      alt={rec.card.fullName}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: 22, color: accentColor }}>
+                      {rec.card.fullName?.charAt(0) || '?'}
+                    </span>
+                  )}
+                </div>
+
+                {/* Info */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontSize: 15, fontWeight: 700, color: '#1a1a2e',
+                    lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                  }}>
+                    {rec.card.fullName}
+                  </div>
+                  {(rec.card.officeRunningFor || rec.card.title) && (
+                    <div style={{
+                      fontSize: 12, color: '#666', marginTop: 2,
+                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                    }}>
+                      {rec.card.officeRunningFor || rec.card.title}
+                    </div>
+                  )}
+                  {rec.card.partyName && (
+                    <div style={{
+                      display: 'inline-block', marginTop: 4,
+                      padding: '2px 8px', borderRadius: 6,
+                      fontSize: 10, fontWeight: 600, letterSpacing: '0.03em',
+                      background: accentColor + '12', color: accentColor,
+                    }}>
+                      {rec.card.partyName}
+                    </div>
+                  )}
+                  {rec.endorsementNote && (
+                    <div style={{
+                      fontSize: 12, color: '#888', marginTop: 4,
+                      fontStyle: 'italic', lineHeight: 1.4,
+                    }}>
+                      "{rec.endorsementNote}"
+                    </div>
+                  )}
+                </div>
+
+                {/* Arrow */}
+                <div style={{
+                  flexShrink: 0, width: 28, height: 28, borderRadius: 8,
+                  background: accentColor + '10', display: 'flex',
+                  alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                </div>
+              </a>
+            ))}
+          </div>
         </div>
       )}
     </div>

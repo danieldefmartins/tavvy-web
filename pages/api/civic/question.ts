@@ -6,6 +6,7 @@
  * 
  * - Requires authenticated user
  * - Max 500 characters
+ * - Question starts as 'pending' — only visible after card owner approves
  */
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
@@ -53,6 +54,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         card_id: cardId,
         user_id: user.id,
         question_text: questionText.trim(),
+        is_visible: false,
+        status: 'pending',
       })
       .select()
       .single();
@@ -62,7 +65,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: 'Failed to submit question' });
     }
 
-    return res.status(200).json({ success: true, question });
+    return res.status(200).json({ success: true, question, pending: true });
   } catch (err) {
     console.error('[Civic Question] Error:', err);
     return res.status(500).json({ error: 'Internal server error' });

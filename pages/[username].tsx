@@ -20,6 +20,7 @@ import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient';
 import { getTemplateByIdWithMigration, resolveTemplateId, TemplateLayout } from '../config/eCardTemplates';
 import CivicCardSection from '../components/CivicCardSection';
+import ECardMessageButton from '../components/ECardMessageButton';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
@@ -141,6 +142,7 @@ interface CardData {
   civicProposals: { id: string; title: string; description: string; sortOrder: number; reactions: { support: number; needs_improvement: number; disagree: number } }[];
   civicQuestions: { id: string; questionText: string; upvoteCount: number; answerText: string | null; answeredAt: string | null; createdAt: string }[];
   civicCommitments: { id: string; title: string; description: string; status: 'planned' | 'in_progress' | 'completed'; sortOrder: number }[];
+  civicRecommendations: { id: string; endorsementNote: string | null; card: { id: string; slug: string; fullName: string; title: string; profilePhotoUrl: string | null; partyName: string | null; officeRunningFor: string | null; region: string | null } }[];
   showVoteCounts: boolean;
   companyLogoUrl: string | null;
 }
@@ -3124,9 +3126,20 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               proposals={cardData.civicProposals || []}
               questions={cardData.civicQuestions || []}
               commitments={cardData.civicCommitments || []}
+              recommendations={cardData.civicRecommendations || []}
               showVoteCounts={cardData.showVoteCounts !== false}
             />
           )}
+          {/* ═══ MESSAGE BUTTON ═══ */}
+          <div style={{ width: '100%', marginTop: 16, padding: '0 20px' }}>
+            <ECardMessageButton
+              cardId={cardData.id}
+              cardSlug={cardData.slug}
+              cardOwnerName={cardData.fullName}
+              accentColor={activeColorScheme?.primary || templateStyles.accentColor}
+            />
+          </div>
+
           {/* ═══ CARD FOOTER ═══ */}
           <div style={{ width: '100%', marginTop: 20, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 12 }}>
 
@@ -4590,6 +4603,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
     let civicProposals: any[] = [];
     let civicQuestions: any[] = [];
     let civicCommitments: any[] = [];
+    let civicRecommendations: any[] = [];
     const resolvedTemplate = resolveTemplateId(data.template_id || 'classic-blue');
     if (resolvedTemplate === 'civic-card') {
       try {
@@ -4627,6 +4641,8 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
           .from('civic_questions')
           .select('*')
           .eq('card_id', data.id)
+          .eq('status', 'approved')
+          .eq('is_visible', true)
           .order('upvote_count', { ascending: false })
           .limit(50);
 
@@ -4653,6 +4669,37 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
           status: c.status || 'planned',
           sortOrder: c.sort_order || 0,
         }));
+
+        // Fetch recommendations ("Who I Recommend")
+        const { data: recsData } = await serverSupabase
+          .from('civic_recommendations')
+          .select(`
+            id,
+            endorsement_note,
+            sort_order,
+            recommended_card:digital_cards!recommended_card_id (
+              id, slug, full_name, title, profile_photo_url,
+              party_name, office_running_for, region
+            )
+          `)
+          .eq('card_id', data.id)
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true });
+
+        civicRecommendations = (recsData || []).map((r: any) => ({
+          id: r.id,
+          endorsementNote: r.endorsement_note,
+          card: r.recommended_card ? {
+            id: r.recommended_card.id,
+            slug: r.recommended_card.slug,
+            fullName: r.recommended_card.full_name,
+            title: r.recommended_card.title,
+            profilePhotoUrl: r.recommended_card.profile_photo_url,
+            partyName: r.recommended_card.party_name,
+            officeRunningFor: r.recommended_card.office_running_for,
+            region: r.recommended_card.region,
+          } : null,
+        })).filter((r: any) => r.card !== null);
 
         // For civic cards, also load political endorsement signals
         const { data: politicalSignals } = await serverSupabase
@@ -4777,6 +4824,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       civicProposals,
       civicQuestions,
       civicCommitments,
+      civicRecommendations,
       showVoteCounts: data.show_vote_counts !== false,
     };
     

@@ -65,20 +65,21 @@ function detectBrowserLanguage(): string {
  * On subsequent visits:
  *   - Restores saved locale from localStorage
  *   - If user manually changes language in Settings, that takes priority
+ * 
+ * IMPORTANT: The detection/restore effect runs FIRST (on mount), and only
+ * after that does the save effect start persisting locale changes.
+ * This prevents the save effect from overwriting a previously saved locale
+ * with the server's default ('en') before detection can read it.
  */
 function LocaleManager() {
   const router = useRouter();
   const { locale, pathname, asPath, query } = router;
   const hasProcessedRef = useRef(false);
-
-  // Save locale to localStorage whenever it changes (from navigation or manual selection)
-  useEffect(() => {
-    if (locale && typeof window !== 'undefined') {
-      localStorage.setItem('tavvy-locale', locale);
-    }
-  }, [locale]);
+  // Track whether initial detection is complete before saving locale
+  const detectionCompleteRef = useRef(false);
 
   // On initial load: restore saved locale OR auto-detect browser language
+  // This MUST run before the save effect to prevent race conditions.
   useEffect(() => {
     if (typeof window === 'undefined' || hasProcessedRef.current) return;
     hasProcessedRef.current = true;
@@ -87,6 +88,7 @@ function LocaleManager() {
 
     if (savedLocale && SUPPORTED_LOCALES.includes(savedLocale)) {
       // User has a saved preference (manual or previous auto-detect)
+      detectionCompleteRef.current = true;
       if (savedLocale !== locale) {
         router.replace({ pathname, query }, asPath, { locale: savedLocale });
       }
@@ -97,12 +99,22 @@ function LocaleManager() {
     // Auto-detect browser/device language
     const detectedLang = detectBrowserLanguage();
     localStorage.setItem('tavvy-locale', detectedLang);
+    detectionCompleteRef.current = true;
     console.log(`[i18n] First visit: auto-detected browser language "${detectedLang}"`);
 
     if (detectedLang !== locale) {
       router.replace({ pathname, query }, asPath, { locale: detectedLang });
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Save locale to localStorage whenever it changes (from navigation or manual selection)
+  // Only starts saving AFTER initial detection is complete to avoid overwriting
+  // a saved preference with the server's default locale.
+  useEffect(() => {
+    if (locale && typeof window !== 'undefined' && detectionCompleteRef.current) {
+      localStorage.setItem('tavvy-locale', locale);
+    }
+  }, [locale]);
 
   return null;
 }
