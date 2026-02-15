@@ -5,6 +5,7 @@
  * This component is rendered inside the [username].tsx card page when templateLayout === 'civic-card'
  */
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'next-i18next';
 import { supabase } from '../lib/supabaseClient';
 
 interface CivicProposal {
@@ -67,6 +68,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
   questions: initialQuestions,
   commitments,
 }) => {
+  const { t } = useTranslation('common');
   const [proposals, setProposals] = useState(initialProposals);
   const [questions, setQuestions] = useState(initialQuestions);
   const [expandedProposal, setExpandedProposal] = useState<string | null>(null);
@@ -226,9 +228,9 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
 
   const statusLabel = (status: string) => {
     switch (status) {
-      case 'completed': return 'Completed';
-      case 'in_progress': return 'In Progress';
-      default: return 'Planned';
+      case 'completed': return t('civic.completed');
+      case 'in_progress': return t('civic.inProgress');
+      default: return t('civic.planned');
     }
   };
 
@@ -276,7 +278,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
               padding: '10px 20px',
               marginBottom: 12,
             }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.9)' }}>VOTE</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.9)' }}>{t('civic.vote')}</span>
               <span style={{
                 fontSize: 36,
                 fontWeight: 900,
@@ -320,7 +322,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
             <span style={{ fontSize: 18 }}>🌡️</span>
-            <span style={{ fontSize: 15, fontWeight: 700, color: '#1a1a2e' }}>Community Pulse</span>
+            <span style={{ fontSize: 15, fontWeight: 700, color: '#1a1a2e' }}>{t('civic.communityPulse')}</span>
             <span style={{ fontSize: 12, color: '#999', marginLeft: 'auto' }}>{totalVotes} votes</span>
           </div>
 
@@ -344,15 +346,15 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <div style={{ width: 8, height: 8, borderRadius: 4, background: '#22c55e' }} />
-              <span style={{ fontSize: 11, color: '#666' }}>Support {supportPct}%</span>
+              <span style={{ fontSize: 11, color: '#666' }}>{t('civic.supportPct', { pct: supportPct })}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <div style={{ width: 8, height: 8, borderRadius: 4, background: '#f59e0b' }} />
-              <span style={{ fontSize: 11, color: '#666' }}>Improve {improvePct}%</span>
+              <span style={{ fontSize: 11, color: '#666' }}>{t('civic.improvePct', { pct: improvePct })}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
               <div style={{ width: 8, height: 8, borderRadius: 4, background: '#ef4444' }} />
-              <span style={{ fontSize: 11, color: '#666' }}>Disagree {disagreePct}%</span>
+              <span style={{ fontSize: 11, color: '#666' }}>{t('civic.disagreePct', { pct: disagreePct })}</span>
             </div>
           </div>
         </div>
@@ -376,9 +378,9 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
               fontFamily: 'inherit',
             }}
           >
-            {tab === 'proposals' && `📋 Proposals${proposals.length > 0 ? ` (${proposals.length})` : ''}`}
-            {tab === 'questions' && `❓ Q&A${questions.length > 0 ? ` (${questions.length})` : ''}`}
-            {tab === 'commitments' && `🎯 Goals${commitments.length > 0 ? ` (${commitments.length})` : ''}`}
+            {tab === 'proposals' && `📋 ${t('civic.proposals')}${proposals.length > 0 ? ` (${proposals.length})` : ''}`}
+            {tab === 'questions' && `❓ ${t('civic.qna')}${questions.length > 0 ? ` (${questions.length})` : ''}`}
+            {tab === 'commitments' && `🎯 ${t('civic.goals')}${commitments.length > 0 ? ` (${commitments.length})` : ''}`}
           </button>
         ))}
       </div>
@@ -392,7 +394,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
               borderRadius: 16, border: '1px solid #f0f0f0',
             }}>
               <span style={{ fontSize: 32, display: 'block', marginBottom: 8 }}>📋</span>
-              <span style={{ fontSize: 14, color: '#999' }}>No proposals yet</span>
+              <span style={{ fontSize: 14, color: '#999' }}>{t('civic.noProposals')}</span>
             </div>
           ) : (
             proposals.sort((a, b) => a.sortOrder - b.sortOrder).map((proposal) => {
@@ -425,7 +427,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
                       </div>
                       {pTotal > 0 && (
                         <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
-                          {pSupportPct}% support • {pTotal} votes
+                          {t('civic.supportVotes', { pct: pSupportPct, total: pTotal })}
                         </div>
                       )}
                     </div>
@@ -460,10 +462,10 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
                       {/* Reaction buttons */}
                       <div style={{ display: 'flex', gap: 8 }}>
                         {[
-                          { type: 'support', emoji: '👍', label: 'Support', color: '#22c55e', count: proposal.reactions.support },
-                          { type: 'needs_improvement', emoji: '🤔', label: 'Improve', color: '#f59e0b', count: proposal.reactions.needs_improvement },
-                          { type: 'disagree', emoji: '👎', label: 'Disagree', color: '#ef4444', count: proposal.reactions.disagree },
-                        ].map(({ type, emoji, label, color, count }) => (
+                          { type: 'support', emoji: '👍', labelKey: 'civic.support', color: '#22c55e', count: proposal.reactions.support },
+                          { type: 'needs_improvement', emoji: '🤔', labelKey: 'civic.improve', color: '#f59e0b', count: proposal.reactions.needs_improvement },
+                          { type: 'disagree', emoji: '👎', labelKey: 'civic.disagree', color: '#ef4444', count: proposal.reactions.disagree },
+                        ].map(({ type, emoji, labelKey, color, count }) => (
                           <button
                             key={type}
                             onClick={() => handleReaction(proposal.id, type)}
@@ -477,7 +479,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
                             }}
                           >
                             <span style={{ fontSize: 20 }}>{emoji}</span>
-                            <span style={{ fontSize: 11, fontWeight: 600, color: userReaction === type ? color : '#666' }}>{label}</span>
+                            <span style={{ fontSize: 11, fontWeight: 600, color: userReaction === type ? color : '#666' }}>{t(labelKey)}</span>
                             {count > 0 && (
                               <span style={{ fontSize: 10, color: '#999' }}>{count}</span>
                             )}
@@ -502,12 +504,12 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
             border: '1px solid #f0f0f0', boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
           }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: '#1a1a2e', marginBottom: 10 }}>
-              Ask {fullName.split(' ')[0]} a question
+              {t('civic.ask')} {fullName.split(' ')[0]}
             </div>
             <textarea
               value={newQuestion}
               onChange={(e) => setNewQuestion(e.target.value)}
-              placeholder="What would you like to know?"
+              placeholder={t('civic.askPlaceholder')}
               maxLength={500}
               style={{
                 width: '100%', padding: '12px 14px', borderRadius: 12,
@@ -523,14 +525,14 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
                 onClick={handleSubmitQuestion}
                 disabled={!newQuestion.trim() || isSubmittingQuestion}
                 style={{
-                  padding: '10px 20px', borderRadius: 10, border: 'none',
+                  padding: '8px 20px', borderRadius: 10, border: 'none',
                   background: newQuestion.trim() ? accentColor : '#e0e0e0',
                   color: newQuestion.trim() ? '#FFFFFF' : '#999',
                   fontSize: 13, fontWeight: 700, cursor: newQuestion.trim() ? 'pointer' : 'not-allowed',
                   fontFamily: 'inherit',
                 }}
               >
-                {isSubmittingQuestion ? 'Sending...' : 'Ask'}
+                {isSubmittingQuestion ? t('civic.sending') : t('civic.ask')}
               </button>
             </div>
             {questionSubmitted && (
@@ -547,7 +549,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
               borderRadius: 16, border: '1px solid #f0f0f0',
             }}>
               <span style={{ fontSize: 32, display: 'block', marginBottom: 8 }}>❓</span>
-              <span style={{ fontSize: 14, color: '#999' }}>No questions yet. Be the first to ask!</span>
+              <span style={{ fontSize: 14, color: '#999' }}>{t('civic.noQuestions')}</span>
             </div>
           ) : (
             questions.sort((a, b) => b.upvoteCount - a.upvoteCount).map((q) => (
@@ -608,7 +610,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
               borderRadius: 16, border: '1px solid #f0f0f0',
             }}>
               <span style={{ fontSize: 32, display: 'block', marginBottom: 8 }}>🎯</span>
-              <span style={{ fontSize: 14, color: '#999' }}>No commitments posted yet</span>
+              <span style={{ fontSize: 14, color: '#999' }}>{t('civic.noCommitments')}</span>
             </div>
           ) : (
             <>
@@ -622,19 +624,19 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
                     <div style={{ fontSize: 24, fontWeight: 800, color: '#22c55e' }}>
                       {commitments.filter(c => c.status === 'completed').length}
                     </div>
-                    <div style={{ fontSize: 11, color: '#999' }}>Completed</div>
+                    <div style={{ fontSize: 11, color: '#999' }}>{t('civic.completed')}</div>
                   </div>
                   <div>
                     <div style={{ fontSize: 24, fontWeight: 800, color: '#f59e0b' }}>
                       {commitments.filter(c => c.status === 'in_progress').length}
                     </div>
-                    <div style={{ fontSize: 11, color: '#999' }}>In Progress</div>
+                    <div style={{ fontSize: 11, color: '#999' }}>{t('civic.inProgress')}</div>
                   </div>
                   <div>
                     <div style={{ fontSize: 24, fontWeight: 800, color: '#94a3b8' }}>
                       {commitments.filter(c => c.status === 'planned').length}
                     </div>
-                    <div style={{ fontSize: 11, color: '#999' }}>Planned</div>
+                    <div style={{ fontSize: 11, color: '#999' }}>{t('civic.planned')}</div>
                   </div>
                 </div>
               </div>

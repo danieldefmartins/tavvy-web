@@ -235,6 +235,24 @@ const DEFAULT_FORM_FIELDS: FormField[] = [
   { id: '4', type: 'textarea', label: 'Message', placeholder: 'How can I help you?', required: false },
 ];
 
+const SIGNAL_KEY_MAP: Record<string, string> = {
+  'Highly Recommended': 'signalHighlyRecommended', 'Trustworthy': 'signalTrustworthy', 'Responsive': 'signalResponsive', 'Expert': 'signalExpert', 'Reliable': 'signalReliable', 'Great Communicator': 'signalGreatCommunicator', 'Goes Above & Beyond': 'signalGoesAboveBeyond', 'On Time': 'signalOnTime',
+  'Transparent': 'signalTransparent', 'Keeps Promises': 'signalKeepsPromises', 'Community Leader': 'signalCommunityLeader', 'Clear Communicator': 'signalClearCommunicator', 'Fair & Just': 'signalFairJust', 'Gets Things Done': 'signalGetsThingsDone', 'Innovative Ideas': 'signalInnovativeIdeas', 'Fights for People': 'signalFightsForPeople',
+  'Great Closer': 'signalGreatCloser', 'Knowledgeable': 'signalKnowledgeable', 'Follows Through': 'signalFollowsThrough', 'Data-Driven': 'signalDataDriven', 'Persistent': 'signalPersistent',
+  'Market Expert': 'signalMarketExpert', 'Great Negotiator': 'signalGreatNegotiator', 'Always Available': 'signalAlwaysAvailable', 'Creative Solutions': 'signalCreativeSolutions', 'Detail Oriented': 'signalDetailOriented', 'Got Best Price': 'signalGotBestPrice',
+  'Great Food': 'signalGreatFood', 'Fast Service': 'signalFastService', 'Friendly Staff': 'signalFriendlyStaff', 'Clean': 'signalClean', 'Good Value': 'signalGoodValue', 'Great Presentation': 'signalGreatPresentation',
+  'Thorough': 'signalThorough', 'Puts You at Ease': 'signalPutsYouAtEase', 'Great Results': 'signalGreatResults', 'Clear Explanations': 'signalClearExplanations',
+  'Skilled': 'signalSkilled', 'Creative': 'signalCreative', 'Listens Well': 'signalListensWell', 'Punctual': 'signalPunctual', 'Attention to Detail': 'signalAttentionToDetail',
+  'Quality Work': 'signalQualityWork', 'Fair Pricing': 'signalFairPricing', 'Left It Clean': 'signalLeftItClean', 'On Schedule': 'signalOnSchedule', 'Stands Behind Work': 'signalStandsBehindWork',
+  'Fair & Honest': 'signalFairHonest', 'Strategic': 'signalStrategic', 'Clear Advice': 'signalClearAdvice', 'Confidential': 'signalConfidential',
+  'Creative Vision': 'signalCreativeVision', 'Great Eye': 'signalGreatEye', 'Delivers Results': 'signalDeliversResults', 'Innovative': 'signalInnovative', 'Understands Brand': 'signalUnderstandsBrand',
+  'Inspiring': 'signalInspiring', 'Goal-Oriented': 'signalGoalOriented', 'Patient': 'signalPatient', 'Tracks Progress': 'signalTracksProgress',
+  'Problem Solver': 'signalProblemSolver', 'Fast Turnaround': 'signalFastTurnaround', 'Security-Minded': 'signalSecurityMinded', 'Up to Date': 'signalUpToDate', 'Smart Solutions': 'signalSmartSolutions',
+  'Honest Diagnosis': 'signalHonestDiagnosis', 'Quick Service': 'signalQuickService', 'Warranty Backed': 'signalWarrantyBacked', 'Quality Parts': 'signalQualityParts',
+  'Great Energy': 'signalGreatEnergy', 'Well Organized': 'signalWellOrganized', 'Perfect Vibe': 'signalPerfectVibe', 'Memorable': 'signalMemorable', 'Creative Ideas': 'signalCreativeIdeas',
+  'Loves Animals': 'signalLovesAnimals', 'Gentle': 'signalGentle', 'Clean Facility': 'signalCleanFacility', 'Friendly': 'signalFriendly',
+};
+
 export default function PublicCardPage({ cardData: initialCardData, error: initialError }: PageProps) {
   const { t } = useTranslation();
   const [cardData, setCardData] = useState<CardData | null>(initialCardData);
@@ -3208,13 +3226,13 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <img src="/brand/tavvy-logo-horizontal-light.png" alt="Tavvy" style={{ height: 28, width: 'auto', objectFit: 'contain' }} />
-                <span style={{ fontSize: 20, fontWeight: 800, color: '#2d3a4a', letterSpacing: '-0.3px' }}>Endorsements</span>
+                <span style={{ fontSize: 20, fontWeight: 800, color: '#2d3a4a', letterSpacing: '-0.3px' }}>{t('endorsement.title')}</span>
               </div>
               <button onClick={() => setShowEndorsementPopup(false)} style={{ background: '#f0f0f0', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#333', flexShrink: 0 }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
-            <div style={{ fontSize: 13, color: '#888', marginTop: -14, marginBottom: 16 }}>{cardData.endorsementCount || cardData.tapCount || 0} total endorsements</div>
+            <div style={{ fontSize: 13, color: '#888', marginTop: -14, marginBottom: 16 }}>{t('endorsement.totalCount', { count: cardData.endorsementCount || cardData.tapCount || 0 })}</div>
 
             {/* Top Endorsement Tags — shown as rows with ×count */}
             {cardData.topEndorsementTags && cardData.topEndorsementTags.length > 0 ? (
@@ -3223,7 +3241,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #f0f0f0' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <span style={{ fontSize: 22 }}>{tag.emoji}</span>
-                      <span style={{ fontSize: 15, fontWeight: 600, color: '#1a1a2e' }}>{tag.label}</span>
+                      <span style={{ fontSize: 15, fontWeight: 600, color: '#1a1a2e' }}>{SIGNAL_KEY_MAP[tag.label] ? t(`endorsement.${SIGNAL_KEY_MAP[tag.label]}`) : tag.label}</span>
                     </div>
                     <span style={{ fontSize: 14, fontWeight: 700, color: '#3B9FD9' }}>×{tag.count}</span>
                   </div>
@@ -3231,7 +3249,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '30px 0', color: '#aaa', fontSize: 15 }}>
-                No endorsements yet. Be the first!
+                {t('endorsement.noEndorsements')}
               </div>
             )}
 
@@ -3241,11 +3259,11 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 onClick={() => { setShowEndorsementPopup(false); setSignalTaps({}); setEndorseNote(''); setShowEndorseFlow(true); }}
                 style={{ width: '100%', padding: '16px', borderRadius: 14, background: '#3B9FD9', border: 'none', color: '#fff', fontSize: 16, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
               >
-                Endorse {cardData.fullName.split(' ')[0]} →
+                {t('endorsement.endorseButton', { name: cardData.fullName.split(' ')[0] })}
               </button>
             ) : (
               <div style={{ textAlign: 'center', padding: '16px', borderRadius: 14, background: 'rgba(0,200,83,0.1)', color: '#00C853', fontSize: 15, fontWeight: 700 }}>
-                ✅ Thank you for your endorsement!
+                ✅ {t('endorsement.thankYou')}
               </div>
             )}
           </div>
@@ -3265,7 +3283,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             {/* Header - fixed at top */}
             <div style={{ padding: '24px 20px 0', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-                <div style={{ fontSize: 22, fontWeight: 800 }}>What Stood Out?</div>
+                <div style={{ fontSize: 22, fontWeight: 800 }}>{t('endorsement.whatStoodOut')}</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div style={{ fontSize: 14, fontWeight: 700, color: '#3B9FD9' }}>{selectedSignalCount} selected</div>
                   <button onClick={() => setShowEndorseFlow(false)} style={{ background: '#f0f0f0', border: 'none', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#333', flexShrink: 0 }}>
@@ -3273,7 +3291,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   </button>
                 </div>
               </div>
-              <div style={{ fontSize: 13, color: '#888', marginBottom: 16 }}>Tap to select · Tap again to make it stronger</div>
+              <div style={{ fontSize: 13, color: '#888', marginBottom: 16 }}>{t('endorsement.tapInstructions')}</div>
             </div>
             {/* Scrollable content area */}
             <div style={{ overflowY: 'auto', padding: '0 20px', flex: 1, minHeight: 0 }}>
@@ -3283,7 +3301,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               const signals = cardData.endorsementSignals || [];
               const categories = [...new Set(signals.map(s => s.category))];
               const catColors: Record<string, string> = { universal: '#3B9FD9', politics: '#1B5E20', sales: '#E87D3E', real_estate: '#6B7280', food_dining: '#E53E3E', health_wellness: '#38A169', beauty: '#D53F8C', home_services: '#DD6B20', legal_finance: '#2B6CB0', creative_marketing: '#8B5CF6', education_coaching: '#D69E2E', tech_it: '#319795', automotive: '#718096', events_entertainment: '#9F7AEA', pets: '#ED8936' };
-              const catLabels: Record<string, string> = { universal: 'Strengths', politics: 'Politics', sales: 'Sales Skills', real_estate: 'Real Estate', food_dining: 'Food & Dining', health_wellness: 'Health & Wellness', beauty: 'Beauty', home_services: 'Home Services', legal_finance: 'Legal & Finance', creative_marketing: 'Creative & Marketing', education_coaching: 'Education & Coaching', tech_it: 'Tech & IT', automotive: 'Automotive', events_entertainment: 'Events & Entertainment', pets: 'Pets' };
+              const catLabels: Record<string, string> = { universal: t('endorsement.catStrengths'), politics: t('endorsement.catPolitics'), sales: t('endorsement.catSales'), real_estate: t('endorsement.catRealEstate'), food_dining: t('endorsement.catFoodDining'), health_wellness: t('endorsement.catHealthWellness'), beauty: t('endorsement.catBeauty'), home_services: t('endorsement.catHomeServices'), legal_finance: t('endorsement.catLegalFinance'), creative_marketing: t('endorsement.catCreativeMarketing'), education_coaching: t('endorsement.catEducationCoaching'), tech_it: t('endorsement.catTechIt'), automotive: t('endorsement.catAutomotive'), events_entertainment: t('endorsement.catEventsEntertainment'), pets: t('endorsement.catPets') };
               return categories.map(cat => (
                 <div key={cat} style={{ marginBottom: 16 }}>
                   <div style={{ display: 'inline-block', padding: '4px 12px', borderRadius: 12, background: catColors[cat] || '#3B9FD9', color: '#fff', fontSize: 12, fontWeight: 700, marginBottom: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>
@@ -3313,7 +3331,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                             </div>
                           )}
                           <span style={{ fontSize: 28, marginBottom: 4 }}>{signal.emoji}</span>
-                          <span style={{ fontSize: 11, fontWeight: 600, textAlign: 'center', lineHeight: 1.2 }}>{signal.label}</span>
+                          <span style={{ fontSize: 11, fontWeight: 600, textAlign: 'center', lineHeight: 1.2 }}>{SIGNAL_KEY_MAP[signal.label] ? t(`endorsement.${SIGNAL_KEY_MAP[signal.label]}`) : signal.label}</span>
                           {intensity > 1 && (
                             <span style={{ fontSize: 12, marginTop: 2 }}>{fireEmojis(intensity)}</span>
                           )}
@@ -3330,7 +3348,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               <textarea
                 value={endorseNote}
                 onChange={e => setEndorseNote(e.target.value)}
-                placeholder="Add a note (optional)..."
+                placeholder={t('endorsement.notePlaceholder')}
                 style={{ width: '100%', padding: '12px 14px', borderRadius: 12, background: '#f5f5f5', border: '1px solid #e0e0e0', color: '#333', fontSize: 14, resize: 'none', minHeight: 50, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' as const }}
                 rows={2}
               />
@@ -3403,7 +3421,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               }}
             >
-              {isSubmittingEndorsement ? 'Submitting...' : 'Continue →'}
+              {isSubmittingEndorsement ? t('endorsement.submitting') : t('endorsement.continue')}
             </button>
             </div>{/* end sticky bottom */}
           </div>
