@@ -808,7 +808,10 @@
     "noCommitments": "尚无承诺发布",
     "completed": "已完成",
     "inProgress": "进行中",
-    "planned": "计划中"
+    "planned": "计划中",
+    "votes": "票数",
+    "questionSubmitted": "问题已提交！候选人将收到通知。",
+    "candidateAnswer": "{{name}}的回答"
   },
   "endorsement": {
     "title": "背书",

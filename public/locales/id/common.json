@@ -808,7 +808,10 @@
     "noCommitments": "Belum ada komitmen yang diposting",
     "completed": "Selesai",
     "inProgress": "Sedang Berlangsung",
-    "planned": "Direncanakan"
+    "planned": "Direncanakan",
+    "votes": "suara",
+    "questionSubmitted": "Pertanyaan telah dikirim! Kandidat akan diberitahu.",
+    "candidateAnswer": "Jawaban {{name}}"
   },
   "endorsement": {
     "title": "Dukungan",

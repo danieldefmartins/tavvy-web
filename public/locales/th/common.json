@@ -808,7 +808,10 @@
     "noCommitments": "ยังไม่มีคำมั่นสัญญา",
     "completed": "เสร็จสิ้น",
     "inProgress": "กำลังดำเนินการ",
-    "planned": "วางแผนไว้"
+    "planned": "วางแผนไว้",
+    "votes": "โหวต",
+    "questionSubmitted": "ส่งคำถามแล้ว! ผู้สมัครจะได้รับการแจ้งเตือน",
+    "candidateAnswer": "คำตอบของ {{name}}"
   },
   "endorsement": {
     "title": "การรับรอง",

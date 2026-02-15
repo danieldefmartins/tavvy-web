@@ -141,6 +141,7 @@ interface CardData {
   civicProposals: { id: string; title: string; description: string; sortOrder: number; reactions: { support: number; needs_improvement: number; disagree: number } }[];
   civicQuestions: { id: string; questionText: string; upvoteCount: number; answerText: string | null; answeredAt: string | null; createdAt: string }[];
   civicCommitments: { id: string; title: string; description: string; status: 'planned' | 'in_progress' | 'completed'; sortOrder: number }[];
+  showVoteCounts: boolean;
   companyLogoUrl: string | null;
 }
 
@@ -3123,6 +3124,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               proposals={cardData.civicProposals || []}
               questions={cardData.civicQuestions || []}
               commitments={cardData.civicCommitments || []}
+              showVoteCounts={cardData.showVoteCounts !== false}
             />
           )}
           {/* ═══ CARD FOOTER ═══ */}
@@ -4773,6 +4775,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       civicProposals,
       civicQuestions,
       civicCommitments,
+      showVoteCounts: data.show_vote_counts !== false,
     };
     
     return {

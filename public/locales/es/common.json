@@ -808,7 +808,10 @@
     "noCommitments": "Aún no se han publicado compromisos",
     "completed": "Completado",
     "inProgress": "En progreso",
-    "planned": "Planificado"
+    "planned": "Planificado",
+    "votes": "votos",
+    "questionSubmitted": "¡Pregunta enviada! Se notificará al candidato.",
+    "candidateAnswer": "Respuesta de {{name}}"
   },
   "endorsement": {
     "title": "Endosos",

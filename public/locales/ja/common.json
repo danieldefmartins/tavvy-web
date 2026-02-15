@@ -808,7 +808,10 @@
     "noCommitments": "まだコミットメントは投稿されていません",
     "completed": "完了",
     "inProgress": "進行中",
-    "planned": "計画中"
+    "planned": "計画中",
+    "votes": "票",
+    "questionSubmitted": "質問が送信されました！候補者に通知されます。",
+    "candidateAnswer": "{{name}}の回答"
   },
   "endorsement": {
     "title": "推薦",

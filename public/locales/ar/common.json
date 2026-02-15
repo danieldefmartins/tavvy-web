@@ -808,7 +808,10 @@
     "noCommitments": "لا توجد التزامات منشورة بعد",
     "completed": "مكتمل",
     "inProgress": "قيد التنفيذ",
-    "planned": "مخطط"
+    "planned": "مخطط",
+    "votes": "تصويت",
+    "questionSubmitted": "تم تقديم السؤال! سيتم إخطار المرشح.",
+    "candidateAnswer": "إجابة {{name}}"
   },
   "endorsement": {
     "title": "التأييدات",

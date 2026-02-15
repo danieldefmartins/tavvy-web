@@ -808,7 +808,10 @@
     "noCommitments": "Chưa có cam kết nào được đăng",
     "completed": "Hoàn thành",
     "inProgress": "Đang tiến hành",
-    "planned": "Đã lên kế hoạch"
+    "planned": "Đã lên kế hoạch",
+    "votes": "lượt bỏ phiếu",
+    "questionSubmitted": "Câu hỏi đã được gửi! Ứng viên sẽ được thông báo.",
+    "candidateAnswer": "Trả lời của {{name}}"
   },
   "endorsement": {
     "title": "Sự ủng hộ",

@@ -808,7 +808,10 @@
     "noCommitments": "Пока нет опубликованных обязательств",
     "completed": "Завершено",
     "inProgress": "В процессе",
-    "planned": "Запланировано"
+    "planned": "Запланировано",
+    "votes": "голосов",
+    "questionSubmitted": "Вопрос отправлен! Кандидату будет сообщено.",
+    "candidateAnswer": "Ответ {{name}}"
   },
   "endorsement": {
     "title": "Рекомендации",

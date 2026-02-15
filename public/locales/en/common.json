@@ -808,7 +808,10 @@
     "noCommitments": "No commitments posted yet",
     "completed": "Completed",
     "inProgress": "In Progress",
-    "planned": "Planned"
+    "planned": "Planned",
+    "votes": "votes",
+    "questionSubmitted": "Question submitted! The candidate will be notified.",
+    "candidateAnswer": "{{name}}'s Answer"
   },
   "endorsement": {
     "title": "Endorsements",

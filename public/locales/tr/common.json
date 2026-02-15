@@ -808,7 +808,10 @@
     "noCommitments": "Henüz taahhüt paylaşılmadı",
     "completed": "Tamamlandı",
     "inProgress": "Devam Ediyor",
-    "planned": "Planlandı"
+    "planned": "Planlandı",
+    "votes": "oy",
+    "questionSubmitted": "Soru gönderildi! Aday bilgilendirilecek.",
+    "candidateAnswer": "{{name}}'in Yanıtı"
   },
   "endorsement": {
     "title": "Onaylar",

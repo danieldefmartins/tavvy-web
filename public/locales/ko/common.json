@@ -808,7 +808,10 @@
     "noCommitments": "아직 약속이 게시되지 않았습니다",
     "completed": "완료됨",
     "inProgress": "진행 중",
-    "planned": "계획됨"
+    "planned": "계획됨",
+    "votes": "투표",
+    "questionSubmitted": "질문이 제출되었습니다! 후보자에게 알림이 전송됩니다.",
+    "candidateAnswer": "{{name}}의 답변"
   },
   "endorsement": {
     "title": "지지",

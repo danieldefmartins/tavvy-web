@@ -49,6 +49,7 @@ interface CivicCardSectionProps {
   proposals: CivicProposal[];
   questions: CivicQuestion[];
   commitments: CivicCommitment[];
+  showVoteCounts: boolean;
 }
 
 const CivicCardSection: React.FC<CivicCardSectionProps> = ({
@@ -67,6 +68,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
   proposals: initialProposals,
   questions: initialQuestions,
   commitments,
+  showVoteCounts = true,
 }) => {
   const { t } = useTranslation('common');
   const [proposals, setProposals] = useState(initialProposals);
@@ -310,7 +312,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
       </div>
 
       {/* ═══ COMMUNITY THERMOMETER ═══ */}
-      {totalVotes > 0 && (
+      {totalVotes > 0 && showVoteCounts && (
         <div style={{
           width: '100%',
           background: '#FFFFFF',
@@ -323,7 +325,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
             <span style={{ fontSize: 18 }}>🌡️</span>
             <span style={{ fontSize: 15, fontWeight: 700, color: '#1a1a2e' }}>{t('civic.communityPulse')}</span>
-            <span style={{ fontSize: 12, color: '#999', marginLeft: 'auto' }}>{totalVotes} votes</span>
+            <span style={{ fontSize: 12, color: '#999', marginLeft: 'auto' }}>{totalVotes} {t('civic.votes')}</span>
           </div>
 
           {/* Thermometer bar */}
@@ -425,7 +427,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
                       <div style={{ fontSize: 15, fontWeight: 700, color: '#1a1a2e', lineHeight: 1.3 }}>
                         {proposal.title}
                       </div>
-                      {pTotal > 0 && (
+                      {pTotal > 0 && showVoteCounts && (
                         <div style={{ fontSize: 12, color: '#999', marginTop: 4 }}>
                           {t('civic.supportVotes', { pct: pSupportPct, total: pTotal })}
                         </div>
@@ -448,7 +450,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
                       </p>
 
                       {/* Mini thermometer for this proposal */}
-                      {pTotal > 0 && (
+                      {pTotal > 0 && showVoteCounts && (
                         <div style={{
                           width: '100%', height: 6, borderRadius: 3, overflow: 'hidden',
                           display: 'flex', background: '#f0f0f0', marginBottom: 16,
@@ -480,7 +482,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
                           >
                             <span style={{ fontSize: 20 }}>{emoji}</span>
                             <span style={{ fontSize: 11, fontWeight: 600, color: userReaction === type ? color : '#666' }}>{t(labelKey)}</span>
-                            {count > 0 && (
+                            {count > 0 && showVoteCounts && (
                               <span style={{ fontSize: 10, color: '#999' }}>{count}</span>
                             )}
                           </button>
@@ -537,7 +539,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
             </div>
             {questionSubmitted && (
               <div style={{ marginTop: 8, padding: '8px 12px', background: '#f0fdf4', borderRadius: 8, fontSize: 13, color: '#16a34a' }}>
-                ✅ Question submitted! The candidate will be notified.
+                ✅ {t('civic.questionSubmitted')}
               </div>
             )}
           </div>
@@ -586,7 +588,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
                         background: `${accentColor}08`, borderLeft: `3px solid ${accentColor}`,
                       }}>
                         <div style={{ fontSize: 11, fontWeight: 700, color: accentColor, marginBottom: 4 }}>
-                          {fullName.split(' ')[0]}&apos;s Answer
+                          {t('civic.candidateAnswer', { name: fullName.split(' ')[0] })}
                         </div>
                         <p style={{ fontSize: 13, color: '#555', lineHeight: 1.5, margin: 0 }}>
                           {q.answerText}

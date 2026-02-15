@@ -808,7 +808,10 @@
     "noCommitments": "Nog geen toezeggingen geplaatst",
     "completed": "Voltooid",
     "inProgress": "Bezig",
-    "planned": "Gepland"
+    "planned": "Gepland",
+    "votes": "stemmen",
+    "questionSubmitted": "Vraag ingediend! De kandidaat wordt op de hoogte gebracht.",
+    "candidateAnswer": "{{name}}'s antwoord"
   },
   "endorsement": {
     "title": "Aanbevelingen",

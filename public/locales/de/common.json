@@ -808,7 +808,10 @@
     "noCommitments": "Noch keine Verpflichtungen veröffentlicht",
     "completed": "Abgeschlossen",
     "inProgress": "In Bearbeitung",
-    "planned": "Geplant"
+    "planned": "Geplant",
+    "votes": "Stimmen",
+    "questionSubmitted": "Frage eingereicht! Der Kandidat wird benachrichtigt.",
+    "candidateAnswer": "{{name}}'s Antwort"
   },
   "endorsement": {
     "title": "Empfehlungen",

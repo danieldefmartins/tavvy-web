@@ -808,7 +808,10 @@
     "noCommitments": "अभी तक कोई प्रतिबद्धताएँ पोस्ट नहीं हुईं",
     "completed": "पूरा हुआ",
     "inProgress": "प्रगति पर",
-    "planned": "योजना बनाई गई"
+    "planned": "योजना बनाई गई",
+    "votes": "वोट",
+    "questionSubmitted": "प्रश्न सबमिट किया गया! उम्मीदवार को सूचित किया जाएगा।",
+    "candidateAnswer": "{{name}} का उत्तर"
   },
   "endorsement": {
     "title": "समर्थन",
