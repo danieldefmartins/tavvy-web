@@ -96,12 +96,25 @@ export default function PlaceDetailScreen() {
   const [place, setPlace] = useState<Place | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [isFavorite, setIsFavorite] = useState(false);
+  const [justAdded, setJustAdded] = useState(false);
+  const [showJustAddedBanner, setShowJustAddedBanner] = useState(false);
 
   useEffect(() => {
     if (id) {
       loadPlace();
     }
   }, [id]);
+
+  // Show congratulations banner when place was just added
+  useEffect(() => {
+    if (router.query.justAdded === 'true') {
+      setJustAdded(true);
+      setShowJustAddedBanner(true);
+      // Remove the query param from URL without reload
+      const { justAdded: _, ...rest } = router.query;
+      router.replace({ pathname: router.pathname, query: rest }, undefined, { shallow: true });
+    }
+  }, [router.query.justAdded]);
 
   const loadPlace = async () => {
     setLoading(true);
@@ -564,6 +577,61 @@ export default function PlaceDetailScreen() {
                 </span>
               </button>
             </div>
+
+            {/* Just Added Banner */}
+            {showJustAddedBanner && (
+              <div style={{
+                background: 'linear-gradient(135deg, #10B981, #059669)',
+                borderRadius: '16px',
+                padding: '20px',
+                marginBottom: '20px',
+                position: 'relative',
+              }}>
+                <button
+                  onClick={() => setShowJustAddedBanner(false)}
+                  style={{
+                    position: 'absolute', top: 8, right: 12,
+                    background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)',
+                    fontSize: 20, cursor: 'pointer', padding: 4,
+                  }}
+                >
+                  ✕
+                </button>
+                <div style={{ fontSize: '28px', marginBottom: '8px' }}>🎉</div>
+                <div style={{ color: '#FFFFFF', fontSize: '18px', fontWeight: '700', marginBottom: '6px' }}>
+                  Place added successfully!
+                </div>
+                <div style={{ color: 'rgba(255,255,255,0.85)', fontSize: '14px', lineHeight: '1.5', marginBottom: '16px' }}>
+                  Help others discover this place by adding a review or photos.
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button
+                    onClick={() => { setActiveTab('reviews'); setShowJustAddedBanner(false); }}
+                    style={{
+                      flex: 1, padding: '12px', borderRadius: '10px',
+                      backgroundColor: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)',
+                      color: '#FFFFFF', fontSize: '14px', fontWeight: '600',
+                      cursor: 'pointer', display: 'flex', alignItems: 'center',
+                      justifyContent: 'center', gap: '6px',
+                    }}
+                  >
+                    ⭐ Write a Review
+                  </button>
+                  <button
+                    onClick={() => { setActiveTab('photos'); setShowJustAddedBanner(false); }}
+                    style={{
+                      flex: 1, padding: '12px', borderRadius: '10px',
+                      backgroundColor: '#FFFFFF', border: 'none',
+                      color: '#059669', fontSize: '14px', fontWeight: '600',
+                      cursor: 'pointer', display: 'flex', alignItems: 'center',
+                      justifyContent: 'center', gap: '6px',
+                    }}
+                  >
+                    📸 Add Photos
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Tabs */}
             <div style={{

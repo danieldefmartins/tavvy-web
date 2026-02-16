@@ -10,6 +10,7 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 import TabBar from '../../components/TabBar';
 import ECardAddressAutocomplete from '../../components/atlas/ECardAddressAutocomplete';
 import { useDrafts, ContentType, ContentSubtype } from '../../hooks/useDrafts';
+import { supabase } from '../../lib/supabaseClient';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { 
@@ -71,11 +72,67 @@ const QUICK_ADD_TYPES = [
   { id: 'photo_spot', label: 'Photo Spot', icon: MdCameraAlt },
 ];
 
-// Category options for businesses
+// Category options for businesses - comprehensive searchable list
 const BUSINESS_CATEGORIES = [
-  'Restaurant', 'Cafe', 'Bar', 'Retail', 'Grocery', 'Health & Wellness',
-  'Beauty & Spa', 'Fitness', 'Entertainment', 'Services', 'Automotive',
-  'Home & Garden', 'Professional', 'Education', 'Religious', 'Other'
+  // Food & Drink
+  'Restaurant', 'Cafe', 'Coffee Shop', 'Bar', 'Pub', 'Brewery', 'Winery', 'Bakery', 'Ice Cream',
+  'Fast Food', 'Food Truck', 'Juice Bar', 'Deli', 'Pizza', 'Sushi', 'BBQ', 'Seafood',
+  // Grocery & Market
+  'Grocery', 'Supermarket', 'Convenience Store', 'Farmers Market', 'Butcher', 'Fish Market',
+  // Retail & Shopping
+  'Retail', 'Shopping Mall', 'Clothing Store', 'Shoe Store', 'Jewelry', 'Electronics',
+  'Bookstore', 'Gift Shop', 'Thrift Store', 'Toy Store', 'Sporting Goods', 'Music Store',
+  'Art Supply', 'Craft Store', 'Florist', 'Antiques',
+  // Health & Medical
+  'Health & Wellness', 'Doctor', 'Dentist', 'Hospital', 'Urgent Care', 'Pharmacy',
+  'Chiropractor', 'Optometrist', 'Physical Therapy', 'Mental Health', 'Dermatologist',
+  // Beauty
+  'Beauty & Spa', 'Hair Salon', 'Barber', 'Nail Salon', 'Spa', 'Tattoo', 'Piercing',
+  'Lash & Brow', 'Skincare', 'Massage',
+  // Fitness
+  'Fitness', 'Gym', 'Yoga Studio', 'Pilates', 'CrossFit', 'Martial Arts',
+  'Dance Studio', 'Swimming Pool', 'Rock Climbing', 'Boxing',
+  // Entertainment
+  'Entertainment', 'Movie Theater', 'Bowling', 'Arcade', 'Escape Room', 'Mini Golf',
+  'Trampoline Park', 'Go Kart', 'Laser Tag', 'Water Park', 'Amusement Park', 'Zoo',
+  'Aquarium', 'Theme Park',
+  // Arts & Culture
+  'Arts & Culture', 'Museum', 'Art Gallery', 'Theater', 'Concert Venue', 'Library',
+  'Cultural Center', 'Historic Site',
+  // Nightlife
+  'Nightlife', 'Night Club', 'Lounge', 'Comedy Club', 'Karaoke', 'Wine Bar', 'Sports Bar',
+  // Services
+  'Services', 'Bank', 'ATM', 'Post Office', 'Laundromat', 'Dry Cleaner', 'Tailor',
+  'Locksmith', 'Print Shop', 'Shipping', 'Storage', 'Cleaning Service',
+  // Automotive
+  'Automotive', 'Gas Station', 'Car Wash', 'Auto Repair', 'Tire Shop', 'Car Dealership',
+  'Parking', 'Oil Change', 'Auto Parts', 'Car Rental',
+  // Home & Garden
+  'Home & Garden', 'Hardware Store', 'Nursery', 'Furniture Store', 'Home Decor',
+  'Appliance Store', 'Plumbing', 'Electrical', 'Landscaping', 'Pool Service',
+  // Professional
+  'Professional', 'Law Office', 'Accountant', 'Real Estate', 'Insurance', 'Consulting',
+  'Financial Advisor', 'Architect', 'Marketing Agency', 'IT Services',
+  // Education
+  'Education', 'School', 'University', 'Tutoring', 'Music Lessons', 'Art Classes',
+  'Driving School', 'Language School', 'Daycare', 'Preschool',
+  // Pets
+  'Pets', 'Veterinarian', 'Pet Store', 'Dog Park', 'Pet Grooming', 'Boarding', 'Dog Training',
+  // Religious
+  'Religious', 'Church', 'Mosque', 'Synagogue', 'Temple', 'Meditation Center',
+  // Outdoors & Recreation
+  'Outdoors', 'Park', 'Playground', 'Beach', 'Trail', 'Campground', 'Marina',
+  'Golf Course', 'Skate Park', 'Sports Field', 'Tennis Court', 'Basketball Court',
+  // Lodging
+  'Hotel', 'Motel', 'Hostel', 'Vacation Rental', 'Resort', 'Bed & Breakfast',
+  // Transportation
+  'Transportation', 'Bus Station', 'Train Station', 'Airport', 'Ferry', 'Bike Rental',
+  'Scooter Rental', 'Taxi Stand',
+  // Government
+  'Government', 'City Hall', 'DMV', 'Courthouse', 'Fire Station', 'Police Station',
+  'Community Center', 'Recycling Center',
+  // Other
+  'Other'
 ];
 
 export default function UniversalAddScreen() {
@@ -102,6 +159,8 @@ export default function UniversalAddScreen() {
   const [selectedSubtype, setSelectedSubtype] = useState<string | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [categorySearch, setCategorySearch] = useState<string | undefined>(undefined);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [manualAddressData, setManualAddressData] = useState<AddressData>({
     address1: '', address2: '', city: '', state: '', zipCode: '', country: 'USA', formattedAddress: ''
   });
@@ -420,8 +479,27 @@ export default function UniversalAddScreen() {
   const handleSubmit = async () => {
     const result = await submitDraft();
     if (result.success) {
+      // Try to find the canonical places ID via the sync trigger
+      if (result.final_id && result.final_table === 'tavvy_places') {
+        try {
+          const { data: placeRow } = await supabase
+            .from('places')
+            .select('id')
+            .eq('source_type', 'user')
+            .eq('source_id', result.final_id)
+            .single();
+          
+          if (placeRow?.id) {
+            router.push(`/app/place/${placeRow.id}?justAdded=true`);
+            return;
+          }
+        } catch (e) {
+          console.warn('Could not find synced place, falling back:', e);
+        }
+      }
+      // Fallback: go to home
       alert('Place submitted successfully!');
-      router.push('/app', undefined, { locale });
+      router.push('/app');
     } else {
       alert(`Error: ${result.error}`);
     }
@@ -729,17 +807,80 @@ export default function UniversalAddScreen() {
                 rows={4}
               />
               
-              <select
-                value={formData.tavvy_category || ''}
-                onChange={(e) => handleFormChange('tavvy_category', e.target.value)}
-                className="input-field"
-                style={{ backgroundColor: cardBg, color: textColor }}
-              >
-                <option value="">Select Category</option>
-                {BUSINESS_CATEGORIES.map(cat => (
-                  <option key={cat} value={cat.toLowerCase()}>{cat}</option>
-                ))}
-              </select>
+              {/* Searchable Category Selector */}
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  placeholder="Search & select category..."
+                  value={categorySearch !== undefined ? categorySearch : (formData.tavvy_category || '')}
+                  onChange={(e) => {
+                    setCategorySearch(e.target.value);
+                    setShowCategoryDropdown(true);
+                  }}
+                  onFocus={() => setShowCategoryDropdown(true)}
+                  onBlur={() => setTimeout(() => setShowCategoryDropdown(false), 200)}
+                  className="input-field"
+                  style={{ backgroundColor: cardBg, color: textColor }}
+                  autoComplete="off"
+                />
+                {formData.tavvy_category && categorySearch === undefined && (
+                  <button
+                    onClick={() => {
+                      handleFormChange('tavvy_category', '');
+                      setCategorySearch('');
+                      setShowCategoryDropdown(true);
+                    }}
+                    style={{
+                      position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+                      background: 'none', border: 'none', cursor: 'pointer', color: subtextColor,
+                      fontSize: 18, padding: 4,
+                    }}
+                  >
+                    ✕
+                  </button>
+                )}
+                {showCategoryDropdown && (
+                  <div style={{
+                    position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+                    backgroundColor: cardBg, border: `1px solid ${isDark ? '#374151' : '#E5E7EB'}`,
+                    borderRadius: 8, maxHeight: 200, overflowY: 'auto',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                  }}>
+                    {BUSINESS_CATEGORIES
+                      .filter(cat => {
+                        const search = (categorySearch || '').toLowerCase();
+                        return !search || cat.toLowerCase().includes(search);
+                      })
+                      .slice(0, 20)
+                      .map(cat => (
+                        <button
+                          key={cat}
+                          onClick={() => {
+                            handleFormChange('tavvy_category', cat.toLowerCase());
+                            setCategorySearch(undefined);
+                            setShowCategoryDropdown(false);
+                          }}
+                          style={{
+                            display: 'block', width: '100%', textAlign: 'left',
+                            padding: '10px 14px', border: 'none', cursor: 'pointer',
+                            backgroundColor: formData.tavvy_category === cat.toLowerCase() ? (isDark ? '#1E3A5F' : '#EFF6FF') : 'transparent',
+                            color: textColor, fontSize: 14,
+                          }}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    {BUSINESS_CATEGORIES.filter(cat => {
+                      const search = (categorySearch || '').toLowerCase();
+                      return !search || cat.toLowerCase().includes(search);
+                    }).length === 0 && (
+                      <div style={{ padding: '12px 14px', color: subtextColor, fontSize: 14 }}>
+                        No categories found
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
               
               <input
                 type="tel"
