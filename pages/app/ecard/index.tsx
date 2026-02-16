@@ -12,6 +12,8 @@ import { useThemeContext } from '../../../contexts/ThemeContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import AppLayout from '../../../components/AppLayout';
 import { getUserCards, deleteCard, duplicateCard, CardData } from '../../../lib/ecard';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { 
   IoArrowBack, 
   IoAdd, 
@@ -789,8 +791,6 @@ export default function ECardHubScreen() {
 
           @keyframes slideUp {
             from { transform: translateY(20px); opacity: 0; }
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
             to { transform: translateY(0); opacity: 1; }
           }
 
