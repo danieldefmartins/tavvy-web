@@ -916,6 +916,68 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
   }
 
   /* ═══════════════════════════════════════════════════════════
+     13b. PREMIUM STATIC — Full-width hero photo with gradient overlay
+     Large hero image, gradient overlay, frosted glass name card,
+     about section, action icons, social links
+     ═══════════════════════════════════════════════════════════ */
+  if (tmpl.layout === 'premium-static') {
+    const bgCol = cs?.background || '#0a0a0a';
+    const accentC = accentCol;
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: bgCol }}>
+        {/* Full-width hero photo with gradient overlay */}
+        <div style={{ width: '100%', height: 280, position: 'relative', overflow: 'hidden' }}>
+          <img src={SAMPLE_BANNER} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, transparent 30%, ${primary} 100%)` }} />
+          {/* Name overlay at bottom of hero */}
+          <div style={{ position: 'absolute', bottom: 16, left: 20, right: 20 }}>
+            <div style={{ fontSize: 24, fontWeight: 800, color: '#fff', letterSpacing: -0.5, textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>Maya Johnson</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.85)', marginTop: 2 }}>Fitness Coach & Wellness Expert</div>
+          </div>
+        </div>
+
+        {/* Content area */}
+        <div style={{ padding: '20px 20px 24px', background: cardBgCol }}>
+          {/* About card */}
+          <div style={{ background: `${primary}10`, borderRadius: 14, padding: '16px 18px', marginBottom: 16, borderLeft: `3px solid ${accentC}` }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: accentC, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>About</div>
+            <div style={{ fontSize: 12, color: cs?.text || '#FFFFFF', lineHeight: 1.6, opacity: 0.85 }}>Certified personal trainer helping you achieve your fitness goals. 10+ years of experience in strength training and nutrition.</div>
+          </div>
+
+          {/* Action buttons row */}
+          <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+            {['Call', 'Email', 'Website'].map((label, i) => (
+              <div key={i} style={{
+                flex: 1, padding: '12px 8px', borderRadius: 12,
+                background: i === 0 ? primary : 'rgba(255,255,255,0.08)',
+                border: i === 0 ? 'none' : `1px solid ${cs?.text || '#FFFFFF'}20`,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+              }}>
+                {i === 0 && <PreviewPhoneIcon size={16} />}
+                {i === 1 && <PreviewEmailIcon size={16} />}
+                {i === 2 && <PreviewGlobeIcon size={16} />}
+                <span style={{ fontSize: 10, fontWeight: 600, color: i === 0 ? '#fff' : (cs?.text || '#FFFFFF') }}>{label}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Social icons */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
+            {['IG', 'FB', 'YT', 'TT'].map((s, i) => (
+              <div key={i} style={{
+                width: 36, height: 36, borderRadius: '50%',
+                background: `${cs?.text || '#FFFFFF'}10`, border: `1px solid ${cs?.text || '#FFFFFF'}20`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 10, fontWeight: 700, color: cs?.text || '#FFFFFF', opacity: 0.7,
+              }}>{s}</div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ═══════════════════════════════════════════════════════════
      14. CIVIC CARD — Brazilian political santinho
      Matches the live Nikolas template: photo, name, title, bio,
      action buttons, social icons, dark info card with ballot #,
@@ -2594,6 +2656,66 @@ export default function ECardCreateScreen() {
             </div>
             <div className="editor-section">
               <div className="editor-section-label" style={{ color: 'rgba(0,0,0,0.4)' }}>
+                <IoLink size={14} /> Links
+              </div>
+              {renderLinksSection()}
+            </div>
+            {renderCategoryPicker()}
+            {renderExternalReviews()}
+            {renderGallerySection()}
+            {renderVideoSection()}
+          </div>
+        </div>
+      );
+    }
+
+    // ─── PREMIUM STATIC ─── (full-width hero with gradient overlay)
+    if (templateLayout === 'premium-static') {
+      const primaryCol = color?.primary || '#000000';
+      const bgCol = color?.background || '#0a0a0a';
+      const cardBg = color?.cardBg || '#1a1a1a';
+      const accentC = color?.accent || '#FFFFFF';
+      const txtCol = color?.text || '#FFFFFF';
+      return (
+        <div className="live-card" style={{ fontFamily: font, position: 'relative', padding: 0, overflow: 'hidden', background: bgCol }}>
+          {/* Full-width hero photo with gradient overlay */}
+          <div onClick={() => fileInputRef.current?.click()} style={{ width: '100%', height: 280, cursor: 'pointer', background: `linear-gradient(135deg, ${primaryCol}, ${color?.secondary || primaryCol})`, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+            {profileImage ? <img src={profileImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                <IoImage size={40} color="rgba(255,255,255,0.4)" />
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>Add Hero Photo</span>
+              </div>
+            )}
+            {/* Gradient overlay */}
+            <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, transparent 30%, ${primaryCol} 100%)` }} />
+            {/* Name overlay at bottom */}
+            <div style={{ position: 'absolute', bottom: 16, left: 20, right: 20 }}>
+              <input style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 24, fontWeight: 800, color: '#fff', width: '100%', textShadow: '0 2px 8px rgba(0,0,0,0.5)' }} placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} />
+              <input style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.85)', width: '100%' }} placeholder="Your Title" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+            </div>
+          </div>
+
+          {/* Content area */}
+          <div style={{ padding: '20px 24px 28px', background: cardBg }}>
+            {/* About card */}
+            <div style={{ background: `${primaryCol}30`, borderRadius: 14, padding: '16px 18px', marginBottom: 16, borderLeft: `3px solid ${accentC}` }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: accentC, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>About</div>
+              <textarea style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 13, color: txtCol, resize: 'none', minHeight: 44, lineHeight: 1.6, width: '100%', opacity: 0.85 }} placeholder="Short bio..." value={bio} onChange={e => setBio(e.target.value)} rows={3} />
+            </div>
+
+            <input style={{ background: 'transparent', border: 'none', outline: 'none', fontSize: 13, color: `${txtCol}80`, fontStyle: 'italic', width: '100%', marginBottom: 12 }} placeholder="Company Name" value={company} onChange={e => setCompany(e.target.value)} />
+
+            <div className="editor-section">
+              <div className="editor-section-label" style={{ color: `${txtCol}60` }}>
+                <IoMail size={14} /> Contact Information
+              </div>
+              {renderContactFields()}
+            </div>
+            <div className="editor-section" style={{ alignItems: 'center' }}>
+              {renderFeaturedIcons()}
+            </div>
+            <div className="editor-section">
+              <div className="editor-section-label" style={{ color: `${txtCol}60` }}>
                 <IoLink size={14} /> Links
               </div>
               {renderLinksSection()}

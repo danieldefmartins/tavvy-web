@@ -353,15 +353,21 @@ export default function ECardHubScreen() {
             </div>
           ) : (
             /* ── Empty State ── */
-            <div style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center',
-              justifyContent: 'center', padding: '80px 40px', textAlign: 'center',
-            }}>
+            <button
+              onClick={handleFabClick}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                justifyContent: 'center', padding: '80px 40px', textAlign: 'center',
+                background: 'transparent', border: 'none', cursor: 'pointer',
+                width: '100%',
+              }}
+            >
               <div style={{
                 width: 80, height: 80, borderRadius: 24,
-                background: 'rgba(0,200,83,0.08)',
+                background: 'rgba(0,200,83,0.12)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 marginBottom: 20,
+                transition: 'transform 0.2s, background 0.2s',
               }}>
                 <IoAdd size={36} color={ACCENT} />
               </div>
@@ -369,9 +375,9 @@ export default function ECardHubScreen() {
                 Create your first eCard
               </h2>
               <p style={{ fontSize: 14, color: textSecondary, margin: 0, lineHeight: 1.5, maxWidth: 260 }}>
-                Tap the + button below to get started with your digital card
+                Tap here to get started with your digital card
               </p>
-            </div>
+            </button>
           )}
 
           {/* ── FAB (Floating Action Button) ── */}
