@@ -63,6 +63,20 @@ import {
   IoPersonAdd,
   IoRefresh,
   IoBusinessOutline,
+  IoLogoInstagram,
+  IoLogoTiktok,
+  IoLogoYoutube,
+  IoLogoTwitter,
+  IoLogoLinkedin,
+  IoLogoFacebook,
+  IoLogoSnapchat,
+  IoLogoWhatsapp,
+  IoLogoGithub,
+  IoLogoDiscord,
+  IoLogoPinterest,
+  IoLogoTwitch,
+  IoMusicalNotes,
+  IoPaperPlane,
 } from 'react-icons/io5';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -108,6 +122,28 @@ const FEATURED_PLATFORMS = [
   { id: 'twitch', name: 'Twitch' },
   { id: 'discord', name: 'Discord' },
 ];
+
+// Map platform IDs to actual React icon components
+const PLATFORM_REACT_ICONS: Record<string, React.ComponentType<{ size?: number; color?: string }>> = {
+  instagram: IoLogoInstagram,
+  tiktok: IoLogoTiktok,
+  youtube: IoLogoYoutube,
+  twitter: IoLogoTwitter,
+  linkedin: IoLogoLinkedin,
+  facebook: IoLogoFacebook,
+  snapchat: IoLogoSnapchat,
+  whatsapp: IoLogoWhatsapp,
+  github: IoLogoGithub,
+  discord: IoLogoDiscord,
+  pinterest: IoLogoPinterest,
+  twitch: IoLogoTwitch,
+  spotify: IoMusicalNotes,
+  telegram: IoPaperPlane,
+  email: IoMail,
+  website: IoGlobe,
+  phone: IoCall,
+  other: IoLink,
+};
 
 export default function ECardDashboardScreen() {
   const { t } = useTranslation();
@@ -1352,13 +1388,16 @@ export default function ECardDashboardScreen() {
                   </div>
                   <div className="featured-icons-list">
                     {featuredIcons.map((fi) => {
-                      const pi = PLATFORM_ICONS[fi.platform];
+                      const pi = PLATFORM_ICONS[fi.platform] || PLATFORM_ICONS.other;
+                      const PlatformIcon = PLATFORM_REACT_ICONS[fi.platform] || PLATFORM_REACT_ICONS.other;
                       const pName = FEATURED_PLATFORMS.find(p => p.id === fi.platform)?.name || fi.platform;
                       return (
                         <div key={fi.platform} className="featured-icon-item" style={{ backgroundColor: isDark ? '#1E293B' : '#fff' }}>
                           <div className="fi-header">
                             <div className="fi-left">
-                              <div className="fi-dot" style={{ backgroundColor: pi?.bgColor || '#888' }} />
+                              <div className="fi-icon-circle" style={{ backgroundColor: pi?.bgColor || '#888' }}>
+                                {PlatformIcon && <PlatformIcon size={16} color={pi?.color || '#fff'} />}
+                              </div>
                               <span className="fi-name" style={{ color: isDark ? '#fff' : '#333' }}>{pName}</span>
                             </div>
                             <button className="fi-remove" onClick={() => removeFeaturedIcon(fi.platform)}>
@@ -1398,17 +1437,23 @@ export default function ECardDashboardScreen() {
                         </button>
                       </div>
                       <div className="platform-grid">
-                        {FEATURED_PLATFORMS.filter(p => !featuredIcons.some(fi => fi.platform === p.id)).map((platform) => (
-                          <button
-                            key={platform.id}
-                            className="platform-option"
-                            onClick={() => addFeaturedIcon(platform.id)}
-                            style={{ backgroundColor: isDark ? '#000000' : '#F3F4F6' }}
-                          >
-                            <div className="po-dot" style={{ backgroundColor: PLATFORM_ICONS[platform.id]?.bgColor || '#888' }} />
-                            <span style={{ color: isDark ? '#fff' : '#333' }}>{platform.name}</span>
-                          </button>
-                        ))}
+                        {FEATURED_PLATFORMS.filter(p => !featuredIcons.some(fi => fi.platform === p.id)).map((platform) => {
+                          const pIcon = PLATFORM_ICONS[platform.id] || PLATFORM_ICONS.other;
+                          const PIcon = PLATFORM_REACT_ICONS[platform.id] || PLATFORM_REACT_ICONS.other;
+                          return (
+                            <button
+                              key={platform.id}
+                              className="platform-option"
+                              onClick={() => addFeaturedIcon(platform.id)}
+                              style={{ backgroundColor: isDark ? '#000000' : '#F3F4F6' }}
+                            >
+                              <div className="po-icon-circle" style={{ backgroundColor: pIcon?.bgColor || '#888' }}>
+                                {PIcon && <PIcon size={14} color={pIcon?.color || '#fff'} />}
+                              </div>
+                              <span style={{ color: isDark ? '#fff' : '#333' }}>{platform.name}</span>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
@@ -1513,16 +1558,23 @@ export default function ECardDashboardScreen() {
                       </button>
                     </div>
                     <div className="platform-grid">
-                      {SOCIAL_PLATFORMS.map((platform) => (
-                        <button
-                          key={platform.id}
-                          className="platform-option"
-                          onClick={() => addLink(platform.id)}
-                          style={{ backgroundColor: isDark ? '#000000' : '#F3F4F6' }}
-                        >
-                          <span style={{ color: isDark ? '#fff' : '#333' }}>{platform.name}</span>
-                        </button>
-                      ))}
+                      {SOCIAL_PLATFORMS.map((platform) => {
+                        const pIcon = PLATFORM_ICONS[platform.id] || PLATFORM_ICONS.other;
+                        const PIcon = PLATFORM_REACT_ICONS[platform.id] || PLATFORM_REACT_ICONS.other;
+                        return (
+                          <button
+                            key={platform.id}
+                            className="platform-option"
+                            onClick={() => addLink(platform.id)}
+                            style={{ backgroundColor: isDark ? '#000000' : '#F3F4F6' }}
+                          >
+                            <div className="po-icon-circle" style={{ backgroundColor: pIcon?.bgColor || '#888' }}>
+                              {PIcon && <PIcon size={14} color={pIcon?.color || '#fff'} />}
+                            </div>
+                            <span style={{ color: isDark ? '#fff' : '#333' }}>{platform.name}</span>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -2504,6 +2556,16 @@ export default function ECardDashboardScreen() {
             flex-shrink: 0;
           }
 
+          .fi-icon-circle {
+            width: 28px;
+            height: 28px;
+            border-radius: 14px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
           .fi-name {
             font-size: 15px;
             font-weight: 600;
@@ -2680,6 +2742,16 @@ export default function ECardDashboardScreen() {
             height: 20px;
             border-radius: 10px;
             flex-shrink: 0;
+          }
+
+          .po-icon-circle {
+            width: 26px;
+            height: 26px;
+            border-radius: 13px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
           }
 
           /* Links Tab */
