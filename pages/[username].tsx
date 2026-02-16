@@ -797,7 +797,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   const templateConfig = getTemplateByIdWithMigration(cardData.templateId || 'classic');
   const templateLayout: TemplateLayout = templateConfig?.layout || 'basic';
   const isCivicCard = templateLayout.startsWith('civic-card');
-  const isNonClassicCivic = templateLayout === 'civic-card-bold';
+  const isNonClassicCivic = isCivicCard && templateLayout !== 'civic-card';
   const isFlagCivic = templateLayout === 'civic-card-flag';
   const isCleanCivic = templateLayout === 'civic-card-clean';
   const isRallyCivic = templateLayout === 'civic-card-rally';

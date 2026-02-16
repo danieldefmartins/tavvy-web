@@ -494,11 +494,15 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
   );
 
   /* Select the right header based on templateLayout */
-  const isNonClassic = templateLayout === 'civic-card-bold';
+  const isNonClassic = templateLayout !== 'civic-card';
 
   const renderHeader = () => {
     switch (templateLayout) {
+      case 'civic-card-flag': return renderFlagHeader();
       case 'civic-card-bold': return renderBoldHeader();
+      case 'civic-card-clean': return renderCleanHeader();
+      case 'civic-card-rally': return renderRallyHeader();
+      case 'civic-card':
       default: return renderClassicHeader();
     }
   };
