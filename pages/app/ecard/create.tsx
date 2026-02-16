@@ -1522,7 +1522,7 @@ export default function ECardCreateScreen() {
       ));
     }
     if (card.links && Array.isArray(card.links)) {
-      setLinks(card.links.map((l: any) => ({ id: `link_${Date.now()}_${Math.random()}`, label: l.label || l.title || '', url: l.url || '' })));
+      setLinks(card.links.map((l: any) => ({ id: `link_${Date.now()}_${Math.random()}`, platform: l.label || l.title || l.platform || '', value: l.url || l.value || '' })));
     }
     setShowAutoFillBanner(false);
   };
@@ -1735,7 +1735,7 @@ export default function ECardCreateScreen() {
       }
       const uniqueId = `${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 8)}`;
       const slug = `draft_${user.id.substring(0, 8)}_${uniqueId}`;
-      let bannerUrl: string | undefined;
+      let bannerUrl: string | null | undefined;
       if (bannerImageFile) { try { bannerUrl = await uploadEcardFile(user.id, bannerImageFile, 'banner'); } catch (e) { console.warn('Banner upload failed:', e); } }
       // Never save blob: URLs to database
       if (bannerUrl && bannerUrl.startsWith('blob:')) { bannerUrl = undefined; }

@@ -113,7 +113,7 @@ export default function StoriesRow({
       }
 
       // Get unique place IDs with stories
-      const placeIdsWithStories = [...new Set(stories.map((s: any) => s.place_id))];
+      const placeIdsWithStories = Array.from(new Set(stories.map((s: any) => s.place_id)));
 
       // Fetch place details
       const { data: places } = await supabase
@@ -219,7 +219,7 @@ export default function StoriesRow({
       .from('place_story_views')
       .insert({ story_id: storyId, user_id: userId });
     
-    setViewedStoryIds(prev => new Set([...prev, storyId]));
+    setViewedStoryIds(prev => { const next = new Set(Array.from(prev)); next.add(storyId); return next; });
   };
 
   const closeStoryViewer = () => {

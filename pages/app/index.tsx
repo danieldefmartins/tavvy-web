@@ -608,7 +608,7 @@ export default function HomeScreen() {
                     />
                     <div className="happening-content">
                       <h3>{item.title}</h3>
-                      <p>{item.subtitle}</p>
+                      <p>{item.subtitleValue ? `${item.subtitleKey}: ${item.subtitleValue}` : item.subtitleKey}</p>
                     </div>
                   </div>
                 ))}

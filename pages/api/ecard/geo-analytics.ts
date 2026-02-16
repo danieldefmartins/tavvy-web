@@ -25,9 +25,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .eq('card_id', card_id);
 
     // 2. Vote geo breakdown
-    const { data: voteGeo } = await supabase.rpc('get_vote_geo_analytics', {
-      p_card_id: card_id,
-    }).catch(() => ({ data: null }));
+    let voteGeo: any = null;
+    try {
+      const rpcResult = await supabase.rpc('get_vote_geo_analytics', {
+        p_card_id: card_id,
+      });
+      voteGeo = rpcResult.data;
+    } catch {
+      // RPC may not exist, fallback below
+    }
 
     // Fallback: query directly if RPC doesn't exist
     let votesByZip: any[] = [];

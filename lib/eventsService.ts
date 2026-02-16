@@ -392,8 +392,8 @@ function stringSimilarity(str1: string, str2: string): number {
   
   const words1 = new Set(s1.split(' '));
   const words2 = new Set(s2.split(' '));
-  const intersection = new Set([...words1].filter(x => words2.has(x)));
-  const union = new Set([...words1, ...words2]);
+  const intersection = new Set(Array.from(words1).filter(x => words2.has(x)));
+  const union = new Set(Array.from(words1).concat(Array.from(words2)));
   
   return intersection.size / union.size;
 }
@@ -427,7 +427,7 @@ export function deduplicateEvents(events: TavvyEvent[]): TavvyEvent[] {
 
     // Check for fuzzy match
     let isDuplicate = false;
-    for (const [key, existing] of seen.entries()) {
+    for (const [key, existing] of Array.from(seen.entries())) {
       // Time within 30 minutes
       const timeDiff = Math.abs(
         new Date(event.start_time).getTime() - new Date(existing.start_time).getTime()

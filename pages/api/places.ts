@@ -400,9 +400,9 @@ export default async function handler(
               placeMap.set(tap.signal_name, (placeMap.get(tap.signal_name) || 0) + 1);
             }
             
-            for (const [placeId, signals] of tapCounts) {
+            for (const [placeId, signals] of Array.from(tapCounts)) {
               const signalArray: Signal[] = [];
-              for (const [name, count] of signals) {
+              for (const [name, count] of Array.from(signals)) {
                 signalArray.push({ bucket: name, tap_total: count });
               }
               // Sort by tap_total descending

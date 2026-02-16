@@ -444,7 +444,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
         const toL = (v: number) => v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
         return 0.2126 * toL(r) + 0.7152 * toL(g) + 0.0722 * toL(b);
       };
-      const avgLum = (hexToLum(cardData.gradientColor1) + hexToLum(cardData.gradientColor2)) / 2;
+      const avgLum = (hexToLum(cardData?.gradientColor1 || '#ffffff') + hexToLum(cardData?.gradientColor2 || '#ffffff')) / 2;
       setBadgeOnLightBg(avgLum > 0.35);
     }
   }, [cardData?.profilePhotoUrl, cardData?.bannerImageUrl, cardData?.gradientColor1, cardData?.gradientColor2]);

@@ -55,13 +55,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Remove upvote (toggle)
       await supabase.from('civic_question_upvotes').delete().eq('id', existing.id);
       // Decrement count
-      await supabase.rpc('decrement_question_upvotes', { q_id: questionId }).catch(() => {
-        // Fallback: manual update
-        return supabase
-          .from('civic_questions')
-          .update({ upvote_count: supabase.rpc ? undefined : 0 })
-          .eq('id', questionId);
-      });
+      try {
+        await supabase.rpc('decrement_question_upvotes', { q_id: questionId });
+      } catch {
+        // Fallback: manual update handled below
+      }
 
       // Get updated count
       const { count } = await supabase

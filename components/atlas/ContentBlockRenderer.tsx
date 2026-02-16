@@ -319,7 +319,7 @@ const PlaceCardBlockComponent: React.FC<{ block: PlaceCardBlock }> = ({ block })
         padding: 16,
         backgroundColor: '#F3F4F6',
         borderRadius: 12,
-        marginVertical: 12,
+        marginTop: 12, marginBottom: 12,
       }}>
         <span style={{ color: '#6B7280', fontSize: 14 }}>Loading place...</span>
       </div>
@@ -368,7 +368,7 @@ const PlaceCardBlockComponent: React.FC<{ block: PlaceCardBlock }> = ({ block })
         </div>
       </div>
       <Link
-        href={`/app/place/${place.id} locale={locale}`}
+        href={`/app/place/${place.id}`}
         style={{
           display: 'block',
           marginTop: 12,
@@ -434,7 +434,7 @@ const ItineraryBlockComponent: React.FC<{ block: ItineraryBlock; settings: Readi
               )}
               {item.place_id && (
                 <Link
-                  href={`/app/place/${item.place_id} locale={locale}`}
+                  href={`/app/place/${item.place_id}`}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: TEAL_PRIMARY, fontSize: 13, marginTop: 4, textDecoration: 'none' }}
                 >
                   <IoLocation size={14} />

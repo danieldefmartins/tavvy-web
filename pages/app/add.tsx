@@ -284,10 +284,10 @@ export default function UniversalAddScreen() {
             const draft = await createDraft({
               latitude,
               longitude,
-              address_line1: `${address.house_number || ''} ${address.road || ''}`.trim() || null,
-              city: address.city || address.town || address.village || null,
-              region: address.state || null,
-              postal_code: address.postcode || null,
+              address_line1: `${address.house_number || ''} ${address.road || ''}`.trim() || undefined,
+              city: address.city || address.town || address.village || undefined,
+              region: address.state || undefined,
+              postal_code: address.postcode || undefined,
               country: address.country || 'USA',
               formatted_address: formattedAddress,
             });

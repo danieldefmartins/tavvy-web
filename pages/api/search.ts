@@ -8,8 +8,8 @@ interface SearchSuggestion {
   city?: string;
   address?: string;
   distance?: number;
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
 }
 
 export default async function handler(

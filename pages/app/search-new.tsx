@@ -81,7 +81,7 @@ export default function SearchScreen() {
         limit: 50,
       });
 
-      setResults(result.places);
+      setResults(result.places as unknown as PlaceCardType[]);
       setSearchTime(result.searchTimeMs);
       setTotalFound(result.totalFound);
       
