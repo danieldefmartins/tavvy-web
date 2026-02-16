@@ -1408,6 +1408,15 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             boxShadow: '0 8px 40px rgba(0,0,0,0.08)',
             background: '#ffffff',
           } : {}),
+          ...(isNonClassicCivic ? {
+            maxWidth: '420px',
+            margin: '20px auto',
+            padding: '0',
+            borderRadius: '20px',
+            overflow: 'hidden' as const,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+            background: '#ffffff',
+          } : {}),
         }}>
           {/* Star Badge - Top Right — Opens Endorsement Popup */}
           {/* Pixel-sampled contrast: detects actual image/gradient behind badge */}
@@ -3191,7 +3200,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             />
           )}
           {/* ═══ MESSAGE BUTTON ═══ */}
-          <div style={{ width: '100%', marginTop: 16, padding: '0 20px' }}>
+          <div style={{ width: '100%', marginTop: isNonClassicCivic ? 0 : 16, padding: isNonClassicCivic ? '16px 20px' : '0 20px' }}>
             <ECardMessageButton
               cardId={cardData.id}
               cardSlug={cardData.slug}
@@ -3201,7 +3210,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           </div>
 
           {/* ═══ CARD FOOTER ═══ */}
-          <div style={{ width: '100%', marginTop: 20, display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 12 }}>
+          <div style={{ width: '100%', marginTop: isNonClassicCivic ? 12 : 20, padding: isNonClassicCivic ? '0 20px 16px' : '0', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 12 }}>
 
             {/* Action Icons — Save, Share, Apple Wallet, Google Wallet */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: 16, width: '100%', padding: '4px 0' }}>
