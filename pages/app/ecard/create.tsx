@@ -915,6 +915,66 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
     );
   }
 
+  /* ═══════════════════════════════════════════════════════════
+     14. CIVIC CARD — Brazilian political santinho
+     Candidate photo, ballot number, party badge, proposals,
+     endorsement signals, and civic engagement
+     ═══════════════════════════════════════════════════════════ */
+  if (tmpl.layout === 'civic-card') {
+    const partyBg = `${primary}22`;
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0', background: `linear-gradient(180deg, ${primary} 0%, ${secondary} 100%)`, borderRadius: 16, overflow: 'hidden' }}>
+        {/* Hero section with candidate photo */}
+        <div style={{ width: '100%', height: 200, position: 'relative', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, transparent 30%, ${primary}dd 100%)` }} />
+          <PhotoAvatar size={120} border={`3px solid ${accentCol}`} shadow="0 4px 20px rgba(0,0,0,0.3)" style={{ position: 'relative', zIndex: 1, marginBottom: -40 }} />
+        </div>
+        {/* Name + Party */}
+        <div style={{ padding: '48px 20px 16px', textAlign: 'center', width: '100%' }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: txtCol, letterSpacing: -0.5 }}>Maria Silva</div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 8, background: partyBg, borderRadius: 20, padding: '4px 14px' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: accentCol, letterSpacing: 1 }}>PT</span>
+            <span style={{ fontSize: 10, color: txtSec }}>Vereadora</span>
+          </div>
+        </div>
+        {/* Ballot number */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '8px 0 16px' }}>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: accentCol }} />
+          <span style={{ fontSize: 28, fontWeight: 900, color: txtCol, letterSpacing: 4 }}>13456</span>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: accentCol }} />
+        </div>
+        {/* Proposals section */}
+        <div style={{ width: '100%', background: 'rgba(255,255,255,0.08)', padding: '16px 20px' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: accentCol, textTransform: 'uppercase' as const, letterSpacing: 2, marginBottom: 10 }}>Proposals</div>
+          {['Education for All', 'Public Safety Reform', 'Green Infrastructure'].map((p, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: accentCol, flexShrink: 0 }} />
+              <span style={{ fontSize: 12, color: txtCol, fontWeight: 500 }}>{p}</span>
+            </div>
+          ))}
+        </div>
+        {/* Endorsement signals */}
+        <div style={{ width: '100%', padding: '16px 20px' }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: accentCol, textTransform: 'uppercase' as const, letterSpacing: 2, marginBottom: 10 }}>Endorsements</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 6 }}>
+            {['Transparent', 'Keeps Promises', 'Community Leader'].map((s, i) => (
+              <div key={i} style={{ background: 'rgba(255,255,255,0.12)', borderRadius: 20, padding: '5px 12px', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span style={{ fontSize: 10, color: txtCol }}>{s}</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: accentCol }}>{(42 - i * 8)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* Vote CTA */}
+        <div style={{ width: '100%', padding: '0 20px 20px' }}>
+          <div style={{ width: '100%', height: 44, borderRadius: 22, background: accentCol, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: primary, letterSpacing: 1 }}>VOTE 13456</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return null;
 }
 
@@ -922,10 +982,17 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
    MAIN COMPONENT
    ============================================================ */
 // Template type mapping — which templates belong to which card type
+const ALL_GENERAL_TEMPLATES = [
+  'biz-traditional', 'biz-modern', 'biz-minimalist',
+  'basic', 'blogger', 'business-card', 'pro-card',
+  'cover-card', 'full-width', 'pro-realtor',
+  'pro-creative', 'pro-corporate', 'premium-static',
+];
+
 const TEMPLATE_TYPE_MAP: Record<string, string[]> = {
-  business: ['biz-traditional', 'biz-modern', 'biz-minimalist', 'business-card', 'pro-card', 'pro-realtor', 'pro-creative', 'pro-corporate'],
-  personal: ['basic', 'blogger', 'cover-card', 'full-width', 'premium-static'],
-  politician: ['civic-card'],
+  business: ALL_GENERAL_TEMPLATES,
+  personal: ALL_GENERAL_TEMPLATES,
+  politician: [...ALL_GENERAL_TEMPLATES, 'civic-card'],
 };
 
 export default function ECardCreateScreen() {
