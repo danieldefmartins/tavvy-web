@@ -1378,6 +1378,7 @@ const TEMPLATE_TYPE_MAP: Record<string, string[]> = {
 export default function ECardCreateScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { locale } = router;
   const { isDark } = useThemeContext();
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -1750,8 +1751,7 @@ export default function ECardCreateScreen() {
         gradient_color_1: color?.primary, gradient_color_2: color?.secondary,
         template_id: template.id, color_scheme_id: color?.id || undefined,
         theme: template.id,
-        card_type: cardType || undefined,
-        country_code: countryCode || undefined,
+        // card_type and country_code not yet in DB schema
         button_style: template.layoutConfig.buttonStyle,
         font_style: template.layoutConfig.fontFamily,
         background_type: color?.background?.includes('gradient') ? 'gradient' : 'solid',
