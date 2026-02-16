@@ -290,39 +290,20 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
       overflow: 'hidden',
       marginBottom: 0,
       position: 'relative',
-      background: '#009C3B',
     }}>
-      {/* Realistic Brazilian flag background */}
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0 }}>
-        {/* Green base — official flag green */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: '#009C3B' }} />
-        {/* Yellow diamond — using clip-path for a real diamond shape */}
-        <div style={{
-          position: 'absolute', top: '8%', left: '5%', right: '5%', bottom: '8%',
-          background: '#FFDF00',
-          clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)',
-        }} />
-        {/* Blue circle — globe */}
-        <div style={{
-          position: 'absolute', top: '50%', left: '50%',
-          width: '38%', height: '52%',
-          transform: 'translate(-50%, -50%)',
-          borderRadius: '50%',
-          background: '#002776',
-        }} />
-        {/* White band across the globe */}
-        <div style={{
-          position: 'absolute', top: '50%', left: '50%',
-          width: '44%', height: '10%',
-          transform: 'translate(-50%, -50%) rotate(-10deg)',
-          background: 'rgba(255,255,255,0.35)',
-          borderRadius: '50%',
-        }} />
-        {/* Subtle star dots inside globe */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(1.5px 1.5px at 42% 38%, rgba(255,255,255,0.5) 1px, transparent 0), radial-gradient(1.5px 1.5px at 55% 32%, rgba(255,255,255,0.4) 1px, transparent 0), radial-gradient(1.5px 1.5px at 48% 55%, rgba(255,255,255,0.45) 1px, transparent 0), radial-gradient(1px 1px at 52% 45%, rgba(255,255,255,0.35) 1px, transparent 0), radial-gradient(1px 1px at 45% 48%, rgba(255,255,255,0.3) 1px, transparent 0)' }} />
-        {/* Soft gradient overlay for text readability — lighter than before */}
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(180deg, rgba(0,39,118,0.25) 0%, rgba(0,156,59,0.3) 100%)' }} />
-      </div>
+      {/* Real Brazilian flag as background image */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0,
+        backgroundImage: 'url(/images/brazil-flag.jpg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }} />
+      {/* Subtle dark overlay for text readability */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0,
+        background: 'linear-gradient(180deg, rgba(0,60,30,0.35) 0%, rgba(0,40,20,0.5) 100%)',
+      }} />
 
       {/* Content */}
       <div style={{ position: 'relative', zIndex: 1, padding: '32px 24px 28px', textAlign: 'center' as const }}>
@@ -334,13 +315,13 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
             </div>
           </div>
         )}
-        <div style={{ fontSize: 24, fontWeight: 800, color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.4)', marginBottom: 4 }}>{fullName}</div>
-        <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.9)', marginBottom: 16 }}>{officeRunningFor}</div>
+        <div style={{ fontSize: 24, fontWeight: 800, color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.5)', marginBottom: 4 }}>{fullName}</div>
+        <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.95)', textShadow: '0 1px 4px rgba(0,0,0,0.4)', marginBottom: 16 }}>{officeRunningFor}</div>
 
         {/* Info box */}
-        <div style={{ background: 'rgba(0,39,118,0.6)', backdropFilter: 'blur(10px)', borderRadius: 16, padding: '20px', marginBottom: 12 }}>
+        <div style={{ background: 'rgba(0,39,118,0.7)', backdropFilter: 'blur(12px)', borderRadius: 16, padding: '20px', marginBottom: 12 }}>
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' as const, color: '#FFDF00', marginBottom: 6 }}>{partyName}</div>
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', marginBottom: 12 }}>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', marginBottom: 12 }}>
             {officeRunningFor}{region ? ` • ${region}` : ''}{electionYear ? ` • ${electionYear}` : ''}
           </div>
           {ballotNumber && (

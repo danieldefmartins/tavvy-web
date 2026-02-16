@@ -1409,13 +1409,14 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             background: '#ffffff',
           } : {}),
           ...(isNonClassicCivic ? {
-            maxWidth: '420px',
-            margin: '20px auto',
+            maxWidth: '100%',
+            margin: '0',
             padding: '0',
-            borderRadius: '20px',
+            borderRadius: '0',
             overflow: 'hidden' as const,
-            boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+            boxShadow: 'none',
             background: '#ffffff',
+            minHeight: 'auto',
           } : {}),
         }}>
           {/* Star Badge - Top Right — Opens Endorsement Popup */}
