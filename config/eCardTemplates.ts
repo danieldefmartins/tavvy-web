@@ -534,20 +534,20 @@ export const TEMPLATES: Template[] = [
     features: ['candidate-photo', 'ballot-number', 'party-identity', 'proposals', 'community-feedback', 'qa', 'commitments', 'endorsements'],
     layout: 'civic-card',
     colorSchemes: [
-      // PT Red
-      { id: 'pt-red', name: 'Vermelho', primary: '#CC0000', secondary: '#990000', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f5f5f5', cardBg: '#FFFFFF' },
+      // PL Blue & Yellow (default — matches Nikolas card)
+      { id: 'pl-blue-yellow', name: 'Azul & Amarelo', primary: '#003366', secondary: '#002244', accent: '#FFD700', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF' },
       // PSDB Blue
       { id: 'psdb-blue', name: 'Azul', primary: '#003399', secondary: '#002266', accent: '#FFD700', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF' },
+      // Brasil (Green & Yellow)
+      { id: 'brasil', name: 'Brasil', primary: '#009739', secondary: '#006B2B', accent: '#FEDD00', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f5f0', cardBg: '#FFFFFF' },
       // MDB Green
       { id: 'mdb-green', name: 'Verde', primary: '#006633', secondary: '#004D26', accent: '#FFD700', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f5f0', cardBg: '#FFFFFF' },
-      // PL Blue & Yellow
-      { id: 'pl-blue-yellow', name: 'Azul & Amarelo', primary: '#003366', secondary: '#002244', accent: '#FFD700', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF' },
+      // PT Red
+      { id: 'pt-red', name: 'Vermelho', primary: '#CC0000', secondary: '#990000', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f5f5f5', cardBg: '#FFFFFF' },
       // PDT Orange
       { id: 'pdt-orange', name: 'Laranja', primary: '#E65100', secondary: '#BF360C', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#fff8f0', cardBg: '#FFFFFF' },
       // PSOL Purple
       { id: 'psol-purple', name: 'Roxo', primary: '#6A1B9A', secondary: '#4A148C', accent: '#FFD700', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f5f0fa', cardBg: '#FFFFFF' },
-      // Brasil (Green & Yellow)
-      { id: 'brasil', name: 'Brasil', primary: '#009739', secondary: '#006B2B', accent: '#FEDD00', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f5f0', cardBg: '#FFFFFF' },
     ],
     layoutConfig: {
       photoPosition: 'center',

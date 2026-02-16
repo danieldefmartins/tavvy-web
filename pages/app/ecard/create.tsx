@@ -930,11 +930,11 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
           <div style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', letterSpacing: -0.5, marginTop: 16 }}>Maria Silva</div>
           <div style={{ fontSize: 14, fontWeight: 500, color: '#555', marginTop: 4 }}>Vereadora</div>
           <p style={{ fontSize: 12, lineHeight: 1.6, color: '#666', textAlign: 'center', margin: '10px 0 0', maxWidth: 280 }}>
-            Defensora da liberdade e dos valores da fam\u00edlia. Comprometida com a transpar\u00eancia e o bem-estar da comunidade.
+            Defensora da liberdade e dos valores da família. Comprometida com a transparência e o bem-estar da comunidade.
           </p>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 10, background: '#f0f0f0', borderRadius: 20, padding: '5px 14px', border: '1px solid #e0e0e0' }}>
             <PreviewLocationIcon size={12} />
-            <span style={{ fontSize: 11, fontWeight: 500, color: '#555' }}>S\u00e3o Paulo, SP</span>
+            <span style={{ fontSize: 11, fontWeight: 500, color: '#555' }}>São Paulo, SP</span>
           </div>
         </div>
         {/* Action buttons row */}
@@ -957,12 +957,12 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
         {/* Dark info card — party, position, ballot number, slogan */}
         <div style={{ width: 'calc(100% - 32px)', margin: '0 16px', borderRadius: 16, background: `linear-gradient(135deg, ${primary}, ${secondary})`, padding: '20px', marginBottom: 16 }}>
           <div style={{ fontSize: 10, fontWeight: 700, color: accentCol, letterSpacing: 2, textTransform: 'uppercase' as const }}>PL - PARTIDO LIBERAL</div>
-          <div style={{ fontSize: 12, color: txtSec, marginTop: 4 }}>Vereadora \u2022 S\u00e3o Paulo \u2022 2026</div>
+          <div style={{ fontSize: 12, color: txtSec, marginTop: 4 }}>Vereadora • São Paulo • 2026</div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 12, background: 'rgba(255,255,255,0.12)', borderRadius: 12, padding: '10px 20px' }}>
             <span style={{ fontSize: 12, fontWeight: 600, color: txtSec }}>VOTE</span>
             <span style={{ fontSize: 32, fontWeight: 900, color: txtCol, letterSpacing: 6 }}>12345</span>
           </div>
-          <div style={{ fontSize: 12, fontStyle: 'italic', color: accentCol, marginTop: 12 }}>\u201CPela liberdade, pela fam\u00edlia e pelo Brasil\u201D</div>
+          <div style={{ fontSize: 12, fontStyle: 'italic', color: accentCol, marginTop: 12 }}>"Pela liberdade, pela família e pelo Brasil"</div>
         </div>
         {/* Community Pulse */}
         <div style={{ width: 'calc(100% - 32px)', margin: '0 16px 12px', background: '#fff', borderRadius: 14, padding: '14px 16px', border: '1px solid #eee' }}>
@@ -994,13 +994,13 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
               <span style={{ fontSize: 11, fontWeight: 600, color: '#888' }}>Goals (3)</span>
             </div>
           </div>
-          {['Defesa da Liberdade', 'Seguran\u00e7a P\u00fablica', 'Educa\u00e7\u00e3o de Qualidade'].map((p, i) => (
+          {['Defesa da Liberdade', 'Segurança Pública', 'Educação de Qualidade'].map((p, i) => (
             <div key={i} style={{ background: '#fff', borderRadius: 12, padding: '12px 14px', marginBottom: 6, border: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>{p}</div>
-                <div style={{ fontSize: 10, color: '#888', marginTop: 2 }}>{75 - i * 12}% support \u2022 16 votes</div>
+                <div style={{ fontSize: 10, color: '#888', marginTop: 2 }}>{75 - i * 12}% support • 16 votes</div>
               </div>
-              <span style={{ fontSize: 14, color: '#ccc' }}>\u25BC</span>
+              <span style={{ fontSize: 14, color: '#ccc' }}>▼</span>
             </div>
           ))}
         </div>
@@ -1037,22 +1037,22 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
           {/* Ballot number card */}
           <div style={{ width: 'calc(100% - 40px)', margin: '16px 20px 0', borderRadius: 14, background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(10px)', padding: '16px 20px', border: '1px solid rgba(255,255,255,0.1)' }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: accentCol, letterSpacing: 2, textTransform: 'uppercase' as const }}>PL - PARTIDO LIBERAL</div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', marginTop: 4 }}>Vereadora \u2022 S\u00e3o Paulo \u2022 2026</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', marginTop: 4 }}>Vereadora • São Paulo • 2026</div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 10, background: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: '8px 18px' }}>
               <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.7)' }}>VOTE</span>
               <span style={{ fontSize: 30, fontWeight: 900, color: '#fff', letterSpacing: 6 }}>12345</span>
             </div>
-            <div style={{ fontSize: 11, fontStyle: 'italic', color: accentCol, marginTop: 10 }}>\u201CPela liberdade, pela fam\u00edlia e pelo Brasil\u201D</div>
+            <div style={{ fontSize: 11, fontStyle: 'italic', color: accentCol, marginTop: 10 }}>"Pela liberdade, pela família e pelo Brasil"</div>
           </div>
           {/* Proposals */}
           <div style={{ width: 'calc(100% - 40px)', margin: '12px 20px' }}>
-            {['Defesa da Liberdade', 'Seguran\u00e7a P\u00fablica', 'Educa\u00e7\u00e3o de Qualidade'].map((p, i) => (
+            {['Defesa da Liberdade', 'Segurança Pública', 'Educação de Qualidade'].map((p, i) => (
               <div key={i} style={{ background: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 14px', marginBottom: 6, border: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontSize: 12, fontWeight: 600, color: '#fff' }}>{p}</div>
                   <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.6)', marginTop: 2 }}>{75 - i * 12}% support</div>
                 </div>
-                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>\u25BC</span>
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>▼</span>
               </div>
             ))}
           </div>
@@ -1082,7 +1082,7 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
           <div style={{ position: 'relative', zIndex: 1, padding: '28px 24px' }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: accentCol, letterSpacing: 3, textTransform: 'uppercase' as const }}>PL - PARTIDO LIBERAL</div>
             <div style={{ fontSize: 28, fontWeight: 900, color: '#fff', letterSpacing: -1, marginTop: 12, lineHeight: 1.1 }}>MARIA<br/>SILVA</div>
-            <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.8)', marginTop: 8 }}>Vereadora \u2022 S\u00e3o Paulo</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.8)', marginTop: 8 }}>Vereadora • São Paulo</div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 16, background: accentCol, borderRadius: 8, padding: '10px 20px' }}>
               <span style={{ fontSize: 11, fontWeight: 700, color: primary }}>VOTE</span>
               <span style={{ fontSize: 26, fontWeight: 900, color: primary, letterSpacing: 4 }}>12345</span>
@@ -1101,13 +1101,13 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
             </div>
           </div>
           {/* Proposals */}
-          {['Defesa da Liberdade', 'Seguran\u00e7a P\u00fablica'].map((p, i) => (
+          {['Defesa da Liberdade', 'Segurança Pública'].map((p, i) => (
             <div key={i} style={{ background: '#fff', borderRadius: 10, padding: '12px 14px', marginBottom: 6, border: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>{p}</div>
                 <div style={{ fontSize: 10, color: '#888', marginTop: 2 }}>{75 - i * 12}% support</div>
               </div>
-              <span style={{ fontSize: 14, color: '#ccc' }}>\u25BC</span>
+              <span style={{ fontSize: 14, color: '#ccc' }}>▼</span>
             </div>
           ))}
           {/* CTA */}
@@ -1135,7 +1135,7 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
             <div style={{ fontSize: 22, fontWeight: 700, color: '#1a1a1a', marginTop: 14 }}>Maria Silva</div>
             <div style={{ fontSize: 13, fontWeight: 500, color: primary, marginTop: 4 }}>Vereadora</div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 8, background: `${primary}10`, borderRadius: 20, padding: '4px 14px', border: `1px solid ${primary}15` }}>
-              <span style={{ fontSize: 10, fontWeight: 600, color: primary }}>PL \u2022 S\u00e3o Paulo \u2022 2026</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: primary }}>PL • São Paulo • 2026</span>
             </div>
           </div>
           {/* Ballot number */}
@@ -1145,18 +1145,18 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
           </div>
           {/* Bio */}
           <p style={{ fontSize: 12, lineHeight: 1.6, color: '#666', textAlign: 'center', margin: '14px 0 0' }}>
-            Defensora da liberdade e dos valores da fam\u00edlia. Comprometida com a transpar\u00eancia.
+            Defensora da liberdade e dos valores da família. Comprometida com a transparência.
           </p>
         </div>
         {/* Proposals on bg */}
         <div style={{ width: 'calc(100% - 32px)', margin: '0 16px 12px' }}>
-          {['Defesa da Liberdade', 'Seguran\u00e7a P\u00fablica', 'Educa\u00e7\u00e3o de Qualidade'].map((p, i) => (
+          {['Defesa da Liberdade', 'Segurança Pública', 'Educação de Qualidade'].map((p, i) => (
             <div key={i} style={{ background: '#fff', borderRadius: 12, padding: '12px 14px', marginBottom: 6, boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>{p}</div>
                 <div style={{ fontSize: 10, color: '#888', marginTop: 2 }}>{75 - i * 12}% support</div>
               </div>
-              <span style={{ fontSize: 14, color: '#ccc' }}>\u25BC</span>
+              <span style={{ fontSize: 14, color: '#ccc' }}>▼</span>
             </div>
           ))}
         </div>
@@ -1182,7 +1182,7 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
             <PhotoAvatar size={80} border={`3px solid ${accentCol}`} shadow="0 4px 16px rgba(0,0,0,0.3)" />
             <div style={{ marginLeft: 16, flex: 1 }}>
               <div style={{ fontSize: 22, fontWeight: 900, color: '#fff', letterSpacing: -0.5, lineHeight: 1.1 }}>MARIA SILVA</div>
-              <div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>Vereadora \u2022 S\u00e3o Paulo</div>
+              <div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>Vereadora • São Paulo</div>
             </div>
           </div>
           {/* Big ballot number */}
@@ -1201,7 +1201,7 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
         <div style={{ width: '100%', padding: '0 16px 16px' }}>
           {/* Slogan */}
           <div style={{ textAlign: 'center', padding: '4px 0 12px' }}>
-            <span style={{ fontSize: 12, fontStyle: 'italic', fontWeight: 600, color: primary }}>\u201CPela liberdade, pela fam\u00edlia e pelo Brasil\u201D</span>
+            <span style={{ fontSize: 12, fontStyle: 'italic', fontWeight: 600, color: primary }}>"Pela liberdade, pela família e pelo Brasil"</span>
           </div>
           {/* Community Pulse */}
           <div style={{ background: '#fff', borderRadius: 12, padding: '14px 16px', marginBottom: 10, border: '1px solid #eee' }}>
@@ -1213,13 +1213,13 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
             </div>
           </div>
           {/* Proposals */}
-          {['Defesa da Liberdade', 'Seguran\u00e7a P\u00fablica', 'Educa\u00e7\u00e3o de Qualidade'].map((p, i) => (
+          {['Defesa da Liberdade', 'Segurança Pública', 'Educação de Qualidade'].map((p, i) => (
             <div key={i} style={{ background: '#fff', borderRadius: 10, padding: '12px 14px', marginBottom: 6, border: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>{p}</div>
                 <div style={{ fontSize: 10, color: '#888', marginTop: 2 }}>{75 - i * 12}% support</div>
               </div>
-              <span style={{ fontSize: 14, color: '#ccc' }}>\u25BC</span>
+              <span style={{ fontSize: 14, color: '#ccc' }}>▼</span>
             </div>
           ))}
           {/* CTA */}
@@ -2759,7 +2759,7 @@ export default function ECardCreateScreen() {
               </div>
               <div style={{ flex: 1 }}>
                 <input style={{ ...cardInputStyle(), fontSize: 20, fontWeight: 900, color: '#fff', letterSpacing: -0.5 }} placeholder="YOUR NAME" value={name} onChange={e => setName(e.target.value)} />
-                <input style={{ ...cardInputStyle(), fontSize: 12, color: 'rgba(255,255,255,0.8)' }} placeholder="Position \u2022 City" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+                <input style={{ ...cardInputStyle(), fontSize: 12, color: 'rgba(255,255,255,0.8)' }} placeholder="Position • City" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
               </div>
             </div>
             <div style={{ marginTop: 14, background: color?.accent || '#FFD700', borderRadius: 8, padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
