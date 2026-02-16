@@ -1032,6 +1032,46 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
 
     // Civic Card — Brazilian Political Santinho
     if (isCivicCard) {
+      // Flag template has dark green bg → white text
+      if (isFlagCivic) {
+        return {
+          isLuxury: false,
+          isDark: true,
+          hasOrnate: false,
+          accentColor: '#F5C518',
+          textColor: '#ffffff',
+          buttonBg: 'rgba(255,255,255,0.15)',
+          buttonBorder: 'rgba(255,255,255,0.25)',
+          photoStyle: 'rounded',
+        };
+      }
+      // Rally template has yellow bg → dark text
+      if (isRallyCivic) {
+        return {
+          isLuxury: false,
+          isDark: false,
+          hasOrnate: false,
+          accentColor: '#1a2744',
+          textColor: '#1a2744',
+          buttonBg: 'rgba(26,39,68,0.08)',
+          buttonBorder: 'rgba(26,39,68,0.15)',
+          photoStyle: 'rounded',
+        };
+      }
+      // Clean template has light bg → dark text with blue accents
+      if (isCleanCivic) {
+        return {
+          isLuxury: false,
+          isDark: false,
+          hasOrnate: false,
+          accentColor: '#1a2744',
+          textColor: '#1a1a2e',
+          buttonBg: '#f1f5f9',
+          buttonBorder: '#e2e8f0',
+          photoStyle: 'rounded',
+        };
+      }
+      // Classic and Bold
       return {
         isLuxury: false,
         isDark: false,
@@ -1111,8 +1151,9 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
     const isOnLightSection = templateLayout === 'pro-card' || templateLayout === 'cover-card' || 
       templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || 
       templateLayout === 'biz-minimalist' || templateLayout === 'pro-realtor' || 
-      templateLayout === 'blogger' || isCivicCard;
+      templateLayout === 'blogger' || (isCivicCard && !isFlagCivic);
     if (isOnLightSection) return '#333333';
+    if (isFlagCivic) return '#ffffff';
     // For templates with dark gradient backgrounds
     if (bgIsActuallyLight) return '#333333';
     return templateStyles.textColor;
@@ -1162,7 +1203,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
 
   // Determine if the footer area has a light background (for logo color switching)
   // pro-card always has a white bottom section, so footer is always on light bg
-  const isLightFooterBg = (templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || isCivicCard) ? true : bgIsActuallyLight;
+  const isLightFooterBg = (templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || (isCivicCard && !isFlagCivic)) ? true : isFlagCivic ? false : bgIsActuallyLight;
 
   return (
     <>
@@ -1420,6 +1461,14 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             boxShadow: 'none',
             background: '#ffffff',
             minHeight: '100vh',
+          } : {}),
+          ...((isFlagCivic || isCleanCivic || isRallyCivic) ? {
+            maxWidth: '100%',
+            margin: '0',
+            padding: '40px 24px 0',
+            borderRadius: '0',
+            boxShadow: 'none',
+            background: 'transparent',
           } : {}),
         }}>
           {/* Star Badge - Top Right — Opens Endorsement Popup */}
