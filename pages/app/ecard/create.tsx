@@ -992,7 +992,7 @@ const ALL_GENERAL_TEMPLATES = [
 const TEMPLATE_TYPE_MAP: Record<string, string[]> = {
   business: ALL_GENERAL_TEMPLATES,
   personal: ALL_GENERAL_TEMPLATES,
-  politician: [...ALL_GENERAL_TEMPLATES, 'civic-card'],
+  politician: ['civic-card'],
 };
 
 export default function ECardCreateScreen() {
