@@ -10,6 +10,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 export default function MatchContactScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { locale } = router;
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', phone: '', location: '' });
   const isValid = form.name && form.email && form.phone && form.location;

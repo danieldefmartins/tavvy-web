@@ -203,6 +203,23 @@ export const lightTheme = {
 
 // ===== LEGACY COLORS (for backward compatibility) =====
 export const Colors = {
+  // Light theme (backward compatibility with React Native pattern)
+  light: {
+    tint: brand.blue,
+    background: palette.gray50,
+    text: brand.textPrimary,
+    textSecondary: brand.textSecondary,
+    tabIconDefault: brand.textSecondary,
+    tabIconSelected: brand.blue,
+  },
+  dark: {
+    tint: brand.blue,
+    background: palette.darkBackground,
+    text: brand.textPrimary,
+    textSecondary: brand.textSecondary,
+    tabIconDefault: brand.textSecondary,
+    tabIconSelected: brand.blue,
+  },
   // Primary colors
   primary: brand.blue,
   secondary: brand.orange,

@@ -29,9 +29,9 @@ interface Place {
 export default function AddStoryPage() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { locale } = router;
   const { universeId, universeName, placeId: initialPlaceId, placeName: initialPlaceName } = router.query;
-  const { theme } = useThemeContext();
-  const isDark = theme === 'dark';
+  const { theme, isDark } = useThemeContext();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -65,7 +65,7 @@ export default function AddStoryPage() {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
       if (!user) {
-        router.push('/app/login?redirect=' + encodeURIComponent(router.asPath, undefined, { locale }));
+        router.push('/app/login?redirect=' + encodeURIComponent(router.asPath), undefined, { locale });
       }
     };
     checkUser();

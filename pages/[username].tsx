@@ -68,6 +68,8 @@ interface CardData {
   title: string;
   company: string;
   bio: string;
+  description: string;
+  pronouns: string;
   phone: string;
   email: string;
   website: string;
@@ -145,6 +147,34 @@ interface CardData {
   civicRecommendations: { id: string; endorsementNote: string | null; card: { id: string; slug: string; fullName: string; title: string; profilePhotoUrl: string | null; partyName: string | null; officeRunningFor: string | null; region: string | null } }[];
   showVoteCounts: boolean;
   companyLogoUrl: string | null;
+  // Industry icons
+  industryIcons: any[];
+  // QR style
+  qrStyle: any;
+  // Pro credentials
+  proCredentials: any;
+  // Card name
+  cardName: string;
+  // Badges
+  showLicensedBadge: boolean;
+  showInsuredBadge: boolean;
+  showBondedBadge: boolean;
+  showTavvyVerifiedBadge: boolean;
+  // Featured icons
+  featuredIcons: any[];
+  // Background video
+  backgroundVideoUrl: string | null;
+  // Address
+  address: string;
+  // Title role
+  titleRole: string;
+  // Review count/rating
+  reviewCount: number;
+  reviewRating: number;
+  // View count
+  viewCount: number;
+  // Published
+  isPublished: boolean;
 }
 
 interface PageProps {
@@ -349,6 +379,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   // Badge contrast: sample actual pixels behind the badge (top-right of card/photo)
   const [badgeOnLightBg, setBadgeOnLightBg] = useState<boolean | null>(null);
   useEffect(() => {
+    if (!cardData) return;
     // Determine what's behind the badge at position top:20px, right:20px
     // Priority: banner image > profile photo (if cover/large) > gradient colors
     const imageUrl = cardData.bannerImageUrl || 
@@ -416,7 +447,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
       const avgLum = (hexToLum(cardData.gradientColor1) + hexToLum(cardData.gradientColor2)) / 2;
       setBadgeOnLightBg(avgLum > 0.35);
     }
-  }, [cardData.profilePhotoUrl, cardData.bannerImageUrl, cardData.gradientColor1, cardData.gradientColor2]);
+  }, [cardData?.profilePhotoUrl, cardData?.bannerImageUrl, cardData?.gradientColor1, cardData?.gradientColor2]);
 
   // Resolved badge contrast — badgeOnLightBg is set by useEffect after image loads.
   // Default to false (dark bg / white text) until detection completes.
@@ -1242,7 +1273,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           }}>
             {(cardData.bannerImageUrl || cardData.profilePhotoUrl) ? (
               <img
-                src={cardData.bannerImageUrl || cardData.profilePhotoUrl}
+                src={cardData.bannerImageUrl || cardData.profilePhotoUrl || undefined}
                 alt={cardData.fullName}
                 style={{
                   width: '100%', height: '60vh', objectFit: 'cover', objectPosition: 'center top', display: 'block',
@@ -1519,7 +1550,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               }}>
                 {cardData.profilePhotoUrl && (
                   <img
-                    src={cardData.bannerImageUrl || cardData.profilePhotoUrl}
+                    src={cardData.bannerImageUrl || cardData.profilePhotoUrl || undefined}
                     alt={cardData.fullName}
                     style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
                   />
@@ -4854,6 +4885,25 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       civicCommitments,
       civicRecommendations,
       showVoteCounts: data.show_vote_counts !== false,
+      // Missing properties
+      description: data.description || '',
+      pronouns: data.pronouns || '',
+      industryIcons: data.industry_icons ? (typeof data.industry_icons === 'string' ? JSON.parse(data.industry_icons) : data.industry_icons) : [],
+      qrStyle: data.qr_style ? (typeof data.qr_style === 'string' ? JSON.parse(data.qr_style) : data.qr_style) : null,
+      proCredentials: data.pro_credentials ? (typeof data.pro_credentials === 'string' ? JSON.parse(data.pro_credentials) : data.pro_credentials) : null,
+      cardName: data.card_name || '',
+      showLicensedBadge: data.show_licensed_badge || false,
+      showInsuredBadge: data.show_insured_badge || false,
+      showBondedBadge: data.show_bonded_badge || false,
+      showTavvyVerifiedBadge: data.show_tavvy_verified_badge || false,
+      featuredIcons: data.featured_icons ? (typeof data.featured_icons === 'string' ? JSON.parse(data.featured_icons) : data.featured_icons) : [],
+      backgroundVideoUrl: data.background_video_url || null,
+      address: data.address || '',
+      titleRole: data.title_role || '',
+      reviewCount: data.review_count || 0,
+      reviewRating: data.review_rating || 0,
+      viewCount: data.view_count || 0,
+      isPublished: data.is_published !== false,
     };
     
     return {

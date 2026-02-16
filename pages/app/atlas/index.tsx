@@ -62,6 +62,7 @@ interface AtlasArticle {
 export default function AtlasHomeScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { locale } = router;
   const { theme, isDark } = useThemeContext();
   const [loading, setLoading] = useState(true);
 

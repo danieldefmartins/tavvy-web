@@ -220,6 +220,7 @@ const SAMPLE_RIDES: Record<string, RideData> = {
 export default function RideDetailsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { locale } = router;
   const { id, name, park } = router.query;
   const { theme, isDark } = useThemeContext();
   
@@ -346,7 +347,7 @@ export default function RideDetailsScreen() {
 
   const handleAddReview = () => {
     if (!ride) return;
-    router.push(`/app/review/add?placeId=${ride.id}&placeName=${encodeURIComponent(ride.name, undefined, { locale })}&category=attraction`);
+    router.push(`/app/review/add?placeId=${ride.id}&placeName=${encodeURIComponent(ride.name)}&category=attraction`);
   };
 
   const handleBack = () => {

@@ -54,6 +54,72 @@ export interface CardData {
   is_active?: boolean;
   created_at?: string;
   updated_at?: string;
+
+  // Address fields
+  address?: string;
+  address_1?: string;
+  address_2?: string;
+  zip_code?: string;
+  country?: string;
+
+  // Display fields
+  title_role?: string;
+  website_label?: string;
+  description?: string;
+  card_name?: string;
+  font_color?: string;
+  pronouns?: string;
+  professional_category?: string;
+  company_logo_url?: string;
+
+  // Social links
+  social_instagram?: string;
+  social_facebook?: string;
+  social_linkedin?: string;
+  social_twitter?: string;
+  social_tiktok?: string;
+  social_youtube?: string;
+  social_snapchat?: string;
+  social_pinterest?: string;
+  social_whatsapp?: string;
+
+  // Review URLs
+  review_google_url?: string;
+  review_yelp_url?: string;
+  review_tripadvisor_url?: string;
+  review_facebook_url?: string;
+  review_bbb_url?: string;
+
+  // Badge toggles
+  show_licensed_badge?: boolean;
+  show_insured_badge?: boolean;
+  show_bonded_badge?: boolean;
+  show_tavvy_verified_badge?: boolean;
+  show_contact_info?: boolean;
+  show_social_icons?: boolean;
+
+  // Gallery & media
+  gallery_title?: string;
+  youtube_video_id?: string;
+  youtube_title?: string;
+
+  // Testimonials
+  testimonials?: string;
+  testimonials_title?: string;
+
+  // Featured icons & links (used in editor)
+  featured_icons?: any[];
+  links?: LinkItem[];
+
+  // Civic card fields
+  card_type?: string;
+  country_code?: string;
+  ballot_number?: string;
+  party_name?: string;
+  office_running_for?: string;
+  election_year?: string;
+  campaign_slogan?: string;
+  region?: string;
 }
 
 export interface LinkItem {

@@ -14,6 +14,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 export default function SmartMatchStartScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { locale } = router;
 
   const handleStart = () => {
     router.push('/app/realtors/match/q1', undefined, { locale });

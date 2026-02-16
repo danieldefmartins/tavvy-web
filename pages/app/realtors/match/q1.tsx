@@ -22,6 +22,7 @@ const options = [
 export default function MatchQ1Screen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { locale } = router;
   const [selected, setSelected] = useState<string | null>(null);
 
   const handleNext = () => {

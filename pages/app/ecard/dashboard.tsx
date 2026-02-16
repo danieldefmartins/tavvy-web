@@ -112,6 +112,7 @@ const FEATURED_PLATFORMS = [
 export default function ECardDashboardScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { locale } = router;
   const { cardId: queryCardId, isNew, openAppearance } = router.query;
   const { theme, isDark } = useThemeContext();
   const { user } = useAuth();

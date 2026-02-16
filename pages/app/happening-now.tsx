@@ -76,12 +76,12 @@ export default function HappeningNowScreen() {
     }
 
     try {
-      const fetchedEvents = await getHappeningNowEvents(
-        userLocation.lat,
-        userLocation.lng,
-        50, // 50 mile radius
-        selectedTime === 'all' ? undefined : selectedTime
-      );
+      const fetchedEvents = await getHappeningNowEvents({
+        lat: userLocation.lat,
+        lng: userLocation.lng,
+        radiusMiles: 50,
+        timeFilter: selectedTime === 'all' ? undefined : selectedTime as any,
+      });
       setEvents(fetchedEvents);
     } catch (error) {
       console.error('Error fetching events:', error);

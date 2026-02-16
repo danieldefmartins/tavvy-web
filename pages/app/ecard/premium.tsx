@@ -78,6 +78,7 @@ const PLANS = {
 export default function ECardPremiumScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { locale } = router;
   const { feature, themeName } = router.query;
   const { theme, isDark } = useThemeContext();
   const { user, refreshProfile } = useAuth();

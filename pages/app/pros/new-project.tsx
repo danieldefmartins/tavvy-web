@@ -185,6 +185,7 @@ function ProgressBar({ step }: { step: number }) {
 export default function NewProjectPage() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { locale } = router;
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState<FormData>({
     fullName: '',
@@ -1302,7 +1303,7 @@ export default function NewProjectPage() {
                     Sign up now to get real-time notifications and chat directly with pros who respond to your request.
                   </p>
                   <button
-                    onClick={() => router.push(`/app/signup?email=${encodeURIComponent(formData.email, undefined, { locale })}`)}
+                    onClick={() => router.push(`/app/signup?email=${encodeURIComponent(formData.email)}`)}
                     style={{
                       width: '100%', padding: '18px', background: ProsColors.primary,
                       color: 'white', border: 'none', borderRadius: '14px',

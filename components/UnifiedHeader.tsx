@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/router';
 import { Search, ChevronLeft, User, MoreHorizontal } from 'lucide-react';
 
 // Screen color configurations - matching mobile

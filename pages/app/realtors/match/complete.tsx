@@ -9,6 +9,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 export default function MatchCompleteScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { locale } = router;
 
   return (
     <>

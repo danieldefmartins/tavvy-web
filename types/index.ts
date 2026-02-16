@@ -25,13 +25,22 @@ export interface Place {
   description?: string;
   signals?: Signal[];
   photos?: string[];
+  tavvy_category?: string;
+  tavvy_subcategory?: string;
 }
 
 export interface SearchSuggestion {
   id: string;
   type: 'place' | 'category' | 'location' | 'recent' | 'address';
+  name?: string;
   title: string;
   subtitle?: string;
+  category?: string;
+  city?: string;
+  address?: string;
+  distance?: number;
+  latitude?: number;
+  longitude?: number;
   icon: string;
   data?: any;
 }

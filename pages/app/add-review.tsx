@@ -58,6 +58,7 @@ type CategoryId = typeof CATEGORIES[number]['id'];
 export default function AddReviewPage() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { locale } = router;
   const { user } = useAuth();
   const { isDark } = useThemeContext();
   
@@ -420,7 +421,7 @@ export default function AddReviewPage() {
               className="auth-btn auth-btn-primary"
               onClick={() => {
                 const returnUrl = router.asPath;
-                router.push(`/app/signup?redirect=${encodeURIComponent(returnUrl, undefined, { locale })}`);
+                router.push(`/app/signup?redirect=${encodeURIComponent(returnUrl)}`);
               }}
             >
               Create Account
@@ -430,7 +431,7 @@ export default function AddReviewPage() {
               className="auth-btn auth-btn-secondary"
               onClick={() => {
                 const returnUrl = router.asPath;
-                router.push(`/app/login?redirect=${encodeURIComponent(returnUrl, undefined, { locale })}`);
+                router.push(`/app/login?redirect=${encodeURIComponent(returnUrl)}`);
               }}
             >
               Log In

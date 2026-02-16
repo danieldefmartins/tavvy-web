@@ -47,6 +47,7 @@ const BG_DARK = '#000000';
 export default function ECardPreviewScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { locale } = router;
   const { cardId: queryCardId } = router.query;
   const { isDark } = useThemeContext();
   const { user } = useAuth();

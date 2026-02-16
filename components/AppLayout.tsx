@@ -20,6 +20,8 @@ interface AppLayoutProps {
   children: ReactNode;
   hideTabBar?: boolean;
   requiredAccess?: AccessLevel;
+  hideNav?: boolean;
+  accessLevel?: string;
 }
 
 // Maximum time to show loading spinner before giving up (in ms)

@@ -422,7 +422,7 @@ export default function HomeScreen() {
       case 'category':
         // Navigate to map with category filter
         const categoryName = suggestion.data.name;
-        router.push(`/app/map?category=${encodeURIComponent(categoryName, undefined, { locale })}`);
+        router.push(`/app/map?category=${encodeURIComponent(categoryName)}`);
         break;
       case 'recent':
         setSearchQuery(suggestion.title);

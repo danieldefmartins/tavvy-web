@@ -77,7 +77,7 @@ export default function SearchScreen() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/app/search?q=${encodeURIComponent(searchQuery, undefined, { locale })}`, undefined, { shallow: true });
+      router.push(`/app/search?q=${encodeURIComponent(searchQuery)}`, undefined, { shallow: true });
       performSearch(searchQuery);
     }
   };
@@ -91,7 +91,7 @@ export default function SearchScreen() {
 
   const handlePopularSearch = (term: string) => {
     setSearchQuery(term);
-    router.push(`/app/search?q=${encodeURIComponent(term, undefined, { locale })}`, undefined, { shallow: true });
+    router.push(`/app/search?q=${encodeURIComponent(term)}`, undefined, { shallow: true });
     performSearch(term);
   };
 

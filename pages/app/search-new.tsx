@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
-import { searchPlacesTypesense, getAutocompleteSuggestions } from '../../lib/typesenseService';
+import { searchPlaces as searchPlacesTypesense, getAutocompleteSuggestions } from '../../lib/typesenseService';
 import { spacing, borderRadius } from '../../constants/Colors';
 import PlaceCard from '../../components/PlaceCard';
 import { FiSearch, FiX, FiFilter, FiMapPin, FiClock } from 'react-icons/fi';
@@ -112,7 +112,7 @@ export default function SearchScreen() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/app/search?q=${encodeURIComponent(searchQuery, undefined, { locale })}`, undefined, { shallow: true });
+      router.push(`/app/search?q=${encodeURIComponent(searchQuery)}`, undefined, { shallow: true });
       performSearch(searchQuery);
     }
   };
@@ -127,14 +127,14 @@ export default function SearchScreen() {
 
   const handlePopularSearch = (term: string) => {
     setSearchQuery(term);
-    router.push(`/app/search?q=${encodeURIComponent(term, undefined, { locale })}`, undefined, { shallow: true });
+    router.push(`/app/search?q=${encodeURIComponent(term)}`, undefined, { shallow: true });
     performSearch(term);
   };
 
   const handleSuggestionClick = (suggestion: string) => {
     setSearchQuery(suggestion);
     setShowSuggestions(false);
-    router.push(`/app/search?q=${encodeURIComponent(suggestion, undefined, { locale })}`, undefined, { shallow: true });
+    router.push(`/app/search?q=${encodeURIComponent(suggestion)}`, undefined, { shallow: true });
     performSearch(suggestion);
   };
 
@@ -342,7 +342,7 @@ export default function SearchScreen() {
           }
 
           .suggestion-item:hover {
-            background: ${theme.hover};
+            background: ${theme.surface};
           }
 
           .search-stats {

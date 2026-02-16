@@ -68,6 +68,7 @@ interface Category {
 export default function UniverseDiscoveryScreen() {
   const { t } = useTranslation();
   const router = useRouter();
+  const { locale } = router;
   const { theme, isDark } = useThemeContext();
   
   const [activeCategory, setActiveCategory] = useState('All');
