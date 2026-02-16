@@ -1461,6 +1461,15 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             background: '#ffffff',
             minHeight: '100vh',
           } : {}),
+          ...((isFlagCivic || isCleanCivic || isRallyCivic) ? {
+            maxWidth: '440px',
+            margin: '20px auto',
+            padding: '60px 24px 40px',
+            borderRadius: '20px',
+            overflow: 'hidden' as const,
+            boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
+            background: '#ffffff',
+          } : {}),
 
         }}>
           {/* Star Badge - Top Right — Opens Endorsement Popup */}
