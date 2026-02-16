@@ -1385,6 +1385,16 @@ export default function ECardCreateScreen() {
   const [websiteLabel, setWebsiteLabel] = useState('');
   const [company, setCompany] = useState('');
   const [address, setAddress] = useState('');
+
+  // Civic card specific fields
+  const [ballotNumber, setBallotNumber] = useState('');
+  const [partyName, setPartyName] = useState('');
+  const [officeRunningFor, setOfficeRunningFor] = useState('');
+  const [electionYear, setElectionYear] = useState('');
+  const [campaignSlogan, setCampaignSlogan] = useState('');
+  const [region, setRegion] = useState('');
+  const [civicProposals, setCivicProposals] = useState<{ title: string; description: string }[]>([]);
+
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [photoSizeIndex, setPhotoSizeIndex] = useState(1);
@@ -1693,6 +1703,13 @@ export default function ECardCreateScreen() {
         review_tripadvisor_url: reviewTripadvisorUrl || undefined,
         review_facebook_url: reviewFacebookUrl || undefined,
         review_bbb_url: reviewBbbUrl || undefined,
+        // Civic card specific fields
+        ballot_number: ballotNumber || undefined,
+        party_name: partyName || undefined,
+        office_running_for: officeRunningFor || undefined,
+        election_year: electionYear || undefined,
+        campaign_slogan: campaignSlogan || undefined,
+        region: region || undefined,
       } as any);
 
       if (!card) { alert('Failed to save card. Please check your connection and try again.'); setIsCreating(false); return; }
@@ -1702,6 +1719,28 @@ export default function ECardCreateScreen() {
             id: l.id, card_id: card.id, platform: l.platform, url: l.value, value: l.value, sort_order: i, is_active: true,
           })));
         } catch (e) { console.warn('Links save failed:', e); }
+      }
+      // Save civic proposals if any
+      if (civicProposals.length > 0) {
+        try {
+          const { createClient } = await import('@supabase/supabase-js');
+          const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+          );
+          const proposalRows = civicProposals
+            .filter(p => p.title.trim())
+            .map((p, i) => ({
+              card_id: card.id,
+              title: p.title.trim(),
+              description: p.description.trim() || null,
+              sort_order: i,
+              is_active: true,
+            }));
+          if (proposalRows.length > 0) {
+            await supabase.from('civic_proposals').insert(proposalRows);
+          }
+        } catch (e) { console.warn('Proposals save failed:', e); }
       }
       router.push(`/app/ecard/dashboard?cardId=${card.id}`, undefined, { locale });
     } catch (err: any) {
@@ -1871,6 +1910,110 @@ export default function ECardCreateScreen() {
       <input ref={videoInputRef} type="file" accept="video/*" style={{ display: 'none' }} onChange={handleVideoFileUpload} />
     </div>
   );
+
+  // ─── SHARED CIVIC CARD SECTIONS ───
+  const isCivicLayout = ['civic-card', 'civic-card-flag', 'civic-card-bold', 'civic-card-clean', 'civic-card-rally'].includes(templateLayout);
+
+  const renderCivicInfoCard = (opts: { darkBg?: boolean } = {}) => {
+    const isDarkSection = opts.darkBg !== false;
+    const labelColor = isDarkSection ? 'rgba(255,255,255,0.5)' : '#888';
+    const inputColor = isDarkSection ? '#fff' : '#333';
+    const inputColorSec = isDarkSection ? 'rgba(255,255,255,0.8)' : '#555';
+    const dividerColor = isDarkSection ? 'rgba(255,255,255,0.1)' : '#eee';
+    const sectionBg = isDarkSection ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)';
+    return (
+      <div style={{ padding: '16px 20px' }}>
+        {/* Party Name */}
+        <div style={{ marginBottom: 8 }}>
+          <label style={{ fontSize: 10, fontWeight: 600, color: labelColor, textTransform: 'uppercase', letterSpacing: 1 }}>Party</label>
+          <input style={{ ...cardInputStyle('left'), fontSize: 14, fontWeight: 700, color: color?.accent || '#FFD700', letterSpacing: 1 }} placeholder="e.g. PL - Partido Liberal" value={partyName} onChange={e => setPartyName(e.target.value)} />
+        </div>
+        {/* Position / Office */}
+        <div style={{ marginBottom: 8 }}>
+          <label style={{ fontSize: 10, fontWeight: 600, color: labelColor, textTransform: 'uppercase', letterSpacing: 1 }}>Position</label>
+          <input style={{ ...cardInputStyle('left'), fontSize: 13, color: inputColorSec }} placeholder="e.g. Deputado Federal, Vereador" value={officeRunningFor} onChange={e => setOfficeRunningFor(e.target.value)} />
+        </div>
+        {/* Region */}
+        <div style={{ marginBottom: 8 }}>
+          <label style={{ fontSize: 10, fontWeight: 600, color: labelColor, textTransform: 'uppercase', letterSpacing: 1 }}>Region / City</label>
+          <input style={{ ...cardInputStyle('left'), fontSize: 13, color: inputColorSec }} placeholder="e.g. Minas Gerais, São Paulo" value={region} onChange={e => setRegion(e.target.value)} />
+        </div>
+        {/* Election Year */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ fontSize: 10, fontWeight: 600, color: labelColor, textTransform: 'uppercase', letterSpacing: 1 }}>Election Year</label>
+          <input style={{ ...cardInputStyle('left'), fontSize: 13, color: inputColorSec }} placeholder="e.g. 2026" value={electionYear} onChange={e => setElectionYear(e.target.value)} />
+        </div>
+        {/* Ballot Number */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12, background: sectionBg, borderRadius: 12, padding: '10px 16px' }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: labelColor }}>VOTE</span>
+          <input style={{ ...cardInputStyle('left'), fontSize: 28, fontWeight: 900, color: color?.accent || '#FFD700', letterSpacing: 6, width: 140 }} placeholder="12345" value={ballotNumber} onChange={e => setBallotNumber(e.target.value)} />
+        </div>
+        {/* Campaign Slogan */}
+        <div style={{ marginBottom: 12 }}>
+          <label style={{ fontSize: 10, fontWeight: 600, color: labelColor, textTransform: 'uppercase', letterSpacing: 1 }}>Campaign Slogan</label>
+          <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: color?.accent || '#FFD700', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 13, resize: 'none', minHeight: 36, fontStyle: 'italic' }} placeholder='"Pela liberdade, pela família e pelo Brasil"' value={campaignSlogan} onChange={e => setCampaignSlogan(e.target.value)} rows={2} />
+        </div>
+        <div style={{ width: '100%', height: 1, background: dividerColor, margin: '8px 0 16px' }} />
+      </div>
+    );
+  };
+
+  const renderCivicProposals = (opts: { darkBg?: boolean } = {}) => {
+    const isDarkSection = opts.darkBg !== false;
+    const labelColor = isDarkSection ? 'rgba(255,255,255,0.5)' : '#888';
+    const inputColor = isDarkSection ? '#fff' : '#333';
+    const inputColorSec = isDarkSection ? 'rgba(255,255,255,0.6)' : '#666';
+    const cardBg = isDarkSection ? 'rgba(255,255,255,0.06)' : '#fff';
+    const cardBorder = isDarkSection ? 'rgba(255,255,255,0.08)' : '#eee';
+    return (
+      <div style={{ padding: '0 20px 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <label style={{ fontSize: 11, fontWeight: 700, color: labelColor, textTransform: 'uppercase', letterSpacing: 1 }}>Proposals</label>
+          <button onClick={() => setCivicProposals(prev => [...prev, { title: '', description: '' }])} style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, color: ACCENT_GREEN, fontSize: 12, fontWeight: 600 }}>
+            <IoAdd size={16} /> Add
+          </button>
+        </div>
+        {civicProposals.length === 0 ? (
+          <button onClick={() => setCivicProposals([{ title: '', description: '' }])} style={{ width: '100%', padding: '14px', background: cardBg, border: `1px dashed ${cardBorder}`, borderRadius: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <IoAdd size={18} color={isDarkSection ? 'rgba(255,255,255,0.4)' : '#aaa'} />
+            <span style={{ fontSize: 13, color: isDarkSection ? 'rgba(255,255,255,0.4)' : '#aaa' }}>Add your first proposal</span>
+          </button>
+        ) : (
+          civicProposals.map((proposal, idx) => (
+            <div key={idx} style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: 12, padding: '12px 14px', marginBottom: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: labelColor, minWidth: 16 }}>{idx + 1}.</span>
+                <input
+                  style={{ ...cardInputStyle('left'), fontSize: 14, fontWeight: 600, color: inputColor, flex: 1 }}
+                  placeholder="Proposal title"
+                  value={proposal.title}
+                  onChange={e => {
+                    const updated = [...civicProposals];
+                    updated[idx] = { ...updated[idx], title: e.target.value };
+                    setCivicProposals(updated);
+                  }}
+                />
+                <button onClick={() => setCivicProposals(prev => prev.filter((_, i) => i !== idx))} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+                  <IoTrash size={14} color="#EF4444" />
+                </button>
+              </div>
+              <textarea
+                style={{ background: 'transparent', border: 'none', outline: 'none', color: inputColorSec, width: '100%', fontFamily: font, padding: '2px 0 2px 24px', fontSize: 12, resize: 'none', minHeight: 28, lineHeight: 1.5 }}
+                placeholder="Brief description (optional)"
+                value={proposal.description}
+                onChange={e => {
+                  const updated = [...civicProposals];
+                  updated[idx] = { ...updated[idx], description: e.target.value };
+                  setCivicProposals(updated);
+                }}
+                rows={1}
+              />
+            </div>
+          ))
+        )}
+      </div>
+    );
+  };
 
   const renderPhotoUpload = () => {
     if (isCover) {
@@ -2636,22 +2779,37 @@ export default function ECardCreateScreen() {
       );
     }
 
-    // ─── CIVIC CARD ─── (Brazilian politician card - redirect to civic card dashboard)
+    // ─── CIVIC CARD ─── (Brazilian politician card)
     if (templateLayout === 'civic-card') {
       return (
-        <div className="live-card" style={{ background: `linear-gradient(180deg, ${color?.primary || '#CC0000'}, ${color?.secondary || '#990000'})`, fontFamily: font, position: 'relative', padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+        <div className="live-card" style={{ background: '#f5f5f5', fontFamily: font, position: 'relative', padding: 0, overflow: 'hidden' }}>
+          {/* Hero section - light bg, centered photo + name + bio */}
+          <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, background: '#fff' }}>
             {renderPhotoUpload()}
-            <div className="card-fields" style={{ textAlign: 'center' }}>
-              <input style={{ ...cardInputStyle(), fontSize: 22, fontWeight: 700, color: '#fff' }} placeholder="Candidate Name" value={name} onChange={e => setName(e.target.value)} />
-              <input style={{ ...cardInputStyle(), fontSize: 14, color: 'rgba(255,255,255,0.8)' }} placeholder="Party / Position" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+            <input style={{ ...cardInputStyle(), fontSize: 24, fontWeight: 800, color: '#1a1a1a', letterSpacing: -0.5 }} placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} />
+            <input style={{ ...cardInputStyle(), fontSize: 14, fontWeight: 500, color: '#555' }} placeholder="Title (e.g. Deputado Federal)" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+            <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: '#666', textAlign: 'center', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 13, resize: 'none', minHeight: 40, lineHeight: 1.6 }} placeholder="Your bio..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f0f0f0', borderRadius: 20, padding: '5px 14px', border: '1px solid #e0e0e0' }}>
+              <IoLocationOutline size={12} color="#555" />
+              <input style={{ ...cardInputStyle('left'), fontSize: 11, fontWeight: 500, color: '#555', width: 140 }} placeholder="City, State" value={address} onChange={e => setAddress(e.target.value)} />
             </div>
-            <input style={{ ...cardInputStyle(), fontSize: 28, fontWeight: 900, color: color?.accent || '#FFD700', letterSpacing: 4 }} placeholder="Ballot #" value={company} onChange={e => setCompany(e.target.value)} />
-            <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: 'rgba(255,255,255,0.85)', textAlign: 'center', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 13, resize: 'none', minHeight: 40 }} placeholder="Your campaign message..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
           </div>
-          <div style={{ padding: '0 20px 20px' }}>
+          {/* Contact & Social */}
+          <div style={{ padding: '12px 20px' }}>
             {renderContactFields()}
           </div>
+          <div style={{ padding: '0 20px 8px' }}>
+            {renderFeaturedIcons()}
+          </div>
+          {/* Dark info card — party, position, ballot number, slogan */}
+          <div style={{ margin: '0 16px', borderRadius: 16, background: `linear-gradient(135deg, ${color?.primary || '#003366'}, ${color?.secondary || '#001a33'})`, overflow: 'hidden' }}>
+            {renderCivicInfoCard({ darkBg: true })}
+          </div>
+          {/* Proposals */}
+          <div style={{ marginTop: 12 }}>
+            {renderCivicProposals({ darkBg: false })}
+          </div>
+          {/* Links */}
           <div style={{ padding: '0 20px 20px' }}>
             {renderLinksSection()}
           </div>
@@ -2666,20 +2824,33 @@ export default function ECardCreateScreen() {
           {/* Flag background overlay */}
           <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(https://flagcdn.com/w640/br.png)', backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.12 }} />
           <div style={{ position: 'relative', zIndex: 1 }}>
-            <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+            {/* Hero */}
+            <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
               {renderPhotoUpload()}
-              <div className="card-fields" style={{ textAlign: 'center' }}>
-                <input style={{ ...cardInputStyle(), fontSize: 22, fontWeight: 700, color: '#fff', textShadow: '0 2px 8px rgba(0,0,0,0.3)' }} placeholder="Candidate Name" value={name} onChange={e => setName(e.target.value)} />
-                <input style={{ ...cardInputStyle(), fontSize: 14, color: 'rgba(255,255,255,0.85)' }} placeholder="Party / Position" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+              <input style={{ ...cardInputStyle(), fontSize: 24, fontWeight: 800, color: '#fff', textShadow: '0 2px 8px rgba(0,0,0,0.3)', letterSpacing: -0.5 }} placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} />
+              <input style={{ ...cardInputStyle(), fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.85)' }} placeholder="Title (e.g. Deputado Federal)" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+              <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: 'rgba(255,255,255,0.85)', textAlign: 'center', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 13, resize: 'none', minHeight: 40, lineHeight: 1.6 }} placeholder="Your bio..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.2)', borderRadius: 20, padding: '5px 14px' }}>
+                <IoLocationOutline size={12} color="rgba(255,255,255,0.7)" />
+                <input style={{ ...cardInputStyle('left'), fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.8)', width: 140 }} placeholder="City, State" value={address} onChange={e => setAddress(e.target.value)} />
               </div>
-              <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 12, padding: '12px 20px', backdropFilter: 'blur(10px)' }}>
-                <input style={{ ...cardInputStyle(), fontSize: 28, fontWeight: 900, color: color?.accent || '#FEDD00', letterSpacing: 4 }} placeholder="Ballot #" value={company} onChange={e => setCompany(e.target.value)} />
-              </div>
-              <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: color?.accent || '#FEDD00', textAlign: 'center', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 13, resize: 'none', minHeight: 40, fontStyle: 'italic' }} placeholder="Your campaign slogan..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
             </div>
-            <div style={{ padding: '0 20px 20px' }}>
+            {/* Contact & Social */}
+            <div style={{ padding: '8px 20px' }}>
               {renderContactFields()}
             </div>
+            <div style={{ padding: '0 20px 8px' }}>
+              {renderFeaturedIcons()}
+            </div>
+            {/* Glassmorphism info card */}
+            <div style={{ margin: '0 16px', borderRadius: 14, background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden' }}>
+              {renderCivicInfoCard({ darkBg: true })}
+            </div>
+            {/* Proposals */}
+            <div style={{ marginTop: 12 }}>
+              {renderCivicProposals({ darkBg: true })}
+            </div>
+            {/* Links */}
             <div style={{ padding: '0 20px 20px' }}>
               {renderLinksSection()}
             </div>
@@ -2696,8 +2867,9 @@ export default function ECardCreateScreen() {
           <div style={{ background: `linear-gradient(135deg, ${color?.primary || '#0a1628'}, ${color?.secondary || '#1a2d4d'})`, padding: '24px 20px', position: 'relative' }}>
             <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
               <div style={{ flex: 1 }}>
-                <input style={{ ...cardInputStyle(), fontSize: 10, fontWeight: 700, color: color?.accent || '#FFD700', letterSpacing: 3, textTransform: 'uppercase' }} placeholder="PARTY NAME" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
-                <input style={{ ...cardInputStyle(), fontSize: 24, fontWeight: 900, color: '#fff', letterSpacing: -1 }} placeholder="YOUR NAME" value={name} onChange={e => setName(e.target.value)} />
+                <input style={{ ...cardInputStyle('left'), fontSize: 10, fontWeight: 700, color: color?.accent || '#FFD700', letterSpacing: 3, textTransform: 'uppercase' }} placeholder="PARTY NAME" value={partyName} onChange={e => setPartyName(e.target.value)} />
+                <input style={{ ...cardInputStyle('left'), fontSize: 24, fontWeight: 900, color: '#fff', letterSpacing: -1 }} placeholder="YOUR NAME" value={name} onChange={e => setName(e.target.value)} />
+                <input style={{ ...cardInputStyle('left'), fontSize: 12, color: 'rgba(255,255,255,0.7)' }} placeholder="Position • Region" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
               </div>
               <div onClick={() => fileInputRef.current?.click()} style={{ width: 80, height: 80, borderRadius: 12, overflow: 'hidden', cursor: 'pointer', flexShrink: 0, border: `2px solid ${color?.accent || '#FFD700'}` }}>
                 {profileImage ? <img src={profileImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IoCamera size={24} color="rgba(255,255,255,0.4)" /></div>}
@@ -2705,13 +2877,46 @@ export default function ECardCreateScreen() {
             </div>
             <div style={{ marginTop: 12, background: color?.accent || '#FFD700', borderRadius: 8, padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 11, fontWeight: 700, color: color?.primary || '#0a1628' }}>VOTE</span>
-              <input style={{ ...cardInputStyle(), fontSize: 24, fontWeight: 900, color: color?.primary || '#0a1628', letterSpacing: 4, width: 120 }} placeholder="12345" value={company} onChange={e => setCompany(e.target.value)} />
+              <input style={{ ...cardInputStyle('left'), fontSize: 24, fontWeight: 900, color: color?.primary || '#0a1628', letterSpacing: 4, width: 120 }} placeholder="12345" value={ballotNumber} onChange={e => setBallotNumber(e.target.value)} />
             </div>
           </div>
-          {/* Content */}
+          {/* Content below hero */}
           <div style={{ padding: '16px 20px' }}>
-            <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: '#555', textAlign: 'center', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 13, resize: 'none', minHeight: 40 }} placeholder="Your campaign message..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
+            <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: '#555', textAlign: 'center', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 13, resize: 'none', minHeight: 40, lineHeight: 1.6 }} placeholder="Your bio..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f0f0f0', borderRadius: 20, padding: '5px 14px', border: '1px solid #e0e0e0', marginBottom: 12 }}>
+              <IoLocationOutline size={12} color="#555" />
+              <input style={{ ...cardInputStyle('left'), fontSize: 11, fontWeight: 500, color: '#555', width: 140 }} placeholder="City, State" value={address} onChange={e => setAddress(e.target.value)} />
+            </div>
             {renderContactFields()}
+            {renderFeaturedIcons()}
+          </div>
+          {/* Civic info (remaining fields) */}
+          <div style={{ margin: '0 16px', borderRadius: 14, background: `linear-gradient(135deg, ${color?.primary || '#0a1628'}, ${color?.secondary || '#1a2d4d'})`, overflow: 'hidden' }}>
+            <div style={{ padding: '16px 20px' }}>
+              <div style={{ marginBottom: 8 }}>
+                <label style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>Position</label>
+                <input style={{ ...cardInputStyle('left'), fontSize: 13, color: 'rgba(255,255,255,0.8)' }} placeholder="e.g. Deputado Federal" value={officeRunningFor} onChange={e => setOfficeRunningFor(e.target.value)} />
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <label style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>Region</label>
+                <input style={{ ...cardInputStyle('left'), fontSize: 13, color: 'rgba(255,255,255,0.8)' }} placeholder="e.g. Minas Gerais" value={region} onChange={e => setRegion(e.target.value)} />
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <label style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>Election Year</label>
+                <input style={{ ...cardInputStyle('left'), fontSize: 13, color: 'rgba(255,255,255,0.8)' }} placeholder="e.g. 2026" value={electionYear} onChange={e => setElectionYear(e.target.value)} />
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <label style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>Campaign Slogan</label>
+                <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: color?.accent || '#FFD700', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 13, resize: 'none', minHeight: 36, fontStyle: 'italic' }} placeholder='"Pela liberdade, pela família e pelo Brasil"' value={campaignSlogan} onChange={e => setCampaignSlogan(e.target.value)} rows={2} />
+              </div>
+            </div>
+          </div>
+          {/* Proposals */}
+          <div style={{ marginTop: 12 }}>
+            {renderCivicProposals({ darkBg: false })}
+          </div>
+          {/* Links */}
+          <div style={{ padding: '0 20px 20px' }}>
             {renderLinksSection()}
           </div>
         </div>
@@ -2729,18 +2934,61 @@ export default function ECardCreateScreen() {
           <div style={{ margin: '20px 16px', background: '#fff', borderRadius: 16, padding: '24px 20px', boxShadow: '0 2px 20px rgba(0,0,0,0.06)' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
               {renderPhotoUpload()}
-              <input style={{ ...cardInputStyle(), fontSize: 22, fontWeight: 700, color: '#1a1a1a' }} placeholder="Candidate Name" value={name} onChange={e => setName(e.target.value)} />
-              <input style={{ ...cardInputStyle(), fontSize: 14, color: color?.primary || '#1e40af', fontWeight: 500 }} placeholder="Position" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+              <input style={{ ...cardInputStyle(), fontSize: 22, fontWeight: 700, color: '#1a1a1a' }} placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} />
+              <input style={{ ...cardInputStyle(), fontSize: 14, color: color?.primary || '#1e40af', fontWeight: 500 }} placeholder="Title (e.g. Deputado Federal)" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: `${color?.primary || '#1e40af'}10`, borderRadius: 20, padding: '4px 14px', border: `1px solid ${color?.primary || '#1e40af'}15` }}>
+                <input style={{ ...cardInputStyle(), fontSize: 10, fontWeight: 600, color: color?.primary || '#1e40af', width: 180 }} placeholder="Party • City • Year" value={partyName ? `${partyName}${region ? ' • ' + region : ''}${electionYear ? ' • ' + electionYear : ''}` : ''} onChange={e => setPartyName(e.target.value)} />
+              </div>
+              {/* Ballot number */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 0', borderTop: `1px solid ${color?.primary || '#1e40af'}15`, borderBottom: `1px solid ${color?.primary || '#1e40af'}15`, width: '100%' }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: color?.primary || '#1e40af' }}>VOTE</span>
-                <input style={{ ...cardInputStyle(), fontSize: 28, fontWeight: 900, color: color?.primary || '#1e40af', letterSpacing: 4, width: 120 }} placeholder="12345" value={company} onChange={e => setCompany(e.target.value)} />
+                <input style={{ ...cardInputStyle(), fontSize: 28, fontWeight: 900, color: color?.primary || '#1e40af', letterSpacing: 4, width: 120 }} placeholder="12345" value={ballotNumber} onChange={e => setBallotNumber(e.target.value)} />
               </div>
-              <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: '#666', textAlign: 'center', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 13, resize: 'none', minHeight: 40, lineHeight: 1.6 }} placeholder="Your campaign message..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
+              <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: '#666', textAlign: 'center', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 13, resize: 'none', minHeight: 40, lineHeight: 1.6 }} placeholder="Your bio..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f0f0f0', borderRadius: 20, padding: '5px 14px', border: '1px solid #e0e0e0' }}>
+                <IoLocationOutline size={12} color="#555" />
+                <input style={{ ...cardInputStyle('left'), fontSize: 11, fontWeight: 500, color: '#555', width: 140 }} placeholder="City, State" value={address} onChange={e => setAddress(e.target.value)} />
+              </div>
             </div>
           </div>
-          {/* Contact & Links on bg */}
-          <div style={{ padding: '0 16px 20px' }}>
+          {/* Contact & Social */}
+          <div style={{ padding: '0 16px 8px' }}>
             {renderContactFields()}
+          </div>
+          <div style={{ padding: '0 16px 8px' }}>
+            {renderFeaturedIcons()}
+          </div>
+          {/* Civic details card */}
+          <div style={{ margin: '0 16px', background: '#fff', borderRadius: 14, padding: '0', boxShadow: '0 1px 8px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
+            <div style={{ padding: '16px 20px' }}>
+              <div style={{ marginBottom: 8 }}>
+                <label style={{ fontSize: 10, fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: 1 }}>Party</label>
+                <input style={{ ...cardInputStyle('left'), fontSize: 14, fontWeight: 700, color: color?.primary || '#1e40af' }} placeholder="e.g. PL - Partido Liberal" value={partyName} onChange={e => setPartyName(e.target.value)} />
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <label style={{ fontSize: 10, fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: 1 }}>Position</label>
+                <input style={{ ...cardInputStyle('left'), fontSize: 13, color: '#555' }} placeholder="e.g. Deputado Federal" value={officeRunningFor} onChange={e => setOfficeRunningFor(e.target.value)} />
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <label style={{ fontSize: 10, fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: 1 }}>Region</label>
+                <input style={{ ...cardInputStyle('left'), fontSize: 13, color: '#555' }} placeholder="e.g. Minas Gerais" value={region} onChange={e => setRegion(e.target.value)} />
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <label style={{ fontSize: 10, fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: 1 }}>Election Year</label>
+                <input style={{ ...cardInputStyle('left'), fontSize: 13, color: '#555' }} placeholder="e.g. 2026" value={electionYear} onChange={e => setElectionYear(e.target.value)} />
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <label style={{ fontSize: 10, fontWeight: 600, color: '#888', textTransform: 'uppercase', letterSpacing: 1 }}>Campaign Slogan</label>
+                <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: color?.primary || '#1e40af', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 13, resize: 'none', minHeight: 36, fontStyle: 'italic' }} placeholder='"Pela liberdade, pela família e pelo Brasil"' value={campaignSlogan} onChange={e => setCampaignSlogan(e.target.value)} rows={2} />
+              </div>
+            </div>
+          </div>
+          {/* Proposals */}
+          <div style={{ marginTop: 12 }}>
+            {renderCivicProposals({ darkBg: false })}
+          </div>
+          {/* Links */}
+          <div style={{ padding: '0 16px 20px' }}>
             {renderLinksSection()}
           </div>
         </div>
@@ -2758,23 +3006,57 @@ export default function ECardCreateScreen() {
                 {profileImage ? <img src={profileImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IoCamera size={22} color="rgba(255,255,255,0.4)" /></div>}
               </div>
               <div style={{ flex: 1 }}>
-                <input style={{ ...cardInputStyle(), fontSize: 20, fontWeight: 900, color: '#fff', letterSpacing: -0.5 }} placeholder="YOUR NAME" value={name} onChange={e => setName(e.target.value)} />
-                <input style={{ ...cardInputStyle(), fontSize: 12, color: 'rgba(255,255,255,0.8)' }} placeholder="Position • City" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+                <input style={{ ...cardInputStyle('left'), fontSize: 20, fontWeight: 900, color: '#fff', letterSpacing: -0.5 }} placeholder="YOUR NAME" value={name} onChange={e => setName(e.target.value)} />
+                <input style={{ ...cardInputStyle('left'), fontSize: 12, color: 'rgba(255,255,255,0.8)' }} placeholder="Title (e.g. Deputado Federal)" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
               </div>
             </div>
             <div style={{ marginTop: 14, background: color?.accent || '#FFD700', borderRadius: 8, padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 11, fontWeight: 800, color: color?.primary || '#003366' }}>VOTE</span>
-              <input style={{ ...cardInputStyle(), fontSize: 24, fontWeight: 900, color: color?.primary || '#003366', letterSpacing: 4, width: 120 }} placeholder="12345" value={company} onChange={e => setCompany(e.target.value)} />
+              <input style={{ ...cardInputStyle('left'), fontSize: 24, fontWeight: 900, color: color?.primary || '#003366', letterSpacing: 4, width: 120 }} placeholder="12345" value={ballotNumber} onChange={e => setBallotNumber(e.target.value)} />
             </div>
             {/* Diagonal cut SVG */}
             <svg viewBox="0 0 400 30" style={{ width: '100%', height: 30, display: 'block', position: 'absolute', bottom: 0, left: 0 }} preserveAspectRatio="none">
               <path d="M0 30 L400 0 L400 30 Z" fill="#f5f5f5" />
             </svg>
           </div>
-          {/* Content below */}
-          <div style={{ padding: '0 20px 20px' }}>
-            <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: color?.primary || '#003366', textAlign: 'center', width: '100%', fontFamily: font, padding: '8px 0', fontSize: 13, resize: 'none', minHeight: 40, fontStyle: 'italic', fontWeight: 600 }} placeholder="Your campaign slogan..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
+          {/* Content below diagonal */}
+          <div style={{ padding: '0 20px' }}>
+            <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: color?.primary || '#003366', textAlign: 'center', width: '100%', fontFamily: font, padding: '8px 0', fontSize: 14, resize: 'none', minHeight: 40, fontStyle: 'italic', fontWeight: 600 }} placeholder='"Your campaign slogan..."' value={campaignSlogan} onChange={e => setCampaignSlogan(e.target.value)} rows={2} />
+            <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: '#555', textAlign: 'center', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 13, resize: 'none', minHeight: 36, lineHeight: 1.6 }} placeholder="Your bio..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f0f0f0', borderRadius: 20, padding: '5px 14px', border: '1px solid #e0e0e0', marginBottom: 12 }}>
+              <IoLocationOutline size={12} color="#555" />
+              <input style={{ ...cardInputStyle('left'), fontSize: 11, fontWeight: 500, color: '#555', width: 140 }} placeholder="City, State" value={address} onChange={e => setAddress(e.target.value)} />
+            </div>
             {renderContactFields()}
+            {renderFeaturedIcons()}
+          </div>
+          {/* Civic info card */}
+          <div style={{ margin: '8px 16px', borderRadius: 14, background: `linear-gradient(135deg, ${color?.primary || '#003366'}, ${color?.secondary || '#001a33'})`, overflow: 'hidden' }}>
+            <div style={{ padding: '16px 20px' }}>
+              <div style={{ marginBottom: 8 }}>
+                <label style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>Party</label>
+                <input style={{ ...cardInputStyle('left'), fontSize: 14, fontWeight: 700, color: color?.accent || '#FFD700' }} placeholder="e.g. PL - Partido Liberal" value={partyName} onChange={e => setPartyName(e.target.value)} />
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <label style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>Position</label>
+                <input style={{ ...cardInputStyle('left'), fontSize: 13, color: 'rgba(255,255,255,0.8)' }} placeholder="e.g. Deputado Federal" value={officeRunningFor} onChange={e => setOfficeRunningFor(e.target.value)} />
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <label style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>Region</label>
+                <input style={{ ...cardInputStyle('left'), fontSize: 13, color: 'rgba(255,255,255,0.8)' }} placeholder="e.g. Minas Gerais" value={region} onChange={e => setRegion(e.target.value)} />
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <label style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: 1 }}>Election Year</label>
+                <input style={{ ...cardInputStyle('left'), fontSize: 13, color: 'rgba(255,255,255,0.8)' }} placeholder="e.g. 2026" value={electionYear} onChange={e => setElectionYear(e.target.value)} />
+              </div>
+            </div>
+          </div>
+          {/* Proposals */}
+          <div style={{ marginTop: 8 }}>
+            {renderCivicProposals({ darkBg: false })}
+          </div>
+          {/* Links */}
+          <div style={{ padding: '0 20px 20px' }}>
             {renderLinksSection()}
           </div>
         </div>
