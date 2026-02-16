@@ -919,6 +919,13 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
 /* ============================================================
    MAIN COMPONENT
    ============================================================ */
+// Template type mapping — which templates belong to which card type
+const TEMPLATE_TYPE_MAP: Record<string, string[]> = {
+  business: ['biz-traditional', 'biz-modern', 'biz-minimalist', 'business-card', 'pro-card', 'pro-realtor', 'pro-creative', 'pro-corporate'],
+  personal: ['basic', 'blogger', 'cover-card', 'full-width', 'premium-static'],
+  politician: ['civic-card'],
+};
+
 export default function ECardCreateScreen() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -929,6 +936,13 @@ export default function ECardCreateScreen() {
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
   const [isCreating, setIsCreating] = useState(false);
+
+  // Card type filter from query param
+  const cardType = (router.query.type as string) || '';
+  const allowedIds = TEMPLATE_TYPE_MAP[cardType] || [];
+  const FILTERED_TEMPLATES = allowedIds.length > 0
+    ? TEMPLATES.filter(t => allowedIds.includes(t.id))
+    : TEMPLATES;
 
   // Step: 'gallery' = pick template, 'editor' = customize card
   const [step, setStep] = useState<'gallery' | 'editor'>('gallery');
@@ -951,7 +965,7 @@ export default function ECardCreateScreen() {
     isSwiping.current = false;
     const diff = touchStartX.current - touchEndX.current;
     const threshold = 50;
-    if (diff > threshold && galleryIndex < TEMPLATES.length - 1) {
+    if (diff > threshold && galleryIndex < FILTERED_TEMPLATES.length - 1) {
       setGalleryIndex(prev => prev + 1);
     } else if (diff < -threshold && galleryIndex > 0) {
       setGalleryIndex(prev => prev - 1);
@@ -1092,7 +1106,7 @@ export default function ECardCreateScreen() {
     }
   }, []);
 
-  const template = TEMPLATES[templateIndex];
+  const template = FILTERED_TEMPLATES[templateIndex];
   const colorSchemes = template?.colorSchemes || [];
   const color = colorSchemes[colorIndex] || colorSchemes[0];
   const usesPremiumTemplate = template?.isPremium || false;
@@ -1146,7 +1160,7 @@ export default function ECardCreateScreen() {
 
   // Template navigation
   const goToPrevTemplate = () => { if (templateIndex > 0) { setTemplateIndex(templateIndex - 1); setColorIndex(0); } };
-  const goToNextTemplate = () => { if (templateIndex < TEMPLATES.length - 1) { setTemplateIndex(templateIndex + 1); setColorIndex(0); } };
+  const goToNextTemplate = () => { if (templateIndex < FILTERED_TEMPLATES.length - 1) { setTemplateIndex(templateIndex + 1); setColorIndex(0); } };
 
   // Photo upload
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -2275,14 +2289,14 @@ export default function ECardCreateScreen() {
             {/* Template name + description + badge — ABOVE the card */}
             <div className="swiper-header">
               <div className="tg-name-row" style={{ justifyContent: 'center' }}>
-                <span className="tg-name" style={{ fontSize: 20 }}>{TEMPLATES[galleryIndex].name}</span>
-                {TEMPLATES[galleryIndex].isPremium ? (
+                <span className="tg-name" style={{ fontSize: 20 }}>{FILTERED_TEMPLATES[galleryIndex]?.name}</span>
+                {FILTERED_TEMPLATES[galleryIndex]?.isPremium ? (
                   <span className="tg-pro-tag">PRO</span>
                 ) : (
                   <span className="tg-free-tag">FREE</span>
                 )}
               </div>
-              <span className="tg-desc" style={{ textAlign: 'center', display: 'block', marginTop: 4 }}>{TEMPLATES[galleryIndex].description}</span>
+              <span className="tg-desc" style={{ textAlign: 'center', display: 'block', marginTop: 4 }}>{FILTERED_TEMPLATES[galleryIndex]?.description}</span>
               <span style={{ fontSize: 11, color: isDark ? 'rgba(255,255,255,0.3)' : '#bbb', display: 'block', marginTop: 6 }}>Swipe to browse &middot; Tap card to select</span>
             </div>
 
@@ -2303,7 +2317,7 @@ export default function ECardCreateScreen() {
                   <IoChevronBack size={24} color={isDark ? '#fff' : '#333'} />
                 </button>
               )}
-              {galleryIndex < TEMPLATES.length - 1 && (
+              {galleryIndex < FILTERED_TEMPLATES.length - 1 && (
                 <button className="swiper-arrow swiper-arrow-right" onClick={() => setGalleryIndex(prev => prev + 1)}>
                   <IoChevronForward size={24} color={isDark ? '#fff' : '#333'} />
                 </button>
@@ -2311,7 +2325,7 @@ export default function ECardCreateScreen() {
 
               {/* The card */}
               {(() => {
-                const currentTmpl = TEMPLATES[galleryIndex];
+                const currentTmpl = FILTERED_TEMPLATES[galleryIndex];
                 const cs = currentTmpl.colorSchemes[0];
                 const bg = cs?.background?.includes('gradient') ? cs.background : `linear-gradient(135deg, ${cs?.primary || '#333'}, ${cs?.secondary || '#555'})`;
                 const isBloggerLayout = currentTmpl.layout === 'blogger';
@@ -2346,7 +2360,7 @@ export default function ECardCreateScreen() {
             {/* Dots + Use button — BELOW the card */}
             <div className="swiper-footer">
               <div className="swiper-dots">
-                {TEMPLATES.map((_, i) => (
+                {FILTERED_TEMPLATES.map((_, i) => (
                   <button
                     key={i}
                     className={`swiper-dot ${i === galleryIndex ? 'active' : ''}`}
@@ -2407,7 +2421,7 @@ export default function ECardCreateScreen() {
                   <IoChevronBack size={18} />
                 </button>
                 <span className="template-nav-label">{template?.name}</span>
-                <button className="template-nav-btn" onClick={goToNextTemplate} disabled={templateIndex === TEMPLATES.length - 1}>
+                <button className="template-nav-btn" onClick={goToNextTemplate} disabled={templateIndex === FILTERED_TEMPLATES.length - 1}>
                   <IoChevronForward size={18} />
                 </button>
               </div>

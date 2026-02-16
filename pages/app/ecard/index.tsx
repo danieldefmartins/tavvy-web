@@ -1,12 +1,11 @@
 /**
  * eCard Hub Screen
- * Main entry point for eCard feature - shows existing cards or create new option
- * Ported from tavvy-mobile/screens/ecard/ECardHubScreen.tsx
+ * Clean, simple entry point — shows existing cards or prompts to create one.
+ * Single "+" FAB to create. Card type picker before template gallery.
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -14,48 +13,39 @@ import AppLayout from '../../../components/AppLayout';
 import { getUserCards, deleteCard, duplicateCard, CardData } from '../../../lib/ecard';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { 
-  IoArrowBack, 
-  IoAdd, 
-  IoEye, 
-  IoHandLeft, 
+import {
+  IoArrowBack,
+  IoAdd,
+  IoEye,
+  IoHandLeft,
   IoChevronForward,
-  IoIdCard,
-  IoBulb,
-  IoRefresh,
   IoTrash,
   IoClose,
   IoCopy,
+  IoBusinessOutline,
+  IoPerson,
+  IoFlagOutline,
 } from 'react-icons/io5';
 
-// Brand colors
-const ACCENT_GREEN = '#00C853';
-const BG_LIGHT = '#FAFAFA';
-const BG_DARK = '#000000';
+const ACCENT = '#00C853';
 
 export default function ECardHubScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { theme, isDark } = useThemeContext();
+  const { locale } = router;
+  const { isDark } = useThemeContext();
   const { user, loading: authLoading } = useAuth();
-  
+
   const [cards, setCards] = useState<CardData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [deleteModalCard, setDeleteModalCard] = useState<CardData | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [duplicating, setDuplicating] = useState<string | null>(null);
+  const [showTypePicker, setShowTypePicker] = useState(false);
 
   const fetchCards = useCallback(async () => {
-    // Wait for auth to finish loading before checking user
     if (authLoading) return;
-    
-    if (!user) {
-      setCards([]);
-      setLoading(false);
-      return;
-    }
-
+    if (!user) { setCards([]); setLoading(false); return; }
     try {
       const data = await getUserCards(user.id);
       setCards(data);
@@ -63,25 +53,18 @@ export default function ECardHubScreen() {
       console.error('Error fetching cards:', err);
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   }, [user, authLoading]);
 
-  useEffect(() => {
-    fetchCards();
-  }, [fetchCards]);
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchCards();
-  };
+  useEffect(() => { fetchCards(); }, [fetchCards]);
 
   const handleEditCard = (card: CardData) => {
     router.push(`/app/ecard/dashboard?cardId=${card.id}`, undefined, { locale });
   };
 
-  const handleCreateNew = () => {
-    router.push('/app/ecard/create', undefined, { locale });
+  const handleCreateWithType = (type: string) => {
+    setShowTypePicker(false);
+    router.push(`/app/ecard/create?type=${type}`, undefined, { locale });
   };
 
   const handleViewCard = (card: CardData) => {
@@ -97,11 +80,11 @@ export default function ECardHubScreen() {
         setCards(prev => prev.filter(c => c.id !== deleteModalCard.id));
         setDeleteModalCard(null);
       } else {
-        alert('Failed to delete card. Please try again.');
+        alert('Failed to delete card.');
       }
     } catch (err) {
       console.error('Error deleting card:', err);
-      alert('Failed to delete card. Please try again.');
+      alert('Failed to delete card.');
     } finally {
       setDeleting(false);
     }
@@ -114,54 +97,33 @@ export default function ECardHubScreen() {
       const newCard = await duplicateCard(card.id, user.id);
       if (newCard) {
         setCards(prev => [newCard, ...prev]);
-        // Navigate to the new card's editor
         router.push(`/app/ecard/dashboard?cardId=${newCard.id}`, undefined, { locale });
       } else {
-        alert('Failed to duplicate card. Please try again.');
+        alert('Failed to duplicate card.');
       }
     } catch (err) {
       console.error('Error duplicating card:', err);
-      alert('Failed to duplicate card. Please try again.');
+      alert('Failed to duplicate card.');
     } finally {
       setDuplicating(null);
     }
   };
 
-  const bgColor = isDark ? BG_DARK : BG_LIGHT;
+  const bg = isDark ? '#000' : '#FAFAFA';
+  const cardBg = isDark ? '#1A1A1A' : '#FFFFFF';
+  const textPrimary = isDark ? '#FFFFFF' : '#111111';
+  const textSecondary = isDark ? 'rgba(255,255,255,0.55)' : '#888888';
+  const border = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
 
-  // Calculate totals
-  const totalViews = cards.reduce((sum, card) => sum + (card.view_count || 0), 0);
-  const totalTaps = cards.reduce((sum, card) => sum + (card.tap_count || 0), 0);
-
+  // ── Loading ──
   if (loading) {
     return (
       <>
-        <Head>
-          <title>My eCards | TavvY</title>
-        </Head>
+        <Head><title>My eCards | TavvY</title></Head>
         <AppLayout>
-          <div className="loading-screen" style={{ backgroundColor: bgColor }}>
-            <div className="loading-spinner" />
-            <p style={{ color: isDark ? '#fff' : '#333' }}>Loading your cards...</p>
-            <style jsx>{`
-              .loading-screen {
-                min-height: 100vh;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                gap: 16px;
-              }
-              .loading-spinner {
-                width: 40px;
-                height: 40px;
-                border: 3px solid ${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'};
-                border-top-color: ${ACCENT_GREEN};
-                border-radius: 50%;
-                animation: spin 1s linear infinite;
-              }
-              @keyframes spin { to { transform: rotate(360deg); } }
-            `}</style>
+          <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: bg }}>
+            <div style={{ width: 36, height: 36, border: `3px solid ${border}`, borderTopColor: ACCENT, borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+            <style jsx>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
         </AppLayout>
       </>
@@ -175,203 +137,318 @@ export default function ECardHubScreen() {
         <meta name="description" content="Manage your digital business cards" />
       </Head>
 
-      <AppLayout>
-        <div className="ecard-hub" style={{ backgroundColor: bgColor }}>
-          {/* Header */}
-          <header className="header">
-            <button className="back-btn" onClick={() => router.back()}>
-              <IoArrowBack size={24} color={isDark ? '#fff' : '#333'} />
+      <AppLayout hideTabBar={false}>
+        <div style={{ minHeight: '100vh', backgroundColor: bg, paddingBottom: 100 }}>
+
+          {/* ── Header ── */}
+          <header style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '16px 20px', paddingTop: 'max(16px, env(safe-area-inset-top))',
+          }}>
+            <button onClick={() => router.back()} style={{ background: 'none', border: 'none', padding: 8, cursor: 'pointer', borderRadius: 8 }}>
+              <IoArrowBack size={22} color={textPrimary} />
             </button>
-            <h1 style={{ color: isDark ? '#fff' : '#333' }}>My eCards</h1>
-            <button className="refresh-btn" onClick={onRefresh}>
-              <IoRefresh size={20} color={isDark ? '#fff' : '#333'} className={refreshing ? 'spinning' : ''} />
-            </button>
+            <h1 style={{ fontSize: 17, fontWeight: 600, margin: 0, color: textPrimary, letterSpacing: '-0.3px' }}>My eCards</h1>
+            <div style={{ width: 38 }} />
           </header>
 
-          {/* Hero Section */}
-          <div className="hero-section">
-            <h2 style={{ color: isDark ? '#fff' : '#111' }}>Your Digital Business Cards</h2>
-            <p style={{ color: isDark ? 'rgba(255,255,255,0.6)' : '#666' }}>
-              Create, customize, and share your professional identity
-            </p>
-          </div>
-
-          {/* Cards Grid */}
-          <div className="cards-grid">
-            {cards.map((card) => (
-              <div key={card.id} className="card-tile" onClick={() => handleEditCard(card)}>
-                <div 
-                  className="card-gradient"
-                  style={{ 
-                    background: `linear-gradient(135deg, ${card.gradient_color_1 || '#667eea'}, ${card.gradient_color_2 || '#764ba2'})` 
+          {/* ── Cards List ── */}
+          {cards.length > 0 ? (
+            <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {cards.map((card) => (
+                <div
+                  key={card.id}
+                  onClick={() => handleEditCard(card)}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 14,
+                    padding: 14, borderRadius: 16, backgroundColor: cardBg,
+                    boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)',
+                    border: `1px solid ${border}`, cursor: 'pointer',
+                    transition: 'transform 0.15s',
                   }}
                 >
-                  {/* Status Badge */}
-                  <div className={`status-badge ${card.is_published ? 'published' : 'draft'}`}>
-                    {card.is_published ? 'Live' : 'Draft'}
-                  </div>
-
-                  {/* Profile Photo */}
-                  <div className="card-photo-container">
+                  {/* Card Preview Thumbnail */}
+                  <div style={{
+                    width: 56, height: 56, borderRadius: 14, flexShrink: 0,
+                    background: `linear-gradient(135deg, ${card.gradient_color_1 || '#667eea'}, ${card.gradient_color_2 || '#764ba2'})`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    overflow: 'hidden',
+                  }}>
                     {card.profile_photo_url ? (
-                      <img src={card.profile_photo_url} alt={card.full_name} className="card-photo" />
+                      <img src={card.profile_photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
-                      <div className="card-photo-placeholder">
-                        <IoIdCard size={24} color="rgba(255,255,255,0.5)" />
-                      </div>
+                      <span style={{ fontSize: 22, color: 'rgba(255,255,255,0.8)', fontWeight: 700 }}>
+                        {(card.full_name || 'U')[0].toUpperCase()}
+                      </span>
                     )}
                   </div>
 
                   {/* Card Info */}
-                  <h3 className="card-name">{card.full_name || 'Untitled Card'}</h3>
-                  {card.title && <p className="card-title">{card.title}</p>}
-
-                  {/* Stats Row */}
-                  <div className="stats-row">
-                    <div className="stat">
-                      <IoEye size={12} color="rgba(255,255,255,0.7)" />
-                      <span>{card.view_count || 0}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{
+                        fontSize: 15, fontWeight: 600, color: textPrimary,
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>
+                        {card.full_name || 'Untitled Card'}
+                      </span>
+                      <span style={{
+                        fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 6,
+                        background: card.is_published ? 'rgba(0,200,83,0.12)' : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'),
+                        color: card.is_published ? ACCENT : textSecondary,
+                        flexShrink: 0,
+                      }}>
+                        {card.is_published ? 'Live' : 'Draft'}
+                      </span>
                     </div>
-                    <div className="stat">
-                      <IoHandLeft size={12} color="rgba(255,255,255,0.7)" />
-                      <span>{card.tap_count || 0}</span>
+                    {card.title && (
+                      <p style={{ fontSize: 13, color: textSecondary, margin: '2px 0 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {card.title}
+                      </p>
+                    )}
+                    <div style={{ display: 'flex', gap: 14, marginTop: 6 }}>
+                      <span style={{ fontSize: 12, color: textSecondary, display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <IoEye size={12} /> {card.view_count || 0}
+                      </span>
+                      <span style={{ fontSize: 12, color: textSecondary, display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <IoHandLeft size={12} /> {card.tap_count || 0}
+                      </span>
                     </div>
                   </div>
-                </div>
 
-                {/* Action Buttons */}
-                <div className="card-actions" style={{ backgroundColor: isDark ? '#1E293B' : '#fff' }}>
-                  <span style={{ color: isDark ? '#94A3B8' : '#666' }}>Edit Card</span>
-                  <div className="card-actions-right">
+                  {/* Actions */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
                     <button
-                      className="duplicate-btn"
-                      title="Duplicate card"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDuplicateCard(card);
-                      }}
+                      title="Duplicate"
+                      onClick={(e) => { e.stopPropagation(); handleDuplicateCard(card); }}
                       disabled={duplicating === card.id}
+                      style={{ background: 'none', border: 'none', padding: 6, cursor: 'pointer', borderRadius: 6, display: 'flex', opacity: duplicating === card.id ? 0.4 : 1 }}
                     >
-                      {duplicating === card.id ? (
-                        <span className="spinner-small" />
-                      ) : (
-                        <IoCopy size={16} color={isDark ? '#94A3B8' : '#666'} />
-                      )}
+                      <IoCopy size={16} color={textSecondary} />
                     </button>
                     <button
-                      className="delete-btn"
-                      title="Delete card"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteModalCard(card);
-                      }}
+                      title="Delete"
+                      onClick={(e) => { e.stopPropagation(); setDeleteModalCard(card); }}
+                      style={{ background: 'none', border: 'none', padding: 6, cursor: 'pointer', borderRadius: 6, display: 'flex' }}
                     >
                       <IoTrash size={16} color="#EF4444" />
                     </button>
-                    <IoChevronForward size={16} color={isDark ? '#94A3B8' : '#666'} />
+                    <IoChevronForward size={16} color={textSecondary} />
                   </div>
                 </div>
-              </div>
-            ))}
-
-            {/* Create New Tile */}
-            <div className="card-tile" onClick={handleCreateNew}>
-              <div className="create-new-gradient" style={{ backgroundColor: isDark ? '#1E293B' : '#F5F5F5' }}>
-                <div className="create-new-icon">
-                  <IoAdd size={40} color={ACCENT_GREEN} />
-                </div>
-                <h3 className="create-new-title" style={{ color: isDark ? '#fff' : '#333' }}>Create New</h3>
-                <p className="create-new-subtitle" style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#888' }}>
-                  Start fresh with a new card
-                </p>
-              </div>
-              <div className="card-actions" style={{ backgroundColor: isDark ? '#1E293B' : '#fff' }}>
-                <span style={{ color: isDark ? '#94A3B8' : '#666' }}>Get Started</span>
-                <IoChevronForward size={16} color={isDark ? '#94A3B8' : '#666'} />
-              </div>
+              ))}
             </div>
-          </div>
-
-          {/* Quick Stats */}
-          {cards.length > 0 && (
-            <div className="quick-stats">
-              <h3 style={{ color: isDark ? '#fff' : '#333' }}>Quick Stats</h3>
-              <div className="stats-cards">
-                <div className="stat-card" style={{ backgroundColor: isDark ? '#1E293B' : '#fff' }}>
-                  <span className="stat-value" style={{ color: isDark ? '#fff' : '#333' }}>{totalViews}</span>
-                  <span className="stat-label" style={{ color: isDark ? '#94A3B8' : '#666' }}>Total Views</span>
-                </div>
-                <div className="stat-card" style={{ backgroundColor: isDark ? '#1E293B' : '#fff' }}>
-                  <span className="stat-value" style={{ color: isDark ? '#fff' : '#333' }}>{totalTaps}</span>
-                  <span className="stat-label" style={{ color: isDark ? '#94A3B8' : '#666' }}>Total Taps</span>
-                </div>
-                <div className="stat-card" style={{ backgroundColor: isDark ? '#1E293B' : '#fff' }}>
-                  <span className="stat-value" style={{ color: isDark ? '#fff' : '#333' }}>{cards.length}</span>
-                  <span className="stat-label" style={{ color: isDark ? '#94A3B8' : '#666' }}>Cards</span>
-                </div>
+          ) : (
+            /* ── Empty State ── */
+            <div style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center',
+              justifyContent: 'center', padding: '80px 40px', textAlign: 'center',
+            }}>
+              <div style={{
+                width: 80, height: 80, borderRadius: 24,
+                background: isDark ? 'rgba(0,200,83,0.08)' : 'rgba(0,200,83,0.08)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginBottom: 20,
+              }}>
+                <IoAdd size={36} color={ACCENT} />
               </div>
+              <h2 style={{ fontSize: 20, fontWeight: 700, color: textPrimary, margin: '0 0 8px' }}>
+                Create your first eCard
+              </h2>
+              <p style={{ fontSize: 14, color: textSecondary, margin: 0, lineHeight: 1.5, maxWidth: 260 }}>
+                Tap the + button below to get started with your digital card
+              </p>
             </div>
           )}
 
-          {/* Empty State */}
-          {cards.length === 0 && (
-            <div className="empty-state">
-              <IoIdCard size={64} color="#E0E0E0" />
-              <h3 style={{ color: isDark ? '#fff' : '#333' }}>No cards yet</h3>
-              <p style={{ color: isDark ? 'rgba(255,255,255,0.5)' : '#666' }}>
-                Create your first digital business card and start sharing your professional identity
-              </p>
-              <button className="create-button" onClick={handleCreateNew}>
-                <IoAdd size={20} color="#fff" />
-                <span>Create Your First Card</span>
-              </button>
-            </div>
-          )}
-
-          {/* Pro Tip */}
-          <div className="pro-tip" style={{ backgroundColor: isDark ? '#1E293B' : '#FFF9E6' }}>
-            <div className="pro-tip-icon">
-              <IoBulb size={20} color="#FFB300" />
-            </div>
-            <div className="pro-tip-content">
-              <h4 style={{ color: isDark ? '#fff' : '#333' }}>Pro Tip</h4>
-              <p style={{ color: isDark ? 'rgba(255,255,255,0.7)' : '#666' }}>
-                Share your card link on social media bios, email signatures, and business materials for maximum reach.
-              </p>
-            </div>
-          </div>
-
-          {/* Bottom Spacing */}
-          <div style={{ height: 100 }} />
+          {/* ── FAB (Floating Action Button) ── */}
+          <button
+            onClick={() => setShowTypePicker(true)}
+            style={{
+              position: 'fixed', bottom: 90, right: 24,
+              width: 56, height: 56, borderRadius: 16,
+              background: `linear-gradient(135deg, ${ACCENT}, #00A843)`,
+              border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 4px 20px rgba(0,200,83,0.35)',
+              zIndex: 100, transition: 'transform 0.2s',
+            }}
+          >
+            <IoAdd size={28} color="#fff" />
+          </button>
         </div>
 
-        {/* Delete Confirmation Modal */}
-        {deleteModalCard && (
-          <div className="modal-overlay" onClick={() => !deleting && setDeleteModalCard(null)}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ backgroundColor: isDark ? '#1E293B' : '#fff' }}>
-              <button className="modal-close" onClick={() => !deleting && setDeleteModalCard(null)}>
-                <IoClose size={20} color={isDark ? '#94A3B8' : '#666'} />
-              </button>
-              <div className="modal-icon">
-                <IoTrash size={32} color="#EF4444" />
-              </div>
-              <h3 className="modal-title" style={{ color: isDark ? '#fff' : '#111' }}>Delete Card?</h3>
-              <p className="modal-desc" style={{ color: isDark ? '#94A3B8' : '#666' }}>
-                Are you sure you want to delete <strong>&ldquo;{deleteModalCard.full_name || 'Untitled Card'}&rdquo;</strong>? This will permanently remove the card, all its links, and uploaded photos. This cannot be undone.
+        {/* ── Card Type Picker Modal ── */}
+        {showTypePicker && (
+          <div
+            onClick={() => setShowTypePicker(false)}
+            style={{
+              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+              background: 'rgba(0,0,0,0.5)', display: 'flex',
+              alignItems: 'flex-end', justifyContent: 'center',
+              zIndex: 9999, animation: 'fadeIn 0.15s ease',
+            }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%', maxWidth: 480,
+                backgroundColor: cardBg, borderRadius: '24px 24px 0 0',
+                padding: '8px 0 max(20px, env(safe-area-inset-bottom))',
+                animation: 'slideUp 0.25s ease',
+              }}
+            >
+              {/* Handle */}
+              <div style={{ width: 36, height: 4, borderRadius: 2, background: isDark ? 'rgba(255,255,255,0.15)' : '#DDD', margin: '8px auto 20px' }} />
+
+              <h2 style={{ fontSize: 20, fontWeight: 700, color: textPrimary, margin: '0 24px 6px', letterSpacing: '-0.3px' }}>
+                Choose your card type
+              </h2>
+              <p style={{ fontSize: 14, color: textSecondary, margin: '0 24px 20px' }}>
+                Select the type that best fits your needs
               </p>
-              <div className="modal-actions">
+
+              <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {/* Business */}
                 <button
-                  className="modal-btn modal-btn-cancel"
+                  onClick={() => handleCreateWithType('business')}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 16,
+                    padding: '16px 18px', borderRadius: 16,
+                    background: isDark ? 'rgba(255,255,255,0.05)' : '#F7F7F7',
+                    border: `1px solid ${border}`, cursor: 'pointer',
+                    textAlign: 'left', width: '100%',
+                    transition: 'background 0.15s',
+                  }}
+                >
+                  <div style={{
+                    width: 48, height: 48, borderRadius: 14,
+                    background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  }}>
+                    <IoBusinessOutline size={24} color="#fff" />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: 16, fontWeight: 600, color: textPrimary, display: 'block' }}>Business</span>
+                    <span style={{ fontSize: 13, color: textSecondary }}>For your company, store, or service</span>
+                  </div>
+                  <IoChevronForward size={18} color={textSecondary} style={{ marginLeft: 'auto', flexShrink: 0 }} />
+                </button>
+
+                {/* Personal */}
+                <button
+                  onClick={() => handleCreateWithType('personal')}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 16,
+                    padding: '16px 18px', borderRadius: 16,
+                    background: isDark ? 'rgba(255,255,255,0.05)' : '#F7F7F7',
+                    border: `1px solid ${border}`, cursor: 'pointer',
+                    textAlign: 'left', width: '100%',
+                    transition: 'background 0.15s',
+                  }}
+                >
+                  <div style={{
+                    width: 48, height: 48, borderRadius: 14,
+                    background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  }}>
+                    <IoPerson size={24} color="#fff" />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: 16, fontWeight: 600, color: textPrimary, display: 'block' }}>Personal</span>
+                    <span style={{ fontSize: 13, color: textSecondary }}>Your personal brand & link page</span>
+                  </div>
+                  <IoChevronForward size={18} color={textSecondary} style={{ marginLeft: 'auto', flexShrink: 0 }} />
+                </button>
+
+                {/* Politician / Civic */}
+                <button
+                  onClick={() => handleCreateWithType('politician')}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 16,
+                    padding: '16px 18px', borderRadius: 16,
+                    background: isDark ? 'rgba(255,255,255,0.05)' : '#F7F7F7',
+                    border: `1px solid ${border}`, cursor: 'pointer',
+                    textAlign: 'left', width: '100%',
+                    transition: 'background 0.15s',
+                  }}
+                >
+                  <div style={{
+                    width: 48, height: 48, borderRadius: 14,
+                    background: 'linear-gradient(135deg, #00C853, #00A843)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  }}>
+                    <IoFlagOutline size={24} color="#fff" />
+                  </div>
+                  <div>
+                    <span style={{ fontSize: 16, fontWeight: 600, color: textPrimary, display: 'block' }}>Politician</span>
+                    <span style={{ fontSize: 13, color: textSecondary }}>For public servants & candidates</span>
+                  </div>
+                  <IoChevronForward size={18} color={textSecondary} style={{ marginLeft: 'auto', flexShrink: 0 }} />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Delete Confirmation Modal ── */}
+        {deleteModalCard && (
+          <div
+            onClick={() => !deleting && setDeleteModalCard(null)}
+            style={{
+              position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+              background: 'rgba(0,0,0,0.5)', display: 'flex',
+              alignItems: 'center', justifyContent: 'center',
+              zIndex: 9999, padding: 20,
+            }}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                width: '100%', maxWidth: 360, borderRadius: 20,
+                padding: '28px 24px 24px', backgroundColor: cardBg,
+                position: 'relative', boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+              }}
+            >
+              <button
+                onClick={() => !deleting && setDeleteModalCard(null)}
+                style={{ position: 'absolute', top: 12, right: 12, background: 'none', border: 'none', padding: 6, cursor: 'pointer', borderRadius: 8 }}
+              >
+                <IoClose size={20} color={textSecondary} />
+              </button>
+              <div style={{
+                width: 56, height: 56, borderRadius: 28,
+                background: 'rgba(239,68,68,0.1)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 16px',
+              }}>
+                <IoTrash size={28} color="#EF4444" />
+              </div>
+              <h3 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 8px', textAlign: 'center', color: textPrimary }}>Delete Card?</h3>
+              <p style={{ fontSize: 14, lineHeight: 1.5, margin: '0 0 24px', textAlign: 'center', color: textSecondary }}>
+                This will permanently remove <strong>&ldquo;{deleteModalCard.full_name || 'Untitled Card'}&rdquo;</strong> and all its data. This cannot be undone.
+              </p>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <button
                   onClick={() => setDeleteModalCard(null)}
                   disabled={deleting}
-                  style={{ backgroundColor: isDark ? '#334155' : '#F1F5F9', color: isDark ? '#fff' : '#333' }}
+                  style={{
+                    flex: 1, padding: '12px 16px', border: 'none', borderRadius: 12,
+                    fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                    background: isDark ? '#334155' : '#F1F5F9', color: textPrimary,
+                  }}
                 >
                   Cancel
                 </button>
                 <button
-                  className="modal-btn modal-btn-delete"
                   onClick={handleDeleteCard}
                   disabled={deleting}
+                  style={{
+                    flex: 1, padding: '12px 16px', border: 'none', borderRadius: 12,
+                    fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                    background: '#EF4444', color: '#fff',
+                    opacity: deleting ? 0.6 : 1,
+                  }}
                 >
                   {deleting ? 'Deleting...' : 'Delete'}
                 </button>
@@ -381,498 +458,14 @@ export default function ECardHubScreen() {
         )}
 
         <style jsx>{`
-          .ecard-hub {
-            min-height: 100vh;
-            padding-bottom: 20px;
-          }
-
-          /* Header */
-          .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 20px;
-            padding-top: max(16px, env(safe-area-inset-top));
-          }
-
-          .back-btn, .refresh-btn {
-            background: none;
-            border: none;
-            padding: 8px;
-            cursor: pointer;
-            border-radius: 8px;
-          }
-
-          .back-btn:hover, .refresh-btn:hover {
-            background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'};
-          }
-
-          .header h1 {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0;
-          }
-
-          .spinning {
-            animation: spin 1s linear infinite;
-          }
-
-          /* Hero Section */
-          .hero-section {
-            padding: 0 20px 24px;
-          }
-
-          .hero-section h2 {
-            font-size: 24px;
-            font-weight: 700;
-            margin: 0 0 8px;
-          }
-
-          .hero-section p {
-            font-size: 14px;
-            margin: 0;
-          }
-
-          /* Cards Grid */
-          .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            padding: 0 20px;
-          }
-
-          @media (max-width: 480px) {
-            .cards-grid {
-              grid-template-columns: 1fr;
-            }
-          }
-
-          .card-tile {
-            border-radius: 16px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: transform 0.2s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-          }
-
-          .card-tile:hover {
-            transform: translateY(-2px);
-          }
-
-          .card-gradient {
-            padding: 16px;
-            min-height: 180px;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-          }
-
-          .status-badge {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-          }
-
-          .status-badge.published {
-            background: rgba(0, 200, 83, 0.2);
-            color: #00C853;
-          }
-
-          .status-badge.draft {
-            background: rgba(255, 255, 255, 0.2);
-            color: rgba(255, 255, 255, 0.8);
-          }
-
-          .card-photo-container {
-            width: 56px;
-            height: 56px;
-            border-radius: 28px;
-            overflow: hidden;
-            margin-bottom: 12px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-          }
-
-          .card-photo {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-
-          .card-photo-placeholder {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.1);
-          }
-
-          .card-name {
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            margin: 0 0 4px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
-
-          .card-title {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 13px;
-            margin: 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
-
-          .stats-row {
-            display: flex;
-            gap: 16px;
-            margin-top: auto;
-            padding-top: 12px;
-          }
-
-          .stat {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 12px;
-          }
-
-          .card-actions {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            font-size: 13px;
-          }
-
-          .card-actions-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-          }
-
-          .delete-btn {
-            background: none;
-            border: none;
-            padding: 6px;
-            cursor: pointer;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.15s;
-          }
-
-          .delete-btn:hover {
-            background: rgba(239, 68, 68, 0.1);
-          }
-
-          .duplicate-btn {
-            background: none;
-            border: none;
-            padding: 6px;
-            cursor: pointer;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.15s;
-          }
-
-          .duplicate-btn:hover {
-            background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'};
-          }
-
-          .duplicate-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-          }
-
-          .spinner-small {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid ${isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'};
-            border-top-color: ${isDark ? '#94A3B8' : '#666'};
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-          }
-
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-
-          /* Create New Tile */
-          .create-new-gradient {
-            padding: 16px;
-            min-height: 180px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border: 2px dashed ${isDark ? 'rgba(255,255,255,0.2)' : '#E0E0E0'};
-            border-radius: 16px 16px 0 0;
-            margin: -2px -2px 0 -2px;
-          }
-
-          .create-new-icon {
-            width: 64px;
-            height: 64px;
-            border-radius: 32px;
-            background: ${isDark ? 'rgba(0,200,83,0.1)' : 'rgba(0,200,83,0.1)'};
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 12px;
-          }
-
-          .create-new-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin: 0 0 4px;
-          }
-
-          .create-new-subtitle {
-            font-size: 12px;
-            margin: 0;
-            text-align: center;
-          }
-
-          /* Quick Stats */
-          .quick-stats {
-            padding: 24px 20px;
-          }
-
-          .quick-stats h3 {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0 0 16px;
-          }
-
-          .stats-cards {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-          }
-
-          .stat-card {
-            padding: 16px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-          }
-
-          .stat-value {
-            display: block;
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 4px;
-          }
-
-          .stat-label {
-            font-size: 12px;
-          }
-
-          /* Empty State */
-          .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 48px 20px;
-            text-align: center;
-          }
-
-          .empty-state h3 {
-            font-size: 20px;
-            font-weight: 600;
-            margin: 16px 0 8px;
-          }
-
-          .empty-state p {
-            font-size: 14px;
-            margin: 0 0 24px;
-            max-width: 280px;
-          }
-
-          .create-button {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 14px 24px;
-            background: linear-gradient(90deg, ${ACCENT_GREEN}, #00A843);
-            border: none;
-            border-radius: 12px;
-            color: #fff;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s;
-          }
-
-          .create-button:hover {
-            transform: scale(1.02);
-          }
-
-          /* Pro Tip */
-          .pro-tip {
-            margin: 24px 20px;
-            padding: 16px;
-            border-radius: 12px;
-            display: flex;
-            gap: 12px;
-          }
-
-          .pro-tip-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 20px;
-            background: rgba(255, 179, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-          }
-
-          .pro-tip-content h4 {
-            font-size: 14px;
-            font-weight: 600;
-            margin: 0 0 4px;
-          }
-
-          .pro-tip-content p {
-            font-size: 13px;
-            margin: 0;
-            line-height: 1.4;
-          }
-
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-
-          /* Delete Confirmation Modal */
-          .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            padding: 20px;
-            animation: fadeIn 0.15s ease;
-          }
-
-          @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-          }
-
-          .modal-content {
-            width: 100%;
-            max-width: 380px;
-            border-radius: 20px;
-            padding: 28px 24px 24px;
-            position: relative;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.2s ease;
-          }
-
-          @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-          }
-
-          .modal-close {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            background: none;
-            border: none;
-            padding: 6px;
-            cursor: pointer;
-            border-radius: 8px;
-          }
-
-          .modal-close:hover {
-            background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'};
-          }
-
-          .modal-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 28px;
-            background: rgba(239, 68, 68, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 16px;
-          }
-
-          .modal-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin: 0 0 8px;
-            text-align: center;
-          }
-
-          .modal-desc {
-            font-size: 14px;
-            line-height: 1.5;
-            margin: 0 0 24px;
-            text-align: center;
-          }
-
-          .modal-actions {
-            display: flex;
-            gap: 12px;
-          }
-
-          .modal-btn {
-            flex: 1;
-            padding: 12px 16px;
-            border: none;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.15s, opacity 0.15s;
-          }
-
-          .modal-btn:hover:not(:disabled) {
-            transform: scale(1.02);
-          }
-
-          .modal-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-          }
-
-          .modal-btn-delete {
-            background: #EF4444;
-            color: #fff;
-          }
-
-          .modal-btn-delete:hover:not(:disabled) {
-            background: #DC2626;
-          }
+          @keyframes spin { to { transform: rotate(360deg); } }
+          @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+          @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         `}</style>
       </AppLayout>
     </>
   );
 }
-
 
 export const getServerSideProps = async ({ locale }: { locale: string }) => ({
   props: {
