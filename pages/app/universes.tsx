@@ -80,6 +80,7 @@ export default function UniversesScreen() {
   const router = useRouter();
   const { t } = useTranslation('common');
   const { isDark } = useThemeContext();
+  const locale = router.locale || 'en';
   
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Universe[]>([]);

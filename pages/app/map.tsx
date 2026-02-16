@@ -202,6 +202,7 @@ const MapEvents = dynamic(
 
 export default function MapScreen() {
   const router = useRouter();
+  const locale = router.locale || 'en';
   const { t } = useTranslation('common');
   const { theme, isDark } = useThemeContext();
   

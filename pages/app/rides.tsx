@@ -129,6 +129,7 @@ const getCategoryFallbackImage = (subcategory: string | undefined): string => {
 
 export default function RidesScreen() {
   const router = useRouter();
+  const locale = router.locale || 'en';
   const { t } = useTranslation('common');
   const { theme, isDark } = useThemeContext();
   

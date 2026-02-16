@@ -15,6 +15,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 export default function ResetPasswordScreen() {
   const { t } = useTranslation('common');
   const router = useRouter();
+  const locale = router.locale || 'en';
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');

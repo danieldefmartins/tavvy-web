@@ -45,6 +45,7 @@ const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda
 
 export default function ExploreScreen() {
   const router = useRouter();
+  const locale = router.locale || 'en';
   const { theme } = useThemeContext();
   const { user } = useAuth();
   const { t } = useTranslation('common');

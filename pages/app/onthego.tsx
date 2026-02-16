@@ -87,6 +87,7 @@ interface LiveSession {
 
 export default function OnTheGoScreen() {
   const router = useRouter();
+  const locale = router.locale || 'en';
   const { t } = useTranslation('common');
   const { isDark } = useThemeContext();
   
