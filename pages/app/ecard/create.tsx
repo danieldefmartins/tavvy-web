@@ -8,6 +8,8 @@
  *   - Each template has its own unique editor layout
  */
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
@@ -3458,8 +3460,6 @@ export default function ECardCreateScreen() {
 
         @keyframes slideUp {
           from { opacity: 0; transform: translateY(20px); }
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
           to { opacity: 1; transform: translateY(0); }
         }
 

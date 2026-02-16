@@ -6,6 +6,8 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../contexts/ThemeContext';
@@ -882,8 +884,6 @@ export default function AddStoryPage() {
       <style jsx global>{`
         @keyframes spin {
           from { transform: rotate(0deg); }
-import { useTranslation } from 'next-i18next';
-import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
           to { transform: rotate(360deg); }
         }
       `}</style>
