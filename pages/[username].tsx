@@ -797,7 +797,10 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   const templateConfig = getTemplateByIdWithMigration(cardData.templateId || 'classic');
   const templateLayout: TemplateLayout = templateConfig?.layout || 'basic';
   const isCivicCard = templateLayout.startsWith('civic-card');
-  const isNonClassicCivic = isCivicCard && templateLayout !== 'civic-card';
+  const isNonClassicCivic = templateLayout === 'civic-card-bold';
+  const isFlagCivic = templateLayout === 'civic-card-flag';
+  const isCleanCivic = templateLayout === 'civic-card-clean';
+  const isRallyCivic = templateLayout === 'civic-card-rally';
 
   // Get color scheme from template config
   const activeColorScheme = templateConfig?.colorSchemes.find(cs => cs.id === (cardData as any).colorSchemeId) || templateConfig?.colorSchemes[0];
@@ -1271,7 +1274,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               : templateLayout === 'blogger'
                 ? { background: activeColorScheme?.background || cardData.gradientColor1 }
                 : templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || isCivicCard
-                  ? { background: isNonClassicCivic ? '#ffffff' : (activeColorScheme?.background || '#f0f2f5') }
+                  ? { background: isFlagCivic ? '#009739' : isNonClassicCivic ? '#ffffff' : isRallyCivic ? '#F5C518' : isCleanCivic ? '#e8edf2' : (activeColorScheme?.background || '#f0f2f5') }
                 : cardData.backgroundType === 'solid' 
                   ? { background: cardData.gradientColor1 }
                   : cardData.backgroundType === 'image' && cardData.backgroundImageUrl
