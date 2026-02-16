@@ -33,7 +33,8 @@ export type TemplateLayout =
   | 'biz-traditional' // Traditional business card: logo, photo, contact info, social
   | 'biz-modern'      // Modern business card: split layout, colored header, clean contact
   | 'biz-minimalist'  // Minimalist business card: ultra-clean, lots of whitespace
-  | 'civic-card';      // Brazilian political santinho: candidate photo, ballot number, proposals, civic engagement
+  | 'civic-card'      // Brazilian political santinho: candidate photo, ballot number, proposals, civic engagement
+  | 'politician-generic'; // Generic politician card for all countries: photo, bio, platform, endorsements
 
 export interface Template {
   id: string;
@@ -543,6 +544,35 @@ export const TEMPLATES: Template[] = [
       { id: 'psol-purple', name: 'Roxo', primary: '#6A1B9A', secondary: '#4A148C', accent: '#FFD700', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f5f0fa', cardBg: '#FFFFFF' },
       // Brasil (Green & Yellow)
       { id: 'brasil', name: 'Brasil', primary: '#009739', secondary: '#006B2B', accent: '#FEDD00', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f5f0', cardBg: '#FFFFFF' },
+    ],
+    layoutConfig: {
+      photoPosition: 'center',
+      photoSize: 'large',
+      photoStyle: 'rounded',
+      buttonStyle: 'rounded',
+      fontFamily: 'modern',
+      showBorder: false,
+      hasBannerImage: false,
+    },
+  },
+
+  // 15. GENERIC POLITICIAN CARD — International
+  {
+    id: 'politician-generic',
+    name: 'Politician Card',
+    description: 'Political e-Card for candidates and public servants worldwide. Photo, bio, platform positions, endorsements, and civic engagement.',
+    category: 'paid',
+    previewImage: 'politician-generic',
+    isPremium: true,
+    features: ['candidate-photo', 'bio', 'platform-positions', 'endorsements', 'community-feedback', 'qa'],
+    layout: 'politician-generic',
+    colorSchemes: [
+      { id: 'classic-blue', name: 'Classic Blue', primary: '#1a365d', secondary: '#2a4a7f', accent: '#c9a84c', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF' },
+      { id: 'patriot-red', name: 'Patriot Red', primary: '#8b1a1a', secondary: '#6b1010', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#faf0f0', cardBg: '#FFFFFF' },
+      { id: 'forest-green', name: 'Forest Green', primary: '#1a4d2e', secondary: '#0d3320', accent: '#c9a84c', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f5f0', cardBg: '#FFFFFF' },
+      { id: 'royal-purple', name: 'Royal Purple', primary: '#4a1a6b', secondary: '#350f50', accent: '#c9a84c', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f5f0fa', cardBg: '#FFFFFF' },
+      { id: 'midnight', name: 'Midnight', primary: '#111827', secondary: '#1f2937', accent: '#f59e0b', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f3f4f6', cardBg: '#FFFFFF' },
+      { id: 'slate', name: 'Slate', primary: '#334155', secondary: '#1e293b', accent: '#38bdf8', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f1f5f9', cardBg: '#FFFFFF' },
     ],
     layoutConfig: {
       photoPosition: 'center',

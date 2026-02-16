@@ -975,6 +975,68 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
     );
   }
 
+  /* ═══════════════════════════════════════════════════════════
+     15. POLITICIAN GENERIC — International politician card
+     Photo, bio, platform positions, endorsements
+     ═══════════════════════════════════════════════════════════ */
+  if (tmpl.layout === 'politician-generic') {
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0', background: cardBgCol, borderRadius: 16, overflow: 'hidden' }}>
+        {/* Hero banner with gradient */}
+        <div style={{ width: '100%', height: 180, position: 'relative', background: `linear-gradient(135deg, ${primary}, ${secondary})`, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.5) 100%)' }} />
+          {/* Decorative accent line */}
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: accentCol }} />
+          <PhotoAvatar size={100} border={`3px solid ${accentCol}`} shadow="0 4px 20px rgba(0,0,0,0.3)" style={{ position: 'relative', zIndex: 1, marginBottom: -50 }} />
+        </div>
+        {/* Name + Title */}
+        <div style={{ padding: '56px 20px 12px', textAlign: 'center', width: '100%' }}>
+          <div style={{ fontSize: 22, fontWeight: 800, color: isLightBg ? '#1a1a1a' : txtCol, letterSpacing: -0.5 }}>John Doe</div>
+          <div style={{ fontSize: 13, fontWeight: 500, color: isLightBg ? '#666' : txtSec, marginTop: 4 }}>City Council Member</div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 8, background: `${primary}15`, borderRadius: 20, padding: '4px 14px', border: `1px solid ${primary}25` }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: primary }}>District 5</span>
+          </div>
+        </div>
+        {/* Bio */}
+        <div style={{ width: '100%', padding: '8px 24px 16px' }}>
+          <p style={{ fontSize: 13, lineHeight: 1.6, color: isLightBg ? '#555' : txtSec, textAlign: 'center', margin: 0 }}>
+            Dedicated to building stronger communities through transparent governance and inclusive policy.
+          </p>
+        </div>
+        {/* Platform Positions */}
+        <div style={{ width: '100%', padding: '12px 20px', borderTop: `1px solid ${isLightBg ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'}` }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: primary, textTransform: 'uppercase' as const, letterSpacing: 2, marginBottom: 10 }}>Platform</div>
+          {['Education & Youth Programs', 'Infrastructure Investment', 'Public Safety Reform'].map((p, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: `${primary}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span style={{ fontSize: 12, fontWeight: 700, color: primary }}>{i + 1}</span>
+              </div>
+              <span style={{ fontSize: 13, color: isLightBg ? '#333' : txtCol, fontWeight: 500 }}>{p}</span>
+            </div>
+          ))}
+        </div>
+        {/* Endorsements */}
+        <div style={{ width: '100%', padding: '12px 20px', borderTop: `1px solid ${isLightBg ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'}` }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: primary, textTransform: 'uppercase' as const, letterSpacing: 2, marginBottom: 10 }}>Endorsements</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 6 }}>
+            {['Trustworthy', 'Gets Results', 'Accessible'].map((s, i) => (
+              <div key={i} style={{ background: `${primary}10`, borderRadius: 20, padding: '5px 12px', display: 'flex', alignItems: 'center', gap: 4, border: `1px solid ${primary}20` }}>
+                <span style={{ fontSize: 10, color: isLightBg ? '#444' : txtCol }}>{s}</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: primary }}>{(38 - i * 12)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* Contact CTA */}
+        <div style={{ width: '100%', padding: '12px 20px 20px' }}>
+          <div style={{ width: '100%', height: 44, borderRadius: 10, background: primary, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 4px 16px ${primary}40` }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', letterSpacing: 0.5 }}>Contact Representative</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return null;
 }
 
@@ -992,7 +1054,7 @@ const ALL_GENERAL_TEMPLATES = [
 const TEMPLATE_TYPE_MAP: Record<string, string[]> = {
   business: ALL_GENERAL_TEMPLATES,
   personal: ALL_GENERAL_TEMPLATES,
-  politician: ['civic-card'],
+  politician: ['civic-card', 'politician-generic'],
 };
 
 export default function ECardCreateScreen() {
@@ -1008,7 +1070,17 @@ export default function ECardCreateScreen() {
 
   // Card type filter from query param
   const cardType = (router.query.type as string) || '';
-  const allowedIds = TEMPLATE_TYPE_MAP[cardType] || [];
+  const countryCode = (router.query.country as string) || '';
+  const templateOverride = (router.query.template as string) || '';
+
+  // For politician cards, use the template specified by country selector
+  // Brazil → civic-card, others → politician-generic
+  const allowedIds = (() => {
+    if (cardType === 'politician' && templateOverride) {
+      return [templateOverride];
+    }
+    return TEMPLATE_TYPE_MAP[cardType] || [];
+  })();
   const FILTERED_TEMPLATES = allowedIds.length > 0
     ? TEMPLATES.filter(t => allowedIds.includes(t.id))
     : TEMPLATES;
@@ -1344,6 +1416,8 @@ export default function ECardCreateScreen() {
         gradient_color_1: color?.primary, gradient_color_2: color?.secondary,
         template_id: template.id, color_scheme_id: color?.id || undefined,
         theme: template.id,
+        card_type: cardType || undefined,
+        country_code: countryCode || undefined,
         button_style: template.layoutConfig.buttonStyle,
         font_style: template.layoutConfig.fontFamily,
         background_type: color?.background?.includes('gradient') ? 'gradient' : 'solid',
@@ -2296,6 +2370,75 @@ export default function ECardCreateScreen() {
           {renderExternalReviews()}
           {renderGallerySection()}
           {renderVideoSection()}
+        </div>
+      );
+    }
+
+    // ─── CIVIC CARD ─── (Brazilian politician card - redirect to civic card dashboard)
+    if (templateLayout === 'civic-card') {
+      return (
+        <div className="live-card" style={{ background: `linear-gradient(180deg, ${color?.primary || '#CC0000'}, ${color?.secondary || '#990000'})`, fontFamily: font, position: 'relative', padding: 0, overflow: 'hidden' }}>
+          <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+            {renderPhotoUpload()}
+            <div className="card-fields" style={{ textAlign: 'center' }}>
+              <input style={{ ...cardInputStyle(), fontSize: 22, fontWeight: 700, color: '#fff' }} placeholder="Candidate Name" value={name} onChange={e => setName(e.target.value)} />
+              <input style={{ ...cardInputStyle(), fontSize: 14, color: 'rgba(255,255,255,0.8)' }} placeholder="Party / Position" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+            </div>
+            <input style={{ ...cardInputStyle(), fontSize: 28, fontWeight: 900, color: color?.accent || '#FFD700', letterSpacing: 4 }} placeholder="Ballot #" value={company} onChange={e => setCompany(e.target.value)} />
+            <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: 'rgba(255,255,255,0.85)', textAlign: 'center', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 13, resize: 'none', minHeight: 40 }} placeholder="Your campaign message..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
+          </div>
+          <div style={{ padding: '0 20px 20px' }}>
+            {renderContactFields()}
+          </div>
+          <div style={{ padding: '0 20px 20px' }}>
+            {renderLinksSection()}
+          </div>
+        </div>
+      );
+    }
+
+    // ─── POLITICIAN GENERIC ─── (International politician card)
+    if (templateLayout === 'politician-generic') {
+      const whiteBg = color?.cardBg || '#FFFFFF';
+      return (
+        <div className="live-card" style={{ background: whiteBg, fontFamily: font, position: 'relative', padding: 0, overflow: 'hidden' }}>
+          {/* Hero banner */}
+          <div style={{ width: '100%', height: 160, background: `linear-gradient(135deg, ${color?.primary || '#1a365d'}, ${color?.secondary || '#2a4a7f'})`, position: 'relative', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: accentColor }} />
+            <div onClick={() => fileInputRef.current?.click()} style={{ position: 'relative', zIndex: 1, marginBottom: -45, cursor: 'pointer' }}>
+              <div style={{ width: 90, height: 90, borderRadius: '50%', border: `3px solid ${accentColor}`, overflow: 'hidden', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+                {profileImage ? <img src={profileImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <IoCamera size={28} color="rgba(255,255,255,0.4)" />}
+              </div>
+            </div>
+          </div>
+          {/* Name + Title */}
+          <div style={{ padding: '52px 20px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+            <input style={{ ...cardInputStyle(), fontSize: 22, fontWeight: 700, color: '#1a1a1a' }} placeholder="Your Name" value={name} onChange={e => setName(e.target.value)} />
+            <input style={{ ...cardInputStyle(), fontSize: 14, color: '#666' }} placeholder="Title / Position" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+            <input style={{ ...cardInputStyle(), fontSize: 12, color: color?.primary || '#1a365d', fontWeight: 600 }} placeholder="District / Region" value={company} onChange={e => setCompany(e.target.value)} />
+          </div>
+          {/* Bio */}
+          <div style={{ padding: '8px 20px 16px' }}>
+            <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: '#555', textAlign: 'center', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 13, resize: 'none', minHeight: 50, lineHeight: 1.6 }} placeholder="Share your vision and mission..." value={bio} onChange={e => setBio(e.target.value)} rows={3} />
+          </div>
+          {/* Contact */}
+          <div style={{ padding: '0 20px', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+            <div className="editor-section">
+              <div className="editor-section-label" style={{ color: '#888' }}>
+                <IoMail size={14} /> Contact Information
+              </div>
+              {renderContactFields()}
+            </div>
+          </div>
+          {/* Links */}
+          <div style={{ padding: '0 20px 20px' }}>
+            <div className="editor-section">
+              <div className="editor-section-label" style={{ color: '#888' }}>
+                <IoLink size={14} /> Links & Resources
+              </div>
+              {renderLinksSection()}
+            </div>
+          </div>
         </div>
       );
     }
@@ -3772,7 +3915,7 @@ export default function ECardCreateScreen() {
           font-size: 12px;
           cursor: pointer;
         }
-      `}</style>>
+      `}</style>
     </AppLayout>
   );
 }
