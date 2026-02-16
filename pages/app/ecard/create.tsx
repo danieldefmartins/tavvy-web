@@ -917,58 +917,98 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
 
   /* ═══════════════════════════════════════════════════════════
      14. CIVIC CARD — Brazilian political santinho
-     Candidate photo, ballot number, party badge, proposals,
-     endorsement signals, and civic engagement
+     Matches the live Nikolas template: photo, name, title, bio,
+     action buttons, social icons, dark info card with ballot #,
+     community pulse, tabbed proposals, send message CTA
      ═══════════════════════════════════════════════════════════ */
   if (tmpl.layout === 'civic-card') {
-    const partyBg = `${primary}22`;
     return (
-      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0', background: `linear-gradient(180deg, ${primary} 0%, ${secondary} 100%)`, borderRadius: 16, overflow: 'hidden' }}>
-        {/* Hero section with candidate photo */}
-        <div style={{ width: '100%', height: 200, position: 'relative', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, transparent 30%, ${primary}dd 100%)` }} />
-          <PhotoAvatar size={120} border={`3px solid ${accentCol}`} shadow="0 4px 20px rgba(0,0,0,0.3)" style={{ position: 'relative', zIndex: 1, marginBottom: -40 }} />
-        </div>
-        {/* Name + Party */}
-        <div style={{ padding: '48px 20px 16px', textAlign: 'center', width: '100%' }}>
-          <div style={{ fontSize: 22, fontWeight: 800, color: txtCol, letterSpacing: -0.5 }}>Maria Silva</div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 8, background: partyBg, borderRadius: 20, padding: '4px 14px' }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: accentCol, letterSpacing: 1 }}>PT</span>
-            <span style={{ fontSize: 10, color: txtSec }}>Vereadora</span>
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0', background: '#f5f5f5', borderRadius: 16, overflow: 'hidden' }}>
+        {/* Hero section — light bg, circle photo, name, title, bio, location */}
+        <div style={{ width: '100%', padding: '28px 24px 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <PhotoAvatar size={120} border={`3px solid ${primary}30`} shadow="0 4px 20px rgba(0,0,0,0.12)" />
+          <div style={{ fontSize: 24, fontWeight: 800, color: '#1a1a1a', letterSpacing: -0.5, marginTop: 16 }}>Maria Silva</div>
+          <div style={{ fontSize: 14, fontWeight: 500, color: '#555', marginTop: 4 }}>Vereadora</div>
+          <p style={{ fontSize: 12, lineHeight: 1.6, color: '#666', textAlign: 'center', margin: '10px 0 0', maxWidth: 280 }}>
+            Defensora da liberdade e dos valores da fam\u00edlia. Comprometida com a transpar\u00eancia e o bem-estar da comunidade.
+          </p>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 10, background: '#f0f0f0', borderRadius: 20, padding: '5px 14px', border: '1px solid #e0e0e0' }}>
+            <PreviewLocationIcon size={12} />
+            <span style={{ fontSize: 11, fontWeight: 500, color: '#555' }}>S\u00e3o Paulo, SP</span>
           </div>
         </div>
-        {/* Ballot number */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '8px 0 16px' }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: accentCol }} />
-          <span style={{ fontSize: 28, fontWeight: 900, color: txtCol, letterSpacing: 4 }}>13456</span>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: accentCol }} />
-        </div>
-        {/* Proposals section */}
-        <div style={{ width: '100%', background: 'rgba(255,255,255,0.08)', padding: '16px 20px' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: accentCol, textTransform: 'uppercase' as const, letterSpacing: 2, marginBottom: 10 }}>Proposals</div>
-          {['Education for All', 'Public Safety Reform', 'Green Infrastructure'].map((p, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: accentCol, flexShrink: 0 }} />
-              <span style={{ fontSize: 12, color: txtCol, fontWeight: 500 }}>{p}</span>
+        {/* Action buttons row */}
+        <div style={{ display: 'flex', gap: 12, padding: '18px 24px 12px' }}>
+          {[{ icon: '\u260E', label: 'Call' }, { icon: '\u2709', label: 'Email' }, { icon: '\uD83C\uDF10', label: 'Website' }].map((a, i) => (
+            <div key={i} style={{ width: 64, height: 56, borderRadius: 12, background: '#fff', border: '1px solid #e5e5e5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+              <span style={{ fontSize: 16 }}>{a.icon}</span>
+              <span style={{ fontSize: 9, fontWeight: 600, color: '#555' }}>{a.label}</span>
             </div>
           ))}
         </div>
-        {/* Endorsement signals */}
-        <div style={{ width: '100%', padding: '16px 20px' }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: accentCol, textTransform: 'uppercase' as const, letterSpacing: 2, marginBottom: 10 }}>Endorsements</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 6 }}>
-            {['Transparent', 'Keeps Promises', 'Community Leader'].map((s, i) => (
-              <div key={i} style={{ background: 'rgba(255,255,255,0.12)', borderRadius: 20, padding: '5px 12px', display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span style={{ fontSize: 10, color: txtCol }}>{s}</span>
-                <span style={{ fontSize: 10, fontWeight: 700, color: accentCol }}>{(42 - i * 8)}</span>
-              </div>
-            ))}
+        {/* Social icons */}
+        <div style={{ display: 'flex', gap: 10, padding: '4px 0 16px' }}>
+          {['instagram', 'facebook', 'twitter', 'youtube'].map(s => (
+            <div key={s} style={{ width: 32, height: 32, borderRadius: '50%', background: '#e8e8e8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <PreviewSocialIcon platform={s} size={14} color="#555" />
+            </div>
+          ))}
+        </div>
+        {/* Dark info card — party, position, ballot number, slogan */}
+        <div style={{ width: 'calc(100% - 32px)', margin: '0 16px', borderRadius: 16, background: `linear-gradient(135deg, ${primary}, ${secondary})`, padding: '20px', marginBottom: 16 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: accentCol, letterSpacing: 2, textTransform: 'uppercase' as const }}>PL - PARTIDO LIBERAL</div>
+          <div style={{ fontSize: 12, color: txtSec, marginTop: 4 }}>Vereadora \u2022 S\u00e3o Paulo \u2022 2026</div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 12, background: 'rgba(255,255,255,0.12)', borderRadius: 12, padding: '10px 20px' }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: txtSec }}>VOTE</span>
+            <span style={{ fontSize: 32, fontWeight: 900, color: txtCol, letterSpacing: 6 }}>12345</span>
+          </div>
+          <div style={{ fontSize: 12, fontStyle: 'italic', color: accentCol, marginTop: 12 }}>\u201CPela liberdade, pela fam\u00edlia e pelo Brasil\u201D</div>
+        </div>
+        {/* Community Pulse */}
+        <div style={{ width: 'calc(100% - 32px)', margin: '0 16px 12px', background: '#fff', borderRadius: 14, padding: '14px 16px', border: '1px solid #eee' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a' }}>Community Pulse</span>
+            <span style={{ fontSize: 11, color: '#888' }}>96 votes</span>
+          </div>
+          <div style={{ width: '100%', height: 8, borderRadius: 4, display: 'flex', overflow: 'hidden' }}>
+            <div style={{ width: '59%', background: '#22c55e' }} />
+            <div style={{ width: '27%', background: '#f59e0b' }} />
+            <div style={{ width: '14%', background: '#ef4444' }} />
+          </div>
+          <div style={{ display: 'flex', gap: 12, marginTop: 6 }}>
+            <span style={{ fontSize: 9, color: '#22c55e', fontWeight: 600 }}>Support 59%</span>
+            <span style={{ fontSize: 9, color: '#f59e0b', fontWeight: 600 }}>Improve 27%</span>
+            <span style={{ fontSize: 9, color: '#ef4444', fontWeight: 600 }}>Disagree 14%</span>
           </div>
         </div>
-        {/* Vote CTA */}
-        <div style={{ width: '100%', padding: '0 20px 20px' }}>
-          <div style={{ width: '100%', height: 44, borderRadius: 22, background: accentCol, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: primary, letterSpacing: 1 }}>VOTE 13456</span>
+        {/* Tabbed proposals section */}
+        <div style={{ width: 'calc(100% - 32px)', margin: '0 16px 12px' }}>
+          <div style={{ display: 'flex', borderRadius: 10, overflow: 'hidden', marginBottom: 10 }}>
+            <div style={{ flex: 1, padding: '8px 0', background: primary, textAlign: 'center' }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#fff' }}>Proposals (3)</span>
+            </div>
+            <div style={{ flex: 1, padding: '8px 0', background: '#f0f0f0', textAlign: 'center' }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: '#888' }}>Q&amp;A (3)</span>
+            </div>
+            <div style={{ flex: 1, padding: '8px 0', background: '#f0f0f0', textAlign: 'center' }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: '#888' }}>Goals (3)</span>
+            </div>
+          </div>
+          {['Defesa da Liberdade', 'Seguran\u00e7a P\u00fablica', 'Educa\u00e7\u00e3o de Qualidade'].map((p, i) => (
+            <div key={i} style={{ background: '#fff', borderRadius: 12, padding: '12px 14px', marginBottom: 6, border: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>{p}</div>
+                <div style={{ fontSize: 10, color: '#888', marginTop: 2 }}>{75 - i * 12}% support \u2022 16 votes</div>
+              </div>
+              <span style={{ fontSize: 14, color: '#ccc' }}>\u25BC</span>
+            </div>
+          ))}
+        </div>
+        {/* Send Message CTA */}
+        <div style={{ width: 'calc(100% - 32px)', margin: '4px 16px 20px' }}>
+          <div style={{ width: '100%', height: 44, borderRadius: 12, background: primary, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <PreviewMsgIcon size={16} />
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>Send Message</span>
           </div>
         </div>
       </div>
@@ -976,7 +1016,223 @@ function FullCardPreview({ tmpl }: { tmpl: Template }) {
   }
 
   /* ═══════════════════════════════════════════════════════════
-     15. POLITICIAN GENERIC — International politician card
+     15. CIVIC CARD FLAG — Brazilian flag background
+     Same structure as civic-card but with flag bg + gradient overlay
+     ═══════════════════════════════════════════════════════════ */
+  if (tmpl.layout === 'civic-card-flag') {
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0', borderRadius: 16, overflow: 'hidden', position: 'relative' }}>
+        {/* Flag background with gradient overlay */}
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${primary} 0%, ${secondary} 50%, ${primary} 100%)`, opacity: 0.95 }} />
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(https://flagcdn.com/w640/br.png)', backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.15 }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.4) 100%)' }} />
+        {/* Content on top */}
+        <div style={{ position: 'relative', zIndex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {/* Photo + Name */}
+          <div style={{ padding: '28px 24px 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <PhotoAvatar size={110} border={`3px solid ${accentCol}`} shadow="0 4px 24px rgba(0,0,0,0.3)" />
+            <div style={{ fontSize: 24, fontWeight: 800, color: '#fff', letterSpacing: -0.5, marginTop: 14, textShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>Maria Silva</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.85)', marginTop: 4 }}>Vereadora</div>
+          </div>
+          {/* Ballot number card */}
+          <div style={{ width: 'calc(100% - 40px)', margin: '16px 20px 0', borderRadius: 14, background: 'rgba(0,0,0,0.3)', backdropFilter: 'blur(10px)', padding: '16px 20px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: accentCol, letterSpacing: 2, textTransform: 'uppercase' as const }}>PL - PARTIDO LIBERAL</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', marginTop: 4 }}>Vereadora \u2022 S\u00e3o Paulo \u2022 2026</div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 10, background: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: '8px 18px' }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.7)' }}>VOTE</span>
+              <span style={{ fontSize: 30, fontWeight: 900, color: '#fff', letterSpacing: 6 }}>12345</span>
+            </div>
+            <div style={{ fontSize: 11, fontStyle: 'italic', color: accentCol, marginTop: 10 }}>\u201CPela liberdade, pela fam\u00edlia e pelo Brasil\u201D</div>
+          </div>
+          {/* Proposals */}
+          <div style={{ width: 'calc(100% - 40px)', margin: '12px 20px' }}>
+            {['Defesa da Liberdade', 'Seguran\u00e7a P\u00fablica', 'Educa\u00e7\u00e3o de Qualidade'].map((p, i) => (
+              <div key={i} style={{ background: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: '10px 14px', marginBottom: 6, border: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#fff' }}>{p}</div>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.6)', marginTop: 2 }}>{75 - i * 12}% support</div>
+                </div>
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>\u25BC</span>
+              </div>
+            ))}
+          </div>
+          {/* CTA */}
+          <div style={{ width: 'calc(100% - 40px)', margin: '0 20px 20px' }}>
+            <div style={{ width: '100%', height: 44, borderRadius: 12, background: accentCol, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: '0 4px 16px rgba(0,0,0,0.3)' }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: primary }}>VOTE 12345</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     16. CIVIC CARD BOLD — Split layout, large photo, strong typography
+     ═══════════════════════════════════════════════════════════ */
+  if (tmpl.layout === 'civic-card-bold') {
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', borderRadius: 16, overflow: 'hidden', background: '#f5f5f5' }}>
+        {/* Bold hero with photo and name overlay */}
+        <div style={{ width: '100%', position: 'relative', background: `linear-gradient(135deg, ${primary}, ${secondary})`, minHeight: 220 }}>
+          <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '50%', overflow: 'hidden' }}>
+            <img src={SAMPLE_AVATAR} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} />
+            <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(90deg, ${primary} 0%, transparent 100%)` }} />
+          </div>
+          <div style={{ position: 'relative', zIndex: 1, padding: '28px 24px' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: accentCol, letterSpacing: 3, textTransform: 'uppercase' as const }}>PL - PARTIDO LIBERAL</div>
+            <div style={{ fontSize: 28, fontWeight: 900, color: '#fff', letterSpacing: -1, marginTop: 12, lineHeight: 1.1 }}>MARIA<br/>SILVA</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.8)', marginTop: 8 }}>Vereadora \u2022 S\u00e3o Paulo</div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 16, background: accentCol, borderRadius: 8, padding: '10px 20px' }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: primary }}>VOTE</span>
+              <span style={{ fontSize: 26, fontWeight: 900, color: primary, letterSpacing: 4 }}>12345</span>
+            </div>
+          </div>
+        </div>
+        {/* Content cards below */}
+        <div style={{ padding: '16px' }}>
+          {/* Community Pulse */}
+          <div style={{ background: '#fff', borderRadius: 12, padding: '14px 16px', marginBottom: 10, border: '1px solid #eee' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', marginBottom: 8 }}>Community Pulse</div>
+            <div style={{ width: '100%', height: 8, borderRadius: 4, display: 'flex', overflow: 'hidden' }}>
+              <div style={{ width: '59%', background: '#22c55e' }} />
+              <div style={{ width: '27%', background: '#f59e0b' }} />
+              <div style={{ width: '14%', background: '#ef4444' }} />
+            </div>
+          </div>
+          {/* Proposals */}
+          {['Defesa da Liberdade', 'Seguran\u00e7a P\u00fablica'].map((p, i) => (
+            <div key={i} style={{ background: '#fff', borderRadius: 10, padding: '12px 14px', marginBottom: 6, border: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>{p}</div>
+                <div style={{ fontSize: 10, color: '#888', marginTop: 2 }}>{75 - i * 12}% support</div>
+              </div>
+              <span style={{ fontSize: 14, color: '#ccc' }}>\u25BC</span>
+            </div>
+          ))}
+          {/* CTA */}
+          <div style={{ width: '100%', height: 44, borderRadius: 10, background: primary, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 8 }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>Send Message</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     17. CIVIC CARD CLEAN — Modern minimal white card design
+     ═══════════════════════════════════════════════════════════ */
+  if (tmpl.layout === 'civic-card-clean') {
+    const bgCol = cs?.background || '#eff6ff';
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0', background: bgCol, borderRadius: 16, overflow: 'hidden' }}>
+        {/* Colored top strip */}
+        <div style={{ width: '100%', height: 8, background: `linear-gradient(90deg, ${primary}, ${accentCol})` }} />
+        {/* White card */}
+        <div style={{ width: 'calc(100% - 32px)', margin: '20px 16px', background: '#fff', borderRadius: 16, padding: '28px 20px', boxShadow: '0 2px 20px rgba(0,0,0,0.06)' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <PhotoAvatar size={90} border={`3px solid ${primary}30`} shadow="0 4px 16px rgba(0,0,0,0.08)" />
+            <div style={{ fontSize: 22, fontWeight: 700, color: '#1a1a1a', marginTop: 14 }}>Maria Silva</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: primary, marginTop: 4 }}>Vereadora</div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 8, background: `${primary}10`, borderRadius: 20, padding: '4px 14px', border: `1px solid ${primary}15` }}>
+              <span style={{ fontSize: 10, fontWeight: 600, color: primary }}>PL \u2022 S\u00e3o Paulo \u2022 2026</span>
+            </div>
+          </div>
+          {/* Ballot number */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 16, padding: '12px 0', borderTop: `1px solid ${primary}15`, borderBottom: `1px solid ${primary}15` }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: primary }}>VOTE</span>
+            <span style={{ fontSize: 28, fontWeight: 900, color: primary, letterSpacing: 4 }}>12345</span>
+          </div>
+          {/* Bio */}
+          <p style={{ fontSize: 12, lineHeight: 1.6, color: '#666', textAlign: 'center', margin: '14px 0 0' }}>
+            Defensora da liberdade e dos valores da fam\u00edlia. Comprometida com a transpar\u00eancia.
+          </p>
+        </div>
+        {/* Proposals on bg */}
+        <div style={{ width: 'calc(100% - 32px)', margin: '0 16px 12px' }}>
+          {['Defesa da Liberdade', 'Seguran\u00e7a P\u00fablica', 'Educa\u00e7\u00e3o de Qualidade'].map((p, i) => (
+            <div key={i} style={{ background: '#fff', borderRadius: 12, padding: '12px 14px', marginBottom: 6, boxShadow: '0 1px 4px rgba(0,0,0,0.04)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>{p}</div>
+                <div style={{ fontSize: 10, color: '#888', marginTop: 2 }}>{75 - i * 12}% support</div>
+              </div>
+              <span style={{ fontSize: 14, color: '#ccc' }}>\u25BC</span>
+            </div>
+          ))}
+        </div>
+        {/* CTA */}
+        <div style={{ width: 'calc(100% - 32px)', margin: '0 16px 20px' }}>
+          <div style={{ width: '100%', height: 44, borderRadius: 22, background: primary, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>Send Message</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     18. CIVIC CARD RALLY — Campaign style, diagonal cuts, high energy
+     ═══════════════════════════════════════════════════════════ */
+  if (tmpl.layout === 'civic-card-rally') {
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', borderRadius: 16, overflow: 'hidden', background: '#f5f5f5' }}>
+        {/* Diagonal hero */}
+        <div style={{ width: '100%', position: 'relative', background: `linear-gradient(135deg, ${primary}, ${secondary})`, paddingBottom: 30 }}>
+          <div style={{ display: 'flex', alignItems: 'center', padding: '24px 24px 0' }}>
+            <PhotoAvatar size={80} border={`3px solid ${accentCol}`} shadow="0 4px 16px rgba(0,0,0,0.3)" />
+            <div style={{ marginLeft: 16, flex: 1 }}>
+              <div style={{ fontSize: 22, fontWeight: 900, color: '#fff', letterSpacing: -0.5, lineHeight: 1.1 }}>MARIA SILVA</div>
+              <div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.8)', marginTop: 4 }}>Vereadora \u2022 S\u00e3o Paulo</div>
+            </div>
+          </div>
+          {/* Big ballot number */}
+          <div style={{ padding: '16px 24px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ background: accentCol, borderRadius: 8, padding: '8px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 12, fontWeight: 800, color: primary }}>VOTE</span>
+              <span style={{ fontSize: 28, fontWeight: 900, color: primary, letterSpacing: 4 }}>12345</span>
+            </div>
+          </div>
+          {/* Diagonal cut */}
+          <svg viewBox="0 0 400 30" style={{ width: '100%', height: 30, display: 'block', position: 'absolute', bottom: 0 }} preserveAspectRatio="none">
+            <path d="M0 30 L400 0 L400 30 Z" fill="#f5f5f5" />
+          </svg>
+        </div>
+        {/* Content */}
+        <div style={{ width: '100%', padding: '0 16px 16px' }}>
+          {/* Slogan */}
+          <div style={{ textAlign: 'center', padding: '4px 0 12px' }}>
+            <span style={{ fontSize: 12, fontStyle: 'italic', fontWeight: 600, color: primary }}>\u201CPela liberdade, pela fam\u00edlia e pelo Brasil\u201D</span>
+          </div>
+          {/* Community Pulse */}
+          <div style={{ background: '#fff', borderRadius: 12, padding: '14px 16px', marginBottom: 10, border: '1px solid #eee' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: '#1a1a1a', marginBottom: 8 }}>Community Pulse</div>
+            <div style={{ width: '100%', height: 8, borderRadius: 4, display: 'flex', overflow: 'hidden' }}>
+              <div style={{ width: '59%', background: '#22c55e' }} />
+              <div style={{ width: '27%', background: '#f59e0b' }} />
+              <div style={{ width: '14%', background: '#ef4444' }} />
+            </div>
+          </div>
+          {/* Proposals */}
+          {['Defesa da Liberdade', 'Seguran\u00e7a P\u00fablica', 'Educa\u00e7\u00e3o de Qualidade'].map((p, i) => (
+            <div key={i} style={{ background: '#fff', borderRadius: 10, padding: '12px 14px', marginBottom: 6, border: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#1a1a1a' }}>{p}</div>
+                <div style={{ fontSize: 10, color: '#888', marginTop: 2 }}>{75 - i * 12}% support</div>
+              </div>
+              <span style={{ fontSize: 14, color: '#ccc' }}>\u25BC</span>
+            </div>
+          ))}
+          {/* CTA */}
+          <div style={{ width: '100%', height: 48, borderRadius: 8, background: primary, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 8, boxShadow: `0 4px 16px ${primary}40` }}>
+            <span style={{ fontSize: 15, fontWeight: 800, color: '#fff', letterSpacing: 1 }}>SEND MESSAGE</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     19. POLITICIAN GENERIC — International politician card
      Photo, bio, platform positions, endorsements
      ═══════════════════════════════════════════════════════════ */
   if (tmpl.layout === 'politician-generic') {
@@ -1054,7 +1310,7 @@ const ALL_GENERAL_TEMPLATES = [
 const TEMPLATE_TYPE_MAP: Record<string, string[]> = {
   business: ALL_GENERAL_TEMPLATES,
   personal: ALL_GENERAL_TEMPLATES,
-  politician: ['civic-card', 'politician-generic'],
+  politician: ['civic-card', 'civic-card-flag', 'civic-card-bold', 'civic-card-clean', 'civic-card-rally', 'politician-generic'],
 };
 
 export default function ECardCreateScreen() {
@@ -1073,11 +1329,17 @@ export default function ECardCreateScreen() {
   const countryCode = (router.query.country as string) || '';
   const templateOverride = (router.query.template as string) || '';
 
-  // For politician cards, use the template specified by country selector
-  // Brazil → civic-card, others → politician-generic
+  // For politician cards, filter templates based on country
+  // Brazil → all civic-card variants, others → politician-generic only
+  const CIVIC_TEMPLATES = ['civic-card', 'civic-card-flag', 'civic-card-bold', 'civic-card-clean', 'civic-card-rally'];
   const allowedIds = (() => {
-    if (cardType === 'politician' && templateOverride) {
-      return [templateOverride];
+    if (cardType === 'politician') {
+      if (templateOverride === 'civic-card' || countryCode === 'BR') {
+        return CIVIC_TEMPLATES;
+      }
+      if (templateOverride === 'politician-generic') {
+        return ['politician-generic'];
+      }
     }
     return TEMPLATE_TYPE_MAP[cardType] || [];
   })();
@@ -2391,6 +2653,128 @@ export default function ECardCreateScreen() {
             {renderContactFields()}
           </div>
           <div style={{ padding: '0 20px 20px' }}>
+            {renderLinksSection()}
+          </div>
+        </div>
+      );
+    }
+
+    // ─── CIVIC CARD FLAG ─── (Brazilian flag background)
+    if (templateLayout === 'civic-card-flag') {
+      return (
+        <div className="live-card" style={{ background: `linear-gradient(180deg, ${color?.primary || '#009739'}, ${color?.secondary || '#002776'})`, fontFamily: font, position: 'relative', padding: 0, overflow: 'hidden' }}>
+          {/* Flag background overlay */}
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(https://flagcdn.com/w640/br.png)', backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.12 }} />
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{ padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+              {renderPhotoUpload()}
+              <div className="card-fields" style={{ textAlign: 'center' }}>
+                <input style={{ ...cardInputStyle(), fontSize: 22, fontWeight: 700, color: '#fff', textShadow: '0 2px 8px rgba(0,0,0,0.3)' }} placeholder="Candidate Name" value={name} onChange={e => setName(e.target.value)} />
+                <input style={{ ...cardInputStyle(), fontSize: 14, color: 'rgba(255,255,255,0.85)' }} placeholder="Party / Position" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+              </div>
+              <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: 12, padding: '12px 20px', backdropFilter: 'blur(10px)' }}>
+                <input style={{ ...cardInputStyle(), fontSize: 28, fontWeight: 900, color: color?.accent || '#FEDD00', letterSpacing: 4 }} placeholder="Ballot #" value={company} onChange={e => setCompany(e.target.value)} />
+              </div>
+              <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: color?.accent || '#FEDD00', textAlign: 'center', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 13, resize: 'none', minHeight: 40, fontStyle: 'italic' }} placeholder="Your campaign slogan..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
+            </div>
+            <div style={{ padding: '0 20px 20px' }}>
+              {renderContactFields()}
+            </div>
+            <div style={{ padding: '0 20px 20px' }}>
+              {renderLinksSection()}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ─── CIVIC CARD BOLD ─── (Bold split layout)
+    if (templateLayout === 'civic-card-bold') {
+      return (
+        <div className="live-card" style={{ background: '#f5f5f5', fontFamily: font, position: 'relative', padding: 0, overflow: 'hidden' }}>
+          {/* Bold hero with gradient */}
+          <div style={{ background: `linear-gradient(135deg, ${color?.primary || '#0a1628'}, ${color?.secondary || '#1a2d4d'})`, padding: '24px 20px', position: 'relative' }}>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+              <div style={{ flex: 1 }}>
+                <input style={{ ...cardInputStyle(), fontSize: 10, fontWeight: 700, color: color?.accent || '#FFD700', letterSpacing: 3, textTransform: 'uppercase' }} placeholder="PARTY NAME" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+                <input style={{ ...cardInputStyle(), fontSize: 24, fontWeight: 900, color: '#fff', letterSpacing: -1 }} placeholder="YOUR NAME" value={name} onChange={e => setName(e.target.value)} />
+              </div>
+              <div onClick={() => fileInputRef.current?.click()} style={{ width: 80, height: 80, borderRadius: 12, overflow: 'hidden', cursor: 'pointer', flexShrink: 0, border: `2px solid ${color?.accent || '#FFD700'}` }}>
+                {profileImage ? <img src={profileImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IoCamera size={24} color="rgba(255,255,255,0.4)" /></div>}
+              </div>
+            </div>
+            <div style={{ marginTop: 12, background: color?.accent || '#FFD700', borderRadius: 8, padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: color?.primary || '#0a1628' }}>VOTE</span>
+              <input style={{ ...cardInputStyle(), fontSize: 24, fontWeight: 900, color: color?.primary || '#0a1628', letterSpacing: 4, width: 120 }} placeholder="12345" value={company} onChange={e => setCompany(e.target.value)} />
+            </div>
+          </div>
+          {/* Content */}
+          <div style={{ padding: '16px 20px' }}>
+            <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: '#555', textAlign: 'center', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 13, resize: 'none', minHeight: 40 }} placeholder="Your campaign message..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
+            {renderContactFields()}
+            {renderLinksSection()}
+          </div>
+        </div>
+      );
+    }
+
+    // ─── CIVIC CARD CLEAN ─── (Modern minimal white card)
+    if (templateLayout === 'civic-card-clean') {
+      const bgCol = color?.background || '#eff6ff';
+      return (
+        <div className="live-card" style={{ background: bgCol, fontFamily: font, position: 'relative', padding: 0, overflow: 'hidden' }}>
+          {/* Top accent strip */}
+          <div style={{ width: '100%', height: 6, background: `linear-gradient(90deg, ${color?.primary || '#1e40af'}, ${color?.accent || '#3b82f6'})` }} />
+          {/* White card */}
+          <div style={{ margin: '20px 16px', background: '#fff', borderRadius: 16, padding: '24px 20px', boxShadow: '0 2px 20px rgba(0,0,0,0.06)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+              {renderPhotoUpload()}
+              <input style={{ ...cardInputStyle(), fontSize: 22, fontWeight: 700, color: '#1a1a1a' }} placeholder="Candidate Name" value={name} onChange={e => setName(e.target.value)} />
+              <input style={{ ...cardInputStyle(), fontSize: 14, color: color?.primary || '#1e40af', fontWeight: 500 }} placeholder="Position" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 0', borderTop: `1px solid ${color?.primary || '#1e40af'}15`, borderBottom: `1px solid ${color?.primary || '#1e40af'}15`, width: '100%' }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: color?.primary || '#1e40af' }}>VOTE</span>
+                <input style={{ ...cardInputStyle(), fontSize: 28, fontWeight: 900, color: color?.primary || '#1e40af', letterSpacing: 4, width: 120 }} placeholder="12345" value={company} onChange={e => setCompany(e.target.value)} />
+              </div>
+              <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: '#666', textAlign: 'center', width: '100%', fontFamily: font, padding: '4px 0', fontSize: 13, resize: 'none', minHeight: 40, lineHeight: 1.6 }} placeholder="Your campaign message..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
+            </div>
+          </div>
+          {/* Contact & Links on bg */}
+          <div style={{ padding: '0 16px 20px' }}>
+            {renderContactFields()}
+            {renderLinksSection()}
+          </div>
+        </div>
+      );
+    }
+
+    // ─── CIVIC CARD RALLY ─── (Campaign/rally style)
+    if (templateLayout === 'civic-card-rally') {
+      return (
+        <div className="live-card" style={{ background: '#f5f5f5', fontFamily: font, position: 'relative', padding: 0, overflow: 'hidden' }}>
+          {/* Diagonal hero */}
+          <div style={{ background: `linear-gradient(135deg, ${color?.primary || '#003366'}, ${color?.secondary || '#001a33'})`, padding: '20px 20px 40px', position: 'relative' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <div onClick={() => fileInputRef.current?.click()} style={{ width: 70, height: 70, borderRadius: '50%', overflow: 'hidden', cursor: 'pointer', flexShrink: 0, border: `3px solid ${color?.accent || '#FFD700'}` }}>
+                {profileImage ? <img src={profileImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <div style={{ width: '100%', height: '100%', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IoCamera size={22} color="rgba(255,255,255,0.4)" /></div>}
+              </div>
+              <div style={{ flex: 1 }}>
+                <input style={{ ...cardInputStyle(), fontSize: 20, fontWeight: 900, color: '#fff', letterSpacing: -0.5 }} placeholder="YOUR NAME" value={name} onChange={e => setName(e.target.value)} />
+                <input style={{ ...cardInputStyle(), fontSize: 12, color: 'rgba(255,255,255,0.8)' }} placeholder="Position \u2022 City" value={titleRole} onChange={e => setTitleRole(e.target.value)} />
+              </div>
+            </div>
+            <div style={{ marginTop: 14, background: color?.accent || '#FFD700', borderRadius: 8, padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 11, fontWeight: 800, color: color?.primary || '#003366' }}>VOTE</span>
+              <input style={{ ...cardInputStyle(), fontSize: 24, fontWeight: 900, color: color?.primary || '#003366', letterSpacing: 4, width: 120 }} placeholder="12345" value={company} onChange={e => setCompany(e.target.value)} />
+            </div>
+            {/* Diagonal cut SVG */}
+            <svg viewBox="0 0 400 30" style={{ width: '100%', height: 30, display: 'block', position: 'absolute', bottom: 0, left: 0 }} preserveAspectRatio="none">
+              <path d="M0 30 L400 0 L400 30 Z" fill="#f5f5f5" />
+            </svg>
+          </div>
+          {/* Content below */}
+          <div style={{ padding: '0 20px 20px' }}>
+            <textarea style={{ background: 'transparent', border: 'none', outline: 'none', color: color?.primary || '#003366', textAlign: 'center', width: '100%', fontFamily: font, padding: '8px 0', fontSize: 13, resize: 'none', minHeight: 40, fontStyle: 'italic', fontWeight: 600 }} placeholder="Your campaign slogan..." value={bio} onChange={e => setBio(e.target.value)} rows={2} />
+            {renderContactFields()}
             {renderLinksSection()}
           </div>
         </div>
