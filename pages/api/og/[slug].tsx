@@ -54,25 +54,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Fetch card data (including civic-specific fields)
     let { data: card } = await supabase
       .from('digital_cards')
-      .select('full_name, title, company, city, state, profile_photo_url, cover_photo_url, professional_category, slug, template_layout, party_name, office_running_for, ballot_number, campaign_slogan, region, election_year, bio')
+      .select('full_name, title, company, city, state, profile_photo_url, professional_category, slug, template_id, party_name, office_running_for, ballot_number, campaign_slogan, region, election_year, bio')
       .eq('slug', slug)
       .eq('is_published', true)
       .single();
 
     if (!card) {
-      // Try custom domain
-      const { data: domainData } = await supabase
-        .from('custom_domains')
-        .select('card_id')
-        .eq('domain', slug)
-        .single();
-      if (domainData) {
-        const { data: domainCard } = await supabase
-          .from('digital_cards')
-          .select('full_name, title, company, city, state, profile_photo_url, cover_photo_url, professional_category, slug, template_layout, party_name, office_running_for, ballot_number, campaign_slogan, region, election_year, bio')
-          .eq('id', domainData.card_id)
+      // Try custom domain (table may not exist yet)
+      try {
+        const { data: domainData } = await supabase
+          .from('custom_domains')
+          .select('card_id')
+          .eq('domain', slug)
           .single();
-        card = domainCard;
+        if (domainData) {
+          const { data: domainCard } = await supabase
+            .from('digital_cards')
+            .select('full_name, title, company, city, state, profile_photo_url, professional_category, slug, template_id, party_name, office_running_for, ballot_number, campaign_slogan, region, election_year, bio')
+            .eq('id', domainData.card_id)
+            .single();
+          card = domainCard;
+        }
+      } catch (e) {
+        // custom_domains table may not exist yet — skip
       }
     }
 
@@ -80,7 +84,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: 'Card not found' });
     }
 
-    const isCivic = isCivicLayout(card.template_layout);
+    const isCivic = isCivicLayout(card.template_id);
 
     // Get endorsement count (signal taps)
     const { count: endorsementCount } = await supabase

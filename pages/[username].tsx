@@ -796,6 +796,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   const resolvedTemplateId = resolveTemplateId(cardData.templateId || 'classic');
   const templateConfig = getTemplateByIdWithMigration(cardData.templateId || 'classic');
   const templateLayout: TemplateLayout = templateConfig?.layout || 'basic';
+  const isCivicCard = templateLayout.startsWith('civic-card');
 
   // Get color scheme from template config
   const activeColorScheme = templateConfig?.colorSchemes.find(cs => cs.id === (cardData as any).colorSchemeId) || templateConfig?.colorSchemes[0];
@@ -1026,7 +1027,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
     }
 
     // Civic Card — Brazilian Political Santinho
-    if (templateLayout === 'civic-card') {
+    if (isCivicCard) {
       return {
         isLuxury: false,
         isDark: false,
@@ -1106,7 +1107,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
     const isOnLightSection = templateLayout === 'pro-card' || templateLayout === 'cover-card' || 
       templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || 
       templateLayout === 'biz-minimalist' || templateLayout === 'pro-realtor' || 
-      templateLayout === 'blogger' || templateLayout === 'civic-card';
+      templateLayout === 'blogger' || isCivicCard;
     if (isOnLightSection) return '#333333';
     // For templates with dark gradient backgrounds
     if (bgIsActuallyLight) return '#333333';
@@ -1157,13 +1158,13 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
 
   // Determine if the footer area has a light background (for logo color switching)
   // pro-card always has a white bottom section, so footer is always on light bg
-  const isLightFooterBg = (templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || templateLayout === 'civic-card') ? true : bgIsActuallyLight;
+  const isLightFooterBg = (templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || isCivicCard) ? true : bgIsActuallyLight;
 
   return (
     <>
       <Head>
-        <title>{templateLayout === 'civic-card' ? `${cardData.fullName} | ${cardData.officeRunningFor || 'Civic Card'} | Tavvy` : `${cardData.fullName} | Digital Card | Tavvy`}</title>
-        <meta name="description" content={templateLayout === 'civic-card' ? [
+        <title>{isCivicCard ? `${cardData.fullName} | ${cardData.officeRunningFor || 'Civic Card'} | Tavvy` : `${cardData.fullName} | Digital Card | Tavvy`}</title>
+        <meta name="description" content={isCivicCard ? [
           cardData.fullName,
           cardData.partyName || '',
           cardData.officeRunningFor || '',
@@ -1178,11 +1179,11 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           cardData.email ? `\u2709 ${cardData.email}` : '',
         ].filter(Boolean).join(' · ')} key="description" />
         <meta property="og:site_name" content="Tavvy" />
-        <meta property="og:title" content={templateLayout === 'civic-card'
+        <meta property="og:title" content={isCivicCard
           ? `${cardData.fullName}${cardData.partyName ? ` — ${cardData.partyName}` : ''}${cardData.ballotNumber ? ` | ${cardData.ballotNumber}` : ''}`
           : `${cardData.fullName}${cardData.title ? ` — ${cardData.title}` : ''}`
         } key="og:title" />
-        <meta property="og:description" content={templateLayout === 'civic-card' ? [
+        <meta property="og:description" content={isCivicCard ? [
           cardData.officeRunningFor || '',
           cardData.region || '',
           cardData.electionYear || '',
@@ -1198,16 +1199,16 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
         <meta property="og:image" content={`https://tavvy.com/api/og/${cardData.slug}`} key="og:image" />
         <meta property="og:image:width" content="1200" key="og:image:width" />
         <meta property="og:image:height" content="630" key="og:image:height" />
-        <meta property="og:image:alt" content={templateLayout === 'civic-card'
+        <meta property="og:image:alt" content={isCivicCard
           ? `${cardData.fullName}'s civic card on Tavvy — ${cardData.officeRunningFor || 'Political Card'}`
           : `${cardData.fullName}'s digital business card on Tavvy`
         } />
         <meta name="twitter:card" content="summary_large_image" key="twitter:card" />
-        <meta name="twitter:title" content={templateLayout === 'civic-card'
+        <meta name="twitter:title" content={isCivicCard
           ? `${cardData.fullName}${cardData.partyName ? ` — ${cardData.partyName}` : ''}${cardData.ballotNumber ? ` | ${cardData.ballotNumber}` : ''}`
           : `${cardData.fullName}${cardData.title ? ` — ${cardData.title}` : ''}`
         } key="twitter:title" />
-        <meta name="twitter:description" content={templateLayout === 'civic-card' ? [
+        <meta name="twitter:description" content={isCivicCard ? [
           cardData.officeRunningFor || '',
           cardData.region || '',
           cardData.campaignSlogan ? `"${cardData.campaignSlogan}"` : '',
@@ -1268,7 +1269,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 ? { background: activeColorScheme?.background || `linear-gradient(165deg, ${cardData.gradientColor1} 0%, ${cardData.gradientColor2} 50%, #0a0f1e 100%)` }
               : templateLayout === 'blogger'
                 ? { background: activeColorScheme?.background || cardData.gradientColor1 }
-                : templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || templateLayout === 'civic-card'
+                : templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || isCivicCard
                   ? { background: activeColorScheme?.background || '#f0f2f5' }
                 : cardData.backgroundType === 'solid' 
                   ? { background: cardData.gradientColor1 }
@@ -3165,7 +3166,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           )}
 
           {/* ═══ CIVIC CARD SECTION ═══ */}
-          {templateLayout === 'civic-card' && (
+          {isCivicCard && (
             <CivicCardSection
               cardId={cardData.id}
               cardSlug={cardData.slug}
@@ -4689,7 +4690,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
     let civicCommitments: any[] = [];
     let civicRecommendations: any[] = [];
     const resolvedTemplate = resolveTemplateId(data.template_id || 'classic-blue');
-    if (resolvedTemplate === 'civic-card') {
+    if (resolvedTemplate.startsWith('civic-card')) {
       try {
         // Fetch proposals
         const { data: proposalsData } = await serverSupabase
