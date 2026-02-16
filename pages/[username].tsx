@@ -1271,7 +1271,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               : templateLayout === 'blogger'
                 ? { background: activeColorScheme?.background || cardData.gradientColor1 }
                 : templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || isCivicCard
-                  ? { background: activeColorScheme?.background || '#f0f2f5' }
+                  ? { background: isNonClassicCivic ? '#ffffff' : (activeColorScheme?.background || '#f0f2f5') }
                 : cardData.backgroundType === 'solid' 
                   ? { background: cardData.gradientColor1 }
                   : cardData.backgroundType === 'image' && cardData.backgroundImageUrl
@@ -1416,7 +1416,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             overflow: 'hidden' as const,
             boxShadow: 'none',
             background: '#ffffff',
-            minHeight: 'auto',
+            minHeight: '100vh',
           } : {}),
         }}>
           {/* Star Badge - Top Right — Opens Endorsement Popup */}
