@@ -1032,16 +1032,16 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
 
     // Civic Card — Brazilian Political Santinho
     if (isCivicCard) {
-      // Flag template has dark green bg → white text
+      // Flag template — card is white, page bg is green
       if (isFlagCivic) {
         return {
           isLuxury: false,
-          isDark: true,
+          isDark: false,
           hasOrnate: false,
-          accentColor: '#F5C518',
-          textColor: '#ffffff',
-          buttonBg: 'rgba(255,255,255,0.15)',
-          buttonBorder: 'rgba(255,255,255,0.25)',
+          accentColor: '#009739',
+          textColor: '#1a1a2e',
+          buttonBg: '#f1f5f9',
+          buttonBorder: '#e2e8f0',
           photoStyle: 'rounded',
         };
       }
@@ -1151,9 +1151,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
     const isOnLightSection = templateLayout === 'pro-card' || templateLayout === 'cover-card' || 
       templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || 
       templateLayout === 'biz-minimalist' || templateLayout === 'pro-realtor' || 
-      templateLayout === 'blogger' || (isCivicCard && !isFlagCivic);
+      templateLayout === 'blogger' || isCivicCard;
     if (isOnLightSection) return '#333333';
-    if (isFlagCivic) return '#ffffff';
     // For templates with dark gradient backgrounds
     if (bgIsActuallyLight) return '#333333';
     return templateStyles.textColor;
@@ -1203,7 +1202,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
 
   // Determine if the footer area has a light background (for logo color switching)
   // pro-card always has a white bottom section, so footer is always on light bg
-  const isLightFooterBg = (templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || (isCivicCard && !isFlagCivic)) ? true : isFlagCivic ? false : bgIsActuallyLight;
+  const isLightFooterBg = (templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || isCivicCard) ? true : bgIsActuallyLight;
 
   return (
     <>
@@ -1462,14 +1461,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             background: '#ffffff',
             minHeight: '100vh',
           } : {}),
-          ...((isFlagCivic || isCleanCivic || isRallyCivic) ? {
-            maxWidth: '100%',
-            margin: '0',
-            padding: '40px 24px 0',
-            borderRadius: '0',
-            boxShadow: 'none',
-            background: 'transparent',
-          } : {}),
+
         }}>
           {/* Star Badge - Top Right — Opens Endorsement Popup */}
           {/* Pixel-sampled contrast: detects actual image/gradient behind badge */}
