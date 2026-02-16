@@ -797,6 +797,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   const templateConfig = getTemplateByIdWithMigration(cardData.templateId || 'classic');
   const templateLayout: TemplateLayout = templateConfig?.layout || 'basic';
   const isCivicCard = templateLayout.startsWith('civic-card');
+  const isNonClassicCivic = isCivicCard && templateLayout !== 'civic-card';
 
   // Get color scheme from template config
   const activeColorScheme = templateConfig?.colorSchemes.find(cs => cs.id === (cardData as any).colorSchemeId) || templateConfig?.colorSchemes[0];
@@ -1754,6 +1755,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             ...(templateLayout === 'biz-traditional' ? { padding: '0', display: 'none' } : {}),
             ...(templateLayout === 'biz-modern' ? { padding: '0', display: 'none' } : {}),
             ...(templateLayout === 'biz-minimalist' ? { padding: '0', display: 'none' } : {}),
+            ...(isNonClassicCivic ? { padding: '0', display: 'none' } : {}),
             ...(templateLayout === 'blogger' ? { paddingTop: 0 } : {}),
           }}>
             {/* Profile Photo - skip for full-width, premium-static (photo IS the hero), pro-card, cover-card, and biz templates (photo in their own sections) */}
@@ -2356,7 +2358,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           )}
 
           {/* Standard Action Buttons (for all other templates) */}
-          {templateLayout !== 'business-card' && templateLayout !== 'pro-card' && templateLayout !== 'cover-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && cardData.showContactInfo && <div style={{
+          {templateLayout !== 'business-card' && templateLayout !== 'pro-card' && templateLayout !== 'cover-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && !isNonClassicCivic && cardData.showContactInfo && <div style={{
             ...styles.actionButtons,
             ...(templateLayout === 'blogger' ? { padding: '0 0 10px', gap: '10px' } : {}),
             ...(templateLayout === 'pro-realtor' ? { gap: '10px' } : {}),
@@ -2426,7 +2428,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           </div>}
 
           {/* Featured Social Icons */}
-          {cardData.showSocialIcons && cardData.featuredSocials && cardData.featuredSocials.length > 0 && (
+          {!isNonClassicCivic && cardData.showSocialIcons && cardData.featuredSocials && cardData.featuredSocials.length > 0 && (
             <div style={styles.featuredSocials}>
               {cardData.featuredSocials.map((item, index) => {
                 const platform = typeof item === 'string' ? item : item.platform;
@@ -2476,7 +2478,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           )}
 
           {/* Social Links — skip platforms already shown in Featured Socials */}
-          {cardData.showSocialIcons && hasSocialLinks && (() => {
+          {!isNonClassicCivic && cardData.showSocialIcons && hasSocialLinks && (() => {
             const featuredPlatforms = new Set(
               (cardData.featuredSocials || []).map((item: any) => typeof item === 'string' ? item : item.platform)
             );
