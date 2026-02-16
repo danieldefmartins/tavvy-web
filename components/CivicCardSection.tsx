@@ -66,6 +66,7 @@ interface CivicCardSectionProps {
   commitments: CivicCommitment[];
   recommendations: CivicRecommendation[];
   showVoteCounts: boolean;
+  templateLayout?: string;
 }
 
 const CivicCardSection: React.FC<CivicCardSectionProps> = ({
@@ -86,6 +87,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
   commitments,
   recommendations,
   showVoteCounts = true,
+  templateLayout = 'civic-card',
 }) => {
   const { t } = useTranslation('common');
   const [proposals, setProposals] = useState(initialProposals);
@@ -239,80 +241,287 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
     }
   };
 
-  return (
-    <div style={{ width: '100%', marginTop: 0 }}>
-      {/* ═══ SANTINHO HEADER ═══ */}
+  /* ═══ HEADER RENDERERS PER TEMPLATE ═══ */
+
+  const renderClassicHeader = () => (
+    <div style={{
+      width: '100%',
+      background: `linear-gradient(135deg, ${accentColor} 0%, ${secondaryColor} 100%)`,
+      borderRadius: 20,
+      padding: '28px 24px 24px',
+      marginBottom: 16,
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
       <div style={{
-        width: '100%',
-        background: `linear-gradient(135deg, ${accentColor} 0%, ${secondaryColor} 100%)`,
-        borderRadius: 20,
-        padding: '28px 24px 24px',
-        marginBottom: 16,
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        {/* Decorative pattern overlay */}
+        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+        background: 'radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%)',
+        pointerEvents: 'none',
+      }} />
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.85)' }}>
+            {partyName}
+          </span>
+        </div>
+        <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.9)', marginBottom: 16 }}>
+          {officeRunningFor}{region ? ` • ${region}` : ''}{electionYear ? ` • ${electionYear}` : ''}
+        </div>
+        {ballotNumber && (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', borderRadius: 14, padding: '10px 20px', marginBottom: 12 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.9)' }}>{t('civic.vote')}</span>
+            <span style={{ fontSize: 36, fontWeight: 900, color: '#FFFFFF', letterSpacing: 4, fontFamily: "'Inter', -apple-system, sans-serif", textShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>{ballotNumber}</span>
+          </div>
+        )}
+        {campaignSlogan && (
+          <div style={{ fontSize: 16, fontWeight: 700, color: '#FFFFFF', fontStyle: 'italic', lineHeight: 1.4, marginTop: 8, textShadow: '0 1px 4px rgba(0,0,0,0.15)' }}>
+            &ldquo;{campaignSlogan}&rdquo;
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  /* ═══ FLAG TEMPLATE — Brazilian flag background ═══ */
+  const renderFlagHeader = () => (
+    <div style={{
+      width: '100%',
+      borderRadius: 20,
+      overflow: 'hidden',
+      marginBottom: 16,
+      position: 'relative',
+      background: '#009739',
+    }}>
+      {/* Brazilian flag background */}
+      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0 }}>
+        {/* Green base */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: '#009739' }} />
+        {/* Yellow diamond */}
         <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%)',
-          pointerEvents: 'none',
+          position: 'absolute', top: '50%', left: '50%',
+          width: '85%', height: '70%',
+          transform: 'translate(-50%, -50%) rotate(45deg)',
+          background: '#FEDD00',
+          opacity: 0.35,
         }} />
+        {/* Blue circle */}
+        <div style={{
+          position: 'absolute', top: '50%', left: '50%',
+          width: '40%', height: '40%',
+          transform: 'translate(-50%, -50%)',
+          borderRadius: '50%',
+          background: '#002776',
+          opacity: 0.3,
+        }} />
+        {/* Stars overlay */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.4) 1px, transparent 0), radial-gradient(1px 1px at 60% 20%, rgba(255,255,255,0.3) 1px, transparent 0), radial-gradient(1px 1px at 80% 60%, rgba(255,255,255,0.3) 1px, transparent 0), radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.2) 1px, transparent 0), radial-gradient(1px 1px at 70% 40%, rgba(255,255,255,0.3) 1px, transparent 0)' }} />
+        {/* Gradient overlay for readability */}
+        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(180deg, rgba(0,39,118,0.4) 0%, rgba(0,151,57,0.5) 100%)' }} />
+      </div>
 
-        {/* Party & Office */}
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase', color: 'rgba(255,255,255,0.85)' }}>
-              {partyName}
-            </span>
+      {/* Content */}
+      <div style={{ position: 'relative', zIndex: 1, padding: '32px 24px 28px', textAlign: 'center' as const }}>
+        {/* Photo with yellow border */}
+        {profilePhotoUrl && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+            <div style={{ width: 120, height: 120, borderRadius: '50%', border: '4px solid #FEDD00', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+              <img src={profilePhotoUrl} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
           </div>
-          <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.9)', marginBottom: 16 }}>
-            {officeRunningFor}
-            {region ? ` • ${region}` : ''}
-            {electionYear ? ` • ${electionYear}` : ''}
-          </div>
+        )}
+        <div style={{ fontSize: 24, fontWeight: 800, color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.4)', marginBottom: 4 }}>{fullName}</div>
+        <div style={{ fontSize: 14, fontWeight: 500, color: 'rgba(255,255,255,0.9)', marginBottom: 16 }}>{officeRunningFor}</div>
 
-          {/* Ballot Number — the big number like a real santinho */}
+        {/* Info box */}
+        <div style={{ background: 'rgba(0,39,118,0.6)', backdropFilter: 'blur(10px)', borderRadius: 16, padding: '20px', marginBottom: 12 }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' as const, color: '#FEDD00', marginBottom: 6 }}>{partyName}</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', marginBottom: 12 }}>
+            {officeRunningFor}{region ? ` • ${region}` : ''}{electionYear ? ` • ${electionYear}` : ''}
+          </div>
           {ballotNumber && (
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              background: 'rgba(255,255,255,0.2)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: 14,
-              padding: '10px 20px',
-              marginBottom: 12,
-            }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.9)' }}>{t('civic.vote')}</span>
-              <span style={{
-                fontSize: 36,
-                fontWeight: 900,
-                color: '#FFFFFF',
-                letterSpacing: 4,
-                fontFamily: "'Inter', -apple-system, sans-serif",
-                textShadow: '0 2px 8px rgba(0,0,0,0.2)',
-              }}>
-                {ballotNumber}
-              </span>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#FEDD00', borderRadius: 12, padding: '10px 24px', marginBottom: 8 }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#002776' }}>{t('civic.vote')}</span>
+              <span style={{ fontSize: 34, fontWeight: 900, color: '#002776', letterSpacing: 4, fontFamily: "'Inter', -apple-system, sans-serif" }}>{ballotNumber}</span>
             </div>
           )}
-
-          {/* Campaign Slogan */}
           {campaignSlogan && (
-            <div style={{
-              fontSize: 16,
-              fontWeight: 700,
-              color: '#FFFFFF',
-              fontStyle: 'italic',
-              lineHeight: 1.4,
-              marginTop: 8,
-              textShadow: '0 1px 4px rgba(0,0,0,0.15)',
-            }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: '#FEDD00', fontStyle: 'italic', marginTop: 8 }}>
               &ldquo;{campaignSlogan}&rdquo;
             </div>
           )}
         </div>
       </div>
+    </div>
+  );
+
+  /* ═══ BOLD TEMPLATE — Split layout, large photo, strong typography ═══ */
+  const renderBoldHeader = () => (
+    <div style={{
+      width: '100%',
+      borderRadius: 20,
+      overflow: 'hidden',
+      marginBottom: 16,
+      position: 'relative',
+      minHeight: 340,
+      background: `linear-gradient(135deg, ${accentColor} 0%, ${secondaryColor} 100%)`,
+    }}>
+      {/* Large candidate photo as background on right side */}
+      {profilePhotoUrl && (
+        <div style={{
+          position: 'absolute', top: 0, right: 0, bottom: 0, width: '55%',
+          zIndex: 0,
+        }}>
+          <img src={profilePhotoUrl} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }} />
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(90deg, ' + accentColor + ' 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.4) 100%)' }} />
+        </div>
+      )}
+
+      {/* Content on left side */}
+      <div style={{ position: 'relative', zIndex: 1, padding: '32px 24px 28px', maxWidth: '60%' }}>
+        {/* Party name in accent color */}
+        <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' as const, color: '#FFD700', marginBottom: 16 }}>
+          {partyName}
+        </div>
+
+        {/* Bold uppercase name */}
+        <div style={{ fontSize: 32, fontWeight: 900, color: '#FFFFFF', lineHeight: 1.1, textTransform: 'uppercase' as const, letterSpacing: -0.5, marginBottom: 8, textShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
+          {fullName}
+        </div>
+
+        {/* Position */}
+        <div style={{ fontSize: 15, fontWeight: 500, color: 'rgba(255,255,255,0.85)', marginBottom: 20 }}>
+          {officeRunningFor}{region ? ` • ${region}` : ''}
+        </div>
+
+        {/* Yellow VOTE badge */}
+        {ballotNumber && (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#FFD700', borderRadius: 12, padding: '10px 24px' }}>
+            <span style={{ fontSize: 13, fontWeight: 800, color: '#1a1a2e' }}>{t('civic.vote')}</span>
+            <span style={{ fontSize: 32, fontWeight: 900, color: '#1a1a2e', letterSpacing: 4, fontFamily: "'Inter', -apple-system, sans-serif" }}>{ballotNumber}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  /* ═══ CLEAN TEMPLATE — White card, minimal, elegant ═══ */
+  const renderCleanHeader = () => (
+    <div style={{
+      width: '100%',
+      borderRadius: 20,
+      overflow: 'hidden',
+      marginBottom: 16,
+      background: '#FFFFFF',
+      border: '1px solid #e8e8e8',
+      boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+    }}>
+      <div style={{ padding: '32px 24px 28px', textAlign: 'center' as const }}>
+        {/* Centered photo with subtle border */}
+        {profilePhotoUrl && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+            <div style={{ width: 110, height: 110, borderRadius: '50%', border: `3px solid ${accentColor}20`, overflow: 'hidden', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+              <img src={profilePhotoUrl} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+          </div>
+        )}
+
+        {/* Name in bold black */}
+        <div style={{ fontSize: 26, fontWeight: 800, color: '#1a1a2e', marginBottom: 4 }}>{fullName}</div>
+
+        {/* Position in accent color */}
+        <div style={{ fontSize: 15, fontWeight: 600, color: accentColor, marginBottom: 12 }}>{officeRunningFor}</div>
+
+        {/* Pill badge: Party · Region · Year */}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 0, background: '#f5f5f5', borderRadius: 20, padding: '6px 16px', marginBottom: 16, border: '1px solid #e8e8e8' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: '#555' }}>
+            {partyName}{region ? ` • ${region}` : ''}{electionYear ? ` • ${electionYear}` : ''}
+          </span>
+        </div>
+
+        {/* Separator */}
+        <div style={{ width: '60%', height: 1, background: '#e8e8e8', margin: '0 auto 16px' }} />
+
+        {/* VOTE + Ballot number */}
+        {ballotNumber && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 12 }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#999', letterSpacing: 2 }}>{t('civic.vote')}</span>
+            <span style={{ fontSize: 42, fontWeight: 900, color: accentColor, letterSpacing: 6, fontFamily: "'Inter', -apple-system, sans-serif" }}>{ballotNumber}</span>
+          </div>
+        )}
+
+        {/* Slogan */}
+        {campaignSlogan && (
+          <div style={{ fontSize: 14, color: '#666', lineHeight: 1.5, maxWidth: 320, margin: '0 auto' }}>
+            {campaignSlogan}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  /* ═══ RALLY TEMPLATE — Yellow/gold header, high energy ═══ */
+  const renderRallyHeader = () => (
+    <div style={{
+      width: '100%',
+      borderRadius: 20,
+      overflow: 'hidden',
+      marginBottom: 16,
+    }}>
+      {/* Yellow/Gold top section */}
+      <div style={{ background: '#FFD700', padding: '28px 24px 24px', textAlign: 'center' as const }}>
+        {/* Photo with yellow border */}
+        {profilePhotoUrl && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+            <div style={{ width: 110, height: 110, borderRadius: '50%', border: '4px solid #e6c200', overflow: 'hidden', boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}>
+              <img src={profilePhotoUrl} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+          </div>
+        )}
+
+        {/* Bold uppercase name in dark */}
+        <div style={{ fontSize: 26, fontWeight: 900, color: accentColor, textTransform: 'uppercase' as const, letterSpacing: -0.5, marginBottom: 4 }}>{fullName}</div>
+
+        {/* Position and region */}
+        <div style={{ fontSize: 14, fontWeight: 600, color: accentColor, opacity: 0.8, marginBottom: 16 }}>
+          {officeRunningFor}{region ? ` • ${region}` : ''}
+        </div>
+
+        {/* Yellow VOTE badge */}
+        {ballotNumber && (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: accentColor, borderRadius: 12, padding: '10px 24px', marginBottom: 8 }}>
+            <span style={{ fontSize: 13, fontWeight: 800, color: '#FFD700' }}>{t('civic.vote')}</span>
+            <span style={{ fontSize: 32, fontWeight: 900, color: '#FFD700', letterSpacing: 4, fontFamily: "'Inter', -apple-system, sans-serif" }}>{ballotNumber}</span>
+          </div>
+        )}
+      </div>
+
+      {/* White bottom with slogan */}
+      <div style={{ background: '#FFFFFF', padding: '16px 24px 20px', borderBottom: `3px solid ${accentColor}` }}>
+        {/* Slogan in accent color italic */}
+        {campaignSlogan && (
+          <div style={{ fontSize: 16, fontWeight: 700, color: accentColor, fontStyle: 'italic', textAlign: 'center' as const, lineHeight: 1.4 }}>
+            &ldquo;{campaignSlogan}&rdquo;
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  /* Select the right header based on templateLayout */
+  const renderHeader = () => {
+    switch (templateLayout) {
+      case 'civic-card-flag': return renderFlagHeader();
+      case 'civic-card-bold': return renderBoldHeader();
+      case 'civic-card-clean': return renderCleanHeader();
+      case 'civic-card-rally': return renderRallyHeader();
+      default: return renderClassicHeader();
+    }
+  };
+
+  return (
+    <div style={{ width: '100%', marginTop: 0 }}>
+      {/* ═══ TEMPLATE-SPECIFIC HEADER ═══ */}
+      {renderHeader()}
 
       {/* ═══ COMMUNITY THERMOMETER ═══ */}
       {totalVotes > 0 && showVoteCounts && (

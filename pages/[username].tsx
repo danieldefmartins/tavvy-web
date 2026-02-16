@@ -3185,6 +3185,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               commitments={cardData.civicCommitments || []}
               recommendations={cardData.civicRecommendations || []}
               showVoteCounts={cardData.showVoteCounts !== false}
+              templateLayout={templateLayout}
             />
           )}
           {/* ═══ MESSAGE BUTTON ═══ */}
