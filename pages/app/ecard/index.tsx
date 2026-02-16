@@ -13,6 +13,7 @@ import { useAuth } from '../../../contexts/AuthContext';
 import AppLayout from '../../../components/AppLayout';
 import { getUserCards, deleteCard, duplicateCard, CardData } from '../../../lib/ecard';
 import { useTranslation } from 'next-i18next';
+import { useRoles } from '../../../hooks/useRoles';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import {
   IoArrowBack,
@@ -28,6 +29,9 @@ import {
   IoFlagOutline,
   IoSearch,
   IoChevronBack,
+  IoLockClosedOutline,
+  IoShieldCheckmarkOutline,
+  IoStarOutline,
 } from 'react-icons/io5';
 
 const ACCENT = '#00C853';
@@ -76,7 +80,14 @@ const COUNTRIES = [
   { code: 'CU', name: 'Cuba', nameLocal: 'Cuba', flag: '🇨🇺', featured: false, template: 'politician-generic' },
 ];
 
-type ModalStep = 'closed' | 'type-picker' | 'country-picker';
+type ModalStep = 'closed' | 'type-picker' | 'country-picker' | 'card-limit';
+
+/* ── Card limits per role ── */
+const CARD_LIMITS = {
+  free: 1,       // Free users: 1 card
+  pro: 1,        // Pro users: 1 premium card per subscription
+  super_admin: Infinity, // Super admins: unlimited
+};
 
 export default function ECardHubScreen() {
   const { t } = useTranslation();
@@ -84,6 +95,7 @@ export default function ECardHubScreen() {
   const { locale } = router;
   const { isDark } = useThemeContext();
   const { user, loading: authLoading } = useAuth();
+  const { isSuperAdmin, isPro, loading: rolesLoading } = useRoles();
 
   const [cards, setCards] = useState<CardData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -92,6 +104,7 @@ export default function ECardHubScreen() {
   const [duplicating, setDuplicating] = useState<string | null>(null);
   const [modalStep, setModalStep] = useState<ModalStep>('closed');
   const [countrySearch, setCountrySearch] = useState('');
+  const [pendingCardType, setPendingCardType] = useState<string>('');
 
   const fetchCards = useCallback(async () => {
     if (authLoading) return;
@@ -110,6 +123,27 @@ export default function ECardHubScreen() {
 
   const handleEditCard = (card: CardData) => {
     router.push(`/app/ecard/dashboard?cardId=${card.id}`, undefined, { locale });
+  };
+
+  /* ── Card limit check ── */
+  const getCardLimit = () => {
+    if (isSuperAdmin) return CARD_LIMITS.super_admin;
+    if (isPro) return CARD_LIMITS.pro;
+    return CARD_LIMITS.free;
+  };
+
+  const canCreateCard = () => {
+    if (isSuperAdmin) return true;
+    const limit = getCardLimit();
+    return cards.length < limit;
+  };
+
+  const handleFabClick = () => {
+    if (canCreateCard()) {
+      setModalStep('type-picker');
+    } else {
+      setModalStep('card-limit');
+    }
   };
 
   const handleCreateWithType = (type: string) => {
@@ -152,6 +186,11 @@ export default function ECardHubScreen() {
 
   const handleDuplicateCard = async (card: CardData) => {
     if (!user || duplicating) return;
+    // Check card limit before duplicating
+    if (!canCreateCard()) {
+      setModalStep('card-limit');
+      return;
+    }
     setDuplicating(card.id);
     try {
       const newCard = await duplicateCard(card.id, user.id);
@@ -337,7 +376,7 @@ export default function ECardHubScreen() {
 
           {/* ── FAB (Floating Action Button) ── */}
           <button
-            onClick={() => setModalStep('type-picker')}
+            onClick={handleFabClick}
             style={{
               position: 'fixed', bottom: 90, right: 24,
               width: 56, height: 56, borderRadius: 16,
@@ -465,6 +504,83 @@ export default function ECardHubScreen() {
                         <span style={{ fontSize: 13, color: textSecondary }}>For public servants & candidates</span>
                       </div>
                       <IoChevronForward size={18} color={textSecondary} style={{ marginLeft: 'auto', flexShrink: 0 }} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* ── CARD LIMIT REACHED ── */}
+              {modalStep === 'card-limit' && (
+                <div style={{ padding: '0 20px', textAlign: 'center' }}>
+                  <div style={{
+                    width: 72, height: 72, borderRadius: 36,
+                    background: isPro ? 'rgba(139,92,246,0.1)' : 'rgba(0,200,83,0.1)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    margin: '8px auto 20px',
+                  }}>
+                    {isPro ? (
+                      <IoStarOutline size={36} color="#8B5CF6" />
+                    ) : (
+                      <IoLockClosedOutline size={36} color={ACCENT} />
+                    )}
+                  </div>
+
+                  <h2 style={{ fontSize: 20, fontWeight: 700, color: textPrimary, margin: '0 0 8px', letterSpacing: '-0.3px' }}>
+                    {isPro ? 'Additional Card' : 'Upgrade to Pro'}
+                  </h2>
+                  <p style={{ fontSize: 14, color: textSecondary, margin: '0 0 24px', lineHeight: 1.6 }}>
+                    {isPro
+                      ? 'Your Pro subscription includes 1 premium card. To create additional cards, an extra fee applies per card.'
+                      : 'Free accounts include 1 card. Upgrade to Pro to unlock premium templates, analytics, and more.'
+                    }
+                  </p>
+
+                  {/* Current plan badge */}
+                  <div style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    padding: '8px 16px', borderRadius: 12, marginBottom: 20,
+                    background: isPro ? 'rgba(139,92,246,0.08)' : (isDark ? 'rgba(255,255,255,0.05)' : '#F7F7F7'),
+                    border: `1px solid ${isPro ? 'rgba(139,92,246,0.2)' : border}`,
+                  }}>
+                    <IoShieldCheckmarkOutline size={16} color={isPro ? '#8B5CF6' : textSecondary} />
+                    <span style={{ fontSize: 13, fontWeight: 600, color: isPro ? '#8B5CF6' : textSecondary }}>
+                      {isPro ? 'Pro Plan' : 'Free Plan'} — {cards.length}/{isPro ? '1' : '1'} card{cards.length !== 1 ? 's' : ''} used
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 4 }}>
+                    {/* Primary CTA */}
+                    <button
+                      onClick={() => {
+                        setModalStep('closed');
+                        router.push(isPro ? '/app/ecard/purchase-card' : '/app/pros', undefined, { locale });
+                      }}
+                      style={{
+                        width: '100%', padding: '14px 20px', border: 'none', borderRadius: 14,
+                        fontSize: 15, fontWeight: 700, cursor: 'pointer',
+                        background: isPro
+                          ? 'linear-gradient(135deg, #8B5CF6, #6D28D9)'
+                          : `linear-gradient(135deg, ${ACCENT}, #00A843)`,
+                        color: '#fff',
+                        boxShadow: isPro
+                          ? '0 4px 16px rgba(139,92,246,0.3)'
+                          : '0 4px 16px rgba(0,200,83,0.3)',
+                      }}
+                    >
+                      {isPro ? 'Purchase Additional Card' : 'Upgrade to Pro'}
+                    </button>
+
+                    {/* Secondary */}
+                    <button
+                      onClick={() => setModalStep('closed')}
+                      style={{
+                        width: '100%', padding: '12px 20px', border: 'none', borderRadius: 14,
+                        fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                        background: isDark ? 'rgba(255,255,255,0.06)' : '#F3F4F6',
+                        color: textSecondary,
+                      }}
+                    >
+                      Maybe Later
                     </button>
                   </div>
                 </div>
