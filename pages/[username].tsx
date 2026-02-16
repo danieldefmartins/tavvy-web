@@ -1162,8 +1162,15 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   return (
     <>
       <Head>
-        <title>{cardData.fullName} | Digital Card | Tavvy</title>
-        <meta name="description" content={[
+        <title>{templateLayout === 'civic-card' ? `${cardData.fullName} | ${cardData.officeRunningFor || 'Civic Card'} | Tavvy` : `${cardData.fullName} | Digital Card | Tavvy`}</title>
+        <meta name="description" content={templateLayout === 'civic-card' ? [
+          cardData.fullName,
+          cardData.partyName || '',
+          cardData.officeRunningFor || '',
+          cardData.ballotNumber ? `Vote ${cardData.ballotNumber}` : '',
+          cardData.region || '',
+          cardData.campaignSlogan || '',
+        ].filter(Boolean).join(' · ') : [
           cardData.fullName,
           cardData.title,
           cardData.company ? `at ${cardData.company}` : '',
@@ -1171,8 +1178,16 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           cardData.email ? `\u2709 ${cardData.email}` : '',
         ].filter(Boolean).join(' · ')} key="description" />
         <meta property="og:site_name" content="Tavvy" />
-        <meta property="og:title" content={`${cardData.fullName}${cardData.title ? ` — ${cardData.title}` : ''}`} key="og:title" />
-        <meta property="og:description" content={[
+        <meta property="og:title" content={templateLayout === 'civic-card'
+          ? `${cardData.fullName}${cardData.partyName ? ` — ${cardData.partyName}` : ''}${cardData.ballotNumber ? ` | ${cardData.ballotNumber}` : ''}`
+          : `${cardData.fullName}${cardData.title ? ` — ${cardData.title}` : ''}`
+        } key="og:title" />
+        <meta property="og:description" content={templateLayout === 'civic-card' ? [
+          cardData.officeRunningFor || '',
+          cardData.region || '',
+          cardData.electionYear || '',
+          cardData.campaignSlogan ? `"${cardData.campaignSlogan}"` : '',
+        ].filter(Boolean).join(' · ') || 'Civic Card on Tavvy' : [
           cardData.company || '',
           cardData.phone || '',
           cardData.email || '',
@@ -1183,10 +1198,20 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
         <meta property="og:image" content={`https://tavvy.com/api/og/${cardData.slug}`} key="og:image" />
         <meta property="og:image:width" content="1200" key="og:image:width" />
         <meta property="og:image:height" content="630" key="og:image:height" />
-        <meta property="og:image:alt" content={`${cardData.fullName}'s digital business card on Tavvy`} />
+        <meta property="og:image:alt" content={templateLayout === 'civic-card'
+          ? `${cardData.fullName}'s civic card on Tavvy — ${cardData.officeRunningFor || 'Political Card'}`
+          : `${cardData.fullName}'s digital business card on Tavvy`
+        } />
         <meta name="twitter:card" content="summary_large_image" key="twitter:card" />
-        <meta name="twitter:title" content={`${cardData.fullName}${cardData.title ? ` — ${cardData.title}` : ''}`} key="twitter:title" />
-        <meta name="twitter:description" content={[
+        <meta name="twitter:title" content={templateLayout === 'civic-card'
+          ? `${cardData.fullName}${cardData.partyName ? ` — ${cardData.partyName}` : ''}${cardData.ballotNumber ? ` | ${cardData.ballotNumber}` : ''}`
+          : `${cardData.fullName}${cardData.title ? ` — ${cardData.title}` : ''}`
+        } key="twitter:title" />
+        <meta name="twitter:description" content={templateLayout === 'civic-card' ? [
+          cardData.officeRunningFor || '',
+          cardData.region || '',
+          cardData.campaignSlogan ? `"${cardData.campaignSlogan}"` : '',
+        ].filter(Boolean).join(' · ') || 'Civic Card on Tavvy' : [
           cardData.company || '',
           cardData.city || '',
           cardData.description || '',
