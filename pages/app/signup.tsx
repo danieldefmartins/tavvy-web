@@ -25,6 +25,7 @@ export default function SignUpScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [zipCode, setZipCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -34,6 +35,11 @@ export default function SignUpScreen() {
     
     if (!email || !password) {
       setError('Please enter your email and password');
+      return;
+    }
+
+    if (!zipCode.trim()) {
+      setError('ZIP code is required');
       return;
     }
     
@@ -51,7 +57,7 @@ export default function SignUpScreen() {
     setError(null);
     
     try {
-      await signUp(email, password, displayName);
+      await signUp(email, password, displayName, zipCode.trim());
       setSuccess(true);
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
@@ -178,6 +184,25 @@ export default function SignUpScreen() {
                   placeholder="Your name"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
+                  style={{ 
+                    backgroundColor: theme.inputBackground,
+                    borderColor: theme.inputBorder,
+                    color: theme.inputText,
+                  }}
+                />
+              </div>
+
+              <div className="input-group">
+                <label className="input-label" style={{ color: theme.textSecondary }}>
+                  ZIP Code *
+                </label>
+                <input
+                  type="text"
+                  className="input"
+                  placeholder="e.g. 33101"
+                  value={zipCode}
+                  onChange={(e) => setZipCode(e.target.value)}
+                  maxLength={10}
                   style={{ 
                     backgroundColor: theme.inputBackground,
                     borderColor: theme.inputBorder,

@@ -7,7 +7,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, displayName?: string) => Promise<void>;
+  signUp: (email: string, password: string, displayName?: string, zipCode?: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -138,13 +138,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // ── Sign up ──────────────────────────────────────────────────────────────
-  const signUp = async (email: string, password: string, displayName?: string) => {
-    const { error } = await supabase.auth.signUp({
+  const signUp = async (email: string, password: string, displayName?: string, zipCode?: string) => {
+    const { error, data } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { display_name: displayName } },
     });
     if (error) throw error;
+
+    // Save ZIP code to profile if provided
+    if (zipCode && data?.user?.id) {
+      await supabase
+        .from('profiles')
+        .update({ zip_code: zipCode })
+        .eq('user_id', data.user.id);
+    }
   };
 
   // ── Sign out ─────────────────────────────────────────────────────────────

@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Head from 'next/head';
 import ECardInbox from '../../../components/ECardInbox';
+import GeoAnalyticsDashboard from '../../../components/GeoAnalyticsDashboard';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -2006,6 +2007,21 @@ export default function ECardDashboardScreen() {
                     <button onClick={() => router.push('/app/ecard/premium', undefined, { locale })}>
                       Upgrade to Pro
                     </button>
+                  </div>
+                )}
+
+                {/* Geo Analytics Dashboard */}
+                {cardId && (
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <h3 style={{
+                      color: isDark ? '#fff' : '#1a1a2e',
+                      fontSize: '1.1rem',
+                      fontWeight: 600,
+                      marginBottom: '1rem',
+                    }}>
+                      📍 Geo Intelligence
+                    </h3>
+                    <GeoAnalyticsDashboard cardId={cardId} isDark={isDark} />
                   </div>
                 )}
               </div>

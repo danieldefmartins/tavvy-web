@@ -10,6 +10,7 @@
  */
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
+import { getClientIp, resolveIpGeo } from '../../../lib/geoip';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -50,11 +51,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: 'Invalid or expired session', requireLogin: true });
     }
 
-    // Upsert the reaction (one per user per proposal)
+    // Get voter's ZIP code from profile
+    const { data: voterProfile } = await supabase
+      .from('profiles')
+      .select('zip_code')
+      .eq('user_id', user.id)
+      .single();
+
+    // Resolve IP geolocation
+    const clientIp = getClientIp(req);
+    const geo = await resolveIpGeo(clientIp);
+
+    // Upsert the reaction with geo data (one per user per proposal)
     const { error: upsertError } = await supabase
       .from('civic_reactions')
       .upsert(
-        { proposal_id: proposalId, user_id: user.id, reaction_type: reactionType },
+        {
+          proposal_id: proposalId,
+          user_id: user.id,
+          reaction_type: reactionType,
+          voter_zip: voterProfile?.zip_code || null,
+          ip_address: geo.ip,
+          ip_city: geo.city,
+          ip_state: geo.state,
+          ip_country: geo.country,
+          ip_zip: geo.zip,
+        },
         { onConflict: 'proposal_id,user_id' }
       );
 

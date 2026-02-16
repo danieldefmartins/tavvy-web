@@ -12,6 +12,7 @@
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
+import { getClientIp, resolveIpGeo } from '../../../lib/geoip';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -74,7 +75,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'You cannot endorse your own card' });
     }
 
-    // Create the endorsement
+    // Get endorser's ZIP code from profile
+    const { data: endorserProfile } = await supabase
+      .from('profiles')
+      .select('zip_code')
+      .eq('user_id', user.id)
+      .single();
+
+    // Resolve IP geolocation (non-blocking, best-effort)
+    const clientIp = getClientIp(req);
+    const geo = await resolveIpGeo(clientIp);
+
+    // Check if user has no ZIP code — return requireZip flag
+    if (!endorserProfile?.zip_code) {
+      return res.status(200).json({ requireZip: true });
+    }
+
+    // Create the endorsement with geo data
     const { data: endorsement, error: insertError } = await supabase
       .from('ecard_endorsements')
       .insert({
@@ -82,6 +99,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         card_owner_id: cardData.user_id,
         endorser_id: user.id,
         public_note: note || null,
+        endorser_zip: endorserProfile?.zip_code || null,
+        ip_address: geo.ip,
+        ip_city: geo.city,
+        ip_state: geo.state,
+        ip_country: geo.country,
+        ip_zip: geo.zip,
       })
       .select('id')
       .single();
