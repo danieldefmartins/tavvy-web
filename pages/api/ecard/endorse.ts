@@ -59,10 +59,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(409).json({ error: 'You have already endorsed this card' });
     }
 
-    // Get the card owner ID from the card
+    // Get the card owner ID and place_id from the card
     const { data: cardData } = await supabase
       .from('digital_cards')
-      .select('user_id')
+      .select('user_id, place_id, professional_category')
       .eq('id', cardId)
       .single();
 
@@ -143,29 +143,107 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .update({ tap_count: newTapCount })
       .eq('id', cardId);
 
-    // Get the actual endorsement count (each signal tap = +1)
-    const { count: newEndorsementCount } = await supabase
-      .from('ecard_endorsement_signals')
-      .select('*', { count: 'exact', head: true })
-      .eq('card_id', cardId);
+    // ── Sync with place reviews for business cards ──
+    // If this card is linked to a place, also create a place_review + signal taps
+    if (cardData.place_id) {
+      try {
+        // Create a place_review for this endorsement
+        const { data: placeReview } = await supabase
+          .from('place_reviews')
+          .insert({
+            place_id: cardData.place_id,
+            user_id: user.id,
+            public_note: note || null,
+            source: 'ecard_endorsement',
+            status: 'published',
+            reviewer_zip: endorserProfile?.zip_code || null,
+            ip_address: geo.ip,
+            ip_city: geo.city,
+            ip_state: geo.state,
+            ip_country: geo.country,
+            ip_zip: geo.zip,
+          })
+          .select('id')
+          .single();
 
-    // Get updated top endorsement tags
-    const { data: allSignalTaps } = await supabase
+        if (placeReview) {
+          // Create place_review_signal_taps for each signal (same signal_ids)
+          const placeSignalRows = signals.map((signalId: string) => ({
+            review_id: placeReview.id,
+            place_id: cardData.place_id,
+            signal_id: signalId,
+          }));
+
+          await supabase
+            .from('place_review_signal_taps')
+            .insert(placeSignalRows);
+        }
+      } catch (syncErr) {
+        // Non-blocking — don't fail the endorsement if place sync fails
+        console.error('Place review sync error:', syncErr);
+      }
+    }
+
+    // Get the actual endorsement count (each signal tap = +1)
+    // For business cards with a place, combine both sources
+    let newEndorsementCount = 0;
+    if (cardData.place_id) {
+      // Combined: ecard endorsement signals + place review signal taps (excluding ecard-sourced to avoid double count)
+      const { count: ecardCount } = await supabase
+        .from('ecard_endorsement_signals')
+        .select('*', { count: 'exact', head: true })
+        .eq('card_id', cardId);
+
+      const { count: placeCount } = await supabase
+        .from('place_review_signal_taps')
+        .select('*, place_reviews!inner(source)', { count: 'exact', head: true })
+        .eq('place_id', cardData.place_id)
+        .neq('place_reviews.source', 'ecard_endorsement');
+
+      newEndorsementCount = (ecardCount || 0) + (placeCount || 0);
+    } else {
+      const { count } = await supabase
+        .from('ecard_endorsement_signals')
+        .select('*', { count: 'exact', head: true })
+        .eq('card_id', cardId);
+      newEndorsementCount = count || 0;
+    }
+
+    // Get updated top endorsement tags — combine both sources for business cards
+    const tagCounts: Record<string, { label: string; emoji: string; count: number }> = {};
+
+    // Source 1: ecard endorsement signals
+    const { data: ecardSignalTaps } = await supabase
       .from('ecard_endorsement_signals')
       .select('signal_id, review_items(label, icon_emoji)')
       .eq('card_id', cardId);
-    let updatedTags: { label: string; emoji: string; count: number }[] = [];
-    if (allSignalTaps && allSignalTaps.length > 0) {
-      const tagCounts: Record<string, { label: string; emoji: string; count: number }> = {};
-      allSignalTaps.forEach((tap: any) => {
+
+    (ecardSignalTaps || []).forEach((tap: any) => {
+      const ri = tap.review_items;
+      if (ri) {
+        if (!tagCounts[tap.signal_id]) tagCounts[tap.signal_id] = { label: ri.label, emoji: ri.icon_emoji || '⭐', count: 0 };
+        tagCounts[tap.signal_id].count++;
+      }
+    });
+
+    // Source 2: place review signal taps (only non-ecard-sourced to avoid double count)
+    if (cardData.place_id) {
+      const { data: placeSignalTaps } = await supabase
+        .from('place_review_signal_taps')
+        .select('signal_id, review_items(label, icon_emoji), place_reviews!inner(source)')
+        .eq('place_id', cardData.place_id)
+        .neq('place_reviews.source', 'ecard_endorsement');
+
+      (placeSignalTaps || []).forEach((tap: any) => {
         const ri = tap.review_items;
         if (ri) {
           if (!tagCounts[tap.signal_id]) tagCounts[tap.signal_id] = { label: ri.label, emoji: ri.icon_emoji || '⭐', count: 0 };
           tagCounts[tap.signal_id].count++;
         }
       });
-      updatedTags = Object.values(tagCounts).sort((a, b) => b.count - a.count).slice(0, 8);
     }
+
+    const updatedTags = Object.values(tagCounts).sort((a, b) => b.count - a.count).slice(0, 8);
 
     return res.status(200).json({
       success: true,

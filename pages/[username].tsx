@@ -4539,29 +4539,57 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
     let endorsementSignals: { id: string; label: string; emoji: string; category: string }[] = [];
 
     try {
-      // Get endorsement count (each signal tap = +1)
-      const { count } = await serverSupabase
+      // Get endorsement count and top signal tags
+      // For business cards with a linked place, combine ecard endorsements + place review "The Good" signals
+      const tagCounts: Record<string, { label: string; emoji: string; count: number }> = {};
+
+      // Source 1: ecard endorsement signals (always)
+      const { count: ecardSignalCount } = await serverSupabase
         .from('ecard_endorsement_signals')
         .select('*', { count: 'exact', head: true })
         .eq('card_id', data.id);
-      endorsementCount = count || 0;
 
-      // Get top signal tags (aggregated)
-      const { data: signalTaps } = await serverSupabase
+      const { data: ecardSignalTaps } = await serverSupabase
         .from('ecard_endorsement_signals')
         .select('signal_id, review_items(label, icon_emoji)')
         .eq('card_id', data.id);
-      if (signalTaps && signalTaps.length > 0) {
-        const tagCounts: Record<string, { label: string; emoji: string; count: number }> = {};
-        signalTaps.forEach((tap: any) => {
+
+      (ecardSignalTaps || []).forEach((tap: any) => {
+        const ri = tap.review_items;
+        if (ri) {
+          if (!tagCounts[tap.signal_id]) tagCounts[tap.signal_id] = { label: ri.label, emoji: ri.icon_emoji || '⭐', count: 0 };
+          tagCounts[tap.signal_id].count++;
+        }
+      });
+
+      // Source 2: place review signal taps (only for business cards with linked place)
+      let placeSignalCount = 0;
+      if (data.place_id) {
+        // Get place review signal taps that were NOT sourced from ecard endorsements (to avoid double count)
+        const { count: pCount } = await serverSupabase
+          .from('place_review_signal_taps')
+          .select('*, place_reviews!inner(source)', { count: 'exact', head: true })
+          .eq('place_id', data.place_id)
+          .neq('place_reviews.source', 'ecard_endorsement');
+        placeSignalCount = pCount || 0;
+
+        const { data: placeSignalTaps } = await serverSupabase
+          .from('place_review_signal_taps')
+          .select('signal_id, review_items(label, icon_emoji), place_reviews!inner(source)')
+          .eq('place_id', data.place_id)
+          .neq('place_reviews.source', 'ecard_endorsement');
+
+        (placeSignalTaps || []).forEach((tap: any) => {
           const ri = tap.review_items;
           if (ri) {
             if (!tagCounts[tap.signal_id]) tagCounts[tap.signal_id] = { label: ri.label, emoji: ri.icon_emoji || '⭐', count: 0 };
             tagCounts[tap.signal_id].count++;
           }
         });
-        topEndorsementTags = Object.values(tagCounts).sort((a, b) => b.count - a.count).slice(0, 8);
       }
+
+      endorsementCount = (ecardSignalCount || 0) + placeSignalCount;
+      topEndorsementTags = Object.values(tagCounts).sort((a, b) => b.count - a.count).slice(0, 8);
 
       // Get recent endorsements with endorser names
       const { data: recentData } = await serverSupabase
