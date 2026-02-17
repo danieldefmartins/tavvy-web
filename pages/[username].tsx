@@ -1476,16 +1476,42 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           ...(isFlagCivic ? {
             maxWidth: '100%',
             margin: '0 auto',
-            padding: '60px 24px 40px',
+            padding: '0',
             borderRadius: '0',
             overflow: 'hidden' as const,
-            backgroundImage: 'url(/images/brazil-flag-alt.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center center',
-            backgroundRepeat: 'no-repeat',
+            position: 'relative' as const,
           } : {}),
 
         }}>
+          {/* ═══ FLAG TEMPLATE: Flag background image + dark overlay ═══ */}
+          {isFlagCivic && (
+            <>
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundImage: 'url(/images/brazil-flag-horizontal.jpg)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center center',
+                backgroundRepeat: 'no-repeat',
+                opacity: 0.85,
+                zIndex: 0,
+              }} />
+              {/* Dark gradient overlay for text readability */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                background: 'linear-gradient(180deg, rgba(0,20,10,0.35) 0%, rgba(0,20,10,0.25) 40%, rgba(0,20,10,0.45) 100%)',
+                zIndex: 1,
+              }} />
+            </>
+          )}
+
           {/* Star Badge - Top Right — Opens Endorsement Popup */}
           {/* Pixel-sampled contrast: detects actual image/gradient behind badge */}
           {(() => {
@@ -1859,6 +1885,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             ...(templateLayout === 'biz-modern' ? { padding: '0', display: 'none' } : {}),
             ...(templateLayout === 'biz-minimalist' ? { padding: '0', display: 'none' } : {}),
             ...(isNonClassicCivic ? { padding: '16px 20px 0' } : {}),
+            ...(isFlagCivic ? { position: 'relative' as const, zIndex: 2, padding: '60px 24px 0' } : {}),
             ...(templateLayout === 'blogger' ? { paddingTop: 0 } : {}),
           }}>
             {/* Profile Photo - skip for full-width, premium-static (photo IS the hero), pro-card, cover-card, and biz templates (photo in their own sections) */}
@@ -1953,6 +1980,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               ...(templateLayout === 'business-card' ? { color: '#1a1a2e', fontWeight: '800' } : {}),
               ...(templateLayout === 'pro-realtor' ? { fontSize: '26px', fontWeight: '800', letterSpacing: '-0.5px' } : {}),
               ...(templateLayout === 'cover-card' ? { textAlign: 'left' as const, width: '100%', color: '#1a1a2e', fontWeight: '700', fontSize: '24px' } : {}),
+              ...(isFlagCivic ? { color: '#ffffff', textShadow: '0 2px 8px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.3)', fontWeight: '800' } : {}),
             }}>{cardData.fullName}</h1>}
             {/* Title (skip for pro-card, biz templates, and civic templates that show title in header) */}
             {cardData.title && templateLayout !== 'pro-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && !isCleanCivic && <p style={{
@@ -1965,6 +1993,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               ...(templateLayout === 'business-card' ? { color: '#555', fontWeight: '600' } : {}),
               ...(templateLayout === 'pro-realtor' ? { fontWeight: '600', letterSpacing: '0.5px' } : {}),
               ...(templateLayout === 'cover-card' ? { textAlign: 'left' as const, width: '100%', color: '#444', fontWeight: '600', fontSize: '14px' } : {}),
+              ...(isFlagCivic ? { color: 'rgba(255,255,255,0.95)', textShadow: '0 1px 6px rgba(0,0,0,0.4)' } : {}),
             }}>{cardData.title}</p>}
             {/* Company (skip for pro-card and biz templates) */}
             {cardData.company && templateLayout !== 'pro-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && <p style={{
@@ -1989,6 +2018,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 ...(templateLayout === 'business-card' ? { color: '#555', fontSize: '14px' } : {}),
                 ...(templateLayout === 'blogger' ? { color: '#555', fontSize: '14px', lineHeight: '1.6' } : {}),
                 ...(templateLayout === 'cover-card' ? { textAlign: 'left' as const, width: '100%', padding: '0', color: '#555', fontSize: '14px', lineHeight: '1.6' } : {}),
+                ...(isFlagCivic ? { color: 'rgba(255,255,255,0.9)', textShadow: '0 1px 4px rgba(0,0,0,0.4)' } : {}),
               }}>
                 {cardData.bio}
               </p>
@@ -2465,6 +2495,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             ...styles.actionButtons,
             ...(templateLayout === 'blogger' ? { padding: '0 0 10px', gap: '10px' } : {}),
             ...(templateLayout === 'pro-realtor' ? { gap: '10px' } : {}),
+            ...(isFlagCivic ? { position: 'relative' as const, zIndex: 2 } : {}),
           }}>
             {cardData.phone && (
               <a href={`tel:${cardData.phone}`} className="action-btn" style={{
@@ -2532,7 +2563,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
 
           {/* Featured Social Icons */}
           {cardData.showSocialIcons && cardData.featuredSocials && cardData.featuredSocials.length > 0 && (
-            <div style={styles.featuredSocials}>
+            <div style={{...styles.featuredSocials, ...(isFlagCivic ? { position: 'relative' as const, zIndex: 2 } : {})}}>
               {cardData.featuredSocials.map((item, index) => {
                 const platform = typeof item === 'string' ? item : item.platform;
                 const url = typeof item === 'string' ? '' : (item.url || '');
@@ -2730,7 +2761,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           })()}
 
           {/* Divider */}
-          <div style={{...styles.divider, background: templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || bgIsActuallyLight ? 'linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent)' : 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)'}} />
+          <div style={{...styles.divider, background: templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || bgIsActuallyLight ? 'linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent)' : 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)', ...(isFlagCivic ? { position: 'relative' as const, zIndex: 2 } : {})}} />
 
           {/* Links Section - always visible */}
 
@@ -3275,9 +3306,11 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             ...(isFlagCivic ? {
               background: '#ffffff',
               borderRadius: '0',
-              margin: '0 -24px',
+              margin: '0',
               padding: '8px 24px 0',
-              width: 'calc(100% + 48px)',
+              width: '100%',
+              position: 'relative' as const,
+              zIndex: 2,
             } : {}),
           }}>
             {/* ═══ CIVIC CARD SECTION ═══ */}
