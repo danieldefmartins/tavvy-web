@@ -1477,10 +1477,13 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             maxWidth: '440px',
             margin: '20px auto',
             padding: '60px 24px 40px',
-            borderRadius: '20px',
+            borderRadius: '20px 20px 0 0',
             overflow: 'hidden' as const,
             boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
-            background: '#ffffff',
+            backgroundImage: 'url(/images/brazil-flag-vertical.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center top',
+            backgroundRepeat: 'no-repeat',
           } : {}),
 
         }}>
@@ -3268,41 +3271,51 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             </div>
           )}
 
-          {/* ═══ CIVIC CARD SECTION ═══ */}
-          {isCivicCard && (
-            <CivicCardSection
-              cardId={cardData.id}
-              cardSlug={cardData.slug}
-              fullName={cardData.fullName}
-              ballotNumber={cardData.ballotNumber || ''}
-              partyName={cardData.partyName || ''}
-              officeRunningFor={cardData.officeRunningFor || ''}
-              electionYear={cardData.electionYear || ''}
-              campaignSlogan={cardData.campaignSlogan || ''}
-              region={cardData.region || ''}
-              profilePhotoUrl={cardData.profilePhotoUrl}
-              accentColor={activeColorScheme?.primary || templateStyles.accentColor}
-              secondaryColor={activeColorScheme?.secondary || templateStyles.accentColor}
-              proposals={cardData.civicProposals || []}
-              questions={cardData.civicQuestions || []}
-              commitments={cardData.civicCommitments || []}
-              recommendations={cardData.civicRecommendations || []}
-              showVoteCounts={cardData.showVoteCounts !== false}
-              templateLayout={templateLayout}
-              hideHeader={isNonClassicCivic && !isFlagCivic}
-            />
-          )}
-          {/* ═══ MESSAGE BUTTON ═══ */}
-          <div style={{ width: '100%', marginTop: isNonClassicCivic ? 0 : 16, padding: isNonClassicCivic ? '16px 20px' : '0 20px' }}>
-            <ECardMessageButton
-              cardId={cardData.id}
-              cardSlug={cardData.slug}
-              cardOwnerName={cardData.fullName}
-              accentColor={activeColorScheme?.primary || templateStyles.accentColor}
-            />
-          </div>
+          {/* ═══ FLAG TEMPLATE: White bottom section for civic content ═══ */}
+          <div style={{
+            ...(isFlagCivic ? {
+              background: '#ffffff',
+              borderRadius: '0 0 20px 20px',
+              margin: '0 -24px',
+              padding: '8px 24px 0',
+              width: 'calc(100% + 48px)',
+            } : {}),
+          }}>
+            {/* ═══ CIVIC CARD SECTION ═══ */}
+            {isCivicCard && (
+              <CivicCardSection
+                cardId={cardData.id}
+                cardSlug={cardData.slug}
+                fullName={cardData.fullName}
+                ballotNumber={cardData.ballotNumber || ''}
+                partyName={cardData.partyName || ''}
+                officeRunningFor={cardData.officeRunningFor || ''}
+                electionYear={cardData.electionYear || ''}
+                campaignSlogan={cardData.campaignSlogan || ''}
+                region={cardData.region || ''}
+                profilePhotoUrl={cardData.profilePhotoUrl}
+                accentColor={activeColorScheme?.primary || templateStyles.accentColor}
+                secondaryColor={activeColorScheme?.secondary || templateStyles.accentColor}
+                proposals={cardData.civicProposals || []}
+                questions={cardData.civicQuestions || []}
+                commitments={cardData.civicCommitments || []}
+                recommendations={cardData.civicRecommendations || []}
+                showVoteCounts={cardData.showVoteCounts !== false}
+                templateLayout={templateLayout}
+                hideHeader={isNonClassicCivic && !isFlagCivic}
+              />
+            )}
+            {/* ═══ MESSAGE BUTTON ═══ */}
+            <div style={{ width: '100%', marginTop: isNonClassicCivic ? 0 : 16, padding: isNonClassicCivic ? '16px 20px' : '0 20px' }}>
+              <ECardMessageButton
+                cardId={cardData.id}
+                cardSlug={cardData.slug}
+                cardOwnerName={cardData.fullName}
+                accentColor={activeColorScheme?.primary || templateStyles.accentColor}
+              />
+            </div>
 
-          {/* ═══ CARD FOOTER ═══ */}
+            {/* ═══ CARD FOOTER ═══ */}
           <div style={{ width: '100%', marginTop: isNonClassicCivic ? 12 : 20, padding: isNonClassicCivic ? '0 20px 16px' : '0', display: 'flex', flexDirection: 'column' as const, alignItems: 'center', gap: 12 }}>
 
             {/* Action Icons — Save, Share, Apple Wallet, Google Wallet */}
@@ -3386,6 +3399,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               }}>Create your free digital card</a>
             </div>
           </div>
+          </div>{/* Close FLAG TEMPLATE white bottom section wrapper */}
         </div>
       </div>
 
