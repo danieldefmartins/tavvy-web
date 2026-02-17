@@ -1493,7 +1493,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 right: 0,
                 bottom: 0,
                 backgroundImage: 'url(/images/brazil-flag-horizontal.jpg)',
-                backgroundSize: 'cover',
+                backgroundSize: '100% 100%',
                 backgroundPosition: 'center center',
                 backgroundRepeat: 'no-repeat',
                 opacity: 0.85,
