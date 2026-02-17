@@ -1316,7 +1316,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 ? { background: activeColorScheme?.background || cardData.gradientColor1 }
                 : templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || isCivicCard
                   ? (isFlagCivic
-                    ? { backgroundImage: 'url(/images/brazil-flag-vertical.jpg)', backgroundSize: 'cover', backgroundPosition: 'center top', backgroundRepeat: 'no-repeat', backgroundColor: '#002776' }
+                    ? { background: '#1a1a2e' }
                     : { background: isNonClassicCivic ? '#ffffff' : isRallyCivic ? '#F5C518' : isCleanCivic ? '#e8edf2' : (activeColorScheme?.background || '#f0f2f5') })
                 : cardData.backgroundType === 'solid' 
                   ? { background: cardData.gradientColor1 }
@@ -1474,15 +1474,14 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             background: '#ffffff',
           } : {}),
           ...(isFlagCivic ? {
-            maxWidth: '440px',
-            margin: '20px auto',
+            maxWidth: '100%',
+            margin: '0 auto',
             padding: '60px 24px 40px',
-            borderRadius: '20px 20px 0 0',
+            borderRadius: '0',
             overflow: 'hidden' as const,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
-            backgroundImage: 'url(/images/brazil-flag-vertical.jpg)',
+            backgroundImage: 'url(/images/brazil-flag-alt.jpg)',
             backgroundSize: 'cover',
-            backgroundPosition: 'center top',
+            backgroundPosition: 'center center',
             backgroundRepeat: 'no-repeat',
           } : {}),
 
@@ -3275,7 +3274,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           <div style={{
             ...(isFlagCivic ? {
               background: '#ffffff',
-              borderRadius: '0 0 20px 20px',
+              borderRadius: '0',
               margin: '0 -24px',
               padding: '8px 24px 0',
               width: 'calc(100% + 48px)',
