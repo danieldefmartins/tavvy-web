@@ -801,6 +801,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   const isFlagCivic = templateLayout === 'civic-card-flag';
   const isCleanCivic = templateLayout === 'civic-card-clean';
   const isRallyCivic = templateLayout === 'civic-card-rally';
+  const isBoldCivic = templateLayout === 'civic-card-bold';
 
   // Get color scheme from template config
   const activeColorScheme = templateConfig?.colorSchemes.find(cs => cs.id === (cardData as any).colorSchemeId) || templateConfig?.colorSchemes[0];
@@ -1805,6 +1806,31 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             </div>
           )}
 
+          {/* ═══ NON-CLASSIC CIVIC HEADER (rendered at top, before profile) ═══ */}
+          {isNonClassicCivic && (
+            <CivicCardSection
+              cardId={cardData.id}
+              cardSlug={cardData.slug}
+              fullName={cardData.fullName}
+              ballotNumber={cardData.ballotNumber || ''}
+              partyName={cardData.partyName || ''}
+              officeRunningFor={cardData.officeRunningFor || ''}
+              electionYear={cardData.electionYear || ''}
+              campaignSlogan={cardData.campaignSlogan || ''}
+              region={cardData.region || ''}
+              profilePhotoUrl={cardData.profilePhotoUrl}
+              accentColor={activeColorScheme?.primary || templateStyles.accentColor}
+              secondaryColor={activeColorScheme?.secondary || templateStyles.accentColor}
+              proposals={[]}
+              questions={[]}
+              commitments={[]}
+              recommendations={[]}
+              showVoteCounts={false}
+              templateLayout={templateLayout}
+              headerOnly={true}
+            />
+          )}
+
           {/* Profile Section */}
           <div style={{
             ...styles.profileSection,
@@ -1818,11 +1844,11 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             ...(templateLayout === 'biz-traditional' ? { padding: '0', display: 'none' } : {}),
             ...(templateLayout === 'biz-modern' ? { padding: '0', display: 'none' } : {}),
             ...(templateLayout === 'biz-minimalist' ? { padding: '0', display: 'none' } : {}),
-            ...(isNonClassicCivic ? { padding: '0', display: 'none' } : {}),
+            ...(isNonClassicCivic ? { padding: '16px 20px 0' } : {}),
             ...(templateLayout === 'blogger' ? { paddingTop: 0 } : {}),
           }}>
             {/* Profile Photo - skip for full-width, premium-static (photo IS the hero), pro-card, cover-card, and biz templates (photo in their own sections) */}
-            {templateLayout !== 'full-width' && templateLayout !== 'premium-static' && templateLayout !== 'pro-card' && templateLayout !== 'cover-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && (() => {
+            {templateLayout !== 'full-width' && templateLayout !== 'premium-static' && templateLayout !== 'pro-card' && templateLayout !== 'cover-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && !isFlagCivic && !isCleanCivic && !isRallyCivic && (() => {
               // Photo size configurations
               const photoSizes = {
                 small: { ring: 100, photo: 92, initials: 28, borderRadius: 50 },
@@ -1903,8 +1929,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             )}
 
             {/* Name & Info */}
-            {/* Name (skip for pro-card and biz templates — rendered in their own sections) */}
-            {templateLayout !== 'pro-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && <h1 style={{
+            {/* Name (skip for pro-card, biz templates, and non-classic civic — rendered in their own headers) */}
+            {templateLayout !== 'pro-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && !isNonClassicCivic && <h1 style={{
               ...styles.name,
               color: templateStyles.textColor,
               ...fontStyleOverrides,
@@ -1914,8 +1940,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               ...(templateLayout === 'pro-realtor' ? { fontSize: '26px', fontWeight: '800', letterSpacing: '-0.5px' } : {}),
               ...(templateLayout === 'cover-card' ? { textAlign: 'left' as const, width: '100%', color: '#1a1a2e', fontWeight: '700', fontSize: '24px' } : {}),
             }}>{cardData.fullName}</h1>}
-            {/* Title (skip for pro-card and biz templates) */}
-            {cardData.title && templateLayout !== 'pro-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && <p style={{
+            {/* Title (skip for pro-card, biz templates, and civic templates that show title in header) */}
+            {cardData.title && templateLayout !== 'pro-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && !isFlagCivic && !isCleanCivic && <p style={{
               ...styles.title,
               color: templateStyles.textColor,
               opacity: 0.9,
@@ -2421,7 +2447,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           )}
 
           {/* Standard Action Buttons (for all other templates) */}
-          {templateLayout !== 'business-card' && templateLayout !== 'pro-card' && templateLayout !== 'cover-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && !isNonClassicCivic && cardData.showContactInfo && <div style={{
+          {templateLayout !== 'business-card' && templateLayout !== 'pro-card' && templateLayout !== 'cover-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && cardData.showContactInfo && <div style={{
             ...styles.actionButtons,
             ...(templateLayout === 'blogger' ? { padding: '0 0 10px', gap: '10px' } : {}),
             ...(templateLayout === 'pro-realtor' ? { gap: '10px' } : {}),
@@ -2491,7 +2517,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           </div>}
 
           {/* Featured Social Icons */}
-          {!isNonClassicCivic && cardData.showSocialIcons && cardData.featuredSocials && cardData.featuredSocials.length > 0 && (
+          {cardData.showSocialIcons && cardData.featuredSocials && cardData.featuredSocials.length > 0 && (
             <div style={styles.featuredSocials}>
               {cardData.featuredSocials.map((item, index) => {
                 const platform = typeof item === 'string' ? item : item.platform;
@@ -2541,7 +2567,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           )}
 
           {/* Social Links — skip platforms already shown in Featured Socials */}
-          {!isNonClassicCivic && cardData.showSocialIcons && hasSocialLinks && (() => {
+          {cardData.showSocialIcons && hasSocialLinks && (() => {
             const featuredPlatforms = new Set(
               (cardData.featuredSocials || []).map((item: any) => typeof item === 'string' ? item : item.platform)
             );
@@ -3251,6 +3277,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               recommendations={cardData.civicRecommendations || []}
               showVoteCounts={cardData.showVoteCounts !== false}
               templateLayout={templateLayout}
+              hideHeader={isNonClassicCivic}
             />
           )}
           {/* ═══ MESSAGE BUTTON ═══ */}

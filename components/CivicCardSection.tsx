@@ -67,6 +67,8 @@ interface CivicCardSectionProps {
   recommendations: CivicRecommendation[];
   showVoteCounts: boolean;
   templateLayout?: string;
+  hideHeader?: boolean;
+  headerOnly?: boolean;
 }
 
 const CivicCardSection: React.FC<CivicCardSectionProps> = ({
@@ -88,6 +90,8 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
   recommendations,
   showVoteCounts = true,
   templateLayout = 'civic-card',
+  hideHeader = false,
+  headerOnly = false,
 }) => {
   const { t } = useTranslation('common');
   const [proposals, setProposals] = useState(initialProposals);
@@ -290,6 +294,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
       overflow: 'hidden',
       marginBottom: 0,
       position: 'relative',
+      minHeight: 280,
     }}>
       {/* Real Brazilian flag as background image */}
       <div style={{
@@ -299,43 +304,22 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
       }} />
-      {/* Subtle dark overlay for text readability */}
+      {/* Dark overlay for text readability */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0,
-        background: 'linear-gradient(180deg, rgba(0,60,30,0.35) 0%, rgba(0,40,20,0.5) 100%)',
+        background: 'linear-gradient(180deg, rgba(0,80,30,0.3) 0%, rgba(0,60,20,0.55) 60%, rgba(0,40,15,0.8) 100%)',
       }} />
 
-      {/* Content */}
-      <div style={{ position: 'relative', zIndex: 1, padding: '32px 24px 28px', textAlign: 'center' as const }}>
-        {/* Photo with yellow border */}
+      {/* Content: ONLY photo + name + title */}
+      <div style={{ position: 'relative', zIndex: 1, padding: '40px 24px 28px', textAlign: 'center' as const, display: 'flex', flexDirection: 'column' as const, alignItems: 'center' }}>
+        {/* Photo with gold ring */}
         {profilePhotoUrl && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-            <div style={{ width: 120, height: 120, borderRadius: '50%', border: '4px solid #FFDF00', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
-              <img src={profilePhotoUrl} alt={fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
+          <div style={{ width: 120, height: 120, borderRadius: '50%', background: 'linear-gradient(145deg, #F5C518, #ffdf00)', padding: 4, boxShadow: '0 6px 24px rgba(0,0,0,0.35)' }}>
+            <img src={profilePhotoUrl} alt={fullName} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
           </div>
         )}
-        <div style={{ fontSize: 24, fontWeight: 800, color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.5)', marginBottom: 4 }}>{fullName}</div>
-        <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.95)', textShadow: '0 1px 4px rgba(0,0,0,0.4)', marginBottom: 16 }}>{officeRunningFor}</div>
-
-        {/* Info box */}
-        <div style={{ background: 'rgba(0,39,118,0.7)', backdropFilter: 'blur(12px)', borderRadius: 16, padding: '20px', marginBottom: 12 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' as const, color: '#FFDF00', marginBottom: 6 }}>{partyName}</div>
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', marginBottom: 12 }}>
-            {officeRunningFor}{region ? ` • ${region}` : ''}{electionYear ? ` • ${electionYear}` : ''}
-          </div>
-          {ballotNumber && (
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#FFDF00', borderRadius: 12, padding: '10px 24px', marginBottom: 8 }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: '#002776' }}>{t('civic.vote')}</span>
-              <span style={{ fontSize: 34, fontWeight: 900, color: '#002776', letterSpacing: 4, fontFamily: "'Inter', -apple-system, sans-serif" }}>{ballotNumber}</span>
-            </div>
-          )}
-          {campaignSlogan && (
-            <div style={{ fontSize: 15, fontWeight: 600, color: '#FFDF00', fontStyle: 'italic', marginTop: 8 }}>
-              &ldquo;{campaignSlogan}&rdquo;
-            </div>
-          )}
-        </div>
+        <div style={{ fontSize: 24, fontWeight: 800, color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.4)', marginTop: 14 }}>{fullName}</div>
+        <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.9)', textShadow: '0 1px 4px rgba(0,0,0,0.3)', marginTop: 4 }}>{officeRunningFor}</div>
       </div>
     </div>
   );
@@ -507,10 +491,15 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
     }
   };
 
+  // If headerOnly mode, render just the header and nothing else
+  if (headerOnly) {
+    return renderHeader();
+  }
+
   return (
     <div style={{ width: '100%', marginTop: 0 }}>
       {/* ═══ TEMPLATE-SPECIFIC HEADER ═══ */}
-      {renderHeader()}
+      {!hideHeader && renderHeader()}
 
       {/* ═══ COMMUNITY THERMOMETER ═══ */}
       {totalVotes > 0 && showVoteCounts && (
