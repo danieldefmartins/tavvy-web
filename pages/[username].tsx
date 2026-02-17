@@ -1316,7 +1316,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 ? { background: activeColorScheme?.background || cardData.gradientColor1 }
                 : templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || isCivicCard
                   ? (isFlagCivic
-                    ? { background: '#009739' }
+                    ? { backgroundImage: 'url(/images/brazil-flag-vertical.jpg)', backgroundSize: 'cover', backgroundPosition: 'center top', backgroundRepeat: 'no-repeat', backgroundColor: '#002776' }
                     : { background: isNonClassicCivic ? '#ffffff' : isRallyCivic ? '#F5C518' : isCleanCivic ? '#e8edf2' : (activeColorScheme?.background || '#f0f2f5') })
                 : cardData.backgroundType === 'solid' 
                   ? { background: cardData.gradientColor1 }
@@ -1479,11 +1479,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             padding: '60px 24px 40px',
             borderRadius: '20px',
             overflow: 'hidden' as const,
-            boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
-            backgroundImage: 'url(/images/brazil-flag-vertical.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+            background: '#ffffff',
           } : {}),
 
         }}>
