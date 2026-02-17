@@ -1483,7 +1483,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           } : {}),
 
         }}>
-          {/* ═══ FLAG TEMPLATE: Flag background image + dark overlay ═══ */}
+          {/* ═══ FLAG TEMPLATE: Flexible background — bannerImageUrl → accentColor gradient → default Brazilian gradient ═══ */}
           {isFlagCivic && (
             <>
               <div style={{
@@ -1492,11 +1492,19 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 left: 0,
                 right: 0,
                 bottom: 0,
-                backgroundImage: 'url(/images/brazil-flag-vertical.jpg)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center center',
-                backgroundRepeat: 'no-repeat',
-                opacity: 0.85,
+                ...(cardData.bannerImageUrl
+                  ? {
+                      backgroundImage: `url(${cardData.bannerImageUrl})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center center',
+                      backgroundRepeat: 'no-repeat',
+                    }
+                  : {
+                      background: cardData.gradientColor1
+                        ? `linear-gradient(160deg, ${cardData.gradientColor1} 0%, ${cardData.gradientColor2 || cardData.gradientColor1}88 50%, ${cardData.gradientColor1}dd 100%)`
+                        : 'linear-gradient(160deg, #009739 0%, #FFDF00 35%, #009739 65%, #002776 100%)',
+                    }),
+                opacity: cardData.bannerImageUrl ? 0.85 : 1,
                 zIndex: 0,
               }} />
               {/* Dark gradient overlay for text readability */}
@@ -1506,7 +1514,9 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 left: 0,
                 right: 0,
                 bottom: 0,
-                background: 'linear-gradient(180deg, rgba(0,20,10,0.35) 0%, rgba(0,20,10,0.25) 40%, rgba(0,20,10,0.45) 100%)',
+                background: cardData.bannerImageUrl
+                  ? 'linear-gradient(180deg, rgba(0,20,10,0.35) 0%, rgba(0,20,10,0.25) 40%, rgba(0,20,10,0.45) 100%)'
+                  : 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.2) 100%)',
                 zIndex: 1,
               }} />
             </>
