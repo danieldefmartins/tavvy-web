@@ -17,12 +17,14 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 interface UserProfile {
-  id: string;
+  user_id: string;
   username?: string;
-  full_name?: string;
+  display_name?: string;
   avatar_url?: string;
   bio?: string;
-  location?: string;
+  city?: string;
+  state?: string;
+  country?: string;
   created_at?: string;
   review_count?: number;
   saved_count?: number;
@@ -52,7 +54,7 @@ export default function ProfileScreen() {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user?.id)
+        .eq('user_id', user?.id)
         .single();
 
       if (!error && data) {
@@ -60,8 +62,8 @@ export default function ProfileScreen() {
       } else {
         // Create profile from user data
         setProfile({
-          id: user?.id || '',
-          full_name: user?.user_metadata?.full_name,
+          user_id: user?.id || '',
+          display_name: user?.user_metadata?.full_name || user?.user_metadata?.display_name,
           avatar_url: user?.user_metadata?.avatar_url,
         });
       }
@@ -157,10 +159,10 @@ export default function ProfileScreen() {
           <div className="profile-info">
             <div className="avatar-container">
               {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt={profile.full_name || 'User'} className="avatar" />
+                <img src={profile.avatar_url} alt={profile.display_name || 'User'} className="avatar" />
               ) : (
                 <div className="avatar-placeholder" style={{ backgroundColor: theme.primary }}>
-                  {(profile?.full_name || user?.email || 'U').charAt(0).toUpperCase()}
+                  {(profile?.display_name || user?.email || 'U').charAt(0).toUpperCase()}
                 </div>
               )}
               <button className="edit-avatar" style={{ backgroundColor: theme.surface }}>
@@ -169,7 +171,7 @@ export default function ProfileScreen() {
             </div>
 
             <h2 style={{ color: theme.text }}>
-              {profile?.full_name || profile?.username || 'TavvY User'}
+              {profile?.display_name || profile?.username || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'TavvY User'}
             </h2>
             
             {profile?.username && (
@@ -181,9 +183,9 @@ export default function ProfileScreen() {
             )}
 
             <div className="meta-row">
-              {profile?.location && (
+              {(profile?.city || profile?.state) && (
                 <span style={{ color: theme.textTertiary }}>
-                  <FiMapPin size={14} /> {profile.location}
+                  <FiMapPin size={14} /> {[profile.city, profile.state].filter(Boolean).join(', ')}
                 </span>
               )}
               <span style={{ color: theme.textTertiary }}>
