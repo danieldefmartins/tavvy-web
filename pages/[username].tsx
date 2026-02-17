@@ -1315,7 +1315,9 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               : templateLayout === 'blogger'
                 ? { background: activeColorScheme?.background || cardData.gradientColor1 }
                 : templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || isCivicCard
-                  ? { background: isFlagCivic ? '#009739' : isNonClassicCivic ? '#ffffff' : isRallyCivic ? '#F5C518' : isCleanCivic ? '#e8edf2' : (activeColorScheme?.background || '#f0f2f5') }
+                  ? (isFlagCivic
+                    ? { background: '#009739' }
+                    : { background: isNonClassicCivic ? '#ffffff' : isRallyCivic ? '#F5C518' : isCleanCivic ? '#e8edf2' : (activeColorScheme?.background || '#f0f2f5') })
                 : cardData.backgroundType === 'solid' 
                   ? { background: cardData.gradientColor1 }
                   : cardData.backgroundType === 'image' && cardData.backgroundImageUrl
@@ -1462,7 +1464,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             background: '#ffffff',
             minHeight: '100vh',
           } : {}),
-          ...((isFlagCivic || isCleanCivic || isRallyCivic) ? {
+          ...((isCleanCivic || isRallyCivic) ? {
             maxWidth: '440px',
             margin: '20px auto',
             padding: '60px 24px 40px',
@@ -1470,6 +1472,18 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             overflow: 'hidden' as const,
             boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
             background: '#ffffff',
+          } : {}),
+          ...(isFlagCivic ? {
+            maxWidth: '440px',
+            margin: '20px auto',
+            padding: '60px 24px 40px',
+            borderRadius: '20px',
+            overflow: 'hidden' as const,
+            boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
+            backgroundImage: 'url(/images/brazil-flag-alt.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
           } : {}),
 
         }}>
@@ -1807,7 +1821,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           )}
 
           {/* ═══ NON-CLASSIC CIVIC HEADER (rendered at top, before profile) ═══ */}
-          {isNonClassicCivic && (
+          {/* Flag template: no header — flag is the page background */}
+          {isNonClassicCivic && !isFlagCivic && (
             <CivicCardSection
               cardId={cardData.id}
               cardSlug={cardData.slug}
@@ -1848,7 +1863,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             ...(templateLayout === 'blogger' ? { paddingTop: 0 } : {}),
           }}>
             {/* Profile Photo - skip for full-width, premium-static (photo IS the hero), pro-card, cover-card, and biz templates (photo in their own sections) */}
-            {templateLayout !== 'full-width' && templateLayout !== 'premium-static' && templateLayout !== 'pro-card' && templateLayout !== 'cover-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && !isFlagCivic && !isCleanCivic && !isRallyCivic && (() => {
+            {templateLayout !== 'full-width' && templateLayout !== 'premium-static' && templateLayout !== 'pro-card' && templateLayout !== 'cover-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && !isCleanCivic && !isRallyCivic && (() => {
               // Photo size configurations
               const photoSizes = {
                 small: { ring: 100, photo: 92, initials: 28, borderRadius: 50 },
@@ -1930,7 +1945,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
 
             {/* Name & Info */}
             {/* Name (skip for pro-card, biz templates, and non-classic civic — rendered in their own headers) */}
-            {templateLayout !== 'pro-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && !isNonClassicCivic && <h1 style={{
+            {templateLayout !== 'pro-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && (!isNonClassicCivic || isFlagCivic) && <h1 style={{
               ...styles.name,
               color: templateStyles.textColor,
               ...fontStyleOverrides,
@@ -1941,7 +1956,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               ...(templateLayout === 'cover-card' ? { textAlign: 'left' as const, width: '100%', color: '#1a1a2e', fontWeight: '700', fontSize: '24px' } : {}),
             }}>{cardData.fullName}</h1>}
             {/* Title (skip for pro-card, biz templates, and civic templates that show title in header) */}
-            {cardData.title && templateLayout !== 'pro-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && !isFlagCivic && !isCleanCivic && <p style={{
+            {cardData.title && templateLayout !== 'pro-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && !isCleanCivic && <p style={{
               ...styles.title,
               color: templateStyles.textColor,
               opacity: 0.9,
@@ -3277,7 +3292,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               recommendations={cardData.civicRecommendations || []}
               showVoteCounts={cardData.showVoteCounts !== false}
               templateLayout={templateLayout}
-              hideHeader={isNonClassicCivic}
+              hideHeader={isNonClassicCivic && !isFlagCivic}
             />
           )}
           {/* ═══ MESSAGE BUTTON ═══ */}

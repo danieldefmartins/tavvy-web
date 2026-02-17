@@ -286,40 +286,44 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
     </div>
   );
 
-  /* ═══ FLAG TEMPLATE — Brazilian flag background ═══ */
+  /* ═══ FLAG TEMPLATE — Green/yellow gradient civic info block ═══ */
+  /* Flag template: the flag image is the PAGE BACKGROUND (set in [username].tsx),
+     NOT a header. This renders the civic info block with green/yellow gradient. */
   const renderFlagHeader = () => (
     <div style={{
       width: '100%',
-      borderRadius: 0,
-      overflow: 'hidden',
-      marginBottom: 0,
+      background: 'linear-gradient(135deg, #009739 0%, #009739 40%, #FFDF00 100%)',
+      borderRadius: 20,
+      padding: '28px 24px 24px',
+      marginBottom: 16,
       position: 'relative',
-      minHeight: 280,
+      overflow: 'hidden',
     }}>
-      {/* Real Brazilian flag as background image */}
       <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0,
-        backgroundImage: 'url(/images/brazil-flag.jpg)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
+        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+        background: 'radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 50%)',
+        pointerEvents: 'none',
       }} />
-      {/* Dark overlay for text readability */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0,
-        background: 'linear-gradient(180deg, rgba(0,80,30,0.3) 0%, rgba(0,60,20,0.55) 60%, rgba(0,40,15,0.8) 100%)',
-      }} />
-
-      {/* Content: ONLY photo + name + title */}
-      <div style={{ position: 'relative', zIndex: 1, padding: '40px 24px 28px', textAlign: 'center' as const, display: 'flex', flexDirection: 'column' as const, alignItems: 'center' }}>
-        {/* Photo with gold ring */}
-        {profilePhotoUrl && (
-          <div style={{ width: 120, height: 120, borderRadius: '50%', background: 'linear-gradient(145deg, #F5C518, #ffdf00)', padding: 4, boxShadow: '0 6px 24px rgba(0,0,0,0.35)' }}>
-            <img src={profilePhotoUrl} alt={fullName} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.85)' }}>
+            {partyName}
+          </span>
+        </div>
+        <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.9)', marginBottom: 16 }}>
+          {officeRunningFor}{region ? ` • ${region}` : ''}{electionYear ? ` • ${electionYear}` : ''}
+        </div>
+        {ballotNumber && (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', borderRadius: 14, padding: '10px 20px', marginBottom: 12 }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.9)' }}>{t('civic.vote')}</span>
+            <span style={{ fontSize: 36, fontWeight: 900, color: '#FFFFFF', letterSpacing: 4, fontFamily: "'Inter', -apple-system, sans-serif", textShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>{ballotNumber}</span>
           </div>
         )}
-        <div style={{ fontSize: 24, fontWeight: 800, color: '#FFFFFF', textShadow: '0 2px 8px rgba(0,0,0,0.4)', marginTop: 14 }}>{fullName}</div>
-        <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.9)', textShadow: '0 1px 4px rgba(0,0,0,0.3)', marginTop: 4 }}>{officeRunningFor}</div>
+        {campaignSlogan && (
+          <div style={{ fontSize: 16, fontWeight: 700, color: '#FFFFFF', fontStyle: 'italic', lineHeight: 1.4, marginTop: 8, textShadow: '0 1px 4px rgba(0,0,0,0.15)' }}>
+            &ldquo;{campaignSlogan}&rdquo;
+          </div>
+        )}
       </div>
     </div>
   );
@@ -479,6 +483,9 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
 
   /* Select the right header based on templateLayout */
   const isNonClassic = templateLayout !== 'civic-card';
+  const isFlag = templateLayout === 'civic-card-flag';
+  // Flag template uses classic-style rounded cards (not edge-to-edge like other non-classic)
+  const useRoundedCards = !isNonClassic || isFlag;
 
   const renderHeader = () => {
     switch (templateLayout) {
@@ -506,12 +513,12 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
         <div style={{
           width: '100%',
           background: '#FFFFFF',
-          borderRadius: isNonClassic ? 0 : 16,
-          padding: isNonClassic ? '20px 20px' : '20px',
-          marginBottom: isNonClassic ? 0 : 16,
-          border: isNonClassic ? 'none' : '1px solid #f0f0f0',
-          boxShadow: isNonClassic ? 'none' : '0 2px 8px rgba(0,0,0,0.04)',
-          borderTop: isNonClassic ? '1px solid #f0f0f0' : undefined,
+          borderRadius: useRoundedCards ? 16 : 0,
+          padding: useRoundedCards ? '20px' : '20px 20px',
+          marginBottom: useRoundedCards ? 16 : 0,
+          border: useRoundedCards ? '1px solid #f0f0f0' : 'none',
+          boxShadow: useRoundedCards ? '0 2px 8px rgba(0,0,0,0.04)' : 'none',
+          borderTop: !useRoundedCards ? '1px solid #f0f0f0' : undefined,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
             <span style={{ fontSize: 18 }}>🌡️</span>
@@ -555,13 +562,13 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
 
       {/* ═══ TAB NAVIGATION ═══ */}
       <div style={{
-        display: 'flex', gap: 0, marginBottom: isNonClassic ? 0 : 16,
-        borderRadius: isNonClassic ? 0 : 14, overflow: 'hidden',
-        border: isNonClassic ? 'none' : '1px solid #e8e8e8',
-        borderTop: isNonClassic ? '1px solid #e8e8e8' : undefined,
-        borderBottom: isNonClassic ? '1px solid #e8e8e8' : undefined,
+        display: 'flex', gap: 0, marginBottom: useRoundedCards ? 16 : 0,
+        borderRadius: useRoundedCards ? 14 : 0, overflow: 'hidden',
+        border: useRoundedCards ? '1px solid #e8e8e8' : 'none',
+        borderTop: !useRoundedCards ? '1px solid #e8e8e8' : undefined,
+        borderBottom: !useRoundedCards ? '1px solid #e8e8e8' : undefined,
         background: '#f8f8f8',
-        ...(isNonClassic ? { padding: '0 0' } : {}),
+        ...(!useRoundedCards ? { padding: '0 0' } : {}),
       }}>
         {(['proposals', 'questions', 'commitments'] as const).map((tab) => (
           <button
@@ -585,12 +592,12 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
 
       {/* ═══ PROPOSALS TAB ═══ */}
       {activeTab === 'proposals' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: isNonClassic ? 0 : 12, ...(isNonClassic ? { padding: '0' } : {}) }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: useRoundedCards ? 12 : 0, ...(useRoundedCards ? {} : { padding: '0' }) }}>
           {proposals.length === 0 ? (
             <div style={{
               padding: '32px 20px', textAlign: 'center', background: '#FFFFFF',
-              borderRadius: isNonClassic ? 0 : 16, border: isNonClassic ? 'none' : '1px solid #f0f0f0',
-              borderBottom: isNonClassic ? '1px solid #f0f0f0' : undefined,
+              borderRadius: useRoundedCards ? 16 : 0, border: useRoundedCards ? '1px solid #f0f0f0' : 'none',
+              borderBottom: !useRoundedCards ? '1px solid #f0f0f0' : undefined,
             }}>
               <span style={{ fontSize: 32, display: 'block', marginBottom: 8 }}>📋</span>
               <span style={{ fontSize: 14, color: '#999' }}>{t('civic.noProposals')}</span>
@@ -605,11 +612,11 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
               return (
                 <div key={proposal.id} style={{
                   background: '#FFFFFF',
-                  borderRadius: isNonClassic ? 0 : 16,
-                  border: isNonClassic ? 'none' : '1px solid #f0f0f0',
-                  borderBottom: isNonClassic ? '1px solid #f0f0f0' : undefined,
+                  borderRadius: useRoundedCards ? 16 : 0,
+                  border: useRoundedCards ? '1px solid #f0f0f0' : 'none',
+                  borderBottom: !useRoundedCards ? '1px solid #f0f0f0' : undefined,
                   overflow: 'hidden',
-                  boxShadow: isNonClassic ? 'none' : '0 2px 8px rgba(0,0,0,0.04)',
+                  boxShadow: useRoundedCards ? '0 2px 8px rgba(0,0,0,0.04)' : 'none',
                 }}>
                   {/* Proposal header */}
                   <button
@@ -697,13 +704,13 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
 
       {/* ═══ QUESTIONS TAB ═══ */}
       {activeTab === 'questions' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: isNonClassic ? 0 : 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: useRoundedCards ? 12 : 0 }}>
           {/* Ask a question */}
           <div style={{
-            background: '#FFFFFF', borderRadius: isNonClassic ? 0 : 16, padding: '16px 20px',
-            border: isNonClassic ? 'none' : '1px solid #f0f0f0',
-            borderBottom: isNonClassic ? '1px solid #f0f0f0' : undefined,
-            boxShadow: isNonClassic ? 'none' : '0 2px 8px rgba(0,0,0,0.04)',
+            background: '#FFFFFF', borderRadius: useRoundedCards ? 16 : 0, padding: '16px 20px',
+            border: useRoundedCards ? '1px solid #f0f0f0' : 'none',
+            borderBottom: !useRoundedCards ? '1px solid #f0f0f0' : undefined,
+            boxShadow: useRoundedCards ? '0 2px 8px rgba(0,0,0,0.04)' : 'none',
           }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: '#1a1a2e', marginBottom: 10 }}>
               {t('civic.ask')} {fullName.split(' ')[0]}
@@ -748,8 +755,8 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
           {questions.length === 0 ? (
             <div style={{
               padding: '32px 20px', textAlign: 'center', background: '#FFFFFF',
-              borderRadius: isNonClassic ? 0 : 16, border: isNonClassic ? 'none' : '1px solid #f0f0f0',
-              borderBottom: isNonClassic ? '1px solid #f0f0f0' : undefined,
+              borderRadius: useRoundedCards ? 16 : 0, border: useRoundedCards ? '1px solid #f0f0f0' : 'none',
+              borderBottom: !useRoundedCards ? '1px solid #f0f0f0' : undefined,
             }}>
               <span style={{ fontSize: 32, display: 'block', marginBottom: 8 }}>❓</span>
               <span style={{ fontSize: 14, color: '#999' }}>{t('civic.noQuestions')}</span>
@@ -757,10 +764,10 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
           ) : (
             questions.sort((a, b) => b.upvoteCount - a.upvoteCount).map((q) => (
               <div key={q.id} style={{
-                background: '#FFFFFF', borderRadius: isNonClassic ? 0 : 16, padding: '16px 20px',
-                border: isNonClassic ? 'none' : '1px solid #f0f0f0',
-                borderBottom: isNonClassic ? '1px solid #f0f0f0' : undefined,
-                boxShadow: isNonClassic ? 'none' : '0 2px 8px rgba(0,0,0,0.04)',
+                background: '#FFFFFF', borderRadius: useRoundedCards ? 16 : 0, padding: '16px 20px',
+                border: useRoundedCards ? '1px solid #f0f0f0' : 'none',
+                borderBottom: !useRoundedCards ? '1px solid #f0f0f0' : undefined,
+                boxShadow: useRoundedCards ? '0 2px 8px rgba(0,0,0,0.04)' : 'none',
               }}>
                 <div style={{ display: 'flex', gap: 12 }}>
                   {/* Upvote button */}
@@ -808,12 +815,12 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
 
       {/* ═══ COMMITMENTS TAB ═══ */}
       {activeTab === 'commitments' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: isNonClassic ? 0 : 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: useRoundedCards ? 12 : 0 }}>
           {commitments.length === 0 ? (
             <div style={{
               padding: '32px 20px', textAlign: 'center', background: '#FFFFFF',
-              borderRadius: isNonClassic ? 0 : 16, border: isNonClassic ? 'none' : '1px solid #f0f0f0',
-              borderBottom: isNonClassic ? '1px solid #f0f0f0' : undefined,
+              borderRadius: useRoundedCards ? 16 : 0, border: useRoundedCards ? '1px solid #f0f0f0' : 'none',
+              borderBottom: !useRoundedCards ? '1px solid #f0f0f0' : undefined,
             }}>
               <span style={{ fontSize: 32, display: 'block', marginBottom: 8 }}>🎯</span>
               <span style={{ fontSize: 14, color: '#999' }}>{t('civic.noCommitments')}</span>
@@ -822,10 +829,10 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
             <>
               {/* Progress summary */}
               <div style={{
-                background: '#FFFFFF', borderRadius: isNonClassic ? 0 : 16, padding: '16px 20px',
-                border: isNonClassic ? 'none' : '1px solid #f0f0f0',
-                borderBottom: isNonClassic ? '1px solid #f0f0f0' : undefined,
-                boxShadow: isNonClassic ? 'none' : '0 2px 8px rgba(0,0,0,0.04)',
+                background: '#FFFFFF', borderRadius: useRoundedCards ? 16 : 0, padding: '16px 20px',
+                border: useRoundedCards ? '1px solid #f0f0f0' : 'none',
+                borderBottom: !useRoundedCards ? '1px solid #f0f0f0' : undefined,
+                boxShadow: useRoundedCards ? '0 2px 8px rgba(0,0,0,0.04)' : 'none',
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center' }}>
                   <div>
@@ -852,10 +859,10 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
               {/* Commitment list */}
               {commitments.sort((a, b) => a.sortOrder - b.sortOrder).map((c) => (
                 <div key={c.id} style={{
-                  background: '#FFFFFF', borderRadius: isNonClassic ? 0 : 16, padding: '16px 20px',
-                  border: isNonClassic ? 'none' : '1px solid #f0f0f0',
-                  borderBottom: isNonClassic ? '1px solid #f0f0f0' : undefined,
-                  boxShadow: isNonClassic ? 'none' : '0 2px 8px rgba(0,0,0,0.04)',
+                  background: '#FFFFFF', borderRadius: useRoundedCards ? 16 : 0, padding: '16px 20px',
+                  border: useRoundedCards ? '1px solid #f0f0f0' : 'none',
+                  borderBottom: !useRoundedCards ? '1px solid #f0f0f0' : undefined,
+                  boxShadow: useRoundedCards ? '0 2px 8px rgba(0,0,0,0.04)' : 'none',
                   borderLeft: `4px solid ${c.status === 'completed' ? '#22c55e' : c.status === 'in_progress' ? '#f59e0b' : '#e0e0e0'}`,
                 }}>
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
