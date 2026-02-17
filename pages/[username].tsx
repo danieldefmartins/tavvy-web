@@ -1480,7 +1480,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             borderRadius: '20px',
             overflow: 'hidden' as const,
             boxShadow: '0 4px 24px rgba(0,0,0,0.12)',
-            backgroundImage: 'url(/images/brazil-flag-alt.jpg)',
+            backgroundImage: 'url(/images/brazil-flag-vertical.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat',
