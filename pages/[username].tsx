@@ -178,6 +178,19 @@ interface CardData {
   // Menu block (mobile-business template)
   menuItems: { category: string; emoji?: string; items: { name: string; description?: string; price: string; popular?: boolean; image_url?: string }[] }[];
   menuTitle: string;
+  // Live session (mobile-business)
+  liveSession: {
+    isLive: boolean;
+    locationLabel: string;
+    sessionAddress: string;
+    sessionLat: number;
+    sessionLng: number;
+    todayNote: string;
+    startedAt: string;
+    scheduledEndAt: string;
+    specials: { title: string; description: string; urgencyLabel: string }[];
+  } | null;
+  placeId: string | null;
 }
 
 interface PageProps {
@@ -1296,6 +1309,10 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
           }
+          @keyframes livePulse {
+            0%, 100% { box-shadow: 0 0 0 3px rgba(34,197,94,0.25); }
+            50% { box-shadow: 0 0 0 6px rgba(34,197,94,0.15), 0 0 12px rgba(34,197,94,0.3); }
+          }
           .action-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(0,0,0,0.2);
@@ -1944,6 +1961,89 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                       <span>{tag.emoji}</span> {tag.label} <span style={{ color: templateStyles.accentColor, fontWeight: 700 }}>{tag.count}</span>
                     </span>
                   ))}
+                </div>
+              )}
+              {/* ═══ LIVE NOW BANNER ═══ */}
+              {cardData.liveSession && cardData.liveSession.isLive && (() => {
+                const session = cardData.liveSession;
+                const endTime = new Date(session.scheduledEndAt);
+                const now = new Date();
+                const hoursLeft = Math.max(0, Math.round((endTime.getTime() - now.getTime()) / (1000 * 60 * 60) * 10) / 10);
+                const minsLeft = Math.max(0, Math.round((endTime.getTime() - now.getTime()) / (1000 * 60)));
+                const timeLabel = minsLeft > 60 ? `~${Math.floor(minsLeft / 60)}h ${minsLeft % 60}m left` : `~${minsLeft}m left`;
+                const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${session.sessionLat},${session.sessionLng}`;
+                return (
+                  <div style={{ margin: '0', background: `linear-gradient(135deg, ${templateStyles.accentColor}12 0%, ${templateStyles.accentColor}06 100%)`, borderTop: `1px solid ${templateStyles.accentColor}20`, borderBottom: `1px solid ${templateStyles.accentColor}20` }}>
+                    {/* Live indicator bar */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px 8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 0 3px rgba(34,197,94,0.25)', animation: 'livePulse 2s ease-in-out infinite' }} />
+                        <span style={{ fontSize: 14, fontWeight: 700, color: '#22c55e', textTransform: 'uppercase' as const, letterSpacing: 0.5 }}>Open Now</span>
+                      </div>
+                      <span style={{ fontSize: 12, color: '#888', fontWeight: 500 }}>{timeLabel}</span>
+                    </div>
+                    {/* Location */}
+                    <div style={{ padding: '0 20px 8px' }}>
+                      {session.locationLabel && (
+                        <p style={{ fontSize: 15, fontWeight: 600, color: '#1a1a2e', margin: '0 0 2px' }}>
+                          <span style={{ marginRight: 6 }}>📍</span>{session.locationLabel}
+                        </p>
+                      )}
+                      {session.sessionAddress && (
+                        <p style={{ fontSize: 13, color: '#666', margin: 0 }}>{session.sessionAddress}</p>
+                      )}
+                    </div>
+                    {/* Today's note */}
+                    {session.todayNote && (
+                      <div style={{ padding: '0 20px 10px' }}>
+                        <p style={{ fontSize: 13, color: '#444', margin: 0, fontStyle: 'italic', lineHeight: 1.5 }}>"{session.todayNote}"</p>
+                      </div>
+                    )}
+                    {/* Specials */}
+                    {session.specials && session.specials.length > 0 && (
+                      <div style={{ padding: '0 20px 10px' }}>
+                        {session.specials.map((special, si) => (
+                          <div key={si} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', background: `${templateStyles.accentColor}10`, borderRadius: 8, marginBottom: 4 }}>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: special.urgencyLabel === 'ending_soon' ? '#ef4444' : templateStyles.accentColor, padding: '2px 8px', borderRadius: 10, textTransform: 'uppercase' as const }}>
+                              {special.urgencyLabel === 'ending_soon' ? 'Ending Soon' : 'Special'}
+                            </span>
+                            <span style={{ fontSize: 13, fontWeight: 600, color: '#333' }}>{special.title}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {/* Get Directions button */}
+                    <div style={{ padding: '0 20px 14px' }}>
+                      <a
+                        href={directionsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                          width: '100%', padding: '12px 0', borderRadius: 12,
+                          background: templateStyles.accentColor, color: '#ffffff',
+                          fontSize: 15, fontWeight: 700, textDecoration: 'none',
+                          boxShadow: `0 2px 8px ${templateStyles.accentColor}40`,
+                          transition: 'transform 0.15s ease',
+                        }}
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M3 11l19-9-9 19-2-8-8-2z"/>
+                        </svg>
+                        Get Directions
+                      </a>
+                    </div>
+                  </div>
+                );
+              })()}
+              {/* ═══ OFFLINE / NOT LIVE STATE ═══ */}
+              {(!cardData.liveSession || !cardData.liveSession.isLive) && templateLayout === 'mobile-business' && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 20px', background: '#fafafa', borderTop: '1px solid #f0f0f0', borderBottom: '1px solid #f0f0f0' }}>
+                  <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#d1d5db' }} />
+                  <span style={{ fontSize: 13, color: '#999', fontWeight: 500 }}>Currently offline</span>
+                  {cardData.address1 && (
+                    <span style={{ fontSize: 12, color: '#bbb', marginLeft: 'auto' }}>📍 {cardData.city || cardData.address1}</span>
+                  )}
                 </div>
               )}
             </div>
@@ -5342,6 +5442,46 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       }
     }
 
+    // Fetch live session for mobile-business cards (or any card with a place_id)
+    let liveSession: CardData['liveSession'] = null;
+    if (data.place_id) {
+      try {
+        const { data: sessionData } = await serverSupabase
+          .from('live_sessions')
+          .select('id, session_lat, session_lng, location_label, session_address, started_at, scheduled_end_at, status, today_note')
+          .eq('place_id', data.place_id)
+          .eq('status', 'active')
+          .order('started_at', { ascending: false })
+          .limit(1)
+          .single();
+        if (sessionData) {
+          // Fetch specials for this session
+          const { data: specialsData } = await serverSupabase
+            .from('live_session_specials')
+            .select('title, description, urgency_label')
+            .eq('session_id', sessionData.id)
+            .order('created_at', { ascending: false });
+          liveSession = {
+            isLive: true,
+            locationLabel: sessionData.location_label || '',
+            sessionAddress: sessionData.session_address || '',
+            sessionLat: sessionData.session_lat,
+            sessionLng: sessionData.session_lng,
+            todayNote: sessionData.today_note || '',
+            startedAt: sessionData.started_at,
+            scheduledEndAt: sessionData.scheduled_end_at,
+            specials: (specialsData || []).map((s: any) => ({
+              title: s.title,
+              description: s.description || '',
+              urgencyLabel: s.urgency_label || '',
+            })),
+          };
+        }
+      } catch (liveErr) {
+        console.error('[Card SSR] Live session fetch error:', liveErr);
+      }
+    }
+
     const cardData: CardData = {
       id: data.id,
       slug: data.slug,
@@ -5470,6 +5610,9 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       reviewRating: data.review_rating || 0,
       viewCount: data.view_count || 0,
       isPublished: data.is_published !== false,
+      // Live session
+      liveSession,
+      placeId: data.place_id || null,
     };
     
     return {
