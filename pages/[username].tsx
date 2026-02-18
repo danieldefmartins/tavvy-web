@@ -175,6 +175,9 @@ interface CardData {
   viewCount: number;
   // Published
   isPublished: boolean;
+  // Menu block (mobile-business template)
+  menuItems: { category: string; emoji?: string; items: { name: string; description?: string; price: string; popular?: boolean; image_url?: string }[] }[];
+  menuTitle: string;
 }
 
 interface PageProps {
@@ -1017,6 +1020,20 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
       };
     }
 
+    // Mobile Business — Food trucks, pop-ups, mobile vendors
+    if (templateLayout === 'mobile-business') {
+      return {
+        isLuxury: false,
+        isDark: false,
+        hasOrnate: false,
+        accentColor: cs?.accent || '#e85d04',
+        textColor: '#1a1a2e',
+        buttonBg: '#f8f9fa',
+        buttonBorder: '#e8e8e8',
+        photoStyle: 'cover',
+      };
+    }
+
     // Cover Card — Cover photo top, white bottom with contact rows
     if (templateLayout === 'cover-card') {
       return {
@@ -1203,7 +1220,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
 
   // Determine if the footer area has a light background (for logo color switching)
   // pro-card always has a white bottom section, so footer is always on light bg
-  const isLightFooterBg = (templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || isCivicCard) ? true : bgIsActuallyLight;
+  const isLightFooterBg = (templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || templateLayout === 'mobile-business' || isCivicCard) ? true : bgIsActuallyLight;
 
   return (
     <>
@@ -1314,7 +1331,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 ? { background: activeColorScheme?.background || `linear-gradient(165deg, ${cardData.gradientColor1} 0%, ${cardData.gradientColor2} 50%, #0a0f1e 100%)` }
               : templateLayout === 'blogger'
                 ? { background: activeColorScheme?.background || cardData.gradientColor1 }
-                : templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || isCivicCard
+                : templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || templateLayout === 'mobile-business' || isCivicCard
                   ? (isFlagCivic
                     ? { background: '#1a1a2e' }
                     : { background: isNonClassicCivic ? '#ffffff' : isRallyCivic ? '#F5C518' : isCleanCivic ? '#e8edf2' : (activeColorScheme?.background || '#f0f2f5') })
@@ -1452,6 +1469,15 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             borderRadius: '16px',
             overflow: 'hidden' as const,
             boxShadow: '0 8px 40px rgba(0,0,0,0.08)',
+            background: '#ffffff',
+          } : {}),
+          ...(templateLayout === 'mobile-business' ? {
+            maxWidth: '420px',
+            margin: '20px auto',
+            padding: '0',
+            borderRadius: '20px',
+            overflow: 'hidden' as const,
+            boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
             background: '#ffffff',
           } : {}),
           ...(isNonClassicCivic ? {
@@ -1855,6 +1881,73 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             </div>
           )}
 
+          {/* ═══ MOBILE BUSINESS HEADER — Cover photo + business name + owner info ═══ */}
+          {templateLayout === 'mobile-business' && (
+            <div style={{ width: '100%' }}>
+              {/* Full-width cover photo */}
+              <div style={{
+                width: '100%', height: 220, position: 'relative',
+                background: `linear-gradient(135deg, ${activeColorScheme?.primary || '#1a1a1a'} 0%, ${activeColorScheme?.secondary || '#2d2d2d'} 100%)`,
+                overflow: 'hidden',
+              }}>
+                {(cardData.bannerImageUrl || cardData.profilePhotoUrl) && (
+                  <img
+                    src={cardData.bannerImageUrl || cardData.profilePhotoUrl || undefined}
+                    alt={cardData.company || cardData.fullName}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                )}
+                {/* Dark gradient overlay for text readability */}
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '60%', background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)' }} />
+                {/* Business name on cover */}
+                <div style={{ position: 'absolute', bottom: 16, left: 20, right: 20 }}>
+                  <h2 style={{ fontSize: 24, fontWeight: 800, color: '#ffffff', margin: 0, letterSpacing: -0.5, textShadow: '0 1px 3px rgba(0,0,0,0.3)', ...fontStyleOverrides }}>{cardData.company || cardData.fullName}</h2>
+                  {cardData.title && <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)', margin: '4px 0 0', fontWeight: 500 }}>{cardData.title}</p>}
+                </div>
+              </div>
+              {/* Owner info bar */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 20px', background: '#ffffff', borderBottom: '1px solid #f0f0f0' }}>
+                {cardData.profilePhotoUrl && !cardData.bannerImageUrl && (
+                  <div style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', border: `2px solid ${templateStyles.accentColor}`, flexShrink: 0 }}>
+                    <img src={cardData.profilePhotoUrl} alt={cardData.fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                )}
+                {cardData.profilePhotoUrl && cardData.bannerImageUrl && (
+                  <div style={{ width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', border: `2px solid ${templateStyles.accentColor}`, flexShrink: 0 }}>
+                    <img src={cardData.profilePhotoUrl} alt={cardData.fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                )}
+                <div style={{ flex: 1 }}>
+                  <span style={{ fontSize: 15, fontWeight: 600, color: '#1a1a2e' }}>{cardData.fullName}</span>
+                  {cardData.title && <p style={{ fontSize: 12, color: '#888', margin: '2px 0 0' }}>{cardData.title}</p>}
+                </div>
+                {/* Endorsement count badge */}
+                {cardData.endorsementCount > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: `${templateStyles.accentColor}15`, padding: '6px 12px', borderRadius: 20 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill={templateStyles.accentColor}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: templateStyles.accentColor }}>{cardData.endorsementCount}</span>
+                  </div>
+                )}
+              </div>
+              {/* Bio */}
+              {cardData.bio && (
+                <div style={{ padding: '16px 20px 0', background: '#ffffff' }}>
+                  <p style={{ fontSize: 14, color: '#555', lineHeight: 1.6, margin: 0 }}>{cardData.bio}</p>
+                </div>
+              )}
+              {/* Top endorsement tags */}
+              {cardData.topEndorsementTags && cardData.topEndorsementTags.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 6, padding: '12px 20px 16px', background: '#ffffff' }}>
+                  {cardData.topEndorsementTags.slice(0, 6).map((tag, i) => (
+                    <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, fontWeight: 500, color: '#555', background: '#f5f5f5', padding: '4px 10px', borderRadius: 16 }}>
+                      <span>{tag.emoji}</span> {tag.label} <span style={{ color: templateStyles.accentColor, fontWeight: 700 }}>{tag.count}</span>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* ═══ NON-CLASSIC CIVIC HEADER (rendered at top, before profile) ═══ */}
           {/* Flag template: no header — flag is the page background */}
           {isNonClassicCivic && !isFlagCivic && (
@@ -1894,12 +1987,13 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             ...(templateLayout === 'biz-traditional' ? { padding: '0', display: 'none' } : {}),
             ...(templateLayout === 'biz-modern' ? { padding: '0', display: 'none' } : {}),
             ...(templateLayout === 'biz-minimalist' ? { padding: '0', display: 'none' } : {}),
+            ...(templateLayout === 'mobile-business' ? { padding: '0', display: 'none' } : {}),
             ...(isNonClassicCivic ? { padding: '16px 20px 0' } : {}),
             ...(isFlagCivic ? { position: 'relative' as const, zIndex: 2, padding: '60px 24px 0' } : {}),
             ...(templateLayout === 'blogger' ? { paddingTop: 0 } : {}),
           }}>
             {/* Profile Photo - skip for full-width, premium-static (photo IS the hero), pro-card, cover-card, and biz templates (photo in their own sections) */}
-            {templateLayout !== 'full-width' && templateLayout !== 'premium-static' && templateLayout !== 'pro-card' && templateLayout !== 'cover-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && !isCleanCivic && !isRallyCivic && (() => {
+            {templateLayout !== 'full-width' && templateLayout !== 'premium-static' && templateLayout !== 'pro-card' && templateLayout !== 'cover-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && templateLayout !== 'mobile-business' && !isCleanCivic && !isRallyCivic && (() => {
               // Photo size configurations
               const photoSizes = {
                 small: { ring: 100, photo: 92, initials: 28, borderRadius: 50 },
@@ -1981,7 +2075,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
 
             {/* Name & Info */}
             {/* Name (skip for pro-card, biz templates, and non-classic civic — rendered in their own headers) */}
-            {templateLayout !== 'pro-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && (!isNonClassicCivic || isFlagCivic) && <h1 style={{
+            {templateLayout !== 'pro-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && templateLayout !== 'mobile-business' && (!isNonClassicCivic || isFlagCivic) && <h1 style={{
               ...styles.name,
               color: templateStyles.textColor,
               ...fontStyleOverrides,
@@ -1993,7 +2087,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               ...(isFlagCivic ? { color: '#ffffff', textShadow: '0 2px 8px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.3)', fontWeight: '800' } : {}),
             }}>{cardData.fullName}</h1>}
             {/* Title (skip for pro-card, biz templates, and civic templates that show title in header) */}
-            {cardData.title && templateLayout !== 'pro-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && !isCleanCivic && <p style={{
+            {cardData.title && templateLayout !== 'pro-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && templateLayout !== 'mobile-business' && !isCleanCivic && <p style={{
               ...styles.title,
               color: templateStyles.textColor,
               opacity: 0.9,
@@ -2006,7 +2100,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               ...(isFlagCivic ? { color: 'rgba(255,255,255,0.95)', textShadow: '0 1px 6px rgba(0,0,0,0.4)' } : {}),
             }}>{cardData.title}</p>}
             {/* Company (skip for pro-card and biz templates) */}
-            {cardData.company && templateLayout !== 'pro-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && <p style={{
+            {cardData.company && templateLayout !== 'pro-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && templateLayout !== 'mobile-business' && <p style={{
               ...styles.company,
               color: templateStyles.textColor,
               opacity: 0.7,
@@ -2019,7 +2113,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             }}>{cardData.company}</p>}
             
             {/* Bio (skip for biz templates — rendered in their own sections) */}
-            {cardData.bio && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && (
+            {cardData.bio && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && templateLayout !== 'mobile-business' && (
               <p style={{
                 ...styles.bio,
                 color: templateStyles.textColor,
@@ -2500,8 +2594,67 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             </div>
           )}
 
+          {/* Mobile Business: Compact contact section with accent-colored icons */}
+          {templateLayout === 'mobile-business' && cardData.showContactInfo && (
+            <div style={{ width: '100%', padding: '0 20px 16px', background: '#ffffff' }}>
+              {/* Quick action buttons row */}
+              <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                {cardData.phone && (
+                  <a href={`tel:${cardData.phone}`} style={{
+                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    padding: '10px 12px', borderRadius: 10,
+                    background: templateStyles.accentColor, color: '#fff',
+                    textDecoration: 'none', fontSize: 13, fontWeight: 600,
+                  }}>
+                    <PhoneIcon />
+                    Call
+                  </a>
+                )}
+                {cardData.phone && (
+                  <a href={`sms:${cardData.phone}`} style={{
+                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    padding: '10px 12px', borderRadius: 10,
+                    background: '#f0f0f0', color: '#333',
+                    textDecoration: 'none', fontSize: 13, fontWeight: 600,
+                  }}>
+                    <MessageIcon />
+                    Text
+                  </a>
+                )}
+                {cardData.website && (
+                  <a href={cardData.website.startsWith('http') ? cardData.website : `https://${cardData.website}`} target="_blank" rel="noopener noreferrer" style={{
+                    flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                    padding: '10px 12px', borderRadius: 10,
+                    background: '#f0f0f0', color: '#333',
+                    textDecoration: 'none', fontSize: 13, fontWeight: 600,
+                  }}>
+                    <GlobeIcon />
+                    {cardData.websiteLabel || 'Order'}
+                  </a>
+                )}
+              </div>
+              {/* Contact details */}
+              {cardData.email && (
+                <a href={`mailto:${cardData.email}`} style={{ display: 'flex', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: '#333' }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: `${templateStyles.accentColor}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 12, flexShrink: 0 }}>
+                    <EmailIcon />
+                  </div>
+                  <span style={{ fontSize: 13, color: '#555' }}>{cardData.email}</span>
+                </a>
+              )}
+              {fullAddress && (
+                <a href={`https://maps.google.com/?q=${encodeURIComponent(fullAddress)}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: '#333' }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: `${templateStyles.accentColor}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 12, flexShrink: 0 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={templateStyles.accentColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  </div>
+                  <span style={{ fontSize: 13, color: '#555' }}>{fullAddress}</span>
+                </a>
+              )}
+            </div>
+          )}
+
           {/* Standard Action Buttons (for all other templates) */}
-          {templateLayout !== 'business-card' && templateLayout !== 'pro-card' && templateLayout !== 'cover-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && cardData.showContactInfo && <div style={{
+          {templateLayout !== 'business-card' && templateLayout !== 'pro-card' && templateLayout !== 'cover-card' && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && templateLayout !== 'mobile-business' && cardData.showContactInfo && <div style={{
             ...styles.actionButtons,
             ...(templateLayout === 'blogger' ? { padding: '0 0 10px', gap: '10px' } : {}),
             ...(templateLayout === 'pro-realtor' ? { gap: '10px' } : {}),
@@ -2849,8 +3002,117 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             </div>
           )}
 
+          {/* ═══ MENU BLOCK (mobile-business template) ═══ */}
+          {cardData.menuItems && cardData.menuItems.length > 0 && (
+            <div style={{ width: '100%', maxWidth: 360, marginBottom: 24 }}>
+              {/* Menu header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 16 }}>
+                <div style={{ width: 24, height: 1, background: isLightFooterBg ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.3)' }} />
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: isLightFooterBg ? '#333' : '#fff', margin: 0, textTransform: 'uppercase' as const, letterSpacing: 1.5 }}>
+                  {cardData.menuTitle || 'Menu'}
+                </h3>
+                <div style={{ width: 24, height: 1, background: isLightFooterBg ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.3)' }} />
+              </div>
+              {/* Menu categories */}
+              {cardData.menuItems.map((category, catIdx) => (
+                <div key={catIdx} style={{ marginBottom: 20 }}>
+                  {/* Category header */}
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10,
+                    padding: '8px 14px',
+                    background: isLightFooterBg ? `${templateStyles.accentColor}10` : 'rgba(255,255,255,0.08)',
+                    borderRadius: 10,
+                    borderLeft: `3px solid ${templateStyles.accentColor}`,
+                  }}>
+                    {category.emoji && <span style={{ fontSize: 18 }}>{category.emoji}</span>}
+                    <span style={{ fontSize: 14, fontWeight: 700, color: isLightFooterBg ? '#333' : '#fff', letterSpacing: 0.3 }}>{category.category}</span>
+                  </div>
+                  {/* Menu items */}
+                  {category.items.map((item, itemIdx) => (
+                    <div key={itemIdx} style={{
+                      display: 'flex', gap: 12, padding: '12px 0',
+                      borderBottom: itemIdx < category.items.length - 1 ? `1px solid ${isLightFooterBg ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'}` : 'none',
+                    }}>
+                      {/* Item image (if available) */}
+                      {item.image_url && (
+                        <div style={{ width: 56, height: 56, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
+                          <img src={item.image_url} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        </div>
+                      )}
+                      {/* Item details */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+                          <div style={{ flex: 1 }}>
+                            <span style={{ fontSize: 14, fontWeight: 600, color: isLightFooterBg ? '#1a1a2e' : '#fff' }}>
+                              {item.name}
+                              {item.popular && (
+                                <span style={{
+                                  display: 'inline-block', marginLeft: 6, fontSize: 9, fontWeight: 700,
+                                  color: '#fff', background: templateStyles.accentColor,
+                                  padding: '2px 6px', borderRadius: 4, verticalAlign: 'middle',
+                                  textTransform: 'uppercase' as const, letterSpacing: 0.5,
+                                }}>Popular</span>
+                              )}
+                            </span>
+                          </div>
+                          <span style={{ fontSize: 14, fontWeight: 700, color: templateStyles.accentColor, whiteSpace: 'nowrap' as const }}>{item.price}</span>
+                        </div>
+                        {item.description && (
+                          <p style={{ fontSize: 12, color: isLightFooterBg ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.6)', lineHeight: 1.4, margin: '4px 0 0' }}>{item.description}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ═══ RECENT ENDORSEMENTS SECTION (mobile-business) ═══ */}
+          {templateLayout === 'mobile-business' && cardData.recentEndorsements && cardData.recentEndorsements.length > 0 && (
+            <div style={{ width: '100%', maxWidth: 360, marginBottom: 24 }}>
+              {/* Section header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 14 }}>
+                <div style={{ width: 24, height: 1, background: 'rgba(0,0,0,0.15)' }} />
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: '#333', margin: 0, textTransform: 'uppercase' as const, letterSpacing: 1.5 }}>What People Say</h3>
+                <div style={{ width: 24, height: 1, background: 'rgba(0,0,0,0.15)' }} />
+              </div>
+              {/* Endorsement cards */}
+              {cardData.recentEndorsements.slice(0, 3).map((endorsement, idx) => (
+                <div key={idx} style={{
+                  padding: '14px 16px', marginBottom: 8,
+                  background: 'rgba(0,0,0,0.03)', borderRadius: 12,
+                  border: '1px solid rgba(0,0,0,0.06)',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: `${templateStyles.accentColor}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill={templateStyles.accentColor}><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    </div>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: '#333' }}>{endorsement.endorserName}</span>
+                    <span style={{ fontSize: 11, color: '#999', marginLeft: 'auto' }}>{new Date(endorsement.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</span>
+                  </div>
+                  <p style={{ fontSize: 13, color: '#555', lineHeight: 1.5, margin: 0, fontStyle: 'italic' }}>"{endorsement.note}"</p>
+                </div>
+              ))}
+              {/* Endorse CTA */}
+              <button
+                onClick={() => setShowEndorsementPopup(true)}
+                style={{
+                  width: '100%', padding: '10px 16px', marginTop: 4,
+                  background: 'transparent', border: `1.5px solid ${templateStyles.accentColor}`,
+                  borderRadius: 10, cursor: 'pointer',
+                  fontSize: 13, fontWeight: 600, color: templateStyles.accentColor,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill={templateStyles.accentColor}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                Endorse this business
+              </button>
+            </div>
+          )}
+
           {/* Testimonials Block */}
-          {cardData.testimonials && cardData.testimonials.length > 0 && (
+          {cardData.testimonials && cardData.testimonials.length > 0 && templateLayout !== 'mobile-business' && (
             <div style={styles.testimonialsBlock}>
               {cardData.testimonialsTitle && (
                 <h3 style={{...styles.testimonialsTitle, ...(isLightFooterBg ? { color: '#333333' } : {})}}>{cardData.testimonialsTitle}</h3>
@@ -5019,6 +5281,11 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
         (typeof data.testimonials === 'string' ? JSON.parse(data.testimonials) : data.testimonials) 
         : [],
       testimonialsTitle: data.testimonials_title || '',
+      // Menu block (mobile-business)
+      menuItems: data.menu_items ?
+        (typeof data.menu_items === 'string' ? JSON.parse(data.menu_items) : data.menu_items)
+        : [],
+      menuTitle: data.menu_title || '',
       // Form block
       formBlock: data.form_block ? 
         (typeof data.form_block === 'string' ? JSON.parse(data.form_block) : data.form_block) 
