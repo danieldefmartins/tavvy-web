@@ -13,6 +13,7 @@ import AppLayout from '../../../components/AppLayout';
 import { supabase } from '../../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../../constants/Colors';
 import { FiArrowLeft, FiEdit2, FiMapPin, FiCalendar, FiStar, FiBookmark, FiSettings, FiLogOut } from 'react-icons/fi';
+import { FaInstagram, FaTiktok, FaYoutube, FaXTwitter } from 'react-icons/fa6';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
@@ -28,6 +29,10 @@ interface UserProfile {
   created_at?: string;
   review_count?: number;
   saved_count?: number;
+  instagram_url?: string;
+  tiktok_url?: string;
+  youtube_url?: string;
+  twitter_url?: string;
 }
 
 export default function ProfileScreen() {
@@ -206,6 +211,35 @@ export default function ProfileScreen() {
                 <span className="stat-label" style={{ color: theme.textSecondary }}>Saved</span>
               </div>
             </div>
+
+            {/* Social Media Links */}
+            {(profile?.instagram_url || profile?.tiktok_url || profile?.youtube_url || profile?.twitter_url) && (
+              <div className="social-links-section">
+                <p className="social-label" style={{ color: theme.textSecondary }}>Follow me on</p>
+                <div className="social-icons">
+                  {profile?.instagram_url && (
+                    <a href={profile.instagram_url} target="_blank" rel="noopener noreferrer" className="social-icon" style={{ backgroundColor: theme.surface }} title="Instagram">
+                      <FaInstagram size={22} color="#E4405F" />
+                    </a>
+                  )}
+                  {profile?.tiktok_url && (
+                    <a href={profile.tiktok_url} target="_blank" rel="noopener noreferrer" className="social-icon" style={{ backgroundColor: theme.surface }} title="TikTok">
+                      <FaTiktok size={20} color={theme.text} />
+                    </a>
+                  )}
+                  {profile?.youtube_url && (
+                    <a href={profile.youtube_url} target="_blank" rel="noopener noreferrer" className="social-icon" style={{ backgroundColor: theme.surface }} title="YouTube">
+                      <FaYoutube size={22} color="#FF0000" />
+                    </a>
+                  )}
+                  {profile?.twitter_url && (
+                    <a href={profile.twitter_url} target="_blank" rel="noopener noreferrer" className="social-icon" style={{ backgroundColor: theme.surface }} title="X (Twitter)">
+                      <FaXTwitter size={20} color={theme.text} />
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Edit Profile Button */}
             <Link href="/app/profile/edit" locale={locale} className="edit-button" style={{ borderColor: theme.border, color: theme.text }}>
@@ -408,6 +442,40 @@ export default function ProfileScreen() {
           
           .stat-label {
             font-size: 12px;
+          }
+          
+          .social-links-section {
+            margin-bottom: ${spacing.lg}px;
+          }
+          
+          .social-label {
+            font-size: 13px;
+            font-weight: 500;
+            margin: 0 0 ${spacing.sm}px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+          
+          .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: ${spacing.md}px;
+          }
+          
+          .social-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: transform 0.2s, opacity 0.2s;
+          }
+          
+          .social-icon:hover {
+            transform: scale(1.1);
+            opacity: 0.85;
           }
           
           .edit-button {

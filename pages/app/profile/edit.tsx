@@ -9,7 +9,8 @@ import { useThemeContext } from '../../../contexts/ThemeContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import AppLayout from '../../../components/AppLayout';
 import { supabase } from '../../../lib/supabaseClient';
-import { FiArrowLeft, FiCamera, FiCheck, FiUser, FiMapPin, FiFileText } from 'react-icons/fi';
+import { FiArrowLeft, FiCamera, FiCheck, FiUser, FiMapPin, FiFileText, FiLink } from 'react-icons/fi';
+import { FaInstagram, FaTiktok, FaYoutube, FaXTwitter } from 'react-icons/fa6';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
@@ -35,6 +36,10 @@ export default function EditProfileScreen() {
   const [state, setState] = useState('');
   const [country, setCountry] = useState('');
   const [zipCode, setZipCode] = useState('');
+  const [instagramUrl, setInstagramUrl] = useState('');
+  const [tiktokUrl, setTiktokUrl] = useState('');
+  const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [twitterUrl, setTwitterUrl] = useState('');
 
   useEffect(() => {
     if (!user) {
@@ -61,6 +66,10 @@ export default function EditProfileScreen() {
         setState(data.state || '');
         setCountry(data.country || '');
         setZipCode(data.zip_code || '');
+        setInstagramUrl(data.instagram_url || '');
+        setTiktokUrl(data.tiktok_url || '');
+        setYoutubeUrl(data.youtube_url || '');
+        setTwitterUrl(data.twitter_url || '');
       } else {
         // Use auth metadata as fallback
         setDisplayName(user?.user_metadata?.full_name || '');
@@ -120,6 +129,10 @@ export default function EditProfileScreen() {
           state: state.trim(),
           country: country.trim(),
           zip_code: zipCode.trim(),
+          instagram_url: instagramUrl.trim() || null,
+          tiktok_url: tiktokUrl.trim() || null,
+          youtube_url: youtubeUrl.trim() || null,
+          twitter_url: twitterUrl.trim() || null,
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id' });
 
@@ -488,6 +501,64 @@ export default function EditProfileScreen() {
                 placeholder="Zip code"
               />
             </div>
+          </div>
+        </div>
+
+        {/* Social Media */}
+        <div className="form-section">
+          <div className="section-title">
+            <FiLink size={14} /> Social Media
+          </div>
+          <p style={{ fontSize: '13px', color: theme.textSecondary, margin: '0 0 16px' }}>
+            Add your social media so other users can follow you
+          </p>
+
+          <div className="field-group">
+            <div className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FaInstagram size={16} color="#E4405F" /> Instagram
+            </div>
+            <input
+              className="field-input"
+              value={instagramUrl}
+              onChange={(e) => setInstagramUrl(e.target.value)}
+              placeholder="https://instagram.com/yourusername"
+            />
+          </div>
+
+          <div className="field-group">
+            <div className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FaTiktok size={16} /> TikTok
+            </div>
+            <input
+              className="field-input"
+              value={tiktokUrl}
+              onChange={(e) => setTiktokUrl(e.target.value)}
+              placeholder="https://tiktok.com/@yourusername"
+            />
+          </div>
+
+          <div className="field-group">
+            <div className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FaYoutube size={16} color="#FF0000" /> YouTube
+            </div>
+            <input
+              className="field-input"
+              value={youtubeUrl}
+              onChange={(e) => setYoutubeUrl(e.target.value)}
+              placeholder="https://youtube.com/@yourchannel"
+            />
+          </div>
+
+          <div className="field-group">
+            <div className="field-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FaXTwitter size={16} /> X (Twitter)
+            </div>
+            <input
+              className="field-input"
+              value={twitterUrl}
+              onChange={(e) => setTwitterUrl(e.target.value)}
+              placeholder="https://x.com/yourusername"
+            />
           </div>
         </div>
       </div>
