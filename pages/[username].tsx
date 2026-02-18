@@ -303,6 +303,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   const [showFormEmbed, setShowFormEmbed] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [menuItemModal, setMenuItemModal] = useState<{ name: string; description?: string; price: string; image_url: string; popular?: boolean } | null>(null);
   // Endorsement state
   const [showEndorsementPopup, setShowEndorsementPopup] = useState(false);
   const [showEndorseFlow, setShowEndorseFlow] = useState(false);
@@ -3029,14 +3030,32 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   </div>
                   {/* Menu items */}
                   {category.items.map((item, itemIdx) => (
-                    <div key={itemIdx} style={{
-                      display: 'flex', gap: 12, padding: '12px 0',
-                      borderBottom: itemIdx < category.items.length - 1 ? `1px solid ${isLightFooterBg ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'}` : 'none',
-                    }}>
-                      {/* Item image (if available) */}
+                    <div
+                      key={itemIdx}
+                      onClick={() => item.image_url ? setMenuItemModal(item as any) : undefined}
+                      style={{
+                        display: 'flex', gap: 12, padding: '12px 0',
+                        borderBottom: itemIdx < category.items.length - 1 ? `1px solid ${isLightFooterBg ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.08)'}` : 'none',
+                        cursor: item.image_url ? 'pointer' : 'default',
+                        borderRadius: 8,
+                        transition: 'background 0.15s ease',
+                      }}
+                      onMouseEnter={(e) => { if (item.image_url) (e.currentTarget as HTMLDivElement).style.background = isLightFooterBg ? 'rgba(0,0,0,0.03)' : 'rgba(255,255,255,0.05)'; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = 'transparent'; }}
+                    >
+                      {/* Item image thumbnail (if available) */}
                       {item.image_url && (
-                        <div style={{ width: 56, height: 56, borderRadius: 10, overflow: 'hidden', flexShrink: 0 }}>
+                        <div style={{ width: 56, height: 56, borderRadius: 10, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
                           <img src={item.image_url} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          {/* Small camera/expand icon overlay */}
+                          <div style={{
+                            position: 'absolute', bottom: 2, right: 2,
+                            width: 18, height: 18, borderRadius: 4,
+                            background: 'rgba(0,0,0,0.5)', display: 'flex',
+                            alignItems: 'center', justifyContent: 'center',
+                          }}>
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="M21 3h-6l2.29 2.29-4.88 4.88 1.41 1.41 4.88-4.88L21 9V3zM3 21h6l-2.29-2.29 4.88-4.88-1.41-1.41-4.88 4.88L3 15v6z"/></svg>
+                          </div>
                         </div>
                       )}
                       {/* Item details */}
@@ -3059,6 +3078,10 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                         </div>
                         {item.description && (
                           <p style={{ fontSize: 12, color: isLightFooterBg ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.6)', lineHeight: 1.4, margin: '4px 0 0' }}>{item.description}</p>
+                        )}
+                        {/* Tap to view hint for items with photos */}
+                        {item.image_url && (
+                          <p style={{ fontSize: 10, color: templateStyles.accentColor, margin: '4px 0 0', opacity: 0.7 }}>Tap to view photo</p>
                         )}
                       </div>
                     </div>
@@ -3920,6 +3943,95 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             </button>
             </div>{/* end sticky bottom */}
           </div>
+        </div>
+      )}
+
+      {/* Menu Item Photo Modal */}
+      {menuItemModal && (
+        <div
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.92)',
+            zIndex: 10000,
+            display: 'flex', flexDirection: 'column' as const,
+            alignItems: 'center', justifyContent: 'center',
+            padding: '20px 16px',
+          }}
+          onClick={() => setMenuItemModal(null)}
+        >
+          {/* Close button */}
+          <button
+            style={{
+              position: 'absolute', top: 16, right: 16,
+              background: 'rgba(255,255,255,0.1)', border: 'none',
+              color: 'white', fontSize: 24, cursor: 'pointer',
+              zIndex: 10001, width: 44, height: 44,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              borderRadius: '50%',
+            }}
+            onClick={() => setMenuItemModal(null)}
+          >
+            ✕
+          </button>
+
+          {/* Modal content card */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%', maxWidth: 380,
+              background: '#fff', borderRadius: 20,
+              overflow: 'hidden',
+              boxShadow: '0 25px 80px rgba(0,0,0,0.5)',
+            }}
+          >
+            {/* Large food photo */}
+            <div style={{ position: 'relative', width: '100%', paddingTop: '75%', overflow: 'hidden' }}>
+              <img
+                src={menuItemModal.image_url}
+                alt={menuItemModal.name}
+                style={{
+                  position: 'absolute', top: 0, left: 0,
+                  width: '100%', height: '100%',
+                  objectFit: 'cover',
+                }}
+              />
+              {menuItemModal.popular && (
+                <div style={{
+                  position: 'absolute', top: 12, left: 12,
+                  background: templateStyles.accentColor,
+                  color: '#fff', fontSize: 11, fontWeight: 700,
+                  padding: '4px 10px', borderRadius: 6,
+                  textTransform: 'uppercase' as const, letterSpacing: 0.5,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                }}>
+                  ★ Popular
+                </div>
+              )}
+            </div>
+
+            {/* Item info */}
+            <div style={{ padding: '20px 20px 24px' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+                <h3 style={{ fontSize: 20, fontWeight: 700, color: '#1a1a2e', margin: 0, lineHeight: 1.3 }}>
+                  {menuItemModal.name}
+                </h3>
+                <span style={{
+                  fontSize: 20, fontWeight: 800, color: templateStyles.accentColor,
+                  whiteSpace: 'nowrap' as const, flexShrink: 0,
+                }}>
+                  {menuItemModal.price}
+                </span>
+              </div>
+              {menuItemModal.description && (
+                <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, margin: 0 }}>
+                  {menuItemModal.description}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Swipe hint */}
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 12, marginTop: 16 }}>Tap outside to close</p>
         </div>
       )}
 
