@@ -38,7 +38,8 @@ export type TemplateLayout =
   | 'civic-card-bold'      // Bold split layout: large photo left, info right, strong typography
   | 'civic-card-clean'     // Clean modern card: white card on colored background, minimal and elegant
   | 'civic-card-rally'     // Rally/campaign style: diagonal cuts, bold CTA, high energy design
-  | 'politician-generic';  // Generic politician card for all countries: photo, bio, platform, endorsements
+  | 'politician-generic'   // Generic politician card for all countries: photo, bio, platform, endorsements
+  | 'mobile-business';     // Mobile business (food trucks, pop-ups): cover photo, menu section, endorsements, no star reviews
 
 export interface Template {
   id: string;
@@ -698,6 +699,39 @@ export const TEMPLATES: Template[] = [
       fontFamily: 'modern',
       showBorder: false,
       hasBannerImage: false,
+    },
+  },
+  // ============ MOBILE BUSINESS TEMPLATE ============
+  // Food trucks, pop-up shops, mobile vendors — cover photo, menu, endorsements
+  {
+    id: 'mobile-business',
+    name: 'Mobile Business',
+    description: 'Perfect for food trucks, pop-ups, and mobile vendors. Cover photo, full menu with categories and prices, Tavvy endorsements, and location info.',
+    category: 'free',
+    previewImage: 'mobile-business',
+    isPremium: false,
+    features: ['cover-photo', 'menu-section', 'endorsements', 'location', 'social-icons', 'order-online', 'catering-info'],
+    layout: 'mobile-business',
+    colorSchemes: [
+      // Fire & Smoke — warm food truck vibes
+      { id: 'fire-smoke', name: 'Fire & Smoke', primary: '#1a1a1a', secondary: '#2d2d2d', accent: '#e85d04', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#faf5f0', cardBg: '#FFFFFF', border: '#e85d04', isFree: true },
+      // Fresh & Green — healthy/organic
+      { id: 'fresh-green', name: 'Fresh & Green', primary: '#1b4332', secondary: '#2d6a4f', accent: '#52b788', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0faf5', cardBg: '#FFFFFF', border: '#52b788', isFree: true },
+      // Street Gold — bold street food
+      { id: 'street-gold', name: 'Street Gold', primary: '#292524', secondary: '#44403c', accent: '#f59e0b', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#fefce8', cardBg: '#FFFFFF', border: '#f59e0b', isFree: true },
+      // Ocean Blue — seafood/coastal
+      { id: 'ocean-blue', name: 'Ocean Blue', primary: '#0c4a6e', secondary: '#075985', accent: '#38bdf8', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f9ff', cardBg: '#FFFFFF', border: '#38bdf8' },
+      // Berry & Cream — desserts/sweet
+      { id: 'berry-cream', name: 'Berry & Cream', primary: '#831843', secondary: '#9d174d', accent: '#f472b6', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#fdf2f8', cardBg: '#FFFFFF', border: '#f472b6' },
+    ],
+    layoutConfig: {
+      photoPosition: 'cover',
+      photoSize: 'hero',
+      photoStyle: 'cover',
+      buttonStyle: 'rounded',
+      fontFamily: 'modern',
+      showBorder: false,
+      hasBannerImage: true,
     },
   },
 ];
