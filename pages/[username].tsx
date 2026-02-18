@@ -2813,7 +2813,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           {cardData.galleryImages && cardData.galleryImages.length > 0 && (
             <div style={styles.galleryBlock}>
               {cardData.galleryTitle && (
-                <h3 style={styles.galleryTitle}>{cardData.galleryTitle}</h3>
+                <h3 style={{...styles.galleryTitle, ...(isLightFooterBg ? { color: '#333333' } : {})}}>{cardData.galleryTitle}</h3>
               )}
               <div style={styles.galleryGrid}>
                 {cardData.galleryImages.slice(0, 9).map((image, index) => (
@@ -2838,7 +2838,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   </div>
                 ))}
               </div>
-              <div style={styles.galleryCountBadge}>
+              <div style={{...styles.galleryCountBadge, ...(isLightFooterBg ? { background: 'rgba(0,0,0,0.06)', color: '#555555' } : {})}}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                   <circle cx="8.5" cy="8.5" r="1.5"/>
@@ -2853,16 +2853,16 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           {cardData.testimonials && cardData.testimonials.length > 0 && (
             <div style={styles.testimonialsBlock}>
               {cardData.testimonialsTitle && (
-                <h3 style={styles.testimonialsTitle}>{cardData.testimonialsTitle}</h3>
+                <h3 style={{...styles.testimonialsTitle, ...(isLightFooterBg ? { color: '#333333' } : {})}}>{cardData.testimonialsTitle}</h3>
               )}
               <div style={styles.testimonialsQuoteIcon}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill={isLightFooterBg ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.3)'}>
                   <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
                 </svg>
               </div>
               <div style={styles.testimonialsCarousel}>
                 {cardData.testimonials.map((testimonial, index) => (
-                  <div key={testimonial.id || index} style={styles.testimonialCard}>
+                  <div key={testimonial.id || index} style={{...styles.testimonialCard, ...(isLightFooterBg ? { background: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)' } : {})}}>
                     <div style={styles.testimonialHeader}>
                       {testimonial.customerPhoto ? (
                         <img 
@@ -2871,36 +2871,36 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                           style={styles.testimonialPhoto}
                         />
                       ) : (
-                        <div style={styles.testimonialPhotoPlaceholder}>
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="rgba(255,255,255,0.6)">
+                        <div style={{...styles.testimonialPhotoPlaceholder, ...(isLightFooterBg ? { background: 'rgba(0,0,0,0.08)', border: '2px solid rgba(0,0,0,0.1)' } : {})}}>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill={isLightFooterBg ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.6)'}>
                             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                           </svg>
                         </div>
                       )}
                       <div style={styles.testimonialInfo}>
-                        <span style={styles.testimonialName}>{testimonial.customerName}</span>
+                        <span style={{...styles.testimonialName, ...(isLightFooterBg ? { color: '#333333' } : {})}}>{testimonial.customerName}</span>
                         <div style={styles.testimonialStars}>
                           {[1, 2, 3, 4, 5].map((star) => (
-                            <svg key={star} width="14" height="14" viewBox="0 0 24 24" fill={star <= testimonial.rating ? '#FFD700' : 'rgba(255,255,255,0.3)'}>
+                            <svg key={star} width="14" height="14" viewBox="0 0 24 24" fill={star <= testimonial.rating ? '#FFD700' : (isLightFooterBg ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.3)')}>
                               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                             </svg>
                           ))}
                         </div>
                       </div>
                       {testimonial.source && (
-                        <div style={styles.testimonialSourceBadge}>
-                          <span style={styles.testimonialSourceText}>{testimonial.source}</span>
+                        <div style={{...styles.testimonialSourceBadge, ...(isLightFooterBg ? { background: 'rgba(0,0,0,0.08)' } : {})}}>
+                          <span style={{...styles.testimonialSourceText, ...(isLightFooterBg ? { color: '#555555' } : {})}}>{testimonial.source}</span>
                         </div>
                       )}
                     </div>
-                    <p style={styles.testimonialText}>"{testimonial.reviewText}"</p>
+                    <p style={{...styles.testimonialText, ...(isLightFooterBg ? { color: 'rgba(0,0,0,0.75)' } : {})}}>"{testimonial.reviewText}"</p>
                     {testimonial.date && (
-                      <span style={styles.testimonialDate}>{testimonial.date}</span>
+                      <span style={{...styles.testimonialDate, ...(isLightFooterBg ? { color: 'rgba(0,0,0,0.4)' } : {})}}>{testimonial.date}</span>
                     )}
                   </div>
                 ))}
               </div>
-              <div style={styles.testimonialsCountBadge}>
+              <div style={{...styles.testimonialsCountBadge, ...(isLightFooterBg ? { background: 'rgba(0,0,0,0.06)', color: '#555555' } : {})}}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                 </svg>
