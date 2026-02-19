@@ -31,22 +31,79 @@ export interface PlaceReview {
 // PLACE RESOLUTION
 // ============================================
 
-async function getOrCreatePlace(googlePlaceId: string, placeName: string): Promise<string | null> {
+async function resolvePlaceId(placeIdentifier: string, placeName: string): Promise<string | null> {
   try {
-    const { data: existingPlace } = await supabase
-      .from('places')
-      .select('id')
-      .eq('google_place_id', googlePlaceId)
-      .maybeSingle();
-
-    if (existingPlace) {
-      return existingPlace.id;
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(placeIdentifier);
+    
+    // If it's already a UUID, verify it exists in the places table
+    if (isUUID) {
+      const { data } = await supabase
+        .from('places')
+        .select('id')
+        .eq('id', placeIdentifier)
+        .maybeSingle();
+      if (data) return data.id;
     }
 
+    // 1. Check canonical places table by source_id (handles FSQ IDs stored there)
+    const { data: bySourceId } = await supabase
+      .from('places')
+      .select('id')
+      .eq('source_id', placeIdentifier)
+      .maybeSingle();
+    if (bySourceId) return bySourceId.id;
+
+    // 2. Check by google_place_id (handles Google Place IDs)
+    const { data: byGoogleId } = await supabase
+      .from('places')
+      .select('id')
+      .eq('google_place_id', placeIdentifier)
+      .maybeSingle();
+    if (byGoogleId) return byGoogleId.id;
+
+    // 3. Check fsq_places_raw table and auto-promote to canonical places
+    const { data: fsqPlace } = await supabase
+      .from('fsq_places_raw')
+      .select('fsq_place_id, name, latitude, longitude, address, locality, region, country, postcode, tel, website, email')
+      .eq('fsq_place_id', placeIdentifier)
+      .maybeSingle();
+
+    if (fsqPlace) {
+      // Promote FSQ place to canonical places table
+      console.log('Promoting FSQ place to canonical:', placeIdentifier);
+      const { data: newPlace, error: createError } = await supabase
+        .from('places')
+        .insert({
+          name: fsqPlace.name || placeName,
+          source_type: 'fsq',
+          source_id: fsqPlace.fsq_place_id,
+          latitude: fsqPlace.latitude,
+          longitude: fsqPlace.longitude,
+          address: fsqPlace.address,
+          city: fsqPlace.locality,
+          region: fsqPlace.region,
+          country: fsqPlace.country,
+          postcode: fsqPlace.postcode,
+          phone: fsqPlace.tel,
+          website: fsqPlace.website,
+          email: fsqPlace.email,
+        })
+        .select('id')
+        .single();
+
+      if (createError) {
+        console.error('Error promoting FSQ place:', createError);
+        return null;
+      }
+      return newPlace.id;
+    }
+
+    // 4. Last resort: create a minimal place entry
+    console.log('Place not found anywhere, creating new place for:', placeIdentifier);
     const { data: newPlace, error: createError } = await supabase
       .from('places')
       .insert({
-        google_place_id: googlePlaceId,
+        google_place_id: placeIdentifier,
         name: placeName,
       })
       .select('id')
@@ -59,7 +116,7 @@ async function getOrCreatePlace(googlePlaceId: string, placeName: string): Promi
 
     return newPlace.id;
   } catch (error) {
-    console.error('Error in getOrCreatePlace:', error);
+    console.error('Error in resolvePlaceId:', error);
     return null;
   }
 }
@@ -84,14 +141,22 @@ export async function submitReview(
 
     const userId = user.id;
 
-    // Resolve place ID if needed
+    // RESOLVE PLACE ID — handles UUIDs, FSQ IDs, and Google Place IDs
+    const isValidUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(placeId);
     let targetPlaceId = placeId;
-    if (placeId.length !== 36) {
-      const resolvedId = await getOrCreatePlace(placeId, placeName);
+    
+    if (!isValidUUID) {
+      const resolvedId = await resolvePlaceId(placeId, placeName);
       if (!resolvedId) {
         return { success: false, error: 'Failed to resolve Place UUID' };
       }
       targetPlaceId = resolvedId;
+    } else {
+      // Even if it looks like a UUID, verify it exists
+      const resolvedId = await resolvePlaceId(placeId, placeName);
+      if (resolvedId) {
+        targetPlaceId = resolvedId;
+      }
     }
 
     // Step 1: Create the review
