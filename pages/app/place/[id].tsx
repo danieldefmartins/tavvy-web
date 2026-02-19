@@ -12,7 +12,7 @@
  * - Stories ring (if available)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
@@ -24,6 +24,7 @@ import {
   IoHeartOutline, IoHeart, IoCheckmarkCircle
 } from 'react-icons/io5';
 import { useTranslation } from 'next-i18next';
+import { useAuth } from '../../../contexts/AuthContext';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // Design System Colors
@@ -98,6 +99,10 @@ export default function PlaceDetailScreen() {
   const [isFavorite, setIsFavorite] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
   const [showJustAddedBanner, setShowJustAddedBanner] = useState(false);
+  const [placePhotos, setPlacePhotos] = useState<{id: string; url: string; caption?: string; uploaded_by?: string; created_at: string}[]>([]);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (id) {
@@ -233,6 +238,99 @@ export default function PlaceDetailScreen() {
       } catch (error) {
         console.log('Error sharing:', error);
       }
+    }
+  };
+
+  // Load photos when place is loaded
+  useEffect(() => {
+    if (place?.id) {
+      loadPlacePhotos(place.id);
+    }
+  }, [place?.id]);
+
+  const resolvePlaceUUID = async (placeId: string): Promise<string | null> => {
+    if (!placeId) return null;
+    const cleanId = placeId.startsWith('fsq:') ? placeId.slice(4) : placeId;
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanId);
+    if (isUUID) {
+      const { data } = await supabase.from('places').select('id').eq('id', cleanId).maybeSingle();
+      if (data) return data.id;
+    }
+    const { data: bySource } = await supabase.from('places').select('id').eq('source_id', cleanId).maybeSingle();
+    if (bySource) return bySource.id;
+    const { data: byGoogle } = await supabase.from('places').select('id').eq('google_place_id', cleanId).maybeSingle();
+    if (byGoogle) return byGoogle.id;
+    const { data: fsqPlace } = await supabase.from('fsq_places_raw').select('*').eq('fsq_place_id', cleanId).maybeSingle();
+    if (fsqPlace) {
+      const { data: newPlace } = await supabase.from('places').insert({
+        name: fsqPlace.name, source_type: 'fsq', source_id: fsqPlace.fsq_place_id,
+        latitude: fsqPlace.latitude, longitude: fsqPlace.longitude,
+        city: fsqPlace.locality, region: fsqPlace.region, country: fsqPlace.country,
+        postcode: fsqPlace.postcode, phone: fsqPlace.tel, website: fsqPlace.website,
+        email: fsqPlace.email, status: 'active',
+      }).select('id').single();
+      if (newPlace) return newPlace.id;
+    }
+    return null;
+  };
+
+  const loadPlacePhotos = async (placeId: string) => {
+    try {
+      const resolvedId = await resolvePlaceUUID(placeId);
+      if (!resolvedId) return;
+      const { data } = await supabase
+        .from('place_photos')
+        .select('id, url, caption, uploaded_by, created_at')
+        .eq('place_id', resolvedId)
+        .eq('status', 'live')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (data) setPlacePhotos(data);
+    } catch (err) {
+      console.error('Error loading photos:', err);
+    }
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !place) return;
+    if (!user?.id) {
+      alert('Please sign in to add photos.');
+      return;
+    }
+    setIsUploadingPhoto(true);
+    try {
+      const resolvedId = await resolvePlaceUUID(place.id);
+      if (!resolvedId) {
+        alert('Could not resolve place. Please try again.');
+        setIsUploadingPhoto(false);
+        return;
+      }
+      const timestamp = Date.now();
+      const ext = file.name.split('.').pop() || 'jpg';
+      const fileName = `${resolvedId}/${user.id}_${timestamp}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from('place-photos')
+        .upload(fileName, file, { contentType: file.type, upsert: false });
+      if (uploadError) {
+        alert('Upload failed: ' + uploadError.message);
+        setIsUploadingPhoto(false);
+        return;
+      }
+      const { data: urlData } = supabase.storage.from('place-photos').getPublicUrl(fileName);
+      const { error: insertError } = await supabase.from('place_photos').insert({
+        place_id: resolvedId, uploaded_by: user.id, user_id: user.id,
+        url: urlData.publicUrl, caption: null, is_owner_photo: false, status: 'live',
+      });
+      if (insertError) console.error('DB insert error:', insertError);
+      // Reload photos
+      await loadPlacePhotos(place.id);
+      setActiveTab('photos');
+    } catch (err: any) {
+      alert('Error uploading photo: ' + (err.message || 'Unknown error'));
+    } finally {
+      setIsUploadingPhoto(false);
+      if (photoInputRef.current) photoInputRef.current.value = '';
     }
   };
 
@@ -618,7 +716,7 @@ export default function PlaceDetailScreen() {
                     ⭐ Write a Review
                   </button>
                   <button
-                    onClick={() => { setActiveTab('photos'); setShowJustAddedBanner(false); }}
+                    onClick={() => { if (photoInputRef.current) photoInputRef.current.click(); }}
                     style={{
                       flex: 1, padding: '12px', borderRadius: '10px',
                       backgroundColor: '#FFFFFF', border: 'none',
@@ -629,6 +727,13 @@ export default function PlaceDetailScreen() {
                   >
                     📸 Add Photos
                   </button>
+                  <input
+                    type="file"
+                    ref={photoInputRef}
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={handlePhotoUpload}
+                  />
                 </div>
               </div>
             )}
@@ -701,18 +806,67 @@ export default function PlaceDetailScreen() {
               )}
 
               {activeTab === 'photos' && (
-                <div style={{
-                  textAlign: 'center',
-                  padding: '40px 20px',
-                  color: colors.textSecondary
-                }}>
-                  <div style={{ fontSize: '48px', marginBottom: '16px' }}>📸</div>
-                  <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>
-                    No photos yet
-                  </div>
-                  <div style={{ fontSize: '14px' }}>
-                    Add photos to help others
-                  </div>
+                <div>
+                  {placePhotos.length > 0 ? (
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+                      gap: '8px',
+                      marginBottom: '16px',
+                    }}>
+                      {placePhotos.map((photo) => (
+                        <div key={photo.id} style={{
+                          borderRadius: '8px',
+                          overflow: 'hidden',
+                          aspectRatio: '1',
+                          backgroundColor: isDark ? '#1A1A1A' : '#F3F4F6',
+                        }}>
+                          <img
+                            src={photo.url}
+                            alt={photo.caption || 'Place photo'}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{
+                      textAlign: 'center',
+                      padding: '40px 20px',
+                      color: colors.textSecondary,
+                    }}>
+                      <div style={{ fontSize: '48px', marginBottom: '16px' }}>📸</div>
+                      <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>
+                        No photos yet
+                      </div>
+                      <div style={{ fontSize: '14px' }}>
+                        Be the first to add a photo!
+                      </div>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => { if (photoInputRef.current) photoInputRef.current.click(); }}
+                    disabled={isUploadingPhoto}
+                    style={{
+                      width: '100%',
+                      padding: '14px',
+                      borderRadius: '10px',
+                      backgroundColor: COLORS.accentGreen,
+                      border: 'none',
+                      color: '#FFFFFF',
+                      fontSize: '15px',
+                      fontWeight: '600',
+                      cursor: isUploadingPhoto ? 'wait' : 'pointer',
+                      opacity: isUploadingPhoto ? 0.7 : 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      marginTop: '8px',
+                    }}
+                  >
+                    {isUploadingPhoto ? '⏳ Uploading...' : '📷 Add a Photo'}
+                  </button>
                 </div>
               )}
 

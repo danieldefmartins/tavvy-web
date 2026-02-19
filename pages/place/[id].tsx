@@ -9,11 +9,12 @@
  * 4. Tab content with white cards on light gray background
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import AppLayout from '../../components/AppLayout';
 import { fetchPlaceById } from '../../lib/placeService';
+import { supabase } from '../../lib/supabaseClient';
 import { Place } from '../../types';
 import { fetchPlaceSignals, SignalAggregate, SIGNAL_LABELS } from '../../lib/signalService';
 import { useTranslation } from 'next-i18next';
@@ -98,6 +99,9 @@ export default function PlaceDetailsScreen() {
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('reviews');
+  const [placePhotosDB, setPlacePhotosDB] = useState<{id: string; url: string; caption?: string}[]>([]);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   
   // Living Score signals (matches iOS)
   const [livingSignals, setLivingSignals] = useState<{
@@ -181,6 +185,87 @@ export default function PlaceDetailsScreen() {
     }
   };
 
+  // Load photos from DB when place loads
+  useEffect(() => {
+    if (place?.id) {
+      loadPhotosFromDB(place.id);
+    }
+  }, [place?.id]);
+
+  const resolvePlaceUUID = async (placeId: string): Promise<string | null> => {
+    if (!placeId) return null;
+    const cleanId = placeId.startsWith('fsq:') ? placeId.slice(4) : placeId;
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanId);
+    if (isUUID) {
+      const { data } = await supabase.from('places').select('id').eq('id', cleanId).maybeSingle();
+      if (data) return data.id;
+    }
+    const { data: bySource } = await supabase.from('places').select('id').eq('source_id', cleanId).maybeSingle();
+    if (bySource) return bySource.id;
+    const { data: byGoogle } = await supabase.from('places').select('id').eq('google_place_id', cleanId).maybeSingle();
+    if (byGoogle) return byGoogle.id;
+    return null;
+  };
+
+  const loadPhotosFromDB = async (placeId: string) => {
+    try {
+      const resolvedId = await resolvePlaceUUID(placeId);
+      if (!resolvedId) return;
+      const { data } = await supabase
+        .from('place_photos')
+        .select('id, url, caption')
+        .eq('place_id', resolvedId)
+        .eq('status', 'live')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (data) setPlacePhotosDB(data);
+    } catch (err) {
+      console.error('Error loading photos:', err);
+    }
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !place) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user?.id) {
+      alert('Please sign in to add photos.');
+      return;
+    }
+    setIsUploadingPhoto(true);
+    try {
+      const resolvedId = await resolvePlaceUUID(place.id);
+      if (!resolvedId) {
+        alert('Could not resolve place. Please try again.');
+        setIsUploadingPhoto(false);
+        return;
+      }
+      const timestamp = Date.now();
+      const ext = file.name.split('.').pop() || 'jpg';
+      const fileName = `${resolvedId}/${user.id}_${timestamp}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from('place-photos')
+        .upload(fileName, file, { contentType: file.type, upsert: false });
+      if (uploadError) {
+        alert('Upload failed: ' + uploadError.message);
+        setIsUploadingPhoto(false);
+        return;
+      }
+      const { data: urlData } = supabase.storage.from('place-photos').getPublicUrl(fileName);
+      await supabase.from('place_photos').insert({
+        place_id: resolvedId, uploaded_by: user.id, user_id: user.id,
+        url: urlData.publicUrl, caption: null, is_owner_photo: false, status: 'live',
+      });
+      await loadPhotosFromDB(place.id);
+      setActiveTab('photos');
+    } catch (err: any) {
+      alert('Error uploading photo: ' + (err.message || 'Unknown error'));
+    } finally {
+      setIsUploadingPhoto(false);
+      if (photoInputRef.current) photoInputRef.current.value = '';
+    }
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -211,6 +296,7 @@ export default function PlaceDetailsScreen() {
 
   const coverImage = place.cover_image_url || getCategoryFallbackImage(place.category || '');
   const photos = place.photos || [];
+  const allPhotos = [...placePhotosDB.map(p => p.url), ...photos];
   const hasLivingSignals = livingSignals.best_for.length > 0 || livingSignals.vibe.length > 0 || livingSignals.heads_up.length > 0;
   const fullAddress = [place.address_line1, place.city, place.state_region].filter(Boolean).join(', ');
   const isOpen = place.current_status === 'open_accessible' || place.current_status === 'active';
@@ -282,7 +368,7 @@ export default function PlaceDetailsScreen() {
           <div className="pd-quick-divider" />
           <div className="pd-quick-item" onClick={() => setActiveTab('photos')}>
             <span className="pd-quick-icon">📷</span>
-            <span className="pd-quick-value">{photos.length}</span>
+            <span className="pd-quick-value">{allPhotos.length}</span>
             <span className="pd-quick-sub">Photos</span>
           </div>
           <div className="pd-quick-divider" />
@@ -519,9 +605,9 @@ export default function PlaceDetailsScreen() {
               <div className="pd-card">
                 <h2 className="pd-card-title">Photos</h2>
 
-                {photos.length > 0 ? (
+                {allPhotos.length > 0 ? (
                   <div className="pd-photo-grid">
-                    {photos.map((photo, idx) => (
+                    {allPhotos.map((photo, idx) => (
                       <div key={idx} className="pd-photo-item">
                         <img src={photo} alt={`${place.name} photo ${idx + 1}`} />
                       </div>
@@ -531,8 +617,19 @@ export default function PlaceDetailsScreen() {
                   <p className="pd-no-photos">No photos yet</p>
                 )}
 
-                <button className="pd-add-photo-btn">
-                  📷 Add a Photo
+                <input
+                  type="file"
+                  ref={photoInputRef}
+                  accept="image/*"
+                  style={{ display: 'none' }}
+                  onChange={handlePhotoUpload}
+                />
+                <button
+                  className="pd-add-photo-btn"
+                  onClick={() => { if (photoInputRef.current) photoInputRef.current.click(); }}
+                  disabled={isUploadingPhoto}
+                >
+                  {isUploadingPhoto ? '⏳ Uploading...' : '📷 Add a Photo'}
                 </button>
               </div>
             </div>
