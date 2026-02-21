@@ -1,25 +1,25 @@
 /**
- * Search Screen (Typesense-powered)
+ * Search Screen (Typesense-powered via canonical API)
  * Lightning-fast search for places with filters
+ *
+ * Now uses /api/search/places — no direct Typesense or Supabase ILIKE calls.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
-import { supabase } from '../../lib/supabaseClient';
-import { searchPlaces as searchPlacesTypesense, getAutocompleteSuggestions } from '../../lib/typesenseService';
+import { searchPlaces, searchAutocomplete, SearchHit } from '../../lib/searchClient';
 import { spacing, borderRadius } from '../../constants/Colors';
 import PlaceCard from '../../components/PlaceCard';
-import { FiSearch, FiX, FiFilter, FiMapPin, FiClock } from 'react-icons/fi';
-import type { PlaceCard as PlaceCardType } from '../../lib/placeService';
+import { FiSearch, FiX, FiClock } from 'react-icons/fi';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 const POPULAR_SEARCHES = [
-  'Restaurants', 'Coffee', 'Bars', 'Pizza', 'Sushi', 
+  'Restaurants', 'Coffee', 'Bars', 'Pizza', 'Sushi',
   'Mexican', 'Italian', 'Brunch', 'Breakfast', 'Lunch'
 ];
 
@@ -31,13 +31,25 @@ export default function SearchScreen() {
   const { theme } = useThemeContext();
 
   const [searchQuery, setSearchQuery] = useState((q as string) || '');
-  const [results, setResults] = useState<PlaceCardType[]>([]);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [results, setResults] = useState<SearchHit[]>([]);
+  const [suggestions, setSuggestions] = useState<SearchHit[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [searchTime, setSearchTime] = useState<number>(0);
   const [totalFound, setTotalFound] = useState<number>(0);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+
+  const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => {}
+      );
+    }
+  }, []);
 
   useEffect(() => {
     if (q || category) {
@@ -46,66 +58,74 @@ export default function SearchScreen() {
     }
   }, [q, category]);
 
-  // Autocomplete suggestions
+  // Autocomplete suggestions via canonical API
   useEffect(() => {
-    const fetchSuggestions = async () => {
-      if (searchQuery.length >= 2 && !hasSearched) {
-        try {
-          const sugg = await getAutocompleteSuggestions(searchQuery, 8);
-          setSuggestions(sugg);
-          setShowSuggestions(true);
-        } catch (error) {
-          console.error('Error fetching suggestions:', error);
-        }
-      } else {
-        setSuggestions([]);
-        setShowSuggestions(false);
-      }
-    };
+    if (searchQuery.length < 2 || hasSearched) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
 
-    const debounce = setTimeout(fetchSuggestions, 300);
-    return () => clearTimeout(debounce);
-  }, [searchQuery, hasSearched]);
+    const controller = new AbortController();
+    const debounce = setTimeout(async () => {
+      try {
+        const hits = await searchAutocomplete(searchQuery, {
+          lat: userLocation?.lat,
+          lng: userLocation?.lng,
+          limit: 8,
+          signal: controller.signal,
+        });
+        setSuggestions(hits);
+        setShowSuggestions(hits.length > 0);
+      } catch (error: any) {
+        if (error.name !== 'AbortError') {
+          console.error('Autocomplete error:', error);
+        }
+      }
+    }, 300);
+
+    return () => {
+      clearTimeout(debounce);
+      controller.abort();
+    };
+  }, [searchQuery, hasSearched, userLocation]);
 
   const performSearch = async (query: string) => {
     if (!query.trim()) return;
-    
+
+    if (abortRef.current) abortRef.current.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     setHasSearched(true);
     setShowSuggestions(false);
 
     try {
-      // Try Typesense first (fast!)
-      const result = await searchPlacesTypesense({
-        query,
+      const response = await searchPlaces({
+        q: query,
+        lat: userLocation?.lat,
+        lng: userLocation?.lng,
+        radius: userLocation ? 50 : undefined,
         limit: 50,
+        signal: controller.signal,
       });
 
-      setResults(result.places as unknown as PlaceCardType[]);
-      setSearchTime(result.searchTimeMs);
-      setTotalFound(result.totalFound);
-      
-      console.log(`[Search] Typesense returned ${result.totalFound} results in ${result.searchTimeMs}ms`);
-    } catch (error) {
-      console.error('Typesense search failed, falling back to Supabase:', error);
-      
-      // Fallback to Supabase
-      try {
-        const { data, error: supabaseError } = await supabase
-          .from('places')
-          .select('*')
-          .or(`name.ilike.%${query}%,category.ilike.%${query}%,city.ilike.%${query}%`)
-          .limit(50);
-
-        if (!supabaseError) {
-          setResults(data || []);
-          setTotalFound(data?.length || 0);
-        }
-      } catch (fallbackError) {
-        console.error('Fallback search also failed:', fallbackError);
+      if (!controller.signal.aborted) {
+        setResults(response.hits);
+        setSearchTime(response.searchTimeMs);
+        setTotalFound(response.found);
+      }
+    } catch (error: any) {
+      if (error.name !== 'AbortError') {
+        console.error('Search error:', error);
+        setResults([]);
+        setTotalFound(0);
       }
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) {
+        setLoading(false);
+      }
     }
   };
 
@@ -122,6 +142,7 @@ export default function SearchScreen() {
     setResults([]);
     setHasSearched(false);
     setShowSuggestions(false);
+    if (abortRef.current) abortRef.current.abort();
     router.push('/app/search', undefined, { shallow: true, locale });
   };
 
@@ -131,12 +152,18 @@ export default function SearchScreen() {
     performSearch(term);
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
-    setSearchQuery(suggestion);
+  const handleSuggestionClick = (hit: SearchHit) => {
+    setSearchQuery(hit.name);
     setShowSuggestions(false);
-    router.push(`/app/search?q=${encodeURIComponent(suggestion)}`, undefined, { shallow: true });
-    performSearch(suggestion);
+    router.push(`/app/search?q=${encodeURIComponent(hit.name)}`, undefined, { shallow: true });
+    performSearch(hit.name);
   };
+
+  useEffect(() => {
+    return () => {
+      if (abortRef.current) abortRef.current.abort();
+    };
+  }, []);
 
   return (
     <>
@@ -147,17 +174,18 @@ export default function SearchScreen() {
 
       <AppLayout>
         <div className="search-screen" style={{ backgroundColor: theme.background }}>
-          {/* Search Header */}
           <header className="search-header">
             <form onSubmit={handleSearch} className="search-form">
-              <div className="search-input-container" style={{ backgroundColor: theme.surface, position: 'relative' }}>
+              <div className="search-input-container" style={{ backgroundColor: theme.surface }}>
                 <FiSearch size={20} color={theme.textSecondary} />
                 <input
                   type="text"
                   placeholder="Search places, categories, cities..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    if (hasSearched) setHasSearched(false);
+                  }}
                   style={{ color: theme.text }}
                   autoFocus
                 />
@@ -166,49 +194,38 @@ export default function SearchScreen() {
                     <FiX size={18} color={theme.textSecondary} />
                   </button>
                 )}
-                
-                {/* Autocomplete Suggestions */}
-                {showSuggestions && suggestions.length > 0 && (
-                  <div className="suggestions-dropdown" style={{ 
-                    backgroundColor: theme.surface,
-                    borderColor: theme.border,
-                  }}>
-                    {suggestions.map((suggestion, index) => (
-                      <button
-                        key={index}
-                        type="button"
-                        className="suggestion-item"
-                        onClick={() => handleSuggestionClick(suggestion)}
-                        style={{ color: theme.text }}
-                      >
-                        <FiSearch size={16} color={theme.textSecondary} />
-                        <span>{suggestion}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
               <button type="submit" className="search-button" style={{ backgroundColor: theme.primary }}>
                 Search
               </button>
             </form>
-            
-            {/* Search Stats */}
-            {hasSearched && !loading && (
-              <div className="search-stats" style={{ color: theme.textSecondary }}>
-                <FiClock size={14} />
-                <span>
-                  Found {totalFound.toLocaleString()} results in {searchTime}ms
-                </span>
+
+            {/* Autocomplete suggestions dropdown */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="suggestions-dropdown" style={{ backgroundColor: theme.surface }}>
+                {suggestions.map((hit) => (
+                  <button
+                    key={hit.id}
+                    className="suggestion-item"
+                    onClick={() => handleSuggestionClick(hit)}
+                    style={{ color: theme.text }}
+                  >
+                    <FiSearch size={14} color={theme.textSecondary} />
+                    <div>
+                      <div className="suggestion-name">{hit.name}</div>
+                      <div className="suggestion-detail" style={{ color: theme.textSecondary }}>
+                        {[hit.locality, hit.region].filter(Boolean).join(', ')}
+                      </div>
+                    </div>
+                  </button>
+                ))}
               </div>
             )}
           </header>
 
-          {/* Content */}
           <div className="search-content">
             {!hasSearched ? (
               <>
-                {/* Popular Searches */}
                 <section className="popular-section">
                   <h2 style={{ color: theme.text }}>Popular Searches</h2>
                   <div className="popular-tags">
@@ -224,243 +241,89 @@ export default function SearchScreen() {
                     ))}
                   </div>
                 </section>
-
-                {/* Quick Tips */}
-                <section className="tips-section">
-                  <h3 style={{ color: theme.text }}>Search Tips</h3>
-                  <ul style={{ color: theme.textSecondary }}>
-                    <li>Try searching by place name, category, or city</li>
-                    <li>Use specific terms for better results (e.g., "Italian restaurant")</li>
-                    <li>Autocomplete suggestions appear as you type</li>
-                  </ul>
-                </section>
               </>
             ) : loading ? (
-              <div className="loading-state">
-                <div className="spinner"></div>
+              <div className="loading-container">
+                <div className="loading-spinner" />
                 <p style={{ color: theme.textSecondary }}>Searching...</p>
               </div>
-            ) : results.length > 0 ? (
-              <div className="results-grid">
-                {results.map((place) => (
-                  <PlaceCard key={place.id} place={place} />
-                ))}
-              </div>
-            ) : (
+            ) : results.length === 0 ? (
               <div className="empty-state">
-                <FiSearch size={48} color={theme.textSecondary} />
+                <FiSearch size={48} color={theme.textTertiary} />
                 <h3 style={{ color: theme.text }}>No results found</h3>
                 <p style={{ color: theme.textSecondary }}>
-                  Try different keywords or browse popular searches above
+                  Try a different search term or browse categories
                 </p>
+                <button className="browse-button" onClick={handleClear} style={{ color: theme.primary }}>
+                  Browse Categories
+                </button>
               </div>
+            ) : (
+              <>
+                <div className="results-header">
+                  <p style={{ color: theme.textSecondary }}>
+                    {totalFound.toLocaleString()} result{totalFound !== 1 ? 's' : ''} for "{searchQuery}"
+                    <span style={{ marginLeft: 8, fontSize: 12, opacity: 0.7 }}>
+                      <FiClock size={12} style={{ verticalAlign: 'middle', marginRight: 2 }} />
+                      {searchTime}ms
+                    </span>
+                  </p>
+                </div>
+                <div className="results-list">
+                  {results.map((hit) => (
+                    <Link
+                      key={hit.id}
+                      href={`/place/${hit.fsq_place_id}`}
+                      locale={locale}
+                      className="result-item"
+                    >
+                      <PlaceCard
+                        place={{
+                          id: hit.id,
+                          name: hit.name,
+                          category: hit.categories?.[0] || 'Place',
+                          city: hit.locality,
+                          address: [hit.address, hit.locality, hit.region].filter(Boolean).join(', '),
+                        }}
+                        compact
+                      />
+                    </Link>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>
 
         <style jsx>{`
-          .search-screen {
-            min-height: 100vh;
-            padding-bottom: 80px;
-          }
-
-          .search-header {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            padding: ${spacing.md}px;
-            background: ${theme.background};
-            border-bottom: 1px solid ${theme.border};
-          }
-
-          .search-form {
-            display: flex;
-            gap: ${spacing.sm}px;
-          }
-
-          .search-input-container {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            gap: ${spacing.sm}px;
-            padding: ${spacing.sm}px ${spacing.md}px;
-            border-radius: ${borderRadius.lg}px;
-            position: relative;
-          }
-
-          .search-input-container input {
-            flex: 1;
-            border: none;
-            outline: none;
-            background: transparent;
-            font-size: 16px;
-          }
-
-          .clear-button {
-            background: none;
-            border: none;
-            padding: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-          }
-
-          .search-button {
-            padding: ${spacing.sm}px ${spacing.lg}px;
-            border: none;
-            border-radius: ${borderRadius.lg}px;
-            color: white;
-            font-weight: 600;
-            cursor: pointer;
-          }
-
-          .suggestions-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            margin-top: 4px;
-            border: 1px solid;
-            border-radius: ${borderRadius.md}px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            max-height: 300px;
-            overflow-y: auto;
-            z-index: 1000;
-          }
-
-          .suggestion-item {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: ${spacing.sm}px;
-            padding: ${spacing.sm}px ${spacing.md}px;
-            border: none;
-            background: none;
-            text-align: left;
-            cursor: pointer;
-            transition: background 0.2s;
-          }
-
-          .suggestion-item:hover {
-            background: ${theme.surface};
-          }
-
-          .search-stats {
-            display: flex;
-            align-items: center;
-            gap: ${spacing.xs}px;
-            margin-top: ${spacing.sm}px;
-            font-size: 14px;
-          }
-
-          .search-content {
-            padding: ${spacing.lg}px;
-          }
-
-          .popular-section {
-            margin-bottom: ${spacing.xl}px;
-          }
-
-          .popular-section h2 {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: ${spacing.md}px;
-          }
-
-          .popular-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: ${spacing.sm}px;
-          }
-
-          .popular-tag {
-            padding: ${spacing.sm}px ${spacing.md}px;
-            border: none;
-            border-radius: ${borderRadius.full}px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: transform 0.2s;
-          }
-
-          .popular-tag:hover {
-            transform: scale(1.05);
-          }
-
-          .tips-section {
-            margin-top: ${spacing.xl}px;
-          }
-
-          .tips-section h3 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: ${spacing.md}px;
-          }
-
-          .tips-section ul {
-            list-style: none;
-            padding: 0;
-          }
-
-          .tips-section li {
-            padding: ${spacing.sm}px 0;
-            padding-left: ${spacing.md}px;
-            position: relative;
-          }
-
-          .tips-section li:before {
-            content: "•";
-            position: absolute;
-            left: 0;
-          }
-
-          .loading-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: ${spacing.xxl}px;
-          }
-
-          .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid ${theme.border};
-            border-top-color: ${theme.primary};
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: ${spacing.md}px;
-          }
-
-          @keyframes spin {
-            to { transform: rotate(360deg); }
-          }
-
-          .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: ${spacing.md}px;
-          }
-
-          .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: ${spacing.xxl}px;
-            text-align: center;
-          }
-
-          .empty-state h3 {
-            margin-top: ${spacing.md}px;
-            margin-bottom: ${spacing.sm}px;
-            font-size: 20px;
-          }
-
-          @media (max-width: 768px) {
-            .results-grid {
-              grid-template-columns: 1fr;
-            }
-          }
+          .search-screen { min-height: 100vh; padding-bottom: 100px; }
+          .search-header { padding: ${spacing.lg}px; position: sticky; top: 0; background: ${theme.background}; z-index: 10; }
+          .search-form { display: flex; gap: ${spacing.sm}px; }
+          .search-input-container { flex: 1; display: flex; align-items: center; gap: ${spacing.sm}px; padding: 12px 16px; border-radius: ${borderRadius.md}px; }
+          .search-input-container input { flex: 1; border: none; background: transparent; font-size: 16px; outline: none; }
+          .clear-button { background: none; border: none; cursor: pointer; padding: 4px; }
+          .search-button { padding: 12px 20px; border-radius: ${borderRadius.md}px; border: none; color: white; font-size: 16px; font-weight: 600; cursor: pointer; }
+          .suggestions-dropdown { position: absolute; left: ${spacing.lg}px; right: ${spacing.lg}px; top: 100%; border-radius: ${borderRadius.md}px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 20; overflow: hidden; }
+          .suggestion-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; width: 100%; border: none; background: transparent; cursor: pointer; text-align: left; }
+          .suggestion-item:hover { background: rgba(0,0,0,0.05); }
+          .suggestion-name { font-size: 14px; font-weight: 500; }
+          .suggestion-detail { font-size: 12px; margin-top: 2px; }
+          .search-content { padding: 0 ${spacing.lg}px; }
+          .popular-section { margin-bottom: ${spacing.xl}px; }
+          .popular-section h2 { font-size: 18px; font-weight: 600; margin: 0 0 ${spacing.md}px; }
+          .popular-tags { display: flex; flex-wrap: wrap; gap: ${spacing.sm}px; }
+          .popular-tag { padding: 8px 16px; border-radius: ${borderRadius.full}px; border: none; font-size: 14px; cursor: pointer; }
+          .loading-container { display: flex; flex-direction: column; align-items: center; padding: 60px; }
+          .loading-spinner { width: 32px; height: 32px; border: 3px solid ${theme.surface}; border-top-color: ${theme.primary}; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: ${spacing.md}px; }
+          @keyframes spin { to { transform: rotate(360deg); } }
+          .empty-state { text-align: center; padding: 60px 20px; }
+          .empty-state h3 { font-size: 20px; font-weight: 600; margin: ${spacing.lg}px 0 ${spacing.sm}px; }
+          .empty-state p { font-size: 14px; margin: 0 0 ${spacing.lg}px; }
+          .browse-button { background: none; border: none; font-size: 16px; font-weight: 600; cursor: pointer; }
+          .results-header { padding: ${spacing.sm}px 0 ${spacing.md}px; }
+          .results-header p { font-size: 14px; margin: 0; }
+          .results-list { display: flex; flex-direction: column; gap: ${spacing.md}px; }
+          .result-item { text-decoration: none; }
         `}</style>
       </AppLayout>
     </>

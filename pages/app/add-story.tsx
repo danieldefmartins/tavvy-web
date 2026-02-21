@@ -159,7 +159,7 @@ export default function AddStoryPage() {
     fetchUniversePlaces();
   }, [universeId, initialPlaceId]);
 
-  // Search places in Supabase
+  // Search places via canonical Search API (Typesense-backed)
   const searchPlaces = useCallback(async (query: string) => {
     if (query.length < 2) {
       setPlaceSearchResults([]);
@@ -168,36 +168,18 @@ export default function AddStoryPage() {
     }
     setPlaceSearchLoading(true);
     try {
-      // Search canonical places table using ilike
-      const { data: placesData, error: placesError } = await supabase
-        .from('places')
-        .select('id, name, cover_image_url, category')
-        .ilike('name', `%${query}%`)
-        .order('name')
-        .limit(10);
+      const params = new URLSearchParams({ q: query, limit: '10', autocomplete: 'true' });
+      const response = await fetch(`/api/search/places?${params}`);
+      const data = await response.json();
+      
+      let results: Place[] = (data.hits || []).map((hit: any) => ({
+        id: hit.fsq_place_id || hit.id,
+        name: hit.name,
+        cover_image_url: null,
+        category: hit.categories?.[0] || 'Place',
+      }));
 
-      let results: Place[] = placesData || [];
-
-      // Also search fsq_places_raw if we got few results
-      if (results.length < 5) {
-        const { data: fsqData } = await supabase
-          .from('fsq_places_raw')
-          .select('fsq_id, name, category')
-          .ilike('name', `%${query}%`)
-          .limit(10);
-        
-        if (fsqData && fsqData.length > 0) {
-          const existingIds = new Set(results.map(r => r.id));
-          const fsqMapped = fsqData
-            .filter(p => !existingIds.has(p.fsq_id))
-            .map(p => ({
-              id: p.fsq_id,
-              name: p.name,
-              cover_image_url: null,
-              category: p.category,
-            }));
-          results = [...results, ...fsqMapped];
-        }
+      if (true) { // keep block structure for minimal diff
       }
 
       setPlaceSearchResults(results);
