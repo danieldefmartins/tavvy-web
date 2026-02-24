@@ -91,6 +91,7 @@ const ECardIframePreview = forwardRef<ECardIframePreviewHandle, ECardIframePrevi
         <iframe
           ref={iframeRef}
           src={iframeSrc}
+          sandbox="allow-same-origin"
           onLoad={() => setLoading(false)}
           style={{
             width: '100%',
