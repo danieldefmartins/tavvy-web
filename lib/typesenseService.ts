@@ -33,7 +33,7 @@ export interface TypesensePlace {
   instagram?: string;
   facebook_id?: string;
   popularity: number;
-  // NEW: Tap-based fields
+  // Future — requires sync pipeline update to populate these fields in Typesense
   tap_signals?: string[];      // e.g., ["Quality Food", "Great Service"]
   tap_categories?: string[];   // e.g., ["quality", "service"]
   tap_total?: number;          // Total tap count
@@ -150,7 +150,7 @@ export async function searchPlaces(options: SearchOptions): Promise<SearchResult
     query,
     latitude,
     longitude,
-    radiusKm = 50,
+    radiusKm,
     country,
     region,
     locality,
@@ -159,74 +159,100 @@ export async function searchPlaces(options: SearchOptions): Promise<SearchResult
     offset = 0,
   } = options;
 
+  const hasGeoLocation = latitude !== undefined && longitude !== undefined && radiusKm !== undefined;
+
   try {
     const searchParams: any = {
       q: query || '*',
-      // ENHANCED: Search tap_signals field (if it exists) with higher weight!
-      // Note: tap_signals field will be added when first tap data is synced
-      query_by: 'name,location_locality,location_region,categories',
-      query_by_weights: '3,1,1,2',
-      
-      // ENHANCED: Sort by popularity for now (will use tap_quality_score after first sync)
-      sort_by: 'popularity:desc',      
+      query_by: 'name,categories,location_locality,location_region',
+      query_by_weights: '4,3,1,1',
+
+      sort_by: hasGeoLocation
+        ? `location(${latitude}, ${longitude}):asc,popularity:desc`
+        : 'popularity:desc',
       per_page: limit,
       page: Math.floor(offset / limit) + 1,
+
+      num_typos: 2,
+      typo_tokens_threshold: 1,
+      drop_tokens_threshold: 2,
+
+      text_match_type: 'max_score',
     };
 
-    // Add location filter
-    if (latitude && longitude) {
-      searchParams.filter_by = `location:(${latitude}, ${longitude}, ${radiusKm} km)`;
+    // Build all filters
+    const filters = [];
+
+    if (hasGeoLocation) {
+      filters.push(`location:(${latitude}, ${longitude}, ${radiusKm} km)`);
     }
 
-    // Add country/region/locality filters
-    const filters = [];
     if (country) filters.push(`location_country:=${country}`);
     if (region) filters.push(`location_region:=${region}`);
-    if (locality) filters.push(`location_locality:=${locality}`);
-    
+    if (locality) {
+      const capitalizedLocality = locality.charAt(0).toUpperCase() + locality.slice(1).toLowerCase();
+      filters.push(`location_locality:=${capitalizedLocality}`);
+    }
+
     // Add category filter (if provided)
     if (categories && categories.length > 0) {
       const categoryQuery = categories.join(',');
       searchParams.q = `${query} ${categoryQuery}`;
     }
-    
+
     if (filters.length > 0) {
-      const extraFilters = filters.join(' && ');
-      searchParams.filter_by = searchParams.filter_by 
-        ? `${searchParams.filter_by} && ${extraFilters}` 
-        : extraFilters;
+      searchParams.filter_by = filters.join(' && ');
     }
 
     const url = `${TYPESENSE_PROTOCOL}://${TYPESENSE_HOST}:${TYPESENSE_PORT}/collections/places/documents/search`;
     const queryString = new URLSearchParams(searchParams).toString();
 
-    const response = await fetch(`${url}?${queryString}`, {
-      headers: {
-        'X-TYPESENSE-API-KEY': TYPESENSE_API_KEY,
-      },
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-    if (!response.ok) {
-      throw new Error(`Typesense search failed: ${response.statusText}`);
+    try {
+      const response = await fetch(`${url}?${queryString}`, {
+        headers: {
+          'X-TYPESENSE-API-KEY': TYPESENSE_API_KEY,
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        if (response.status === 502) {
+          throw new Error('TYPESENSE_502: Search service temporarily unavailable');
+        }
+        throw new Error(`Typesense search failed: ${response.statusText} - ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('[Typesense] Response:', { found: data.found, hits: data.hits?.length, searchTimeMs: data.search_time_ms });
+
+      const places = data.hits.map((hit: any) => {
+        const doc = hit.document;
+        const distance = hit.geo_distance_meters
+          ? (hit.geo_distance_meters / 1609.34)
+          : undefined;
+
+        return transformTypesensePlace(doc, distance);
+      });
+
+      return {
+        places,
+        totalFound: data.found,
+        searchTimeMs: data.search_time_ms,
+        page: data.page,
+      };
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId);
+      if (fetchError.name === 'AbortError') {
+        throw new Error('TYPESENSE_TIMEOUT: Search request timed out');
+      }
+      throw fetchError;
     }
-
-    const data = await response.json();
-
-    const places = data.hits.map((hit: any) => {
-      const doc = hit.document;
-      const distance = hit.geo_distance_meters 
-        ? (hit.geo_distance_meters / 1609.34) // Convert meters to miles
-        : undefined;
-      
-      return transformTypesensePlace(doc, distance);
-    });
-
-    return {
-      places,
-      totalFound: data.found,
-      searchTimeMs: data.search_time_ms,
-      page: data.page,
-    };
   } catch (error) {
     console.error('[typesenseService] Search failed:', error);
     throw error;
@@ -247,20 +273,20 @@ export async function searchPlacesInBounds(options: {
   const { minLat, maxLat, minLng, maxLng, category, limit = 150 } = options;
 
   try {
-    // Calculate center point
+    // Calculate center point and radius for geopoint search
     const centerLat = (minLat + maxLat) / 2;
     const centerLng = (minLng + maxLng) / 2;
 
+    const latDiff = maxLat - minLat;
+    const lngDiff = maxLng - minLng;
+    const radiusKm = Math.max(latDiff, lngDiff) * 111; // 1 degree ≈ 111km
+
     const searchParams: any = {
       q: category || '*',
-      // ENHANCED: Search (tap_signals will be added after first sync)
       query_by: 'name,categories',
-      query_by_weights: '2,2',
-      
-      // ENHANCED: Sort by popularity (will use tap_quality_score after sync)
-      sort_by: 'popularity:desc',
-      
-      filter_by: `geocodes_lat:[${minLat}..${maxLat}] && geocodes_lng:[${minLng}..${maxLng}]`,
+      query_by_weights: '3,2',
+      filter_by: `location:(${centerLat}, ${centerLng}, ${radiusKm} km)`,
+      sort_by: `location(${centerLat}, ${centerLng}):asc,popularity:desc`,
       per_page: limit,
     };
 
