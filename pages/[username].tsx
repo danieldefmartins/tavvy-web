@@ -613,9 +613,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
       if (supabaseUrl && supabaseKey) {
         const supabase = createClient(supabaseUrl, supabaseKey);
         await supabase
-          .from('digital_cards')
-          .update({ tap_count: cardData.tapCount + 1 })
-          .eq('id', cardData.id);
+          .rpc('increment_card_tap', { card_id: cardData.id });
       }
     } catch (err) {
       console.error('Error updating tap count:', err);
@@ -640,7 +638,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
       if (supabaseUrl && supabaseKey) {
         const supabase = createClient(supabaseUrl, supabaseKey);
         await supabase
-          .from('card_links')
+          .from('digital_card_links')
           .update({ clicks: (link.clicks || 0) + 1 })
           .eq('id', link.id);
       }
@@ -5217,11 +5215,9 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       linksData = legacyLinksData || [];
     }
     
-    // Increment view count
+    // Increment view count atomically
     serverSupabase
-      .from('digital_cards')
-      .update({ view_count: (data.view_count || 0) + 1 })
-      .eq('id', data.id)
+      .rpc('increment_card_view', { card_id: data.id })
       .then(() => {});
 
     // Fetch endorsement data

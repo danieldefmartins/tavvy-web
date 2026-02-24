@@ -162,6 +162,7 @@ export default function ECardDashboardScreen() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'error' | null>(null);
   const [cardData, setCardData] = useState<CardData | null>(null);
   // Store cardId in state so it persists even if router.query changes
   const [cardId, setCardId] = useState<string | null>(null);
@@ -446,10 +447,12 @@ export default function ECardDashboardScreen() {
       } : null);
 
       setProfilePhotoFile(null);
-      alert('Card saved successfully!');
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus(null), 2000);
     } catch (error) {
       console.error('Error saving:', error);
-      alert('Failed to save changes');
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus(null), 3000);
     } finally {
       setSaving(false);
     }
@@ -724,6 +727,34 @@ export default function ECardDashboardScreen() {
               {saving ? 'Saving...' : 'Save'}
             </button>
           </header>
+
+          {/* Save status toast */}
+          {saveStatus && (
+            <div style={{
+              position: 'fixed',
+              top: 20,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 9999,
+              padding: '10px 20px',
+              borderRadius: 8,
+              fontSize: 14,
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              backgroundColor: saveStatus === 'saved' ? '#ECFDF5' : '#FEF2F2',
+              color: saveStatus === 'saved' ? '#065F46' : '#991B1B',
+              border: `1px solid ${saveStatus === 'saved' ? '#A7F3D0' : '#FECACA'}`,
+            }}>
+              {saveStatus === 'saved' ? (
+                <><IoCheckmark size={16} /> Card saved successfully</>
+              ) : (
+                <><IoClose size={16} /> Failed to save changes</>
+              )}
+            </div>
+          )}
 
           {/* Card Preview */}
           <div className="preview-section">
@@ -2063,8 +2094,10 @@ export default function ECardDashboardScreen() {
                   </div>
                 )}
 
-                {/* Geo Analytics Dashboard */}
-                {cardId && (
+                {/* Geo Analytics Dashboard - only for civic/political cards */}
+                {cardId && cardData?.template_id != null && (
+                  cardData.template_id.startsWith('civic-') || cardData.template_id === 'politician-generic'
+                ) ? (
                   <div style={{ marginTop: '1.5rem' }}>
                     <h3 style={{
                       color: isDark ? '#fff' : '#1a1a2e',
@@ -2072,11 +2105,53 @@ export default function ECardDashboardScreen() {
                       fontWeight: 600,
                       marginBottom: '1rem',
                     }}>
-                      📍 Geo Intelligence
+                      Geo Intelligence
                     </h3>
                     <GeoAnalyticsDashboard cardId={cardId} isDark={isDark} />
                   </div>
-                )}
+                ) : null}
+
+                {/* Link clicks summary for non-civic cards */}
+                {cardId && !(cardData?.template_id != null && (
+                  cardData.template_id.startsWith('civic-') || cardData.template_id === 'politician-generic'
+                )) ? (
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <h3 style={{
+                      color: isDark ? '#fff' : '#1a1a2e',
+                      fontSize: '1.1rem',
+                      fontWeight: 600,
+                      marginBottom: '1rem',
+                    }}>
+                      Link Performance
+                    </h3>
+                    {links.length > 0 ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {links.map((link) => (
+                          <div key={link.id} style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                            padding: '12px 16px', borderRadius: 10,
+                            backgroundColor: isDark ? '#1E293B' : '#fff',
+                            border: `1px solid ${isDark ? '#334155' : '#E5E7EB'}`,
+                          }}>
+                            <span style={{ fontSize: 14, color: isDark ? '#E2E8F0' : '#374151', fontWeight: 500 }}>
+                              {link.title || link.url}
+                            </span>
+                            <span style={{
+                              fontSize: 14, fontWeight: 600,
+                              color: isDark ? '#94A3B8' : '#6B7280',
+                            }}>
+                              {link.clicks || 0} clicks
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p style={{ color: isDark ? '#94A3B8' : '#6B7280', fontSize: 14 }}>
+                        Add links to your card to start tracking clicks.
+                      </p>
+                    )}
+                  </div>
+                ) : null}
               </div>
             )}
             {/* ── Inbox Tab ── */}

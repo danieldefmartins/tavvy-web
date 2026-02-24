@@ -52,10 +52,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(403).json({ error: 'Only the card owner can view pending questions' });
     }
 
-    // Fetch pending questions with submitter info
+    // Fetch pending questions (without user join — profiles table is separate from users)
     const { data: questions, error: fetchError } = await supabase
       .from('civic_questions')
-      .select('*, users!inner(id, full_name, avatar_url)')
+      .select('*')
       .eq('card_id', cardId)
       .eq('status', 'pending')
       .order('created_at', { ascending: false });
@@ -65,18 +65,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(500).json({ error: 'Failed to fetch questions' });
     }
 
+    // Batch-fetch submitter profiles from the profiles table
+    const userIds = [...new Set((questions || []).map((q: any) => q.user_id).filter(Boolean))];
+    let profileMap: Record<string, { display_name: string; avatar_url: string | null }> = {};
+    if (userIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, display_name, avatar_url')
+        .in('user_id', userIds);
+      for (const p of profiles || []) {
+        profileMap[p.user_id] = { display_name: p.display_name, avatar_url: p.avatar_url };
+      }
+    }
+
     return res.status(200).json({
       success: true,
-      questions: (questions || []).map((q: any) => ({
-        id: q.id,
-        questionText: q.question_text,
-        createdAt: q.created_at,
-        submitter: {
-          id: q.users?.id,
-          name: q.users?.full_name || 'Anonymous',
-          avatar: q.users?.avatar_url,
-        },
-      })),
+      questions: (questions || []).map((q: any) => {
+        const profile = profileMap[q.user_id];
+        return {
+          id: q.id,
+          questionText: q.question_text,
+          createdAt: q.created_at,
+          submitter: {
+            id: q.user_id,
+            name: profile?.display_name || 'Anonymous',
+            avatar: profile?.avatar_url || null,
+          },
+        };
+      }),
     });
   } catch (err) {
     console.error('[Pending Questions] Error:', err);

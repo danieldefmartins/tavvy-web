@@ -49,19 +49,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    // Fetch messages
+    // Fetch messages (without user join — profiles table is separate from users)
     const { data: messages, error: fetchError } = await supabase
       .from('ecard_messages')
-      .select(`
-        id, sender_id, content, is_read, read_at, created_at,
-        sender:users!sender_id (id, full_name, avatar_url)
-      `)
+      .select('id, sender_id, content, is_read, read_at, created_at')
       .eq('thread_id', threadId)
       .order('created_at', { ascending: true });
 
     if (fetchError) {
       console.error('[ECard Messages] Fetch error:', fetchError);
       return res.status(500).json({ error: 'Failed to fetch messages' });
+    }
+
+    // Batch-fetch sender profiles from the profiles table
+    const senderIds = [...new Set((messages || []).map((m: any) => m.sender_id).filter(Boolean))];
+    let profileMap: Record<string, { display_name: string; avatar_url: string | null }> = {};
+    if (senderIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, display_name, avatar_url')
+        .in('user_id', senderIds);
+      for (const p of profiles || []) {
+        profileMap[p.user_id] = { display_name: p.display_name, avatar_url: p.avatar_url };
+      }
     }
 
     // Mark messages as read for the current user
@@ -98,16 +108,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         cardId: thread.card_id,
         isOwner,
       },
-      messages: (messages || []).map((m: any) => ({
-        id: m.id,
-        senderId: m.sender_id,
-        senderName: m.sender?.full_name || 'Unknown',
-        senderAvatar: m.sender?.avatar_url,
-        content: m.content,
-        isRead: m.is_read,
-        isMine: m.sender_id === user.id,
-        createdAt: m.created_at,
-      })),
+      messages: (messages || []).map((m: any) => {
+        const profile = profileMap[m.sender_id];
+        return {
+          id: m.id,
+          senderId: m.sender_id,
+          senderName: profile?.display_name || 'Unknown',
+          senderAvatar: profile?.avatar_url || null,
+          content: m.content,
+          isRead: m.is_read,
+          isMine: m.sender_id === user.id,
+          createdAt: m.created_at,
+        };
+      }),
     });
   }
 

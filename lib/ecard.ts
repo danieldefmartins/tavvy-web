@@ -4,6 +4,7 @@
  */
 
 import { supabase } from './supabaseClient';
+import { isReservedUsername } from '../config/reservedUsernames';
 
 // Types
 export interface CardData {
@@ -490,14 +491,23 @@ export async function checkSlugAvailability(slug: string, currentCardId?: string
 }
 
 /**
- * Generate a slug from a name
+ * Generate a slug from a name.
+ * If the resulting slug is a reserved username, append a random 4-char suffix
+ * to avoid collisions with app routes and protected names.
  */
 export function generateSlug(name: string): string {
-  return name
+  let slug = name
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, '')
     .replace(/\s+/g, '')
     .substring(0, 30);
+
+  if (isReservedUsername(slug)) {
+    const suffix = Math.random().toString(36).substring(2, 6);
+    slug = `${slug}${suffix}`.substring(0, 30);
+  }
+
+  return slug;
 }
 
 /**

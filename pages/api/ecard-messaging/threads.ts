@@ -52,13 +52,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(403).json({ error: 'Only the card owner can view threads' });
     }
 
-    // Fetch threads with sender info
+    // Fetch threads (without user join — profiles table is separate from users)
     const { data: threads, error: fetchError } = await supabase
       .from('ecard_threads')
-      .select(`
-        id, folder, owner_unread, last_message_preview, last_message_at, created_at,
-        sender:users!sender_id (id, full_name, avatar_url)
-      `)
+      .select('id, sender_id, folder, owner_unread, last_message_preview, last_message_at, created_at')
       .eq('card_id', cardId)
       .eq('folder', folder as string)
       .order('last_message_at', { ascending: false });
@@ -66,6 +63,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (fetchError) {
       console.error('[ECard Threads] Fetch error:', fetchError);
       return res.status(500).json({ error: 'Failed to fetch threads' });
+    }
+
+    // Batch-fetch sender profiles from the profiles table
+    const senderIds = [...new Set((threads || []).map((t: any) => t.sender_id).filter(Boolean))];
+    let profileMap: Record<string, { display_name: string; avatar_url: string | null }> = {};
+    if (senderIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, display_name, avatar_url')
+        .in('user_id', senderIds);
+      for (const p of profiles || []) {
+        profileMap[p.user_id] = { display_name: p.display_name, avatar_url: p.avatar_url };
+      }
     }
 
     // Also get counts for both folders
@@ -92,19 +102,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     return res.status(200).json({
       success: true,
-      threads: (threads || []).map((t: any) => ({
-        id: t.id,
-        folder: t.folder,
-        unreadCount: t.owner_unread || 0,
-        lastMessagePreview: t.last_message_preview,
-        lastMessageAt: t.last_message_at,
-        createdAt: t.created_at,
-        sender: {
-          id: t.sender?.id,
-          name: t.sender?.full_name || 'Unknown',
-          avatar: t.sender?.avatar_url,
-        },
-      })),
+      threads: (threads || []).map((t: any) => {
+        const profile = profileMap[t.sender_id];
+        return {
+          id: t.id,
+          folder: t.folder,
+          unreadCount: t.owner_unread || 0,
+          lastMessagePreview: t.last_message_preview,
+          lastMessageAt: t.last_message_at,
+          createdAt: t.created_at,
+          sender: {
+            id: t.sender_id,
+            name: profile?.display_name || 'Unknown',
+            avatar: profile?.avatar_url || null,
+          },
+        };
+      }),
       counts: {
         primary: primaryCount || 0,
         spam: spamCount || 0,
