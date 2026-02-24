@@ -1,11 +1,11 @@
 /**
- * ECardIframePreview — fetches the live card's SSR HTML and renders it
- * in an iframe via srcdoc. This avoids all client-side JS issues (locale
- * redirects, auth, hydration) that plague the src= approach.
- * Falls back to CardPreview for draft/unpublished cards.
+ * ECardIframePreview — loads the live card page in an iframe using src=.
+ * Uses the parent page's locale in the URL so the iframe doesn't trigger
+ * a locale redirect. Falls back to CardPreview for draft/unpublished cards.
  */
 
-import React, { useState, useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
+import React, { useState, useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
+import { useRouter } from 'next/router';
 import CardPreview from './CardPreview';
 import { CardData, LinkItem } from '../../lib/ecard';
 
@@ -21,43 +21,32 @@ interface ECardIframePreviewProps {
   height?: number;
 }
 
-const SCRIPT_TAG_RE = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
+function buildPreviewUrl(slug: string, locale: string | undefined): string {
+  const defaultLocale = 'en';
+  const loc = locale || defaultLocale;
+  // Default locale has no prefix in Next.js i18n
+  const prefix = loc === defaultLocale ? '' : `/${loc}`;
+  return `${prefix}/${slug}?preview=1`;
+}
 
 const ECardIframePreview = forwardRef<ECardIframePreviewHandle, ECardIframePreviewProps>(
   ({ slug, isPublished, fallbackCard, fallbackLinks, height = 580 }, ref) => {
+    const router = useRouter();
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [loading, setLoading] = useState(true);
-    const [htmlContent, setHtmlContent] = useState<string | null>(null);
-    const [fetchKey, setFetchKey] = useState(0);
+    const [cacheBuster, setCacheBuster] = useState(0);
 
     const canUseIframe = isPublished && slug && !slug.startsWith('draft_');
 
-    const fetchHtml = useCallback(async () => {
-      if (!canUseIframe || !slug) return;
-      setLoading(true);
-      try {
-        const res = await fetch(`/${slug}?preview=1`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        let html = await res.text();
-        // Strip all script tags to prevent any JS from running
-        html = html.replace(SCRIPT_TAG_RE, '');
-        setHtmlContent(html);
-      } catch (err) {
-        console.error('[ECardIframePreview] Failed to fetch card HTML:', err);
-      } finally {
-        setLoading(false);
-      }
-    }, [canUseIframe, slug]);
-
-    useEffect(() => {
-      fetchHtml();
-    }, [fetchHtml, fetchKey]);
-
     const reload = useCallback(() => {
-      setFetchKey(Date.now());
+      setCacheBuster(Date.now());
     }, []);
 
     useImperativeHandle(ref, () => ({ reload }), [reload]);
+
+    const handleLoad = useCallback(() => {
+      setLoading(false);
+    }, []);
 
     // Draft / unpublished fallback
     if (!canUseIframe) {
@@ -81,6 +70,9 @@ const ECardIframePreview = forwardRef<ECardIframePreviewHandle, ECardIframePrevi
         </div>
       );
     }
+
+    const baseUrl = buildPreviewUrl(slug!, router.locale);
+    const iframeSrc = cacheBuster ? `${baseUrl}&t=${cacheBuster}` : baseUrl;
 
     return (
       <div style={{ position: 'relative', width: '100%', maxWidth: 375, margin: '0 auto' }}>
@@ -107,22 +99,21 @@ const ECardIframePreview = forwardRef<ECardIframePreviewHandle, ECardIframePrevi
           </div>
         )}
 
-        {htmlContent && (
-          <iframe
-            ref={iframeRef}
-            srcDoc={htmlContent}
-            sandbox="allow-same-origin"
-            style={{
-              width: '100%',
-              height,
-              border: 'none',
-              borderRadius: 20,
-              boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-              display: 'block',
-            }}
-            title="Card Preview"
-          />
-        )}
+        <iframe
+          ref={iframeRef}
+          key={cacheBuster}
+          src={iframeSrc}
+          onLoad={handleLoad}
+          style={{
+            width: '100%',
+            height,
+            border: 'none',
+            borderRadius: 20,
+            boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+            display: 'block',
+          }}
+          title="Card Preview"
+        />
 
         <style jsx>{`
           @keyframes ecard-iframe-spin {

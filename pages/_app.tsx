@@ -84,6 +84,15 @@ function LocaleManager() {
     if (typeof window === 'undefined' || hasProcessedRef.current) return;
     hasProcessedRef.current = true;
 
+    // Skip locale management entirely in iframe preview mode.
+    // This prevents locale redirects from causing infinite reloads
+    // when the card page is embedded in a preview iframe.
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('preview') === '1') {
+      detectionCompleteRef.current = true;
+      return;
+    }
+
     const savedLocale = localStorage.getItem('tavvy-locale');
 
     if (savedLocale && SUPPORTED_LOCALES.includes(savedLocale)) {
@@ -112,6 +121,9 @@ function LocaleManager() {
   // a saved preference with the server's default locale.
   useEffect(() => {
     if (locale && typeof window !== 'undefined' && detectionCompleteRef.current) {
+      // Don't let iframe preview mode overwrite the user's saved locale
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('preview') === '1') return;
       localStorage.setItem('tavvy-locale', locale);
     }
   }, [locale]);
