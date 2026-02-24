@@ -84,15 +84,6 @@ function LocaleManager() {
     if (typeof window === 'undefined' || hasProcessedRef.current) return;
     hasProcessedRef.current = true;
 
-    // Skip locale management entirely in iframe preview mode.
-    // This prevents locale redirects from causing infinite reloads
-    // when the card page is embedded in a preview iframe.
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('preview') === '1') {
-      detectionCompleteRef.current = true;
-      return;
-    }
-
     const savedLocale = localStorage.getItem('tavvy-locale');
 
     if (savedLocale && SUPPORTED_LOCALES.includes(savedLocale)) {
@@ -121,9 +112,6 @@ function LocaleManager() {
   // a saved preference with the server's default locale.
   useEffect(() => {
     if (locale && typeof window !== 'undefined' && detectionCompleteRef.current) {
-      // Don't let iframe preview mode overwrite the user's saved locale
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('preview') === '1') return;
       localStorage.setItem('tavvy-locale', locale);
     }
   }, [locale]);
@@ -132,11 +120,6 @@ function LocaleManager() {
 }
 
 function App({ Component, pageProps }: AppProps) {
-  // Skip locale management entirely for iframe preview pages.
-  // isPreview is set by getServerSideProps in [username].tsx when ?preview=1.
-  // This prevents LocaleManager from ever mounting, avoiding locale redirect loops.
-  const isPreview = pageProps?.isPreview === true;
-
   return (
     <>
       <Head>
@@ -172,7 +155,7 @@ function App({ Component, pageProps }: AppProps) {
         <AuthProvider>
           <ProAuthProvider>
             <ThemeProvider>
-              {!isPreview && <LocaleManager />}
+              <LocaleManager />
               <Component {...pageProps} />
             </ThemeProvider>
           </ProAuthProvider>

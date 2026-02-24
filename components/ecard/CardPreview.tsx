@@ -198,6 +198,128 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
     );
   };
 
+  // ===== CIVIC / POLITICAL TEMPLATES =====
+  const isCivic = template.startsWith('civic-card') || template === 'politician-generic';
+  if (isCivic) {
+    const ballotNumber = card.ballot_number;
+    const partyName = card.party_name;
+    const officeRunningFor = card.office_running_for;
+    const campaignSlogan = card.campaign_slogan;
+    const region = card.region;
+
+    // Determine civic variant colors
+    const isFlag = template === 'civic-card-flag';
+    const isRally = template === 'civic-card-rally';
+    const isClean = template === 'civic-card-clean';
+    const isBold = template === 'civic-card-bold';
+    const accentColor = isFlag ? '#009739' : isRally ? '#1a2744' : c1 || '#003366';
+    const pageBg = isFlag ? '#1a1a2e' : isRally ? '#F5C518' : isClean ? '#e8edf2' : '#f0f2f5';
+    const cardBg = '#FFFFFF';
+
+    return (
+      <div style={{ background: pageBg, borderRadius: 16, overflow: 'hidden', minHeight: 400 }}>
+        {/* Civic header accent bar */}
+        <div style={{
+          background: isFlag
+            ? 'linear-gradient(135deg, #009739 0%, #002776 50%, #FEDD00 100%)'
+            : isRally
+              ? `linear-gradient(135deg, ${accentColor}, #1a1a2e)`
+              : `linear-gradient(135deg, ${c1}, ${c2})`,
+          padding: '24px 20px 16px',
+          textAlign: 'center',
+          position: 'relative',
+        }}>
+          {ballotNumber && (
+            <div style={{
+              position: 'absolute', top: 12, right: 16,
+              background: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: '4px 12px',
+              fontSize: 20, fontWeight: 800, color: '#fff', letterSpacing: 2,
+            }}>
+              {ballotNumber}
+            </div>
+          )}
+          {profilePhotoUrl && (
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+              <div style={{
+                width: 90, height: 90, borderRadius: '50%', overflow: 'hidden',
+                border: '3px solid rgba(255,255,255,0.4)',
+              }}>
+                <img src={profilePhotoUrl} alt={card.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
+            </div>
+          )}
+          <h2 style={{ color: '#fff', fontSize: 22, fontWeight: 800, margin: '0 0 4px', textTransform: 'uppercase' }}>{card.full_name}</h2>
+          {partyName && <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: 13, fontWeight: 600, margin: '0 0 2px' }}>{partyName}</p>}
+          {officeRunningFor && <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, margin: 0 }}>{officeRunningFor}</p>}
+        </div>
+
+        {/* Card body */}
+        <div style={{ padding: '20px', background: cardBg, margin: isFlag || isRally ? '0 12px 12px' : 0, borderRadius: isFlag || isRally ? 12 : 0 }}>
+          {campaignSlogan && (
+            <p style={{
+              fontSize: 15, fontWeight: 700, color: accentColor, textAlign: 'center',
+              margin: '0 0 12px', fontStyle: 'italic',
+              borderLeft: `3px solid ${accentColor}`, paddingLeft: 12,
+            }}>
+              &ldquo;{campaignSlogan}&rdquo;
+            </p>
+          )}
+          {card.bio && <p style={{ fontSize: 13, color: '#4B5563', lineHeight: 1.5, margin: '0 0 12px' }}>{card.bio}</p>}
+          {region && <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 12px' }}>📍 {region}</p>}
+
+          {showContact && (
+            <div>
+              {card.phone && renderContactRow('📞', card.phone, 'Phone')}
+              {card.email && renderContactRow('✉️', card.email, 'Email')}
+              {card.website && renderContactRow('🌐', card.website, 'Website')}
+            </div>
+          )}
+
+          {renderFeaturedSocials()}
+          {renderSocialLinks()}
+          {renderLinks()}
+        </div>
+      </div>
+    );
+  }
+
+  // ===== MOBILE BUSINESS TEMPLATE =====
+  if (template === 'mobile-business') {
+    return (
+      <div style={{ background: '#f5f5f5', borderRadius: 16, overflow: 'hidden' }}>
+        {/* Cover/banner */}
+        <div style={{
+          height: 160,
+          background: bannerImageUrl || profilePhotoUrl
+            ? `url(${bannerImageUrl || profilePhotoUrl}) center/cover`
+            : `linear-gradient(135deg, ${c1}, ${c2})`,
+          position: 'relative',
+        }}>
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, background: 'linear-gradient(transparent, #fff)' }} />
+        </div>
+        <div style={{ padding: '0 24px 24px', background: '#fff' }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: '#1a1a2e', margin: '0 0 4px' }}>{card.full_name}</h2>
+          {card.title && <p style={{ fontSize: 14, color: '#374151', margin: '0 0 2px' }}>{card.title}</p>}
+          {card.company && <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 4px' }}>{card.company}</p>}
+          {(card as any).city && <p style={{ fontSize: 12, color: '#9CA3AF', margin: '0 0 12px' }}>📍 {(card as any).city}</p>}
+          {card.bio && <p style={{ fontSize: 13, color: '#4B5563', lineHeight: 1.5, margin: '0 0 16px' }}>{card.bio}</p>}
+
+          {showContact && (
+            <div>
+              {card.phone && renderContactRow('📞', card.phone, 'Phone')}
+              {card.email && renderContactRow('✉️', card.email, 'Email')}
+              {card.website && renderContactRow('🌐', card.website, 'Website')}
+            </div>
+          )}
+
+          {renderFeaturedSocials()}
+          {renderSocialLinks()}
+          {renderLinks()}
+        </div>
+      </div>
+    );
+  }
+
   // ===== BIZ-MODERN TEMPLATE =====
   if (template === 'biz-modern') {
     return (
