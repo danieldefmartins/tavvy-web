@@ -84,6 +84,13 @@ function LocaleManager() {
     if (typeof window === 'undefined' || hasProcessedRef.current) return;
     hasProcessedRef.current = true;
 
+    // Skip locale redirect in preview/iframe mode to prevent redirect loops
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('preview') === '1') {
+      detectionCompleteRef.current = true;
+      return;
+    }
+
     const savedLocale = localStorage.getItem('tavvy-locale');
 
     if (savedLocale && SUPPORTED_LOCALES.includes(savedLocale)) {
