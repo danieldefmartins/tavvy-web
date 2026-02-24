@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { searchPlaces } from '../../lib/typesenseService';
+import { parseSearchQuery } from '../../lib/smartQueryParser';
 
 interface SearchSuggestion {
   id: string;
@@ -30,19 +31,24 @@ export default async function handler(
     const limitNum = parseInt(limit as string, 10);
     const searchTerm = q.trim();
 
-    console.log('[API/search] Searching Typesense for:', searchTerm);
+    // Parse query for location keywords (e.g., "pizza near Orlando, FL")
+    const parsed = parseSearchQuery(searchTerm);
+
+    console.log('[API/search] Searching Typesense for:', searchTerm, parsed.isParsed ? `(parsed: "${parsed.placeName}" in ${parsed.city || ''} ${parsed.region || ''})` : '');
 
     const userLocation = userLat && userLng ? {
       latitude: parseFloat(userLat as string),
       longitude: parseFloat(userLng as string),
     } : undefined;
 
-    // Use Typesense for fast full-text search (same as iOS)
     const result = await searchPlaces({
-      query: searchTerm,
+      query: parsed.isParsed ? parsed.placeName : searchTerm,
       latitude: userLocation?.latitude,
       longitude: userLocation?.longitude,
-      radiusKm: userLocation ? 50 : undefined,
+      radiusKm: parsed.isParsed ? undefined : (userLocation ? 50 : undefined),
+      locality: parsed.city,
+      region: parsed.region,
+      country: parsed.country,
       limit: limitNum,
     });
 

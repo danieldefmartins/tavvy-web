@@ -11,6 +11,7 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
 import { searchPlaces as searchPlacesTypesense, getAutocompleteSuggestions } from '../../lib/typesenseService';
+import { parseSearchQuery } from '../../lib/smartQueryParser';
 import { spacing, borderRadius } from '../../constants/Colors';
 import PlaceCard from '../../components/PlaceCard';
 import { FiSearch, FiX, FiFilter, FiMapPin, FiClock } from 'react-icons/fi';
@@ -69,15 +70,20 @@ export default function SearchScreen() {
 
   const performSearch = async (query: string) => {
     if (!query.trim()) return;
-    
+
     setLoading(true);
     setHasSearched(true);
     setShowSuggestions(false);
 
     try {
-      // Try Typesense first (fast!)
+      // Parse query for location keywords (e.g., "pizza near Orlando, FL")
+      const parsed = parseSearchQuery(query.trim());
+
       const result = await searchPlacesTypesense({
-        query,
+        query: parsed.isParsed ? parsed.placeName : query,
+        locality: parsed.city,
+        region: parsed.region,
+        country: parsed.country,
         limit: 50,
       });
 

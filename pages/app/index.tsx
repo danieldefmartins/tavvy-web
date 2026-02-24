@@ -27,6 +27,7 @@ import AppLayout from '../../components/AppLayout';
 import PlaceCard from '../../components/PlaceCard';
 import { fetchPlacesInBounds, searchPlaces, PlaceCard as PlaceCardType } from '../../lib/placeService';
 import { searchPlaces as typesenseSearchPlaces, getAutocompleteSuggestions } from '../../lib/typesenseService';
+import { parseSearchQuery } from '../../lib/smartQueryParser';
 import { spacing, borderRadius, Colors } from '../../constants/Colors';
 import { 
   FiSearch, FiX, FiMapPin, FiUser, FiChevronRight, FiMenu,
@@ -339,13 +340,19 @@ export default function HomeScreen() {
         });
       });
 
+      // Parse query for location keywords (e.g., "pizza near Orlando, FL")
+      const parsed = parseSearchQuery(searchQuery);
+
       // Search for matching places using Typesense
       try {
         const typesenseResults = await typesenseSearchPlaces({
-          query: searchQuery,
+          query: parsed.isParsed ? parsed.placeName : searchQuery,
           latitude: userLocation?.[1],
           longitude: userLocation?.[0],
-          radiusKm: 50,
+          radiusKm: parsed.isParsed ? undefined : 50,
+          locality: parsed.city,
+          region: parsed.region,
+          country: parsed.country,
           limit: 5,
         });
 
@@ -379,11 +386,44 @@ export default function HomeScreen() {
       fetchNearbyPlaces();
       return;
     }
-    
+
     setLoading(true);
     try {
-      const results = await searchPlaces(searchQuery, userLocation);
-      setPlaces(results);
+      // Parse query for location keywords (e.g., "pizza near Orlando, FL")
+      const parsed = parseSearchQuery(searchQuery.trim());
+
+      if (parsed.isParsed && (parsed.city || parsed.region)) {
+        // Use Typesense with parsed location filters
+        const typesenseResults = await typesenseSearchPlaces({
+          query: parsed.placeName,
+          locality: parsed.city,
+          region: parsed.region,
+          country: parsed.country,
+          limit: 50,
+        });
+        // Transform to PlaceCard format for display
+        const results = typesenseResults.places.map(p => ({
+          id: p.id,
+          source: p.id.startsWith('tavvy:') ? 'places' : 'fsq_raw',
+          source_id: p.fsq_place_id,
+          name: p.name,
+          latitude: p.latitude,
+          longitude: p.longitude,
+          address: p.address,
+          city: p.locality,
+          region: p.region,
+          country: p.country,
+          category: p.category,
+          subcategory: p.subcategory,
+          phone: p.tel,
+          website: p.website,
+          distance: p.distance,
+        }));
+        setPlaces(results as any);
+      } else {
+        const results = await searchPlaces(searchQuery, userLocation);
+        setPlaces(results);
+      }
     } catch (error) {
       console.error('Search error:', error);
     } finally {
