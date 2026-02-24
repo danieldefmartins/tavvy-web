@@ -196,6 +196,7 @@ interface CardData {
 interface PageProps {
   cardData: CardData | null;
   error: string | null;
+  isPreview?: boolean;
 }
 
 // SVG Icons as components for cleaner rendering
@@ -302,7 +303,7 @@ const SIGNAL_KEY_MAP: Record<string, string> = {
   'Loves Animals': 'signalLovesAnimals', 'Gentle': 'signalGentle', 'Clean Facility': 'signalCleanFacility', 'Friendly': 'signalFriendly',
 };
 
-export default function PublicCardPage({ cardData: initialCardData, error: initialError }: PageProps) {
+export default function PublicCardPage({ cardData: initialCardData, error: initialError, isPreview = false }: PageProps) {
   const { t } = useTranslation();
   const [cardData, setCardData] = useState<CardData | null>(initialCardData);
   const [error] = useState<string | null>(initialError);
@@ -1237,6 +1238,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   return (
     <>
       <Head>
+        {isPreview && <style>{`body { margin: 0; overflow-x: hidden; }`}</style>}
         <title>{isCivicCard ? `${cardData.fullName} | ${cardData.officeRunningFor || 'Civic Card'} | Tavvy` : `${cardData.fullName} | Digital Card | Tavvy`}</title>
         <meta name="description" content={isCivicCard ? [
           cardData.fullName,
@@ -3800,12 +3802,13 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               </div>
             )}
 
-            {/* Row 4: Tavvy Branding */}
+            {/* Row 4: Tavvy Branding (hidden in preview/iframe mode) */}
+            {!isPreview && (
             <div style={{ width: '100%', textAlign: 'center' as const, paddingTop: 8, paddingBottom: 8 }}>
               <a href="https://tavvy.com/ecard" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', textDecoration: 'none' }}>
-                <img 
+                <img
                   src={isLightFooterBg ? '/tavvy-logo-dark.png' : '/tavvy-logo-white.png'}
-                  alt="Tavvy" 
+                  alt="Tavvy"
                   style={{ height: 22, width: 'auto', objectFit: 'contain' as const, marginBottom: 4 }}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -3823,6 +3826,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 textDecoration: 'none',
               }}>Create your free digital card</a>
             </div>
+            )}
           </div>
           </div>{/* Close FLAG TEMPLATE white bottom section wrapper */}
         </div>
@@ -5215,10 +5219,12 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       linksData = legacyLinksData || [];
     }
     
-    // Increment view count atomically
-    serverSupabase
-      .rpc('increment_card_view', { card_id: data.id })
-      .then(() => {});
+    // Increment view count atomically (skip for preview mode)
+    if (context.query.preview !== '1') {
+      serverSupabase
+        .rpc('increment_card_view', { card_id: data.id })
+        .then(() => {});
+    }
 
     // Fetch endorsement data
     let endorsementCount = 0;
@@ -5615,6 +5621,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       props: {
         cardData,
         error: null,
+        isPreview: context.query.preview === '1',
         ...(await serverSideTranslations(context.locale ?? 'en', ['common'])),
       },
     };
@@ -5624,6 +5631,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       props: {
         cardData: null,
         error: 'Failed to load card',
+        isPreview: context.query.preview === '1',
         ...(await serverSideTranslations(context.locale ?? 'en', ['common'])),
       },
     };

@@ -7,6 +7,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Head from 'next/head';
 import ECardInbox from '../../../components/ECardInbox';
 import GeoAnalyticsDashboard from '../../../components/GeoAnalyticsDashboard';
+import ECardIframePreview, { ECardIframePreviewHandle } from '../../../components/ecard/ECardIframePreview';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -62,7 +63,6 @@ import {
   IoPlayForward,
   IoPersonAdd,
   IoRefresh,
-  IoBusinessOutline,
   IoLogoInstagram,
   IoLogoTiktok,
   IoLogoYoutube,
@@ -156,6 +156,7 @@ export default function ECardDashboardScreen() {
   const photoInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const iframePreviewRef = useRef<ECardIframePreviewHandle>(null);
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
   const [videoDurationError, setVideoDurationError] = useState<string | null>(null);
@@ -314,6 +315,15 @@ export default function ECardDashboardScreen() {
       return;
     }
 
+    // Validate template access — block premium templates for non-Pro users
+    const tpl = getTemplateById(selectedTemplateId);
+    if (tpl?.isPremium && !isPro) {
+      setSelectedTemplateId(cardData.template_id || 'basic');
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus(null), 3000);
+      return;
+    }
+
     setSaving(true);
     try {
       // Upload new profile photo if changed
@@ -448,6 +458,8 @@ export default function ECardDashboardScreen() {
 
       setProfilePhotoFile(null);
       setSaveStatus('saved');
+      // Reload iframe preview to reflect saved changes
+      setTimeout(() => iframePreviewRef.current?.reload(), 500);
       setTimeout(() => setSaveStatus(null), 2000);
     } catch (error) {
       console.error('Error saving:', error);
@@ -758,417 +770,17 @@ export default function ECardDashboardScreen() {
 
           {/* Card Preview */}
           <div className="preview-section">
-            {(() => {
-              const currentTpl = getTemplateById(selectedTemplateId);
-              const layout = currentTpl?.layout || 'basic';
-              const bgGrad = `linear-gradient(135deg, ${gradientColors[0]}, ${gradientColors[1]})`;
-              // Compute if background is light for text contrast
-              const hexToLum = (hex: string) => {
-                const c = hex.replace('#', '');
-                if (c.length < 6) return 0.5;
-                const r = parseInt(c.substring(0,2),16)/255;
-                const g = parseInt(c.substring(2,4),16)/255;
-                const b = parseInt(c.substring(4,6),16)/255;
-                const toL = (v: number) => v <= 0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4);
-                return 0.2126*toL(r) + 0.7152*toL(g) + 0.0722*toL(b);
-              };
-              const bgLight = (hexToLum(gradientColors[0]) + hexToLum(gradientColors[1])) / 2 > 0.35;
-              const txtColor = bgLight ? '#1a1a1a' : '#ffffff';
-              const txtSecondary = bgLight ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)';
+            <div className={`status-badge ${cardData?.is_published ? 'published' : 'draft'}`}>
+              {cardData?.is_published ? 'Live' : 'Draft'}
+            </div>
 
-              const statusBadge = (
-                <div className={`status-badge ${cardData?.is_published ? 'published' : 'draft'}`}>
-                  {cardData?.is_published ? 'Live' : 'Draft'}
-                </div>
-              );
-
-              const photoEl = profilePhotoUrl ? (
-                <img src={profilePhotoUrl} alt="" className="preview-photo" onClick={() => photoInputRef.current?.click()} />
-              ) : (
-                <div className="preview-photo-placeholder" onClick={() => photoInputRef.current?.click()}>
-                  <IoCamera size={24} color={bgLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.5)'} />
-                </div>
-              );
-
-              // ===== BLOGGER =====
-              if (layout === 'blogger') {
-                return (
-                  <div className="card-preview blogger-preview" style={{ background: bgGrad, padding: 0 }}>
-                    {statusBadge}
-                    <div style={{ paddingTop: 40 }} />
-                    <div style={{ background: '#fff', borderRadius: '20px 20px 16px 16px', margin: '0 12px 12px', padding: '48px 16px 20px', position: 'relative', textAlign: 'center' }}>
-                      <div style={{ position: 'absolute', top: -36, left: '50%', transform: 'translateX(-50%)' }}>
-                        {profilePhotoUrl ? (
-                          <img src={profilePhotoUrl} alt="" style={{ width: 72, height: 72, borderRadius: 36, objectFit: 'cover', border: '3px solid #fff', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }} onClick={() => photoInputRef.current?.click()} />
-                        ) : (
-                          <div style={{ width: 72, height: 72, borderRadius: 36, background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '3px solid #fff' }} onClick={() => photoInputRef.current?.click()}>
-                            <IoCamera size={24} color="#ccc" />
-                          </div>
-                        )}
-                      </div>
-                      <h3 style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic', fontSize: 18, fontWeight: 600, color: '#333', margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
-                      {titleRole && <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: 1.5, textTransform: 'uppercase', color: '#999', margin: 0 }}>{titleRole}</p>}
-                    </div>
-                  </div>
-                );
-              }
-
-              // ===== BUSINESS CARD =====
-              if (layout === 'business-card') {
-                return (
-                  <div className="card-preview" style={{ background: bgGrad, padding: 0, overflow: 'hidden' }}>
-                    {statusBadge}
-                    {/* Dark top section */}
-                    <div style={{ padding: '20px 16px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-                      {profilePhotoUrl ? (
-                        <img src={profilePhotoUrl} alt="" style={{ width: 56, height: 56, borderRadius: 28, objectFit: 'cover', border: `2px solid ${currentTpl?.colorSchemes[0]?.accent || '#C9A84C'}` }} onClick={() => photoInputRef.current?.click()} />
-                      ) : (
-                        <div style={{ width: 56, height: 56, borderRadius: 28, background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => photoInputRef.current?.click()}>
-                          <IoCamera size={20} color="rgba(255,255,255,0.5)" />
-                        </div>
-                      )}
-                      <div style={{ textAlign: 'left' }}>
-                        <h3 style={{ color: txtColor, fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
-                        {titleRole && <p style={{ color: txtSecondary, fontSize: 12, margin: 0 }}>{titleRole}</p>}
-                      </div>
-                    </div>
-                    {/* White bottom section */}
-                    <div style={{ background: '#fff', padding: '12px 16px 16px', borderRadius: '12px 12px 0 0' }}>
-                      <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                        <div style={{ width: 32, height: 32, borderRadius: 16, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <IoCall size={14} color="#fff" />
-                        </div>
-                        <div style={{ width: 32, height: 32, borderRadius: 16, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <IoMail size={14} color="#fff" />
-                        </div>
-                        <div style={{ width: 32, height: 32, borderRadius: 16, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <IoGlobe size={14} color="#fff" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-
-              // ===== FULL WIDTH =====
-              if (layout === 'full-width') {
-                return (
-                  <div className="card-preview" style={{ background: bgGrad, padding: 0, overflow: 'hidden', minHeight: 160 }}>
-                    {statusBadge}
-                    {profilePhotoUrl ? (
-                      <div style={{ position: 'relative', height: 120 }}>
-                        <img src={profilePhotoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onClick={() => photoInputRef.current?.click()} />
-                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, background: 'linear-gradient(transparent, rgba(0,0,0,0.6))' }} />
-                      </div>
-                    ) : (
-                      <div style={{ height: 80, display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => photoInputRef.current?.click()}>
-                        <IoCamera size={32} color="rgba(255,255,255,0.3)" />
-                      </div>
-                    )}
-                    <div style={{ padding: '12px 16px 16px' }}>
-                      <h3 style={{ color: txtColor, fontSize: 18, fontWeight: 700, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
-                      {titleRole && <p style={{ color: txtSecondary, fontSize: 13, margin: 0 }}>{titleRole}</p>}
-                    </div>
-                  </div>
-                );
-              }
-
-              // ===== PRO REALTOR =====
-              if (layout === 'pro-realtor') {
-                return (
-                  <div className="card-preview" style={{ background: bgGrad, padding: '20px 16px', textAlign: 'center' }}>
-                    {statusBadge}
-                    {profilePhotoUrl ? (
-                      <div style={{ width: 72, height: 72, borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%', overflow: 'hidden', margin: '0 auto 10px', border: '3px solid rgba(255,255,255,0.3)' }}>
-                        <img src={profilePhotoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onClick={() => photoInputRef.current?.click()} />
-                      </div>
-                    ) : (
-                      <div style={{ width: 72, height: 72, borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%', background: 'rgba(255,255,255,0.1)', margin: '0 auto 10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => photoInputRef.current?.click()}>
-                        <IoCamera size={24} color="rgba(255,255,255,0.5)" />
-                      </div>
-                    )}
-                    <p style={{ color: txtSecondary, fontSize: 10, letterSpacing: 2, textTransform: 'uppercase', margin: '0 0 2px' }}>HI, I'M</p>
-                    <h3 style={{ color: txtColor, fontSize: 18, fontWeight: 700, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
-                    {titleRole && <p style={{ color: txtSecondary, fontSize: 13, margin: 0 }}>{titleRole}</p>}
-                  </div>
-                );
-              }
-
-              // ===== PRO CREATIVE =====
-              if (layout === 'pro-creative') {
-                return (
-                  <div className="card-preview" style={{ background: bgGrad, padding: 0, overflow: 'hidden' }}>
-                    {statusBadge}
-                    <div style={{ padding: '20px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-                      <div style={{ flex: 1, textAlign: 'left' }}>
-                        <h3 style={{ color: txtColor, fontSize: 18, fontWeight: 700, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
-                        {titleRole && <p style={{ color: txtSecondary, fontSize: 12, margin: 0 }}>{titleRole}</p>}
-                      </div>
-                      {profilePhotoUrl ? (
-                        <img src={profilePhotoUrl} alt="" style={{ width: 56, height: 56, borderRadius: 28, objectFit: 'cover', border: '2px solid rgba(255,255,255,0.3)' }} onClick={() => photoInputRef.current?.click()} />
-                      ) : (
-                        <div style={{ width: 56, height: 56, borderRadius: 28, background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }} onClick={() => photoInputRef.current?.click()}>
-                          <IoCamera size={20} color="rgba(255,255,255,0.5)" />
-                        </div>
-                      )}
-                    </div>
-                    {/* Wave divider */}
-                    <svg viewBox="0 0 400 30" style={{ display: 'block', width: '100%' }}>
-                      <path d="M0,15 Q100,0 200,15 T400,15 L400,30 L0,30 Z" fill="#fff" />
-                    </svg>
-                    <div style={{ background: '#fff', padding: '8px 16px 16px' }}>
-                      <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                        <div style={{ width: 28, height: 28, borderRadius: 14, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <IoCall size={12} color="#fff" />
-                        </div>
-                        <div style={{ width: 28, height: 28, borderRadius: 14, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <IoMail size={12} color="#fff" />
-                        </div>
-                        <div style={{ width: 28, height: 28, borderRadius: 14, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <IoGlobe size={12} color="#fff" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-
-              // ===== PRO CORPORATE =====
-              if (layout === 'pro-corporate') {
-                return (
-                  <div className="card-preview" style={{ background: bgGrad, padding: '20px 16px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-                    {statusBadge}
-                    {/* Decorative circles */}
-                    <div style={{ position: 'absolute', top: -20, left: -20, width: 80, height: 80, borderRadius: 40, border: `2px solid ${bgLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)'}` }} />
-                    <div style={{ position: 'absolute', top: 10, right: -15, width: 60, height: 60, borderRadius: 30, border: `2px solid ${bgLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)'}` }} />
-                    {photoEl}
-                    <h3 style={{ color: txtColor, fontSize: 18, fontWeight: 700, margin: '0 0 2px', position: 'relative', zIndex: 1 }}>{fullName || 'Your Name'}</h3>
-                    {titleRole && <p style={{ color: txtSecondary, fontSize: 13, margin: 0, position: 'relative', zIndex: 1 }}>{titleRole}</p>}
-                  </div>
-                );
-              }
-
-              // ===== PRO CARD =====
-              if (layout === 'pro-card') {
-                return (
-                  <div className="card-preview" style={{ background: bgGrad, padding: 0, overflow: 'hidden' }}>
-                    {statusBadge}
-                    {/* Banner area */}
-                    {bannerImageUrl ? (
-                      <div style={{ height: 80, position: 'relative' }}>
-                        <img src={bannerImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 40, background: `linear-gradient(transparent, ${gradientColors[0]})` }} />
-                      </div>
-                    ) : (
-                      <div style={{ height: 40 }} />
-                    )}
-                    {/* Photo overlapping */}
-                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: bannerImageUrl ? -28 : 0, marginBottom: 8, position: 'relative', zIndex: 2 }}>
-                      {profilePhotoUrl ? (
-                        <img src={profilePhotoUrl} alt="" style={{ width: 56, height: 56, borderRadius: 28, objectFit: 'cover', border: `3px solid ${currentTpl?.colorSchemes[0]?.accent || '#C9A84C'}` }} onClick={() => photoInputRef.current?.click()} />
-                      ) : (
-                        <div style={{ width: 56, height: 56, borderRadius: 28, background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `3px solid ${currentTpl?.colorSchemes[0]?.accent || '#C9A84C'}` }} onClick={() => photoInputRef.current?.click()}>
-                          <IoCamera size={20} color="rgba(255,255,255,0.5)" />
-                        </div>
-                      )}
-                    </div>
-                    <div style={{ padding: '0 16px 16px', textAlign: 'center' }}>
-                      <h3 style={{ color: txtColor, fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
-                      {titleRole && <p style={{ color: txtSecondary, fontSize: 12, margin: 0 }}>{titleRole}</p>}
-                    </div>
-                  </div>
-                );
-              }
-
-              // ===== BIZ TRADITIONAL =====
-              if (layout === 'biz-traditional') {
-                return (
-                  <div className="card-preview" style={{ background: '#fff', padding: 0, overflow: 'hidden' }}>
-                    {statusBadge}
-                    {/* Colored header band */}
-                    <div style={{ background: bgGrad, padding: '16px 16px 24px', position: 'relative' }}>
-                      <div style={{ width: 28, height: 28, borderRadius: 4, background: 'rgba(255,255,255,0.2)', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <IoBusinessOutline size={14} color="rgba(255,255,255,0.8)" />
-                      </div>
-                      <h3 style={{ color: '#fff', fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
-                      {titleRole && <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, margin: 0 }}>{titleRole}</p>}
-                      {/* Photo circle on right */}
-                      <div style={{ position: 'absolute', bottom: -20, right: 16 }}>
-                        {profilePhotoUrl ? (
-                          <img src={profilePhotoUrl} alt="" style={{ width: 48, height: 48, borderRadius: 24, objectFit: 'cover', border: '3px solid #fff' }} onClick={() => photoInputRef.current?.click()} />
-                        ) : (
-                          <div style={{ width: 48, height: 48, borderRadius: 24, background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '3px solid #fff' }} onClick={() => photoInputRef.current?.click()}>
-                            <IoCamera size={16} color="#9ca3af" />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    {/* White bottom */}
-                    <div style={{ padding: '28px 16px 16px' }}>
-                      <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
-                        <div style={{ width: 28, height: 28, borderRadius: 14, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <IoCall size={12} color="#fff" />
-                        </div>
-                        <div style={{ width: 28, height: 28, borderRadius: 14, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <IoMail size={12} color="#fff" />
-                        </div>
-                        <div style={{ width: 28, height: 28, borderRadius: 14, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <IoGlobe size={12} color="#fff" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-
-              // ===== BIZ MODERN =====
-              if (layout === 'biz-modern') {
-                return (
-                  <div className="card-preview" style={{ background: '#fff', padding: 0, overflow: 'hidden' }}>
-                    {statusBadge}
-                    {/* Colored top with diagonal or banner image */}
-                    <div style={{ background: bannerImageUrl ? 'none' : bgGrad, padding: bannerImageUrl ? 0 : '16px', minHeight: 80, position: 'relative', overflow: 'hidden' }}>
-                      {bannerImageUrl && (
-                        <>
-                          <img src={bannerImageUrl} alt="" style={{ width: '100%', height: 100, objectFit: 'cover', display: 'block' }} />
-                          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 100%)' }} />
-                        </>
-                      )}
-                      <div style={{ position: bannerImageUrl ? 'absolute' : 'relative' as any, bottom: bannerImageUrl ? 0 : undefined, left: 0, right: 0, padding: '16px' }}>
-                      <h3 style={{ color: '#fff', fontSize: 15, fontWeight: 700, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
-                      {titleRole && <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 11, margin: 0 }}>{titleRole}</p>}
-                      {/* Photo on right */}
-                      <div style={{ position: 'absolute', bottom: -16, right: 16 }}>
-                        {profilePhotoUrl ? (
-                          <img src={profilePhotoUrl} alt="" style={{ width: 48, height: 48, borderRadius: 24, objectFit: 'cover', border: '3px solid #fff' }} onClick={() => photoInputRef.current?.click()} />
-                        ) : (
-                          <div style={{ width: 48, height: 48, borderRadius: 24, background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '3px solid #fff' }} onClick={() => photoInputRef.current?.click()}>
-                            <IoCamera size={16} color="#9ca3af" />
-                          </div>
-                        )}
-                      </div>
-                      </div>
-                    </div>
-                    {/* Diagonal transition */}
-                    <svg viewBox="0 0 400 20" style={{ display: 'block', width: '100%', marginTop: -1 }}>
-                      <path d="M0,0 L400,0 L400,20 L0,0 Z" fill={gradientColors[0]} />
-                    </svg>
-                    {/* White bottom */}
-                    <div style={{ padding: '12px 16px 16px' }}>
-                      <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
-                        <div style={{ width: 28, height: 28, borderRadius: 14, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <IoCall size={12} color="#fff" />
-                        </div>
-                        <div style={{ width: 28, height: 28, borderRadius: 14, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <IoMail size={12} color="#fff" />
-                        </div>
-                        <div style={{ width: 28, height: 28, borderRadius: 14, background: gradientColors[0], display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <IoGlobe size={12} color="#fff" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-
-              // ===== BIZ MINIMALIST =====
-              if (layout === 'biz-minimalist') {
-                return (
-                  <div className="card-preview" style={{ background: '#fff', padding: '20px 16px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-                    {statusBadge}
-                    {/* Thin accent line */}
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: bgGrad }} />
-                    {profilePhotoUrl ? (
-                      <img src={profilePhotoUrl} alt="" style={{ width: 48, height: 48, borderRadius: 12, objectFit: 'cover', marginBottom: 8 }} onClick={() => photoInputRef.current?.click()} />
-                    ) : (
-                      <div style={{ width: 48, height: 48, borderRadius: 12, background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8, margin: '0 auto 8px' }} onClick={() => photoInputRef.current?.click()}>
-                        <IoCamera size={16} color="#9ca3af" />
-                      </div>
-                    )}
-                    <h3 style={{ color: '#1f2937', fontSize: 16, fontWeight: 600, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
-                    {titleRole && <p style={{ color: '#6b7280', fontSize: 12, margin: 0 }}>{titleRole}</p>}
-                  </div>
-                );
-              }
-
-              // ===== COVER CARD =====
-              if (layout === 'cover-card') {
-                return (
-                  <div className="card-preview" style={{ background: '#fff', padding: 0, overflow: 'hidden' }}>
-                    {statusBadge}
-                    {/* Cover photo area */}
-                    {bannerImageUrl ? (
-                      <div style={{ height: 100, position: 'relative' }}>
-                        <img src={bannerImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      </div>
-                    ) : profilePhotoUrl ? (
-                      <div style={{ height: 100, position: 'relative' }}>
-                        <img src={profilePhotoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onClick={() => photoInputRef.current?.click()} />
-                      </div>
-                    ) : (
-                      <div style={{ height: 80, background: bgGrad, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <IoCamera size={28} color="rgba(255,255,255,0.4)" />
-                      </div>
-                    )}
-                    {/* Wave transition */}
-                    <svg viewBox="0 0 400 20" style={{ display: 'block', width: '100%', marginTop: -10 }}>
-                      <path d="M0,20 Q100,0 200,10 T400,0 L400,20 Z" fill="#fff" />
-                    </svg>
-                    <div style={{ padding: '4px 16px 16px' }}>
-                      <h3 style={{ color: '#1f2937', fontSize: 15, fontWeight: 700, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
-                      {titleRole && <p style={{ color: '#6b7280', fontSize: 11, margin: 0 }}>{titleRole}</p>}
-                    </div>
-                  </div>
-                );
-              }
-
-              // ===== PREMIUM STATIC =====
-              if (layout === 'premium-static') {
-                return (
-                  <div className="card-preview" style={{ background: bgGrad, padding: 0, overflow: 'hidden', minHeight: 160 }}>
-                    {statusBadge}
-                    {bannerImageUrl ? (
-                      <div style={{ position: 'relative', height: 120 }}>
-                        <img src={bannerImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, background: 'linear-gradient(transparent, rgba(0,0,0,0.6))' }} />
-                        <div style={{ position: 'absolute', bottom: 8, left: 12 }}>
-                          <h3 style={{ color: '#fff', fontSize: 14, fontWeight: 700, margin: 0, textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>{fullName || 'Your Name'}</h3>
-                        </div>
-                      </div>
-                    ) : (
-                      <div style={{ padding: '24px 16px', textAlign: 'center' }}>
-                        {photoEl}
-                        <h3 style={{ color: txtColor, fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{fullName || 'Your Name'}</h3>
-                        {titleRole && <p style={{ color: txtSecondary, fontSize: 12, margin: 0 }}>{titleRole}</p>}
-                      </div>
-                    )}
-                    <div style={{ padding: '8px 16px 16px' }}>
-                      <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
-                        <div style={{ width: 28, height: 28, borderRadius: 14, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <IoCall size={12} color="#fff" />
-                        </div>
-                        <div style={{ width: 28, height: 28, borderRadius: 14, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <IoMail size={12} color="#fff" />
-                        </div>
-                        <div style={{ width: 28, height: 28, borderRadius: 14, background: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <IoGlobe size={12} color="#fff" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              }
-
-              // ===== BASIC (default) =====
-              return (
-                <div className="card-preview" style={{ background: bgGrad, padding: '24px 16px', textAlign: 'center' }}>
-                  {statusBadge}
-                  {photoEl}
-                  <h3 style={{ color: txtColor, fontSize: 18, fontWeight: 600, margin: '0 0 4px' }}>{fullName || 'Your Name'}</h3>
-                  {titleRole && <p style={{ color: txtSecondary, fontSize: 14, margin: 0 }}>{titleRole}</p>}
-                </div>
-              );
-            })()}
+            <ECardIframePreview
+              ref={iframePreviewRef}
+              slug={cardData?.slug}
+              isPublished={!!cardData?.is_published}
+              fallbackCard={cardData as any}
+              fallbackLinks={links as any}
+            />
 
             {/* Action Buttons */}
             <div className="preview-actions">
@@ -2094,27 +1706,8 @@ export default function ECardDashboardScreen() {
                   </div>
                 )}
 
-                {/* Geo Analytics Dashboard - only for civic/political cards */}
-                {cardId && cardData?.template_id != null && (
-                  cardData.template_id.startsWith('civic-') || cardData.template_id === 'politician-generic'
-                ) ? (
-                  <div style={{ marginTop: '1.5rem' }}>
-                    <h3 style={{
-                      color: isDark ? '#fff' : '#1a1a2e',
-                      fontSize: '1.1rem',
-                      fontWeight: 600,
-                      marginBottom: '1rem',
-                    }}>
-                      Geo Intelligence
-                    </h3>
-                    <GeoAnalyticsDashboard cardId={cardId} isDark={isDark} />
-                  </div>
-                ) : null}
-
-                {/* Link clicks summary for non-civic cards */}
-                {cardId && !(cardData?.template_id != null && (
-                  cardData.template_id.startsWith('civic-') || cardData.template_id === 'politician-generic'
-                )) ? (
+                {/* Link Performance - shown for ALL card types */}
+                {cardId && (
                   <div style={{ marginTop: '1.5rem' }}>
                     <h3 style={{
                       color: isDark ? '#fff' : '#1a1a2e',
@@ -2150,6 +1743,23 @@ export default function ECardDashboardScreen() {
                         Add links to your card to start tracking clicks.
                       </p>
                     )}
+                  </div>
+                )}
+
+                {/* Geo Analytics Dashboard - additionally shown for civic/political cards */}
+                {cardId && cardData?.template_id != null && (
+                  cardData.template_id.startsWith('civic-') || cardData.template_id === 'politician-generic'
+                ) ? (
+                  <div style={{ marginTop: '1.5rem' }}>
+                    <h3 style={{
+                      color: isDark ? '#fff' : '#1a1a2e',
+                      fontSize: '1.1rem',
+                      fontWeight: 600,
+                      marginBottom: '1rem',
+                    }}>
+                      Geo Intelligence
+                    </h3>
+                    <GeoAnalyticsDashboard cardId={cardId} isDark={isDark} />
                   </div>
                 ) : null}
               </div>

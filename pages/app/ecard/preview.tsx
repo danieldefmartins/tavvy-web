@@ -21,6 +21,7 @@ import {
   getCardUrl,
 } from '../../../lib/ecard';
 import CardPreview from '../../../components/ecard/CardPreview';
+import ECardIframePreview, { ECardIframePreviewHandle } from '../../../components/ecard/ECardIframePreview';
 import StyledQRCode, { QR_STYLE_PRESETS, QRStyleConfig } from '../../../components/ecard/StyledQRCode';
 import { 
   IoArrowBack, 
@@ -58,6 +59,7 @@ export default function ECardPreviewScreen() {
   const [showQRModal, setShowQRModal] = useState(false);
   const [qrStyle, setQrStyle] = useState<Partial<QRStyleConfig>>({});
   const qrContainerRef = useRef<HTMLDivElement>(null);
+  const iframePreviewRef = useRef<ECardIframePreviewHandle>(null);
   const [copied, setCopied] = useState(false);
   const [cardId, setCardId] = useState<string | null>(null);
 
@@ -134,6 +136,8 @@ export default function ECardPreviewScreen() {
         gradient_color_2: gradientColor2,
       } as any : prev);
       setHasChanges(false);
+      // Reload iframe preview to reflect saved changes
+      setTimeout(() => iframePreviewRef.current?.reload(), 500);
     } catch (error) {
       console.error('Error saving changes:', error);
     } finally {
@@ -194,7 +198,7 @@ export default function ECardPreviewScreen() {
     }
   };
 
-  // Refresh preview by reloading card data
+  // Refresh preview by reloading card data + iframe
   const refreshPreview = async () => {
     if (!cardId) return;
     try {
@@ -206,6 +210,7 @@ export default function ECardPreviewScreen() {
         setCardData(card);
         setCardLinks(links || []);
       }
+      iframePreviewRef.current?.reload();
     } catch (error) {
       console.error('Error refreshing preview:', error);
     }
@@ -277,7 +282,13 @@ export default function ECardPreviewScreen() {
             </div>
           ) : (
             <div className="card-preview-container">
-              <CardPreview card={previewCard} links={cardLinks} />
+              <ECardIframePreview
+                ref={iframePreviewRef}
+                slug={cardData.slug}
+                isPublished={!!cardData.is_published}
+                fallbackCard={previewCard}
+                fallbackLinks={cardLinks}
+              />
             </div>
           )}
 
