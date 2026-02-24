@@ -1,9 +1,11 @@
 /**
- * ECardIframePreview — renders the live card page in an iframe for 100% visual parity.
- * Falls back to CardPreview for draft/unpublished cards that don't have a live URL yet.
+ * ECardIframePreview — fetches the live card's SSR HTML and renders it
+ * in an iframe via srcdoc. This avoids all client-side JS issues (locale
+ * redirects, auth, hydration) that plague the src= approach.
+ * Falls back to CardPreview for draft/unpublished cards.
  */
 
-import React, { useState, useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
 import CardPreview from './CardPreview';
 import { CardData, LinkItem } from '../../lib/ecard';
 
@@ -19,26 +21,43 @@ interface ECardIframePreviewProps {
   height?: number;
 }
 
+const SCRIPT_TAG_RE = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi;
+
 const ECardIframePreview = forwardRef<ECardIframePreviewHandle, ECardIframePreviewProps>(
   ({ slug, isPublished, fallbackCard, fallbackLinks, height = 580 }, ref) => {
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const [loading, setLoading] = useState(true);
-    const [cacheBuster, setCacheBuster] = useState(0);
+    const [htmlContent, setHtmlContent] = useState<string | null>(null);
+    const [fetchKey, setFetchKey] = useState(0);
 
     const canUseIframe = isPublished && slug && !slug.startsWith('draft_');
 
-    const reload = useCallback(() => {
-      if (canUseIframe) {
-        setCacheBuster(Date.now());
-        setLoading(true);
+    const fetchHtml = useCallback(async () => {
+      if (!canUseIframe || !slug) return;
+      setLoading(true);
+      try {
+        const res = await fetch(`/${slug}?preview=1`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        let html = await res.text();
+        // Strip all script tags to prevent any JS from running
+        html = html.replace(SCRIPT_TAG_RE, '');
+        setHtmlContent(html);
+      } catch (err) {
+        console.error('[ECardIframePreview] Failed to fetch card HTML:', err);
+      } finally {
+        setLoading(false);
       }
-    }, [canUseIframe]);
+    }, [canUseIframe, slug]);
+
+    useEffect(() => {
+      fetchHtml();
+    }, [fetchHtml, fetchKey]);
+
+    const reload = useCallback(() => {
+      setFetchKey(Date.now());
+    }, []);
 
     useImperativeHandle(ref, () => ({ reload }), [reload]);
-
-    const iframeSrc = canUseIframe
-      ? `/${slug}?preview=1${cacheBuster ? `&t=${cacheBuster}` : ''}`
-      : '';
 
     // Draft / unpublished fallback
     if (!canUseIframe) {
@@ -88,20 +107,22 @@ const ECardIframePreview = forwardRef<ECardIframePreviewHandle, ECardIframePrevi
           </div>
         )}
 
-        <iframe
-          ref={iframeRef}
-          src={iframeSrc}
-          onLoad={() => setLoading(false)}
-          style={{
-            width: '100%',
-            height,
-            border: 'none',
-            borderRadius: 20,
-            boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-            display: 'block',
-          }}
-          title="Card Preview"
-        />
+        {htmlContent && (
+          <iframe
+            ref={iframeRef}
+            srcDoc={htmlContent}
+            sandbox="allow-same-origin"
+            style={{
+              width: '100%',
+              height,
+              border: 'none',
+              borderRadius: 20,
+              boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
+              display: 'block',
+            }}
+            title="Card Preview"
+          />
+        )}
 
         <style jsx>{`
           @keyframes ecard-iframe-spin {

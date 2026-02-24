@@ -84,19 +84,6 @@ function LocaleManager() {
     if (typeof window === 'undefined' || hasProcessedRef.current) return;
     hasProcessedRef.current = true;
 
-    // Skip locale redirect when loaded inside an iframe (preview mode)
-    // to prevent navigation loops that cause infinite reloading
-    try {
-      if (window.self !== window.top) {
-        detectionCompleteRef.current = true;
-        return;
-      }
-    } catch (e) {
-      // Cross-origin iframe — also skip
-      detectionCompleteRef.current = true;
-      return;
-    }
-
     const savedLocale = localStorage.getItem('tavvy-locale');
 
     if (savedLocale && SUPPORTED_LOCALES.includes(savedLocale)) {
