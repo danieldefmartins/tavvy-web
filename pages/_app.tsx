@@ -132,6 +132,11 @@ function LocaleManager() {
 }
 
 function App({ Component, pageProps }: AppProps) {
+  // Skip locale management entirely for iframe preview pages.
+  // isPreview is set by getServerSideProps in [username].tsx when ?preview=1.
+  // This prevents LocaleManager from ever mounting, avoiding locale redirect loops.
+  const isPreview = pageProps?.isPreview === true;
+
   return (
     <>
       <Head>
@@ -167,7 +172,7 @@ function App({ Component, pageProps }: AppProps) {
         <AuthProvider>
           <ProAuthProvider>
             <ThemeProvider>
-              <LocaleManager />
+              {!isPreview && <LocaleManager />}
               <Component {...pageProps} />
             </ThemeProvider>
           </ProAuthProvider>
