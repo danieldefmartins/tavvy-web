@@ -320,9 +320,9 @@ export default function AddStoryPage() {
         .from('place-stories')
         .getPublicUrl(fileName);
 
-      // Calculate expiration (24 hours from now)
+      // Calculate expiration (72 hours from now)
       const expiresAt = new Date();
-      expiresAt.setHours(expiresAt.getHours() + 24);
+      expiresAt.setHours(expiresAt.getHours() + 72);
 
       // Create story record (matching iOS schema exactly)
       const { error: insertError } = await supabase
@@ -342,7 +342,7 @@ export default function AddStoryPage() {
       if (insertError) throw insertError;
 
       // Success - go back to previous page (universe page)
-      alert('Story uploaded successfully! It will be visible for 24 hours.');
+      alert('Story uploaded successfully! It will be visible for 72 hours.');
       router.back();
       
     } catch (err: any) {
@@ -874,7 +874,7 @@ export default function AddStoryPage() {
               color: colors.textSecondary,
               lineHeight: '1.5',
             }}>
-              📸 Your story will be visible for 24 hours. If it's the only story for this place, it will stay visible until someone adds a new one.
+              📸 Your story will be visible for 72 hours. If it's the only story for this place, it will stay visible until someone adds a new one.
             </p>
           </div>
         </div>

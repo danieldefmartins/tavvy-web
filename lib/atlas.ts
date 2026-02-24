@@ -498,7 +498,7 @@ export async function isArticleSaved(
   userId: string
 ): Promise<boolean> {
   const { data, error } = await supabase
-    .from('atlas_saved_articles')
+    .from('atlas_article_saves')
     .select('id')
     .eq('article_id', articleId)
     .eq('user_id', userId)
@@ -513,7 +513,7 @@ export async function isArticleSaved(
 
 export async function saveArticle(articleId: string, userId: string): Promise<void> {
   const { error } = await supabase
-    .from('atlas_saved_articles')
+    .from('atlas_article_saves')
     .insert({
       article_id: articleId,
       user_id: userId,
@@ -530,7 +530,7 @@ export async function saveArticle(articleId: string, userId: string): Promise<vo
 
 export async function unsaveArticle(articleId: string, userId: string): Promise<void> {
   const { error } = await supabase
-    .from('atlas_saved_articles')
+    .from('atlas_article_saves')
     .delete()
     .eq('article_id', articleId)
     .eq('user_id', userId);
@@ -546,7 +546,7 @@ export async function unsaveArticle(articleId: string, userId: string): Promise<
 
 export async function getSavedArticles(userId: string): Promise<AtlasArticle[]> {
   const { data, error } = await supabase
-    .from('atlas_saved_articles')
+    .from('atlas_article_saves')
     .select(`
       article:atlas_articles(
         *,

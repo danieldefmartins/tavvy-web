@@ -6,9 +6,9 @@
 
 import { supabase } from './supabaseClient';
 
-// API Keys (should be stored securely - in production use environment variables)
-const TICKETMASTER_API_KEY = 'Jy4lTOUADcz6MbrnIDCuSkBmIA96wBqf';
-const PREDICTHQ_API_KEY = 'E7n5kSWF5N7CmyruBAfuJKsX4RIgXrJ8tHMUVbYD';
+// API Keys
+const TICKETMASTER_API_KEY = process.env.NEXT_PUBLIC_TICKETMASTER_API_KEY || '';
+const PREDICTHQ_API_KEY = process.env.NEXT_PUBLIC_PREDICTHQ_API_KEY || '';
 
 // Canonical Event Type
 export interface TavvyEvent {

@@ -61,7 +61,7 @@ export default function SearchScreen() {
       const { data, error } = await supabase
         .from('places')
         .select('*')
-        .or(`name.ilike.%${query}%,category.ilike.%${query}%,city.ilike.%${query}%`)
+        .or(`name.ilike.%${query}%,tavvy_category.ilike.%${query}%,city.ilike.%${query}%`)
         .limit(50);
 
       if (!error) {

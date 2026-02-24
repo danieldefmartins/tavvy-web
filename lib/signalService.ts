@@ -651,3 +651,7 @@ export async function getTopSignals(placeId: string, limit: number = 3): Promise
   all.sort((a, b) => b.current_score - a.current_score);
   return all.slice(0, limit);
 }
+
+export async function preloadSignalCache(): Promise<void> {
+  await loadSignalCache();
+}
