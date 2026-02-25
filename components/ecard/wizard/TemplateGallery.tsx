@@ -3,7 +3,7 @@
  * Full-size realistic card previews in a horizontal scroll-snap carousel.
  */
 
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { TEMPLATES, Template } from '../../../config/eCardTemplates';
 import { IoLockClosed, IoArrowBack } from 'react-icons/io5';
 import { FullCardPreview } from './FullCardPreview';
@@ -49,17 +49,18 @@ export default function TemplateGallery({
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const isInitialMount = useRef(true);
 
-  // Filter templates by card type
-  const templates = TEMPLATES.filter(t => {
+  // Filter templates by card type (memoized to stabilize useEffect deps)
+  const sorted = useMemo(() => {
     const category = TEMPLATE_CATEGORIES[cardType];
-    if (category) return category.includes(t.id);
-    return true;
-  });
+    const filtered = category
+      ? TEMPLATES.filter(t => category.includes(t.id))
+      : TEMPLATES;
 
-  // If politician with specific country template, put that first
-  const sorted = countryTemplate
-    ? [...templates.filter(t => t.id === countryTemplate), ...templates.filter(t => t.id !== countryTemplate)]
-    : templates;
+    // If politician with specific country template, put that first
+    return countryTemplate
+      ? [...filtered.filter(t => t.id === countryTemplate), ...filtered.filter(t => t.id !== countryTemplate)]
+      : filtered;
+  }, [cardType, countryTemplate]);
 
   // Set up IntersectionObserver to track the current visible card
   useEffect(() => {
