@@ -1,11 +1,11 @@
 /**
- * eCard Hub Screen
- * Clean, simple entry point — shows existing cards or prompts to create one.
- * Single "+" FAB to create. Card type picker before template gallery.
- * Politician flow includes a country selector with search.
+ * eCard Hub Screen — /app/ecard
+ * Shows existing cards or prompts to create one.
+ * FAB navigates to /app/ecard/new (creation wizard).
+ * Card actions: Edit → /app/ecard/[cardId]/edit, Stats → /app/ecard/[cardId]/stats
  */
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
@@ -24,11 +24,6 @@ import {
   IoTrash,
   IoClose,
   IoCopy,
-  IoBusinessOutline,
-  IoPerson,
-  IoFlagOutline,
-  IoSearch,
-  IoChevronBack,
   IoLockClosedOutline,
   IoShieldCheckmarkOutline,
   IoStarOutline,
@@ -36,51 +31,7 @@ import {
 
 const ACCENT = '#00C853';
 
-/* ── Country list with flag emojis ── */
-const COUNTRIES = [
-  { code: 'BR', name: 'Brazil', nameLocal: 'Brasil', flag: '🇧🇷', featured: true, template: 'civic-card' },
-  { code: 'US', name: 'United States', nameLocal: 'Estados Unidos', flag: '🇺🇸', featured: false, template: 'politician-generic' },
-  { code: 'GB', name: 'United Kingdom', nameLocal: 'Reino Unido', flag: '🇬🇧', featured: false, template: 'politician-generic' },
-  { code: 'CA', name: 'Canada', nameLocal: 'Canadá', flag: '🇨🇦', featured: false, template: 'politician-generic' },
-  { code: 'MX', name: 'Mexico', nameLocal: 'México', flag: '🇲🇽', featured: false, template: 'politician-generic' },
-  { code: 'AR', name: 'Argentina', nameLocal: 'Argentina', flag: '🇦🇷', featured: false, template: 'politician-generic' },
-  { code: 'CO', name: 'Colombia', nameLocal: 'Colombia', flag: '🇨🇴', featured: false, template: 'politician-generic' },
-  { code: 'CL', name: 'Chile', nameLocal: 'Chile', flag: '🇨🇱', featured: false, template: 'politician-generic' },
-  { code: 'PE', name: 'Peru', nameLocal: 'Perú', flag: '🇵🇪', featured: false, template: 'politician-generic' },
-  { code: 'PT', name: 'Portugal', nameLocal: 'Portugal', flag: '🇵🇹', featured: false, template: 'politician-generic' },
-  { code: 'ES', name: 'Spain', nameLocal: 'España', flag: '🇪🇸', featured: false, template: 'politician-generic' },
-  { code: 'FR', name: 'France', nameLocal: 'France', flag: '🇫🇷', featured: false, template: 'politician-generic' },
-  { code: 'DE', name: 'Germany', nameLocal: 'Deutschland', flag: '🇩🇪', featured: false, template: 'politician-generic' },
-  { code: 'IT', name: 'Italy', nameLocal: 'Italia', flag: '🇮🇹', featured: false, template: 'politician-generic' },
-  { code: 'AU', name: 'Australia', nameLocal: 'Australia', flag: '🇦🇺', featured: false, template: 'politician-generic' },
-  { code: 'JP', name: 'Japan', nameLocal: '日本', flag: '🇯🇵', featured: false, template: 'politician-generic' },
-  { code: 'KR', name: 'South Korea', nameLocal: '대한민국', flag: '🇰🇷', featured: false, template: 'politician-generic' },
-  { code: 'IN', name: 'India', nameLocal: 'भारत', flag: '🇮🇳', featured: false, template: 'politician-generic' },
-  { code: 'NG', name: 'Nigeria', nameLocal: 'Nigeria', flag: '🇳🇬', featured: false, template: 'politician-generic' },
-  { code: 'ZA', name: 'South Africa', nameLocal: 'South Africa', flag: '🇿🇦', featured: false, template: 'politician-generic' },
-  { code: 'KE', name: 'Kenya', nameLocal: 'Kenya', flag: '🇰🇪', featured: false, template: 'politician-generic' },
-  { code: 'EG', name: 'Egypt', nameLocal: 'مصر', flag: '🇪🇬', featured: false, template: 'politician-generic' },
-  { code: 'IL', name: 'Israel', nameLocal: 'ישראל', flag: '🇮🇱', featured: false, template: 'politician-generic' },
-  { code: 'PH', name: 'Philippines', nameLocal: 'Pilipinas', flag: '🇵🇭', featured: false, template: 'politician-generic' },
-  { code: 'ID', name: 'Indonesia', nameLocal: 'Indonesia', flag: '🇮🇩', featured: false, template: 'politician-generic' },
-  { code: 'PL', name: 'Poland', nameLocal: 'Polska', flag: '🇵🇱', featured: false, template: 'politician-generic' },
-  { code: 'SE', name: 'Sweden', nameLocal: 'Sverige', flag: '🇸🇪', featured: false, template: 'politician-generic' },
-  { code: 'UY', name: 'Uruguay', nameLocal: 'Uruguay', flag: '🇺🇾', featured: false, template: 'politician-generic' },
-  { code: 'PY', name: 'Paraguay', nameLocal: 'Paraguay', flag: '🇵🇾', featured: false, template: 'politician-generic' },
-  { code: 'EC', name: 'Ecuador', nameLocal: 'Ecuador', flag: '🇪🇨', featured: false, template: 'politician-generic' },
-  { code: 'VE', name: 'Venezuela', nameLocal: 'Venezuela', flag: '🇻🇪', featured: false, template: 'politician-generic' },
-  { code: 'BO', name: 'Bolivia', nameLocal: 'Bolivia', flag: '🇧🇴', featured: false, template: 'politician-generic' },
-  { code: 'CR', name: 'Costa Rica', nameLocal: 'Costa Rica', flag: '🇨🇷', featured: false, template: 'politician-generic' },
-  { code: 'PA', name: 'Panama', nameLocal: 'Panamá', flag: '🇵🇦', featured: false, template: 'politician-generic' },
-  { code: 'DO', name: 'Dominican Republic', nameLocal: 'República Dominicana', flag: '🇩🇴', featured: false, template: 'politician-generic' },
-  { code: 'GT', name: 'Guatemala', nameLocal: 'Guatemala', flag: '🇬🇹', featured: false, template: 'politician-generic' },
-  { code: 'HN', name: 'Honduras', nameLocal: 'Honduras', flag: '🇭🇳', featured: false, template: 'politician-generic' },
-  { code: 'SV', name: 'El Salvador', nameLocal: 'El Salvador', flag: '🇸🇻', featured: false, template: 'politician-generic' },
-  { code: 'NI', name: 'Nicaragua', nameLocal: 'Nicaragua', flag: '🇳🇮', featured: false, template: 'politician-generic' },
-  { code: 'CU', name: 'Cuba', nameLocal: 'Cuba', flag: '🇨🇺', featured: false, template: 'politician-generic' },
-];
-
-type ModalStep = 'closed' | 'type-picker' | 'country-picker' | 'card-limit';
+type ModalStep = 'closed' | 'card-limit';
 
 /* ── Card limits per role ── */
 const CARD_LIMITS = {
@@ -103,8 +54,6 @@ export default function ECardHubScreen() {
   const [deleting, setDeleting] = useState(false);
   const [duplicating, setDuplicating] = useState<string | null>(null);
   const [modalStep, setModalStep] = useState<ModalStep>('closed');
-  const [countrySearch, setCountrySearch] = useState('');
-  const [pendingCardType, setPendingCardType] = useState<string>('');
 
   const fetchCards = useCallback(async () => {
     if (authLoading) return;
@@ -122,7 +71,7 @@ export default function ECardHubScreen() {
   useEffect(() => { fetchCards(); }, [fetchCards]);
 
   const handleEditCard = (card: CardData) => {
-    router.push(`/app/ecard/dashboard?cardId=${card.id}`, undefined, { locale });
+    router.push(`/app/ecard/${card.id}/edit`, undefined, { locale });
   };
 
   /* ── Card limit check ── */
@@ -140,29 +89,14 @@ export default function ECardHubScreen() {
 
   const handleFabClick = () => {
     if (canCreateCard()) {
-      setModalStep('type-picker');
+      router.push('/app/ecard/new', undefined, { locale });
     } else {
       setModalStep('card-limit');
     }
   };
 
-  const handleCreateWithType = (type: string) => {
-    if (type === 'politician') {
-      setModalStep('country-picker');
-      setCountrySearch('');
-      return;
-    }
-    setModalStep('closed');
-    router.push(`/app/ecard/create?type=${type}`, undefined, { locale });
-  };
-
-  const handleSelectCountry = (country: typeof COUNTRIES[0]) => {
-    setModalStep('closed');
-    router.push(`/app/ecard/create?type=politician&country=${country.code}&template=${country.template}`, undefined, { locale });
-  };
-
   const handleViewCard = (card: CardData) => {
-    router.push(`/app/ecard/preview?cardId=${card.id}`, undefined, { locale });
+    router.push(`/app/ecard/${card.id}/preview`, undefined, { locale });
   };
 
   const handleDeleteCard = async () => {
@@ -196,7 +130,7 @@ export default function ECardHubScreen() {
       const newCard = await duplicateCard(card.id, user.id);
       if (newCard) {
         setCards(prev => [newCard, ...prev]);
-        router.push(`/app/ecard/dashboard?cardId=${newCard.id}`, undefined, { locale });
+        router.push(`/app/ecard/${newCard.id}/edit`, undefined, { locale });
       } else {
         alert('Failed to duplicate card.');
       }
@@ -207,20 +141,6 @@ export default function ECardHubScreen() {
       setDuplicating(null);
     }
   };
-
-  /* ── Filtered countries ── */
-  const filteredCountries = useMemo(() => {
-    const q = countrySearch.toLowerCase().trim();
-    if (!q) return COUNTRIES;
-    return COUNTRIES.filter(c =>
-      c.name.toLowerCase().includes(q) ||
-      c.nameLocal.toLowerCase().includes(q) ||
-      c.code.toLowerCase().includes(q)
-    );
-  }, [countrySearch]);
-
-  const featuredCountries = filteredCountries.filter(c => c.featured);
-  const otherCountries = filteredCountries.filter(c => !c.featured);
 
   const bg = isDark ? '#000' : '#FAFAFA';
   const cardBg = isDark ? '#1A1A1A' : '#FFFFFF';
@@ -397,9 +317,7 @@ export default function ECardHubScreen() {
           </button>
         </div>
 
-        {/* ══════════════════════════════════════════════════════════
-            MODAL: Card Type Picker + Country Selector
-           ══════════════════════════════════════════════════════════ */}
+        {/* ── Card Limit Modal ── */}
         {modalStep !== 'closed' && (
           <div
             onClick={() => setModalStep('closed')}
@@ -422,98 +340,6 @@ export default function ECardHubScreen() {
             >
               {/* Handle */}
               <div style={{ width: 36, height: 4, borderRadius: 2, background: isDark ? 'rgba(255,255,255,0.15)' : '#DDD', margin: '8px auto 16px', flexShrink: 0 }} />
-
-              {/* ── STEP 1: Card Type Picker ── */}
-              {modalStep === 'type-picker' && (
-                <div style={{ padding: '0 20px' }}>
-                  <h2 style={{ fontSize: 20, fontWeight: 700, color: textPrimary, margin: '0 4px 6px', letterSpacing: '-0.3px' }}>
-                    Choose your card type
-                  </h2>
-                  <p style={{ fontSize: 14, color: textSecondary, margin: '0 4px 20px' }}>
-                    Select the type that best fits your needs
-                  </p>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {/* Business */}
-                    <button
-                      onClick={() => handleCreateWithType('business')}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 16,
-                        padding: '16px 18px', borderRadius: 16,
-                        background: isDark ? 'rgba(255,255,255,0.05)' : '#F7F7F7',
-                        border: `1px solid ${border}`, cursor: 'pointer',
-                        textAlign: 'left', width: '100%',
-                        transition: 'background 0.15s',
-                      }}
-                    >
-                      <div style={{
-                        width: 48, height: 48, borderRadius: 14,
-                        background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                      }}>
-                        <IoBusinessOutline size={24} color="#fff" />
-                      </div>
-                      <div>
-                        <span style={{ fontSize: 16, fontWeight: 600, color: textPrimary, display: 'block' }}>Business</span>
-                        <span style={{ fontSize: 13, color: textSecondary }}>For your company, store, or service</span>
-                      </div>
-                      <IoChevronForward size={18} color={textSecondary} style={{ marginLeft: 'auto', flexShrink: 0 }} />
-                    </button>
-
-                    {/* Personal */}
-                    <button
-                      onClick={() => handleCreateWithType('personal')}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 16,
-                        padding: '16px 18px', borderRadius: 16,
-                        background: isDark ? 'rgba(255,255,255,0.05)' : '#F7F7F7',
-                        border: `1px solid ${border}`, cursor: 'pointer',
-                        textAlign: 'left', width: '100%',
-                        transition: 'background 0.15s',
-                      }}
-                    >
-                      <div style={{
-                        width: 48, height: 48, borderRadius: 14,
-                        background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                      }}>
-                        <IoPerson size={24} color="#fff" />
-                      </div>
-                      <div>
-                        <span style={{ fontSize: 16, fontWeight: 600, color: textPrimary, display: 'block' }}>Personal</span>
-                        <span style={{ fontSize: 13, color: textSecondary }}>Your personal brand & link page</span>
-                      </div>
-                      <IoChevronForward size={18} color={textSecondary} style={{ marginLeft: 'auto', flexShrink: 0 }} />
-                    </button>
-
-                    {/* Politician / Civic */}
-                    <button
-                      onClick={() => handleCreateWithType('politician')}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 16,
-                        padding: '16px 18px', borderRadius: 16,
-                        background: isDark ? 'rgba(255,255,255,0.05)' : '#F7F7F7',
-                        border: `1px solid ${border}`, cursor: 'pointer',
-                        textAlign: 'left', width: '100%',
-                        transition: 'background 0.15s',
-                      }}
-                    >
-                      <div style={{
-                        width: 48, height: 48, borderRadius: 14,
-                        background: 'linear-gradient(135deg, #00C853, #00A843)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                      }}>
-                        <IoFlagOutline size={24} color="#fff" />
-                      </div>
-                      <div>
-                        <span style={{ fontSize: 16, fontWeight: 600, color: textPrimary, display: 'block' }}>Politician</span>
-                        <span style={{ fontSize: 13, color: textSecondary }}>For public servants & candidates</span>
-                      </div>
-                      <IoChevronForward size={18} color={textSecondary} style={{ marginLeft: 'auto', flexShrink: 0 }} />
-                    </button>
-                  </div>
-                </div>
-              )}
 
               {/* ── CARD LIMIT REACHED ── */}
               {modalStep === 'card-limit' && (
@@ -592,136 +418,6 @@ export default function ECardHubScreen() {
                 </div>
               )}
 
-              {/* ── STEP 2: Country Selector (Politician only) ── */}
-              {modalStep === 'country-picker' && (
-                <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
-                  {/* Header with back button */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 16px 12px', flexShrink: 0 }}>
-                    <button
-                      onClick={() => setModalStep('type-picker')}
-                      style={{ background: 'none', border: 'none', padding: 6, cursor: 'pointer', borderRadius: 8, display: 'flex', alignItems: 'center' }}
-                    >
-                      <IoChevronBack size={22} color={textPrimary} />
-                    </button>
-                    <div>
-                      <h2 style={{ fontSize: 18, fontWeight: 700, color: textPrimary, margin: 0, letterSpacing: '-0.3px' }}>
-                        Select your country
-                      </h2>
-                      <p style={{ fontSize: 13, color: textSecondary, margin: '2px 0 0' }}>
-                        Choose where the politician operates
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Search bar */}
-                  <div style={{ padding: '0 20px 12px', flexShrink: 0 }}>
-                    <div style={{
-                      display: 'flex', alignItems: 'center', gap: 10,
-                      padding: '10px 14px', borderRadius: 12,
-                      background: isDark ? 'rgba(255,255,255,0.06)' : '#F3F4F6',
-                      border: `1px solid ${border}`,
-                    }}>
-                      <IoSearch size={18} color={textSecondary} />
-                      <input
-                        type="text"
-                        placeholder="Search country..."
-                        value={countrySearch}
-                        onChange={(e) => setCountrySearch(e.target.value)}
-                        style={{
-                          flex: 1, border: 'none', outline: 'none', background: 'transparent',
-                          fontSize: 15, color: textPrimary,
-                        }}
-                        autoFocus
-                      />
-                      {countrySearch && (
-                        <button
-                          onClick={() => setCountrySearch('')}
-                          style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer', display: 'flex' }}
-                        >
-                          <IoClose size={16} color={textSecondary} />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Country list */}
-                  <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px', minHeight: 0 }}>
-                    {/* Featured countries */}
-                    {featuredCountries.length > 0 && (
-                      <>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: ACCENT, textTransform: 'uppercase', letterSpacing: 1.5, padding: '8px 4px', marginBottom: 4 }}>
-                          Featured
-                        </div>
-                        {featuredCountries.map((country) => (
-                          <button
-                            key={country.code}
-                            onClick={() => handleSelectCountry(country)}
-                            style={{
-                              display: 'flex', alignItems: 'center', gap: 14,
-                              padding: '14px 14px', borderRadius: 14, width: '100%',
-                              background: isDark ? 'rgba(0,200,83,0.08)' : 'rgba(0,200,83,0.06)',
-                              border: `1.5px solid ${ACCENT}33`,
-                              cursor: 'pointer', textAlign: 'left', marginBottom: 8,
-                              transition: 'background 0.15s',
-                            }}
-                          >
-                            <span style={{ fontSize: 32, lineHeight: 1 }}>{country.flag}</span>
-                            <div style={{ flex: 1 }}>
-                              <span style={{ fontSize: 15, fontWeight: 600, color: textPrimary, display: 'block' }}>{country.name}</span>
-                              <span style={{ fontSize: 12, color: textSecondary }}>{country.nameLocal !== country.name ? country.nameLocal : ''}</span>
-                            </div>
-                            <span style={{
-                              fontSize: 10, fontWeight: 600, padding: '3px 10px', borderRadius: 8,
-                              background: ACCENT, color: '#fff',
-                            }}>
-                              Civic Card
-                            </span>
-                            <IoChevronForward size={16} color={textSecondary} />
-                          </button>
-                        ))}
-                      </>
-                    )}
-
-                    {/* Other countries */}
-                    {otherCountries.length > 0 && (
-                      <>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: textSecondary, textTransform: 'uppercase', letterSpacing: 1.5, padding: '12px 4px 8px' }}>
-                          All Countries
-                        </div>
-                        {otherCountries.map((country) => (
-                          <button
-                            key={country.code}
-                            onClick={() => handleSelectCountry(country)}
-                            style={{
-                              display: 'flex', alignItems: 'center', gap: 14,
-                              padding: '12px 14px', borderRadius: 12, width: '100%',
-                              background: 'transparent',
-                              border: 'none', borderBottom: `1px solid ${border}`,
-                              cursor: 'pointer', textAlign: 'left',
-                              transition: 'background 0.15s',
-                            }}
-                          >
-                            <span style={{ fontSize: 28, lineHeight: 1 }}>{country.flag}</span>
-                            <div style={{ flex: 1 }}>
-                              <span style={{ fontSize: 15, fontWeight: 500, color: textPrimary, display: 'block' }}>{country.name}</span>
-                              {country.nameLocal !== country.name && (
-                                <span style={{ fontSize: 12, color: textSecondary }}>{country.nameLocal}</span>
-                              )}
-                            </div>
-                            <IoChevronForward size={16} color={textSecondary} />
-                          </button>
-                        ))}
-                      </>
-                    )}
-
-                    {filteredCountries.length === 0 && (
-                      <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-                        <p style={{ fontSize: 15, color: textSecondary }}>No countries found for &ldquo;{countrySearch}&rdquo;</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         )}
