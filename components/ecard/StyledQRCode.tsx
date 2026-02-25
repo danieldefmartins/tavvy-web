@@ -128,25 +128,40 @@ export default function StyledQRCode({ url, style = {}, className }: StyledQRCod
 export async function downloadQRCode(containerRef: HTMLDivElement, filename: string = 'qr-code') {
   const svg = containerRef.querySelector('svg');
   if (!svg) return;
-  
-  const svgData = new XMLSerializer().serializeToString(svg);
+
+  // Clone SVG and strip embedded images (they taint the canvas)
+  const clonedSvg = svg.cloneNode(true) as SVGElement;
+  clonedSvg.querySelectorAll('image').forEach((img) => img.remove());
+
+  const svgData = new XMLSerializer().serializeToString(clonedSvg);
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
   const img = new window.Image();
-  
-  return new Promise<void>((resolve) => {
+
+  return new Promise<void>((resolve, reject) => {
     img.onload = () => {
-      canvas.width = img.width * 2;
-      canvas.height = img.height * 2;
-      ctx?.scale(2, 2);
-      ctx?.drawImage(img, 0, 0);
-      
-      const link = document.createElement('a');
-      link.download = `${filename}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      resolve();
+      try {
+        canvas.width = img.width * 2;
+        canvas.height = img.height * 2;
+        ctx.scale(2, 2);
+        ctx.drawImage(img, 0, 0);
+
+        const link = document.createElement('a');
+        link.download = `${filename}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        resolve();
+      } catch (err) {
+        console.error('QR download canvas error:', err);
+        reject(err);
+      }
     };
-    img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+    img.onerror = (err) => {
+      console.error('QR download image load error:', err);
+      reject(err);
+    };
+    img.src = 'data:image/svg+xml;base64,' + btoa(decodeURIComponent(encodeURIComponent(svgData)));
   });
 }

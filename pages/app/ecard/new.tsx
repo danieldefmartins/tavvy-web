@@ -92,23 +92,24 @@ export default function ECardNewPage() {
 
       const slug = generateSlug(data.fullName);
 
-      const newCard = await createCard({
+      // Build payload — only include defined values to avoid PostgREST column errors
+      const payload: Record<string, any> = {
         user_id: user.id,
         full_name: data.fullName.trim(),
-        title: data.title.trim() || undefined,
         slug,
         template_id: selectedTemplateId || 'basic',
-        color_scheme_id: selectedColorSchemeId || undefined,
         gradient_color_1: data.primaryColor,
         gradient_color_2: data.primaryColor,
-        profile_photo_url: photoUrl,
         card_type: cardType || 'business',
-        country_code: countryCode,
         is_published: false,
         is_active: true,
-        view_count: 0,
-        tap_count: 0,
-      });
+      };
+      if (data.title.trim()) payload.title = data.title.trim();
+      if (selectedColorSchemeId) payload.color_scheme_id = selectedColorSchemeId;
+      if (photoUrl) payload.profile_photo_url = photoUrl;
+      if (countryCode) payload.country_code = countryCode;
+
+      const newCard = await createCard(payload as any);
 
       if (newCard) {
         router.push(`/app/ecard/${newCard.id}/edit`, undefined, { locale });
