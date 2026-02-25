@@ -37,7 +37,7 @@ type ModalStep = 'closed' | 'card-limit';
 /* ── Card limits per role ── */
 const CARD_LIMITS = {
   free: 1,       // Free users: 1 card
-  pro: 1,        // Pro users: 1 premium card per subscription
+  pro: 5,        // Pro users: up to 5 cards
   super_admin: Infinity, // Super admins: unlimited
 };
 
