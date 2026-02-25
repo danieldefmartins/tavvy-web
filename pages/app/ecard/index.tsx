@@ -27,6 +27,7 @@ import {
   IoLockClosedOutline,
   IoShieldCheckmarkOutline,
   IoStarOutline,
+  IoBarChartOutline,
 } from 'react-icons/io5';
 
 const ACCENT = '#00C853';
@@ -250,23 +251,40 @@ export default function ECardHubScreen() {
                   </div>
 
                   {/* Actions */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
+                    {/* Stats button — prominent */}
                     <button
-                      title="Duplicate"
-                      onClick={(e) => { e.stopPropagation(); handleDuplicateCard(card); }}
-                      disabled={duplicating === card.id}
-                      style={{ background: 'none', border: 'none', padding: 6, cursor: 'pointer', borderRadius: 6, display: 'flex', opacity: duplicating === card.id ? 0.4 : 1 }}
+                      title="View Stats"
+                      onClick={(e) => { e.stopPropagation(); router.push(`/app/ecard/${card.id}/stats`, undefined, { locale }); }}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 4,
+                        padding: '4px 10px', border: 'none', borderRadius: 8,
+                        background: isDark ? 'rgba(0,200,83,0.1)' : 'rgba(0,200,83,0.08)',
+                        cursor: 'pointer', fontSize: 12, fontWeight: 600, color: ACCENT,
+                      }}
                     >
-                      <IoCopy size={16} color={textSecondary} />
+                      <IoBarChartOutline size={14} />
+                      Stats
                     </button>
-                    <button
-                      title="Delete"
-                      onClick={(e) => { e.stopPropagation(); setDeleteModalCard(card); }}
-                      style={{ background: 'none', border: 'none', padding: 6, cursor: 'pointer', borderRadius: 6, display: 'flex' }}
-                    >
-                      <IoTrash size={16} color="#EF4444" />
-                    </button>
-                    <IoChevronForward size={16} color={textSecondary} />
+                    {/* Secondary actions */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <button
+                        title="Duplicate"
+                        onClick={(e) => { e.stopPropagation(); handleDuplicateCard(card); }}
+                        disabled={duplicating === card.id}
+                        style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', borderRadius: 6, display: 'flex', opacity: duplicating === card.id ? 0.4 : 1 }}
+                      >
+                        <IoCopy size={14} color={textSecondary} />
+                      </button>
+                      <button
+                        title="Delete"
+                        onClick={(e) => { e.stopPropagation(); setDeleteModalCard(card); }}
+                        style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', borderRadius: 6, display: 'flex' }}
+                      >
+                        <IoTrash size={14} color="#EF4444" />
+                      </button>
+                      <IoChevronForward size={14} color={textSecondary} />
+                    </div>
                   </div>
                 </div>
               ))}
