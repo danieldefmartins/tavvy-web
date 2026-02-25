@@ -35,10 +35,11 @@ const ACCENT = '#00C853';
 type ModalStep = 'closed' | 'card-limit';
 
 /* ── Card limits per role ── */
-const CARD_LIMITS = {
-  free: 1,       // Free users: 1 card
-  pro: 5,        // Pro users: up to 5 cards
-  super_admin: Infinity, // Super admins: unlimited
+// Publish limits — card creation is unlimited, publishing has limits
+const PUBLISH_LIMITS = {
+  free: 1,            // Free users: 1 published card with share link
+  pro: Infinity,      // Pro users: unlimited published cards
+  super_admin: Infinity,
 };
 
 export default function ECardHubScreen() {
@@ -75,25 +76,16 @@ export default function ECardHubScreen() {
     router.push(`/app/ecard/${card.id}/edit`, undefined, { locale });
   };
 
-  /* ── Card limit check ── */
-  const getCardLimit = () => {
-    if (isSuperAdmin) return CARD_LIMITS.super_admin;
-    if (isPro) return CARD_LIMITS.pro;
-    return CARD_LIMITS.free;
-  };
-
-  const canCreateCard = () => {
-    if (isSuperAdmin) return true;
-    const limit = getCardLimit();
-    return cards.length < limit;
+  /* ── Publish limit check (creation is unlimited) ── */
+  const getPublishLimit = () => {
+    if (isSuperAdmin) return PUBLISH_LIMITS.super_admin;
+    if (isPro) return PUBLISH_LIMITS.pro;
+    return PUBLISH_LIMITS.free;
   };
 
   const handleFabClick = () => {
-    if (canCreateCard()) {
-      router.push('/app/ecard/new', undefined, { locale });
-    } else {
-      setModalStep('card-limit');
-    }
+    // Always navigate — card limits are enforced at creation time, not at entry
+    router.push('/app/ecard/new', undefined, { locale });
   };
 
   const handleViewCard = (card: CardData) => {
@@ -122,10 +114,6 @@ export default function ECardHubScreen() {
   const handleDuplicateCard = async (card: CardData) => {
     if (!user || duplicating) return;
     // Check card limit before duplicating
-    if (!canCreateCard()) {
-      setModalStep('card-limit');
-      return;
-    }
     setDuplicating(card.id);
     try {
       const newCard = await duplicateCard(card.id, user.id);

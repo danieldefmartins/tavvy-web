@@ -86,7 +86,7 @@ export default function StyledQRCode({ url, style = {}, className }: StyledQRCod
             margin: 8,
             imageSize: 0.35,
           } : undefined,
-          image: config.showLogo ? '/tavvy-icon.png' : undefined,
+          image: config.showLogo ? '/brand/logo-icon.png' : undefined,
         });
 
         if (containerRef.current) {
