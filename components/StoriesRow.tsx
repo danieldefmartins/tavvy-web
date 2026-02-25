@@ -276,7 +276,34 @@ export default function StoriesRow({
   }
 
   if (placesWithStories.length === 0 && !onAddStoryPress) {
-    return null;
+    return (
+      <div style={{
+        padding: '24px 32px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        textAlign: 'center',
+      }}>
+        <span style={{ fontSize: 28, marginBottom: 8 }}>&#10024;</span>
+        <div style={{
+          fontSize: 15,
+          fontWeight: 600,
+          color: isDark ? '#FFFFFF' : '#333333',
+          marginBottom: 4,
+        }}>
+          Stories are coming soon
+        </div>
+        <div style={{
+          fontSize: 13,
+          color: isDark ? '#AAAAAA' : '#999999',
+          lineHeight: '1.4',
+          maxWidth: 280,
+        }}>
+          Great stories about your favorite places are about to go live. Stay tuned!
+        </div>
+      </div>
+    );
   }
 
   const colors = {
