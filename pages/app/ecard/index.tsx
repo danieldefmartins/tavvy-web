@@ -3,9 +3,11 @@
  * Shows existing cards or prompts to create one.
  * FAB navigates to /app/ecard/new (creation wizard).
  * Card actions: Edit → /app/ecard/[cardId]/edit, Stats → /app/ecard/[cardId]/stats
+ *
+ * Matches mobile: search bar, right-click context menu, improved empty state.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
@@ -28,6 +30,10 @@ import {
   IoShieldCheckmarkOutline,
   IoStarOutline,
   IoBarChartOutline,
+  IoSearch,
+  IoCardOutline,
+  IoLink,
+  IoCreate,
 } from 'react-icons/io5';
 
 const ACCENT = '#00C853';
@@ -35,10 +41,9 @@ const ACCENT = '#00C853';
 type ModalStep = 'closed' | 'card-limit';
 
 /* ── Card limits per role ── */
-// Publish limits — card creation is unlimited, publishing has limits
 const PUBLISH_LIMITS = {
-  free: 1,            // Free users: 1 published card with share link
-  pro: Infinity,      // Pro users: unlimited published cards
+  free: 1,
+  pro: Infinity,
   super_admin: Infinity,
 };
 
@@ -56,6 +61,10 @@ export default function ECardHubScreen() {
   const [deleting, setDeleting] = useState(false);
   const [duplicating, setDuplicating] = useState<string | null>(null);
   const [modalStep, setModalStep] = useState<ModalStep>('closed');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Context menu
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; card: CardData } | null>(null);
 
   const fetchCards = useCallback(async () => {
     if (authLoading) return;
@@ -72,11 +81,30 @@ export default function ECardHubScreen() {
 
   useEffect(() => { fetchCards(); }, [fetchCards]);
 
+  // Close context menu on click outside
+  useEffect(() => {
+    if (!contextMenu) return;
+    const handler = () => setContextMenu(null);
+    window.addEventListener('click', handler);
+    return () => window.removeEventListener('click', handler);
+  }, [contextMenu]);
+
+  // Filter cards by search query
+  const filteredCards = useMemo(() => {
+    if (!searchQuery.trim()) return cards;
+    const q = searchQuery.toLowerCase().trim();
+    return cards.filter(
+      (c) =>
+        (c.full_name || '').toLowerCase().includes(q) ||
+        (c.title || '').toLowerCase().includes(q) ||
+        (c.is_published ? 'live published' : 'draft').includes(q)
+    );
+  }, [cards, searchQuery]);
+
   const handleEditCard = (card: CardData) => {
     router.push(`/app/ecard/${card.id}/edit`, undefined, { locale });
   };
 
-  /* ── Publish limit check (creation is unlimited) ── */
   const getPublishLimit = () => {
     if (isSuperAdmin) return PUBLISH_LIMITS.super_admin;
     if (isPro) return PUBLISH_LIMITS.pro;
@@ -84,7 +112,6 @@ export default function ECardHubScreen() {
   };
 
   const handleFabClick = () => {
-    // Always navigate — card limits are enforced at creation time, not at entry
     router.push('/app/ecard/new', undefined, { locale });
   };
 
@@ -113,7 +140,6 @@ export default function ECardHubScreen() {
 
   const handleDuplicateCard = async (card: CardData) => {
     if (!user || duplicating) return;
-    // Check card limit before duplicating
     setDuplicating(card.id);
     try {
       const newCard = await duplicateCard(card.id, user.id);
@@ -129,6 +155,20 @@ export default function ECardHubScreen() {
     } finally {
       setDuplicating(null);
     }
+  };
+
+  const handleCopyLink = async (card: CardData) => {
+    const url = `https://tavvy.com/${card.slug || card.id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      // fallback
+    }
+  };
+
+  const handleContextMenu = (e: React.MouseEvent, card: CardData) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY, card });
   };
 
   const bg = isDark ? '#000' : '#FAFAFA';
@@ -174,19 +214,61 @@ export default function ECardHubScreen() {
             <div style={{ width: 38 }} />
           </header>
 
+          {/* ── Search Bar ── */}
+          {cards.length > 0 && (
+            <div style={{ padding: '0 20px 12px' }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                padding: '10px 14px',
+                borderRadius: 12,
+                background: isDark ? 'rgba(255,255,255,0.06)' : '#F3F4F6',
+                border: `1px solid ${searchQuery ? ACCENT : border}`,
+                transition: 'border-color 0.2s',
+              }}>
+                <IoSearch size={18} color={textSecondary} />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search cards..."
+                  style={{
+                    flex: 1,
+                    border: 'none',
+                    outline: 'none',
+                    background: 'transparent',
+                    fontSize: 15,
+                    color: textPrimary,
+                  }}
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer', display: 'flex' }}
+                  >
+                    <IoClose size={16} color={textSecondary} />
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* ── Cards List ── */}
-          {cards.length > 0 ? (
+          {filteredCards.length > 0 ? (
             <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {cards.map((card) => (
+              {filteredCards.map((card, index) => (
                 <div
                   key={card.id}
                   onClick={() => handleEditCard(card)}
+                  onContextMenu={(e) => handleContextMenu(e, card)}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 14,
                     padding: 14, borderRadius: 16, backgroundColor: cardBg,
                     boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)',
                     border: `1px solid ${border}`, cursor: 'pointer',
                     transition: 'transform 0.15s',
+                    animation: `hubCardFadeIn 0.3s ease ${index * 50}ms both`,
                   }}
                 >
                   {/* Card Preview Thumbnail */}
@@ -238,44 +320,18 @@ export default function ECardHubScreen() {
                     </div>
                   </div>
 
-                  {/* Actions */}
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
-                    {/* Stats button — prominent */}
-                    <button
-                      title="View Stats"
-                      onClick={(e) => { e.stopPropagation(); router.push(`/app/ecard/${card.id}/stats`, undefined, { locale }); }}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 4,
-                        padding: '4px 10px', border: 'none', borderRadius: 8,
-                        background: isDark ? 'rgba(0,200,83,0.1)' : 'rgba(0,200,83,0.08)',
-                        cursor: 'pointer', fontSize: 12, fontWeight: 600, color: ACCENT,
-                      }}
-                    >
-                      <IoBarChartOutline size={14} />
-                      Stats
-                    </button>
-                    {/* Secondary actions */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <button
-                        title="Duplicate"
-                        onClick={(e) => { e.stopPropagation(); handleDuplicateCard(card); }}
-                        disabled={duplicating === card.id}
-                        style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', borderRadius: 6, display: 'flex', opacity: duplicating === card.id ? 0.4 : 1 }}
-                      >
-                        <IoCopy size={14} color={textSecondary} />
-                      </button>
-                      <button
-                        title="Delete"
-                        onClick={(e) => { e.stopPropagation(); setDeleteModalCard(card); }}
-                        style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', borderRadius: 6, display: 'flex' }}
-                      >
-                        <IoTrash size={14} color="#EF4444" />
-                      </button>
-                      <IoChevronForward size={14} color={textSecondary} />
-                    </div>
-                  </div>
+                  {/* Chevron */}
+                  <IoChevronForward size={16} color={textSecondary} style={{ flexShrink: 0 }} />
                 </div>
               ))}
+            </div>
+          ) : cards.length > 0 && filteredCards.length === 0 ? (
+            /* ── No search results ── */
+            <div style={{ textAlign: 'center', padding: '60px 40px' }}>
+              <IoSearch size={36} color={textSecondary} />
+              <p style={{ fontSize: 15, color: textSecondary, marginTop: 12 }}>
+                No cards match &ldquo;{searchQuery}&rdquo;
+              </p>
             </div>
           ) : (
             /* ── Empty State ── */
@@ -295,10 +351,10 @@ export default function ECardHubScreen() {
                 marginBottom: 20,
                 transition: 'transform 0.2s, background 0.2s',
               }}>
-                <IoAdd size={36} color={ACCENT} />
+                <IoCardOutline size={36} color={ACCENT} />
               </div>
               <h2 style={{ fontSize: 20, fontWeight: 700, color: textPrimary, margin: '0 0 8px' }}>
-                Create your first eCard
+                Create your first digital card
               </h2>
               <p style={{ fontSize: 14, color: textSecondary, margin: 0, lineHeight: 1.5, maxWidth: 260 }}>
                 Tap here to get started with your digital card
@@ -323,6 +379,61 @@ export default function ECardHubScreen() {
           </button>
         </div>
 
+        {/* ── Context Menu ── */}
+        {contextMenu && (
+          <div
+            style={{
+              position: 'fixed',
+              top: contextMenu.y,
+              left: contextMenu.x,
+              zIndex: 10000,
+              minWidth: 180,
+              background: isDark ? '#1E293B' : '#FFFFFF',
+              borderRadius: 12,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+              border: `1px solid ${border}`,
+              overflow: 'hidden',
+              animation: 'ctxMenuIn 0.15s ease',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {[
+              { label: 'Edit Card', icon: <IoCreate size={16} />, action: () => handleEditCard(contextMenu.card) },
+              { label: 'View Stats', icon: <IoBarChartOutline size={16} />, action: () => router.push(`/app/ecard/${contextMenu.card.id}/stats`, undefined, { locale }) },
+              { label: 'Preview', icon: <IoEye size={16} />, action: () => handleViewCard(contextMenu.card) },
+              { label: 'Copy Link', icon: <IoLink size={16} />, action: () => handleCopyLink(contextMenu.card) },
+              { label: 'Duplicate', icon: <IoCopy size={16} />, action: () => handleDuplicateCard(contextMenu.card) },
+              { label: 'Delete', icon: <IoTrash size={16} color="#EF4444" />, action: () => setDeleteModalCard(contextMenu.card), danger: true },
+            ].map((item, i) => (
+              <button
+                key={item.label}
+                onClick={() => {
+                  setContextMenu(null);
+                  item.action();
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  width: '100%',
+                  padding: '10px 16px',
+                  background: 'none',
+                  border: 'none',
+                  borderTop: i > 0 ? `1px solid ${border}` : 'none',
+                  cursor: 'pointer',
+                  fontSize: 14,
+                  fontWeight: 500,
+                  color: (item as any).danger ? '#EF4444' : textPrimary,
+                  textAlign: 'left',
+                }}
+              >
+                {item.icon}
+                {item.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* ── Card Limit Modal ── */}
         {modalStep !== 'closed' && (
           <div
@@ -344,10 +455,8 @@ export default function ECardHubScreen() {
                 maxHeight: '80vh', display: 'flex', flexDirection: 'column',
               }}
             >
-              {/* Handle */}
               <div style={{ width: 36, height: 4, borderRadius: 2, background: isDark ? 'rgba(255,255,255,0.15)' : '#DDD', margin: '8px auto 16px', flexShrink: 0 }} />
 
-              {/* ── CARD LIMIT REACHED ── */}
               {modalStep === 'card-limit' && (
                 <div style={{ padding: '0 20px', textAlign: 'center' }}>
                   <div style={{
@@ -373,7 +482,6 @@ export default function ECardHubScreen() {
                     }
                   </p>
 
-                  {/* Current plan badge */}
                   <div style={{
                     display: 'inline-flex', alignItems: 'center', gap: 8,
                     padding: '8px 16px', borderRadius: 12, marginBottom: 20,
@@ -387,7 +495,6 @@ export default function ECardHubScreen() {
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 4 }}>
-                    {/* Primary CTA */}
                     <button
                       onClick={() => {
                         setModalStep('closed');
@@ -408,7 +515,6 @@ export default function ECardHubScreen() {
                       {isPro ? 'Purchase Additional Card' : 'Upgrade to Pro'}
                     </button>
 
-                    {/* Secondary */}
                     <button
                       onClick={() => setModalStep('closed')}
                       style={{
@@ -423,7 +529,6 @@ export default function ECardHubScreen() {
                   </div>
                 </div>
               )}
-
             </div>
           </div>
         )}
@@ -498,6 +603,14 @@ export default function ECardHubScreen() {
           @keyframes spin { to { transform: rotate(360deg); } }
           @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
           @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+          @keyframes hubCardFadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes ctxMenuIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+          }
         `}</style>
       </AppLayout>
     </>

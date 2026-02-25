@@ -1,6 +1,8 @@
 /**
  * TypePicker — Step 1 of creation wizard: choose card type.
  * Business, Personal, or Politician (with inline country picker).
+ *
+ * Matches mobile: staggered fade-in entrance animations on type cards.
  */
 
 import React, { useState, useMemo } from 'react';
@@ -98,6 +100,7 @@ export default function TypePicker({ onSelect, isDark }: TypePickerProps) {
                 border: country.featured ? `1.5px solid ${ACCENT}33` : 'none',
                 borderBottom: country.featured ? undefined : `1px solid ${border}`,
                 cursor: 'pointer', textAlign: 'left', marginBottom: 4,
+                transition: 'background 0.15s',
               }}
             >
               <span style={{ fontSize: 28, lineHeight: 1 }}>{country.flag}</span>
@@ -128,16 +131,18 @@ export default function TypePicker({ onSelect, isDark }: TypePickerProps) {
       <p style={{ fontSize: 15, color: textSecondary, margin: '0 0 24px' }}>Select the type that best fits your needs</p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {TYPE_OPTIONS.map(({ id, name, desc, icon: Icon, gradient }) => (
+        {TYPE_OPTIONS.map(({ id, name, desc, icon: Icon, gradient }, index) => (
           <button
             key={id}
             onClick={() => id === 'politician' ? setShowCountries(true) : onSelect(id)}
+            className="typeCardAnim"
             style={{
               display: 'flex', alignItems: 'center', gap: 16,
               padding: '18px 20px', borderRadius: 16,
               background: cardBg, border: `1px solid ${border}`,
               cursor: 'pointer', textAlign: 'left', width: '100%',
-              transition: 'transform 0.15s',
+              transition: 'transform 0.15s, box-shadow 0.15s',
+              animation: `typeCardFadeIn 0.4s ease ${index * 100}ms both`,
             }}
           >
             <div style={{
@@ -155,6 +160,23 @@ export default function TypePicker({ onSelect, isDark }: TypePickerProps) {
           </button>
         ))}
       </div>
+
+      <style>{`
+        @keyframes typeCardFadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(16px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .typeCardAnim:hover {
+          transform: scale(1.01);
+          box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+      `}</style>
     </div>
   );
 }

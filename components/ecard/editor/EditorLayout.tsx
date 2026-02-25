@@ -1,9 +1,11 @@
 /**
- * EditorLayout — main editor shell with header, scrollable sections, and section navigation.
- * Replaces the 5-tab dashboard with vertically scrollable collapsible sections.
+ * EditorLayout — main editor shell with header, live preview, scrollable sections,
+ * and section navigation.
+ * Matches the mobile EditorLayout: sticky header with save animation, QR, share,
+ * live preview card, and 3 split style sections.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useEditor } from '../../../lib/ecard/EditorContext';
 import { useAutoSave } from '../../../lib/ecard/useAutoSave';
@@ -12,12 +14,15 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useRoles } from '../../../hooks/useRoles';
 import EditorSection from './shared/EditorSection';
 import SectionNavigator from './SectionNavigator';
+import LivePreviewCard from './LivePreviewCard';
 import ProfileSection from './sections/ProfileSection';
 import ContactSection from './sections/ContactSection';
 import SocialSection from './sections/SocialSection';
 import LinksSection from './sections/LinksSection';
 import MediaSection from './sections/MediaSection';
-import StyleSection from './sections/StyleSection';
+import TemplateColorSection from './sections/TemplateColorSection';
+import ImagesLayoutSection from './sections/ImagesLayoutSection';
+import TypographySection from './sections/TypographySection';
 import CivicSection from './sections/CivicSection';
 import MobileBusinessSection from './sections/MobileBusinessSection';
 import AdvancedSection from './sections/AdvancedSection';
@@ -31,9 +36,14 @@ import {
   IoLink,
   IoImages,
   IoColorPalette,
+  IoText,
+  IoImageOutline,
   IoFlagOutline,
   IoRestaurantOutline,
   IoSettingsOutline,
+  IoQrCodeOutline,
+  IoShareOutline,
+  IoClose,
 } from 'react-icons/io5';
 
 const ACCENT = '#00C853';
@@ -53,13 +63,17 @@ export default function EditorLayout() {
   const card = state.card;
   const cardId = card.id;
   const templateId = card.template_id || 'basic';
+  const cardUrl = `https://tavvy.com/${card.slug || 'preview'}`;
+
+  // QR modal
+  const [showQR, setShowQR] = useState(false);
 
   // Determine which conditional sections to show
   const isCivic = templateId.startsWith('civic-') || templateId === 'politician-generic';
   const isMobileBiz = templateId === 'mobile-business';
   const isProTemplate = templateId.startsWith('pro-') || templateId === 'business-card' || templateId === 'cover-card';
 
-  // Build section list for navigator
+  // Build section list for navigator (matches mobile)
   const sections = useMemo(() => {
     const base = [
       { id: 'profile', label: 'Profile' },
@@ -67,7 +81,9 @@ export default function EditorLayout() {
       { id: 'social', label: 'Social' },
       { id: 'links', label: 'Links' },
       { id: 'media', label: 'Media' },
-      { id: 'style', label: 'Style' },
+      { id: 'template-colors', label: 'Template' },
+      { id: 'images-layout', label: 'Images' },
+      { id: 'typography', label: 'Fonts' },
     ];
     if (isCivic) base.push({ id: 'civic', label: 'Civic' });
     if (isMobileBiz) base.push({ id: 'mobile-business', label: 'Menu' });
@@ -89,6 +105,35 @@ export default function EditorLayout() {
     : lastSaved
     ? 'Saved'
     : 'Save';
+
+  // Save animation
+  const [saveFlash, setSaveFlash] = useState(false);
+  const [saveScale, setSaveScale] = useState(1);
+  const prevLastSaved = useRef<Date | null>(null);
+
+  useEffect(() => {
+    if (lastSaved && lastSaved !== prevLastSaved.current) {
+      prevLastSaved.current = lastSaved;
+      setSaveScale(0.85);
+      setSaveFlash(true);
+      requestAnimationFrame(() => {
+        setTimeout(() => setSaveScale(1), 50);
+        setTimeout(() => setSaveFlash(false), 500);
+      });
+    }
+  }, [lastSaved]);
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: card.card_name || card.full_name, url: cardUrl });
+      } catch {
+        // User cancelled
+      }
+    } else {
+      await navigator.clipboard.writeText(cardUrl);
+    }
+  };
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: bg }}>
@@ -126,7 +171,7 @@ export default function EditorLayout() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* Save indicator */}
+          {/* Save button with animation */}
           <button
             onClick={saveNow}
             disabled={isSaving || !isDirty}
@@ -145,16 +190,58 @@ export default function EditorLayout() {
                 : (isDark ? 'rgba(255,255,255,0.06)' : '#F3F4F6'),
               color: isDirty ? '#fff' : (lastSaved ? ACCENT : textSecondary),
               transition: 'all 0.2s',
+              transform: `scale(${saveScale})`,
+              position: 'relative',
+              overflow: 'hidden',
             }}
           >
+            {/* Green flash overlay */}
+            <span style={{
+              position: 'absolute',
+              inset: 0,
+              background: ACCENT,
+              borderRadius: 8,
+              opacity: saveFlash ? 0.3 : 0,
+              transition: 'opacity 0.4s',
+              pointerEvents: 'none',
+            }} />
             {!isDirty && lastSaved && <IoCheckmark size={14} />}
             {saveStatusText}
           </button>
+
+          {/* QR Code */}
+          {cardId && (
+            <button
+              onClick={() => setShowQR(true)}
+              title="QR Code"
+              style={{
+                background: 'none', border: 'none', padding: 8,
+                cursor: 'pointer', borderRadius: 8, display: 'flex',
+              }}
+            >
+              <IoQrCodeOutline size={20} color={textSecondary} />
+            </button>
+          )}
+
+          {/* Share */}
+          {cardId && (
+            <button
+              onClick={handleShare}
+              title="Share card"
+              style={{
+                background: 'none', border: 'none', padding: 8,
+                cursor: 'pointer', borderRadius: 8, display: 'flex',
+              }}
+            >
+              <IoShareOutline size={20} color={textSecondary} />
+            </button>
+          )}
 
           {/* Preview button */}
           {cardId && (
             <button
               onClick={() => router.push(`/app/ecard/${cardId}/preview`, undefined, { locale })}
+              title="Preview card"
               style={{
                 background: 'none', border: 'none', padding: 8,
                 cursor: 'pointer', borderRadius: 8, display: 'flex',
@@ -168,6 +255,14 @@ export default function EditorLayout() {
 
       {/* Scrollable sections */}
       <div id="editor-scroll-container" style={{ paddingBottom: 100 }}>
+        {/* Live Preview Card */}
+        <div style={{ padding: '16px 20px 0' }}>
+          <LivePreviewCard
+            isDark={isDark}
+            onExpandPreview={() => router.push(`/app/ecard/${cardId}/preview`, undefined, { locale })}
+          />
+        </div>
+
         <EditorSection id="profile" title="Profile" icon={<IoPersonCircle size={20} />} isDark={isDark}>
           <ProfileSection isDark={isDark} isPro={isPro} />
         </EditorSection>
@@ -188,8 +283,16 @@ export default function EditorLayout() {
           <MediaSection isDark={isDark} isPro={isPro} />
         </EditorSection>
 
-        <EditorSection id="style" title="Style" icon={<IoColorPalette size={20} />} isDark={isDark} defaultOpen={false}>
-          <StyleSection isDark={isDark} isPro={isPro} />
+        <EditorSection id="template-colors" title="Template & Colors" icon={<IoColorPalette size={20} />} isDark={isDark} defaultOpen={true}>
+          <TemplateColorSection isDark={isDark} isPro={isPro} />
+        </EditorSection>
+
+        <EditorSection id="images-layout" title="Images & Layout" icon={<IoImageOutline size={20} />} isDark={isDark} defaultOpen={false}>
+          <ImagesLayoutSection isDark={isDark} isPro={isPro} />
+        </EditorSection>
+
+        <EditorSection id="typography" title="Typography & Buttons" icon={<IoText size={20} />} isDark={isDark} defaultOpen={false}>
+          <TypographySection isDark={isDark} isPro={isPro} />
         </EditorSection>
 
         {isCivic && (
@@ -213,6 +316,120 @@ export default function EditorLayout() {
 
       {/* Section navigator dots */}
       <SectionNavigator sections={sections} isDark={isDark} />
+
+      {/* QR Code Modal */}
+      {showQR && (
+        <div
+          onClick={() => setShowQR(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: 20,
+            animation: 'editorFadeIn 0.15s ease',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%',
+              maxWidth: 340,
+              borderRadius: 24,
+              padding: 28,
+              background: isDark ? '#1E293B' : '#FFFFFF',
+              textAlign: 'center',
+              position: 'relative',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            }}
+          >
+            <button
+              onClick={() => setShowQR(false)}
+              style={{
+                position: 'absolute',
+                top: 14,
+                right: 14,
+                background: 'none',
+                border: 'none',
+                padding: 6,
+                cursor: 'pointer',
+                borderRadius: 8,
+                display: 'flex',
+              }}
+            >
+              <IoClose size={22} color={isDark ? '#94A3B8' : '#666'} />
+            </button>
+
+            <h3 style={{ fontSize: 20, fontWeight: 700, color: textPrimary, margin: '0 0 4px' }}>
+              QR Code
+            </h3>
+            <p style={{ fontSize: 14, color: textSecondary, margin: '0 0 24px' }}>
+              Scan to view your card
+            </p>
+
+            <div style={{
+              padding: 16,
+              background: '#FFFFFF',
+              borderRadius: 16,
+              display: 'inline-block',
+              marginBottom: 16,
+            }}>
+              {/* QR code rendered as SVG via inline generation */}
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(cardUrl)}`}
+                alt="QR Code"
+                width={200}
+                height={200}
+                style={{ display: 'block' }}
+              />
+            </div>
+
+            <p style={{
+              fontSize: 13,
+              color: textSecondary,
+              margin: '0 0 20px',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}>
+              {cardUrl}
+            </p>
+
+            <button
+              onClick={() => {
+                setShowQR(false);
+                handleShare();
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '12px 24px',
+                borderRadius: 12,
+                border: 'none',
+                background: ACCENT,
+                color: '#FFFFFF',
+                fontSize: 15,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              <IoShareOutline size={18} />
+              Share
+            </button>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes editorFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }

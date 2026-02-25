@@ -1,9 +1,11 @@
 /**
  * eCard Creation Wizard — /app/ecard/new
  * Single-page 3-step wizard: Type → Template → Quick Setup → Create
+ *
+ * Matches mobile: CSS slide transitions between steps, smooth step indicators.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
@@ -43,23 +45,35 @@ export default function ECardNewPage() {
   const [selectedColorSchemeId, setSelectedColorSchemeId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
 
+  // Track direction for animation
+  const directionRef = useRef<'forward' | 'back'>('forward');
+  const [animKey, setAnimKey] = useState(0);
+
   const bg = isDark ? '#000' : '#FAFAFA';
   const headerBg = isDark ? '#0A0A0A' : '#FFFFFF';
   const textPrimary = isDark ? '#FFFFFF' : '#111111';
   const border = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
 
-  // Step indicators
   const stepIndex = step === 'type' ? 0 : step === 'template' ? 1 : 2;
+
+  const goForward = (nextStep: WizardStep) => {
+    directionRef.current = 'forward';
+    setAnimKey((k) => k + 1);
+    setStep(nextStep);
+  };
+
+  const goBack = (nextStep: WizardStep) => {
+    directionRef.current = 'back';
+    setAnimKey((k) => k + 1);
+    setStep(nextStep);
+  };
 
   const handleTypeSelect = (type: string, country?: string, template?: string) => {
     setCardType(type);
     setCountryCode(country);
     setCountryTemplate(template);
-    // Pre-select template if country specifies one
-    if (template) {
-      setSelectedTemplateId(template);
-    }
-    setStep('template');
+    if (template) setSelectedTemplateId(template);
+    goForward('template');
   };
 
   const handleTemplateSelect = (templateId: string, colorSchemeId: string) => {
@@ -69,7 +83,7 @@ export default function ECardNewPage() {
 
   const handleContinueToSetup = () => {
     if (selectedTemplateId) {
-      setStep('setup');
+      goForward('setup');
     }
   };
 
@@ -83,7 +97,6 @@ export default function ECardNewPage() {
     setCreating(true);
 
     try {
-      // Upload photo if provided
       let photoUrl: string | undefined;
       if (data.photoFile) {
         const uploaded = await uploadProfilePhoto(user.id, data.photoFile);
@@ -92,7 +105,6 @@ export default function ECardNewPage() {
 
       const slug = generateSlug(data.fullName);
 
-      // Build payload — only include defined values to avoid PostgREST column errors
       const payload: Record<string, any> = {
         user_id: user.id,
         full_name: data.fullName.trim(),
@@ -124,6 +136,8 @@ export default function ECardNewPage() {
     }
   };
 
+  const animClass = directionRef.current === 'forward' ? 'wizardSlideInRight' : 'wizardSlideInLeft';
+
   return (
     <>
       <Head>
@@ -142,8 +156,8 @@ export default function ECardNewPage() {
             <button
               onClick={() => {
                 if (step === 'type') router.push('/app/ecard', undefined, { locale });
-                else if (step === 'template') setStep('type');
-                else setStep('template');
+                else if (step === 'template') goBack('type');
+                else goBack('template');
               }}
               style={{ background: 'none', border: 'none', padding: 8, cursor: 'pointer', borderRadius: 8, display: 'flex' }}
             >
@@ -169,8 +183,12 @@ export default function ECardNewPage() {
             </button>
           </header>
 
-          {/* Content */}
-          <div style={{ padding: '24px 20px', paddingBottom: 120, maxWidth: 480, margin: '0 auto' }}>
+          {/* Content with slide animation */}
+          <div
+            key={animKey}
+            className={animClass}
+            style={{ padding: '24px 20px', paddingBottom: 120, maxWidth: 480, margin: '0 auto' }}
+          >
             {step === 'type' && (
               <TypePicker onSelect={handleTypeSelect} isDark={isDark} />
             )}
@@ -183,11 +201,10 @@ export default function ECardNewPage() {
                   selectedTemplateId={selectedTemplateId}
                   selectedColorSchemeId={selectedColorSchemeId}
                   onSelect={handleTemplateSelect}
-                  onBack={() => setStep('type')}
+                  onBack={() => goBack('type')}
                   isPro={isPro}
                   isDark={isDark}
                 />
-                {/* Continue button */}
                 {selectedTemplateId && (
                   <div style={{
                     position: 'fixed', bottom: 0, left: 0, right: 0,
@@ -216,7 +233,7 @@ export default function ECardNewPage() {
 
             {step === 'setup' && (
               <QuickSetup
-                onBack={() => setStep('template')}
+                onBack={() => goBack('template')}
                 onCreate={handleCreate}
                 creating={creating}
                 isDark={isDark}
@@ -224,6 +241,23 @@ export default function ECardNewPage() {
             )}
           </div>
         </div>
+
+        <style jsx>{`
+          @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(60px); }
+            to { opacity: 1; transform: translateX(0); }
+          }
+          @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-60px); }
+            to { opacity: 1; transform: translateX(0); }
+          }
+          .wizardSlideInRight {
+            animation: slideInRight 0.3s ease both;
+          }
+          .wizardSlideInLeft {
+            animation: slideInLeft 0.3s ease both;
+          }
+        `}</style>
       </AppLayout>
     </>
   );
