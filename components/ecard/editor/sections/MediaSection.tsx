@@ -12,8 +12,11 @@ import {
   IoLogoYoutube,
   IoGlobe,
   IoFilm,
+  IoCloudUpload,
 } from 'react-icons/io5';
 import { useEditor } from '../../../../lib/ecard/EditorContext';
+import { uploadEcardFile } from '../../../../lib/ecard';
+import { supabase } from '../../../../lib/supabaseClient';
 import EditorSection from '../shared/EditorSection';
 
 interface MediaSectionProps {
@@ -36,9 +39,11 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
   const videos = card.videos || [];
 
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
   const [videoType, setVideoType] = useState<VideoType>('youtube');
   const [videoUrl, setVideoUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
 
   const textPrimary = isDark ? '#FFFFFF' : '#111111';
   const textSecondary = isDark ? '#94A3B8' : '#6B7280';
@@ -66,6 +71,35 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
 
   const handleGalleryRemove = (id: string) => {
     dispatch({ type: 'REMOVE_GALLERY_IMAGE', id });
+  };
+
+  // -- Video file upload (Tavvy Short) --
+  const handleVideoFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+
+    setUploading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id;
+      if (!userId) {
+        alert('Please sign in to upload videos.');
+        return;
+      }
+
+      const url = await uploadEcardFile(userId, file, 'videos');
+      if (url) {
+        setVideoUrl(url);
+      } else {
+        alert('Failed to upload video. Please try again.');
+      }
+    } catch (err) {
+      console.error('Video upload error:', err);
+      alert('Failed to upload video. Please try again.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   // -- Videos --
@@ -402,8 +436,71 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
               </div>
             </div>
 
-            {/* URL input */}
+            {/* Upload / URL input */}
             <div style={{ marginBottom: 20 }}>
+              {/* Hidden file input for video upload */}
+              <input
+                ref={videoInputRef}
+                type="file"
+                accept="video/*"
+                style={{ display: 'none' }}
+                onChange={handleVideoFileSelect}
+              />
+
+              {videoType === 'tavvy_short' && (
+                <>
+                  <label
+                    style={{
+                      display: 'block',
+                      fontSize: 13,
+                      fontWeight: 500,
+                      color: textSecondary,
+                      marginBottom: 8,
+                    }}
+                  >
+                    Upload Video
+                  </label>
+                  <button
+                    onClick={() => videoInputRef.current?.click()}
+                    disabled={uploading}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 8,
+                      width: '100%',
+                      padding: '14px 16px',
+                      border: `2px dashed ${uploading ? '#00C853' : borderColor}`,
+                      borderRadius: 10,
+                      background: uploading
+                        ? (isDark ? 'rgba(0,200,83,0.08)' : 'rgba(0,200,83,0.04)')
+                        : 'none',
+                      cursor: uploading ? 'wait' : 'pointer',
+                      fontSize: 14,
+                      fontWeight: 500,
+                      color: uploading ? '#00C853' : textSecondary,
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <IoCloudUpload size={20} />
+                    {uploading ? 'Uploading...' : 'Choose Video from Device'}
+                  </button>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 10,
+                      margin: '12px 0',
+                    }}
+                  >
+                    <div style={{ flex: 1, height: 1, background: borderColor }} />
+                    <span style={{ fontSize: 12, color: textSecondary }}>or paste URL</span>
+                    <div style={{ flex: 1, height: 1, background: borderColor }} />
+                  </div>
+                </>
+              )}
+
               <label
                 style={{
                   display: 'block',
