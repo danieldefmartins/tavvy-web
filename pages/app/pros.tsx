@@ -937,11 +937,10 @@ export default function ProsScreen() {
   );
 }
 
-export async function getStaticProps({ locale }: { locale: string }) {
+export async function getServerSideProps({ locale }: { locale: string }) {
   return {
     props: {
       ...(await serverSideTranslations(locale, ['common'])),
     },
-    revalidate: 60,
   };
 }
