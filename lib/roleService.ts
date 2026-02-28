@@ -241,6 +241,7 @@ export const routeAccessConfig: Record<string, AccessLevel> = {
   
   // Pro-only routes (requires active Stripe subscription)
   '/app/pros/dashboard': 'pro',
+  '/app/pros/profile': 'pro',
   '/app/pros/messages': 'pro',
   '/app/pros/leads': 'pro',
   '/app/pros/settings': 'pro',
@@ -284,7 +285,8 @@ export function getRouteAccessLevel(pathname: string): AccessLevel {
   }
   
   // Check for pro dashboard routes
-  if (pathname.startsWith('/app/pros/dashboard') || 
+  if (pathname.startsWith('/app/pros/dashboard') ||
+      pathname.startsWith('/app/pros/profile') ||
       pathname.startsWith('/app/pros/messages') ||
       pathname.startsWith('/app/pros/leads') ||
       pathname.startsWith('/app/pros/billing')) {
