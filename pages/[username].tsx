@@ -2380,7 +2380,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
 
           {/* Cover Card: Contact Rows with colored circle icons */}
           {templateLayout === 'cover-card' && cardData.showContactInfo && (() => {
-            const iconBg = cardData.iconColor || templateStyles.accentColor;
+            const iconBg = cardData.buttonColor || templateStyles.accentColor;
             return (
             <div style={{ width: '100%', padding: '0 28px 16px', background: '#ffffff' }}>
               {cardData.email && (
