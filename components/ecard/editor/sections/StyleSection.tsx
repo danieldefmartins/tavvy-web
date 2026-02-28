@@ -225,133 +225,21 @@ export default function StyleSection({ isDark, isPro }: StyleSectionProps) {
       {/* ===== Button Color ===== */}
       <div style={{ marginBottom: 28 }}>
         <SectionLabel isDark={isDark}>Button Color</SectionLabel>
-        <p style={{ fontSize: 12, color: textSecondary, margin: '0 0 10px' }}>
-          Override the default button background. Leave on Auto to use theme colors.
-        </p>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          <button
-            onClick={() => dispatch({ type: 'SET_FIELD', field: 'button_color', value: null })}
-            style={{
-              padding: '8px 14px',
-              borderRadius: 10,
-              border: `2px solid ${!card.button_color ? '#00C853' : borderColor}`,
-              background: !card.button_color
-                ? (isDark ? 'rgba(0,200,83,0.1)' : 'rgba(0,200,83,0.05)')
-                : cardBg,
-              cursor: 'pointer',
-              fontSize: 13,
-              fontWeight: !card.button_color ? 600 : 400,
-              color: !card.button_color ? '#00C853' : textPrimary,
-            }}
-          >
-            Auto
-          </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <input
-              type="color"
-              value={card.button_color || '#f8f9fa'}
-              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'button_color', value: e.target.value })}
-              style={{
-                width: 36,
-                height: 36,
-                border: `1px solid ${borderColor}`,
-                borderRadius: 8,
-                cursor: 'pointer',
-                padding: 2,
-                background: inputBg,
-              }}
-            />
-            <input
-              type="text"
-              value={card.button_color || ''}
-              onChange={(e) => {
-                const v = e.target.value;
-                if (/^#[0-9a-fA-F]{0,6}$/.test(v)) {
-                  dispatch({ type: 'SET_FIELD', field: 'button_color', value: v });
-                }
-              }}
-              placeholder="#f8f9fa"
-              maxLength={7}
-              style={{
-                width: 90,
-                padding: '8px 10px',
-                border: `1px solid ${borderColor}`,
-                borderRadius: 8,
-                fontSize: 13,
-                backgroundColor: inputBg,
-                color: inputColor,
-                outline: 'none',
-                fontFamily: 'monospace',
-              }}
-            />
-          </div>
-        </div>
+        <ColorSwatchPicker
+          value={card.button_color || null}
+          onChange={(v) => dispatch({ type: 'SET_FIELD', field: 'button_color', value: v })}
+          isDark={isDark}
+        />
       </div>
 
       {/* ===== Icon Color ===== */}
       <div style={{ marginBottom: 28 }}>
         <SectionLabel isDark={isDark}>Icon Color</SectionLabel>
-        <p style={{ fontSize: 12, color: textSecondary, margin: '0 0 10px' }}>
-          Override the default icon accent color. Leave on Auto to use theme colors.
-        </p>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          <button
-            onClick={() => dispatch({ type: 'SET_FIELD', field: 'icon_color', value: null })}
-            style={{
-              padding: '8px 14px',
-              borderRadius: 10,
-              border: `2px solid ${!card.icon_color ? '#00C853' : borderColor}`,
-              background: !card.icon_color
-                ? (isDark ? 'rgba(0,200,83,0.1)' : 'rgba(0,200,83,0.05)')
-                : cardBg,
-              cursor: 'pointer',
-              fontSize: 13,
-              fontWeight: !card.icon_color ? 600 : 400,
-              color: !card.icon_color ? '#00C853' : textPrimary,
-            }}
-          >
-            Auto
-          </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <input
-              type="color"
-              value={card.icon_color || '#333333'}
-              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'icon_color', value: e.target.value })}
-              style={{
-                width: 36,
-                height: 36,
-                border: `1px solid ${borderColor}`,
-                borderRadius: 8,
-                cursor: 'pointer',
-                padding: 2,
-                background: inputBg,
-              }}
-            />
-            <input
-              type="text"
-              value={card.icon_color || ''}
-              onChange={(e) => {
-                const v = e.target.value;
-                if (/^#[0-9a-fA-F]{0,6}$/.test(v)) {
-                  dispatch({ type: 'SET_FIELD', field: 'icon_color', value: v });
-                }
-              }}
-              placeholder="#333333"
-              maxLength={7}
-              style={{
-                width: 90,
-                padding: '8px 10px',
-                border: `1px solid ${borderColor}`,
-                borderRadius: 8,
-                fontSize: 13,
-                backgroundColor: inputBg,
-                color: inputColor,
-                outline: 'none',
-                fontFamily: 'monospace',
-              }}
-            />
-          </div>
-        </div>
+        <ColorSwatchPicker
+          value={card.icon_color || null}
+          onChange={(v) => dispatch({ type: 'SET_FIELD', field: 'icon_color', value: v })}
+          isDark={isDark}
+        />
       </div>
 
       {/* ===== Font Selector ===== */}
@@ -571,6 +459,158 @@ function SectionLabel({ children, isDark }: { children: React.ReactNode; isDark:
     >
       {children}
     </label>
+  );
+}
+
+const COLOR_PRESETS = [
+  { color: '#1e293b', name: 'Navy' },
+  { color: '#c9a84c', name: 'Gold' },
+  { color: '#ef4444', name: 'Red' },
+  { color: '#10b981', name: 'Green' },
+  { color: '#3b82f6', name: 'Blue' },
+  { color: '#8b5cf6', name: 'Purple' },
+  { color: '#f97316', name: 'Orange' },
+  { color: '#111111', name: 'Black' },
+  { color: '#f8f9fa', name: 'White' },
+  { color: '#7A5330', name: 'Bronze' },
+];
+
+function ColorSwatchPicker({
+  value,
+  onChange,
+  isDark,
+}: {
+  value: string | null;
+  onChange: (v: string | null) => void;
+  isDark: boolean;
+}) {
+  const [showCustom, setShowCustom] = React.useState(false);
+  const borderColor = isDark ? '#334155' : '#E5E7EB';
+  const cardBg = isDark ? 'rgba(255,255,255,0.04)' : '#FAFAFA';
+  const inputBg = isDark ? '#1E293B' : '#fff';
+  const inputColor = isDark ? '#fff' : '#333';
+  const textPrimary = isDark ? '#FFFFFF' : '#111111';
+
+  const isPreset = value && COLOR_PRESETS.some(p => p.color === value);
+  const isCustom = value && !isPreset;
+
+  return (
+    <div>
+      {/* Swatches grid */}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+        {/* Auto option */}
+        <button
+          onClick={() => { onChange(null); setShowCustom(false); }}
+          title="Auto (theme default)"
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 10,
+            border: `2px solid ${!value ? '#00C853' : borderColor}`,
+            background: cardBg,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 11,
+            fontWeight: 600,
+            color: !value ? '#00C853' : (isDark ? '#94A3B8' : '#6B7280'),
+            position: 'relative',
+          }}
+        >
+          A
+          {!value && (
+            <div style={{ position: 'absolute', bottom: -2, right: -2, width: 10, height: 10, borderRadius: '50%', background: '#00C853', border: '2px solid ' + (isDark ? '#1E293B' : '#fff') }} />
+          )}
+        </button>
+
+        {/* Preset swatches */}
+        {COLOR_PRESETS.map((preset) => {
+          const isSelected = value === preset.color;
+          return (
+            <button
+              key={preset.color}
+              onClick={() => { onChange(preset.color); setShowCustom(false); }}
+              title={preset.name}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 10,
+                border: `2px solid ${isSelected ? '#00C853' : borderColor}`,
+                background: preset.color,
+                cursor: 'pointer',
+                position: 'relative',
+                boxShadow: isSelected ? '0 0 0 1px #00C853' : 'none',
+              }}
+            >
+              {isSelected && (
+                <div style={{ position: 'absolute', bottom: -2, right: -2, width: 10, height: 10, borderRadius: '50%', background: '#00C853', border: '2px solid ' + (isDark ? '#1E293B' : '#fff') }} />
+              )}
+            </button>
+          );
+        })}
+
+        {/* Custom color button */}
+        <button
+          onClick={() => setShowCustom(!showCustom)}
+          title="Custom color"
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 10,
+            border: `2px solid ${isCustom ? '#00C853' : borderColor}`,
+            background: isCustom ? value : `conic-gradient(red, yellow, lime, aqua, blue, magenta, red)`,
+            cursor: 'pointer',
+            position: 'relative',
+          }}
+        >
+          {isCustom && (
+            <div style={{ position: 'absolute', bottom: -2, right: -2, width: 10, height: 10, borderRadius: '50%', background: '#00C853', border: '2px solid ' + (isDark ? '#1E293B' : '#fff') }} />
+          )}
+        </button>
+      </div>
+
+      {/* Custom color picker (expanded) */}
+      {showCustom && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
+          <input
+            type="color"
+            value={value || '#333333'}
+            onChange={(e) => onChange(e.target.value)}
+            style={{
+              width: 40,
+              height: 40,
+              border: `1px solid ${borderColor}`,
+              borderRadius: 8,
+              cursor: 'pointer',
+              padding: 2,
+              background: inputBg,
+            }}
+          />
+          <input
+            type="text"
+            value={value || ''}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (/^#[0-9a-fA-F]{0,6}$/.test(v)) onChange(v);
+            }}
+            placeholder="#333333"
+            maxLength={7}
+            style={{
+              width: 100,
+              padding: '8px 10px',
+              border: `1px solid ${borderColor}`,
+              borderRadius: 8,
+              fontSize: 13,
+              backgroundColor: inputBg,
+              color: inputColor,
+              outline: 'none',
+              fontFamily: 'monospace',
+            }}
+          />
+        </div>
+      )}
+    </div>
   );
 }
 
