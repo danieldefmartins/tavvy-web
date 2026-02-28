@@ -19,6 +19,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { useRoles } from '../../hooks/useRoles';
 import AppLayout from '../../components/AppLayout';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -93,6 +94,7 @@ const EDUCATION_CONTENT = [
 export default function ProsScreen() {
   const { theme, isDark } = useThemeContext();
   const { user } = useAuth();
+  const { isPro } = useRoles();
   const router = useRouter();
   const { locale } = router;
   const { t } = useTranslation('common');
@@ -133,8 +135,10 @@ export default function ProsScreen() {
                 onClick={() => {
                   if (!user) {
                     router.push('/app/login');
-                  } else {
+                  } else if (isPro) {
                     router.push('/app/pros/dashboard');
+                  } else {
+                    router.push('/app/pros/register');
                   }
                 }}
               >
