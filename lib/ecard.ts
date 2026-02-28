@@ -31,6 +31,7 @@ export interface CardData {
   button_style?: string;
   button_color?: string;
   icon_color?: string;
+  social_icon_color?: string;
   font_style?: string;
   view_count?: number;
   tap_count?: number;

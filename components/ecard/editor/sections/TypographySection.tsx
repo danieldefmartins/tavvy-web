@@ -94,6 +94,16 @@ export default function TypographySection({ isDark, isPro }: TypographySectionPr
         />
       </div>
 
+      {/* Social Media Icon Color */}
+      <div style={{ marginBottom: 28 }}>
+        <SectionLabel isDark={isDark}>Social Media Icon Color</SectionLabel>
+        <SocialIconColorPicker
+          value={card.social_icon_color || null}
+          onChange={(v) => dispatch({ type: 'SET_FIELD', field: 'social_icon_color', value: v })}
+          isDark={isDark}
+        />
+      </div>
+
       {/* Font Selector */}
       <div style={{ marginBottom: 28 }}>
         <SectionLabel isDark={isDark}>Font</SectionLabel>
@@ -397,6 +407,130 @@ function ColorSwatchPicker({
           {isCustom && (
             <div style={{ position: 'absolute', bottom: -2, right: -2, width: 10, height: 10, borderRadius: '50%', background: ACCENT, border: `2px solid ${isDark ? '#1E293B' : '#fff'}` }} />
           )}
+        </button>
+      </div>
+
+      {showCustom && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8 }}>
+          <input
+            type="color"
+            value={value || '#333333'}
+            onChange={(e) => onChange(e.target.value)}
+            style={{
+              width: 40, height: 40,
+              border: `1px solid ${borderColor}`,
+              borderRadius: 8, cursor: 'pointer',
+              padding: 2, background: inputBg,
+            }}
+          />
+          <input
+            type="text"
+            value={value || ''}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (/^#[0-9a-fA-F]{0,6}$/.test(v)) onChange(v);
+            }}
+            placeholder="#333333"
+            maxLength={7}
+            style={{
+              width: 100, padding: '8px 10px',
+              border: `1px solid ${borderColor}`,
+              borderRadius: 8, fontSize: 13,
+              backgroundColor: inputBg, color: inputColor,
+              outline: 'none', fontFamily: 'monospace',
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+const SOCIAL_ICON_OPTIONS: { id: string | null; label: string; swatch: string | null }[] = [
+  { id: null, label: 'Standard', swatch: null },
+  { id: '#FFFFFF', label: 'White', swatch: '#FFFFFF' },
+  { id: '#000000', label: 'Black', swatch: '#000000' },
+];
+
+function SocialIconColorPicker({
+  value,
+  onChange,
+  isDark,
+}: {
+  value: string | null;
+  onChange: (v: string | null) => void;
+  isDark: boolean;
+}) {
+  const [showCustom, setShowCustom] = React.useState(false);
+  const borderColor = isDark ? '#334155' : '#E5E7EB';
+  const cardBg = isDark ? 'rgba(255,255,255,0.04)' : '#FAFAFA';
+  const inputBg = isDark ? '#1E293B' : '#fff';
+  const inputColor = isDark ? '#fff' : '#333';
+
+  const isPreset = value && SOCIAL_ICON_OPTIONS.some(o => o.id === value);
+  const isCustom = value && !isPreset;
+
+  return (
+    <div>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
+        {SOCIAL_ICON_OPTIONS.map((opt) => {
+          const sel = value === opt.id;
+          return (
+            <button
+              key={opt.label}
+              onClick={() => { onChange(opt.id); setShowCustom(false); }}
+              title={opt.label}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '8px 14px', borderRadius: 10,
+                border: `2px solid ${sel ? ACCENT : borderColor}`,
+                background: sel
+                  ? (isDark ? 'rgba(0,200,83,0.1)' : 'rgba(0,200,83,0.05)')
+                  : cardBg,
+                cursor: 'pointer', position: 'relative',
+              }}
+            >
+              {opt.swatch && (
+                <div style={{
+                  width: 18, height: 18, borderRadius: 6,
+                  background: opt.swatch,
+                  border: `1px solid ${opt.swatch === '#FFFFFF' ? '#ddd' : 'transparent'}`,
+                }} />
+              )}
+              <span style={{
+                fontSize: 13, fontWeight: sel ? 600 : 500,
+                color: sel ? ACCENT : (isDark ? '#94A3B8' : '#6B7280'),
+              }}>
+                {opt.label}
+              </span>
+            </button>
+          );
+        })}
+
+        {/* Custom */}
+        <button
+          onClick={() => setShowCustom(!showCustom)}
+          title="Custom color"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            padding: '8px 14px', borderRadius: 10,
+            border: `2px solid ${isCustom ? ACCENT : borderColor}`,
+            background: isCustom
+              ? (isDark ? 'rgba(0,200,83,0.1)' : 'rgba(0,200,83,0.05)')
+              : cardBg,
+            cursor: 'pointer', position: 'relative',
+          }}
+        >
+          <div style={{
+            width: 18, height: 18, borderRadius: 6,
+            background: isCustom ? value : 'conic-gradient(red, yellow, lime, aqua, blue, magenta, red)',
+          }} />
+          <span style={{
+            fontSize: 13, fontWeight: isCustom ? 600 : 500,
+            color: isCustom ? ACCENT : (isDark ? '#94A3B8' : '#6B7280'),
+          }}>
+            Custom
+          </span>
         </button>
       </div>
 

@@ -1179,7 +1179,9 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   // If the button background is light (e.g. #f8f9fa, rgba with low alpha on white), icons should be dark.
   // If the button background is dark, icons should be light.
   const getSocialIconColor = (): string => {
-    // User override takes priority
+    // Dedicated social icon color takes top priority
+    if (cardData.socialIconColor) return cardData.socialIconColor;
+    // General icon color override
     if (cardData.iconColor) return cardData.iconColor;
     // For templates with white card sections, the social buttons sit on a light background
     const isOnLightSection = templateLayout === 'pro-card' || templateLayout === 'cover-card' ||
@@ -5567,6 +5569,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       buttonStyle: data.button_style || 'fill',
       buttonColor: data.button_color || null,
       iconColor: data.icon_color || null,
+      socialIconColor: data.social_icon_color || null,
       fontStyle: data.font_style || 'default',
       tapCount: data.tap_count || 0,
       links: linksData?.map(l => ({
