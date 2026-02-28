@@ -168,7 +168,6 @@ export default function ECardPreviewPage() {
       try {
         await navigator.share({
           title: `${cardData.full_name}'s Card`,
-          text: `Check out ${cardData.full_name}'s digital business card`,
           url,
         });
       } catch (error) {

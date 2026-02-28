@@ -531,14 +531,13 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
 
   const handleShare = async () => {
     if (!cardData) return;
-    
-    const shareUrl = `https://tavvy.com/card/${cardData.slug}`;
-    
+
+    const shareUrl = `https://tavvy.com/${cardData.slug}`;
+
     if (navigator.share) {
       try {
         await navigator.share({
           title: `${cardData.fullName}'s Digital Card`,
-          text: `Check out ${cardData.fullName}'s digital business card`,
           url: shareUrl,
         });
       } catch (err) {
