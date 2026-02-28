@@ -1179,11 +1179,12 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   // If the button background is light (e.g. #f8f9fa, rgba with low alpha on white), icons should be dark.
   // If the button background is dark, icons should be light.
   const getSocialIconColor = (): string => {
-    const btnBg = templateStyles.buttonBg;
+    // User override takes priority
+    if (cardData.iconColor) return cardData.iconColor;
     // For templates with white card sections, the social buttons sit on a light background
-    const isOnLightSection = templateLayout === 'pro-card' || templateLayout === 'cover-card' || 
-      templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || 
-      templateLayout === 'biz-minimalist' || templateLayout === 'pro-realtor' || 
+    const isOnLightSection = templateLayout === 'pro-card' || templateLayout === 'cover-card' ||
+      templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' ||
+      templateLayout === 'biz-minimalist' || templateLayout === 'pro-realtor' ||
       templateLayout === 'blogger' || isCivicCard;
     if (isOnLightSection) return '#333333';
     // For templates with dark gradient backgrounds
@@ -2378,11 +2379,13 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           )}
 
           {/* Cover Card: Contact Rows with colored circle icons */}
-          {templateLayout === 'cover-card' && cardData.showContactInfo && (
+          {templateLayout === 'cover-card' && cardData.showContactInfo && (() => {
+            const iconBg = cardData.iconColor || templateStyles.accentColor;
+            return (
             <div style={{ width: '100%', padding: '0 28px 16px', background: '#ffffff' }}>
               {cardData.email && (
                 <a href={`mailto:${cardData.email}`} style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: '#333' }}>
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: activeColorScheme?.primary || '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, flexShrink: 0 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, flexShrink: 0 }}>
                     <EmailIcon />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -2392,7 +2395,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               )}
               {cardData.phone && (
                 <a href={`tel:${cardData.phone}`} style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: '#333' }}>
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: templateStyles.accentColor, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, flexShrink: 0 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, flexShrink: 0 }}>
                     <PhoneIcon />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -2402,7 +2405,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               )}
               {cardData.phone && (
                 <a href={`sms:${cardData.phone}`} style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: '#333' }}>
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: activeColorScheme?.primary || '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, flexShrink: 0 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, flexShrink: 0 }}>
                     <MessageIcon />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -2412,7 +2415,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               )}
               {cardData.website && (
                 <a href={cardData.website.startsWith('http') ? cardData.website : `https://${cardData.website}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: '#333' }}>
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: templateStyles.accentColor, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, flexShrink: 0 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, flexShrink: 0 }}>
                     <GlobeIcon />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -2423,7 +2426,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               )}
               {fullAddress && (
                 <a href={`https://maps.google.com/?q=${encodeURIComponent(fullAddress)}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #f0f0f0', textDecoration: 'none', color: '#333' }}>
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: activeColorScheme?.primary || '#7c3aed', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, flexShrink: 0 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, flexShrink: 0 }}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -2432,7 +2435,8 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 </a>
               )}
             </div>
-          )}
+            );
+          })()}
 
           {/* Biz Traditional: Contact rows with accent-colored icons */}
           {templateLayout === 'biz-traditional' && cardData.showContactInfo && (
@@ -3570,13 +3574,13 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                         fontSize: '12px',
                       } : {}),
                       ...(templateLayout === 'business-card' ? {
-                        background: '#f8f9fa',
-                        borderColor: '#e5e7eb',
+                        background: cardData.buttonColor || '#f8f9fa',
+                        borderColor: cardData.buttonColor ? `${cardData.buttonColor}40` : '#e5e7eb',
                         borderRadius: '12px',
                       } : {}),
                       ...(templateLayout === 'pro-card' || templateLayout === 'cover-card' ? {
-                        background: '#f8f9fa',
-                        borderColor: '#e8e8e8',
+                        background: cardData.buttonColor || '#f8f9fa',
+                        borderColor: cardData.buttonColor ? `${cardData.buttonColor}40` : '#e8e8e8',
                         borderRadius: '12px',
                       } : {}),
                     }}
@@ -3592,7 +3596,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                         <LinkIcon />
                       )}
                     </div>
-                    <span style={{...styles.linkButtonText, color: templateLayout === 'business-card' || templateLayout === 'pro-card' || templateLayout === 'cover-card' ? '#1a1a2e' : templateLayout === 'blogger' ? '#333' : templateStyles.textColor}}>{link.title}</span>
+                    <span style={{...styles.linkButtonText, color: (templateLayout === 'business-card' || templateLayout === 'pro-card' || templateLayout === 'cover-card') ? (cardData.buttonColor ? '#ffffff' : '#1a1a2e') : templateLayout === 'blogger' ? '#333' : templateStyles.textColor}}>{link.title}</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={templateLayout === 'pro-card' || templateLayout === 'cover-card' || templateLayout === 'biz-traditional' || templateLayout === 'biz-modern' || templateLayout === 'biz-minimalist' || bgIsActuallyLight ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.5)'} strokeWidth="2">
                       <polyline points="9 18 15 12 9 6"/>
                     </svg>
