@@ -222,6 +222,138 @@ export default function StyleSection({ isDark, isPro }: StyleSectionProps) {
         </div>
       </div>
 
+      {/* ===== Button Color ===== */}
+      <div style={{ marginBottom: 28 }}>
+        <SectionLabel isDark={isDark}>Button Color</SectionLabel>
+        <p style={{ fontSize: 12, color: textSecondary, margin: '0 0 10px' }}>
+          Override the default button background. Leave on Auto to use theme colors.
+        </p>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          <button
+            onClick={() => dispatch({ type: 'SET_FIELD', field: 'button_color', value: null })}
+            style={{
+              padding: '8px 14px',
+              borderRadius: 10,
+              border: `2px solid ${!card.button_color ? '#00C853' : borderColor}`,
+              background: !card.button_color
+                ? (isDark ? 'rgba(0,200,83,0.1)' : 'rgba(0,200,83,0.05)')
+                : cardBg,
+              cursor: 'pointer',
+              fontSize: 13,
+              fontWeight: !card.button_color ? 600 : 400,
+              color: !card.button_color ? '#00C853' : textPrimary,
+            }}
+          >
+            Auto
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="color"
+              value={card.button_color || '#f8f9fa'}
+              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'button_color', value: e.target.value })}
+              style={{
+                width: 36,
+                height: 36,
+                border: `1px solid ${borderColor}`,
+                borderRadius: 8,
+                cursor: 'pointer',
+                padding: 2,
+                background: inputBg,
+              }}
+            />
+            <input
+              type="text"
+              value={card.button_color || ''}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (/^#[0-9a-fA-F]{0,6}$/.test(v)) {
+                  dispatch({ type: 'SET_FIELD', field: 'button_color', value: v });
+                }
+              }}
+              placeholder="#f8f9fa"
+              maxLength={7}
+              style={{
+                width: 90,
+                padding: '8px 10px',
+                border: `1px solid ${borderColor}`,
+                borderRadius: 8,
+                fontSize: 13,
+                backgroundColor: inputBg,
+                color: inputColor,
+                outline: 'none',
+                fontFamily: 'monospace',
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ===== Icon Color ===== */}
+      <div style={{ marginBottom: 28 }}>
+        <SectionLabel isDark={isDark}>Icon Color</SectionLabel>
+        <p style={{ fontSize: 12, color: textSecondary, margin: '0 0 10px' }}>
+          Override the default icon accent color. Leave on Auto to use theme colors.
+        </p>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+          <button
+            onClick={() => dispatch({ type: 'SET_FIELD', field: 'icon_color', value: null })}
+            style={{
+              padding: '8px 14px',
+              borderRadius: 10,
+              border: `2px solid ${!card.icon_color ? '#00C853' : borderColor}`,
+              background: !card.icon_color
+                ? (isDark ? 'rgba(0,200,83,0.1)' : 'rgba(0,200,83,0.05)')
+                : cardBg,
+              cursor: 'pointer',
+              fontSize: 13,
+              fontWeight: !card.icon_color ? 600 : 400,
+              color: !card.icon_color ? '#00C853' : textPrimary,
+            }}
+          >
+            Auto
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              type="color"
+              value={card.icon_color || '#333333'}
+              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'icon_color', value: e.target.value })}
+              style={{
+                width: 36,
+                height: 36,
+                border: `1px solid ${borderColor}`,
+                borderRadius: 8,
+                cursor: 'pointer',
+                padding: 2,
+                background: inputBg,
+              }}
+            />
+            <input
+              type="text"
+              value={card.icon_color || ''}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (/^#[0-9a-fA-F]{0,6}$/.test(v)) {
+                  dispatch({ type: 'SET_FIELD', field: 'icon_color', value: v });
+                }
+              }}
+              placeholder="#333333"
+              maxLength={7}
+              style={{
+                width: 90,
+                padding: '8px 10px',
+                border: `1px solid ${borderColor}`,
+                borderRadius: 8,
+                fontSize: 13,
+                backgroundColor: inputBg,
+                color: inputColor,
+                outline: 'none',
+                fontFamily: 'monospace',
+              }}
+            />
+          </div>
+        </div>
+      </div>
+
       {/* ===== Font Selector ===== */}
       <div style={{ marginBottom: 28 }}>
         <SectionLabel isDark={isDark}>Font</SectionLabel>

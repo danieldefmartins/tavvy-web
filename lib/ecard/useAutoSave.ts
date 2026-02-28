@@ -103,6 +103,8 @@ export function useAutoSave({ userId, isPro, debounceMs = 2000 }: UseAutoSaveOpt
         template_id: card.template_id,
         color_scheme_id: card.color_scheme_id,
         button_style: card.button_style || 'fill',
+        button_color: card.button_color || null,
+        icon_color: card.icon_color || null,
         font_style: card.font_style || 'default',
         font_color: card.font_color || null,
         banner_image_url: cleanUrl(bannerUrl) || null,

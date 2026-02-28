@@ -113,6 +113,8 @@ interface CardData {
   backgroundType: string;
   backgroundImageUrl: string | null;
   buttonStyle: string;
+  buttonColor: string | null;
+  iconColor: string | null;
   fontStyle: string;
   links: CardLink[];
   // Videos (Tavvy Shorts, external URLs)
@@ -1168,8 +1170,9 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
   const templateStyles = {
     ...rawTemplateStyles,
     textColor: autoTextColor,
-    buttonBg: (rawTemplateStyles.buttonBg && !rawTemplateStyles.buttonBg.includes('255,255,255')) ? rawTemplateStyles.buttonBg : autoButtonBg,
-    buttonBorder: (rawTemplateStyles.buttonBorder && !rawTemplateStyles.buttonBorder.includes('255,255,255')) ? rawTemplateStyles.buttonBorder : autoButtonBorder,
+    buttonBg: cardData.buttonColor || ((rawTemplateStyles.buttonBg && !rawTemplateStyles.buttonBg.includes('255,255,255')) ? rawTemplateStyles.buttonBg : autoButtonBg),
+    buttonBorder: cardData.buttonColor ? `${cardData.buttonColor}80` : ((rawTemplateStyles.buttonBorder && !rawTemplateStyles.buttonBorder.includes('255,255,255')) ? rawTemplateStyles.buttonBorder : autoButtonBorder),
+    accentColor: cardData.iconColor || rawTemplateStyles.accentColor,
     isDark: !bgIsActuallyLight,
   };
 
@@ -2243,40 +2246,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               <div style={{ width: '60px', height: '3px', background: templateStyles.accentColor, borderRadius: '2px', margin: '8px 0 16px' }} />
             )}
             
-            {/* Address Display */}
-            {(cardData.address1 || cardData.city) && (
-              <div style={{
-                ...styles.addressBadge,
-                background: templateStyles.buttonBg,
-                borderColor: templateStyles.buttonBorder,
-                color: templateStyles.textColor,
-              }}>
-                <LocationIcon />
-                <div style={styles.addressText}>
-                  {cardData.address1 && <span>{cardData.address1}</span>}
-                  {cardData.address2 && <span> {cardData.address2}</span>}
-                  {(cardData.city || cardData.state || cardData.zipCode) && (
-                    <span style={styles.addressLine2}>
-                      {[cardData.city, cardData.state].filter(Boolean).join(', ')}
-                      {cardData.zipCode && ` ${cardData.zipCode}`}
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
-            
-            {/* Simple Location Badge (fallback if no full address) */}
-            {!cardData.address1 && !cardData.city && location && (
-              <div style={{
-                ...styles.locationBadge,
-                background: templateStyles.buttonBg,
-                borderColor: templateStyles.buttonBorder,
-                color: templateStyles.textColor,
-              }}>
-                <LocationIcon />
-                <span>{location}</span>
-              </div>
-            )}
+            {/* Address is rendered only as a link button in the links section below */}
 
             {/* Pro Corporate: Industry & Services Tags */}
             {templateLayout === 'pro-corporate' && cardData.title && (
@@ -3460,14 +3430,57 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               {cardData.videos.map((video, index) => {
                 if (video.type === 'tavvy_short') {
                   return (
-                    <div key={index} style={{ marginBottom: 12, borderRadius: 16, overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <div key={index} style={{ marginBottom: 12, borderRadius: 16, overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', position: 'relative' }}>
                       <video
+                        id={`tavvy-short-${index}`}
                         src={video.url}
                         controls
                         playsInline
-                        preload="metadata"
-                        style={{ width: '100%', display: 'block', borderRadius: 16, maxHeight: 400 }}
+                        preload="auto"
+                        poster=""
+                        style={{ width: '100%', display: 'block', borderRadius: 16, maxHeight: 400, minHeight: 200, backgroundColor: '#1a1a2e' }}
+                        onLoadedData={(e) => {
+                          // Once video loads, hide the overlay poster
+                          const overlay = document.getElementById(`tavvy-overlay-${index}`);
+                          if (overlay) overlay.style.display = 'none';
+                        }}
                       />
+                      {/* Play overlay shown until video loads first frame */}
+                      <div
+                        id={`tavvy-overlay-${index}`}
+                        onClick={() => {
+                          const vid = document.getElementById(`tavvy-short-${index}`) as HTMLVideoElement;
+                          if (vid) { vid.play(); }
+                          const overlay = document.getElementById(`tavvy-overlay-${index}`);
+                          if (overlay) overlay.style.display = 'none';
+                        }}
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                          borderRadius: 16,
+                          cursor: 'pointer',
+                          zIndex: 2,
+                        }}
+                      >
+                        <div style={{
+                          width: 60,
+                          height: 60,
+                          borderRadius: '50%',
+                          background: 'rgba(0,200,83,0.9)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: '0 4px 20px rgba(0,200,83,0.4)',
+                        }}>
+                          <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                        </div>
+                        <span style={{ marginTop: 12, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)', letterSpacing: 0.5 }}>Tavvy Short</span>
+                      </div>
                       <div style={{ padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00C853" strokeWidth="2">
                           <polygon points="23 7 16 12 23 17 23 7"/>
@@ -5549,6 +5562,8 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       backgroundType: data.background_type || 'gradient',
       backgroundImageUrl: data.background_image_url || null,
       buttonStyle: data.button_style || 'fill',
+      buttonColor: data.button_color || null,
+      iconColor: data.icon_color || null,
       fontStyle: data.font_style || 'default',
       tapCount: data.tap_count || 0,
       links: linksData?.map(l => ({
