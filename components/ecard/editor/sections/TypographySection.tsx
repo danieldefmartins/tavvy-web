@@ -74,6 +74,26 @@ export default function TypographySection({ isDark, isPro }: TypographySectionPr
         </div>
       </div>
 
+      {/* Button Color */}
+      <div style={{ marginBottom: 28 }}>
+        <SectionLabel isDark={isDark}>Button Color</SectionLabel>
+        <ColorSwatchPicker
+          value={card.button_color || null}
+          onChange={(v) => dispatch({ type: 'SET_FIELD', field: 'button_color', value: v })}
+          isDark={isDark}
+        />
+      </div>
+
+      {/* Icon Color */}
+      <div style={{ marginBottom: 28 }}>
+        <SectionLabel isDark={isDark}>Icon Color</SectionLabel>
+        <ColorSwatchPicker
+          value={card.icon_color || null}
+          onChange={(v) => dispatch({ type: 'SET_FIELD', field: 'icon_color', value: v })}
+          isDark={isDark}
+        />
+      </div>
+
       {/* Font Selector */}
       <div style={{ marginBottom: 28 }}>
         <SectionLabel isDark={isDark}>Font</SectionLabel>
@@ -283,5 +303,135 @@ function SectionLabel({ children, isDark }: { children: React.ReactNode; isDark:
     >
       {children}
     </label>
+  );
+}
+
+const COLOR_PRESETS = [
+  { color: '#1e293b', name: 'Navy' },
+  { color: '#c9a84c', name: 'Gold' },
+  { color: '#ef4444', name: 'Red' },
+  { color: '#10b981', name: 'Green' },
+  { color: '#3b82f6', name: 'Blue' },
+  { color: '#8b5cf6', name: 'Purple' },
+  { color: '#f97316', name: 'Orange' },
+  { color: '#111111', name: 'Black' },
+  { color: '#f8f9fa', name: 'White' },
+  { color: '#7A5330', name: 'Bronze' },
+];
+
+function ColorSwatchPicker({
+  value,
+  onChange,
+  isDark,
+}: {
+  value: string | null;
+  onChange: (v: string | null) => void;
+  isDark: boolean;
+}) {
+  const [showCustom, setShowCustom] = React.useState(false);
+  const borderColor = isDark ? '#334155' : '#E5E7EB';
+  const cardBg = isDark ? 'rgba(255,255,255,0.04)' : '#FAFAFA';
+  const inputBg = isDark ? '#1E293B' : '#fff';
+  const inputColor = isDark ? '#fff' : '#333';
+
+  const isPreset = value && COLOR_PRESETS.some(p => p.color === value);
+  const isCustom = value && !isPreset;
+
+  return (
+    <div>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
+        {/* Auto */}
+        <button
+          onClick={() => { onChange(null); setShowCustom(false); }}
+          title="Auto (theme default)"
+          style={{
+            width: 36, height: 36, borderRadius: 10,
+            border: `2px solid ${!value ? ACCENT : borderColor}`,
+            background: cardBg, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 11, fontWeight: 600,
+            color: !value ? ACCENT : (isDark ? '#94A3B8' : '#6B7280'),
+            position: 'relative',
+          }}
+        >
+          A
+          {!value && (
+            <div style={{ position: 'absolute', bottom: -2, right: -2, width: 10, height: 10, borderRadius: '50%', background: ACCENT, border: `2px solid ${isDark ? '#1E293B' : '#fff'}` }} />
+          )}
+        </button>
+
+        {/* Presets */}
+        {COLOR_PRESETS.map((preset) => {
+          const sel = value === preset.color;
+          return (
+            <button
+              key={preset.color}
+              onClick={() => { onChange(preset.color); setShowCustom(false); }}
+              title={preset.name}
+              style={{
+                width: 36, height: 36, borderRadius: 10,
+                border: `2px solid ${sel ? ACCENT : borderColor}`,
+                background: preset.color, cursor: 'pointer',
+                position: 'relative',
+                boxShadow: sel ? '0 0 0 1px ' + ACCENT : 'none',
+              }}
+            >
+              {sel && (
+                <div style={{ position: 'absolute', bottom: -2, right: -2, width: 10, height: 10, borderRadius: '50%', background: ACCENT, border: `2px solid ${isDark ? '#1E293B' : '#fff'}` }} />
+              )}
+            </button>
+          );
+        })}
+
+        {/* Custom */}
+        <button
+          onClick={() => setShowCustom(!showCustom)}
+          title="Custom color"
+          style={{
+            width: 36, height: 36, borderRadius: 10,
+            border: `2px solid ${isCustom ? ACCENT : borderColor}`,
+            background: isCustom ? value : 'conic-gradient(red, yellow, lime, aqua, blue, magenta, red)',
+            cursor: 'pointer', position: 'relative',
+          }}
+        >
+          {isCustom && (
+            <div style={{ position: 'absolute', bottom: -2, right: -2, width: 10, height: 10, borderRadius: '50%', background: ACCENT, border: `2px solid ${isDark ? '#1E293B' : '#fff'}` }} />
+          )}
+        </button>
+      </div>
+
+      {showCustom && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 8 }}>
+          <input
+            type="color"
+            value={value || '#333333'}
+            onChange={(e) => onChange(e.target.value)}
+            style={{
+              width: 40, height: 40,
+              border: `1px solid ${borderColor}`,
+              borderRadius: 8, cursor: 'pointer',
+              padding: 2, background: inputBg,
+            }}
+          />
+          <input
+            type="text"
+            value={value || ''}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (/^#[0-9a-fA-F]{0,6}$/.test(v)) onChange(v);
+            }}
+            placeholder="#333333"
+            maxLength={7}
+            style={{
+              width: 100, padding: '8px 10px',
+              border: `1px solid ${borderColor}`,
+              borderRadius: 8, fontSize: 13,
+              backgroundColor: inputBg, color: inputColor,
+              outline: 'none', fontFamily: 'monospace',
+            }}
+          />
+        </div>
+      )}
+    </div>
   );
 }
