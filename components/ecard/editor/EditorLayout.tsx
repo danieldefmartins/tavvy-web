@@ -9,6 +9,7 @@ import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useEditor } from '../../../lib/ecard/EditorContext';
 import { useAutoSave } from '../../../lib/ecard/useAutoSave';
+import { publishCard, unpublishCard, THEMES, FREE_LINK_LIMIT } from '../../../lib/ecard';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useRoles } from '../../../hooks/useRoles';
@@ -44,6 +45,9 @@ import {
   IoQrCodeOutline,
   IoShareOutline,
   IoClose,
+  IoRocketOutline,
+  IoCloudDoneOutline,
+  IoLockClosedOutline,
 } from 'react-icons/io5';
 
 const ACCENT = '#00C853';
@@ -67,6 +71,63 @@ export default function EditorLayout() {
 
   // QR modal
   const [showQR, setShowQR] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
+
+  const isPublished = !!card.is_published;
+
+  /** Check if this card uses premium features */
+  const hasPremiumFeatures = (): boolean => {
+    const themeObj = THEMES.find(t => t.id === card.theme);
+    if (themeObj?.isPremium) return true;
+    if (card.template_id && ['pro-', 'business-card', 'cover-card'].some(p => card.template_id!.startsWith(p))) return true;
+    if (card.gallery_images && card.gallery_images.length > 0) return true;
+    if (card.youtube_video_url) return true;
+    if (card.pro_credentials) return true;
+    if (card.form_block) return true;
+    return false;
+  };
+
+  const handlePublish = async () => {
+    if (!cardId) return;
+    if (!isPro && hasPremiumFeatures()) {
+      setShowPremiumModal(true);
+      return;
+    }
+    // Save any pending changes first
+    if (isDirty) await saveNow();
+    setPublishing(true);
+    try {
+      const success = await publishCard(cardId, card.slug || cardId);
+      if (success) {
+        // Force reload card data
+        window.location.reload();
+      } else {
+        alert('Failed to publish card.');
+      }
+    } catch (error) {
+      console.error('Publish error:', error);
+      alert('Failed to publish card.');
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const handleUnpublish = async () => {
+    if (!cardId) return;
+    if (!confirm('This will make your card invisible to others. Continue?')) return;
+    setPublishing(true);
+    try {
+      const success = await unpublishCard(cardId);
+      if (success) {
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Unpublish error:', error);
+    } finally {
+      setPublishing(false);
+    }
+  };
 
   // Determine which conditional sections to show
   const isCivic = templateId.startsWith('civic-') || templateId === 'politician-generic';
@@ -312,10 +373,124 @@ export default function EditorLayout() {
             <AdvancedSection isDark={isDark} isPro={isPro} />
           </EditorSection>
         )}
+        {/* Publish / Unpublish Button */}
+        {cardId && (
+          <div style={{ padding: '24px 20px 8px' }}>
+            {isPublished ? (
+              <div style={{ display: 'flex', gap: 10 }}>
+                <div style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  padding: '14px 20px',
+                  borderRadius: 14,
+                  background: isDark ? 'rgba(0,200,83,0.1)' : 'rgba(0,200,83,0.08)',
+                  border: `1px solid ${ACCENT}33`,
+                }}>
+                  <IoCloudDoneOutline size={18} color={ACCENT} />
+                  <span style={{ fontSize: 14, fontWeight: 600, color: ACCENT }}>Published</span>
+                </div>
+                <button
+                  onClick={handleUnpublish}
+                  disabled={publishing}
+                  style={{
+                    padding: '14px 20px',
+                    borderRadius: 14,
+                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
+                    background: 'transparent',
+                    color: isDark ? '#94A3B8' : '#6B7280',
+                    fontSize: 13,
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Unpublish
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handlePublish}
+                disabled={publishing || isSaving}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  padding: '16px 24px',
+                  borderRadius: 14,
+                  border: 'none',
+                  background: `linear-gradient(135deg, ${ACCENT}, #00A843)`,
+                  color: '#fff',
+                  fontSize: 16,
+                  fontWeight: 700,
+                  cursor: publishing ? 'not-allowed' : 'pointer',
+                  opacity: publishing || isSaving ? 0.6 : 1,
+                  boxShadow: '0 4px 16px rgba(0,200,83,0.3)',
+                  transition: 'transform 0.2s, opacity 0.2s',
+                }}
+              >
+                <IoRocketOutline size={20} />
+                {publishing ? 'Publishing...' : 'Publish Card'}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Section navigator dots */}
       <SectionNavigator sections={sections} isDark={isDark} />
+
+      {/* Premium Modal */}
+      {showPremiumModal && (
+        <div
+          onClick={() => setShowPremiumModal(false)}
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 9999, padding: 20, animation: 'editorFadeIn 0.15s ease',
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%', maxWidth: 380, borderRadius: 24, padding: 28,
+              background: isDark ? '#1E293B' : '#FFFFFF', textAlign: 'center',
+              position: 'relative', boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+            }}
+          >
+            <button
+              onClick={() => setShowPremiumModal(false)}
+              style={{ position: 'absolute', top: 14, right: 14, background: 'none', border: 'none', padding: 6, cursor: 'pointer', borderRadius: 8, display: 'flex' }}
+            >
+              <IoClose size={22} color={isDark ? '#94A3B8' : '#666'} />
+            </button>
+            <div style={{ width: 64, height: 64, borderRadius: 32, background: 'rgba(139,92,246,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <IoLockClosedOutline size={28} color="#8B5CF6" />
+            </div>
+            <h3 style={{ fontSize: 20, fontWeight: 700, color: isDark ? '#fff' : '#333', margin: '0 0 8px' }}>Premium Features Detected</h3>
+            <p style={{ fontSize: 14, color: isDark ? '#94A3B8' : '#6B7280', lineHeight: 1.6, margin: '0 0 24px' }}>
+              Your card includes premium features. Upgrade to Tavvy Pro to publish this card, or remove premium features to use the free version.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <button
+                onClick={() => { setShowPremiumModal(false); router.push('/app/ecard/premium', undefined, { locale }); }}
+                style={{ padding: '14px 24px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)', color: '#fff', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}
+              >
+                Upgrade to Pro
+              </button>
+              <button
+                onClick={() => setShowPremiumModal(false)}
+                style={{ padding: '10px', background: 'none', border: 'none', color: isDark ? '#64748B' : '#9CA3AF', fontSize: 13, cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* QR Code Modal */}
       {showQR && (

@@ -16,10 +16,15 @@ import {
   getCardById,
   updateCard,
   getCardLinks,
+  publishCard,
+  unpublishCard,
   CardData,
   LinkItem,
   getCardUrl,
+  THEMES,
+  FREE_LINK_LIMIT,
 } from '../../../../lib/ecard';
+import { useRoles } from '../../../../hooks/useRoles';
 import ECardIframePreview, { ECardIframePreviewHandle } from '../../../../components/ecard/ECardIframePreview';
 import StyledQRCode, { QR_STYLE_PRESETS, QRStyleConfig } from '../../../../components/ecard/StyledQRCode';
 import {
@@ -38,6 +43,8 @@ import {
   IoChevronUp,
   IoRefresh,
   IoSave,
+  IoLockClosedOutline,
+  IoRocketOutline,
 } from 'react-icons/io5';
 
 const ACCENT_GREEN = '#00C853';
@@ -49,6 +56,7 @@ export default function ECardPreviewPage() {
   const { cardId: routeCardId } = router.query;
   const { isDark } = useThemeContext();
   const { user } = useAuth();
+  const { isPro } = useRoles();
 
   const [loading, setLoading] = useState(true);
   const [cardData, setCardData] = useState<CardData | null>(null);
@@ -58,6 +66,8 @@ export default function ECardPreviewPage() {
   const qrContainerRef = useRef<HTMLDivElement>(null);
   const iframePreviewRef = useRef<ECardIframePreviewHandle>(null);
   const [copied, setCopied] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   const cardId = typeof routeCardId === 'string' ? routeCardId : null;
 
@@ -180,6 +190,77 @@ export default function ECardPreviewPage() {
     }
   };
 
+  /** Check if this card uses premium features */
+  const hasPremiumFeatures = (): boolean => {
+    if (!cardData) return false;
+    // Check premium theme
+    const theme = THEMES.find(t => t.id === cardData.theme);
+    if (theme?.isPremium) return true;
+    // Check premium template
+    const premiumTemplates = ['pro-', 'business-card', 'cover-card'];
+    if (cardData.template_id && premiumTemplates.some(p => cardData.template_id!.startsWith(p))) return true;
+    // Check link limit
+    if (cardLinks.length > FREE_LINK_LIMIT) return true;
+    // Check premium blocks
+    const premiumBlockTypes = ['gallery', 'video', 'youtube', 'testimonials', 'form', 'credentials'];
+    if ((cardData as any).blocks) {
+      const hasPremiumBlock = (cardData as any).blocks.some((block: any) =>
+        premiumBlockTypes.includes(block.type)
+      );
+      if (hasPremiumBlock) return true;
+    }
+    // Check premium features individually
+    if (cardData.gallery_images && cardData.gallery_images.length > 0) return true;
+    if (cardData.youtube_video_url) return true;
+    if (cardData.pro_credentials) return true;
+    if (cardData.form_block) return true;
+    return false;
+  };
+
+  /** Handle publish with premium gating */
+  const handlePublish = async () => {
+    if (!cardId || !cardData) return;
+
+    // Check if card has premium features and user is not Pro
+    if (!isPro && hasPremiumFeatures()) {
+      setShowPremiumModal(true);
+      return;
+    }
+
+    setPublishing(true);
+    try {
+      const success = await publishCard(cardId, cardData.slug);
+      if (success) {
+        setCardData(prev => prev ? { ...prev, is_published: true } : prev);
+        setTimeout(() => iframePreviewRef.current?.reload(), 500);
+      } else {
+        alert('Failed to publish card. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error publishing card:', error);
+      alert('Failed to publish card.');
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  /** Handle unpublish */
+  const handleUnpublish = async () => {
+    if (!cardId) return;
+    if (!confirm('This will make your card invisible to others. Continue?')) return;
+    setPublishing(true);
+    try {
+      const success = await unpublishCard(cardId);
+      if (success) {
+        setCardData(prev => prev ? { ...prev, is_published: false } : prev);
+      }
+    } catch (error) {
+      console.error('Error unpublishing card:', error);
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   const isDraft = cardData ? !cardData.is_published : false;
   const isOwner = user && cardData && cardData.user_id === user.id;
 
@@ -254,10 +335,22 @@ export default function ECardPreviewPage() {
             </div>
           )}
 
-          {/* Draft Banner */}
-          {isDraft && (
+          {/* Draft Banner with Publish Button */}
+          {isDraft && isOwner && (
             <div className="draft-banner">
-              <span>This card is not published yet. Publish to make it visible to others.</span>
+              <span>This card is not published yet.</span>
+              <button
+                className="publish-inline-btn"
+                onClick={handlePublish}
+                disabled={publishing}
+              >
+                {publishing ? 'Publishing...' : 'Publish Now'}
+              </button>
+            </div>
+          )}
+          {isDraft && !isOwner && (
+            <div className="draft-banner">
+              <span>This card is not published yet.</span>
             </div>
           )}
 
@@ -357,6 +450,29 @@ export default function ECardPreviewPage() {
             </div>
           )}
 
+          {/* Publish / Unpublish Button (Owner only) */}
+          {isOwner && (
+            <div className="publish-section">
+              {isDraft ? (
+                <button
+                  className="publish-btn"
+                  onClick={handlePublish}
+                  disabled={publishing}
+                >
+                  {publishing ? 'Publishing...' : 'Publish Card'}
+                </button>
+              ) : (
+                <button
+                  className="unpublish-btn"
+                  onClick={handleUnpublish}
+                  disabled={publishing}
+                >
+                  {publishing ? 'Unpublishing...' : 'Unpublish'}
+                </button>
+              )}
+            </div>
+          )}
+
           {/* Action Buttons */}
           <div className="actions">
             <button className="action-btn" onClick={() => setShowQRModal(true)}>
@@ -382,6 +498,44 @@ export default function ECardPreviewPage() {
               <IoCreate size={18} />
               <span>Full Editor</span>
             </button>
+          )}
+
+          {/* Premium Required Modal */}
+          {showPremiumModal && (
+            <div className="modal-overlay" onClick={() => setShowPremiumModal(false)}>
+              <div className="modal" onClick={e => e.stopPropagation()} style={{ backgroundColor: isDark ? '#1E293B' : '#fff', maxWidth: 380 }}>
+                <button className="modal-close" onClick={() => setShowPremiumModal(false)}>
+                  <IoClose size={24} color={isDark ? '#fff' : '#333'} />
+                </button>
+                <div style={{ width: 64, height: 64, borderRadius: 32, background: 'rgba(139,92,246,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                  <IoLockClosedOutline size={28} color="#8B5CF6" />
+                </div>
+                <h2 style={{ color: isDark ? '#fff' : '#333', fontSize: 20, fontWeight: 700, margin: '0 0 8px' }}>Premium Features Detected</h2>
+                <p style={{ color: isDark ? '#94A3B8' : '#6B7280', fontSize: 14, lineHeight: 1.6, margin: '0 0 24px' }}>
+                  Your card includes premium features. Upgrade to Tavvy Pro to publish this card, or remove premium features to use the free version.
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <button
+                    onClick={() => { setShowPremiumModal(false); router.push('/app/ecard/premium', undefined, { locale }); }}
+                    style={{ padding: '14px 24px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)', color: '#fff', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    Upgrade to Pro
+                  </button>
+                  <button
+                    onClick={() => { setShowPremiumModal(false); router.push(`/app/ecard/${cardId}/edit`, undefined, { locale }); }}
+                    style={{ padding: '14px 24px', borderRadius: 12, border: `1px solid ${isDark ? '#334155' : '#E5E7EB'}`, background: 'transparent', color: isDark ? '#E2E8F0' : '#374151', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}
+                  >
+                    Edit Card
+                  </button>
+                  <button
+                    onClick={() => setShowPremiumModal(false)}
+                    style={{ padding: '10px', background: 'none', border: 'none', color: isDark ? '#64748B' : '#9CA3AF', fontSize: 13, cursor: 'pointer' }}
+                  >
+                    Save as Draft
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* QR Code Modal */}
@@ -595,6 +749,86 @@ export default function ECardPreviewPage() {
             color: ${isDark ? '#FFC107' : '#856404'};
             font-size: 13px;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+          }
+
+          .publish-inline-btn {
+            padding: 6px 16px;
+            border-radius: 8px;
+            border: none;
+            background: ${isDark ? '#FFC107' : '#F59E0B'};
+            color: ${isDark ? '#000' : '#fff'};
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+          }
+          .publish-inline-btn:hover {
+            opacity: 0.9;
+          }
+          .publish-inline-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+
+          .publish-section {
+            padding: 0 16px;
+            margin-bottom: 16px;
+          }
+
+          .publish-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px;
+            border-radius: 14px;
+            border: none;
+            background: linear-gradient(135deg, ${ACCENT_GREEN}, #00A843);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            box-shadow: 0 4px 16px rgba(0, 200, 83, 0.3);
+          }
+          .publish-btn:hover {
+            transform: scale(1.02);
+          }
+          .publish-btn:disabled {
+            opacity: 0.6;
+            transform: none;
+            cursor: not-allowed;
+          }
+
+          .unpublish-btn {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px;
+            border-radius: 14px;
+            border: 1px solid ${isDark ? '#334155' : '#E5E7EB'};
+            background: transparent;
+            color: ${isDark ? '#94A3B8' : '#6B7280'};
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+          }
+          .unpublish-btn:hover {
+            opacity: 0.8;
+          }
+          .unpublish-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
           }
 
           .toolbar-toggle {
