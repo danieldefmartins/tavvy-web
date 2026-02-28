@@ -139,6 +139,52 @@ export default function ProsScreen() {
             </div>
           </div>
 
+          {viewMode === 'pro' ? (
+            <>
+              {/* Pro View */}
+              <div className="pro-landing">
+                <Link href="/app/pros/dashboard" locale={locale} className="start-project-card">
+                  <div className="start-project-gradient">
+                    <div className="start-project-icon">
+                      <IoChevronForward size={28} color="#FFFFFF" />
+                    </div>
+                    <div className="start-project-content">
+                      <h3 className="start-project-title">Go to Dashboard</h3>
+                      <p className="start-project-subtitle">Manage leads, messages & profile</p>
+                    </div>
+                    <IoChevronForward size={24} color="#FFFFFF" />
+                  </div>
+                </Link>
+
+                <div className="pro-actions-grid">
+                  <Link href="/app/pros/dashboard" locale={locale} className="pro-action-card" style={{ backgroundColor: surfaceColor, borderColor }}>
+                    <IoAddCircleOutline size={28} color={COLORS.successGreen} />
+                    <span style={{ color: textColor }}>Leads</span>
+                  </Link>
+                  <Link href="/app/pros/dashboard" locale={locale} className="pro-action-card" style={{ backgroundColor: surfaceColor, borderColor }}>
+                    <IoChevronForward size={28} color={COLORS.primaryBlue} />
+                    <span style={{ color: textColor }}>Messages</span>
+                  </Link>
+                  <Link href="/app/pros/dashboard" locale={locale} className="pro-action-card" style={{ backgroundColor: surfaceColor, borderColor }}>
+                    <IoChevronForward size={28} color={COLORS.warningAmber} />
+                    <span style={{ color: textColor }}>Profile</span>
+                  </Link>
+                </div>
+
+                <div className="pro-register-cta" style={{ backgroundColor: surfaceColor, borderColor }}>
+                  <h3 style={{ color: textColor }}>Not a Pro yet?</h3>
+                  <p style={{ color: secondaryTextColor }}>
+                    Join Tavvy Pros to connect with customers and grow your business.
+                  </p>
+                  <Link href="/app/pros/register" locale={locale} className="pro-register-button">
+                    Register Now
+                  </Link>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+
           {/* Start a Project Card - Primary CTA */}
           <Link href="/app/pros/new-project" locale={locale} className="start-project-card">
             <div className="start-project-gradient">
@@ -370,6 +416,9 @@ export default function ProsScreen() {
           </div>
 
           <div style={{ height: 100 }} />
+
+            </>
+          )}
 
           <style jsx>{`
             .pros-screen {
@@ -911,6 +960,72 @@ export default function ProsScreen() {
 
             .practice-item:last-child {
               margin-bottom: 0;
+            }
+
+            /* Pro Landing View */
+            .pro-landing {
+              padding: 0 20px;
+            }
+
+            .pro-actions-grid {
+              display: grid;
+              grid-template-columns: repeat(3, 1fr);
+              gap: 12px;
+              margin: 20px 0;
+            }
+
+            .pro-actions-grid :global(.pro-action-card) {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              gap: 8px;
+              padding: 20px;
+              border: 1px solid;
+              border-radius: 12px;
+              text-decoration: none;
+              font-size: 14px;
+              font-weight: 600;
+              transition: transform 0.2s;
+            }
+
+            .pro-actions-grid :global(.pro-action-card:hover) {
+              transform: translateY(-2px);
+            }
+
+            .pro-register-cta {
+              padding: 24px;
+              border: 1px solid;
+              border-radius: 16px;
+              text-align: center;
+              margin-top: 8px;
+            }
+
+            .pro-register-cta h3 {
+              font-size: 18px;
+              font-weight: 700;
+              margin: 0 0 8px;
+            }
+
+            .pro-register-cta p {
+              font-size: 14px;
+              margin: 0 0 16px;
+              line-height: 1.5;
+            }
+
+            .pro-register-cta :global(.pro-register-button) {
+              display: inline-block;
+              background: ${COLORS.primaryBlue};
+              color: #FFFFFF;
+              padding: 12px 32px;
+              border-radius: 10px;
+              font-size: 16px;
+              font-weight: 600;
+              text-decoration: none;
+              transition: transform 0.2s;
+            }
+
+            .pro-register-cta :global(.pro-register-button:hover) {
+              transform: translateY(-2px);
             }
 
             @media (max-width: 768px) {
