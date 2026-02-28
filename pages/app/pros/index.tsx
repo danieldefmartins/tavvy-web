@@ -13,11 +13,13 @@
  * - Best practices (Do's/Don'ts/What to Expect)
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
+import { useAuth } from '../../../contexts/AuthContext';
+import { useRoles } from '../../../hooks/useRoles';
 import AppLayout from '../../../components/AppLayout';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -91,10 +93,11 @@ const EDUCATION_CONTENT = [
 
 export default function ProsScreen() {
   const { theme, isDark } = useThemeContext();
+  const { user } = useAuth();
+  const { isPro } = useRoles();
   const router = useRouter();
   const { locale } = router;
   const { t } = useTranslation('common');
-  const [viewMode, setViewMode] = useState<'user' | 'pro'>('user');
 
   const bgColor = isDark ? '#121212' : '#FAFAFA';
   const surfaceColor = isDark ? '#1E1E1E' : '#FFFFFF';
@@ -124,15 +127,20 @@ export default function ProsScreen() {
           {/* Segmented Control */}
           <div className="segmented-control-container">
             <div className="segmented-control" style={{ backgroundColor: surfaceColor }}>
-              <button
-                className={`segment ${viewMode === 'user' ? 'active' : ''}`}
-                onClick={() => setViewMode('user')}
-              >
+              <button className="segment active">
                 Find a Pro
               </button>
               <button
-                className={`segment ${viewMode === 'pro' ? 'active' : ''}`}
-                onClick={() => setViewMode('pro')}
+                className="segment"
+                onClick={() => {
+                  if (!user) {
+                    router.push('/app/login');
+                  } else if (isPro) {
+                    router.push('/app/pros/dashboard');
+                  } else {
+                    router.push('/app/pros/register');
+                  }
+                }}
               >
                 I'm a Pro
               </button>
@@ -929,7 +937,8 @@ export default function ProsScreen() {
   );
 }
 
-export async function getStaticProps({ locale }: { locale: string }) {
+export async function getServerSideProps({ locale, res }: { locale: string; res: any }) {
+  res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
   return {
     props: {
       ...(await serverSideTranslations(locale, ['common'])),
