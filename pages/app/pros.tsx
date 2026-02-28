@@ -937,7 +937,8 @@ export default function ProsScreen() {
   );
 }
 
-export async function getServerSideProps({ locale }: { locale: string }) {
+export async function getServerSideProps({ locale, res }: { locale: string; res: any }) {
+  res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
   return {
     props: {
       ...(await serverSideTranslations(locale, ['common'])),
