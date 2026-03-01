@@ -2841,7 +2841,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                     }}
                     title={config.label}
                   >
-                    <svg viewBox="0 0 24 24" width="22" height="22" fill="white">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill={cardData.socialIconColor || 'white'}>
                       <path d={config.svgPath} />
                     </svg>
                   </a>
