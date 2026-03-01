@@ -162,6 +162,7 @@ interface CardData {
   showInsuredBadge: boolean;
   showBondedBadge: boolean;
   showTavvyVerifiedBadge: boolean;
+  badgeApprovalStatus: string;
   // Featured icons
   featuredIcons: any[];
   // Background video
@@ -2217,7 +2218,43 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               ...(templateLayout === 'pro-realtor' ? { fontSize: '13px', fontWeight: '500' } : {}),
               ...(templateLayout === 'cover-card' ? { textAlign: 'left' as const, width: '100%', color: '#888', fontStyle: 'italic', fontSize: '13px' } : {}),
             }}>{cardData.company}</p>}
-            
+
+            {/* Professional Badges — only shown when admin-approved */}
+            {cardData.badgeApprovalStatus === 'approved' && (
+              cardData.showLicensedBadge || cardData.showInsuredBadge || cardData.showBondedBadge || cardData.showTavvyVerifiedBadge
+            ) && (
+              <div style={{
+                display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'center',
+                margin: '8px 0 4px',
+                ...(templateLayout === 'pro-creative' || templateLayout === 'cover-card' ? { justifyContent: 'flex-start', width: '100%' } : {}),
+              }}>
+                {cardData.showLicensedBadge && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: 'rgba(59,130,246,0.15)', color: '#3B82F6', letterSpacing: '0.3px' }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    Licensed
+                  </span>
+                )}
+                {cardData.showInsuredBadge && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: 'rgba(16,185,129,0.15)', color: '#10B981', letterSpacing: '0.3px' }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                    Insured
+                  </span>
+                )}
+                {cardData.showBondedBadge && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: 'rgba(245,158,11,0.15)', color: '#F59E0B', letterSpacing: '0.3px' }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                    Bonded
+                  </span>
+                )}
+                {cardData.showTavvyVerifiedBadge && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: 'rgba(139,92,246,0.15)', color: '#8B5CF6', letterSpacing: '0.3px' }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                    Tavvy Verified
+                  </span>
+                )}
+              </div>
+            )}
+
             {/* Bio (skip for biz templates — rendered in their own sections) */}
             {cardData.bio && templateLayout !== 'biz-traditional' && templateLayout !== 'biz-modern' && templateLayout !== 'biz-minimalist' && templateLayout !== 'mobile-business' && (
               <p style={{
@@ -5625,6 +5662,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
       showInsuredBadge: data.show_insured_badge || false,
       showBondedBadge: data.show_bonded_badge || false,
       showTavvyVerifiedBadge: data.show_tavvy_verified_badge || false,
+      badgeApprovalStatus: data.badge_approval_status || 'none',
       featuredIcons: data.featured_icons ? (typeof data.featured_icons === 'string' ? JSON.parse(data.featured_icons) : data.featured_icons) : [],
       backgroundVideoUrl: data.background_video_url || null,
       address: data.address || '',

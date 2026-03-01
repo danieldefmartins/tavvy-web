@@ -116,6 +116,13 @@ export function useAutoSave({ userId, isPro, debounceMs = 2000 }: UseAutoSaveOpt
         show_social_icons: card.show_social_icons !== false,
         pronouns: card.pronouns || undefined,
         description: card.description || undefined,
+        // Professional badges & credentials
+        show_licensed_badge: card.show_licensed_badge || false,
+        show_insured_badge: card.show_insured_badge || false,
+        show_bonded_badge: card.show_bonded_badge || false,
+        show_tavvy_verified_badge: card.show_tavvy_verified_badge || false,
+        pro_credentials: card.pro_credentials || undefined,
+        professional_category: card.professional_category || undefined,
         // Civic fields
         ballot_number: card.ballot_number || undefined,
         party_name: card.party_name || undefined,
@@ -125,10 +132,19 @@ export function useAutoSave({ userId, isPro, debounceMs = 2000 }: UseAutoSaveOpt
         region: card.region || undefined,
       };
 
+      // Auto-set badge approval status to pending when any badge is toggled on
+      const anyBadgeOn = !!(
+        updatePayload.show_licensed_badge ||
+        updatePayload.show_insured_badge ||
+        updatePayload.show_bonded_badge ||
+        updatePayload.show_tavvy_verified_badge
+      );
+
       // Include company_logo_url via spread since it's not in the CardData interface
       const fullPayload = {
         ...updatePayload,
         company_logo_url: cleanUrl(logoUrl) || null,
+        ...(anyBadgeOn ? { badge_approval_status: 'pending' } : {}),
       };
 
       // 3. Save card + links

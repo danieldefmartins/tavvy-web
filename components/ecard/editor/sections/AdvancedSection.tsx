@@ -62,6 +62,28 @@ export default function AdvancedSection({ isDark, isPro }: AdvancedSectionProps)
         <ToggleRow label="Insured" field="show_insured_badge" checked={!!card.show_insured_badge} />
         <ToggleRow label="Bonded" field="show_bonded_badge" checked={!!card.show_bonded_badge} />
         <ToggleRow label="Tavvy Verified" field="show_tavvy_verified_badge" checked={!!card.show_tavvy_verified_badge} />
+
+        {/* Badge Approval Status */}
+        {(card as any).badge_approval_status && (card as any).badge_approval_status !== 'none' && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, padding: '8px 12px',
+            borderRadius: 8, fontSize: 13, fontWeight: 500,
+            background: (card as any).badge_approval_status === 'pending'
+              ? (isDark ? '#422006' : '#FFFBEB')
+              : (card as any).badge_approval_status === 'approved'
+              ? (isDark ? '#064E3B' : '#ECFDF5')
+              : (isDark ? '#7F1D1D' : '#FEF2F2'),
+            color: (card as any).badge_approval_status === 'pending'
+              ? (isDark ? '#FDE68A' : '#92400E')
+              : (card as any).badge_approval_status === 'approved'
+              ? (isDark ? '#6EE7B7' : '#059669')
+              : (isDark ? '#FCA5A5' : '#DC2626'),
+          }}>
+            {(card as any).badge_approval_status === 'pending' && '⏳ Pending Review'}
+            {(card as any).badge_approval_status === 'approved' && '✓ Approved'}
+            {(card as any).badge_approval_status === 'rejected' && '✗ Rejected'}
+          </div>
+        )}
       </div>
 
       {/* Professional Category */}
