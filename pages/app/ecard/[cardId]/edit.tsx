@@ -9,11 +9,12 @@ import { useRouter } from 'next/router';
 import { useAuth } from '../../../../contexts/AuthContext';
 import AppLayout from '../../../../components/AppLayout';
 import { EditorProvider, useEditor } from '../../../../lib/ecard/EditorContext';
-import EditorLayout from '../../../../components/ecard/editor/EditorLayout';
+import CardStudioLayout from '../../../../components/ecard/editor/CardStudioLayout';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
-const ACCENT = '#00C853';
+const AMBER = '#FF9F0A';
+const CANVAS_BG = '#1C1C1E';
 
 function EditorShell() {
   const router = useRouter();
@@ -42,12 +43,13 @@ function EditorShell() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: CANVAS_BG,
       }}>
         <div style={{
           width: 36,
           height: 36,
-          border: '3px solid rgba(0,0,0,0.1)',
-          borderTopColor: ACCENT,
+          border: '3px solid rgba(255,255,255,0.1)',
+          borderTopColor: AMBER,
           borderRadius: '50%',
           animation: 'spin 1s linear infinite',
         }} />
@@ -67,6 +69,7 @@ function EditorShell() {
         gap: 16,
         padding: 40,
         textAlign: 'center',
+        backgroundColor: CANVAS_BG,
       }}>
         <p style={{ fontSize: 16, color: '#EF4444', fontWeight: 500 }}>
           {state.loadError}
@@ -77,7 +80,7 @@ function EditorShell() {
             padding: '10px 20px',
             border: 'none',
             borderRadius: 8,
-            background: ACCENT,
+            background: AMBER,
             color: '#fff',
             fontSize: 14,
             fontWeight: 600,
@@ -90,7 +93,7 @@ function EditorShell() {
     );
   }
 
-  return <EditorLayout />;
+  return <CardStudioLayout />;
 }
 
 export default function ECardEditPage() {
