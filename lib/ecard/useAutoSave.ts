@@ -115,7 +115,6 @@ export function useAutoSave({ userId, isPro, debounceMs = 2000 }: UseAutoSaveOpt
         show_contact_info: card.show_contact_info !== false,
         show_social_icons: card.show_social_icons !== false,
         pronouns: card.pronouns || undefined,
-        description: card.description || undefined,
         // Professional badges & credentials
         show_licensed_badge: card.show_licensed_badge || false,
         show_insured_badge: card.show_insured_badge || false,
