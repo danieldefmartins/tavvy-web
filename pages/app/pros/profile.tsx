@@ -41,56 +41,44 @@ export default function ProProfileScreen() {
   const fetchProfile = async () => {
     setLoading(true);
     try {
-      // Try the pros table first (mobile schema)
       const { data, error } = await supabase
-        .from('pros')
-        .select('*, category:service_categories(name, id)')
+        .from('pro_providers')
+        .select('*')
         .eq('user_id', user!.id)
         .single();
 
       if (data) {
-        setProfile(data);
+        setProfile({
+          ...data,
+          // Normalize service_radius → service_radius_miles for the UI
+          service_radius_miles: data.service_radius ?? 25,
+        });
 
-        // Fetch available specialties for this category
-        if (data.category_id) {
-          const { data: questions } = await supabase
-            .from('service_category_questions')
-            .select('options')
-            .eq('category_id', data.category_id)
-            .is('parent_question_id', null)
+        // Fetch available specialties by matching trade_category to service_categories
+        if (data.trade_category) {
+          const { data: cat } = await supabase
+            .from('service_categories')
+            .select('id, name')
+            .eq('slug', data.trade_category)
             .single();
 
-          if (questions?.options) {
-            setAvailableSpecialties(questions.options);
+          if (cat) {
+            setProfile((prev: any) => ({ ...prev, category: cat }));
+            const { data: questions } = await supabase
+              .from('service_category_questions')
+              .select('options')
+              .eq('category_id', cat.id)
+              .is('parent_question_id', null)
+              .single();
+
+            if (questions?.options) {
+              setAvailableSpecialties(questions.options);
+            }
           }
         }
-      } else if (provider) {
-        // Fallback to pro_providers data from the hook
-        setProfile({
-          id: provider.id,
-          business_name: (provider as any).business_name || '',
-          description: (provider as any).description || '',
-          phone: (provider as any).phone || '',
-          location: (provider as any).location || '',
-          specialties: (provider as any).specialties || [],
-          service_radius_miles: (provider as any).service_radius_miles || 25,
-          category: (provider as any).category || null,
-        });
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
-      // Fallback to provider data if available
-      if (provider) {
-        setProfile({
-          id: provider.id,
-          business_name: (provider as any).business_name || '',
-          description: (provider as any).description || '',
-          phone: (provider as any).phone || '',
-          location: (provider as any).location || '',
-          specialties: (provider as any).specialties || [],
-          service_radius_miles: (provider as any).service_radius_miles || 25,
-        });
-      }
     } finally {
       setLoading(false);
     }
@@ -109,33 +97,20 @@ export default function ProProfileScreen() {
     setSaving(true);
     setSaved(false);
     try {
-      // Try updating pros table first
       const { error } = await supabase
-        .from('pros')
+        .from('pro_providers')
         .update({
           business_name: profile.business_name,
           description: profile.description,
           phone: profile.phone,
           location: profile.location,
           specialties: profile.specialties,
-          service_radius_miles: profile.service_radius_miles,
+          service_radius: profile.service_radius_miles,
+          updated_at: new Date().toISOString(),
         })
         .eq('id', profile.id);
 
-      if (error) {
-        // Fallback: try pro_providers table
-        const { error: error2 } = await supabase
-          .from('pro_providers')
-          .update({
-            business_name: profile.business_name,
-            description: profile.description,
-            phone: profile.phone,
-            location: profile.location,
-          })
-          .eq('id', profile.id);
-
-        if (error2) throw error2;
-      }
+      if (error) throw error;
 
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);

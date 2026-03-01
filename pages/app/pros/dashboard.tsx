@@ -100,17 +100,6 @@ export default function ProDashboardScreen() {
       if (profile) {
         setFullProfile(profile);
         setProfileCompletion(calcProfileCompletion(profile));
-      } else {
-        // Try pros table as fallback
-        const { data: prosProfile } = await supabase
-          .from('pros')
-          .select('*, category:service_categories(name)')
-          .eq('user_id', user!.id)
-          .single();
-        if (prosProfile) {
-          setFullProfile(prosProfile);
-          setProfileCompletion(calcProfileCompletion(prosProfile));
-        }
       }
 
       // Fetch recent leads if provider exists
