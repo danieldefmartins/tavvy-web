@@ -1,18 +1,25 @@
 /**
- * TemplatePicker — template selection grid with previews.
- * Shows all templates, locks premium ones for non-pro users.
+ * TemplatePicker — horizontal scroll carousel of realistic card previews.
+ * Renders each template using FullCardPreview at ~0.28 scale.
  */
 
 import React from 'react';
 import { TEMPLATES, Template } from '../../../../config/eCardTemplates';
+import { FullCardPreview } from '../../wizard/FullCardPreview';
 import { IoLockClosed } from 'react-icons/io5';
+
+const ACCENT = '#00C853';
+const PREVIEW_SCALE = 0.28;
+const CONTAINER_WIDTH = 140;
+const CONTAINER_HEIGHT = 220;
+const INNER_WIDTH = Math.round(CONTAINER_WIDTH / PREVIEW_SCALE); // ~500
 
 interface TemplatePickerProps {
   selectedTemplateId: string;
   onSelect: (templateId: string, colorSchemeId?: string) => void;
   isPro: boolean;
   isDark?: boolean;
-  filterCategory?: string; // 'business' | 'personal' | 'politician' — used during creation
+  filterCategory?: string;
 }
 
 // Group templates for filtering
@@ -40,9 +47,15 @@ export default function TemplatePicker({
 
   return (
     <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(2, 1fr)',
-      gap: 12,
+      display: 'flex',
+      gap: 10,
+      overflowX: 'auto',
+      scrollSnapType: 'x mandatory',
+      paddingBottom: 4,
+      marginLeft: -2,
+      marginRight: -2,
+      paddingLeft: 2,
+      paddingRight: 2,
     }}>
       {filtered.map((template) => {
         const isSelected = selectedTemplateId === template.id;
@@ -57,82 +70,105 @@ export default function TemplatePicker({
               onSelect(template.id, firstScheme?.id);
             }}
             style={{
-              position: 'relative',
+              flexShrink: 0,
+              scrollSnapAlign: 'start',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              padding: 12,
+              padding: 8,
+              paddingBottom: 10,
               borderRadius: 14,
-              border: `2px solid ${isSelected ? '#00C853' : border}`,
+              border: `2px solid ${isSelected ? ACCENT : border}`,
               background: cardBg,
               cursor: isLocked ? 'not-allowed' : 'pointer',
-              opacity: isLocked ? 0.6 : 1,
-              transition: 'border-color 0.2s, transform 0.15s',
+              transition: 'border-color 0.2s',
               textAlign: 'center',
+              width: CONTAINER_WIDTH + 16,
             }}
           >
-            {/* Color preview swatch */}
+            {/* Scaled card preview */}
             <div style={{
-              width: '100%',
-              height: 80,
+              width: CONTAINER_WIDTH,
+              height: CONTAINER_HEIGHT,
               borderRadius: 10,
-              background: `linear-gradient(135deg, ${firstScheme?.primary || '#667eea'}, ${firstScheme?.secondary || '#764ba2'})`,
+              overflow: 'hidden',
               marginBottom: 8,
               position: 'relative',
-              overflow: 'hidden',
+              backgroundColor: firstScheme?.cardBg || firstScheme?.primary || '#333',
             }}>
+              <div style={{
+                width: INNER_WIDTH,
+                transformOrigin: 'top left',
+                transform: `scale(${PREVIEW_SCALE})`,
+              }}>
+                <FullCardPreview tmpl={template} />
+              </div>
+
+              {/* Lock overlay */}
               {isLocked && (
                 <div style={{
                   position: 'absolute',
-                  top: 6,
-                  right: 6,
-                  width: 24,
-                  height: 24,
-                  borderRadius: 12,
-                  background: 'rgba(0,0,0,0.5)',
+                  inset: 0,
+                  backgroundColor: 'rgba(0,0,0,0.45)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                  <IoLockClosed size={12} color="#fff" />
+                  <div style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: 14,
+                    background: 'rgba(0,0,0,0.6)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                    <IoLockClosed size={14} color="#fff" />
+                  </div>
+                </div>
+              )}
+
+              {/* Selected check */}
+              {isSelected && (
+                <div style={{
+                  position: 'absolute',
+                  top: 6,
+                  left: 6,
+                  width: 22,
+                  height: 22,
+                  borderRadius: 11,
+                  background: ACCENT,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
                 </div>
               )}
             </div>
+
+            {/* Template name + badge */}
             <span style={{
-              fontSize: 13,
+              fontSize: 12,
               fontWeight: 600,
               color: textPrimary,
               marginBottom: 2,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              maxWidth: CONTAINER_WIDTH,
             }}>
               {template.name}
             </span>
             <span style={{
-              fontSize: 11,
+              fontSize: 10,
               color: textSecondary,
               lineHeight: 1.3,
             }}>
               {template.isPremium ? 'Pro' : 'Free'}
             </span>
-
-            {/* Selected check */}
-            {isSelected && (
-              <div style={{
-                position: 'absolute',
-                top: 8,
-                left: 8,
-                width: 22,
-                height: 22,
-                borderRadius: 11,
-                background: '#00C853',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </div>
-            )}
           </button>
         );
       })}

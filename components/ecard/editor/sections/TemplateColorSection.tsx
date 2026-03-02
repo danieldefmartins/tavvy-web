@@ -22,6 +22,10 @@ export default function TemplateColorSection({ isDark, isPro }: TemplateColorSec
   const inputBg = isDark ? '#1E293B' : '#fff';
   const inputColor = isDark ? '#fff' : '#333';
 
+  const cardTypeCategory = card.card_type === 'politician' ? 'politician'
+    : card.card_type === 'personal' ? 'personal'
+    : 'business';
+
   const handleTemplateSelect = (templateId: string, colorSchemeId?: string) => {
     dispatch({ type: 'SET_TEMPLATE', templateId, colorSchemeId });
   };
@@ -40,6 +44,7 @@ export default function TemplateColorSection({ isDark, isPro }: TemplateColorSec
           onSelect={handleTemplateSelect}
           isPro={isPro}
           isDark={isDark}
+          filterCategory={cardTypeCategory}
         />
       </div>
 
