@@ -118,7 +118,7 @@ interface CardData {
   fontStyle: string;
   links: CardLink[];
   // Videos (Tavvy Shorts, external URLs)
-  videos: { type: string; url: string }[];
+  videos: { type: string; url: string; thumbnail_url?: string }[];
   tapCount: number;
   showContactInfo: boolean;
   showSocialIcons: boolean;
@@ -2874,11 +2874,11 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                     rel="noopener noreferrer"
                     style={{
                       ...styles.featuredSocialButton,
-                      backgroundColor: config.bgColor,
+                      backgroundColor: cardData.socialIconColor || config.bgColor,
                     }}
                     title={config.label}
                   >
-                    <svg viewBox="0 0 24 24" width="22" height="22" fill={cardData.socialIconColor || 'white'}>
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="white">
                       <path d={config.svgPath} />
                     </svg>
                   </a>
@@ -3471,6 +3471,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             <div style={{ width: '100%', maxWidth: '360px', marginTop: 16 }}>
               {cardData.videos.map((video, index) => {
                 if (video.type === 'tavvy_short') {
+                  const hasThumbnail = !!video.thumbnail_url;
                   return (
                     <div key={index} style={{ marginBottom: 12, borderRadius: 16, overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', position: 'relative' }}>
                       <video
@@ -3478,16 +3479,15 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                         src={video.url}
                         controls
                         playsInline
-                        preload="auto"
-                        poster=""
-                        style={{ width: '100%', display: 'block', borderRadius: 16, maxHeight: 400, minHeight: 200, backgroundColor: '#1a1a2e' }}
-                        onLoadedData={(e) => {
-                          // Once video loads, hide the overlay poster
+                        preload="metadata"
+                        poster={video.thumbnail_url || undefined}
+                        style={{ width: '100%', display: 'block', borderRadius: '16px 16px 0 0', maxHeight: 400, minHeight: 200, backgroundColor: '#1a1a2e' }}
+                        onPlay={() => {
                           const overlay = document.getElementById(`tavvy-overlay-${index}`);
                           if (overlay) overlay.style.display = 'none';
                         }}
                       />
-                      {/* Play overlay shown until video loads first frame */}
+                      {/* Play overlay — uses thumbnail as background if available, otherwise gradient */}
                       <div
                         id={`tavvy-overlay-${index}`}
                         onClick={() => {
@@ -3498,30 +3498,40 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                         }}
                         style={{
                           position: 'absolute',
-                          inset: 0,
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 40,
                           display: 'flex',
                           flexDirection: 'column',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-                          borderRadius: 16,
+                          background: hasThumbnail
+                            ? `url(${video.thumbnail_url}) center/cover no-repeat`
+                            : 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+                          borderRadius: '16px 16px 0 0',
                           cursor: 'pointer',
                           zIndex: 2,
                         }}
                       >
+                        {/* Dark scrim over thumbnail for contrast */}
+                        {hasThumbnail && (
+                          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.3)', borderRadius: '16px 16px 0 0' }} />
+                        )}
                         <div style={{
-                          width: 60,
-                          height: 60,
+                          width: 56,
+                          height: 56,
                           borderRadius: '50%',
-                          background: 'rgba(0,200,83,0.9)',
+                          background: 'rgba(255,255,255,0.95)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          boxShadow: '0 4px 20px rgba(0,200,83,0.4)',
+                          boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
+                          zIndex: 1,
+                          backdropFilter: 'blur(8px)',
                         }}>
-                          <svg width="26" height="26" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                          <svg width="24" height="24" viewBox="0 0 24 24" fill="#1a1a2e"><path d="M8 5v14l11-7z"/></svg>
                         </div>
-                        <span style={{ marginTop: 12, fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.8)', letterSpacing: 0.5 }}>Tavvy Short</span>
                       </div>
                       <div style={{ padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 8 }}>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00C853" strokeWidth="2">
