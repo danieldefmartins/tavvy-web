@@ -103,9 +103,12 @@ export default function ProProfileScreen() {
           business_name: profile.business_name,
           description: profile.description,
           phone: profile.phone,
+          email: profile.email,
           location: profile.location,
           specialties: profile.specialties,
           service_radius: profile.service_radius_miles,
+          years_in_business: profile.years_in_business || null,
+          trade_category: profile.trade_category || null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', profile.id);
@@ -266,6 +269,38 @@ export default function ProProfileScreen() {
                   value={profile.location || ''}
                   onChange={(e) => setProfile({ ...profile, location: e.target.value })}
                   placeholder="City, State"
+                  className="input"
+                  style={{
+                    backgroundColor: theme.surface,
+                    color: theme.text,
+                    borderColor: theme.border || '#E5E7EB',
+                  }}
+                />
+              </div>
+
+              <div className="field">
+                <label style={{ color: theme.textSecondary }}>Email</label>
+                <input
+                  type="email"
+                  value={profile.email || ''}
+                  onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                  placeholder="your@email.com"
+                  className="input"
+                  style={{
+                    backgroundColor: theme.surface,
+                    color: theme.text,
+                    borderColor: theme.border || '#E5E7EB',
+                  }}
+                />
+              </div>
+
+              <div className="field">
+                <label style={{ color: theme.textSecondary }}>Years in Business</label>
+                <input
+                  type="number"
+                  value={profile.years_in_business || ''}
+                  onChange={(e) => setProfile({ ...profile, years_in_business: parseInt(e.target.value) || null })}
+                  placeholder="e.g., 5"
                   className="input"
                   style={{
                     backgroundColor: theme.surface,

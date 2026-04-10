@@ -72,7 +72,7 @@ export default function ProsCategoryScreen() {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('pros_providers')
+        .from('pro_providers')
         .select('*')
         .eq('category_slug', categorySlug)
         .order('rating', { ascending: false })

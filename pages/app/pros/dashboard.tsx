@@ -46,7 +46,7 @@ function calcProfileCompletion(provider: any): number {
     { key: 'email', weight: 10 },
     { key: 'location', weight: 15 },
     { key: 'description', weight: 15 },
-    { key: 'category_slug', weight: 10 },
+    { key: 'trade_category', weight: 10 },
     { key: 'specialties', weight: 10, check: (v: any) => Array.isArray(v) && v.length > 0 },
     { key: 'years_in_business', weight: 5 },
   ];

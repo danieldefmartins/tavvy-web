@@ -66,25 +66,26 @@ export default function ProsRegisterScreen() {
     setLoading(true);
     try {
       const { error } = await supabase
-        .from('pros_providers')
+        .from('pro_providers')
         .insert({
           user_id: user?.id,
           business_name: formData.businessName,
-          category_slug: formData.category,
+          trade_category: formData.category,
           phone: formData.phone,
           email: formData.email,
           location: formData.location,
           description: formData.description,
           years_in_business: parseInt(formData.yearsInBusiness) || null,
           license_number: formData.licenseNumber || null,
-          insurance_verified: formData.hasInsurance,
-          status: 'pending',
+          is_insured: formData.hasInsurance,
+          is_active: true,
+          service_radius: 25,
         });
 
       if (error) throw error;
 
-      // Success - redirect to success page or dashboard
-      router.push('/app/pros/register-success', undefined, { locale });
+      // Success - redirect to dashboard
+      router.push('/app/pros/dashboard', undefined, { locale });
     } catch (error) {
       console.error('Error registering:', error);
       alert('There was an error submitting your registration. Please try again.');

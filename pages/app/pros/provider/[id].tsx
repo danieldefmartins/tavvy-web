@@ -68,7 +68,7 @@ export default function ProviderProfileScreen() {
     try {
       // Fetch provider details
       const { data: providerData, error: providerError } = await supabase
-        .from('pros_providers')
+        .from('pro_providers')
         .select('*')
         .or(`id.eq.${id},slug.eq.${id}`)
         .single();
@@ -79,7 +79,7 @@ export default function ProviderProfileScreen() {
 
       // Fetch reviews
       const { data: reviewsData, error: reviewsError } = await supabase
-        .from('pros_reviews')
+        .from('pro_reviews')
         .select('*')
         .eq('provider_id', id)
         .order('created_at', { ascending: false })
