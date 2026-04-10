@@ -123,9 +123,17 @@ export function useProSubscription() {
   }
 
   /**
-   * Check if the user has an active Pro subscription
+   * Check if the user has an active Pro subscription.
+   * Free plans (no end_date) are always active.
+   * Paid plans must not be past their end_date.
    */
-  const isActivePro = subscription?.status === 'active';
+  const isActivePro = (() => {
+    if (subscription?.status !== 'active') return false;
+    // Free plans have no end_date - always active
+    if (!subscription.end_date) return true;
+    // Paid plans: check if end_date is still in the future
+    return new Date(subscription.end_date) > new Date();
+  })();
 
   /**
    * Check if the user is in a trial period

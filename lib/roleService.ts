@@ -80,30 +80,46 @@ export async function fetchProStatus(userId?: string): Promise<boolean> {
       return profile?.is_pro === true;
     }
 
-    // User is a Pro provider — automatically grant Pro eCard access
-    // Also ensure their subscription record exists (auto-create if missing)
-    const { data: subscription } = await supabase
-      .from('pro_subscriptions')
-      .select('status')
-      .eq('provider_id', provider.id)
-      .eq('status', 'active')
-      .maybeSingle();
-    
-    if (!subscription) {
-      // Auto-create active subscription for Pro provider
-      await supabase.from('pro_subscriptions').insert({
-        provider_id: provider.id,
-        tier: 'early_adopter',
-        status: 'active',
-        price_per_year: 0,
-        start_date: new Date().toISOString(),
-        end_date: new Date(Date.now() + 100 * 365 * 24 * 60 * 60 * 1000).toISOString(),
-      });
-      // Also update profile
-      await supabase.from('profiles').update({ is_pro: true, subscription_status: 'active', subscription_plan: 'pro' }).eq('user_id', uid);
+    // User is a Pro provider — check subscription status
+    // First check pro_providers for subscription info
+    const { data: providerFull } = await supabase
+      .from('pro_providers')
+      .select('subscription_status, subscription_plan, subscription_expires_at, is_active')
+      .eq('id', provider.id)
+      .single();
+
+    if (!providerFull) return false;
+
+    // If provider is not active, deny access
+    if (providerFull.is_active === false) return false;
+
+    // Free plan pros are always active (no expiry)
+    if (providerFull.subscription_plan === 'free') return true;
+
+    // Paid plan: check if subscription has expired
+    if (providerFull.subscription_status === 'active' && providerFull.subscription_expires_at) {
+      const expiresAt = new Date(providerFull.subscription_expires_at);
+      if (expiresAt < new Date()) {
+        // Subscription expired — deactivate in background (cron will also catch this)
+        supabase.from('pro_providers').update({
+          subscription_status: 'expired',
+          is_active: false,
+          updated_at: new Date().toISOString(),
+        }).eq('id', provider.id).then(() => {});
+        supabase.from('profiles').update({
+          is_pro: false,
+          subscription_status: 'expired',
+          updated_at: new Date().toISOString(),
+        }).eq('user_id', uid).then(() => {});
+        return false;
+      }
     }
-    
-    return true;
+
+    // Active subscription
+    if (providerFull.subscription_status === 'active') return true;
+
+    // Expired or inactive
+    return false;
   } catch (error) {
     console.error('Error in fetchProStatus:', error);
     return false;
