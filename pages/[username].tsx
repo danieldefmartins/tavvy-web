@@ -1748,7 +1748,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 {/* Company logo overlay */}
                 {cardData.companyLogoUrl && (
                   <div style={{
-                    position: 'absolute', top: 16, right: 16,
+                    position: 'absolute', top: 16, left: 16,
                     background: 'rgba(255,255,255,0.9)', borderRadius: 12, padding: '8px 12px',
                     backdropFilter: 'blur(10px)',
                   }}>
