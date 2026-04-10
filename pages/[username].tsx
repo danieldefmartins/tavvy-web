@@ -1748,11 +1748,11 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 {/* Company logo overlay */}
                 {cardData.companyLogoUrl && (
                   <div style={{
-                    position: 'absolute', top: 16, left: 16,
-                    background: 'rgba(255,255,255,0.9)', borderRadius: 12, padding: '8px 12px',
-                    backdropFilter: 'blur(10px)',
+                    position: 'absolute', top: 12, left: 12,
+                    borderRadius: 10, overflow: 'hidden',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                   }}>
-                    <img src={cardData.companyLogoUrl} alt="" style={{ height: 28, width: 'auto', objectFit: 'contain' }} />
+                    <img src={cardData.companyLogoUrl} alt="" style={{ height: 40, width: 'auto', display: 'block', objectFit: 'contain' }} />
                   </div>
                 )}
               </div>
