@@ -203,14 +203,16 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const subscriptionId = subscription.id;
   const status = mapStripeStatus(subscription.status);
+  const endDate = new Date(subscription.current_period_end * 1000).toISOString();
 
   console.log(`Subscription updated: ${subscriptionId}, new status: ${status}`);
 
+  // Update pro_subscriptions
   const { error } = await supabaseAdmin
     .from("pro_subscriptions")
     .update({
       status: status,
-      end_date: new Date(subscription.current_period_end * 1000).toISOString(),
+      end_date: endDate,
       updated_at: new Date().toISOString(),
     })
     .eq("stripe_subscription_id", subscriptionId);
@@ -219,11 +221,14 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     console.error("Error updating subscription status:", error);
     throw error;
   }
+
+  // Also sync pro_providers and profiles
+  await syncProviderStatus(subscriptionId, status, endDate);
 }
 
 /**
  * Handle customer.subscription.deleted event
- * Marks the subscription as cancelled
+ * Marks the subscription as cancelled and deactivates the pro
  */
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const subscriptionId = subscription.id;
@@ -243,6 +248,9 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     console.error("Error marking subscription as cancelled:", error);
     throw error;
   }
+
+  // Deactivate the pro provider and profile
+  await syncProviderStatus(subscriptionId, "cancelled", null);
 }
 
 /**
@@ -267,6 +275,9 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     console.error("Error updating subscription after payment:", error);
     throw error;
   }
+
+  // Reactivate the pro provider on successful payment
+  await syncProviderStatus(subscriptionId, "active", null);
 }
 
 /**
@@ -290,6 +301,62 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   if (error) {
     console.error("Error updating subscription after failed payment:", error);
     throw error;
+  }
+
+  // Mark pro as past_due (still accessible but flagged)
+  await syncProviderStatus(subscriptionId, "past_due", null);
+}
+
+/**
+ * Sync pro_providers and profiles tables when subscription status changes.
+ * This ensures that when Stripe reports a payment failure, cancellation, or renewal,
+ * the pro's active status and profile are updated accordingly.
+ */
+async function syncProviderStatus(stripeSubscriptionId: string, status: string, endDate: string | null) {
+  try {
+    // Find the provider linked to this Stripe subscription
+    const { data: sub } = await supabaseAdmin
+      .from("pro_subscriptions")
+      .select("provider_id")
+      .eq("stripe_subscription_id", stripeSubscriptionId)
+      .single();
+
+    if (!sub) return;
+
+    const isActive = status === "active" || status === "trialing";
+
+    // Update pro_providers
+    const providerUpdate: Record<string, any> = {
+      subscription_status: status,
+      is_active: isActive,
+      updated_at: new Date().toISOString(),
+    };
+    if (endDate) {
+      providerUpdate.subscription_expires_at = endDate;
+    }
+
+    const { data: provider } = await supabaseAdmin
+      .from("pro_providers")
+      .update(providerUpdate)
+      .eq("id", sub.provider_id)
+      .select("user_id")
+      .single();
+
+    if (!provider?.user_id) return;
+
+    // Update profiles
+    await supabaseAdmin
+      .from("profiles")
+      .update({
+        is_pro: isActive,
+        subscription_status: status,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", provider.user_id);
+
+    console.log(`Synced provider ${sub.provider_id}: status=${status}, is_active=${isActive}`);
+  } catch (error) {
+    console.error("Error syncing provider status:", error);
   }
 }
 
