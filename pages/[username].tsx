@@ -1752,7 +1752,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                     borderRadius: 10, overflow: 'hidden',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
                   }}>
-                    <img src={cardData.companyLogoUrl} alt="" style={{ height: 40, width: 'auto', display: 'block', objectFit: 'contain' }} />
+                    <img src={cardData.companyLogoUrl} alt="" style={{ height: 50, width: 'auto', display: 'block', objectFit: 'contain' }} />
                   </div>
                 )}
               </div>
