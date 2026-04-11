@@ -4062,6 +4062,19 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                     body: JSON.stringify({ cardId: cardData.id, signals: signalIds, intensities: signalTaps, note: endorseNote }),
                   });
                   const resData = await res.json();
+                  if (resData?.requireLogin) {
+                    // Save endorsement data to localStorage so it persists through login
+                    localStorage.setItem('tavvy_pending_endorsement', JSON.stringify({
+                      cardId: cardData.id,
+                      signals: signalIds,
+                      intensities: signalTaps,
+                      note: endorseNote,
+                      cardSlug: cardData.slug,
+                    }));
+                    const currentPath = `/${cardData.slug}`;
+                    window.location.href = `/app/login?returnUrl=${encodeURIComponent(currentPath)}`;
+                    return;
+                  }
                   if (res.ok) {
                     // Update the displayed count and tags immediately
                     setCardData(prev => prev ? {
@@ -4074,21 +4087,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                     setShowEndorseFlow(false);
                     setShowEndorsementPopup(true);
                   } else {
-                    if (resData?.requireLogin) {
-                      // Save endorsement data to localStorage so it persists through login
-                      localStorage.setItem('tavvy_pending_endorsement', JSON.stringify({
-                        cardId: cardData.id,
-                        signals: signalIds,
-                        intensities: signalTaps,
-                        note: endorseNote,
-                        cardSlug: cardData.slug,
-                      }));
-                      // Redirect to login/signup with return URL back to this card
-                      const currentPath = `/${cardData.slug}`;
-                      window.location.href = `/app/login?returnUrl=${encodeURIComponent(currentPath)}`;
-                    } else {
-                      alert(resData?.error || 'Failed to submit endorsement.');
-                    }
+                    alert(resData?.error || 'Failed to submit endorsement.');
                   }
                 } catch (err) {
                   alert('Network error. Please try again.');

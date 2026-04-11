@@ -86,12 +86,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const clientIp = getClientIp(req);
     const geo = await resolveIpGeo(clientIp);
 
-    // Check if user has no ZIP code — return requireZip flag
-    if (!endorserProfile?.zip_code) {
-      return res.status(200).json({ requireZip: true });
-    }
-
-    // Create the endorsement with geo data
+    // Create the endorsement with geo data (ZIP code is optional)
     const { data: endorsement, error: insertError } = await supabase
       .from('ecard_endorsements')
       .insert({
