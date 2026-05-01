@@ -1300,6 +1300,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
           cardData.description || '',
         ].filter(Boolean).join(' · ') || 'Digital Business Card on Tavvy'} key="twitter:description" />
         <meta name="twitter:image" content={`https://tavvy.com/api/og/${cardData.slug}`} key="twitter:image" />
+        <link rel="canonical" href={`https://tavvy.com/${cardData.slug}`} />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
         <style>{`

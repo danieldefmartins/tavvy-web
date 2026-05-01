@@ -308,8 +308,13 @@ export default function PlaceDetailsScreen() {
   return (
     <AppLayout>
       <Head>
-        <title>{place.name} | TavvY</title>
-        <meta name="description" content={`${place.name} - ${place.category} in ${place.city || ''}`} />
+        <title>{place.name || 'Place'} | Tavvy</title>
+        <meta name="description" content={`Discover ${place.name || 'this place'}${place.category ? ` (${place.category})` : ''} on Tavvy. See real signals from real people — what's great, the vibe, and what to watch out for.`} key="description" />
+        <meta property="og:title" content={`${place.name || 'Place'} | Tavvy`} key="og:title" />
+        <meta property="og:description" content={`See real signals for ${place.name || 'this place'}${place.category ? ` (${place.category})` : ''} — not just stars. Real experiences from real people.`} key="og:description" />
+        <meta property="og:image" content={place.cover_image_url || 'https://tavvy.com/og-image.png'} key="og:image" />
+        <meta property="og:url" content={`https://tavvy.com/place/${id}`} key="og:url" />
+        <link rel="canonical" href={`https://tavvy.com/place/${id}`} />
       </Head>
 
       <style jsx global>{pageStyles}</style>
