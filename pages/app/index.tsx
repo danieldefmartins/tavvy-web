@@ -35,9 +35,9 @@ import {
   FiCoffee, FiHome as FiHotel, FiShoppingBag, FiDroplet
 } from 'react-icons/fi';
 import { 
-  IoRestaurant, IoCafe, IoBeer, IoCarSport, IoBed, 
+  IoRestaurant, IoCafe, IoBeer, IoCarSport, IoBed,
   IoBonfire, IoStorefront, IoSparkles, IoChevronForward,
-  IoLocationSharp, IoSearch
+  IoLocationSharp, IoSearch, IoHeart
 } from 'react-icons/io5';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -497,23 +497,30 @@ export default function HomeScreen() {
       <div className="home-screen">
         <div className="container">
           <main className="main-content">
-            {/* Greeting Section - iOS Style */}
+            {/* Tavvy Header */}
+            <div className="tavvy-header">
+              <img
+                src={isDark ? '/brand/logo-icon.png' : '/brand/logo-icon.png'}
+                alt="Tavvy"
+                className="tavvy-header-icon"
+              />
+              <button
+                className="theme-toggle-btn"
+                onClick={() => setThemeMode(isDark ? 'light' : 'dark')}
+              >
+                {isDark ? '🌙' : '🌞'}
+              </button>
+            </div>
+
+            {/* Greeting Section - Tavvy Brand */}
             <section className="greeting-section">
-              <div className="greeting-row">
-                <div>
-                  <div className="greeting-text">{greeting}</div>
-                  <h1 className="greeting-name">{t('home.greetingName')} 👋</h1>
-                </div>
-                <button 
-                  className="theme-toggle-btn"
-                  onClick={() => setThemeMode(isDark ? 'light' : 'dark')}
-                >
-                  {isDark ? '🌙' : '🌞'}
-                </button>
-              </div>
-              <div className="tagline">
-                <span className="tagline-dot">•</span>
-                <span className="tagline-text">{t('home.tagline')}</span>
+              <div className="greeting-text">{greeting}</div>
+              <h1 className="greeting-name">{t('home.greetingName')}</h1>
+              <div className="tagline-brand">
+                <span className="tagline-pill">
+                  <span className="tagline-pulse" />
+                  Real signals from real people
+                </span>
               </div>
             </section>
 
@@ -597,7 +604,7 @@ export default function HomeScreen() {
                 </button>
                 <button className="quick-action-btn">
                   <div className="quick-action-icon">
-                    ⭐
+                    <IoHeart size={24} />
                   </div>
                   <span>{t('home.saved')}</span>
                 </button>
@@ -761,15 +768,20 @@ export default function HomeScreen() {
           }
 
           /* Greeting Section - iOS Style */
-          .greeting-section {
-            padding: 32px 0 24px;
-          }
-
-          .greeting-row {
+          .tavvy-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 12px;
+            align-items: center;
+            padding: 16px 0 8px;
+          }
+
+          .tavvy-header-icon {
+            height: 36px;
+            width: auto;
+          }
+
+          .greeting-section {
+            padding: 8px 0 24px;
           }
 
           .theme-toggle-btn {
@@ -809,32 +821,45 @@ export default function HomeScreen() {
             margin: 0 0 12px;
           }
 
-          .tagline {
+          .tagline-brand {
             display: flex;
             align-items: center;
+          }
+
+          .tagline-pill {
+            display: inline-flex;
+            align-items: center;
             gap: 8px;
+            padding: 8px 16px;
+            background: rgba(138, 5, 190, 0.12);
+            border: 1px solid rgba(138, 5, 190, 0.2);
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #C77DFF;
           }
 
-          .tagline-dot {
-            color: ${TEAL};
-            font-size: 12px;
-            font-weight: 700;
-            line-height: 1;
+          .tagline-pulse {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: ${TEAL};
+            animation: pulse 2s infinite;
           }
 
-          .tagline-text {
-            color: ${TEAL};
-            font-size: 12px;
-            font-weight: 500;
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
           }
 
-          /* Search Card - iOS Style */
+          /* Search Card */
           .search-card {
-            background: ${isDark ? '#1C1C1E' : '#fff'};
+            background: ${isDark ? '#1E0A3C' : '#fff'};
             border-radius: 20px;
             padding: 20px;
             margin-bottom: 24px;
             box-shadow: ${isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.04)'};
+            border: ${isDark ? '1px solid rgba(255,255,255,0.06)' : 'none'};
             position: relative;
           }
 
