@@ -28,6 +28,7 @@ import PlaceCard from '../../components/PlaceCard';
 import { fetchPlacesInBounds, searchPlaces, PlaceCard as PlaceCardType } from '../../lib/placeService';
 import { searchPlaces as typesenseSearchPlaces, getAutocompleteSuggestions } from '../../lib/typesenseService';
 import { parseSearchQuery } from '../../lib/smartQueryParser';
+import Onboarding, { useOnboarding } from '../../components/Onboarding';
 import { spacing, borderRadius, Colors } from '../../constants/Colors';
 import { 
   FiSearch, FiX, FiMapPin, FiUser, FiChevronRight, FiMenu,
@@ -126,6 +127,9 @@ export default function HomeScreen() {
   const router = useRouter();
   const { locale } = router;
   
+  // Onboarding
+  const { showOnboarding, completeOnboarding } = useOnboarding();
+
   // View mode
   const [viewMode, setViewMode] = useState<'standard' | 'map'>('standard');
   
@@ -483,8 +487,12 @@ export default function HomeScreen() {
   return (
     <AppLayout>
       <Head>
-        <title>Tavvy - Find Your Perfect Spot</title>
+        <title>Tavvy — Real Experiences, Not Fake Stars</title>
       </Head>
+
+      {showOnboarding && (
+        <Onboarding onComplete={completeOnboarding} />
+      )}
 
       <div className="home-screen">
         <div className="container">
