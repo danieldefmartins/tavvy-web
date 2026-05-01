@@ -15,7 +15,21 @@ const nextConfig = {
   
   // Optimize images
   images: {
-    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'scasgwrikoqdwlwlwcff.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'tavvy.com',
+      },
+    ],
   },
   
   // Skip ESLint during builds for faster builds
