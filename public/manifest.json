@@ -1,0 +1,30 @@
+{
+  "name": "Tavvy",
+  "short_name": "Tavvy",
+  "description": "Real experiences, not fake stars. Discover places through verified signals from real people.",
+  "start_url": "/app",
+  "display": "standalone",
+  "background_color": "#17013A",
+  "theme_color": "#8A05BE",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-source.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/brand/logo-icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "food", "travel", "business"],
+  "lang": "en"
+}

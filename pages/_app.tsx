@@ -128,20 +128,22 @@ function App({ Component, pageProps }: AppProps) {
         <meta name="theme-color" content="#17013A" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/favicon-source.png" />
 
         {/* Default Meta Tags — pages can override these with their own <Head> */}
-        <title>Tavvy - Discover. Review. Explore.</title>
-        <meta name="title" content="Tavvy - Discover. Review. Explore." key="title" />
-        <meta name="description" content="Discover restaurants, cafes, bars, and more near you. Real reviews from real people. Your local guide to the best spots." key="description" />
+        <title>Tavvy — Real Experiences, Not Fake Stars</title>
+        <meta name="title" content="Tavvy — Real Experiences, Not Fake Stars" key="title" />
+        <meta name="description" content="Stop guessing with meaningless star ratings. Tavvy shows you real signals from real people — what's actually great, the vibe, and what to watch out for." key="description" />
 
         {/* Default Open Graph / Facebook — overridden by page-level <Head> for eCards, places, etc. */}
         <meta property="og:type" content="website" key="og:type" />
         <meta property="og:url" content="https://tavvy.com/" key="og:url" />
-        <meta property="og:title" content="Tavvy - Discover. Review. Explore." key="og:title" />
-        <meta property="og:description" content="Discover restaurants, cafes, bars, and more near you. Real reviews from real people. Your local guide to the best spots." key="og:description" />
-        <meta property="og:image" content="https://files.manuscdn.com/user_upload_by_module/session_file/310519663313028198/XIYZzUZRGypYoHEu.png" key="og:image" />
-        <meta property="og:image:width" content="2752" key="og:image:width" />
-        <meta property="og:image:height" content="1536" key="og:image:height" />
+        <meta property="og:title" content="Tavvy — Real Experiences, Not Fake Stars" key="og:title" />
+        <meta property="og:description" content="Stop guessing with meaningless star ratings. Tavvy shows you real signals from real people — what's actually great, the vibe, and what to watch out for." key="og:description" />
+        <meta property="og:image" content="https://tavvy.com/og-image.png" key="og:image" />
+        <meta property="og:image:width" content="1200" key="og:image:width" />
+        <meta property="og:image:height" content="630" key="og:image:height" />
         <meta property="og:site_name" content="Tavvy" />
 
         {/* Default Twitter — overridden by page-level <Head> for eCards, places, etc. */}

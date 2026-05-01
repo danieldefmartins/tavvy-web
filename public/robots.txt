@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Disallow internal app routes from indexing
+Disallow: /app/
+Disallow: /api/
+Disallow: /app/settings/
+Disallow: /app/saved
+
+# Allow public pages
+Allow: /place/
+Allow: /ecard
+Allow: /about-us
+Allow: /privacy
+Allow: /terms
+
+# Sitemap
+Sitemap: https://tavvy.com/sitemap.xml
