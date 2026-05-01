@@ -1303,6 +1303,63 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
         <link rel="canonical" href={`https://tavvy.com/${cardData.slug}`} />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(
+              Object.fromEntries(
+                Object.entries({
+                  "@context": "https://schema.org",
+                  "@type": "Person",
+                  "name": cardData.fullName,
+                  "jobTitle": cardData.title || undefined,
+                  "worksFor": cardData.company ? {
+                    "@type": "Organization",
+                    "name": cardData.company,
+                  } : undefined,
+                  "description": cardData.bio || cardData.description || undefined,
+                  "image": cardData.profilePhotoUrl || undefined,
+                  "url": `https://tavvy.com/${cardData.slug}`,
+                  "telephone": cardData.phone || undefined,
+                  "email": cardData.email || undefined,
+                  "address": (cardData.address1 || cardData.city || cardData.state) ? {
+                    "@type": "PostalAddress",
+                    "streetAddress": [cardData.address1, cardData.address2].filter(Boolean).join(', ') || undefined,
+                    "addressLocality": cardData.city || undefined,
+                    "addressRegion": cardData.state || undefined,
+                    "postalCode": cardData.zipCode || undefined,
+                    "addressCountry": cardData.country || undefined,
+                  } : undefined,
+                  "sameAs": [
+                    cardData.socialInstagram,
+                    cardData.socialFacebook,
+                    cardData.socialLinkedin,
+                    cardData.socialTwitter,
+                    cardData.socialTiktok,
+                    cardData.socialYoutube,
+                    cardData.socialSnapchat,
+                    cardData.socialPinterest,
+                    cardData.socialWhatsapp,
+                    cardData.website,
+                  ].filter(Boolean).length > 0
+                    ? [
+                        cardData.socialInstagram,
+                        cardData.socialFacebook,
+                        cardData.socialLinkedin,
+                        cardData.socialTwitter,
+                        cardData.socialTiktok,
+                        cardData.socialYoutube,
+                        cardData.socialSnapchat,
+                        cardData.socialPinterest,
+                        cardData.socialWhatsapp,
+                        cardData.website,
+                      ].filter(Boolean)
+                    : undefined,
+                }).filter(([, v]) => v !== undefined)
+              )
+            ),
+          }}
+        />
         <style>{`
           @keyframes crownPulse {
             0%, 100% { transform: scale(1); }

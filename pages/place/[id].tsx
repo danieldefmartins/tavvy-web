@@ -315,6 +315,41 @@ export default function PlaceDetailsScreen() {
         <meta property="og:image" content={place.cover_image_url || 'https://tavvy.com/og-image.png'} key="og:image" />
         <meta property="og:url" content={`https://tavvy.com/place/${id}`} key="og:url" />
         <link rel="canonical" href={`https://tavvy.com/place/${id}`} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "LocalBusiness",
+              "name": place.name,
+              "description": place.description || `Discover ${place.name} on Tavvy — real signals from real people.`,
+              "url": `https://tavvy.com/place/${id}`,
+              ...(fullAddress ? { "address": {
+                "@type": "PostalAddress",
+                ...(place.address_line1 ? { "streetAddress": place.address_line1 } : {}),
+                ...(place.city ? { "addressLocality": place.city } : {}),
+                ...(place.state_region ? { "addressRegion": place.state_region } : {}),
+              }} : {}),
+              ...((place.latitude || place.lat) && (place.longitude || place.lng) ? { "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": place.latitude || place.lat,
+                "longitude": place.longitude || place.lng,
+              }} : {}),
+              ...(place.cover_image_url || (place.photos && place.photos.length > 0) ? { "image": place.cover_image_url || place.photos![0] } : {}),
+              ...(place.phone ? { "telephone": place.phone } : {}),
+              ...(place.website ? { "url": place.website.startsWith('http') ? place.website : `https://${place.website}` } : {}),
+              ...(place.category ? { "additionalType": place.category } : {}),
+              ...((livingSignals.best_for.length + livingSignals.vibe.length + livingSignals.heads_up.length) > 0 ? {
+                "aggregateRating": {
+                  "@type": "AggregateRating",
+                  "ratingCount": livingSignals.best_for.reduce((sum, s) => sum + s.review_count, 0)
+                    + livingSignals.vibe.reduce((sum, s) => sum + s.review_count, 0)
+                    + livingSignals.heads_up.reduce((sum, s) => sum + s.review_count, 0),
+                },
+              } : {}),
+            }),
+          }}
+        />
       </Head>
 
       <style jsx global>{pageStyles}</style>
