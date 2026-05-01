@@ -497,36 +497,33 @@ export default function HomeScreen() {
       <div className="home-screen">
         <div className="container">
           <main className="main-content">
-            {/* Tavvy Header */}
-            <div className="tavvy-header">
-              <img
-                src={isDark ? '/brand/logo-icon.png' : '/brand/logo-icon.png'}
-                alt="Tavvy"
-                className="tavvy-header-icon"
-              />
-              <button
-                className="theme-toggle-btn"
-                onClick={() => setThemeMode(isDark ? 'light' : 'dark')}
-              >
-                {isDark ? '🌙' : '🌞'}
-              </button>
-            </div>
-
-            {/* Greeting Section - Tavvy Brand */}
-            <section className="greeting-section">
-              <div className="greeting-text">{greeting}</div>
-              <h1 className="greeting-name">{t('home.greetingName')}</h1>
-              <div className="tagline-brand">
-                <span className="tagline-pill">
-                  <span className="tagline-pulse" />
-                  Real signals from real people
-                </span>
+            {/* Hero Header — Brand Identity */}
+            <section className="hero-header">
+              <div className="hero-header-top">
+                <img
+                  src={isDark ? '/tavvy-logo-white.png' : '/tavvy-logo-dark.png'}
+                  alt="Tavvy"
+                  className="hero-logo"
+                />
+                <button
+                  className="theme-toggle-btn"
+                  onClick={() => setThemeMode(isDark ? 'light' : 'dark')}
+                >
+                  {isDark ? '🌙' : '🌞'}
+                </button>
               </div>
-            </section>
 
-            {/* Search Card - iOS Style */}
-            <div className="search-card">
-              <div className="search-input-wrapper">
+              <div className="hero-greeting">
+                <span className="hero-greeting-time">{greeting}</span>
+                <h1 className="hero-greeting-name">{t('home.greetingName')}</h1>
+              </div>
+
+              <p className="hero-headline">
+                What are you looking for <span className="hero-highlight">today</span>?
+              </p>
+
+              {/* Search */}
+              <div className="hero-search">
                 <IoSearch size={20} className="search-icon" />
                 <input
                   type="text"
@@ -535,14 +532,13 @@ export default function HomeScreen() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchFocused(true)}
                   onBlur={() => {
-                    // Delay to allow click on suggestions
                     setTimeout(() => setIsSearchFocused(false), 200);
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   className="search-input"
                 />
                 {searchQuery && (
-                  <button 
+                  <button
                     className="clear-btn"
                     onClick={() => {
                       setSearchQuery('');
@@ -553,7 +549,7 @@ export default function HomeScreen() {
                   </button>
                 )}
               </div>
-              
+
               {/* Autocomplete Suggestions */}
               {isSearchFocused && searchSuggestions.length > 0 && (
                 <div className="autocomplete-dropdown">
@@ -581,35 +577,35 @@ export default function HomeScreen() {
                   ))}
                 </div>
               )}
-              
-              {/* Quick Action Buttons */}
-              <div className="quick-actions">
-                <button className="quick-action-btn">
-                  <div className="quick-action-icon">
-                    <IoLocationSharp size={24} />
+
+              {/* Quick Actions */}
+              <div className="hero-quick-actions">
+                <button className="hero-action" onClick={() => {}}>
+                  <div className="hero-action-icon" style={{ background: 'rgba(0, 194, 203, 0.12)' }}>
+                    <IoLocationSharp size={20} color="#00C2CB" />
                   </div>
                   <span>{t('home.nearMe')}</span>
                 </button>
-                <button className="quick-action-btn" onClick={switchToMapMode}>
-                  <div className="quick-action-icon">
-                    <FiMapPin size={24} />
+                <button className="hero-action" onClick={switchToMapMode}>
+                  <div className="hero-action-icon" style={{ background: 'rgba(138, 5, 190, 0.12)' }}>
+                    <FiMapPin size={20} color="#8A05BE" />
                   </div>
                   <span>{t('home.map')}</span>
                 </button>
-                <button className="quick-action-btn">
-                  <div className="quick-action-icon">
-                    <IoSparkles size={24} />
+                <button className="hero-action" onClick={() => {}}>
+                  <div className="hero-action-icon" style={{ background: 'rgba(0, 194, 203, 0.12)' }}>
+                    <IoSparkles size={20} color="#00C2CB" />
                   </div>
                   <span>{t('home.surprise')}</span>
                 </button>
-                <button className="quick-action-btn">
-                  <div className="quick-action-icon">
-                    <IoHeart size={24} />
+                <button className="hero-action" onClick={() => {}}>
+                  <div className="hero-action-icon" style={{ background: 'rgba(138, 5, 190, 0.12)' }}>
+                    <IoHeart size={20} color="#8A05BE" />
                   </div>
                   <span>{t('home.saved')}</span>
                 </button>
               </div>
-            </div>
+            </section>
 
             {/* Mood Section - iOS Style */}
             <section className="mood-section">
@@ -767,106 +763,180 @@ export default function HomeScreen() {
             background-color: ${bgColor};
           }
 
-          /* Greeting Section - iOS Style */
-          .tavvy-header {
+          /* Hero Header */
+          .hero-header {
+            padding: 20px 0 28px;
+            position: relative;
+          }
+
+          .hero-header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 0 8px;
+            margin-bottom: 28px;
           }
 
-          .tavvy-header-icon {
-            height: 36px;
+          .hero-logo {
+            height: 28px;
             width: auto;
           }
 
-          .greeting-section {
-            padding: 8px 0 24px;
-          }
-
           .theme-toggle-btn {
-            background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'};
+            background: ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'};
             border: none;
-            border-radius: 12px;
-            width: 44px;
-            height: 44px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 18px;
             cursor: pointer;
             transition: all 0.2s;
           }
 
           .theme-toggle-btn:hover {
-            background: ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'};
-            transform: scale(1.05);
+            background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'};
           }
 
-          .theme-toggle-btn:active {
-            transform: scale(0.95);
+          .hero-greeting {
+            margin-bottom: 6px;
           }
 
-          .greeting-text {
+          .hero-greeting-time {
             font-size: 14px;
             font-weight: 500;
-            color: ${isDark ? 'rgba(255,255,255,0.6)' : '#666'};
+            color: ${isDark ? 'rgba(255,255,255,0.45)' : '#999'};
+            display: block;
             margin-bottom: 2px;
           }
 
-          .greeting-name {
-            font-size: 32px;
-            font-weight: 600;
+          .hero-greeting-name {
+            font-size: 28px;
+            font-weight: 800;
             color: ${isDark ? '#fff' : ACCENT};
-            margin: 0 0 12px;
+            margin: 0;
+            letter-spacing: -0.5px;
           }
 
-          .tagline-brand {
+          .hero-headline {
+            font-size: 17px;
+            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#888'};
+            font-weight: 400;
+            margin: 4px 0 20px;
+          }
+
+          .hero-highlight {
+            color: ${TEAL};
+            font-weight: 600;
+          }
+
+          /* Search */
+          .hero-search {
             display: flex;
             align-items: center;
-          }
-
-          .tagline-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: rgba(138, 5, 190, 0.12);
-            border: 1px solid rgba(138, 5, 190, 0.2);
-            border-radius: 100px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #C77DFF;
-          }
-
-          .tagline-pulse {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: ${TEAL};
-            animation: pulse 2s infinite;
-          }
-
-          @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.4; }
-          }
-
-          /* Search Card */
-          .search-card {
-            background: ${isDark ? '#1E0A3C' : '#fff'};
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 24px;
-            box-shadow: ${isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.04)'};
-            border: ${isDark ? '1px solid rgba(255,255,255,0.06)' : 'none'};
+            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#F5F5F5'};
+            border-radius: 16px;
+            padding: 0 16px;
+            height: 52px;
+            margin-bottom: 20px;
+            border: 1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'transparent'};
+            transition: border-color 0.2s;
             position: relative;
           }
 
+          .hero-search:focus-within {
+            border-color: ${isDark ? 'rgba(138, 5, 190, 0.4)' : 'rgba(138, 5, 190, 0.3)'};
+          }
+
+          .hero-search .search-icon {
+            color: ${isDark ? 'rgba(255,255,255,0.3)' : '#999'};
+            flex-shrink: 0;
+          }
+
+          .hero-search .search-input {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: ${isDark ? '#fff' : '#000'};
+            font-size: 16px;
+            padding: 0 12px;
+            font-weight: 400;
+          }
+
+          .hero-search .search-input::placeholder {
+            color: ${isDark ? 'rgba(255,255,255,0.3)' : '#999'};
+          }
+
+          .hero-search .clear-btn {
+            background: none;
+            border: none;
+            color: ${isDark ? 'rgba(255,255,255,0.4)' : '#999'};
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+          }
+
+          /* Quick Actions */
+          .hero-quick-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 8px;
+          }
+
+          .hero-action {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 12px 8px;
+            border-radius: 16px;
+            transition: background 0.2s;
+          }
+
+          .hero-action:hover {
+            background: ${isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)'};
+          }
+
+          .hero-action-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+
+          .hero-action span {
+            font-size: 12px;
+            font-weight: 600;
+            color: ${isDark ? 'rgba(255,255,255,0.6)' : '#666'};
+          }
+
+          /* Autocomplete below search */
+          .autocomplete-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: ${isDark ? '#1E0A3C' : '#fff'};
+            border-radius: 16px;
+            border: 1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#eee'};
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            z-index: 50;
+            overflow: hidden;
+          }
+
+          /* Legacy compat */
           .search-input-wrapper {
             display: flex;
             align-items: center;
-            background: ${isDark ? '#2C2C2E' : '#F5F5F5'};
+            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#F5F5F5'};
             border-radius: 12px;
             padding: 14px 16px;
             margin-bottom: 16px;
