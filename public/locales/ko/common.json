@@ -917,5 +917,20 @@
     "signalGentle": "부드러운",
     "signalCleanFacility": "청결 시설",
     "signalFriendly": "친근한"
+  },
+  "signals": {
+    "theGood": "좋은 점",
+    "theVibe": "분위기",
+    "headsUp": "주의사항",
+    "theGoodDesc": "이 장소가 가장 잘하는 것",
+    "theVibeDesc": "어떤 느낌인지",
+    "headsUpDesc": "주의할 점",
+    "beFirstToTap": "첫 번째 시그널을 남겨보세요!",
+    "tapToSelect": "탭하여 선택",
+    "tapAgainStronger": "다시 탭하여 강조",
+    "whatStoodOut": "인상적이었던 점은?",
+    "submitSignals": "시그널 제출",
+    "communitySignals": "커뮤니티 시그널",
+    "signalBreakdown": "시그널 분석"
   }
 }

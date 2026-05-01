@@ -996,5 +996,20 @@
     "statePlaceholder": "Estado",
     "save": "Salvar & Continuar",
     "skip": "Pular por enquanto"
+  },
+  "signals": {
+    "theGood": "O Bom",
+    "theVibe": "A Vibe",
+    "headsUp": "Atenção",
+    "theGoodDesc": "O que este lugar faz de melhor",
+    "theVibeDesc": "Como é a sensação",
+    "headsUpDesc": "O que observar",
+    "beFirstToTap": "Seja o primeiro a deixar um sinal!",
+    "tapToSelect": "Toque para selecionar",
+    "tapAgainStronger": "Toque novamente para reforçar",
+    "whatStoodOut": "O que se destacou?",
+    "submitSignals": "Enviar Sinais",
+    "communitySignals": "Sinais da Comunidade",
+    "signalBreakdown": "Detalhamento dos Sinais"
   }
 }

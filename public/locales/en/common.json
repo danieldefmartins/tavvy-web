@@ -996,5 +996,20 @@
     "statePlaceholder": "State",
     "save": "Save & Continue",
     "skip": "Skip for now"
+  },
+  "signals": {
+    "theGood": "The Good",
+    "theVibe": "The Vibe",
+    "headsUp": "Heads Up",
+    "theGoodDesc": "What this place does best",
+    "theVibeDesc": "What it feels like",
+    "headsUpDesc": "What to watch out for",
+    "beFirstToTap": "Be the first to leave a signal!",
+    "tapToSelect": "Tap to select",
+    "tapAgainStronger": "Tap again to make it stronger",
+    "whatStoodOut": "What stood out?",
+    "submitSignals": "Submit Signals",
+    "communitySignals": "Community Signals",
+    "signalBreakdown": "Signal Breakdown"
   }
 }

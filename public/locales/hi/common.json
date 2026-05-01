@@ -917,5 +917,20 @@
     "signalGentle": "कोमल",
     "signalCleanFacility": "साफ सुविधा",
     "signalFriendly": "मित्रवत"
+  },
+  "signals": {
+    "theGood": "अच्छी बातें",
+    "theVibe": "माहौल",
+    "headsUp": "ध्यान दें",
+    "theGoodDesc": "यह जगह किसमें सबसे अच्छी है",
+    "theVibeDesc": "कैसा महसूस होता है",
+    "headsUpDesc": "किन बातों का ध्यान रखें",
+    "beFirstToTap": "पहला सिग्नल छोड़ने वाले बनें!",
+    "tapToSelect": "चुनने के लिए टैप करें",
+    "tapAgainStronger": "मजबूत करने के लिए फिर से टैप करें",
+    "whatStoodOut": "क्या खास लगा?",
+    "submitSignals": "सिग्नल भेजें",
+    "communitySignals": "समुदाय के सिग्नल",
+    "signalBreakdown": "सिग्नल विश्लेषण"
   }
 }

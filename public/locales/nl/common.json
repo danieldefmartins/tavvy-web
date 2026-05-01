@@ -917,5 +917,20 @@
     "signalGentle": "Zacht",
     "signalCleanFacility": "Schone Locatie",
     "signalFriendly": "Vriendelijk"
+  },
+  "signals": {
+    "theGood": "Het Goede",
+    "theVibe": "De Sfeer",
+    "headsUp": "Let Op",
+    "theGoodDesc": "Waar deze plek het beste in is",
+    "theVibeDesc": "Hoe het aanvoelt",
+    "headsUpDesc": "Waar je op moet letten",
+    "beFirstToTap": "Wees de eerste die een signaal achterlaat!",
+    "tapToSelect": "Tik om te selecteren",
+    "tapAgainStronger": "Tik nogmaals om te versterken",
+    "whatStoodOut": "Wat viel op?",
+    "submitSignals": "Signalen Versturen",
+    "communitySignals": "Community Signalen",
+    "signalBreakdown": "Signaaloverzicht"
   }
 }

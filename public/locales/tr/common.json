@@ -917,5 +917,20 @@
     "signalGentle": "Nazik",
     "signalCleanFacility": "Temiz Mekan",
     "signalFriendly": "Samimi"
+  },
+  "signals": {
+    "theGood": "İyi Yönler",
+    "theVibe": "Atmosfer",
+    "headsUp": "Dikkat",
+    "theGoodDesc": "Bu mekanın en iyi yaptığı şey",
+    "theVibeDesc": "Nasıl hissettiriyor",
+    "headsUpDesc": "Nelere dikkat edilmeli",
+    "beFirstToTap": "İlk sinyali bırakan siz olun!",
+    "tapToSelect": "Seçmek için dokunun",
+    "tapAgainStronger": "Güçlendirmek için tekrar dokunun",
+    "whatStoodOut": "Dikkatinizi ne çekti?",
+    "submitSignals": "Sinyalleri Gönder",
+    "communitySignals": "Topluluk Sinyalleri",
+    "signalBreakdown": "Sinyal Dağılımı"
   }
 }

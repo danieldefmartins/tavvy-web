@@ -917,5 +917,20 @@
     "signalGentle": "温和",
     "signalCleanFacility": "环境整洁",
     "signalFriendly": "友善"
+  },
+  "signals": {
+    "theGood": "优点",
+    "theVibe": "氛围",
+    "headsUp": "注意",
+    "theGoodDesc": "这个地方最擅长的",
+    "theVibeDesc": "感觉如何",
+    "headsUpDesc": "需要注意的事项",
+    "beFirstToTap": "成为第一个留下信号的人！",
+    "tapToSelect": "点击选择",
+    "tapAgainStronger": "再次点击加强",
+    "whatStoodOut": "什么让你印象深刻？",
+    "submitSignals": "提交信号",
+    "communitySignals": "社区信号",
+    "signalBreakdown": "信号分析"
   }
 }

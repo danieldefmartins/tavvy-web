@@ -855,5 +855,20 @@
     "signalGetsThingsDone": "Hoàn thành công việc",
     "signalInnovativeIdeas": "Ý tưởng sáng tạo",
     "signalFightsForPeople": "Đấu tranh vì mọi người"
+  },
+  "signals": {
+    "theGood": "Điểm tốt",
+    "theVibe": "Không khí",
+    "headsUp": "Lưu ý",
+    "theGoodDesc": "Điều nơi này làm tốt nhất",
+    "theVibeDesc": "Cảm giác như thế nào",
+    "headsUpDesc": "Điều cần chú ý",
+    "beFirstToTap": "Hãy là người đầu tiên để lại tín hiệu!",
+    "tapToSelect": "Chạm để chọn",
+    "tapAgainStronger": "Chạm lần nữa để tăng cường",
+    "whatStoodOut": "Điều gì nổi bật?",
+    "submitSignals": "Gửi Tín hiệu",
+    "communitySignals": "Tín hiệu Cộng đồng",
+    "signalBreakdown": "Phân tích Tín hiệu"
   }
 }

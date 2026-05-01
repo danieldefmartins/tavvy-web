@@ -917,5 +917,20 @@
     "signalGentle": "Нежный",
     "signalCleanFacility": "Чистое помещение",
     "signalFriendly": "Дружелюбный"
+  },
+  "signals": {
+    "theGood": "Плюсы",
+    "theVibe": "Атмосфера",
+    "headsUp": "Обратите внимание",
+    "theGoodDesc": "Что это место делает лучше всего",
+    "theVibeDesc": "Какие ощущения",
+    "headsUpDesc": "На что обратить внимание",
+    "beFirstToTap": "Будьте первым, кто оставит сигнал!",
+    "tapToSelect": "Нажмите для выбора",
+    "tapAgainStronger": "Нажмите ещё раз для усиления",
+    "whatStoodOut": "Что запомнилось?",
+    "submitSignals": "Отправить сигналы",
+    "communitySignals": "Сигналы сообщества",
+    "signalBreakdown": "Разбор сигналов"
   }
 }

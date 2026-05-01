@@ -855,5 +855,20 @@
     "signalGetsThingsDone": "ทำงานสำเร็จ",
     "signalInnovativeIdeas": "ไอเดียนวัตกรรม",
     "signalFightsForPeople": "ต่อสู้เพื่อประชาชน"
+  },
+  "signals": {
+    "theGood": "จุดเด่น",
+    "theVibe": "บรรยากาศ",
+    "headsUp": "ข้อควรระวัง",
+    "theGoodDesc": "สิ่งที่สถานที่นี้ทำได้ดีที่สุด",
+    "theVibeDesc": "รู้สึกอย่างไร",
+    "headsUpDesc": "สิ่งที่ควรระวัง",
+    "beFirstToTap": "เป็นคนแรกที่ทิ้งสัญญาณ!",
+    "tapToSelect": "แตะเพื่อเลือก",
+    "tapAgainStronger": "แตะอีกครั้งเพื่อเพิ่มความเข้ม",
+    "whatStoodOut": "อะไรที่โดดเด่น?",
+    "submitSignals": "ส่งสัญญาณ",
+    "communitySignals": "สัญญาณจากชุมชน",
+    "signalBreakdown": "รายละเอียดสัญญาณ"
   }
 }

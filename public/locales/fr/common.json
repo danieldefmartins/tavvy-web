@@ -917,5 +917,20 @@
     "signalGentle": "Doux",
     "signalCleanFacility": "Locaux Propres",
     "signalFriendly": "Sympathique"
+  },
+  "signals": {
+    "theGood": "Le Bon",
+    "theVibe": "L'Ambiance",
+    "headsUp": "À Savoir",
+    "theGoodDesc": "Ce que ce lieu fait de mieux",
+    "theVibeDesc": "Ce que l'on ressent",
+    "headsUpDesc": "Ce à quoi faire attention",
+    "beFirstToTap": "Soyez le premier à laisser un signal !",
+    "tapToSelect": "Appuyez pour sélectionner",
+    "tapAgainStronger": "Appuyez à nouveau pour renforcer",
+    "whatStoodOut": "Qu'est-ce qui vous a marqué ?",
+    "submitSignals": "Envoyer les Signaux",
+    "communitySignals": "Signaux de la Communauté",
+    "signalBreakdown": "Détail des Signaux"
   }
 }

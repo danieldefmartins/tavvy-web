@@ -917,5 +917,20 @@
     "signalGentle": "Gentil",
     "signalCleanFacility": "Instalación Limpia",
     "signalFriendly": "Amable"
+  },
+  "signals": {
+    "theGood": "Lo Bueno",
+    "theVibe": "El Ambiente",
+    "headsUp": "Aviso",
+    "theGoodDesc": "Lo que mejor hace este lugar",
+    "theVibeDesc": "Cómo se siente",
+    "headsUpDesc": "A qué prestar atención",
+    "beFirstToTap": "¡Sé el primero en dejar una señal!",
+    "tapToSelect": "Toca para seleccionar",
+    "tapAgainStronger": "Toca de nuevo para hacerlo más fuerte",
+    "whatStoodOut": "¿Qué destacó?",
+    "submitSignals": "Enviar Señales",
+    "communitySignals": "Señales de la Comunidad",
+    "signalBreakdown": "Desglose de Señales"
   }
 }

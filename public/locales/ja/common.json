@@ -917,5 +917,20 @@
     "signalGentle": "優しい",
     "signalCleanFacility": "清潔施設",
     "signalFriendly": "親しみやすい"
+  },
+  "signals": {
+    "theGood": "良い点",
+    "theVibe": "雰囲気",
+    "headsUp": "注意点",
+    "theGoodDesc": "この場所の一番の魅力",
+    "theVibeDesc": "どんな雰囲気か",
+    "headsUpDesc": "気をつけるべきこと",
+    "beFirstToTap": "最初にシグナルを残しましょう！",
+    "tapToSelect": "タップして選択",
+    "tapAgainStronger": "もう一度タップして強調",
+    "whatStoodOut": "印象に残ったことは？",
+    "submitSignals": "シグナルを送信",
+    "communitySignals": "コミュニティシグナル",
+    "signalBreakdown": "シグナルの内訳"
   }
 }

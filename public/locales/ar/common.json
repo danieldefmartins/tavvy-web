@@ -917,5 +917,20 @@
     "signalGentle": "لطيف",
     "signalCleanFacility": "مرفق نظيف",
     "signalFriendly": "ودود"
+  },
+  "signals": {
+    "theGood": "الإيجابيات",
+    "theVibe": "الأجواء",
+    "headsUp": "تنبيه",
+    "theGoodDesc": "ما يتميز به هذا المكان",
+    "theVibeDesc": "كيف يبدو الشعور",
+    "headsUpDesc": "ما يجب الانتباه إليه",
+    "beFirstToTap": "كن أول من يترك إشارة!",
+    "tapToSelect": "انقر للاختيار",
+    "tapAgainStronger": "انقر مرة أخرى لتعزيزها",
+    "whatStoodOut": "ما الذي لفت انتباهك؟",
+    "submitSignals": "إرسال الإشارات",
+    "communitySignals": "إشارات المجتمع",
+    "signalBreakdown": "تفصيل الإشارات"
   }
 }

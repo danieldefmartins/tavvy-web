@@ -855,5 +855,20 @@
     "signalGetsThingsDone": "Menyelesaikan Pekerjaan",
     "signalInnovativeIdeas": "Ide Inovatif",
     "signalFightsForPeople": "Berjuang untuk Rakyat"
+  },
+  "signals": {
+    "theGood": "Yang Bagus",
+    "theVibe": "Suasana",
+    "headsUp": "Perhatian",
+    "theGoodDesc": "Apa yang paling baik dari tempat ini",
+    "theVibeDesc": "Bagaimana rasanya",
+    "headsUpDesc": "Apa yang perlu diperhatikan",
+    "beFirstToTap": "Jadilah yang pertama meninggalkan sinyal!",
+    "tapToSelect": "Ketuk untuk memilih",
+    "tapAgainStronger": "Ketuk lagi untuk memperkuat",
+    "whatStoodOut": "Apa yang menonjol?",
+    "submitSignals": "Kirim Sinyal",
+    "communitySignals": "Sinyal Komunitas",
+    "signalBreakdown": "Rincian Sinyal"
   }
 }
