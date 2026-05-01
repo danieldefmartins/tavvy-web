@@ -200,7 +200,7 @@ export const THEMES = [
   { id: 'bold', name: 'Bold', colors: ['#FF6B6B', '#FF8E53'], textColor: '#fff', isPremium: false },
   { id: 'elegant', name: 'Elegant', colors: ['#1A1A1A', '#333333'], textColor: '#fff', isPremium: true },
   { id: 'ocean', name: 'Ocean', colors: ['#0077B6', '#00B4D8'], textColor: '#fff', isPremium: true },
-  { id: 'sunset', name: 'Sunset', colors: ['#F97316', '#FACC15'], textColor: '#fff', isPremium: true },
+  { id: 'sunset', name: 'Sunset', colors: ['#00C2CB', '#FACC15'], textColor: '#fff', isPremium: true },
   { id: 'forest', name: 'Forest', colors: ['#059669', '#34D399'], textColor: '#fff', isPremium: true },
 ];
 
@@ -208,15 +208,15 @@ export const THEMES = [
 export const PRESET_GRADIENTS = [
   { id: 'purple', name: 'Purple', colors: ['#667eea', '#764ba2'] },
   { id: 'ocean', name: 'Ocean', colors: ['#0077B6', '#00B4D8'] },
-  { id: 'sunset', name: 'Sunset', colors: ['#F97316', '#EC4899'] },
+  { id: 'sunset', name: 'Sunset', colors: ['#00C2CB', '#EC4899'] },
   { id: 'forest', name: 'Forest', colors: ['#059669', '#34D399'] },
-  { id: 'fire', name: 'Fire', colors: ['#EF4444', '#F97316'] },
+  { id: 'fire', name: 'Fire', colors: ['#EF4444', '#00C2CB'] },
   { id: 'pink', name: 'Pink', colors: ['#EC4899', '#F472B6'] },
   { id: 'teal', name: 'Teal', colors: ['#14B8A6', '#06B6D4'] },
   { id: 'gold', name: 'Gold', colors: ['#D4AF37', '#F59E0B'] },
   { id: 'midnight', name: 'Midnight', colors: ['#1E1B4B', '#312E81'] },
   { id: 'coral', name: 'Coral', colors: ['#FB7185', '#F43F5E'] },
-  { id: 'lavender', name: 'Lavender', colors: ['#A78BFA', '#8B5CF6'] },
+  { id: 'lavender', name: 'Lavender', colors: ['#A78BFA', '#8A05BE'] },
   { id: 'mint', name: 'Mint', colors: ['#6EE7B7', '#34D399'] },
 ];
 
@@ -676,7 +676,7 @@ export async function duplicateCard(sourceCardId: string, userId: string): Promi
       country: sourceCard.country || 'USA',
       profile_photo_url: sourceCard.profile_photo_url || null,
       profile_photo_size: sourceCard.profile_photo_size || 'medium',
-      gradient_color_1: sourceCard.gradient_color_1 || '#8B5CF6',
+      gradient_color_1: sourceCard.gradient_color_1 || '#8A05BE',
       gradient_color_2: sourceCard.gradient_color_2 || '#4F46E5',
       theme: sourceCard.theme || 'classic',
       background_type: sourceCard.background_type || 'gradient',

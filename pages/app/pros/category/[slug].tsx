@@ -113,7 +113,7 @@ export default function ProsCategoryScreen() {
       <AppLayout hideTabBar>
         <div className="category-screen" style={{ backgroundColor: theme.background }}>
           {/* Header */}
-          <header className="category-header" style={{ background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)' }}>
+          <header className="category-header" style={{ background: 'linear-gradient(135deg, #8A05BE, #6B0496)' }}>
             <button className="back-button" onClick={() => router.back()}>
               <FiArrowLeft size={24} color="white" />
             </button>
@@ -423,7 +423,7 @@ export default function ProsCategoryScreen() {
             right: 0;
             width: 20px;
             height: 20px;
-            background: #10B981;
+            background: #00C2CB;
             border-radius: 50%;
             display: flex;
             align-items: center;

@@ -51,13 +51,13 @@ export default function TavvyShieldScreen() {
       icon: IoAnalytics,
       title: 'Real Activity Signals',
       description: 'No fake reviews. We track real visits, live activity, and verified behavior patterns',
-      color: '#8B5CF6',
+      color: '#8A05BE',
     },
     {
       icon: IoCard,
       title: 'Payment Protection',
       description: 'Choose to pay directly or let Tavvy handle payments. All transactions are tracked and accountable',
-      color: '#10B981',
+      color: '#00C2CB',
     },
     {
       icon: IoConstruct,
@@ -73,7 +73,7 @@ export default function TavvyShieldScreen() {
       title: 'Pay Contractor Directly',
       description: 'After Tavvy approval, pay the contractor directly with full transparency',
       badge: 'Popular',
-      badgeColor: '#10B981',
+      badgeColor: '#00C2CB',
     },
     {
       icon: IoShieldCheckmark,
@@ -233,7 +233,7 @@ export default function TavvyShieldScreen() {
               <div className="inspection-features">
                 {inspectionFeatures.map((item, index) => (
                   <div key={index} className="inspection-item">
-                    <IoCheckmarkCircle size={24} color="#10B981" />
+                    <IoCheckmarkCircle size={24} color="#00C2CB" />
                     <span>{item.text}</span>
                   </div>
                 ))}
@@ -261,7 +261,7 @@ export default function TavvyShieldScreen() {
                   <div className="benefit-items">
                     {benefit.items.map((item, idx) => (
                       <div key={idx} className="benefit-item">
-                        <IoCheckmarkCircle size={20} color="#10B981" />
+                        <IoCheckmarkCircle size={20} color="#00C2CB" />
                         <span>{item}</span>
                       </div>
                     ))}
@@ -326,7 +326,7 @@ export default function TavvyShieldScreen() {
             .hero-section {
               text-align: center;
               padding: 80px 24px;
-              background: linear-gradient(135deg, rgba(107, 127, 255, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+              background: linear-gradient(135deg, rgba(107, 127, 255, 0.15) 0%, rgba(138, 5, 190, 0.15) 100%);
             }
 
             .hero-icon {

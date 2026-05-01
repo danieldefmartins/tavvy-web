@@ -15,7 +15,7 @@ export default function TermsOfService() {
       <div className="legal-page">
         <header className="legal-header">
           <Link href="/">
-            <img src="/logo-white.png" alt="TavvY" style={{ height: 40, marginBottom: 24 }} />
+            <img src="/tavvy-logo-white.png" alt="TavvY" style={{ height: 40, marginBottom: 24 }} />
           </Link>
           <h1>Terms of Service</h1>
           <p>Last Updated: January 17, 2026</p>

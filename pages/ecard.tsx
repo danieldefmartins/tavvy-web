@@ -467,7 +467,7 @@ export default function EcardLanding() {
         }
         .nav-cta {
           padding: 10px 24px;
-          background: #3B82F6;
+          background: #8A05BE;
           color: #fff;
           border-radius: 10px;
           font-size: 14px;
@@ -498,7 +498,7 @@ export default function EcardLanding() {
           right: -200px;
           width: 600px;
           height: 600px;
-          background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+          background: radial-gradient(circle, rgba(138, 5, 190, 0.15) 0%, transparent 70%);
           pointer-events: none;
         }
         .hero-content {
@@ -511,8 +511,8 @@ export default function EcardLanding() {
           align-items: center;
           gap: 8px;
           padding: 8px 16px;
-          background: rgba(59, 130, 246, 0.1);
-          border: 1px solid rgba(59, 130, 246, 0.2);
+          background: rgba(138, 5, 190, 0.1);
+          border: 1px solid rgba(138, 5, 190, 0.2);
           border-radius: 100px;
           font-size: 13px;
           font-weight: 500;
@@ -522,7 +522,7 @@ export default function EcardLanding() {
         .badge-dot {
           width: 8px;
           height: 8px;
-          background: #3B82F6;
+          background: #8A05BE;
           border-radius: 50%;
           animation: pulse-dot 2s infinite;
         }
@@ -538,7 +538,7 @@ export default function EcardLanding() {
           margin-bottom: 24px;
         }
         .gradient-text {
-          background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #EC4899 100%);
+          background: linear-gradient(135deg, #8A05BE 0%, #8A05BE 50%, #EC4899 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -560,7 +560,7 @@ export default function EcardLanding() {
           align-items: center;
           gap: 10px;
           padding: 16px 32px;
-          background: #3B82F6;
+          background: #8A05BE;
           color: #fff;
           border-radius: 14px;
           font-size: 16px;
@@ -574,7 +574,7 @@ export default function EcardLanding() {
           background: #2563EB;
           text-decoration: none;
           transform: translateY(-2px);
-          box-shadow: 0 8px 30px rgba(59, 130, 246, 0.3);
+          box-shadow: 0 8px 30px rgba(138, 5, 190, 0.3);
         }
         .btn-secondary-lg {
           display: inline-flex;
@@ -664,9 +664,9 @@ export default function EcardLanding() {
 
         /* ===== FEATURES STRIP ===== */
         .features-strip {
-          background: rgba(59, 130, 246, 0.05);
-          border-top: 1px solid rgba(59, 130, 246, 0.1);
-          border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+          background: rgba(138, 5, 190, 0.05);
+          border-top: 1px solid rgba(138, 5, 190, 0.1);
+          border-bottom: 1px solid rgba(138, 5, 190, 0.1);
           padding: 20px 0;
           overflow: hidden;
         }
@@ -690,7 +690,7 @@ export default function EcardLanding() {
           color: rgba(255, 255, 255, 0.7);
         }
         .strip-check {
-          color: #3B82F6;
+          color: #8A05BE;
           font-weight: 700;
         }
 
@@ -716,8 +716,8 @@ export default function EcardLanding() {
         .section-badge {
           display: inline-block;
           padding: 6px 14px;
-          background: rgba(59, 130, 246, 0.1);
-          border: 1px solid rgba(59, 130, 246, 0.2);
+          background: rgba(138, 5, 190, 0.1);
+          border: 1px solid rgba(138, 5, 190, 0.2);
           border-radius: 100px;
           font-size: 12px;
           font-weight: 600;
@@ -773,8 +773,8 @@ export default function EcardLanding() {
           color: #fff;
         }
         .filter-btn.active {
-          background: #3B82F6;
-          border-color: #3B82F6;
+          background: #8A05BE;
+          border-color: #8A05BE;
           color: #fff;
         }
         .template-grid {
@@ -790,7 +790,7 @@ export default function EcardLanding() {
           transition: all 0.3s;
         }
         .template-card:hover {
-          border-color: rgba(59, 130, 246, 0.3);
+          border-color: rgba(138, 5, 190, 0.3);
           transform: translateY(-4px);
           box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
         }
@@ -815,7 +815,7 @@ export default function EcardLanding() {
           top: 12px;
           right: 12px;
           padding: 4px 10px;
-          background: linear-gradient(135deg, #8B5CF6, #EC4899);
+          background: linear-gradient(135deg, #8A05BE, #EC4899);
           color: #fff;
           font-size: 11px;
           font-weight: 700;
@@ -856,8 +856,8 @@ export default function EcardLanding() {
           text-decoration: none;
         }
         .overlay-btn-primary {
-          background: #3B82F6;
-          border-color: #3B82F6;
+          background: #8A05BE;
+          border-color: #8A05BE;
         }
         .overlay-btn-primary:hover {
           background: #2563EB;
@@ -907,9 +907,9 @@ export default function EcardLanding() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(59, 130, 246, 0.1);
+          background: rgba(138, 5, 190, 0.1);
           border-radius: 12px;
-          color: #3B82F6;
+          color: #8A05BE;
         }
         .endorse-feature strong {
           display: block;
@@ -979,7 +979,7 @@ export default function EcardLanding() {
           width: 100%;
           height: 100%;
           border-radius: 50%;
-          background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+          background: linear-gradient(135deg, #8A05BE, #8A05BE);
         }
         .endorse-more {
           margin-left: 8px;
@@ -1008,7 +1008,7 @@ export default function EcardLanding() {
           transition: all 0.3s;
         }
         .sharing-card:hover {
-          border-color: rgba(59, 130, 246, 0.3);
+          border-color: rgba(138, 5, 190, 0.3);
           transform: translateY(-4px);
         }
         .sharing-icon {
@@ -1017,10 +1017,10 @@ export default function EcardLanding() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: rgba(59, 130, 246, 0.08);
+          background: rgba(138, 5, 190, 0.08);
           border-radius: 16px;
           margin: 0 auto 20px;
-          color: #3B82F6;
+          color: #8A05BE;
         }
         .sharing-card h3 {
           font-size: 17px;
@@ -1052,7 +1052,7 @@ export default function EcardLanding() {
           transition: all 0.3s;
         }
         .usecase-card:hover {
-          border-color: rgba(59, 130, 246, 0.2);
+          border-color: rgba(138, 5, 190, 0.2);
           transform: translateY(-2px);
         }
         .usecase-icon {
@@ -1085,7 +1085,7 @@ export default function EcardLanding() {
           transform: translate(-50%, -50%);
           width: 800px;
           height: 400px;
-          background: radial-gradient(ellipse, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+          background: radial-gradient(ellipse, rgba(138, 5, 190, 0.15) 0%, transparent 70%);
           pointer-events: none;
         }
         .cta-content {

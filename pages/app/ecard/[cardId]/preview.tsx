@@ -502,12 +502,12 @@ export default function ECardPreviewPage() {
           {/* Premium Required Modal */}
           {showPremiumModal && (
             <div className="modal-overlay" onClick={() => setShowPremiumModal(false)}>
-              <div className="modal" onClick={e => e.stopPropagation()} style={{ backgroundColor: isDark ? '#1E293B' : '#fff', maxWidth: 380 }}>
+              <div className="modal" onClick={e => e.stopPropagation()} style={{ backgroundColor: isDark ? '#1E0A3C' : '#fff', maxWidth: 380 }}>
                 <button className="modal-close" onClick={() => setShowPremiumModal(false)}>
                   <IoClose size={24} color={isDark ? '#fff' : '#333'} />
                 </button>
-                <div style={{ width: 64, height: 64, borderRadius: 32, background: 'rgba(139,92,246,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-                  <IoLockClosedOutline size={28} color="#8B5CF6" />
+                <div style={{ width: 64, height: 64, borderRadius: 32, background: 'rgba(138,5,190,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                  <IoLockClosedOutline size={28} color="#8A05BE" />
                 </div>
                 <h2 style={{ color: isDark ? '#fff' : '#333', fontSize: 20, fontWeight: 700, margin: '0 0 8px' }}>Premium Features Detected</h2>
                 <p style={{ color: isDark ? '#94A3B8' : '#6B7280', fontSize: 14, lineHeight: 1.6, margin: '0 0 24px' }}>
@@ -516,13 +516,13 @@ export default function ECardPreviewPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <button
                     onClick={() => { setShowPremiumModal(false); router.push('/app/ecard/premium', undefined, { locale }); }}
-                    style={{ padding: '14px 24px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)', color: '#fff', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}
+                    style={{ padding: '14px 24px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #8A05BE, #6D28D9)', color: '#fff', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}
                   >
                     Upgrade to Pro
                   </button>
                   <button
                     onClick={() => { setShowPremiumModal(false); router.push(`/app/ecard/${cardId}/edit`, undefined, { locale }); }}
-                    style={{ padding: '14px 24px', borderRadius: 12, border: `1px solid ${isDark ? '#334155' : '#E5E7EB'}`, background: 'transparent', color: isDark ? '#E2E8F0' : '#374151', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}
+                    style={{ padding: '14px 24px', borderRadius: 12, border: `1px solid ${isDark ? '#250E45' : '#E5E7EB'}`, background: 'transparent', color: isDark ? '#E2E8F0' : '#374151', fontSize: 15, fontWeight: 500, cursor: 'pointer' }}
                   >
                     Edit Card
                   </button>
@@ -540,7 +540,7 @@ export default function ECardPreviewPage() {
           {/* QR Code Modal */}
           {showQRModal && cardData?.slug && (
             <div className="modal-overlay" onClick={() => setShowQRModal(false)}>
-              <div className="modal qr-modal" onClick={e => e.stopPropagation()} style={{ backgroundColor: isDark ? '#1E293B' : '#fff', maxWidth: 420 }}>
+              <div className="modal qr-modal" onClick={e => e.stopPropagation()} style={{ backgroundColor: isDark ? '#1E0A3C' : '#fff', maxWidth: 420 }}>
                 <button className="modal-close" onClick={() => setShowQRModal(false)}>
                   <IoClose size={24} color={isDark ? '#fff' : '#333'} />
                 </button>
@@ -561,7 +561,7 @@ export default function ECardPreviewPage() {
                       style={{
                         padding: '8px 4px',
                         borderRadius: 8,
-                        border: `2px solid ${JSON.stringify(qrStyle) === JSON.stringify(preset.config) ? '#00C853' : (isDark ? '#334155' : '#E5E7EB')}`,
+                        border: `2px solid ${JSON.stringify(qrStyle) === JSON.stringify(preset.config) ? '#00C853' : (isDark ? '#250E45' : '#E5E7EB')}`,
                         backgroundColor: isDark ? '#0F172A' : '#F9FAFB',
                         cursor: 'pointer',
                         fontSize: 11,
@@ -705,8 +705,8 @@ export default function ECardPreviewPage() {
             border-radius: 20px;
             overflow: hidden;
             position: relative;
-            background: ${isDark ? '#1E293B' : '#fff'};
-            border: 1px solid ${isDark ? '#334155' : '#E5E7EB'};
+            background: ${isDark ? '#1E0A3C' : '#fff'};
+            border: 1px solid ${isDark ? '#250E45' : '#E5E7EB'};
             box-shadow: 0 4px 24px rgba(0,0,0,0.08);
           }
 
@@ -716,7 +716,7 @@ export default function ECardPreviewPage() {
 
           .skeleton-header {
             height: 160px;
-            background: ${isDark ? '#334155' : '#E5E7EB'};
+            background: ${isDark ? '#250E45' : '#E5E7EB'};
           }
 
           .skeleton-body {
@@ -726,7 +726,7 @@ export default function ECardPreviewPage() {
           .skeleton-line {
             height: 14px;
             border-radius: 7px;
-            background: ${isDark ? '#334155' : '#E5E7EB'};
+            background: ${isDark ? '#250E45' : '#E5E7EB'};
             margin-bottom: 12px;
           }
 
@@ -814,7 +814,7 @@ export default function ECardPreviewPage() {
             gap: 8px;
             padding: 14px;
             border-radius: 14px;
-            border: 1px solid ${isDark ? '#334155' : '#E5E7EB'};
+            border: 1px solid ${isDark ? '#250E45' : '#E5E7EB'};
             background: transparent;
             color: ${isDark ? '#94A3B8' : '#6B7280'};
             font-size: 14px;
@@ -838,8 +838,8 @@ export default function ECardPreviewPage() {
             width: calc(100% - 32px);
             margin: 0 16px 8px;
             padding: 12px;
-            background: ${isDark ? '#1E293B' : '#fff'};
-            border: 1px solid ${isDark ? '#334155' : '#E5E7EB'};
+            background: ${isDark ? '#1E0A3C' : '#fff'};
+            border: 1px solid ${isDark ? '#250E45' : '#E5E7EB'};
             border-radius: 12px;
             color: ${isDark ? '#E2E8F0' : '#374151'};
             font-size: 14px;
@@ -849,7 +849,7 @@ export default function ECardPreviewPage() {
           }
 
           .toolbar-toggle:hover {
-            background: ${isDark ? '#334155' : '#F3F4F6'};
+            background: ${isDark ? '#250E45' : '#F3F4F6'};
           }
 
           .toolbar-toggle.active {
@@ -859,8 +859,8 @@ export default function ECardPreviewPage() {
 
           .quick-edit-toolbar {
             margin: 0 16px 16px;
-            background: ${isDark ? '#1E293B' : '#fff'};
-            border: 1px solid ${isDark ? '#334155' : '#E5E7EB'};
+            background: ${isDark ? '#1E0A3C' : '#fff'};
+            border: 1px solid ${isDark ? '#250E45' : '#E5E7EB'};
             border-radius: 16px;
             overflow: hidden;
             animation: slideDown 0.2s ease;
@@ -873,7 +873,7 @@ export default function ECardPreviewPage() {
 
           .toolbar-tabs {
             display: flex;
-            border-bottom: 1px solid ${isDark ? '#334155' : '#E5E7EB'};
+            border-bottom: 1px solid ${isDark ? '#250E45' : '#E5E7EB'};
           }
 
           .tab-btn {
@@ -911,7 +911,7 @@ export default function ECardPreviewPage() {
           }
 
           .toggle-row + .toggle-row {
-            border-top: 1px solid ${isDark ? '#334155' : '#F3F4F6'};
+            border-top: 1px solid ${isDark ? '#250E45' : '#F3F4F6'};
           }
 
           .toggle-label {
@@ -966,7 +966,7 @@ export default function ECardPreviewPage() {
           }
 
           .color-row + .color-row {
-            border-top: 1px solid ${isDark ? '#334155' : '#F3F4F6'};
+            border-top: 1px solid ${isDark ? '#250E45' : '#F3F4F6'};
           }
 
           .color-label {
@@ -1024,7 +1024,7 @@ export default function ECardPreviewPage() {
             padding: 12px;
             background: ${ACCENT_GREEN};
             border: none;
-            border-top: 1px solid ${isDark ? '#334155' : '#E5E7EB'};
+            border-top: 1px solid ${isDark ? '#250E45' : '#E5E7EB'};
             color: #fff;
             font-size: 14px;
             font-weight: 600;
@@ -1050,7 +1050,7 @@ export default function ECardPreviewPage() {
             justify-content: center;
             gap: 8px;
             padding: 14px;
-            background: ${isDark ? '#1E293B' : '#fff'};
+            background: ${isDark ? '#1E0A3C' : '#fff'};
             border: none;
             border-radius: 12px;
             color: ${isDark ? '#fff' : '#333'};
@@ -1078,7 +1078,7 @@ export default function ECardPreviewPage() {
             margin: 0 16px;
             padding: 14px;
             background: transparent;
-            border: 1px solid ${isDark ? '#334155' : '#E5E7EB'};
+            border: 1px solid ${isDark ? '#250E45' : '#E5E7EB'};
             border-radius: 12px;
             color: ${isDark ? '#fff' : '#333'};
             font-size: 15px;

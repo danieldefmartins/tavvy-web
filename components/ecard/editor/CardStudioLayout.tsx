@@ -790,11 +790,11 @@ export default function CardStudioLayout() {
             </button>
             <div style={{
               width: 64, height: 64, borderRadius: 32,
-              background: 'rgba(139,92,246,0.1)',
+              background: 'rgba(138,5,190,0.1)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               margin: '0 auto 16px',
             }}>
-              <IoLockClosedOutline size={28} color="#8B5CF6" />
+              <IoLockClosedOutline size={28} color="#8A05BE" />
             </div>
             <h3 style={{ fontSize: 20, fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>
               Premium Features Detected
@@ -807,7 +807,7 @@ export default function CardStudioLayout() {
                 onClick={() => { setShowPremiumModal(false); router.push('/app/ecard/premium', undefined, { locale }); }}
                 style={{
                   padding: '14px 24px', borderRadius: 12, border: 'none',
-                  background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)',
+                  background: 'linear-gradient(135deg, #8A05BE, #6D28D9)',
                   color: '#fff', fontSize: 15, fontWeight: 600, cursor: 'pointer',
                 }}
               >

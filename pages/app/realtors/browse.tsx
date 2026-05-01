@@ -80,13 +80,13 @@ export default function RealtorsBrowseScreen() {
 
           <div style={{display:'flex',gap:'10px',padding:'16px 20px',overflowX:'auto'}}>
             {SPECIALTIES.map((specialty) => (
-              <button key={specialty} onClick={() => setSelectedSpecialty(specialty)} style={{padding:'10px 18px',borderRadius:'20px',border:'none',fontSize:'14px',fontWeight:500,cursor:'pointer',whiteSpace:'nowrap',background:selectedSpecialty === specialty ? '#3B82F6' : '#1A1A24',color:selectedSpecialty === specialty ? '#FFFFFF' : '#9CA3AF'}}>{specialty}</button>
+              <button key={specialty} onClick={() => setSelectedSpecialty(specialty)} style={{padding:'10px 18px',borderRadius:'20px',border:'none',fontSize:'14px',fontWeight:500,cursor:'pointer',whiteSpace:'nowrap',background:selectedSpecialty === specialty ? '#8A05BE' : '#1A1A24',color:selectedSpecialty === specialty ? '#FFFFFF' : '#9CA3AF'}}>{specialty}</button>
             ))}
           </div>
 
           <div style={{padding:'0 20px'}}>
             {loading ? (
-              <div style={{display:'flex',justifyContent:'center',padding:'60px'}}><div style={{width:'32px',height:'32px',border:'3px solid #252532',borderTopColor:'#3B82F6',borderRadius:'50%',animation:'spin 1s linear infinite'}} /></div>
+              <div style={{display:'flex',justifyContent:'center',padding:'60px'}}><div style={{width:'32px',height:'32px',border:'3px solid #252532',borderTopColor:'#8A05BE',borderRadius:'50%',animation:'spin 1s linear infinite'}} /></div>
             ) : filteredRealtors.length === 0 ? (
               <div style={{textAlign:'center',padding:'60px 20px'}}><span style={{fontSize:'48px',display:'block',marginBottom:'16px'}}>🏠</span><p style={{color:'#6B7280',fontSize:'16px'}}>No realtors found</p></div>
             ) : (

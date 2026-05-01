@@ -89,7 +89,7 @@ export default function ExperiencesScreen() {
       <AppLayout>
         <div className="experiences-screen" style={{ backgroundColor: theme.background }}>
           {/* Header */}
-          <header className="experiences-header" style={{ background: 'linear-gradient(135deg, #8B5CF6, #6366F1)' }}>
+          <header className="experiences-header" style={{ background: 'linear-gradient(135deg, #8A05BE, #6366F1)' }}>
             <h1>✨ Experiences</h1>
             <p>Discover unique local activities</p>
             

@@ -23,14 +23,14 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // Category colors matching the universal review system
 const CATEGORY_COLORS = {
-  best_for: '#0A84FF',  // Blue - The Good
-  vibe: '#8B5CF6',      // Purple - The Vibe
-  heads_up: '#FF9500',  // Orange - Heads Up
+  best_for: '#00C2CB',  // Teal - The Good
+  vibe: '#8A05BE',      // Purple - The Vibe
+  heads_up: '#F5A623',  // Amber - Heads Up
 };
 
 const THRILL_LABELS: Record<string, { label: string; color: string }> = {
-  mild: { label: 'Mild', color: '#10B981' },
-  moderate: { label: 'Moderate', color: '#3B82F6' },
+  mild: { label: 'Mild', color: '#00C2CB' },
+  moderate: { label: 'Moderate', color: '#8A05BE' },
   thrilling: { label: 'Thrilling', color: '#F59E0B' },
   extreme: { label: 'Extreme', color: '#EF4444' },
 };

@@ -388,7 +388,7 @@ export default function ECardHubScreen() {
               left: contextMenu.x,
               zIndex: 10000,
               minWidth: 180,
-              background: isDark ? '#1E293B' : '#FFFFFF',
+              background: isDark ? '#1E0A3C' : '#FFFFFF',
               borderRadius: 12,
               boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
               border: `1px solid ${border}`,
@@ -461,12 +461,12 @@ export default function ECardHubScreen() {
                 <div style={{ padding: '0 20px', textAlign: 'center' }}>
                   <div style={{
                     width: 72, height: 72, borderRadius: 36,
-                    background: isPro ? 'rgba(139,92,246,0.1)' : 'rgba(0,200,83,0.1)',
+                    background: isPro ? 'rgba(138,5,190,0.1)' : 'rgba(0,200,83,0.1)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     margin: '8px auto 20px',
                   }}>
                     {isPro ? (
-                      <IoStarOutline size={36} color="#8B5CF6" />
+                      <IoStarOutline size={36} color="#8A05BE" />
                     ) : (
                       <IoLockClosedOutline size={36} color={ACCENT} />
                     )}
@@ -485,11 +485,11 @@ export default function ECardHubScreen() {
                   <div style={{
                     display: 'inline-flex', alignItems: 'center', gap: 8,
                     padding: '8px 16px', borderRadius: 12, marginBottom: 20,
-                    background: isPro ? 'rgba(139,92,246,0.08)' : (isDark ? 'rgba(255,255,255,0.05)' : '#F7F7F7'),
-                    border: `1px solid ${isPro ? 'rgba(139,92,246,0.2)' : border}`,
+                    background: isPro ? 'rgba(138,5,190,0.08)' : (isDark ? 'rgba(255,255,255,0.05)' : '#F7F7F7'),
+                    border: `1px solid ${isPro ? 'rgba(138,5,190,0.2)' : border}`,
                   }}>
-                    <IoShieldCheckmarkOutline size={16} color={isPro ? '#8B5CF6' : textSecondary} />
-                    <span style={{ fontSize: 13, fontWeight: 600, color: isPro ? '#8B5CF6' : textSecondary }}>
+                    <IoShieldCheckmarkOutline size={16} color={isPro ? '#8A05BE' : textSecondary} />
+                    <span style={{ fontSize: 13, fontWeight: 600, color: isPro ? '#8A05BE' : textSecondary }}>
                       {isPro ? 'Pro Plan' : 'Free Plan'} — {cards.length}/{isPro ? '1' : '1'} card{cards.length !== 1 ? 's' : ''} used
                     </span>
                   </div>
@@ -504,11 +504,11 @@ export default function ECardHubScreen() {
                         width: '100%', padding: '14px 20px', border: 'none', borderRadius: 14,
                         fontSize: 15, fontWeight: 700, cursor: 'pointer',
                         background: isPro
-                          ? 'linear-gradient(135deg, #8B5CF6, #6D28D9)'
+                          ? 'linear-gradient(135deg, #8A05BE, #6D28D9)'
                           : `linear-gradient(135deg, ${ACCENT}, #00A843)`,
                         color: '#fff',
                         boxShadow: isPro
-                          ? '0 4px 16px rgba(139,92,246,0.3)'
+                          ? '0 4px 16px rgba(138,5,190,0.3)'
                           : '0 4px 16px rgba(0,200,83,0.3)',
                       }}
                     >
@@ -577,7 +577,7 @@ export default function ECardHubScreen() {
                   style={{
                     flex: 1, padding: '12px 16px', border: 'none', borderRadius: 12,
                     fontSize: 14, fontWeight: 600, cursor: 'pointer',
-                    background: isDark ? '#334155' : '#F1F5F9', color: textPrimary,
+                    background: isDark ? '#250E45' : '#F1F5F9', color: textPrimary,
                   }}
                 >
                   Cancel

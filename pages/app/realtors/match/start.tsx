@@ -25,8 +25,8 @@ export default function SmartMatchStartScreen() {
   };
 
   const benefits = [
-    { icon: FiShield, title: 'Spam-free matching', desc: 'No unwanted calls or emails', color: '#10B981' },
-    { icon: FiClock, title: 'Takes less than 2 minutes', desc: 'Quick and easy process', color: '#3B82F6' },
+    { icon: FiShield, title: 'Spam-free matching', desc: 'No unwanted calls or emails', color: '#00C2CB' },
+    { icon: FiClock, title: 'Takes less than 2 minutes', desc: 'Quick and easy process', color: '#8A05BE' },
     { icon: FiUsers, title: 'Connect with top realtors', desc: 'Up to 5 matched professionals', color: '#C9A227' },
     { icon: FiLock, title: "You're in control", desc: 'Choose who contacts you', color: '#EF4444' },
   ];
@@ -203,7 +203,7 @@ export default function SmartMatchStartScreen() {
             align-items: center;
             justify-content: center;
             gap: 8px;
-            background: linear-gradient(90deg, #3B82F6 0%, #2563EB 100%);
+            background: linear-gradient(90deg, #8A05BE 0%, #6B0496 100%);
             color: #FFFFFF;
             font-size: 18px;
             font-weight: 700;

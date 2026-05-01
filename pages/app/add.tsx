@@ -169,7 +169,7 @@ export default function UniversalAddScreen() {
   const bgColor = isDark ? BG_DARK : BG_LIGHT;
   const textColor = isDark ? '#FFFFFF' : '#000000';
   const subtextColor = isDark ? '#9CA3AF' : '#6B7280';
-  const cardBg = isDark ? '#1E293B' : '#FFFFFF';
+  const cardBg = isDark ? '#1E0A3C' : '#FFFFFF';
 
   // Show resume modal when there's a pending draft
   useEffect(() => {
@@ -630,7 +630,7 @@ export default function UniversalAddScreen() {
                 
                 {!hasStreetNumber(currentDraft.address_line1 || currentDraft.formatted_address) && (
                   <div className="address-warning">
-                    <FiAlertTriangle size={18} color="#FF9500" />
+                    <FiAlertTriangle size={18} color="#F5A623" />
                     <span>This address may be missing a street number</span>
                   </div>
                 )}
@@ -715,8 +715,8 @@ export default function UniversalAddScreen() {
                 style={{ backgroundColor: cardBg }}
                 onClick={() => handleServiceLocationAnswer(false)}
               >
-                <div className="option-icon" style={{ backgroundColor: '#0A84FF15' }}>
-                  <MdDirectionsCar size={32} color="#0A84FF" />
+                <div className="option-icon" style={{ backgroundColor: '#00C2CB15' }}>
+                  <MdDirectionsCar size={32} color="#00C2CB" />
                 </div>
                 <div className="option-content">
                   <h4 style={{ color: textColor }}>No, I go to my customers</h4>

@@ -68,7 +68,7 @@ export default function MatchQ2Screen() {
           .header { display: flex; align-items: center; gap: 16px; padding-top: 40px; margin-bottom: 40px; }
           .back-button { width: 40px; height: 40px; border-radius: 20px; background: #1A1A24; border: none; color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer; }
           .progress-bar { flex: 1; height: 4px; background: #1A1A24; border-radius: 2px; overflow: hidden; }
-          .progress-fill { height: 100%; background: #3B82F6; border-radius: 2px; }
+          .progress-fill { height: 100%; background: #8A05BE; border-radius: 2px; }
           .step-indicator { font-size: 14px; color: #6B7280; white-space: nowrap; }
           .content { flex: 1; }
           h1 { font-size: 28px; font-weight: 700; color: #FFFFFF; margin: 0 0 8px; }
@@ -76,12 +76,12 @@ export default function MatchQ2Screen() {
           .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
           .option-card { display: flex; flex-direction: column; align-items: center; gap: 12px; background: #1A1A24; padding: 24px 16px; border-radius: 16px; border: 2px solid transparent; cursor: pointer; transition: all 0.2s; }
           .option-card:hover { background: #252532; }
-          .option-card.selected { border-color: #3B82F6; background: rgba(59, 130, 246, 0.1); }
+          .option-card.selected { border-color: #8A05BE; background: rgba(138, 5, 190, 0.1); }
           .option-emoji { font-size: 36px; }
           .option-label { font-size: 14px; font-weight: 500; color: #FFFFFF; text-align: center; }
           .bottom-container { padding: 20px 0 40px; }
           .next-button { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: #3B3B4F; color: #6B7280; font-size: 18px; font-weight: 700; padding: 18px; border: none; border-radius: 16px; cursor: not-allowed; }
-          .next-button.active { background: linear-gradient(90deg, #3B82F6 0%, #2563EB 100%); color: #FFFFFF; cursor: pointer; }
+          .next-button.active { background: linear-gradient(90deg, #8A05BE 0%, #2563EB 100%); color: #FFFFFF; cursor: pointer; }
         `}</style>
       </AppLayout>
     </>

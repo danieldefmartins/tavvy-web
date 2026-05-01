@@ -69,7 +69,7 @@ if (typeof window !== 'undefined') {
 const BG_LIGHT = '#F9F7F2';
 const BG_DARK = '#000000';  // Pure black
 const ACCENT_CYAN = '#22D3EE';  // Tavvy cyan/teal
-const ACCENT_GREEN = '#10B981';  // Tavvy green
+const ACCENT_GREEN = '#00C2CB';  // Tavvy teal
 const ACCENT_GOLD = '#F59E0B';  // Tavvy gold
 const BLUE = '#007AFF';
 
@@ -96,9 +96,9 @@ const MAP_STYLES = {
 const categories = [
   { id: 'all', name: 'All', icon: null, color: BLUE },
   { id: 'restaurants', name: 'Restaurants', icon: IoRestaurant, color: '#EF4444' },
-  { id: 'cafes', name: 'Cafes', icon: IoCafe, color: '#8B5CF6' },
+  { id: 'cafes', name: 'Cafes', icon: IoCafe, color: '#8A05BE' },
   { id: 'bars', name: 'Bars', icon: IoBeer, color: '#F59E0B' },
-  { id: 'gas', name: 'Gas', icon: IoCarSport, color: '#3B82F6' },
+  { id: 'gas', name: 'Gas', icon: IoCarSport, color: '#8A05BE' },
   { id: 'shopping', name: 'Shopping', icon: IoStorefront, color: '#EC4899' },
 ];
 
@@ -703,9 +703,9 @@ export default function MapScreen() {
 
   const getSignalColor = (bucket: string): string => {
     const type = getSignalType(bucket);
-    if (type === 'positive') return '#0A84FF'; // Blue - The Good
-    if (type === 'negative') return '#FF9500'; // Orange - Heads Up
-    return '#8B5CF6'; // Purple - The Vibe
+    if (type === 'positive') return '#00C2CB'; // Teal - The Good
+    if (type === 'negative') return '#F5A623'; // Amber - Heads Up
+    return '#8A05BE'; // Purple - The Vibe
   };
 
   const getSignalIcon = (type: SignalType) => {
@@ -1110,7 +1110,7 @@ export default function MapScreen() {
                     <span>Restaurants</span>
                   </div>
                   <div className="legend-item">
-                    <div className="legend-dot" style={{ background: '#8B5CF6' }}></div>
+                    <div className="legend-dot" style={{ background: '#8A05BE' }}></div>
                     <span>Cafes</span>
                   </div>
                   <div className="legend-item">
@@ -1118,7 +1118,7 @@ export default function MapScreen() {
                     <span>Bars</span>
                   </div>
                   <div className="legend-item">
-                    <div className="legend-dot" style={{ background: '#3B82F6' }}></div>
+                    <div className="legend-dot" style={{ background: '#8A05BE' }}></div>
                     <span>Gas Stations</span>
                   </div>
                   <div className="legend-item">
@@ -2224,17 +2224,17 @@ export default function MapScreen() {
         }
 
         .signal-btn.the-good {
-          background: #0A84FF;
+          background: #00C2CB;
           color: #fff;
         }
 
         .signal-btn.the-vibe {
-          background: #8B5CF6;
+          background: #8A05BE;
           color: #fff;
         }
 
         .signal-btn.heads-up {
-          background: #FF9500;
+          background: #F5A623;
           color: #fff;
         }
 

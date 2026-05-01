@@ -35,14 +35,14 @@ const FEATURED_APPS = [
     id: 'pros',
     nameKey: 'apps.pros',
     icon: IoConstruct,
-    gradient: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+    gradient: 'linear-gradient(135deg, #8A05BE 0%, #6B04A0 100%)',
     href: '/app/pros',
   },
   {
     id: 'atlas',
     nameKey: 'apps.atlas',
     icon: IoBook,
-    gradient: 'linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%)',
+    gradient: 'linear-gradient(135deg, #8A05BE 0%, #7C3AED 100%)',
     href: '/app/atlas',
   },
   {
@@ -67,7 +67,7 @@ const ALL_APPS = [
     id: 'onthego',
     nameKey: 'apps.onTheGo',
     icon: IoCar,
-    color: '#10B981',
+    color: '#00C2CB',
     href: '/app/onthego',
   },
   {
@@ -81,7 +81,7 @@ const ALL_APPS = [
     id: 'rv-camping',
     nameKey: 'apps.rvCamping',
     icon: IoCar,
-    color: '#F97316',
+    color: '#00C2CB',
     href: '/app/rv-camping',
   },
   {
@@ -95,14 +95,14 @@ const ALL_APPS = [
     id: 'wallet',
     nameKey: 'apps.wallet',
     icon: IoWallet,
-    color: '#8B5CF6',
+    color: '#8A05BE',
     href: '/app/wallet',
   },
   {
     id: 'cities',
     nameKey: 'apps.cities',
     icon: IoBusinessOutline,
-    color: '#3B82F6',
+    color: '#8A05BE',
     href: '/app/cities',
   },
   {
@@ -123,7 +123,7 @@ const ALL_APPS = [
     id: 'create',
     nameKey: 'apps.create',
     icon: IoAddCircle,
-    color: '#10B981',
+    color: '#00C2CB',
     href: '/app/create',
   },
   {
@@ -315,7 +315,7 @@ export default function AppsScreen() {
           /* Subtitle */
           .subtitle {
             font-size: 16px;
-            color: ${isDark ? '#8B5CF6' : '#7C3AED'};
+            color: ${isDark ? '#8A05BE' : '#7C3AED'};
             margin: 0 0 20px 0;
           }
 
@@ -453,7 +453,7 @@ export default function AppsScreen() {
           }
 
           .theme-btn.active {
-            background-color: #3B82F6;
+            background-color: #8A05BE;
             color: #FFFFFF;
           }
 

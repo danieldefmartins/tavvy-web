@@ -569,13 +569,13 @@ export default function UniverseLandingScreen() {
           {[
             { icon: IoRocket, label: "Rides", filter: "rides", color: '#EF4444' },
             { icon: IoStar, label: "Attractions", filter: "attractions", color: '#F59E0B' },
-            { icon: IoPeople, label: "Characters", filter: "characters", color: '#8B5CF6' },
+            { icon: IoPeople, label: "Characters", filter: "characters", color: '#8A05BE' },
             { icon: IoMusicalNotes, label: "Shows", filter: "shows", color: '#EC4899' },
-            { icon: IoFlash, label: "Fireworks", filter: "fireworks", color: '#F97316' },
+            { icon: IoFlash, label: "Fireworks", filter: "fireworks", color: '#00C2CB' },
             { icon: IoCalendar, label: "Events", filter: "special_events", color: '#06B6D4' },
             { icon: IoExitOutline, label: "Entrances", filter: "entrance", color: '#6366F1' },
-            { icon: IoRestaurantOutline, label: "Dining", filter: "dining", color: '#10B981' },
-            { icon: IoWaterOutline, label: "Restrooms", filter: "restroom", color: '#3B82F6' },
+            { icon: IoRestaurantOutline, label: "Dining", filter: "dining", color: '#00C2CB' },
+            { icon: IoWaterOutline, label: "Restrooms", filter: "restroom", color: '#8A05BE' },
             { icon: IoCarOutline, label: "Parking", filter: "parking", color: '#6B7280' },
           ].map((item, i) => {
             const Icon = item.icon;
@@ -760,7 +760,7 @@ export default function UniverseLandingScreen() {
             display: 'flex',
             alignItems: 'center',
             padding: '14px 16px',
-            backgroundColor: '#0A84FF',
+            backgroundColor: '#00C2CB',
             border: 'none',
             borderRadius: '12px',
             marginBottom: '8px',
@@ -781,7 +781,7 @@ export default function UniverseLandingScreen() {
             display: 'flex',
             alignItems: 'center',
             padding: '14px 16px',
-            backgroundColor: '#8B5CF6',
+            backgroundColor: '#8A05BE',
             border: 'none',
             borderRadius: '12px',
             marginBottom: '8px',
@@ -802,7 +802,7 @@ export default function UniverseLandingScreen() {
             display: 'flex',
             alignItems: 'center',
             padding: '14px 16px',
-            backgroundColor: '#FF9500',
+            backgroundColor: '#F5A623',
             border: 'none',
             borderRadius: '12px',
             cursor: 'pointer'
@@ -832,7 +832,7 @@ export default function UniverseLandingScreen() {
                 width: '28px',
                 height: '28px',
                 borderRadius: '14px',
-                backgroundColor: review.type === 'good' ? '#0A84FF' : review.type === 'vibe' ? '#8B5CF6' : '#FF9500',
+                backgroundColor: review.type === 'good' ? '#00C2CB' : review.type === 'vibe' ? '#8A05BE' : '#F5A623',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -1488,7 +1488,7 @@ export default function UniverseLandingScreen() {
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                               {item.price && (
-                                <span style={{ fontSize: '13px', fontWeight: '600', color: '#10B981' }}>
+                                <span style={{ fontSize: '13px', fontWeight: '600', color: '#00C2CB' }}>
                                   ${item.price.toFixed(2)}
                                 </span>
                               )}
@@ -1505,7 +1505,7 @@ export default function UniverseLandingScreen() {
                                 </span>
                               )}
                               {item.dietary_tags && item.dietary_tags.length > 0 && (
-                                <span style={{ fontSize: '10px', color: '#10B981' }}>
+                                <span style={{ fontSize: '10px', color: '#00C2CB' }}>
                                   {item.dietary_tags.includes('vegan') ? '🌱' : ''}
                                   {item.dietary_tags.includes('vegetarian') ? '🥬' : ''}
                                   {item.dietary_tags.includes('gluten-free') ? '🌾' : ''}

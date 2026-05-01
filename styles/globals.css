@@ -2,10 +2,10 @@
 
 :root {
   /* TavvY Brand Colors */
-  --primary: #3B82F6;
-  --primary-dark: #2563EB;
-  --secondary: #F97316;
-  --accent: #0F1233;
+  --primary: #8A05BE;
+  --primary-dark: #6B0496;
+  --secondary: #00C2CB;
+  --accent: #17013A;
   
   /* Neutrals */
   --background: #FFFFFF;
@@ -141,7 +141,7 @@ a:hover {
 }
 
 .landing-hero {
-  background: linear-gradient(135deg, var(--accent) 0%, #1a1f4e 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, #2a0550 100%);
   padding: 120px 20px 80px;
   text-align: center;
 }
@@ -194,7 +194,7 @@ a:hover {
 }
 
 .btn-primary:hover {
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 8px 24px rgba(138, 5, 190, 0.3);
 }
 
 .btn-secondary {
@@ -290,16 +290,19 @@ a:hover {
 /* TavvY Brand Colors (Dark Theme Primary) */
 :root {
   /* Primary Brand Colors */
-  --tavvy-navy: #0F1233;
-  --tavvy-blue: #3B82F6;
-  --tavvy-blue-light: #60A5FA;
-  --tavvy-orange: #F97316;
-  --tavvy-orange-light: #FB923C;
-  
+  --tavvy-navy: #17013A;
+  --tavvy-dark: #17013A;
+  --tavvy-purple: #8A05BE;
+  --tavvy-blue: #8A05BE; /* backward compat alias */
+  --tavvy-blue-light: #A832D6;
+  --tavvy-teal: #00C2CB;
+  --tavvy-orange: #00C2CB; /* backward compat alias */
+  --tavvy-orange-light: #33D1D8;
+
   /* Signal Colors */
-  --signal-positive: #0A84FF;
-  --signal-neutral: #8B5CF6;
-  --signal-negative: #FF9500;
+  --signal-positive: #00C2CB;
+  --signal-neutral: #8A05BE;
+  --signal-negative: #F5A623;
   
   /* Spacing */
   --spacing-xs: 4px;

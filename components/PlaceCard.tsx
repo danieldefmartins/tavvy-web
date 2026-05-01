@@ -1,12 +1,12 @@
 /**
  * PlaceCard - Card component for displaying place information
  * Pixel-perfect port from tavvy-mobile/components/PlaceCard.tsx
- * 
+ *
  * Features:
  * - Photo with gradient overlay
  * - Place name and location
  * - Quick action buttons (Call, Directions, Social, Website)
- * - 4 Signal bars in 2x2 grid (The Good, The Vibe, Heads Up)
+ * - Signal pills (compact, scannable pill UI)
  */
 
 import React, { useState } from 'react';
@@ -15,6 +15,7 @@ import { useRouter } from 'next/router';
 import { useThemeContext } from '../contexts/ThemeContext';
 import { spacing, borderRadius, shadows, Colors } from '../constants/Colors';
 import { FiPhone, FiNavigation, FiGlobe, FiInstagram, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { SignalPillsGrid, inferCategoryFromLabel } from './SignalPill';
 
 interface Signal {
   bucket: string;
@@ -46,89 +47,6 @@ interface PlaceCardProps {
   compact?: boolean;
 }
 
-// Determine signal type based on bucket name
-const getSignalType = (bucket: string): 'positive' | 'neutral' | 'negative' => {
-  const bucketLower = bucket.toLowerCase();
-  
-  // Positive signals (The Good)
-  if (bucketLower.includes('great') || bucketLower.includes('excellent') || 
-      bucketLower.includes('amazing') || bucketLower.includes('affordable') ||
-      bucketLower.includes('good') || bucketLower.includes('friendly') ||
-      bucketLower.includes('fast') || bucketLower.includes('clean') ||
-      bucketLower.includes('fresh') || bucketLower.includes('delicious') ||
-      bucketLower.includes('quality') || bucketLower.includes('recommend')) {
-    return 'positive';
-  }
-  
-  // Negative signals (Heads Up)
-  if (bucketLower.includes('pricey') || bucketLower.includes('expensive') || 
-      bucketLower.includes('crowded') || bucketLower.includes('loud') ||
-      bucketLower.includes('slow') || bucketLower.includes('dirty') ||
-      bucketLower.includes('rude') || bucketLower.includes('limited') ||
-      bucketLower.includes('wait') || bucketLower.includes('noisy') ||
-      bucketLower.includes('cold') || bucketLower.includes('small')) {
-    return 'negative';
-  }
-  
-  // Everything else is neutral (The Vibe)
-  return 'neutral';
-};
-
-// Sort signals for 2x2 display: 2 positive first, then 1 neutral, then 1 negative
-const sortSignalsForDisplay = (signals: Signal[]): Signal[] => {
-  const positive = signals.filter(s => getSignalType(s.bucket) === 'positive');
-  const neutral = signals.filter(s => getSignalType(s.bucket) === 'neutral');
-  const negative = signals.filter(s => getSignalType(s.bucket) === 'negative');
-  
-  const result: Signal[] = [];
-  
-  // First row: 2 positive (blue)
-  result.push(...positive.slice(0, 2));
-  
-  // Fill remaining with neutral/negative
-  while (result.length < 2 && neutral.length > 0) {
-    result.push(neutral.shift()!);
-  }
-  while (result.length < 2 && negative.length > 0) {
-    result.push(negative.shift()!);
-  }
-  
-  // Second row: 1 neutral (purple) + 1 negative (orange)
-  if (neutral.length > 0) {
-    result.push(neutral[0]);
-  }
-  if (negative.length > 0) {
-    result.push(negative[0]);
-  }
-  
-  return result.slice(0, 4);
-};
-
-// Signal colors based on POSITION in grid (not signal type)
-// Row 1 (positions 0, 1): Blue (The Good)
-// Row 2 left (position 2): Purple (The Vibe)
-// Row 2 right (position 3): Orange (Heads Up)
-const getSignalBackgroundColorByPosition = (index: number) => {
-  if (index === 0 || index === 1) {
-    return Colors.positive.primary; // Blue - The Good
-  } else if (index === 2) {
-    return Colors.vibe.primary; // Purple - The Vibe
-  } else {
-    return Colors.negative.primary; // Orange - Heads Up
-  }
-};
-
-// Get emoji for signal type
-const getSignalEmoji = (type: 'positive' | 'neutral' | 'negative') => {
-  switch (type) {
-    case 'positive':
-      return '👍';
-    case 'neutral':
-      return '✨';
-    case 'negative':
-      return '⚠️';
-  }
-};
 
 export default function PlaceCard({ place, onPress, showQuickActions = true, compact = false }: PlaceCardProps) {
   const { theme, isDark } = useThemeContext();
@@ -147,15 +65,15 @@ export default function PlaceCard({ place, onPress, showQuickActions = true, com
       ? [place.photo_url]
       : [null];
   
-  const sortedSignals = place.signals ? sortSignalsForDisplay(place.signals) : [];
-  
-  // Generate placeholder signals if none exist
-  const displaySignals = sortedSignals.length > 0 ? sortedSignals : [
-    { bucket: 'Be the first to tap!', tap_total: 0 },
-    { bucket: 'Be the first to tap!', tap_total: 0 },
-    { bucket: 'Be the first to tap!', tap_total: 0 },
-    { bucket: 'Be the first to tap!', tap_total: 0 },
-  ];
+  // Map signals to the format SignalPillsGrid expects
+  const pillSignals = (place.signals || [])
+    .filter(s => s.tap_total > 0)
+    .map(s => ({
+      label: s.bucket,
+      tapCount: s.tap_total,
+      category: inferCategoryFromLabel(s.bucket),
+      signalId: undefined as string | undefined,
+    }));
 
   // Quick action handlers
   const handleCall = (e: React.MouseEvent) => {
@@ -305,29 +223,13 @@ export default function PlaceCard({ place, onPress, showQuickActions = true, com
         </div>
       )}
       
-      {/* Signal Bars - 2x2 Grid */}
+      {/* Signal Pills */}
       <div className="signals-container">
-        {displaySignals.map((signal, index) => {
-          const hasSignal = signal.tap_total > 0;
-          // Emoji based on position
-          const emoji = index < 2 ? '👍' : index === 2 ? '✨' : '⚠️';
-          
-          return (
-            <button
-              key={index}
-              className="signal-badge"
-              style={{ 
-                backgroundColor: getSignalBackgroundColorByPosition(index),
-                opacity: hasSignal ? 1 : 0.85,
-              }}
-            >
-              <span className="signal-emoji">{hasSignal ? emoji : '👆'}</span>
-              <span className="signal-text">
-                {hasSignal ? `${signal.bucket}` : 'Be the first to tap!'}
-              </span>
-            </button>
-          );
-        })}
+        <SignalPillsGrid
+          signals={pillSignals}
+          maxVisible={4}
+          showCounts={true}
+        />
       </div>
 
       <style jsx>{`
@@ -499,40 +401,7 @@ export default function PlaceCard({ place, onPress, showQuickActions = true, com
         }
         
         .signals-container {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
           padding: ${spacing.md}px;
-          gap: ${spacing.sm}px;
-        }
-        
-        .signal-badge {
-          padding: ${spacing.sm}px ${spacing.md}px;
-          border-radius: ${borderRadius.xl}px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 6px;
-          border: none;
-          cursor: pointer;
-          transition: transform 0.2s, opacity 0.2s;
-        }
-        
-        .signal-badge:hover {
-          transform: scale(1.02);
-        }
-
-        .signal-emoji {
-          font-size: 14px;
-        }
-        
-        .signal-text {
-          color: #FFFFFF;
-          font-size: 13px;
-          font-weight: 600;
-          text-align: center;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
         }
       `}</style>
     </div>

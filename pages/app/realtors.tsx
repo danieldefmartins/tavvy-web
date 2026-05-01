@@ -259,7 +259,7 @@ export default function RealtorsHubScreen() {
           
           .subtitle {
             font-size: 16px;
-            color: #3B82F6;
+            color: #8A05BE;
             margin: 0 0 20px;
             font-style: italic;
           }
@@ -314,7 +314,7 @@ export default function RealtorsHubScreen() {
           }
           
           .filter-pill.active {
-            background: #3B82F6;
+            background: #8A05BE;
             color: #FFFFFF;
           }
           
@@ -397,7 +397,7 @@ export default function RealtorsHubScreen() {
             position: absolute;
             top: 12px;
             left: 12px;
-            background: #3B82F6;
+            background: #8A05BE;
             color: #FFFFFF;
             font-size: 10px;
             font-weight: 700;
@@ -561,7 +561,7 @@ export default function RealtorsHubScreen() {
             width: 32px;
             height: 32px;
             border: 3px solid #252532;
-            border-top-color: #3B82F6;
+            border-top-color: #8A05BE;
             border-radius: 50%;
             animation: spin 1s linear infinite;
           }
@@ -594,7 +594,7 @@ export default function RealtorsHubScreen() {
             justify-content: center;
             gap: 8px;
             background: #1A1A24;
-            color: #3B82F6;
+            color: #8A05BE;
             padding: 16px;
             border-radius: 12px;
             text-decoration: none;

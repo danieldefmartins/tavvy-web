@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tavvy Signal Redesign — Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple: #8A05BE;
+    --teal: #00C2CB;
+    --dark: #17013A;
+    --dark-card: #1E0A3C;
+    --dark-surface: #250E45;
+    --white: #FFFFFF;
+    --lavender: #F4F0FF;
+    --amber: #F5A623;
+    --mint: #36DDB0;
+    --gray-400: #9394A1;
+    --gray-600: #56576B;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: #0C0C0C;
+    color: var(--white);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .mockup-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 60px 40px;
+  }
+
+  .mockup-header {
+    text-align: center;
+    margin-bottom: 80px;
+  }
+
+  .mockup-header h1 {
+    font-family: 'Nunito', sans-serif;
+    font-size: 48px;
+    font-weight: 900;
+    letter-spacing: -2px;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, var(--purple), var(--teal));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .mockup-header p {
+    font-size: 18px;
+    color: var(--gray-400);
+  }
+
+  .section-label {
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--white);
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+
+  .section-desc {
+    font-size: 16px;
+    color: var(--gray-400);
+    margin-bottom: 40px;
+    max-width: 600px;
+  }
+
+  .mockup-section {
+    margin-bottom: 100px;
+  }
+
+  /* ========== COMPARISON ========== */
+  .comparison-grid {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 0;
+    align-items: center;
+    margin-bottom: 60px;
+  }
+
+  .comparison-label {
+    text-align: center;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 20px;
+    color: var(--gray-400);
+  }
+
+  .old-card, .new-card {
+    border-radius: 24px;
+    padding: 32px;
+  }
+
+  .old-card {
+    background: #1a1a2e;
+    border: 1px solid #2a2a3e;
+  }
+
+  .new-card {
+    background: var(--dark);
+    border: 1px solid rgba(138, 5, 190, 0.3);
+  }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    padding: 6px 14px;
+    border-radius: 100px;
+    display: inline-block;
+  }
+
+  .card-label-old {
+    background: rgba(255,255,255,0.08);
+    color: var(--gray-400);
+  }
+
+  .card-label-new {
+    background: rgba(138, 5, 190, 0.2);
+    color: var(--purple);
+  }
+
+  /* Old bars */
+  .old-bar {
+    display: flex;
+    align-items: center;
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    gap: 10px;
+  }
+
+  .old-bar-blue { background: #0A84FF; }
+  .old-bar-purple { background: #8B5CF6; }
+  .old-bar-orange { background: #FF9500; }
+
+  .old-bar-emoji { font-size: 16px; }
+  .old-bar-label { font-size: 15px; font-weight: 600; flex: 1; }
+  .old-bar-count { font-size: 14px; opacity: 0.7; }
+  .old-bar-chevron { font-size: 12px; opacity: 0.5; }
+
+  /* ========== NEW SIGNAL PILLS ========== */
+  .signal-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .signal-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    cursor: default;
+  }
+
+  .signal-pill:hover {
+    transform: translateY(-1px);
+  }
+
+  .signal-pill-emoji {
+    font-size: 16px;
+  }
+
+  .signal-pill-label {
+    white-space: nowrap;
+  }
+
+  .signal-pill-count {
+    font-size: 12px;
+    font-weight: 700;
+    opacity: 0.6;
+    margin-left: 2px;
+  }
+
+  /* Good signals - teal tint */
+  .pill-good {
+    background: rgba(0, 194, 203, 0.12);
+    color: #5EEAEF;
+    border: 1px solid rgba(0, 194, 203, 0.2);
+  }
+
+  /* Vibe signals - purple tint */
+  .pill-vibe {
+    background: rgba(138, 5, 190, 0.12);
+    color: #C77DFF;
+    border: 1px solid rgba(138, 5, 190, 0.2);
+  }
+
+  /* Heads up signals - amber tint */
+  .pill-headsup {
+    background: rgba(245, 166, 35, 0.12);
+    color: #FFB84D;
+    border: 1px solid rgba(245, 166, 35, 0.2);
+  }
+
+  /* Light mode pills */
+  .pill-good-light {
+    background: rgba(0, 194, 203, 0.10);
+    color: var(--dark);
+    border: 1px solid rgba(0, 194, 203, 0.25);
+  }
+
+  .pill-vibe-light {
+    background: rgba(138, 5, 190, 0.08);
+    color: var(--dark);
+    border: 1px solid rgba(138, 5, 190, 0.18);
+  }
+
+  .pill-headsup-light {
+    background: rgba(245, 166, 35, 0.10);
+    color: var(--dark);
+    border: 1px solid rgba(245, 166, 35, 0.22);
+  }
+
+  /* Popular = bigger */
+  .pill-lg {
+    padding: 12px 22px;
+    font-size: 15px;
+  }
+
+  .pill-lg .signal-pill-emoji {
+    font-size: 18px;
+  }
+
+  /* Less popular = smaller, muted */
+  .pill-sm {
+    padding: 8px 14px;
+    font-size: 13px;
+    opacity: 0.75;
+  }
+
+  .pill-sm .signal-pill-emoji {
+    font-size: 14px;
+  }
+
+  /* Ghost / fading */
+  .pill-ghost {
+    opacity: 0.4;
+    border-style: dashed;
+  }
+
+  /* ========== PLACE CARDS ========== */
+  .place-cards-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .place-card {
+    background: var(--dark);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: transform 0.2s ease;
+  }
+
+  .place-card:hover {
+    transform: translateY(-4px);
+  }
+
+  .place-card-photo {
+    width: 100%;
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .place-card-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .place-card-gradient {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: linear-gradient(transparent, rgba(23, 1, 58, 0.95));
+  }
+
+  .place-card-info {
+    position: absolute;
+    bottom: 12px;
+    left: 16px;
+    right: 16px;
+  }
+
+  .place-card-name {
+    font-family: 'Nunito', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--white);
+    margin-bottom: 2px;
+  }
+
+  .place-card-address {
+    font-size: 13px;
+    color: rgba(255,255,255,0.65);
+  }
+
+  .place-card-signals {
+    padding: 14px 16px 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Photo placeholders */
+  .photo-restaurant {
+    background: linear-gradient(135deg, #8B4513, #D2691E);
+  }
+
+  .photo-cafe {
+    background: linear-gradient(135deg, #4A3728, #8B6F47);
+  }
+
+  .photo-contractor {
+    background: linear-gradient(135deg, #2C5F2D, #4A7C59);
+  }
+
+  /* ========== PLACE DETAIL ========== */
+  .detail-container {
+    background: var(--dark);
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.06);
+    max-width: 480px;
+  }
+
+  .detail-hero {
+    height: 240px;
+    position: relative;
+  }
+
+  .detail-hero-gradient {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 120px;
+    background: linear-gradient(transparent, var(--dark));
+  }
+
+  .detail-hero-info {
+    position: absolute;
+    bottom: 20px;
+    left: 24px;
+    right: 24px;
+  }
+
+  .detail-name {
+    font-family: 'Nunito', sans-serif;
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+
+  .detail-meta {
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .detail-body {
+    padding: 24px;
+  }
+
+  .detail-section-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--white);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .detail-section-title .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .dot-teal { background: var(--teal); }
+  .dot-purple { background: var(--purple); }
+  .dot-amber { background: var(--amber); }
+
+  .detail-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+    margin: 24px 0;
+  }
+
+  /* Signal with progress */
+  .signal-detail-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .signal-detail-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 160px;
+  }
+
+  .signal-detail-bar-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .signal-detail-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+  }
+
+  .fill-teal { background: var(--teal); }
+  .fill-purple { background: var(--purple); }
+  .fill-amber { background: var(--amber); }
+
+  .signal-detail-count {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.4);
+    min-width: 32px;
+    text-align: right;
+  }
+
+  /* ========== LIGHT MODE ========== */
+  .light-section {
+    background: #FAFAFA;
+    border-radius: 32px;
+    padding: 48px;
+    color: var(--dark);
+  }
+
+  .light-card {
+    background: var(--white);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border: 1px solid rgba(0,0,0,0.04);
+  }
+
+  .light-card .place-card-gradient {
+    background: linear-gradient(transparent, rgba(255,255,255,0.95));
+  }
+
+  .light-card .place-card-info .place-card-name {
+    color: var(--dark);
+  }
+
+  .light-card .place-card-info .place-card-address {
+    color: var(--gray-600);
+  }
+
+  .light-card .place-card-signals {
+    background: var(--white);
+  }
+
+  /* ========== REVIEW FLOW ========== */
+  .review-container {
+    background: var(--dark);
+    border-radius: 24px;
+    padding: 32px;
+    max-width: 480px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .review-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 24px;
+    font-weight: 900;
+    margin-bottom: 4px;
+  }
+
+  .review-subtitle {
+    font-size: 14px;
+    color: var(--gray-400);
+    margin-bottom: 28px;
+  }
+
+  .review-category {
+    margin-bottom: 24px;
+  }
+
+  .review-category-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+
+  .badge-teal {
+    background: rgba(0, 194, 203, 0.15);
+    color: var(--teal);
+  }
+
+  .badge-purple {
+    background: rgba(138, 5, 190, 0.15);
+    color: #C77DFF;
+  }
+
+  .badge-amber {
+    background: rgba(245, 166, 35, 0.15);
+    color: var(--amber);
+  }
+
+  .review-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .review-tile {
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 16px 10px 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  .review-tile:hover {
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(255,255,255,0.12);
+  }
+
+  .review-tile-selected-teal {
+    background: rgba(0, 194, 203, 0.12);
+    border-color: rgba(0, 194, 203, 0.4);
+  }
+
+  .review-tile-selected-purple {
+    background: rgba(138, 5, 190, 0.12);
+    border-color: rgba(138, 5, 190, 0.4);
+  }
+
+  .review-tile-selected-amber {
+    background: rgba(245, 166, 35, 0.12);
+    border-color: rgba(245, 166, 35, 0.4);
+  }
+
+  .review-tile-emoji {
+    font-size: 28px;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .review-tile-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+  }
+
+  .review-tile-selected-teal .review-tile-label { color: #5EEAEF; }
+  .review-tile-selected-purple .review-tile-label { color: #C77DFF; }
+  .review-tile-selected-amber .review-tile-label { color: #FFB84D; }
+
+  .review-tile-intensity {
+    margin-top: 6px;
+    font-size: 14px;
+    letter-spacing: 2px;
+  }
+
+  .review-tile-check {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: white;
+    font-weight: 700;
+  }
+
+  .check-teal { background: var(--teal); }
+  .check-purple { background: var(--purple); }
+  .check-amber { background: var(--amber); }
+
+  .review-submit {
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+    border: none;
+    background: var(--purple);
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    margin-top: 28px;
+    transition: all 0.2s;
+  }
+
+  .review-submit:hover {
+    background: #9B10D4;
+    transform: translateY(-1px);
+  }
+
+  /* ========== USE CASE DEMO ========== */
+  .usecase {
+    background: var(--dark);
+    border-radius: 24px;
+    padding: 40px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .usecase-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .usecase-emoji {
+    font-size: 40px;
+  }
+
+  .usecase-name {
+    font-family: 'Nunito', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+  }
+
+  .usecase-type {
+    font-size: 14px;
+    color: var(--gray-400);
+    margin-bottom: 24px;
+  }
+
+  .usecase-insight {
+    background: rgba(0, 194, 203, 0.08);
+    border: 1px solid rgba(0, 194, 203, 0.15);
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 20px;
+  }
+
+  .usecase-insight-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 8px;
+  }
+
+  .usecase-insight-text {
+    font-size: 15px;
+    color: rgba(255,255,255,0.75);
+    line-height: 1.6;
+  }
+
+  /* ========== LAYOUT HELPERS ========== */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+
+  .three-col {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  @media (max-width: 900px) {
+    .comparison-grid { grid-template-columns: 1fr; gap: 24px; }
+    .place-cards-row { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .three-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="mockup-container">
+
+  <!-- HEADER -->
+  <div class="mockup-header">
+    <h1>Signal System Redesign</h1>
+    <p>From bars to pills. From hidden to instant. From confusing to clear.</p>
+  </div>
+
+  <!-- ==================== SECTION 1: BEFORE / AFTER ==================== -->
+  <div class="mockup-section">
+    <div class="section-label">Before & After</div>
+    <div class="section-title">The Same Restaurant, Two Ways</div>
+    <div class="section-desc">Left: current bars that hide information. Right: new pills that reveal everything at a glance.</div>
+
+    <div class="comparison-grid">
+      <!-- OLD -->
+      <div class="old-card">
+        <div class="card-label card-label-old">Current Design</div>
+        <div style="font-family: 'Nunito'; font-size: 20px; font-weight: 800; margin-bottom: 4px;">Maria's Kitchen</div>
+        <div style="font-size: 13px; color: var(--gray-400); margin-bottom: 20px;">Mexican Restaurant · 0.3 mi</div>
+
+        <div class="old-bar old-bar-blue">
+          <span class="old-bar-emoji">👍</span>
+          <span class="old-bar-label">The Good</span>
+          <span class="old-bar-count">×54</span>
+          <span class="old-bar-chevron">▼</span>
+        </div>
+        <div class="old-bar old-bar-purple">
+          <span class="old-bar-emoji">✨</span>
+          <span class="old-bar-label">The Vibe</span>
+          <span class="old-bar-count">×23</span>
+          <span class="old-bar-chevron">▼</span>
+        </div>
+        <div class="old-bar old-bar-orange">
+          <span class="old-bar-emoji">⚠️</span>
+          <span class="old-bar-label">Heads Up</span>
+          <span class="old-bar-count">×31</span>
+          <span class="old-bar-chevron">▼</span>
+        </div>
+
+        <div style="margin-top: 20px; padding: 16px; background: rgba(255,255,255,0.04); border-radius: 12px; text-align: center;">
+          <div style="font-size: 13px; color: var(--gray-400);">What's good? What's the vibe? What should I watch out for?</div>
+          <div style="font-size: 14px; color: #FF6B6B; font-weight: 600; margin-top: 8px;">🤷 You have to tap each bar to find out</div>
+        </div>
+      </div>
+
+      <div class="comparison-label">vs</div>
+
+      <!-- NEW -->
+      <div class="new-card">
+        <div class="card-label card-label-new">New Design</div>
+        <div style="font-family: 'Nunito'; font-size: 20px; font-weight: 800; margin-bottom: 4px;">Maria's Kitchen</div>
+        <div style="font-size: 13px; color: var(--gray-400); margin-bottom: 20px;">Mexican Restaurant · 0.3 mi</div>
+
+        <div class="signal-pills">
+          <div class="signal-pill pill-good pill-lg">
+            <span class="signal-pill-emoji">🌮</span>
+            <span class="signal-pill-label">Best Tacos</span>
+            <span class="signal-pill-count">×42</span>
+          </div>
+          <div class="signal-pill pill-good pill-lg">
+            <span class="signal-pill-emoji">🍕</span>
+            <span class="signal-pill-label">Amazing Food</span>
+            <span class="signal-pill-count">×38</span>
+          </div>
+          <div class="signal-pill pill-vibe">
+            <span class="signal-pill-emoji">🎉</span>
+            <span class="signal-pill-label">Lively</span>
+            <span class="signal-pill-count">×23</span>
+          </div>
+          <div class="signal-pill pill-headsup">
+            <span class="signal-pill-emoji">🐌</span>
+            <span class="signal-pill-label">Slow Service</span>
+            <span class="signal-pill-count">×15</span>
+          </div>
+          <div class="signal-pill pill-good pill-sm">
+            <span class="signal-pill-emoji">😊</span>
+            <span class="signal-pill-label">Friendly Owner</span>
+            <span class="signal-pill-count">×12</span>
+          </div>
+          <div class="signal-pill pill-headsup pill-sm">
+            <span class="signal-pill-emoji">💰</span>
+            <span class="signal-pill-label">Cash Only</span>
+            <span class="signal-pill-count">×8</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; padding: 16px; background: rgba(0,194,203,0.06); border-radius: 12px; text-align: center;">
+          <div style="font-size: 14px; color: var(--teal); font-weight: 600;">✓ You know everything instantly</div>
+          <div style="font-size: 13px; color: var(--gray-400); margin-top: 4px;">Best tacos in town, lively vibe, just bring cash and don't rush</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SECTION 2: PLACE CARDS ==================== -->
+  <div class="mockup-section">
+    <div class="section-label">Place Cards</div>
+    <div class="section-title">How Cards Look in the Feed</div>
+    <div class="section-desc">Top signals surface automatically. Size reflects popularity. Color tells the category at a glance.</div>
+
+    <div class="place-cards-row">
+      <!-- Card 1 -->
+      <div class="place-card">
+        <div class="place-card-photo photo-restaurant">
+          <div class="place-card-gradient"></div>
+          <div class="place-card-info">
+            <div class="place-card-name">Sunrise Diner</div>
+            <div class="place-card-address">Breakfast · Downtown · 0.2 mi</div>
+          </div>
+        </div>
+        <div class="place-card-signals">
+          <div class="signal-pill pill-good" style="font-size: 13px; padding: 8px 14px;">
+            <span class="signal-pill-emoji" style="font-size: 14px;">🥞</span>
+            <span>Best Pancakes</span>
+            <span class="signal-pill-count">×67</span>
+          </div>
+          <div class="signal-pill pill-good" style="font-size: 13px; padding: 8px 14px;">
+            <span class="signal-pill-emoji" style="font-size: 14px;">☕</span>
+            <span>Great Coffee</span>
+            <span class="signal-pill-count">×45</span>
+          </div>
+          <div class="signal-pill pill-vibe" style="font-size: 13px; padding: 8px 14px;">
+            <span class="signal-pill-emoji" style="font-size: 14px;">👨‍👩‍👧</span>
+            <span>Family Friendly</span>
+            <span class="signal-pill-count">×31</span>
+          </div>
+          <div class="signal-pill pill-headsup" style="font-size: 12px; padding: 7px 12px; opacity: 0.75;">
+            <span class="signal-pill-emoji" style="font-size: 13px;">⏰</span>
+            <span>Long Wait</span>
+            <span class="signal-pill-count">×18</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="place-card">
+        <div class="place-card-photo photo-cafe">
+          <div class="place-card-gradient"></div>
+          <div class="place-card-info">
+            <div class="place-card-name">The Hideout</div>
+            <div class="place-card-address">Cafe · Arts District · 0.5 mi</div>
+          </div>
+        </div>
+        <div class="place-card-signals">
+          <div class="signal-pill pill-vibe" style="font-size: 13px; padding: 8px 14px;">
+            <span class="signal-pill-emoji" style="font-size: 14px;">🛋️</span>
+            <span>Cozy Vibes</span>
+            <span class="signal-pill-count">×52</span>
+          </div>
+          <div class="signal-pill pill-good" style="font-size: 13px; padding: 8px 14px;">
+            <span class="signal-pill-emoji" style="font-size: 14px;">📶</span>
+            <span>Great WiFi</span>
+            <span class="signal-pill-count">×41</span>
+          </div>
+          <div class="signal-pill pill-good" style="font-size: 13px; padding: 8px 14px;">
+            <span class="signal-pill-emoji" style="font-size: 14px;">💻</span>
+            <span>Perfect for Working</span>
+            <span class="signal-pill-count">×38</span>
+          </div>
+          <div class="signal-pill pill-vibe" style="font-size: 12px; padding: 7px 12px; opacity: 0.75;">
+            <span class="signal-pill-emoji" style="font-size: 13px;">🎵</span>
+            <span>Good Music</span>
+            <span class="signal-pill-count">×15</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="place-card">
+        <div class="place-card-photo photo-contractor">
+          <div class="place-card-gradient"></div>
+          <div class="place-card-info">
+            <div class="place-card-name">Mike's Plumbing</div>
+            <div class="place-card-address">Plumber · Serves your area</div>
+          </div>
+        </div>
+        <div class="place-card-signals">
+          <div class="signal-pill pill-good" style="font-size: 13px; padding: 8px 14px;">
+            <span class="signal-pill-emoji" style="font-size: 14px;">⏰</span>
+            <span>Punctual</span>
+            <span class="signal-pill-count">×34</span>
+          </div>
+          <div class="signal-pill pill-good" style="font-size: 13px; padding: 8px 14px;">
+            <span class="signal-pill-emoji" style="font-size: 14px;">💬</span>
+            <span>Communicates Well</span>
+            <span class="signal-pill-count">×29</span>
+          </div>
+          <div class="signal-pill pill-good" style="font-size: 13px; padding: 8px 14px;">
+            <span class="signal-pill-emoji" style="font-size: 14px;">💰</span>
+            <span>Fairly Priced</span>
+            <span class="signal-pill-count">×25</span>
+          </div>
+          <div class="signal-pill pill-good" style="font-size: 12px; padding: 7px 12px; opacity: 0.75;">
+            <span class="signal-pill-emoji" style="font-size: 13px;">🧹</span>
+            <span>Clean Work</span>
+            <span class="signal-pill-count">×19</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SECTION 3: DETAIL VIEW ==================== -->
+  <div class="mockup-section">
+    <div class="section-label">Place Details</div>
+    <div class="section-title">The Full Signal Breakdown</div>
+    <div class="section-desc">All signals visible by category. Pill + thin bar shows relative popularity. No hidden content.</div>
+
+    <div class="two-col">
+      <div class="detail-container">
+        <div class="detail-hero photo-restaurant">
+          <div class="detail-hero-gradient"></div>
+          <div class="detail-hero-info">
+            <div class="detail-name">Maria's Kitchen</div>
+            <div class="detail-meta">Mexican Restaurant · Downtown · Open now</div>
+          </div>
+        </div>
+        <div class="detail-body">
+          <!-- The Good -->
+          <div class="detail-section-title"><span class="dot dot-teal"></span> The Good</div>
+          <div class="signal-detail-row">
+            <div class="signal-detail-pill pill-good" style="font-size: 13px; padding: 8px 14px;">
+              <span>🌮</span> <span>Best Tacos</span>
+            </div>
+            <div class="signal-detail-bar-track">
+              <div class="signal-detail-bar-fill fill-teal" style="width: 92%;"></div>
+            </div>
+            <div class="signal-detail-count">42</div>
+          </div>
+          <div class="signal-detail-row">
+            <div class="signal-detail-pill pill-good" style="font-size: 13px; padding: 8px 14px;">
+              <span>🍕</span> <span>Amazing Food</span>
+            </div>
+            <div class="signal-detail-bar-track">
+              <div class="signal-detail-bar-fill fill-teal" style="width: 83%;"></div>
+            </div>
+            <div class="signal-detail-count">38</div>
+          </div>
+          <div class="signal-detail-row">
+            <div class="signal-detail-pill pill-good" style="font-size: 13px; padding: 8px 14px;">
+              <span>😊</span> <span>Friendly</span>
+            </div>
+            <div class="signal-detail-bar-track">
+              <div class="signal-detail-bar-fill fill-teal" style="width: 26%;"></div>
+            </div>
+            <div class="signal-detail-count">12</div>
+          </div>
+
+          <div class="detail-divider"></div>
+
+          <!-- The Vibe -->
+          <div class="detail-section-title"><span class="dot dot-purple"></span> The Vibe</div>
+          <div class="signal-detail-row">
+            <div class="signal-detail-pill pill-vibe" style="font-size: 13px; padding: 8px 14px;">
+              <span>🎉</span> <span>Lively</span>
+            </div>
+            <div class="signal-detail-bar-track">
+              <div class="signal-detail-bar-fill fill-purple" style="width: 50%;"></div>
+            </div>
+            <div class="signal-detail-count">23</div>
+          </div>
+          <div class="signal-detail-row">
+            <div class="signal-detail-pill pill-vibe" style="font-size: 13px; padding: 8px 14px;">
+              <span>🎵</span> <span>Live Music</span>
+            </div>
+            <div class="signal-detail-bar-track">
+              <div class="signal-detail-bar-fill fill-purple" style="width: 17%;"></div>
+            </div>
+            <div class="signal-detail-count">8</div>
+          </div>
+
+          <div class="detail-divider"></div>
+
+          <!-- Heads Up -->
+          <div class="detail-section-title"><span class="dot dot-amber"></span> Heads Up</div>
+          <div class="signal-detail-row">
+            <div class="signal-detail-pill pill-headsup" style="font-size: 13px; padding: 8px 14px;">
+              <span>🐌</span> <span>Slow Service</span>
+            </div>
+            <div class="signal-detail-bar-track">
+              <div class="signal-detail-bar-fill fill-amber" style="width: 33%;"></div>
+            </div>
+            <div class="signal-detail-count">15</div>
+          </div>
+          <div class="signal-detail-row">
+            <div class="signal-detail-pill pill-headsup" style="font-size: 13px; padding: 8px 14px;">
+              <span>💰</span> <span>Cash Only</span>
+            </div>
+            <div class="signal-detail-bar-track">
+              <div class="signal-detail-bar-fill fill-amber" style="width: 17%;"></div>
+            </div>
+            <div class="signal-detail-count">8</div>
+          </div>
+          <div class="signal-detail-row">
+            <div class="signal-detail-pill pill-headsup pill-ghost" style="font-size: 13px; padding: 8px 14px;">
+              <span>🅿️</span> <span>Hard to Park</span>
+            </div>
+            <div class="signal-detail-bar-track">
+              <div class="signal-detail-bar-fill fill-amber" style="width: 4%;"></div>
+            </div>
+            <div class="signal-detail-count" style="opacity: 0.3;">2</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Review submission -->
+      <div class="review-container">
+        <div class="review-title">What Stood Out?</div>
+        <div class="review-subtitle">Tap to select · Tap again to make it stronger</div>
+
+        <div class="review-category">
+          <div class="review-category-badge badge-teal">✓ The Good</div>
+          <div class="review-tiles">
+            <div class="review-tile review-tile-selected-teal">
+              <div class="review-tile-check check-teal">✓</div>
+              <span class="review-tile-emoji">🌮</span>
+              <div class="review-tile-label">Best Tacos</div>
+              <div class="review-tile-intensity">🔥🔥🔥</div>
+            </div>
+            <div class="review-tile review-tile-selected-teal">
+              <div class="review-tile-check check-teal">✓</div>
+              <span class="review-tile-emoji">🍕</span>
+              <div class="review-tile-label">Amazing Food</div>
+              <div class="review-tile-intensity">🔥🔥</div>
+            </div>
+            <div class="review-tile">
+              <span class="review-tile-emoji">😊</span>
+              <div class="review-tile-label">Friendly Staff</div>
+            </div>
+            <div class="review-tile">
+              <span class="review-tile-emoji">🧹</span>
+              <div class="review-tile-label">Clean</div>
+            </div>
+            <div class="review-tile">
+              <span class="review-tile-emoji">⚡</span>
+              <div class="review-tile-label">Fast Service</div>
+            </div>
+            <div class="review-tile">
+              <span class="review-tile-emoji">💰</span>
+              <div class="review-tile-label">Good Value</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-category">
+          <div class="review-category-badge badge-purple">✧ The Vibe</div>
+          <div class="review-tiles">
+            <div class="review-tile review-tile-selected-purple">
+              <div class="review-tile-check check-purple">✓</div>
+              <span class="review-tile-emoji">🎉</span>
+              <div class="review-tile-label">Lively</div>
+              <div class="review-tile-intensity">🔥</div>
+            </div>
+            <div class="review-tile">
+              <span class="review-tile-emoji">🛋️</span>
+              <div class="review-tile-label">Cozy</div>
+            </div>
+            <div class="review-tile">
+              <span class="review-tile-emoji">💑</span>
+              <div class="review-tile-label">Date Night</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-category">
+          <div class="review-category-badge badge-amber">⚠ Heads Up</div>
+          <div class="review-tiles">
+            <div class="review-tile">
+              <span class="review-tile-emoji">🐌</span>
+              <div class="review-tile-label">Slow Service</div>
+            </div>
+            <div class="review-tile">
+              <span class="review-tile-emoji">💸</span>
+              <div class="review-tile-label">Pricey</div>
+            </div>
+            <div class="review-tile">
+              <span class="review-tile-emoji">🔊</span>
+              <div class="review-tile-label">Loud</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="review-submit">Submit 3 Signals</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SECTION 4: THE USE CASE ==================== -->
+  <div class="mockup-section">
+    <div class="section-label">The Power of Signals</div>
+    <div class="section-title">Your Restaurant Example</div>
+    <div class="section-desc">A 3.0 star restaurant that's actually perfect — if you know what you're looking for.</div>
+
+    <div class="usecase">
+      <div class="usecase-header">
+        <div class="usecase-emoji">🍝</div>
+        <div class="usecase-name">Tony's Italian</div>
+      </div>
+      <div class="usecase-type">Italian Restaurant · Midtown · ★ 3.0 on Google</div>
+
+      <div style="display: flex; gap: 16px; margin-bottom: 8px; align-items: center;">
+        <div style="font-size: 13px; color: var(--gray-400); text-decoration: line-through;">★★★☆☆ 3.0 stars</div>
+        <div style="font-size: 13px; color: var(--teal);">→ Here's what that number is actually hiding:</div>
+      </div>
+
+      <div class="signal-pills" style="margin-top: 16px;">
+        <div class="signal-pill pill-good pill-lg">
+          <span class="signal-pill-emoji">🍝</span>
+          <span class="signal-pill-label">Best Pasta in Town</span>
+          <span class="signal-pill-count">×89</span>
+        </div>
+        <div class="signal-pill pill-good pill-lg">
+          <span class="signal-pill-emoji">👨‍🍳</span>
+          <span class="signal-pill-label">Chef is Incredible</span>
+          <span class="signal-pill-count">×72</span>
+        </div>
+        <div class="signal-pill pill-good">
+          <span class="signal-pill-emoji">🍷</span>
+          <span class="signal-pill-label">Amazing Wine List</span>
+          <span class="signal-pill-count">×45</span>
+        </div>
+        <div class="signal-pill pill-vibe">
+          <span class="signal-pill-emoji">💑</span>
+          <span class="signal-pill-label">Perfect Date Night</span>
+          <span class="signal-pill-count">×38</span>
+        </div>
+        <div class="signal-pill pill-headsup">
+          <span class="signal-pill-emoji">🐌</span>
+          <span class="signal-pill-label">Slow Service</span>
+          <span class="signal-pill-count">×52</span>
+        </div>
+        <div class="signal-pill pill-headsup">
+          <span class="signal-pill-emoji">😤</span>
+          <span class="signal-pill-label">Rude Waitstaff</span>
+          <span class="signal-pill-count">×41</span>
+        </div>
+        <div class="signal-pill pill-headsup pill-sm">
+          <span class="signal-pill-emoji">💸</span>
+          <span class="signal-pill-label">Expensive</span>
+          <span class="signal-pill-count">×28</span>
+        </div>
+        <div class="signal-pill pill-vibe pill-sm">
+          <span class="signal-pill-emoji">🕯️</span>
+          <span class="signal-pill-label">Romantic Lighting</span>
+          <span class="signal-pill-count">×19</span>
+        </div>
+      </div>
+
+      <div class="usecase-insight">
+        <div class="usecase-insight-label">What Tavvy tells you</div>
+        <div class="usecase-insight-text">
+          Tony's has the <strong>best pasta in town</strong> (89 taps!) and a <strong>world-class chef</strong>. The service is slow and the staff can be rude — that's why Google shows 3.0 stars. But if you care about <strong>incredible food</strong> and a <strong>romantic atmosphere</strong> and you're not in a rush? This is a hidden gem that star ratings are actively hiding from you.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SECTION 5: LIGHT MODE ==================== -->
+  <div class="mockup-section">
+    <div class="section-label">Light Mode</div>
+    <div class="section-title">Works on Both Sides</div>
+    <div class="section-desc">Signal pills adapt to light mode with darker text and softer tinted backgrounds.</div>
+
+    <div class="light-section">
+      <div class="three-col">
+        <div class="light-card">
+          <div class="place-card-photo photo-restaurant" style="height: 150px;">
+            <div class="place-card-gradient" style="background: linear-gradient(transparent, white);"></div>
+            <div class="place-card-info">
+              <div class="place-card-name" style="color: var(--dark);">Sunrise Diner</div>
+              <div class="place-card-address" style="color: var(--gray-600);">Breakfast · 0.2 mi</div>
+            </div>
+          </div>
+          <div class="place-card-signals" style="background: white;">
+            <div class="signal-pill pill-good-light" style="font-size: 13px; padding: 8px 14px;">
+              <span class="signal-pill-emoji" style="font-size: 14px;">🥞</span>
+              <span>Best Pancakes</span>
+              <span class="signal-pill-count" style="color: var(--gray-400);">×67</span>
+            </div>
+            <div class="signal-pill pill-good-light" style="font-size: 13px; padding: 8px 14px;">
+              <span class="signal-pill-emoji" style="font-size: 14px;">☕</span>
+              <span>Great Coffee</span>
+              <span class="signal-pill-count" style="color: var(--gray-400);">×45</span>
+            </div>
+            <div class="signal-pill pill-vibe-light" style="font-size: 13px; padding: 8px 14px;">
+              <span class="signal-pill-emoji" style="font-size: 14px;">👨‍👩‍👧</span>
+              <span>Family Friendly</span>
+              <span class="signal-pill-count" style="color: var(--gray-400);">×31</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="light-card">
+          <div class="place-card-photo photo-cafe" style="height: 150px;">
+            <div class="place-card-gradient" style="background: linear-gradient(transparent, white);"></div>
+            <div class="place-card-info">
+              <div class="place-card-name" style="color: var(--dark);">The Hideout</div>
+              <div class="place-card-address" style="color: var(--gray-600);">Cafe · 0.5 mi</div>
+            </div>
+          </div>
+          <div class="place-card-signals" style="background: white;">
+            <div class="signal-pill pill-vibe-light" style="font-size: 13px; padding: 8px 14px;">
+              <span class="signal-pill-emoji" style="font-size: 14px;">🛋️</span>
+              <span>Cozy Vibes</span>
+              <span class="signal-pill-count" style="color: var(--gray-400);">×52</span>
+            </div>
+            <div class="signal-pill pill-good-light" style="font-size: 13px; padding: 8px 14px;">
+              <span class="signal-pill-emoji" style="font-size: 14px;">📶</span>
+              <span>Great WiFi</span>
+              <span class="signal-pill-count" style="color: var(--gray-400);">×41</span>
+            </div>
+            <div class="signal-pill pill-good-light" style="font-size: 13px; padding: 8px 14px;">
+              <span class="signal-pill-emoji" style="font-size: 14px;">💻</span>
+              <span>Perfect for Working</span>
+              <span class="signal-pill-count" style="color: var(--gray-400);">×38</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="light-card">
+          <div class="place-card-photo photo-contractor" style="height: 150px;">
+            <div class="place-card-gradient" style="background: linear-gradient(transparent, white);"></div>
+            <div class="place-card-info">
+              <div class="place-card-name" style="color: var(--dark);">Mike's Plumbing</div>
+              <div class="place-card-address" style="color: var(--gray-600);">Plumber · Your area</div>
+            </div>
+          </div>
+          <div class="place-card-signals" style="background: white;">
+            <div class="signal-pill pill-good-light" style="font-size: 13px; padding: 8px 14px;">
+              <span class="signal-pill-emoji" style="font-size: 14px;">⏰</span>
+              <span>Punctual</span>
+              <span class="signal-pill-count" style="color: var(--gray-400);">×34</span>
+            </div>
+            <div class="signal-pill pill-good-light" style="font-size: 13px; padding: 8px 14px;">
+              <span class="signal-pill-emoji" style="font-size: 14px;">💬</span>
+              <span>Communicates Well</span>
+              <span class="signal-pill-count" style="color: var(--gray-400);">×29</span>
+            </div>
+            <div class="signal-pill pill-good-light" style="font-size: 13px; padding: 8px 14px;">
+              <span class="signal-pill-emoji" style="font-size: 14px;">💰</span>
+              <span>Fairly Priced</span>
+              <span class="signal-pill-count" style="color: var(--gray-400);">×25</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SECTION 6: SIGNAL SIZE SYSTEM ==================== -->
+  <div class="mockup-section">
+    <div class="section-label">Signal Hierarchy</div>
+    <div class="section-title">Size = Consensus</div>
+    <div class="section-desc">The more people agree on a signal, the bigger and bolder it appears. Fading signals go ghost.</div>
+
+    <div style="background: var(--dark); border-radius: 24px; padding: 40px; border: 1px solid rgba(255,255,255,0.06);">
+      <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+        <div class="signal-pill pill-good" style="padding: 14px 24px; font-size: 17px;">
+          <span style="font-size: 20px;">🌮</span>
+          <span style="font-weight: 700;">Best Tacos</span>
+          <span class="signal-pill-count" style="font-size: 14px;">×89</span>
+        </div>
+        <div class="signal-pill pill-good pill-lg">
+          <span class="signal-pill-emoji">🍕</span>
+          <span class="signal-pill-label">Amazing Food</span>
+          <span class="signal-pill-count">×45</span>
+        </div>
+        <div class="signal-pill pill-vibe">
+          <span class="signal-pill-emoji">🎉</span>
+          <span class="signal-pill-label">Lively</span>
+          <span class="signal-pill-count">×23</span>
+        </div>
+        <div class="signal-pill pill-headsup pill-sm">
+          <span class="signal-pill-emoji">🐌</span>
+          <span class="signal-pill-label">Slow</span>
+          <span class="signal-pill-count">×12</span>
+        </div>
+        <div class="signal-pill pill-good pill-sm" style="opacity: 0.5;">
+          <span class="signal-pill-emoji">🧹</span>
+          <span class="signal-pill-label">Clean</span>
+          <span class="signal-pill-count">×5</span>
+        </div>
+        <div class="signal-pill pill-headsup pill-ghost" style="font-size: 12px; padding: 6px 12px;">
+          <span class="signal-pill-emoji" style="font-size: 12px;">🅿️</span>
+          <span class="signal-pill-label">Hard to Park</span>
+          <span class="signal-pill-count">×2</span>
+        </div>
+      </div>
+
+      <div style="margin-top: 24px; display: flex; gap: 32px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 40px; height: 4px; background: var(--teal); border-radius: 2px;"></div>
+          <span style="font-size: 12px; color: var(--gray-400);">High consensus (larger)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 40px; height: 4px; background: var(--gray-400); border-radius: 2px; opacity: 0.4;"></div>
+          <span style="font-size: 12px; color: var(--gray-400);">Low consensus (smaller)</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 40px; height: 4px; background: var(--gray-400); border-radius: 2px; opacity: 0.2; border: 1px dashed var(--gray-400);"></div>
+          <span style="font-size: 12px; color: var(--gray-400);">Ghost / fading out</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

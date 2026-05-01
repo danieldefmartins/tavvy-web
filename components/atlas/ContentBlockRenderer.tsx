@@ -20,8 +20,8 @@ const TEAL_LIGHT = '#5EEAD4';
 const TEAL_BG = '#F0FDFA';
 const AMBER_WARNING = '#F59E0B';
 const AMBER_BG = '#FFFBEB';
-const BLUE_INFO = '#3B82F6';
-const BLUE_BG = '#EFF6FF';
+const BLUE_INFO = '#8A05BE';
+const BLUE_BG = '#F3E8FF';
 
 // ============================================================================
 // TYPES

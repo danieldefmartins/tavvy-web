@@ -260,15 +260,15 @@ export const SUBCATEGORY_SIGNAL_OVERRIDES: Record<string, string[]> = {
 
 export const CATEGORY_COLORS = {
   best_for: {
-    bg: '#0A84FF',
+    bg: '#00C2CB',
     text: '#FFFFFF',
   },
   vibe: {
-    bg: '#8B5CF6',
+    bg: '#8A05BE',
     text: '#FFFFFF',
   },
   heads_up: {
-    bg: '#FF9500',
+    bg: '#F5A623',
     text: '#FFFFFF',
   },
 } as const;

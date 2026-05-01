@@ -408,19 +408,19 @@ export default function SettingsScreen() {
           }
 
           .icon-container.blue {
-            background-color: #3B82F6;
+            background-color: #8A05BE;
           }
 
           .icon-container.purple {
-            background-color: #8B5CF6;
+            background-color: #8A05BE;
           }
 
           .icon-container.green {
-            background-color: #10B981;
+            background-color: #00C2CB;
           }
 
           .icon-container.orange {
-            background-color: #F97316;
+            background-color: #00C2CB;
           }
 
           .row-title {
@@ -490,7 +490,7 @@ export default function SettingsScreen() {
           }
 
           .toggle input:checked + .toggle-slider {
-            background-color: #3B82F6;
+            background-color: #8A05BE;
           }
 
           .toggle input:checked + .toggle-slider:before {

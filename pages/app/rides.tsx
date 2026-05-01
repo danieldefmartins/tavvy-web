@@ -47,9 +47,9 @@ const COLORS = {
 
 // Signal colors matching PlaceCard
 const SIGNAL_COLORS = {
-  positive: '#0A84FF', // Blue - The Good
-  neutral: '#8B5CF6',  // Purple - The Vibe
-  negative: '#FF9500', // Orange - Heads Up
+  positive: '#00C2CB', // Teal - The Good
+  neutral: '#8A05BE',  // Purple - The Vibe
+  negative: '#F5A623', // Amber - Heads Up
 };
 
 type FilterOption = 'all' | 'thrill_rides' | 'family_rides' | 'dark_rides' | 'shows' | 'characters' | 'explore' | 'animals' | 'water_rides' | 'simulators' | 'interactive';
@@ -94,8 +94,8 @@ const FILTER_OPTIONS: { key: FilterOption; label: string }[] = [
 ];
 
 const THRILL_LABELS: Record<string, { label: string; color: string }> = {
-  mild: { label: 'Mild', color: '#10B981' },
-  moderate: { label: 'Moderate', color: '#3B82F6' },
+  mild: { label: 'Mild', color: '#00C2CB' },
+  moderate: { label: 'Moderate', color: '#8A05BE' },
   thrilling: { label: 'Thrilling', color: '#F59E0B' },
   extreme: { label: 'Extreme', color: '#EF4444' },
 };

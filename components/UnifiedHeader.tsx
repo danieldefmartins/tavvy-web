@@ -6,12 +6,12 @@ import { Search, ChevronLeft, User, MoreHorizontal } from 'lucide-react';
 
 // Screen color configurations - matching mobile
 export const SCREEN_COLORS = {
-  universes: { start: '#0EA5E9', end: '#14B8A6' },
+  universes: { start: '#8A05BE', end: '#14B8A6' },
   happeningNow: { start: '#F43F5E', end: '#FB7185' },
   realtors: { start: '#1E3A5F', end: '#2D4A6F' },
-  pros: { start: '#059669', end: '#10B981' },
-  atlas: { start: '#7C3AED', end: '#8B5CF6' },
-  cities: { start: '#EA580C', end: '#F97316' },
+  pros: { start: '#059669', end: '#00C2CB' },
+  atlas: { start: '#7C3AED', end: '#8A05BE' },
+  cities: { start: '#EA580C', end: '#00C2CB' },
   wallet: { start: '#475569', end: '#64748B' },
   rvCamping: { start: '#166534', end: '#15803D' },
   rides: { start: '#D946EF', end: '#F472B6' },

@@ -391,7 +391,7 @@ export default function ProDashboardScreen() {
                 {subscription ? (
                   <div className="sub-info">
                     <div className="sub-badge" style={{
-                      backgroundColor: isActivePro ? '#10B981' : isTrialing ? '#3B82F6' : isPastDue ? '#EF4444' : '#6B7280'
+                      backgroundColor: isActivePro ? '#00C2CB' : isTrialing ? '#8A05BE' : isPastDue ? '#EF4444' : '#6B7280'
                     }}>
                       {isActivePro ? 'Active' : isTrialing ? 'Trial' : isPastDue ? 'Past Due' : 'Inactive'}
                     </div>
@@ -579,7 +579,7 @@ export default function ProDashboardScreen() {
           .progress-fill {
             height: 100%;
             border-radius: 3px;
-            background: linear-gradient(90deg, #EA580C, #F97316);
+            background: linear-gradient(90deg, #EA580C, #F5A623);
             transition: width 0.5s ease;
           }
 
@@ -746,7 +746,7 @@ export default function ProDashboardScreen() {
             text-transform: uppercase;
           }
           .badge-new {
-            background: #10B981;
+            background: #00C2CB;
             color: white;
           }
           .badge-contacted {

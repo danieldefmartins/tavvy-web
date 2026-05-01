@@ -37,11 +37,11 @@ export default function ZipCodePrompt({ isOpen, isDark, onSubmit, onClose }: Zip
     );
   };
 
-  const bg = isDark ? '#1E293B' : '#fff';
+  const bg = isDark ? '#1E0A3C' : '#fff';
   const text = isDark ? '#F1F5F9' : '#1F2937';
   const textSec = isDark ? '#94A3B8' : '#6B7280';
   const inputBg = isDark ? '#0F172A' : '#F9FAFB';
-  const inputBorder = isDark ? '#334155' : '#D1D5DB';
+  const inputBorder = isDark ? '#250E45' : '#D1D5DB';
 
   return (
     <div style={{
@@ -156,7 +156,7 @@ export default function ZipCodePrompt({ isOpen, isDark, onSubmit, onClose }: Zip
           onClick={handleSubmit}
           style={{
             width: '100%', padding: 14, borderRadius: 12,
-            background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+            background: 'linear-gradient(135deg, #6366F1, #8A05BE)',
             color: '#fff', fontSize: 16, fontWeight: 600,
             border: 'none', cursor: 'pointer', marginTop: 8,
           }}

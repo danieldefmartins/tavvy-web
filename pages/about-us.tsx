@@ -82,7 +82,7 @@ export default function AboutUs() {
                   className="heartbeat-path"
                   d="M0,50 L80,50 L100,50 L120,20 L140,80 L160,30 L180,70 L200,50 L220,50 L400,50"
                   fill="none"
-                  stroke="rgba(59, 130, 246, 0.6)"
+                  stroke="rgba(138, 5, 190, 0.6)"
                   strokeWidth="2"
                 />
               </svg>
@@ -441,7 +441,7 @@ export default function AboutUs() {
           position: absolute;
           inset: 0;
           background: 
-            radial-gradient(ellipse 80% 50% at 50% 0%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+            radial-gradient(ellipse 80% 50% at 50% 0%, rgba(138, 5, 190, 0.15) 0%, transparent 50%),
             radial-gradient(ellipse 60% 40% at 80% 80%, rgba(168, 85, 247, 0.1) 0%, transparent 50%),
             radial-gradient(ellipse 50% 30% at 20% 60%, rgba(236, 72, 153, 0.08) 0%, transparent 50%);
         }
@@ -456,7 +456,7 @@ export default function AboutUs() {
           position: absolute;
           width: 4px;
           height: 4px;
-          background: rgba(59, 130, 246, 0.4);
+          background: rgba(138, 5, 190, 0.4);
           border-radius: 50%;
           animation: float-particle 6s ease-in-out infinite;
         }
@@ -524,7 +524,7 @@ export default function AboutUs() {
         }
 
         .title-accent {
-          background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 50%, #EC4899 100%);
+          background: linear-gradient(135deg, #8A05BE 0%, #8A05BE 50%, #EC4899 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -605,7 +605,7 @@ export default function AboutUs() {
         .chapter-number {
           font-size: 6rem;
           font-weight: 800;
-          color: rgba(59, 130, 246, 0.1);
+          color: rgba(138, 5, 190, 0.1);
           position: absolute;
           top: -40px;
           left: -20px;
@@ -673,7 +673,7 @@ export default function AboutUs() {
         .discovery-bg {
           position: absolute;
           inset: 0;
-          background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.15) 0%, transparent 50%);
+          background: radial-gradient(circle at 50% 50%, rgba(138, 5, 190, 0.15) 0%, transparent 50%);
         }
 
         .discovery-statement {
@@ -702,7 +702,7 @@ export default function AboutUs() {
         .tavi-letters span {
           font-size: 5rem;
           font-weight: 800;
-          background: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+          background: linear-gradient(135deg, #8A05BE 0%, #8A05BE 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
@@ -755,9 +755,9 @@ export default function AboutUs() {
         .realization {
           margin-top: 48px;
           padding: 40px;
-          background: rgba(59, 130, 246, 0.1);
+          background: rgba(138, 5, 190, 0.1);
           border-radius: 20px;
-          border-left: 4px solid #3B82F6;
+          border-left: 4px solid #8A05BE;
         }
 
         .realization p {
@@ -767,7 +767,7 @@ export default function AboutUs() {
         }
 
         .mirror-text {
-          color: #60A5FA !important;
+          color: #D4A0FF !important;
           font-weight: 600;
           font-size: 1.75rem !important;
           margin-bottom: 0 !important;
@@ -782,8 +782,8 @@ export default function AboutUs() {
           position: absolute;
           inset: 0;
           background: 
-            radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.1) 0%, transparent 40%),
-            radial-gradient(circle at 80% 70%, rgba(16, 185, 129, 0.08) 0%, transparent 40%);
+            radial-gradient(circle at 20% 30%, rgba(138, 5, 190, 0.1) 0%, transparent 40%),
+            radial-gradient(circle at 80% 70%, rgba(0, 194, 203, 0.08) 0%, transparent 40%);
         }
 
         .journey-conclusion {
@@ -814,22 +814,22 @@ export default function AboutUs() {
           align-items: center;
           gap: 24px;
           padding: 32px;
-          background: rgba(59, 130, 246, 0.1);
+          background: rgba(138, 5, 190, 0.1);
           border-radius: 16px;
-          border: 1px solid rgba(59, 130, 246, 0.2);
+          border: 1px solid rgba(138, 5, 190, 0.2);
           transition: transform 0.3s, background 0.3s;
         }
 
         .mission-item:hover {
           transform: translateX(8px);
-          background: rgba(59, 130, 246, 0.15);
+          background: rgba(138, 5, 190, 0.15);
         }
 
         .mission-icon {
           flex-shrink: 0;
           width: 48px;
           height: 48px;
-          color: #60A5FA;
+          color: #D4A0FF;
         }
 
         .mission-icon svg {
@@ -903,7 +903,7 @@ export default function AboutUs() {
           color: rgba(255, 255, 255, 0.9);
           text-align: center;
           padding: 48px;
-          background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+          background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(138, 5, 190, 0.1) 100%);
           border-radius: 24px;
           border: 1px solid rgba(236, 72, 153, 0.2);
           position: relative;
@@ -967,11 +967,11 @@ export default function AboutUs() {
         }
 
         .value-icon.trust {
-          background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
+          background: linear-gradient(135deg, #8A05BE 0%, #D4A0FF 100%);
         }
 
         .value-icon.forward {
-          background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+          background: linear-gradient(135deg, #00C2CB 0%, #34D399 100%);
         }
 
         .value-card p {
@@ -1010,7 +1010,7 @@ export default function AboutUs() {
         .heart-icon {
           width: 80px;
           height: 80px;
-          color: #3B82F6;
+          color: #8A05BE;
           animation: heart-beat 1.5s ease-in-out infinite;
         }
 

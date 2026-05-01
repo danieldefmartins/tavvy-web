@@ -120,8 +120,8 @@ export default function TypePicker({ onSelect, isDark }: TypePickerProps) {
   }
 
   const TYPE_OPTIONS = [
-    { id: 'business', name: 'Business', desc: 'For your company, store, or service', icon: IoBusinessOutline, gradient: ['#3B82F6', '#1D4ED8'] },
-    { id: 'personal', name: 'Personal', desc: 'Your personal brand & link page', icon: IoPerson, gradient: ['#8B5CF6', '#6D28D9'] },
+    { id: 'business', name: 'Business', desc: 'For your company, store, or service', icon: IoBusinessOutline, gradient: ['#8A05BE', '#1D4ED8'] },
+    { id: 'personal', name: 'Personal', desc: 'Your personal brand & link page', icon: IoPerson, gradient: ['#8A05BE', '#6D28D9'] },
     { id: 'politician', name: 'Politician', desc: 'For public servants & candidates', icon: IoFlagOutline, gradient: [ACCENT, '#00A843'] },
   ];
 

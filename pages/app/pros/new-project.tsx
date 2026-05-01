@@ -26,10 +26,10 @@ import {
 // Pros brand colors (matching iOS ProsColors)
 const ProsColors = {
   primary: '#0D9668',
-  primaryLight: '#10B981',
+  primaryLight: '#00C2CB',
   primaryDark: '#047857',
   secondary: '#F59E0B',
-  accent: '#3B82F6',
+  accent: '#8A05BE',
   success: '#22C55E',
   warning: '#F59E0B',
   error: '#EF4444',
@@ -659,8 +659,8 @@ export default function NewProjectPage() {
                 padding: '12px', background: '#F0F9FF', borderRadius: '8px',
                 marginTop: '12px',
               }}>
-                <FiShield size={16} color="#3B82F6" />
-                <span style={{ fontSize: '13px', color: '#3B82F6' }}>
+                <FiShield size={16} color="#8A05BE" />
+                <span style={{ fontSize: '13px', color: '#8A05BE' }}>
                   Your information is secure and will only be shared with pros who bid on your project.
                 </span>
               </div>

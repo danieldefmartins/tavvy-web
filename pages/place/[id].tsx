@@ -17,6 +17,7 @@ import { fetchPlaceById } from '../../lib/placeService';
 import { supabase } from '../../lib/supabaseClient';
 import { Place } from '../../types';
 import { fetchPlaceSignals, SignalAggregate, SIGNAL_LABELS } from '../../lib/signalService';
+import SignalPill, { SignalPillsGrid, SignalDetailRow, getSignalCategory, inferCategoryFromLabel, SignalCategory } from '../../components/SignalPill';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
@@ -419,96 +420,125 @@ export default function PlaceDetailsScreen() {
                 </div>
               )}
 
-              <div className="pd-card">
-                <h2 className="pd-card-title">Community Signals</h2>
+              {/* Quick Glance Pills */}
+              {(() => {
+                const allSignals = [
+                  ...livingSignals.best_for.map(s => ({
+                    label: s.label || s.signal_id,
+                    tapCount: s.review_count,
+                    category: 'good' as SignalCategory,
+                    emoji: s.icon,
+                    signalId: s.signal_id,
+                  })),
+                  ...livingSignals.vibe.map(s => ({
+                    label: s.label || s.signal_id,
+                    tapCount: s.review_count,
+                    category: 'vibe' as SignalCategory,
+                    emoji: s.icon,
+                    signalId: s.signal_id,
+                  })),
+                  ...livingSignals.heads_up.map(s => ({
+                    label: s.label || s.signal_id,
+                    tapCount: s.review_count,
+                    category: 'headsup' as SignalCategory,
+                    emoji: s.icon,
+                    signalId: s.signal_id,
+                  })),
+                ];
 
-                {signalsLoading ? (
+                const maxTapCount = allSignals.reduce((max, s) => Math.max(max, s.tapCount), 0);
+
+                return signalsLoading ? (
                   <div style={{ textAlign: 'center', padding: '20px 0' }}>
                     <div className="pd-spinner" style={{ width: 24, height: 24, margin: '0 auto' }} />
                   </div>
-                ) : hasLivingSignals ? (
-                  <>
-                    {/* The Good signals with Living Score */}
-                    {livingSignals.best_for.map((signal) => (
-                      <div key={signal.signal_id} className={`pd-signal-bar pd-signal-blue ${signal.is_ghost ? 'pd-signal-ghost' : ''}`}>
-                        <span className="pd-signal-icon">{signal.icon || '👍'}</span>
-                        <span className="pd-signal-text">
-                          {signal.label} · {signal.review_count} {signal.review_count === 1 ? 'tap' : 'taps'}
-                        </span>
-                        <span className="pd-signal-score">Score: {signal.current_score}</span>
-                      </div>
-                    ))}
-                    {livingSignals.best_for.length === 0 && (
-                      <div className="pd-signal-bar pd-signal-blue">
-                        <span className="pd-signal-icon">👍</span>
-                        <span className="pd-signal-text pd-signal-italic">
-                          The Good · Be the first to tap!
-                        </span>
-                      </div>
-                    )}
-
-                    {/* The Vibe signals with Living Score */}
-                    {livingSignals.vibe.map((signal) => (
-                      <div key={signal.signal_id} className={`pd-signal-bar pd-signal-purple ${signal.is_ghost ? 'pd-signal-ghost' : ''}`}>
-                        <span className="pd-signal-icon">{signal.icon || '✨'}</span>
-                        <span className="pd-signal-text">
-                          {signal.label} · {signal.review_count} {signal.review_count === 1 ? 'tap' : 'taps'}
-                        </span>
-                        <span className="pd-signal-score">Score: {signal.current_score}</span>
-                      </div>
-                    ))}
-                    {livingSignals.vibe.length === 0 && (
-                      <div className="pd-signal-bar pd-signal-purple">
-                        <span className="pd-signal-icon">✨</span>
-                        <span className="pd-signal-text pd-signal-italic">
-                          The Vibe · Be the first to tap!
-                        </span>
-                      </div>
-                    )}
-
-                    {/* Heads Up signals with Living Score */}
-                    {livingSignals.heads_up.map((signal) => (
-                      <div key={signal.signal_id} className={`pd-signal-bar pd-signal-orange ${signal.is_ghost ? 'pd-signal-ghost' : ''}`}>
-                        <span className="pd-signal-icon">{signal.icon || '⚠️'}</span>
-                        <span className="pd-signal-text">
-                          {signal.label} · {signal.review_count} {signal.review_count === 1 ? 'tap' : 'taps'}
-                        </span>
-                        <span className="pd-signal-score">Score: {signal.current_score}</span>
-                      </div>
-                    ))}
-                    {livingSignals.heads_up.length === 0 && (
-                      <div className="pd-signal-bar pd-signal-orange">
-                        <span className="pd-signal-icon">⚠️</span>
-                        <span className="pd-signal-text pd-signal-italic">
-                          Heads Up · Be the first to tap!
-                        </span>
-                      </div>
-                    )}
-                  </>
                 ) : (
                   <>
-                    {/* Empty state - "Be the first to tap!" bars */}
-                    <div className="pd-signal-bar pd-signal-blue">
-                      <span className="pd-signal-icon">👍</span>
-                      <span className="pd-signal-text pd-signal-italic">
-                        The Good · Be the first to tap!
-                      </span>
+                    {/* Quick Glance */}
+                    <div className="pd-card">
+                      <h2 className="pd-card-title">Community Signals</h2>
+                      <SignalPillsGrid
+                        signals={allSignals}
+                        maxVisible={6}
+                        showCounts
+                      />
                     </div>
-                    <div className="pd-signal-bar pd-signal-purple">
-                      <span className="pd-signal-icon">✨</span>
-                      <span className="pd-signal-text pd-signal-italic">
-                        The Vibe · Be the first to tap!
-                      </span>
-                    </div>
-                    <div className="pd-signal-bar pd-signal-orange">
-                      <span className="pd-signal-icon">⚠️</span>
-                      <span className="pd-signal-text pd-signal-italic">
-                        Heads Up · Be the first to tap!
-                      </span>
+
+                    {/* Detailed Breakdown */}
+                    <div className="pd-card">
+                      {/* The Good */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                        <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#00C2CB', display: 'inline-block', flexShrink: 0 }} />
+                        <span style={{ fontSize: 18, fontWeight: 800 }}>The Good</span>
+                      </div>
+                      {livingSignals.best_for.length > 0 ? (
+                        livingSignals.best_for.map((signal) => (
+                          <SignalDetailRow
+                            key={signal.signal_id}
+                            label={signal.label || signal.signal_id}
+                            tapCount={signal.review_count}
+                            category="good"
+                            emoji={signal.icon}
+                            maxTapCount={maxTapCount}
+                          />
+                        ))
+                      ) : (
+                        <div style={{ fontSize: 14, fontStyle: 'italic', opacity: 0.5, marginBottom: 14, paddingLeft: 16 }}>
+                          Be the first to tap!
+                        </div>
+                      )}
+
+                      <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '16px 0' }} />
+
+                      {/* The Vibe */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                        <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#8A05BE', display: 'inline-block', flexShrink: 0 }} />
+                        <span style={{ fontSize: 18, fontWeight: 800 }}>The Vibe</span>
+                      </div>
+                      {livingSignals.vibe.length > 0 ? (
+                        livingSignals.vibe.map((signal) => (
+                          <SignalDetailRow
+                            key={signal.signal_id}
+                            label={signal.label || signal.signal_id}
+                            tapCount={signal.review_count}
+                            category="vibe"
+                            emoji={signal.icon}
+                            maxTapCount={maxTapCount}
+                          />
+                        ))
+                      ) : (
+                        <div style={{ fontSize: 14, fontStyle: 'italic', opacity: 0.5, marginBottom: 14, paddingLeft: 16 }}>
+                          Be the first to tap!
+                        </div>
+                      )}
+
+                      <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '16px 0' }} />
+
+                      {/* Heads Up */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                        <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#F5A623', display: 'inline-block', flexShrink: 0 }} />
+                        <span style={{ fontSize: 18, fontWeight: 800 }}>Heads Up</span>
+                      </div>
+                      {livingSignals.heads_up.length > 0 ? (
+                        livingSignals.heads_up.map((signal) => (
+                          <SignalDetailRow
+                            key={signal.signal_id}
+                            label={signal.label || signal.signal_id}
+                            tapCount={signal.review_count}
+                            category="headsup"
+                            emoji={signal.icon}
+                            maxTapCount={maxTapCount}
+                          />
+                        ))
+                      ) : (
+                        <div style={{ fontSize: 14, fontStyle: 'italic', opacity: 0.5, marginBottom: 14, paddingLeft: 16 }}>
+                          Be the first to tap!
+                        </div>
+                      )}
                     </div>
                   </>
-                )}
-              </div>
+                );
+              })()}
 
               {/* Been here? card */}
               <div className="pd-card">
@@ -798,7 +828,7 @@ const pageStyles = `
     color: #333;
   }
   .pd-open {
-    color: #10b981;
+    color: #00C2CB;
   }
   .pd-quick-value {
     font-size: 15px;
@@ -871,50 +901,6 @@ const pageStyles = `
     margin: -8px 0 16px;
   }
 
-  /* ===== SIGNAL BARS ===== */
-  .pd-signal-bar {
-    display: flex;
-    align-items: center;
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-  .pd-signal-bar:hover {
-    opacity: 0.9;
-  }
-  .pd-signal-bar:last-child {
-    margin-bottom: 0;
-  }
-  .pd-signal-blue { background: #0A84FF; }
-  .pd-signal-purple { background: #8B5CF6; }
-  .pd-signal-orange { background: #FF9500; }
-
-  .pd-signal-icon {
-    font-size: 18px;
-    margin-right: 10px;
-    flex-shrink: 0;
-  }
-  .pd-signal-text {
-    color: #fff;
-    font-size: 15px;
-    font-weight: 600;
-  }
-  .pd-signal-italic {
-    font-style: italic;
-    opacity: 0.9;
-  }
-  .pd-signal-ghost {
-    opacity: 0.5;
-  }
-  .pd-signal-score {
-    color: rgba(255,255,255,0.7);
-    font-size: 12px;
-    margin-left: auto;
-    padding-left: 8px;
-    white-space: nowrap;
-  }
 
   /* ===== MEDALS ===== */
   .pd-medals {

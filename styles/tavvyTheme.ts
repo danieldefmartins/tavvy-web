@@ -50,9 +50,9 @@ export const tavvyTheme = {
       universesLight: 'rgba(102, 126, 234, 0.1)',
       
       // Pros - Purple
-      pros: '#8B5CF6',
+      pros: '#8A05BE',
       prosHover: '#7C3AED',
-      prosLight: 'rgba(139, 92, 246, 0.1)',
+      prosLight: 'rgba(138, 5, 190, 0.1)',
       
       // Atlas - Indigo
       atlas: '#6366F1',
@@ -68,10 +68,10 @@ export const tavvyTheme = {
     // Status Colors
     status: {
       active: '#EF4444',      // Red - Live/Active indicator
-      success: '#10B981',     // Green
+      success: '#00C2CB',     // Green
       warning: '#F59E0B',     // Orange
       error: '#EF4444',       // Red
-      info: '#3B82F6',        // Blue
+      info: '#8A05BE',        // Blue
     },
 
     // Interactive Elements

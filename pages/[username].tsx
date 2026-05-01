@@ -2229,13 +2229,13 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                 ...(templateLayout === 'pro-creative' || templateLayout === 'cover-card' ? { justifyContent: 'flex-start', width: '100%' } : {}),
               }}>
                 {cardData.showLicensedBadge && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: 'rgba(59,130,246,0.15)', color: '#3B82F6', letterSpacing: '0.3px' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: 'rgba(138,5,190,0.15)', color: '#8A05BE', letterSpacing: '0.3px' }}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                     Licensed
                   </span>
                 )}
                 {cardData.showInsuredBadge && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: 'rgba(16,185,129,0.15)', color: '#10B981', letterSpacing: '0.3px' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: 'rgba(0,194,203,0.15)', color: '#00C2CB', letterSpacing: '0.3px' }}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
                     Insured
                   </span>
@@ -2247,7 +2247,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
                   </span>
                 )}
                 {cardData.showTavvyVerifiedBadge && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: 'rgba(139,92,246,0.15)', color: '#8B5CF6', letterSpacing: '0.3px' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600, background: 'rgba(138,5,190,0.15)', color: '#8A05BE', letterSpacing: '0.3px' }}>
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
                     Tavvy Verified
                   </span>
@@ -2380,7 +2380,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
               )}
               {cardData.email && (
                 <a href={`mailto:${cardData.email}`} style={{ display: 'flex', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid #eee', textDecoration: 'none', color: '#333' }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 12, background: '#60A5FA15', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, color: '#60A5FA', flexShrink: 0 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: '#D4A0FF15', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: 14, color: '#D4A0FF', flexShrink: 0 }}>
                     <EmailIcon />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -3985,7 +3985,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             {(() => {
               const signals = cardData.endorsementSignals || [];
               const categories = [...new Set(signals.map(s => s.category))];
-              const catColors: Record<string, string> = { universal: '#3B9FD9', politics: '#1B5E20', sales: '#E87D3E', real_estate: '#6B7280', food_dining: '#E53E3E', health_wellness: '#38A169', beauty: '#D53F8C', home_services: '#DD6B20', legal_finance: '#2B6CB0', creative_marketing: '#8B5CF6', education_coaching: '#D69E2E', tech_it: '#319795', automotive: '#718096', events_entertainment: '#9F7AEA', pets: '#ED8936' };
+              const catColors: Record<string, string> = { universal: '#3B9FD9', politics: '#1B5E20', sales: '#E87D3E', real_estate: '#6B7280', food_dining: '#E53E3E', health_wellness: '#38A169', beauty: '#D53F8C', home_services: '#DD6B20', legal_finance: '#2B6CB0', creative_marketing: '#8A05BE', education_coaching: '#D69E2E', tech_it: '#319795', automotive: '#718096', events_entertainment: '#9F7AEA', pets: '#ED8936' };
               const catLabels: Record<string, string> = { universal: t('endorsement.catStrengths'), politics: t('endorsement.catPolitics'), sales: t('endorsement.catSales'), real_estate: t('endorsement.catRealEstate'), food_dining: t('endorsement.catFoodDining'), health_wellness: t('endorsement.catHealthWellness'), beauty: t('endorsement.catBeauty'), home_services: t('endorsement.catHomeServices'), legal_finance: t('endorsement.catLegalFinance'), creative_marketing: t('endorsement.catCreativeMarketing'), education_coaching: t('endorsement.catEducationCoaching'), tech_it: t('endorsement.catTechIt'), automotive: t('endorsement.catAutomotive'), events_entertainment: t('endorsement.catEventsEntertainment'), pets: t('endorsement.catPets') };
               return categories.map(cat => (
                 <div key={cat} style={{ marginBottom: 16 }}>

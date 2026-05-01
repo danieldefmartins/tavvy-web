@@ -124,8 +124,8 @@ function App({ Component, pageProps }: AppProps) {
     <>
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        <link rel="icon" href="/favicon.ico" />
-        <meta name="theme-color" content="#0F1233" />
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <meta name="theme-color" content="#17013A" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 

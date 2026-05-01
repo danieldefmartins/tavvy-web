@@ -1,13 +1,16 @@
 /**
  * SignalBar - Universal signal bar component for TavvY Web
- * 
+ *
  * This component renders signal bars consistently across the entire app.
  * Ported from tavvy-mobile/components/SignalBar.tsx
- * 
- * COLORS (Single source of truth):
- * - The Good (positive): Blue #0A84FF
- * - The Vibe (neutral): Purple #8B5CF6
- * - Heads Up (negative): Orange #FF9500
+ *
+ * COLORS (Updated May 2026 — Brand-aligned):
+ * - The Good (positive): Teal #00C2CB
+ * - The Vibe (neutral): Purple #8A05BE
+ * - Heads Up (negative): Amber #F5A623
+ *
+ * NOTE: Consider migrating to SignalPill.tsx for the new pill-based UI.
+ * This component is kept for backward compatibility.
  */
 
 import React, { useState } from 'react';
@@ -18,17 +21,17 @@ import { useThemeContext } from '../contexts/ThemeContext';
 // ============================================
 export const SIGNAL_COLORS = {
   positive: {
-    background: '#0A84FF',  // Blue - The Good
+    background: '#00C2CB',  // Teal - The Good
     text: '#FFFFFF',
     icon: '#FFFFFF',
   },
   neutral: {
-    background: '#8B5CF6',  // Purple - The Vibe
+    background: '#8A05BE',  // Purple - The Vibe
     text: '#FFFFFF',
     icon: '#FFFFFF',
   },
   negative: {
-    background: '#FF9500',  // Orange - Heads Up
+    background: '#F5A623',  // Amber - Heads Up
     text: '#FFFFFF',
     icon: '#FFFFFF',
   },
@@ -168,7 +171,7 @@ export default function SignalBar({
       {expanded && details && !isCompact && (
         <div 
           className="signal-expanded-content"
-          style={{ backgroundColor: isDark ? '#1C1C1E' : '#F5F5F5' }}
+          style={{ backgroundColor: isDark ? '#1E0A3C' : '#F4F0FF' }}
         >
           {(details.intensity1Count || details.intensity2Count || details.intensity3Count) && (
             <div className="intensity-section">

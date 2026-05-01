@@ -37,7 +37,7 @@ export const QR_STYLE_PRESETS: { id: string; name: string; config: Partial<QRSty
   { id: 'dots', name: 'Dots', config: { dotStyle: 'dots', dotColor: '#000000', backgroundColor: '#FFFFFF', cornerSquareStyle: 'dot', cornerDotStyle: 'dot' } },
   { id: 'classy', name: 'Classy', config: { dotStyle: 'classy-rounded', dotColor: '#1f2937', backgroundColor: '#FFFFFF', cornerSquareStyle: 'extra-rounded' } },
   { id: 'brand-green', name: 'Tavvy Green', config: { dotStyle: 'rounded', dotColor: '#00C853', backgroundColor: '#FFFFFF', cornerSquareStyle: 'extra-rounded', cornerColor: '#00C853' } },
-  { id: 'brand-purple', name: 'Purple', config: { dotStyle: 'dots', dotColor: '#8B5CF6', backgroundColor: '#FFFFFF', cornerSquareStyle: 'dot', cornerColor: '#8B5CF6', cornerDotStyle: 'dot' } },
+  { id: 'brand-purple', name: 'Purple', config: { dotStyle: 'dots', dotColor: '#8A05BE', backgroundColor: '#FFFFFF', cornerSquareStyle: 'dot', cornerColor: '#8A05BE', cornerDotStyle: 'dot' } },
   { id: 'dark', name: 'Dark', config: { dotStyle: 'rounded', dotColor: '#FFFFFF', backgroundColor: '#1f2937', cornerSquareStyle: 'extra-rounded', cornerColor: '#FFFFFF' } },
   { id: 'gold', name: 'Gold', config: { dotStyle: 'classy-rounded', dotColor: '#d4af37', backgroundColor: '#1f2937', cornerSquareStyle: 'extra-rounded', cornerColor: '#d4af37' } },
 ];

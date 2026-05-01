@@ -152,7 +152,7 @@ export default function SignUpScreen() {
           {/* Logo */}
           <div className="logo-container">
             <img 
-              src="/brand/logo-white.png" 
+              src="/tavvy-logo-white.png" 
               alt="TavvY" 
               className="logo"
             />

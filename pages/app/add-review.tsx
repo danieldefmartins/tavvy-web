@@ -33,22 +33,22 @@ const CATEGORIES = [
   {
     id: 'best_for' as const,
     title: 'Best For',
-    accent: '#0A84FF',
-    accentBg: 'rgba(10, 132, 255, 0.15)',
+    accent: '#00C2CB',
+    accentBg: 'rgba(0, 194, 203, 0.15)',
     limit: 5,
   },
   {
     id: 'vibe' as const,
     title: 'Vibe',
-    accent: '#8B5CF6',
-    accentBg: 'rgba(139, 92, 246, 0.15)',
+    accent: '#8A05BE',
+    accentBg: 'rgba(138, 5, 190, 0.15)',
     limit: 5,
   },
   {
     id: 'heads_up' as const,
     title: 'Heads Up',
-    accent: '#FF9500',
-    accentBg: 'rgba(255, 149, 0, 0.15)',
+    accent: '#F5A623',
+    accentBg: 'rgba(245, 166, 35, 0.15)',
     limit: 2,
   },
 ] as const;
@@ -213,7 +213,7 @@ export default function AddReviewPage() {
             width: 32px;
             height: 32px;
             border: 3px solid rgba(0,0,0,0.1);
-            border-top-color: #0A84FF;
+            border-top-color: #00C2CB;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
           }
@@ -534,7 +534,7 @@ export default function AddReviewPage() {
         .selected-badge {
           font-size: 16px;
           font-weight: 700;
-          color: #0A84FF;
+          color: #00C2CB;
         }
 
         .header-subtitle {
@@ -588,8 +588,8 @@ export default function AddReviewPage() {
           display: flex;
           align-items: flex-start;
           gap: 10px;
-          background: ${isDark ? 'rgba(255, 149, 0, 0.1)' : '#FFF8F0'};
-          border: 1.5px solid ${isDark ? 'rgba(255, 149, 0, 0.3)' : '#FFD699'};
+          background: ${isDark ? 'rgba(245, 166, 35, 0.1)' : '#FFF8F0'};
+          border: 1.5px solid ${isDark ? 'rgba(245, 166, 35, 0.3)' : '#FFD699'};
           border-radius: 12px;
           padding: 12px 14px;
           margin-bottom: 12px;
@@ -611,7 +611,7 @@ export default function AddReviewPage() {
           display: block;
           margin-bottom: 2px;
           font-size: 13px;
-          color: ${isDark ? '#FF9500' : '#7A4D00'};
+          color: ${isDark ? '#F5A623' : '#7A4D00'};
         }
 
         /* Signal grid - tile layout */
@@ -719,7 +719,7 @@ export default function AddReviewPage() {
           padding: 16px 24px;
           border-radius: 16px;
           border: none;
-          background: #0A84FF;
+          background: #8A05BE;
           color: #fff;
           font-size: 17px;
           font-weight: 700;
@@ -800,7 +800,7 @@ export default function AddReviewPage() {
         }
 
         .auth-btn-primary {
-          background: #0A84FF;
+          background: #8A05BE;
           color: #fff;
         }
 

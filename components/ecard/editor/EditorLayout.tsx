@@ -457,7 +457,7 @@ export default function EditorLayout() {
             onClick={(e) => e.stopPropagation()}
             style={{
               width: '100%', maxWidth: 380, borderRadius: 24, padding: 28,
-              background: isDark ? '#1E293B' : '#FFFFFF', textAlign: 'center',
+              background: isDark ? '#1E0A3C' : '#FFFFFF', textAlign: 'center',
               position: 'relative', boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
             }}
           >
@@ -467,8 +467,8 @@ export default function EditorLayout() {
             >
               <IoClose size={22} color={isDark ? '#94A3B8' : '#666'} />
             </button>
-            <div style={{ width: 64, height: 64, borderRadius: 32, background: 'rgba(139,92,246,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-              <IoLockClosedOutline size={28} color="#8B5CF6" />
+            <div style={{ width: 64, height: 64, borderRadius: 32, background: 'rgba(138,5,190,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <IoLockClosedOutline size={28} color="#8A05BE" />
             </div>
             <h3 style={{ fontSize: 20, fontWeight: 700, color: isDark ? '#fff' : '#333', margin: '0 0 8px' }}>Premium Features Detected</h3>
             <p style={{ fontSize: 14, color: isDark ? '#94A3B8' : '#6B7280', lineHeight: 1.6, margin: '0 0 24px' }}>
@@ -477,7 +477,7 @@ export default function EditorLayout() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <button
                 onClick={() => { setShowPremiumModal(false); router.push('/app/ecard/premium', undefined, { locale }); }}
-                style={{ padding: '14px 24px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #8B5CF6, #6D28D9)', color: '#fff', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}
+                style={{ padding: '14px 24px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg, #8A05BE, #6D28D9)', color: '#fff', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}
               >
                 Upgrade to Pro
               </button>
@@ -515,7 +515,7 @@ export default function EditorLayout() {
               maxWidth: 340,
               borderRadius: 24,
               padding: 28,
-              background: isDark ? '#1E293B' : '#FFFFFF',
+              background: isDark ? '#1E0A3C' : '#FFFFFF',
               textAlign: 'center',
               position: 'relative',
               boxShadow: '0 20px 60px rgba(0,0,0,0.3)',

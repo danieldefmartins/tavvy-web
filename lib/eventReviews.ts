@@ -105,9 +105,9 @@ export function getSignalLabel(signalId: string): string {
 }
 
 export const CATEGORY_COLORS = {
-  best_for: { bg: '#0A84FF', text: '#FFFFFF' },
-  vibe: { bg: '#8B5CF6', text: '#FFFFFF' },
-  heads_up: { bg: '#FF9500', text: '#FFFFFF' },
+  best_for: { bg: '#00C2CB', text: '#FFFFFF' },
+  vibe: { bg: '#8A05BE', text: '#FFFFFF' },
+  heads_up: { bg: '#F5A623', text: '#FFFFFF' },
 } as const;
 
 // Get or create event in database

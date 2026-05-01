@@ -12,10 +12,10 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 const options = [
-  { id: 'buy', label: 'Buy a home', icon: FiHome, color: '#3B82F6' },
-  { id: 'sell', label: 'Sell my home', icon: FiDollarSign, color: '#10B981' },
+  { id: 'buy', label: 'Buy a home', icon: FiHome, color: '#8A05BE' },
+  { id: 'sell', label: 'Sell my home', icon: FiDollarSign, color: '#00C2CB' },
   { id: 'rent', label: 'Rent a property', icon: FiKey, color: '#F59E0B' },
-  { id: 'invest', label: 'Investment property', icon: FiTrendingUp, color: '#8B5CF6' },
+  { id: 'invest', label: 'Investment property', icon: FiTrendingUp, color: '#8A05BE' },
   { id: 'other', label: 'Something else', icon: FiHelpCircle, color: '#6B7280' },
 ];
 
@@ -127,7 +127,7 @@ export default function MatchQ1Screen() {
           
           .progress-fill {
             height: 100%;
-            background: #3B82F6;
+            background: #8A05BE;
             border-radius: 2px;
           }
           
@@ -178,8 +178,8 @@ export default function MatchQ1Screen() {
           }
           
           .option-card.selected {
-            border-color: #3B82F6;
-            background: rgba(59, 130, 246, 0.1);
+            border-color: #8A05BE;
+            background: rgba(138, 5, 190, 0.1);
           }
           
           .option-icon {
@@ -207,8 +207,8 @@ export default function MatchQ1Screen() {
           }
           
           .option-check.checked {
-            background: #3B82F6;
-            border-color: #3B82F6;
+            background: #8A05BE;
+            border-color: #8A05BE;
           }
           
           .bottom-container {
@@ -232,7 +232,7 @@ export default function MatchQ1Screen() {
           }
           
           .next-button.active {
-            background: linear-gradient(90deg, #3B82F6 0%, #2563EB 100%);
+            background: linear-gradient(90deg, #8A05BE 0%, #2563EB 100%);
             color: #FFFFFF;
             cursor: pointer;
           }

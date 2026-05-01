@@ -45,7 +45,7 @@ export default function MatchContactScreen() {
         <div style={{minHeight:'100vh',background:'#0A0A0F',display:'flex',flexDirection:'column',padding:'20px'}}>
           <div style={{display:'flex',alignItems:'center',gap:'16px',paddingTop:'40px',marginBottom:'40px'}}>
             <button onClick={() => router.back()} style={{width:'40px',height:'40px',borderRadius:'20px',background:'#1A1A24',border:'none',color:'#FFFFFF',display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer'}}><FiArrowLeft size={24} /></button>
-            <div style={{flex:1,height:'4px',background:'#1A1A24',borderRadius:'2px',overflow:'hidden'}}><div style={{width:'75%',height:'100%',background:'#3B82F6',borderRadius:'2px'}} /></div>
+            <div style={{flex:1,height:'4px',background:'#1A1A24',borderRadius:'2px',overflow:'hidden'}}><div style={{width:'75%',height:'100%',background:'#8A05BE',borderRadius:'2px'}} /></div>
             <span style={{fontSize:'14px',color:'#6B7280'}}>3 of 4</span>
           </div>
           <div style={{flex:1}}>
@@ -61,7 +61,7 @@ export default function MatchContactScreen() {
             </div>
           </div>
           <div style={{padding:'20px 0 40px'}}>
-            <button onClick={handleSubmit} disabled={!isValid || loading} style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',background:isValid && !loading ? 'linear-gradient(90deg, #3B82F6 0%, #2563EB 100%)' : '#3B3B4F',color:isValid && !loading ? '#FFFFFF' : '#6B7280',fontSize:'18px',fontWeight:700,padding:'18px',border:'none',borderRadius:'16px',cursor:isValid && !loading ? 'pointer' : 'not-allowed',marginBottom:'16px'}}>{loading ? 'Submitting...' : 'Find My Realtors'} <FiArrowRight size={20} /></button>
+            <button onClick={handleSubmit} disabled={!isValid || loading} style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'center',gap:'8px',background:isValid && !loading ? 'linear-gradient(90deg, #8A05BE 0%, #2563EB 100%)' : '#3B3B4F',color:isValid && !loading ? '#FFFFFF' : '#6B7280',fontSize:'18px',fontWeight:700,padding:'18px',border:'none',borderRadius:'16px',cursor:isValid && !loading ? 'pointer' : 'not-allowed',marginBottom:'16px'}}>{loading ? 'Submitting...' : 'Find My Realtors'} <FiArrowRight size={20} /></button>
             <p style={{fontSize:'12px',color:'#6B7280',textAlign:'center',margin:0}}>Your information is secure and only shared with matched realtors.</p>
           </div>
         </div>

@@ -12,7 +12,7 @@ interface StatsOverviewProps {
 }
 
 export default function StatsOverview({ viewCount, tapCount, isDark }: StatsOverviewProps) {
-  const cardBg = isDark ? '#1E293B' : '#FFFFFF';
+  const cardBg = isDark ? '#1E0A3C' : '#FFFFFF';
   const textPrimary = isDark ? '#FFFFFF' : '#111111';
   const textSecondary = isDark ? '#94A3B8' : '#6B7280';
 
@@ -22,7 +22,7 @@ export default function StatsOverview({ viewCount, tapCount, isDark }: StatsOver
         padding: 20, borderRadius: 14, backgroundColor: cardBg,
         textAlign: 'center', boxShadow: isDark ? 'none' : '0 1px 4px rgba(0,0,0,0.06)',
       }}>
-        <IoEye size={22} color="#3B82F6" style={{ marginBottom: 8 }} />
+        <IoEye size={22} color="#8A05BE" style={{ marginBottom: 8 }} />
         <span style={{ display: 'block', fontSize: 32, fontWeight: 700, color: textPrimary, marginBottom: 4 }}>
           {viewCount.toLocaleString()}
         </span>

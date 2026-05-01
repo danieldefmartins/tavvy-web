@@ -48,19 +48,19 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 // Theme colors matching mobile app
 const BG_LIGHT = '#F9F7F2';
 const BG_DARK = '#000000'; // Pure black for dark mode
-const ACCENT = '#0F1233';
+const ACCENT = '#17013A';
 const TEAL = '#14B8A6';
-const GREEN = '#10B981';
+const GREEN = '#00C2CB';
 
 // Categories for filtering - matching mobile app with icons
 const categoriesDef = [
   { id: 'restaurants', nameKey: 'categories.restaurants', apiName: 'Restaurants', icon: IoRestaurant, color: '#EF4444' },
-  { id: 'cafes', nameKey: 'categories.cafes', apiName: 'Cafes', icon: IoCafe, color: '#8B5CF6' },
+  { id: 'cafes', nameKey: 'categories.cafes', apiName: 'Cafes', icon: IoCafe, color: '#8A05BE' },
   { id: 'bars', nameKey: 'categories.bars', apiName: 'Bars', icon: IoBeer, color: '#F59E0B' },
-  { id: 'gas', nameKey: 'categories.gas', apiName: 'Gas Stations', icon: IoCarSport, color: '#3B82F6' },
+  { id: 'gas', nameKey: 'categories.gas', apiName: 'Gas Stations', icon: IoCarSport, color: '#8A05BE' },
   { id: 'shopping', nameKey: 'categories.shopping', apiName: 'Shopping', icon: IoStorefront, color: '#EC4899' },
   { id: 'hotels', nameKey: 'categories.hotels', apiName: 'Hotels', icon: IoBed, color: '#6366F1' },
-  { id: 'rv-camping', nameKey: 'categories.rvCamping', apiName: 'RV & Camping', icon: IoBonfire, color: '#F97316' },
+  { id: 'rv-camping', nameKey: 'categories.rvCamping', apiName: 'RV & Camping', icon: IoBonfire, color: '#00C2CB' },
 ];
 
 // Searchable categories for autocomplete
@@ -77,9 +77,9 @@ const SEARCHABLE_CATEGORIES = [
 
 // Explore Tavvy items (Universes preview)
 const exploreItems = [
-  { id: 'airports', title: 'Airports', subtitle: 'Terminals, lounges & more', icon: '✈️', color: '#3B82F6', route: '/app/explore' },
+  { id: 'airports', title: 'Airports', subtitle: 'Terminals, lounges & more', icon: '✈️', color: '#8A05BE', route: '/app/explore' },
   { id: 'theme-parks', title: 'Theme Parks', subtitle: 'Rides, shows & attractions', icon: '🎢', color: '#EC4899', route: '/app/explore' },
-  { id: 'rv-camping', title: 'RV & Camping', subtitle: 'Parks, sites & amenities', icon: '🏕️', color: '#F97316', route: '/app/rv-camping' },
+  { id: 'rv-camping', title: 'RV & Camping', subtitle: 'Parks, sites & amenities', icon: '🏕️', color: '#00C2CB', route: '/app/rv-camping' },
 ];
 
 // Top contributors mock data

@@ -36,7 +36,7 @@ import {
 const COLORS = {
   primaryBlue: '#6B7FFF',
   accentTeal: '#00CED1',
-  successGreen: '#10B981',
+  successGreen: '#00C2CB',
   warningAmber: '#F59E0B',
   errorRed: '#EF4444',
 };
@@ -44,19 +44,19 @@ const COLORS = {
 // Category configuration
 const CATEGORY_CONFIG = [
   { slug: 'home', label: 'Home', icon: IoHomeOutline, color: '#6B7FFF' },
-  { slug: 'auto', label: 'Auto', icon: IoCarOutline, color: '#10B981' },
+  { slug: 'auto', label: 'Auto', icon: IoCarOutline, color: '#00C2CB' },
   { slug: 'marine', label: 'Marine', icon: IoBoatOutline, color: '#00CED1' },
   { slug: 'events', label: 'Events', icon: IoCameraOutline, color: '#F59E0B' },
-  { slug: 'business', label: 'Business', icon: IoBriefcaseOutline, color: '#8B5CF6' },
+  { slug: 'business', label: 'Business', icon: IoBriefcaseOutline, color: '#8A05BE' },
   { slug: 'creative', label: 'Creative', icon: IoColorPaletteOutline, color: '#EC4899' },
 ];
 
 // Popular Services
 const POPULAR_SERVICES = [
   { slug: 'auto-mechanic', label: 'Auto Mechanic', icon: IoConstruct, color: '#6B7FFF', desc: 'Car repairs' },
-  { slug: 'landscaping', label: 'Landscaping', icon: IoLeafOutline, color: '#10B981', desc: 'Lawn & garden' },
+  { slug: 'landscaping', label: 'Landscaping', icon: IoLeafOutline, color: '#00C2CB', desc: 'Lawn & garden' },
   { slug: 'electrical', label: 'Electrician', icon: IoFlashOutline, color: '#F59E0B', desc: 'Electrical work' },
-  { slug: 'contractor', label: 'Contractor', icon: IoHammer, color: '#8B5CF6', desc: 'Remodeling' },
+  { slug: 'contractor', label: 'Contractor', icon: IoHammer, color: '#8A05BE', desc: 'Remodeling' },
   { slug: 'plumbing', label: 'Plumber', icon: IoWaterOutline, color: '#EF4444', desc: 'Plumbing' },
   { slug: 'boat-mechanic', label: 'Boat Mechanic', icon: IoBoatOutline, color: '#00CED1', desc: 'Marine repairs' },
 ];
@@ -593,7 +593,7 @@ export default function ProsScreen() {
             }
 
             .tavvy-shield-gradient {
-              background: linear-gradient(90deg, rgba(107, 127, 255, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+              background: linear-gradient(90deg, rgba(107, 127, 255, 0.15) 0%, rgba(138, 5, 190, 0.15) 100%);
               border: 1px solid rgba(107, 127, 255, 0.3);
               padding: 20px;
               display: flex;
@@ -879,7 +879,7 @@ export default function ProsScreen() {
             }
 
             .practice-icon-bg.green {
-              background: rgba(16, 185, 129, 0.15);
+              background: rgba(0, 194, 203, 0.15);
             }
 
             .practice-icon-bg.red {

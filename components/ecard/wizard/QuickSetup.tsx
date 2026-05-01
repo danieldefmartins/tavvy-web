@@ -8,8 +8,8 @@ import { IoArrowBack, IoCamera } from 'react-icons/io5';
 const ACCENT = '#00C853';
 
 const QUICK_COLORS = [
-  '#3B82F6', '#8B5CF6', '#00C853', '#EF4444', '#F59E0B',
-  '#EC4899', '#14B8A6', '#1E293B', '#D4AF37', '#0EA5E9',
+  '#8A05BE', '#8A05BE', '#00C853', '#EF4444', '#F59E0B',
+  '#EC4899', '#14B8A6', '#1E0A3C', '#D4AF37', '#8A05BE',
 ];
 
 interface QuickSetupProps {
@@ -29,9 +29,9 @@ export default function QuickSetup({ onBack, onCreate, creating, isDark }: Quick
 
   const textPrimary = isDark ? '#FFFFFF' : '#111111';
   const textSecondary = isDark ? '#94A3B8' : '#6B7280';
-  const inputBg = isDark ? '#1E293B' : '#FFFFFF';
+  const inputBg = isDark ? '#1E0A3C' : '#FFFFFF';
   const inputColor = isDark ? '#fff' : '#333';
-  const borderColor = isDark ? '#334155' : '#E5E7EB';
+  const borderColor = isDark ? '#250E45' : '#E5E7EB';
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -144,7 +144,7 @@ export default function QuickSetup({ onBack, onCreate, creating, isDark }: Quick
         style={{
           width: '100%', padding: '16px 24px', border: 'none', borderRadius: 14,
           fontSize: 16, fontWeight: 700, cursor: canCreate ? 'pointer' : 'not-allowed',
-          background: canCreate ? `linear-gradient(135deg, ${ACCENT}, #00A843)` : (isDark ? '#334155' : '#D1D5DB'),
+          background: canCreate ? `linear-gradient(135deg, ${ACCENT}, #00A843)` : (isDark ? '#250E45' : '#D1D5DB'),
           color: canCreate ? '#fff' : textSecondary,
           boxShadow: canCreate ? '0 4px 20px rgba(0,200,83,0.35)' : 'none',
           opacity: creating ? 0.6 : 1,
