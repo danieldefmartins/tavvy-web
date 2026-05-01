@@ -126,20 +126,109 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Real World Example */}
+        <section className="example-section">
+          <h2 className="section-title">See the difference in action</h2>
+          <p className="section-subtitle">A real restaurant scenario that star ratings get completely wrong.</p>
+
+          <div className="example-card">
+            <div className="example-header">
+              <div className="example-place">
+                <div className="example-name">Tony's Italian</div>
+                <div className="example-meta">Italian Restaurant · Midtown</div>
+              </div>
+              <div className="example-stars">
+                <div className="example-stars-display">★★★☆☆</div>
+                <div className="example-stars-label">3.0 on Google</div>
+              </div>
+            </div>
+
+            <div className="example-body">
+              <div className="example-signals">
+                <span className="pill pill-good" style={{ padding: '12px 22px', fontSize: 15 }}>🍝 Best Pasta in Town ×89</span>
+                <span className="pill pill-good" style={{ padding: '12px 22px', fontSize: 15 }}>👨‍🍳 Incredible Chef ×72</span>
+                <span className="pill pill-good">🍷 Amazing Wine List ×45</span>
+                <span className="pill pill-vibe">💑 Perfect Date Night ×38</span>
+                <span className="pill pill-heads">🐌 Slow Service ×52</span>
+                <span className="pill pill-heads">😤 Rude Waitstaff ×41</span>
+                <span className="pill pill-vibe" style={{ opacity: 0.75, fontSize: 13 }}>🕯️ Romantic Lighting ×19</span>
+                <span className="pill pill-heads" style={{ opacity: 0.75, fontSize: 13 }}>💸 Expensive ×28</span>
+              </div>
+            </div>
+
+            <div className="example-insight">
+              <div className="example-insight-label">What Tavvy reveals</div>
+              <p className="example-insight-text">
+                Tony's has the <strong>best pasta in town</strong> (89 people agree!) and an <strong>incredible chef</strong>.
+                The service is slow and the staff can be rude — that's why Google shows 3.0 stars.
+                But if you love <strong>amazing food</strong> and a <strong>romantic atmosphere</strong> and you're not in a rush?
+                <strong> This is a hidden gem that stars are actively hiding from you.</strong>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Who Uses Tavvy */}
+        <section className="who-section">
+          <h2 className="section-title">Built for everyone who's tired of guessing</h2>
+          <p className="section-subtitle">Whether you're finding places or building your reputation.</p>
+
+          <div className="who-grid">
+            <div className="who-card">
+              <div className="who-emoji">🔍</div>
+              <h3 className="who-name">Foodies & Explorers</h3>
+              <p className="who-desc">Find the best spots based on what actually matters to you. Not a number — specific signals like "Best Tacos" or "Cozy Vibes."</p>
+            </div>
+            <div className="who-card">
+              <div className="who-emoji">🏠</div>
+              <h3 className="who-name">Homeowners</h3>
+              <p className="who-desc">Hire contractors based on "Punctual," "Communicates Well," and "Fairly Priced" — not fake 5-star reviews on Angi.</p>
+            </div>
+            <div className="who-card">
+              <div className="who-emoji">🧳</div>
+              <h3 className="who-name">Travelers</h3>
+              <p className="who-desc">Explore Universes — curated worlds of theme parks, airports, national parks, and cities. Know every spot before you go.</p>
+            </div>
+            <div className="who-card">
+              <div className="who-emoji">🔧</div>
+              <h3 className="who-name">Service Pros</h3>
+              <p className="who-desc">Build your reputation with verified signals. Create a digital eCard. Get discovered organically — no pay-per-lead fees.</p>
+            </div>
+          </div>
+        </section>
+
         {/* Pros */}
         <section className="pros-section">
           <div className="pros-inner">
             <div className="pros-text">
-              <h2 className="section-title" style={{ textAlign: 'left' }}>Built for Pros, too.</h2>
+              <h2 className="section-title" style={{ textAlign: 'left' }}>Tavvy Pros: grow the right way.</h2>
               <p className="pros-desc">
-                Contractors, plumbers, realtors, and service providers build verified reputations on Tavvy.
-                No pay-per-lead fees. No fake reviews. Just real signals from real clients.
+                While other platforms charge you $50 per lead, Tavvy lets contractors, plumbers, realtors, and service providers
+                build verified reputations through real client signals. Your work speaks for itself.
               </p>
               <div className="how-pills" style={{ justifyContent: 'flex-start' }}>
                 <span className="mini-pill pill-good">⏰ Punctual ×34</span>
                 <span className="mini-pill pill-good">💬 Communicates Well ×29</span>
                 <span className="mini-pill pill-good">💰 Fairly Priced ×25</span>
                 <span className="mini-pill pill-good">🧹 Clean Work ×19</span>
+              </div>
+              <div className="pros-features">
+                <div className="pros-feature">
+                  <span className="pros-check">✓</span>
+                  <span>Verified digital eCard — share with one tap</span>
+                </div>
+                <div className="pros-feature">
+                  <span className="pros-check">✓</span>
+                  <span>No pay-per-lead fees — ever</span>
+                </div>
+                <div className="pros-feature">
+                  <span className="pros-check">✓</span>
+                  <span>Real signals, not fake reviews</span>
+                </div>
+                <div className="pros-feature">
+                  <span className="pros-check">✓</span>
+                  <span>Tavvy Shield protection</span>
+                </div>
               </div>
               <Link href="/app/pros" className="btn-primary" style={{ marginTop: 24, display: 'inline-block' }}>
                 Join Tavvy Pros — it's free
@@ -148,13 +237,22 @@ export default function Home() {
           </div>
         </section>
 
-        {/* CTA */}
+        {/* Final CTA */}
         <section className="cta-section">
-          <h2 className="cta-title">Stop guessing.<br /><span className="hero-gradient">Start experiencing.</span></h2>
-          <p className="cta-subtitle">Join the platform where stars are dead and real signals thrive.</p>
-          <Link href="/app" className="btn-primary btn-large">
-            Explore Tavvy
-          </Link>
+          <div className="cta-badge">
+            <span className="badge-dot" />
+            #StarsAreDead
+          </div>
+          <h2 className="cta-title">The future of reviews<br /><span className="hero-gradient">starts now.</span></h2>
+          <p className="cta-subtitle">Join thousands of people who are done guessing and ready to start experiencing.</p>
+          <div className="hero-actions">
+            <Link href="/app" className="btn-primary btn-large">
+              Explore Tavvy
+            </Link>
+            <Link href="/ecard" className="btn-ghost">
+              Create Your eCard
+            </Link>
+          </div>
         </section>
 
         {/* Footer */}
@@ -534,6 +632,125 @@ export default function Home() {
         .footer-links :global(a:hover) { color: #F1F5F9; }
         .footer-copy { font-size: 13px; color: #6B6B80; }
 
+        /* Example */
+        .example-section {
+          padding: 100px 24px;
+          max-width: 800px;
+          margin: 0 auto;
+        }
+        .example-card {
+          background: #1E0A3C;
+          border-radius: 24px;
+          overflow: hidden;
+          border: 1px solid rgba(255,255,255,0.06);
+        }
+        .example-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 28px 32px;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .example-name { font-size: 24px; font-weight: 800; }
+        .example-meta { font-size: 14px; color: #9394A1; margin-top: 4px; }
+        .example-stars { text-align: right; }
+        .example-stars-display { font-size: 24px; color: #D4A843; opacity: 0.4; text-decoration: line-through; }
+        .example-stars-label { font-size: 12px; color: #6B6B80; margin-top: 2px; }
+        .example-body {
+          padding: 24px 32px;
+        }
+        .example-signals {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+        }
+        .example-insight {
+          margin: 0 32px 28px;
+          padding: 24px;
+          background: rgba(0, 194, 203, 0.06);
+          border: 1px solid rgba(0, 194, 203, 0.12);
+          border-radius: 16px;
+        }
+        .example-insight-label {
+          font-size: 12px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 1.5px;
+          color: #00C2CB;
+          margin-bottom: 10px;
+        }
+        .example-insight-text {
+          font-size: 15px;
+          color: rgba(255,255,255,0.7);
+          line-height: 1.7;
+          margin: 0;
+        }
+        .example-insight-text strong {
+          color: #F1F5F9;
+        }
+
+        /* Who Uses Tavvy */
+        .who-section {
+          padding: 100px 24px;
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+        .who-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 20px;
+        }
+        .who-card {
+          background: #1E0A3C;
+          border-radius: 20px;
+          padding: 32px 24px;
+          border: 1px solid rgba(255,255,255,0.06);
+          text-align: center;
+          transition: transform 0.2s, border-color 0.2s;
+        }
+        .who-card:hover {
+          transform: translateY(-4px);
+          border-color: rgba(138, 5, 190, 0.3);
+        }
+        .who-emoji { font-size: 40px; margin-bottom: 16px; }
+        .who-name { font-size: 18px; font-weight: 800; margin-bottom: 8px; }
+        .who-desc { font-size: 14px; color: #9394A1; line-height: 1.6; margin: 0; }
+
+        /* Pros features */
+        .pros-features {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          margin-top: 20px;
+        }
+        .pros-feature {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          font-size: 15px;
+          color: #9394A1;
+        }
+        .pros-check {
+          color: #00C2CB;
+          font-weight: 700;
+          font-size: 16px;
+        }
+
+        /* CTA badge */
+        .cta-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 20px;
+          background: rgba(138, 5, 190, 0.15);
+          border: 1px solid rgba(138, 5, 190, 0.25);
+          border-radius: 100px;
+          font-size: 16px;
+          font-weight: 700;
+          color: #C77DFF;
+          margin-bottom: 24px;
+        }
+
         @media (max-width: 768px) {
           .hero-title { font-size: 42px; letter-spacing: -2px; }
           .hero-subtitle { font-size: 17px; }
@@ -545,6 +762,11 @@ export default function Home() {
           .hero-actions { flex-direction: column; align-items: center; }
           .footer-inner { flex-direction: column; gap: 16px; text-align: center; }
           .nav-links { gap: 16px; }
+          .who-grid { grid-template-columns: repeat(2, 1fr); }
+          .example-header { flex-direction: column; text-align: center; gap: 12px; }
+          .example-stars { text-align: center; }
+          .example-body { padding: 20px; }
+          .example-insight { margin: 0 20px 20px; }
         }
       `}</style>
     </>
