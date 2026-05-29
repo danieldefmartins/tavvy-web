@@ -143,7 +143,21 @@
     "discoverCities": "Descubrir Ciudades",
     "exploreCities": "Explora ciudades alrededor del mundo",
     "greetingName": "hola",
-    "curatedWorlds": "Mundos curados de experiencias"
+    "curatedWorlds": "Mundos curados de experiencias",
+    "signals": "Senales"
+  },
+  "signalSearch": {
+    "title": "Buscar por Senales",
+    "subtitle": "Combina senales para encontrar tu lugar perfecto",
+    "filterPlaceholder": "Filtrar senales...",
+    "searching": "Buscando",
+    "clearAll": "Limpiar",
+    "results": "Resultados",
+    "places": "lugares",
+    "combinedTaps": "toques combinados",
+    "loadingSignals": "Cargando senales...",
+    "noResults": "No se encontraron lugares",
+    "noResultsHint": "Intenta quitar algunas senales o seleccionar otras"
   },
   "places": {
     "title": "Lugares",

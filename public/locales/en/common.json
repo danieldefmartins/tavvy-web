@@ -143,7 +143,21 @@
     "discoverCities": "Discover Cities",
     "exploreCities": "Explore cities around the world",
     "greetingName": "there",
-    "curatedWorlds": "Curated worlds of experiences"
+    "curatedWorlds": "Curated worlds of experiences",
+    "signals": "Signals"
+  },
+  "signalSearch": {
+    "title": "Signal Search",
+    "subtitle": "Combine signals to find your perfect spot",
+    "filterPlaceholder": "Filter signals...",
+    "searching": "Searching",
+    "clearAll": "Clear",
+    "results": "Results",
+    "places": "places",
+    "combinedTaps": "combined taps",
+    "loadingSignals": "Loading signals...",
+    "noResults": "No places found",
+    "noResultsHint": "Try removing some signals or selecting different ones"
   },
   "places": {
     "title": "Places",

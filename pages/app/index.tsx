@@ -589,11 +589,11 @@ export default function HomeScreen() {
                   </div>
                   <span>{t('home.map')}</span>
                 </button>
-                <button className="hero-action" onClick={() => {}}>
+                <button className="hero-action" onClick={() => router.push('/app/signal-search', undefined, { locale })}>
                   <div className="hero-action-icon" style={{ background: 'rgba(0, 194, 203, 0.12)' }}>
                     <IoSparkles size={20} color="#00C2CB" />
                   </div>
-                  <span>{t('home.surprise')}</span>
+                  <span>{t('home.signals', 'Signals')}</span>
                 </button>
                 <button className="hero-action" onClick={() => {}}>
                   <div className="hero-action-icon" style={{ background: 'rgba(138, 5, 190, 0.12)' }}>
