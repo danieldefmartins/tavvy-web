@@ -9,9 +9,9 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Tavvy — Real Experiences, Not Fake Stars</title>
+        <title>Tavvy — Discover Real Experiences</title>
         <meta name="description" content="Stop guessing with meaningless star ratings. Tavvy shows you real signals from real people — what's actually great, the vibe, and what to watch out for." key="description" />
-        <meta property="og:title" content="Tavvy — Real Experiences, Not Fake Stars" key="og:title" />
+        <meta property="og:title" content="Tavvy — Discover Real Experiences" key="og:title" />
         <meta property="og:description" content="Stop guessing with meaningless star ratings. Tavvy shows you real signals from real people." key="og:description" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://tavvy.com" />
@@ -41,8 +41,8 @@ export default function Home() {
               The future of reviews
             </div>
             <h1 className="hero-title">
-              Real experiences,<br />
-              <span className="hero-gradient">not fake stars.</span>
+              Discover places<br />
+              <span className="hero-gradient">through real signals.</span>
             </h1>
             <p className="hero-subtitle">
               Star ratings are broken. A "4.5" tells you nothing about the food, the vibe, or the service.
@@ -265,7 +265,7 @@ export default function Home() {
               <Link href="/privacy">Privacy</Link>
               <Link href="/terms">Terms</Link>
             </div>
-            <p className="footer-copy">© {new Date().getFullYear()} Tavvy. Real experiences, not fake stars.</p>
+            <p className="footer-copy">© {new Date().getFullYear()} Tavvy.</p>
           </div>
         </footer>
       </div>

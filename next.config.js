@@ -58,6 +58,11 @@ const nextConfig = withPWA({
   async redirects() {
     return [
       {
+        source: '/',
+        destination: '/app',
+        permanent: false,
+      },
+      {
         source: '/card/:slug',
         destination: '/:slug',
         permanent: true,

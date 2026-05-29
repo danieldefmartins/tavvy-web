@@ -127,8 +127,9 @@ export default function HomeScreen() {
   const router = useRouter();
   const { locale } = router;
   
-  // Onboarding
+  // Onboarding — optional prompt, not blocking
   const { showOnboarding, completeOnboarding } = useOnboarding();
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
 
   // View mode
   const [viewMode, setViewMode] = useState<'standard' | 'map'>('standard');
@@ -487,12 +488,8 @@ export default function HomeScreen() {
   return (
     <AppLayout>
       <Head>
-        <title>Tavvy — Real Experiences, Not Fake Stars</title>
+        <title>Tavvy — Discover Real Experiences</title>
       </Head>
-
-      {showOnboarding && (
-        <Onboarding onComplete={completeOnboarding} />
-      )}
 
       <div className="home-screen">
         <div className="container">
@@ -606,6 +603,38 @@ export default function HomeScreen() {
                 </button>
               </div>
             </section>
+
+            {/* Onboarding Banner — optional, non-blocking */}
+            {showOnboarding && !showOnboardingModal && (
+              <div className="onboarding-banner">
+                <div className="onboarding-banner-text">
+                  <span className="onboarding-banner-icon">👋</span>
+                  <span>New here? <strong>Take a quick tour</strong> to learn how Tavvy works.</span>
+                </div>
+                <div className="onboarding-banner-actions">
+                  <button
+                    className="onboarding-banner-btn"
+                    onClick={() => setShowOnboardingModal(true)}
+                  >
+                    Show me
+                  </button>
+                  <button
+                    className="onboarding-banner-dismiss"
+                    onClick={completeOnboarding}
+                  >
+                    Skip
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Onboarding Modal — shown only when user opts in */}
+            {showOnboardingModal && (
+              <Onboarding onComplete={() => {
+                setShowOnboardingModal(false);
+                completeOnboarding();
+              }} />
+            )}
 
             {/* Mood Section - iOS Style */}
             <section className="mood-section">
@@ -1421,6 +1450,67 @@ export default function HomeScreen() {
 
           .main-content {
             padding-bottom: 100px;
+          }
+
+          /* Onboarding Banner */
+          .onboarding-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: ${isDark ? 'rgba(138, 5, 190, 0.12)' : 'rgba(138, 5, 190, 0.06)'};
+            border: 1px solid ${isDark ? 'rgba(138, 5, 190, 0.25)' : 'rgba(138, 5, 190, 0.15)'};
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 24px;
+          }
+
+          .onboarding-banner-text {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: ${isDark ? 'rgba(255,255,255,0.8)' : '#333'};
+          }
+
+          .onboarding-banner-icon {
+            font-size: 20px;
+          }
+
+          .onboarding-banner-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+          }
+
+          .onboarding-banner-btn {
+            background: #8A05BE;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+          }
+
+          .onboarding-banner-btn:hover {
+            background: #9B10D4;
+          }
+
+          .onboarding-banner-dismiss {
+            background: none;
+            border: none;
+            color: ${isDark ? 'rgba(255,255,255,0.4)' : '#999'};
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 8px 12px;
+          }
+
+          .onboarding-banner-dismiss:hover {
+            color: ${isDark ? 'rgba(255,255,255,0.6)' : '#666'};
           }
 
           .bottom-spacing {

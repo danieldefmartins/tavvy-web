@@ -18,7 +18,7 @@ Tavvy is a trust-based review and discovery platform that replaces meaningless s
 - **Bold** -- We're the new player taking on giants. Our brand should feel fearless.
 
 ### Brand Positioning
-> "Real experiences, not fake stars."
+> "Discover real experiences."
 
 Tavvy is the anti-star-rating. While competitors reduce rich human experiences to a single number, Tavvy captures what actually matters -- specific, verified signals that tell you exactly what to expect.
 
@@ -261,7 +261,7 @@ Signal tags should feel lightweight, colorful, and easy to scan -- the visual op
 
 | Instead of... | Write... |
 |--------------|---------|
-| "We're the best review platform ever" | "Real experiences, not fake stars" |
+| "We're the best review platform ever" | "Discover real experiences" |
 | "Yelp and Google are terrible" | "Stars tell you nothing. Signals tell you everything." |
 | "Sign up now!!!" | "Join the future of reviews" |
 | "Our proprietary AI-powered algorithm" | "Real people sharing what actually matters" |

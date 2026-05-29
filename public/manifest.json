@@ -1,7 +1,7 @@
 {
   "name": "Tavvy",
   "short_name": "Tavvy",
-  "description": "Real experiences, not fake stars. Discover places through verified signals from real people.",
+  "description": "Discover places through verified signals from real people.",
   "start_url": "/app",
   "display": "standalone",
   "background_color": "#17013A",

@@ -87,7 +87,7 @@ const STEPS = [
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
         }}>
-          Real experiences, not fake stars.
+          Discover real experiences.
         </div>
       </div>
     ),
