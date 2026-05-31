@@ -69,15 +69,18 @@ const MEAL_PERIOD_LABELS: Record<MealPeriod, string> = {
 };
 
 const DIETARY_ICONS: Record<string, string> = {
-  vegan: '\u{1F331}',
-  vegetarian: '\u{1F331}',
-  gluten_free: '\u{1F33E}',
-  gf: '\u{1F33E}',
-  dairy_free: '\u{1F95B}',
-  nut_free: '\u{1F330}',
-  spicy: '\u{1F336}\uFE0F',
-  halal: '\u{2615}',
-  kosher: '\u{2721}\uFE0F',
+  vegan: '🌱',
+  vegetarian: '🌱',
+  'gluten-free': '🌾',
+  gluten_free: '🌾',
+  gf: '🌾',
+  dairy_free: '🥛',
+  nut_free: '🌰',
+  spicy: '🌶️',
+  'spicy-2': '🌶️🌶️',
+  'spicy-3': '🌶️🌶️🌶️',
+  halal: '☕',
+  kosher: '✡️',
 };
 
 export default function MenuPage() {

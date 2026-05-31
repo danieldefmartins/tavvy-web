@@ -57,11 +57,14 @@ type MealPeriod = 'all' | 'breakfast' | 'lunch' | 'dinner' | 'all_day';
 const DIETARY_LABELS: Record<string, { icon: string; label: string }> = {
   vegan: { icon: '\u{1F331}', label: 'Vegan' },
   vegetarian: { icon: '\u{1F331}', label: 'Veggie' },
+  'gluten-free': { icon: '\u{1F33E}', label: 'GF' },
   gluten_free: { icon: '\u{1F33E}', label: 'GF' },
   gf: { icon: '\u{1F33E}', label: 'GF' },
   dairy_free: { icon: '\u{1F95B}', label: 'DF' },
   nut_free: { icon: '\u{1F330}', label: 'NF' },
-  spicy: { icon: '\u{1F336}\uFE0F', label: 'Spicy' },
+  spicy: { icon: '🌶️', label: 'Mild' },
+  'spicy-2': { icon: '🌶️🌶️', label: 'Spicy' },
+  'spicy-3': { icon: '🌶️🌶️🌶️', label: 'Hot' },
 };
 
 export default function MenuGalleryPage() {
