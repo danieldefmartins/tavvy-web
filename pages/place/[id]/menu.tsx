@@ -945,13 +945,7 @@ const menuStyles = `
     color: #8A05BE;
     background: rgba(138, 5, 190, 0.08);
   }
-  .menu-badge.popular {
-    animation: menu-pulse 2s ease-in-out infinite;
-  }
-  @keyframes menu-pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
-  }
+  /* popular badge styles defined below in cover section */
   .menu-item-desc {
     font-size: 14px;
     color: #666;
@@ -1296,133 +1290,86 @@ const menuStyles = `
     background: #000;
   }
 
-  /* Promo Cards Row */
-  .menu-cover-cards {
+  /* ===== ALLERGEN FILTER ROW ===== */
+  .menu-allergen-filters {
     display: flex;
-    gap: 12px;
-    padding: 16px 20px 24px;
+    gap: 8px;
+    padding: 10px 20px;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
     background: #fff;
+    border-bottom: 1px solid #eee;
   }
-  .menu-cover-cards::-webkit-scrollbar { display: none; }
-
-  .menu-promo-card {
-    min-width: 200px;
-    max-width: 240px;
-    flex-shrink: 0;
-    border-radius: 14px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    position: relative;
-    overflow: hidden;
-  }
-  .menu-promo-card-icon {
-    font-size: 24px;
-  }
-  .menu-promo-card-content {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-  .menu-promo-card-label {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  }
-  .menu-promo-card-text {
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 1.3;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-  }
-  .menu-promo-card-times {
+  .menu-allergen-filters::-webkit-scrollbar { display: none; }
+  .menu-allergen-pill {
+    padding: 6px 14px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
     font-size: 12px;
-    opacity: 0.8;
+    font-weight: 500;
+    color: #666;
+    background: #fff;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    flex-shrink: 0;
+  }
+  .menu-allergen-pill.active {
+    background: #059669;
+    border-color: #059669;
+    color: #fff;
+    font-weight: 600;
+  }
+  .menu-item.filtered-out {
+    opacity: 0.3;
+    position: relative;
+  }
+  .menu-item-allergen-warn {
+    position: absolute;
+    top: 14px;
+    right: 8px;
+    font-size: 14px;
+    z-index: 2;
+  }
+  .menu-item-calories {
+    font-size: 13px;
+    color: #999;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   }
-  .menu-promo-card-price {
-    font-size: 15px;
+  .menu-item-order-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: rgba(138, 5, 190, 0.1);
+    color: #8A05BE;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    transition: background 0.2s;
+    margin-left: auto;
+  }
+  .menu-item-order-btn:hover {
+    background: rgba(138, 5, 190, 0.2);
+  }
+  .menu-badge.popular {
+    font-size: 12px;
     font-weight: 700;
+    background: linear-gradient(135deg, #ff6b00, #ff3d00);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 10px;
+    animation: menu-pulse-big 1.5s ease-in-out infinite;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   }
-  .menu-promo-card-dish-img {
-    width: 100%;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 8px;
-    margin-bottom: 4px;
-  }
-
-  /* Card Variants */
-  .card-happy-hour {
-    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-    border: 1px solid #fcd34d;
-  }
-  .card-happy-hour .menu-promo-card-label {
-    color: #92400e;
-  }
-  .card-happy-hour .menu-promo-card-text {
-    color: #78350f;
-  }
-  .card-happy-hour .menu-promo-card-times {
-    color: #a16207;
-  }
-
-  .card-chef {
-    background: linear-gradient(135deg, #f5f0ff 0%, #ede9fe 100%);
-    border: 1px solid #c4b5fd;
-  }
-  .card-chef .menu-promo-card-label {
-    color: #6b21a8;
-  }
-  .card-chef .menu-promo-card-text {
-    color: #4c1d95;
-  }
-  .card-chef .menu-promo-card-price {
-    color: #7c3aed;
-  }
-
-  .card-day {
-    background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
-    border: 1px solid #5eead4;
-  }
-  .card-day .menu-promo-card-label {
-    color: #115e59;
-  }
-  .card-day .menu-promo-card-text {
-    color: #134e4a;
-  }
-  .card-day .menu-promo-card-price {
-    color: #0d9488;
-  }
-
-  .card-promo {
-    background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
-    border: 1px solid #f9a8d4;
-  }
-  .card-promo .menu-promo-card-label {
-    color: #9d174d;
-  }
-  .card-promo .menu-promo-card-text {
-    color: #831843;
-  }
-
-  .card-seasonal {
-    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-    border: 1px solid #86efac;
-  }
-  .card-seasonal .menu-promo-card-label {
-    color: #166534;
-  }
-  .card-seasonal .menu-promo-card-text {
-    color: #14532d;
+  @keyframes menu-pulse-big {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,107,0,0.4); }
+    50% { transform: scale(1.08); box-shadow: 0 0 12px 4px rgba(255,107,0,0.2); }
   }
 
   /* Responsive */
@@ -1438,54 +1385,26 @@ const menuStyles = `
 
   /* Dark mode support */
   @media (prefers-color-scheme: dark) {
-    .menu-cover-intro {
-      background: #0a0a0a;
+    .menu-allergen-filters {
+      background: #111;
+      border-bottom-color: #222;
     }
-    .menu-cover-name {
+    .menu-allergen-pill {
+      background: #1a1a1a;
+      border-color: #333;
+      color: #aaa;
+    }
+    .menu-allergen-pill.active {
+      background: #059669;
+      border-color: #059669;
       color: #fff;
     }
-    .menu-cover-tagline {
-      color: #999;
+    .menu-item-calories {
+      color: #666;
     }
-    .menu-cover-welcome {
-      color: #888;
+    .menu-item-order-btn {
+      background: rgba(138, 5, 190, 0.2);
     }
-    .menu-cover-cards {
-      background: #0a0a0a;
-    }
-    .card-happy-hour {
-      background: linear-gradient(135deg, #1a1500 0%, #2a1f00 100%);
-      border-color: #5c4a00;
-    }
-    .card-happy-hour .menu-promo-card-label { color: #fbbf24; }
-    .card-happy-hour .menu-promo-card-text { color: #fde68a; }
-    .card-happy-hour .menu-promo-card-times { color: #d97706; }
-    .card-chef {
-      background: linear-gradient(135deg, #1a0a2e 0%, #2d1254 100%);
-      border-color: #6b21a8;
-    }
-    .card-chef .menu-promo-card-label { color: #c4b5fd; }
-    .card-chef .menu-promo-card-text { color: #e9d5ff; }
-    .card-chef .menu-promo-card-price { color: #a78bfa; }
-    .card-day {
-      background: linear-gradient(135deg, #022c22 0%, #064e3b 100%);
-      border-color: #0d9488;
-    }
-    .card-day .menu-promo-card-label { color: #5eead4; }
-    .card-day .menu-promo-card-text { color: #99f6e4; }
-    .card-day .menu-promo-card-price { color: #2dd4bf; }
-    .card-promo {
-      background: linear-gradient(135deg, #2a0a1e 0%, #4a1035 100%);
-      border-color: #9d174d;
-    }
-    .card-promo .menu-promo-card-label { color: #f9a8d4; }
-    .card-promo .menu-promo-card-text { color: #fbcfe8; }
-    .card-seasonal {
-      background: linear-gradient(135deg, #052e16 0%, #14532d 100%);
-      border-color: #16a34a;
-    }
-    .card-seasonal .menu-promo-card-label { color: #86efac; }
-    .card-seasonal .menu-promo-card-text { color: #bbf7d0; }
     .menu-container {
       background: #0a0a0a;
     }

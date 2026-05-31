@@ -35,6 +35,8 @@ interface MenuItem {
   category_id: string;
   category_name?: string;
   meal_period?: string | null;
+  calories: number | null; // TODO: add `calories integer` column to menu_items table
+  order_url: string | null; // TODO: add `order_url text` column to menu_items table
 }
 
 interface MenuCategory {
@@ -76,6 +78,16 @@ interface FeaturedDish {
 
 type MealPeriod = 'all' | 'breakfast' | 'lunch' | 'dinner' | 'all_day';
 
+type AllergenFilter = 'nut_free' | 'gluten_free' | 'dairy_free' | 'vegan' | 'vegetarian';
+
+const ALLERGEN_FILTERS: { key: AllergenFilter; label: string; icon: string }[] = [
+  { key: 'nut_free', label: 'Nut-Free', icon: '🌰' },
+  { key: 'gluten_free', label: 'Gluten-Free', icon: '🌾' },
+  { key: 'dairy_free', label: 'Dairy-Free', icon: '🥛' },
+  { key: 'vegan', label: 'Vegan', icon: '🌱' },
+  { key: 'vegetarian', label: 'Vegetarian', icon: '🌱' },
+];
+
 const DIETARY_LABELS: Record<string, { icon: string; label: string }> = {
   vegan: { icon: '\u{1F331}', label: 'Vegan' },
   vegetarian: { icon: '\u{1F331}', label: 'Veggie' },
@@ -107,6 +119,7 @@ export default function MenuGalleryPage() {
   // Filters
   const [activePeriod, setActivePeriod] = useState<MealPeriod>('all');
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [activeFilters, setActiveFilters] = useState<AllergenFilter[]>([]);
 
   // Scroll position
   const [activeIndex, setActiveIndex] = useState(0);
@@ -206,6 +219,21 @@ export default function MenuGalleryPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const itemMatchesFilters = (item: MenuItem): boolean => {
+    if (activeFilters.length === 0) return true;
+    const tags = (item.dietary_tags || []).map(t => t.toLowerCase().replace('-', '_'));
+    return activeFilters.every(filter => {
+      if (filter === 'gluten_free') return tags.includes('gluten_free') || tags.includes('gf') || tags.includes('gluten-free');
+      return tags.includes(filter);
+    });
+  };
+
+  const toggleFilter = (filter: AllergenFilter) => {
+    setActiveFilters(prev =>
+      prev.includes(filter) ? prev.filter(f => f !== filter) : [...prev, filter]
+    );
   };
 
   // Filtered items
@@ -404,6 +432,19 @@ export default function MenuGalleryPage() {
                 </button>
               ))}
           </div>
+
+          {/* Allergen Filter Pills */}
+          <div className="gallery-allergens">
+            {ALLERGEN_FILTERS.map(f => (
+              <button
+                key={f.key}
+                className={`gallery-allergen-pill ${activeFilters.includes(f.key) ? 'active' : ''}`}
+                onClick={() => toggleFilter(f.key)}
+              >
+                {activeFilters.includes(f.key) ? '✓ ' : `${f.icon} `}{f.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Gallery Cards - Horizontal Scroll */}
@@ -414,25 +455,44 @@ export default function MenuGalleryPage() {
               ref={scrollRef}
               onScroll={handleScroll}
             >
-              {/* Cover Card */}
+              {/* Cover Card — Full-screen image background */}
               {menu?.show_cover && (
                 <div className="gallery-card gallery-cover-card">
                   <div className="gallery-card-image">
-                    <div className="gallery-cover-bg" />
+                    {menu.cover_image_url ? (
+                      <img src={menu.cover_image_url} alt={placeName} className="gallery-cover-hero-img" />
+                    ) : (
+                      <div className="gallery-cover-bg" />
+                    )}
+                    <div className="gallery-card-gradient" />
                     <div className="gallery-cover-content">
                       <h1 className="gallery-cover-name">{placeName}</h1>
                       {menu.tagline && <p className="gallery-cover-tagline">{menu.tagline}</p>}
-                      {menu.welcome_message && <p className="gallery-cover-welcome">{menu.welcome_message}</p>}
+
+                      {/* Food thumbnails teaser */}
+                      {filteredItems.length > 0 && (
+                        <div className="gallery-cover-thumbs">
+                          {filteredItems.slice(0, 4).map(item => (
+                            <div key={item.id} className="gallery-cover-thumb">
+                              {item.image_url ? (
+                                <img src={item.image_url} alt={item.name} />
+                              ) : (
+                                <div className="gallery-thumb-placeholder" />
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
 
                       <div className="gallery-cover-pills">
                         {menu.happy_hour_enabled && menu.happy_hour_times && (
                           <span className="gallery-cover-pill pill-happy">🍸 Happy Hour {menu.happy_hour_times}</span>
                         )}
                         {chefDish && (
-                          <span className="gallery-cover-pill pill-chef">👨‍🍳 Chef Picks: {chefDish.name}</span>
+                          <span className="gallery-cover-pill pill-chef">👨‍🍳 {chefDish.name}</span>
                         )}
                         {dayDish && (
-                          <span className="gallery-cover-pill pill-day">⭐ Today: {dayDish.name}</span>
+                          <span className="gallery-cover-pill pill-day">⭐ {dayDish.name}</span>
                         )}
                         {menu.promo_banner_enabled && menu.promo_banner_text && (
                           <span className="gallery-cover-pill pill-promo">🎉 {menu.promo_banner_text}</span>
@@ -451,9 +511,10 @@ export default function MenuGalleryPage() {
               {filteredItems.map((item, idx) => {
                 const priceStr = formatPrice(item.price, item.price_label);
                 const imageUrl = item.image_url || menu?.cover_image_url || null;
+                const matchesFilter = itemMatchesFilters(item);
 
                 return (
-                  <div key={item.id} className="gallery-card">
+                  <div key={item.id} className={`gallery-card ${!matchesFilter ? 'gallery-card-filtered' : ''}`}>
                     {/* Full 9:16 image */}
                     <div className="gallery-card-image">
                       {imageUrl ? (
@@ -466,10 +527,30 @@ export default function MenuGalleryPage() {
                       {/* Gradient overlay for text readability */}
                       <div className="gallery-card-gradient" />
 
-                      {/* Price badge + share (top right) */}
+                      {/* Allergen warning overlay */}
+                      {!matchesFilter && (
+                        <div className="gallery-card-allergen-overlay">
+                          <span>⚠️ Does not match your dietary filters</span>
+                        </div>
+                      )}
+
+                      {/* Price badge + calories + share (top right) */}
                       <div className="gallery-card-top-right">
                         {priceStr && (
-                          <div className="gallery-card-price">{priceStr}</div>
+                          <div className="gallery-card-price">
+                            {priceStr}{item.calories ? ` · ${item.calories} cal` : ''}
+                          </div>
+                        )}
+                        {item.order_url && (
+                          <a
+                            href={item.order_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="gallery-card-order"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            🛒
+                          </a>
                         )}
                         <button
                           className="gallery-card-share"
@@ -484,9 +565,9 @@ export default function MenuGalleryPage() {
                         </button>
                       </div>
 
-                      {/* Badges (top left) */}
+                      {/* Badges (top left) — enhanced popular */}
                       <div className="gallery-card-badges-top">
-                        {item.is_popular && <span className="gallery-badge fire">{'\u{1F525}'} Popular</span>}
+                        {item.is_popular && <span className="gallery-badge fire gallery-badge-pulse">🔥 Popular</span>}
                         {item.is_new && <span className="gallery-badge new">{'\u2728'} New</span>}
                       </div>
 
@@ -1064,6 +1145,123 @@ const galleryStyles = `
   @keyframes gallery-swipe-pulse {
     0%, 100% { opacity: 0.35; transform: translateX(0); }
     50% { opacity: 0.7; transform: translateX(4px); }
+  }
+
+  /* Cover hero image */
+  .gallery-cover-hero-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Cover food thumbnails teaser */
+  .gallery-cover-thumbs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 20px;
+    width: 160px;
+  }
+  .gallery-cover-thumb {
+    width: 72px;
+    height: 72px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.2);
+  }
+  .gallery-cover-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .gallery-thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.05);
+  }
+
+  /* Allergen filter row in gallery */
+  .gallery-allergens {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    margin-top: 8px;
+    padding-bottom: 2px;
+  }
+  .gallery-allergens::-webkit-scrollbar { display: none; }
+  .gallery-allergen-pill {
+    padding: 5px 12px;
+    border: 1px solid #333;
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #aaa;
+    background: transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .gallery-allergen-pill.active {
+    background: #059669;
+    border-color: #059669;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  /* Filtered card */
+  .gallery-card-filtered {
+    opacity: 0.3;
+  }
+  .gallery-card-allergen-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    padding: 10px 16px;
+    border-radius: 12px;
+    z-index: 5;
+    font-size: 12px;
+    color: rgba(255,255,255,0.8);
+    text-align: center;
+  }
+
+  /* Order button in gallery */
+  .gallery-card-order {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(138, 5, 190, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: none;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background 0.2s;
+  }
+  .gallery-card-order:hover {
+    background: rgba(138, 5, 190, 0.9);
+  }
+
+  /* Enhanced popular badge pulse */
+  .gallery-badge-pulse {
+    animation: gallery-fire-pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes gallery-fire-pulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,80,0,0.4); }
+    50% { transform: scale(1.1); box-shadow: 0 0 12px 4px rgba(255,80,0,0.3); }
   }
 
   /* Smooth momentum scrolling feel */
