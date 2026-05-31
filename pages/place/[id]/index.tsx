@@ -404,11 +404,6 @@ export default function PlaceDetailsScreen() {
                 <line x1="12" y1="2" x2="12" y2="15"/>
               </svg>
             </button>
-            <button className="pd-hero-btn" onClick={() => router.push(`/place/${place.id}/menu`)} aria-label="Menu">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 6h18M3 12h18M3 18h18"/>
-              </svg>
-            </button>
           </div>
 
           {/* Hero text overlay */}
@@ -442,10 +437,10 @@ export default function PlaceDetailsScreen() {
             <span className="pd-quick-sub">Photos</span>
           </div>
           <div className="pd-quick-divider" />
-          <div className="pd-quick-item" onClick={handleDirections}>
-            <span className="pd-quick-icon">🚗</span>
-            <span className="pd-quick-value">{driveTime}</span>
-            <span className="pd-quick-sub">Drive</span>
+          <div className="pd-quick-item" onClick={() => router.push(`/place/${place.id}/menu-gallery`)}>
+            <span className="pd-quick-icon">📖</span>
+            <span className="pd-quick-value">Menu</span>
+            <span className="pd-quick-sub">View</span>
           </div>
         </div>
 
@@ -687,6 +682,11 @@ export default function PlaceDetailsScreen() {
                     </a>
                   </div>
                 )}
+
+                <div className="pd-contact-item" onClick={handleDirections} style={{ cursor: 'pointer' }}>
+                  <span className="pd-contact-icon">🚗</span>
+                  <span className="pd-contact-link">Get Directions{driveTime ? ` (${driveTime})` : ''}</span>
+                </div>
 
                 <div className="pd-claim-divider" />
                 <div className="pd-claim-section">
