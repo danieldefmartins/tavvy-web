@@ -22,6 +22,7 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import MenuLanguageToggle from '../../../components/MenuLanguageToggle';
 import { trackMenuView, trackMenuShare } from '../../../lib/menuAnalytics';
+import { trackItemView, trackItemShare } from '../../../lib/menuItemAnalytics';
 
 interface MenuItem {
   id: string;
@@ -313,6 +314,7 @@ export default function MenuPage() {
   const handleShareItem = async (item: MenuItem, e: React.MouseEvent) => {
     e.stopPropagation();
     trackMenuShare(id as string);
+    trackItemShare(item.id);
     const slug = placeSlug || id;
     const shareUrl = `https://tavvy.com/place/${id}/menu?dish=${item.id}`;
     const priceStr = formatPrice(item.price, item.price_label);
@@ -601,7 +603,7 @@ export default function MenuPage() {
                       key={item.id}
                       id={`menu-item-${item.id}`}
                       className={`menu-item ${displayImage ? 'has-image' : ''} ${isExpanded ? 'expanded' : ''} ${highlightedDish === item.id ? 'highlighted' : ''} ${!matchesFilter ? 'filtered-out' : ''}`}
-                      onClick={() => router.push(`/place/${id}/menu-gallery?dish=${item.id}`)}
+                      onClick={() => { trackItemView(item.id); router.push(`/place/${id}/menu-gallery?dish=${item.id}`); }}
                     >
                       {!matchesFilter && <span className="menu-item-allergen-warn">⚠️</span>}
                       <div className="menu-item-content">

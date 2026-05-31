@@ -19,6 +19,7 @@ import { fetchPlaceById } from '../../../lib/placeService';
 import { supabase } from '../../../lib/supabaseClient';
 import { Place } from '../../../types';
 import { fetchPlaceSignals, SignalAggregate, SIGNAL_LABELS } from '../../../lib/signalService';
+import DeliveryLinks from '../../../components/DeliveryLinks';
 import SignalPill, { SignalPillsGrid, SignalDetailRow, getSignalCategory, inferCategoryFromLabel, SignalCategory } from '../../../components/SignalPill';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -581,6 +582,13 @@ export default function PlaceDetailsScreen() {
               View Full Menu →
             </button>
           </div>
+
+          {/* Delivery Links — only if no Tavvy ordering */}
+          <DeliveryLinks
+            restaurantName={place.name}
+            address={place.address_line1}
+            orderingEnabled={(place as any).ordering_enabled}
+          />
         </div>
 
         {/* ===== 5. FULL SIGNAL BREAKDOWN (expandable) ===== */}

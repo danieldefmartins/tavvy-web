@@ -21,6 +21,7 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import MenuLanguageToggle from '../../../components/MenuLanguageToggle';
 import { trackMenuView, trackMenuShare } from '../../../lib/menuAnalytics';
+import { trackItemView, trackItemShare } from '../../../lib/menuItemAnalytics';
 
 interface MenuItem {
   id: string;
@@ -267,13 +268,19 @@ export default function MenuGalleryPage() {
     all_day: 'All Day',
   };
 
-  // Handle scroll to track active index
+  // Handle scroll to track active index + per-item view analytics
   const handleScroll = () => {
     if (!scrollRef.current) return;
     const el = scrollRef.current;
     const cardWidth = el.clientWidth;
     const index = Math.round(el.scrollLeft / cardWidth);
     setActiveIndex(index);
+
+    // Track item view when card snaps into view
+    const itemIndex = index - coverOffset;
+    if (itemIndex >= 0 && itemIndex < filteredItems.length) {
+      trackItemView(filteredItems[itemIndex].id);
+    }
   };
 
   // Reset index when filters change
@@ -310,6 +317,7 @@ export default function MenuGalleryPage() {
   // Share a dish
   const handleShareDish = async (item: MenuItem) => {
     trackMenuShare(id as string);
+    trackItemShare(item.id);
     const shareUrl = `https://tavvy.com/place/${id}/menu-gallery?dish=${item.id}`;
     const priceStr = formatPrice(item.price, item.price_label);
     const shareText = `${item.name} at ${placeName}${priceStr ? ` — ${priceStr}` : ''}`;
