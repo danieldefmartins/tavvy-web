@@ -5307,7 +5307,26 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
     }
     
     if (fetchError || !data) {
-      console.log('[Card SSR] Card not found:', slug);
+      console.log('[Card SSR] Card not found, checking place slugs:', slug);
+
+      // Check if this slug matches a place in the places table
+      const { data: placeData } = await serverSupabase
+        .from('places')
+        .select('id')
+        .eq('slug', slug)
+        .maybeSingle();
+
+      if (placeData?.id) {
+        console.log('[Card SSR] Place found by slug, redirecting to:', placeData.id);
+        return {
+          redirect: {
+            destination: `/place/${placeData.id}`,
+            permanent: false,
+          },
+        };
+      }
+
+      console.log('[Card SSR] No card or place found for slug:', slug);
       return {
         props: {
           cardData: null,

@@ -1,7 +1,7 @@
 /**
  * Place Details Screen
  * Redesigned to match tavvy-mobile/screens/PlaceDetailsScreen.tsx
- * 
+ *
  * Layout:
  * 1. Hero section with cover photo + gradient overlay + text
  * 2. Quick info bar (Open / Call / Photos / Drive)
@@ -12,12 +12,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import AppLayout from '../../components/AppLayout';
-import { fetchPlaceById } from '../../lib/placeService';
-import { supabase } from '../../lib/supabaseClient';
-import { Place } from '../../types';
-import { fetchPlaceSignals, SignalAggregate, SIGNAL_LABELS } from '../../lib/signalService';
-import SignalPill, { SignalPillsGrid, SignalDetailRow, getSignalCategory, inferCategoryFromLabel, SignalCategory } from '../../components/SignalPill';
+import AppLayout from '../../../components/AppLayout';
+import { fetchPlaceById } from '../../../lib/placeService';
+import { supabase } from '../../../lib/supabaseClient';
+import { Place } from '../../../types';
+import { fetchPlaceSignals, SignalAggregate, SIGNAL_LABELS } from '../../../lib/signalService';
+import SignalPill, { SignalPillsGrid, SignalDetailRow, getSignalCategory, inferCategoryFromLabel, SignalCategory } from '../../../components/SignalPill';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
@@ -103,7 +103,7 @@ export default function PlaceDetailsScreen() {
   const [placePhotosDB, setPlacePhotosDB] = useState<{id: string; url: string; caption?: string}[]>([]);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Living Score signals (matches iOS)
   const [livingSignals, setLivingSignals] = useState<{
     best_for: SignalAggregate[];
@@ -584,7 +584,7 @@ export default function PlaceDetailsScreen() {
               <div className="pd-card">
                 <h2 className="pd-card-title">Been here?</h2>
                 <p className="pd-card-subtitle">Share your experience with the community</p>
-                <button 
+                <button
                   className="pd-add-review-btn"
                   onClick={() => router.push({
                     pathname: '/app/add-review',
