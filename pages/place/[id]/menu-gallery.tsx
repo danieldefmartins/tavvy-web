@@ -348,15 +348,15 @@ export default function MenuGalleryPage() {
                         {item.is_new && <span className="gallery-badge new">{'\u2728'} New</span>}
                       </div>
 
-                      {/* Dish name + small description overlaid at bottom */}
-                      <h2 className="gallery-card-name">{item.name}</h2>
-                      <div className="gallery-card-info">
-                        {item.description && (
-                          <p className="gallery-card-desc">{item.description}</p>
-                        )}
-                        {item.dietary_tags && item.dietary_tags.length > 0 && (
-                          <div className="gallery-card-dietary">
-                            {item.dietary_tags.map(tag => {
+                      {/* Fixed text block — ALWAYS same position regardless of content */}
+                      <div className="gallery-card-text-block">
+                        <h2 className="gallery-card-name">{item.name}</h2>
+                        <p className="gallery-card-desc">
+                          {item.description || '\u00A0'}
+                        </p>
+                        <div className="gallery-card-dietary">
+                          {item.dietary_tags && item.dietary_tags.length > 0 ? (
+                            item.dietary_tags.map(tag => {
                               const info = DIETARY_LABELS[tag.toLowerCase()];
                               if (!info) return null;
                               return (
@@ -364,9 +364,11 @@ export default function MenuGalleryPage() {
                                   {info.icon} {info.label}
                                 </span>
                               );
-                            })}
-                          </div>
-                        )}
+                            })
+                          ) : (
+                            <span className="gallery-dietary-pill" style={{ opacity: 0 }}>placeholder</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -676,65 +678,62 @@ const galleryStyles = `
   }
 
   /*
-   * Bottom content layout (from bottom up):
-   * - Footer (Tavvy logo) — outside the card
-   * - Info block: description + dietary tags (bottom: 16px)
-   * - Dish name (above info block, bottom: 90px)
-   * - Counter/dots (above name, bottom: 140px)
+   * FIXED TEXT BLOCK — locked position for ALL cards.
+   * Uses fixed height so text never shifts between dishes.
    */
-
-  /* Dish name + description together at bottom */
-  .gallery-card-name {
+  .gallery-card-text-block {
     position: absolute;
-    bottom: 52px;
+    bottom: 16px;
     left: 20px;
-    right: 20px;
+    right: 70px;
+    height: 90px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+  .gallery-card-name {
     margin: 0;
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 800;
     color: #fff;
     line-height: 1.2;
     letter-spacing: -0.5px;
-    text-shadow: 0 2px 16px rgba(0,0,0,0.8);
-    z-index: 2;
-  }
-
-  /* Description sits right below dish name */
-  .gallery-card-info {
-    position: absolute;
-    bottom: 16px;
-    left: 0;
-    right: 0;
-    padding: 0 20px;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.8);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .gallery-card-desc {
-    font-size: 13px;
-    color: rgba(255,255,255,0.7);
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
     margin: 0;
     line-height: 1.4;
+    height: 34px;
+    overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
-    overflow: hidden;
   }
   .gallery-card-dietary {
     display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
+    gap: 5px;
+    flex-wrap: nowrap;
+    height: 20px;
+    align-items: center;
+    overflow: hidden;
   }
   .gallery-dietary-pill {
-    padding: 3px 8px;
-    border-radius: 10px;
+    padding: 2px 7px;
+    border-radius: 8px;
     font-size: 10px;
     font-weight: 500;
-    background: rgba(255,255,255,0.15);
-    color: rgba(255,255,255,0.8);
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.75);
     backdrop-filter: blur(4px);
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.08);
+    white-space: nowrap;
   }
 
   /* Dots — bottom right, subtle */
