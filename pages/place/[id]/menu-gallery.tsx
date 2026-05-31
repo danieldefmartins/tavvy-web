@@ -565,7 +565,7 @@ const galleryStyles = `
     color: #fff;
   }
 
-  /* Gallery Scroll Container */
+  /* Gallery Scroll Container — fills ALL available space */
   .gallery-scroll {
     flex: 1;
     display: flex;
@@ -574,32 +574,34 @@ const galleryStyles = `
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    min-height: 0;
   }
   .gallery-scroll::-webkit-scrollbar { display: none; }
 
-  /* Each Card — 9:16 portrait ratio, image fills everything */
+  /* Each Card — FULL SCREEN between header and footer, image fills everything */
   .gallery-card {
     min-width: 100%;
     width: 100%;
+    height: 100%;
     flex-shrink: 0;
     scroll-snap-align: start;
     position: relative;
-    aspect-ratio: 9 / 16;
-    height: 100%;
     overflow: hidden;
   }
 
-  /* Image fills the entire 9:16 card — stretch smaller images to fit */
+  /* Image fills the ENTIRE card — no padding, no gaps, edge to edge */
   .gallery-card-image {
     position: absolute;
-    inset: 0;
-    overflow: hidden;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
   }
   .gallery-card-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* Forces all images to 9:16 regardless of source aspect ratio */
+    /* Stretches/crops any image to fill the full screen */
   }
   .gallery-card-placeholder {
     width: 100%;
