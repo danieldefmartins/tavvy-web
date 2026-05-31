@@ -1506,22 +1506,6 @@ const orderStyles = `
 `;
 
 export const getServerSideProps = async ({ params, locale }: { params: { id: string }; locale: string }) => {
-  // Validate place exists
-  const { createClient } = require('@supabase/supabase-js');
-  const supabaseServer = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://scasgwrikoqdwlwlwcff.supabase.co',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjYXNnd3Jpa29xZHdsd2x3Y2ZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY5ODUxODEsImV4cCI6MjA4MjU2MTE4MX0.83ARHv2Zj6oJpbojPCIT0ljL8Ze2JqMBztLVueGXXhs'
-  );
-
-  const { data: place } = await supabaseServer
-    .from('places')
-    .select('id')
-    .eq('id', params.id)
-    .maybeSingle();
-
-  if (!place) {
-    return { notFound: true };
-  }
 
   return {
     props: {

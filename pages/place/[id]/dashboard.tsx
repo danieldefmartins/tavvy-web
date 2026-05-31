@@ -13,7 +13,6 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { GetServerSideProps } from 'next';
 import { supabase } from '../../../lib/supabaseClient';
-import { createClient } from '@supabase/supabase-js';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -602,10 +601,12 @@ function OrderCard({
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params as { id: string };
 
-  // Create server-side Supabase client
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://scasgwrikoqdwlwlwcff.supabase.co';
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjYXNnd3Jpa29xZHdsd2x3Y2ZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY5ODUxODEsImV4cCI6MjA4MjU2MTE4MX0.83ARHv2Zj6oJpbojPCIT0ljL8Ze2JqMBztLVueGXXhs';
-  const serverSupabase = createClient(supabaseUrl, supabaseKey);
+  // Create server-side Supabase client (dynamic import for ESM compat)
+  const { createClient: createSupabaseClient } = await import('@supabase/supabase-js');
+  const serverSupabase = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://scasgwrikoqdwlwlwcff.supabase.co',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjYXNnd3Jpa29xZHdsd2x3Y2ZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY5ODUxODEsImV4cCI6MjA4MjU2MTE4MX0.83ARHv2Zj6oJpbojPCIT0ljL8Ze2JqMBztLVueGXXhs'
+  );
 
   // Validate place exists
   const { data: placeData, error } = await serverSupabase
