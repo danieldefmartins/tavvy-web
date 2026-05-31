@@ -235,7 +235,7 @@ export default function MenuPage() {
   const handleShareItem = async (item: MenuItem, e: React.MouseEvent) => {
     e.stopPropagation();
     const slug = placeSlug || id;
-    const shareUrl = `https://tavvy.com/${slug}/menu?dish=${item.id}`;
+    const shareUrl = `https://tavvy.com/place/${id}/menu?dish=${item.id}`;
     const priceStr = formatPrice(item.price, item.price_label);
     const shareText = `${item.name} at ${placeName}${priceStr ? ` — ${priceStr}` : ''}`;
 
@@ -330,7 +330,7 @@ export default function MenuPage() {
           </button>
           <div className="menu-title-section">
             <h1 className="menu-title">{menu?.name || `${placeName} Menu`}</h1>
-            {placeName && <p className="menu-subtitle">{placeName}</p>}
+            {placeName && <Link href={`/place/${id}`}><p className="menu-subtitle" style={{ cursor: 'pointer' }}>{placeName}</p></Link>}
           </div>
           <Link href={`/place/${id}/menu-gallery`} className="menu-gallery-link">
             View Gallery Mode

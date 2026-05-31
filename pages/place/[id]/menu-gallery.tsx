@@ -229,8 +229,7 @@ export default function MenuGalleryPage() {
 
   // Share a dish
   const handleShareDish = async (item: MenuItem) => {
-    const slug = placeSlug || id;
-    const shareUrl = `https://tavvy.com/${slug}/menu-gallery?dish=${item.id}`;
+    const shareUrl = `https://tavvy.com/place/${id}/menu-gallery?dish=${item.id}`;
     const priceStr = formatPrice(item.price, item.price_label);
     const shareText = `${item.name} at ${placeName}${priceStr ? ` — ${priceStr}` : ''}`;
 
@@ -305,7 +304,7 @@ export default function MenuGalleryPage() {
               <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
           </button>
-          <span className="gallery-nav-title">{placeName}</span>
+          <Link href={`/place/${id}`} className="gallery-nav-title">{placeName}</Link>
           <Link href={`/place/${id}/menu`} className="gallery-nav-classic">
             Classic
           </Link>
@@ -557,6 +556,11 @@ const galleryStyles = `
     overflow: hidden;
     text-overflow: ellipsis;
     padding: 0 8px;
+    color: #fff;
+    text-decoration: none;
+  }
+  .gallery-nav-title:hover {
+    opacity: 0.8;
   }
   .gallery-nav-classic {
     font-size: 12px;
