@@ -253,16 +253,20 @@ export default function MenuGalleryPage() {
     return `$${price.toFixed(2)}`;
   };
 
+  // Cover card offset (1 if cover is shown, 0 otherwise)
+  const coverOffset = menu?.show_cover ? 1 : 0;
+
   // Auto-scroll to dish from ?dish= query param
   useEffect(() => {
     if (!router.isReady || loading || filteredItems.length === 0) return;
     const dishId = router.query.dish as string;
     if (!dishId || !scrollRef.current) return;
     const index = filteredItems.findIndex(item => item.id === dishId);
-    if (index > 0) {
+    if (index >= 0) {
+      const actualIndex = index + coverOffset;
       const cardWidth = scrollRef.current.clientWidth;
-      scrollRef.current.scrollLeft = cardWidth * index;
-      setActiveIndex(index);
+      scrollRef.current.scrollLeft = cardWidth * actualIndex;
+      setActiveIndex(actualIndex);
     }
   }, [router.isReady, loading, filteredItems.length]);
 
@@ -504,9 +508,9 @@ export default function MenuGalleryPage() {
             </div>
 
             {/* Dot indicators */}
-            {filteredItems.length > 1 && filteredItems.length <= 20 && (
+            {(filteredItems.length + coverOffset) > 1 && (filteredItems.length + coverOffset) <= 20 && (
               <div className="gallery-dots">
-                {filteredItems.map((_, idx) => (
+                {Array.from({ length: filteredItems.length + coverOffset }).map((_, idx) => (
                   <span
                     key={idx}
                     className={`gallery-dot ${idx === activeIndex ? 'active' : ''}`}
@@ -516,9 +520,9 @@ export default function MenuGalleryPage() {
             )}
 
             {/* Counter for large menus */}
-            {filteredItems.length > 20 && (
+            {(filteredItems.length + coverOffset) > 20 && (
               <div className="gallery-counter">
-                {activeIndex + 1} / {filteredItems.length}
+                {activeIndex + 1} / {filteredItems.length + coverOffset}
               </div>
             )}
           </>
@@ -952,6 +956,103 @@ const galleryStyles = `
     height: 18px;
     width: auto;
     opacity: 0.5;
+  }
+
+  /* Cover Card */
+  .gallery-cover-card .gallery-card-image {
+    background: #000;
+  }
+  .gallery-cover-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center top, #1a0a2e 0%, #000 70%);
+  }
+  .gallery-cover-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    text-align: center;
+    z-index: 2;
+  }
+  .gallery-cover-name {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+  }
+  .gallery-cover-tagline {
+    margin: 8px 0 0;
+    font-size: 15px;
+    color: rgba(255,255,255,0.6);
+    font-weight: 400;
+  }
+  .gallery-cover-welcome {
+    margin: 20px 0 0;
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+    font-style: italic;
+    line-height: 1.6;
+    max-width: 300px;
+  }
+  .gallery-cover-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 28px;
+    max-width: 320px;
+  }
+  .gallery-cover-pill {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    backdrop-filter: blur(4px);
+  }
+  .pill-happy {
+    background: rgba(251, 191, 36, 0.15);
+    border: 1px solid rgba(251, 191, 36, 0.4);
+    color: #fbbf24;
+  }
+  .pill-chef {
+    background: rgba(138, 5, 190, 0.15);
+    border: 1px solid rgba(138, 5, 190, 0.4);
+    color: #c4b5fd;
+  }
+  .pill-day {
+    background: rgba(20, 184, 166, 0.15);
+    border: 1px solid rgba(20, 184, 166, 0.4);
+    color: #5eead4;
+  }
+  .pill-promo {
+    background: rgba(244, 114, 182, 0.15);
+    border: 1px solid rgba(244, 114, 182, 0.4);
+    color: #f9a8d4;
+  }
+  .pill-seasonal {
+    background: rgba(74, 222, 128, 0.15);
+    border: 1px solid rgba(74, 222, 128, 0.4);
+    color: #86efac;
+  }
+  .gallery-cover-swipe {
+    position: absolute;
+    bottom: 30px;
+    margin: 0;
+    font-size: 13px;
+    color: rgba(255,255,255,0.35);
+    font-weight: 400;
+    animation: gallery-swipe-pulse 2s ease-in-out infinite;
+  }
+  @keyframes gallery-swipe-pulse {
+    0%, 100% { opacity: 0.35; transform: translateX(0); }
+    50% { opacity: 0.7; transform: translateX(4px); }
   }
 
   /* Smooth momentum scrolling feel */
