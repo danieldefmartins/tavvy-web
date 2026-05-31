@@ -680,10 +680,10 @@ const galleryStyles = `
    * - Counter/dots (above name, bottom: 140px)
    */
 
-  /* Dish name — overlaid, well above the description */
+  /* Dish name + description together at bottom */
   .gallery-card-name {
     position: absolute;
-    bottom: 100px;
+    bottom: 52px;
     left: 20px;
     right: 20px;
     margin: 0;
@@ -696,7 +696,7 @@ const galleryStyles = `
     z-index: 2;
   }
 
-  /* Small description + tags — anchored at bottom with padding */
+  /* Description sits right below dish name */
   .gallery-card-info {
     position: absolute;
     bottom: 16px;
@@ -706,7 +706,7 @@ const galleryStyles = `
     z-index: 2;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
   .gallery-card-desc {
     font-size: 13px;
@@ -734,19 +734,18 @@ const galleryStyles = `
     border: 1px solid rgba(255,255,255,0.1);
   }
 
-  /* Counter / dots — positioned above the dish name */
+  /* Dots — bottom right, subtle */
   .gallery-dots {
     position: absolute;
-    bottom: 145px;
-    left: 50%;
-    transform: translateX(-50%);
+    bottom: 20px;
+    right: 20px;
     display: flex;
-    gap: 5px;
+    gap: 4px;
     z-index: 10;
   }
   .gallery-dot {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
     background: rgba(255,255,255,0.3);
     transition: all 0.2s;
@@ -756,15 +755,16 @@ const galleryStyles = `
     transform: scale(1.3);
   }
 
-  /* Counter for large menus */
+  /* Counter — bottom right */
   .gallery-counter {
     position: absolute;
-    bottom: 145px;
-    left: 50%;
-    transform: translateX(-50%);
+    bottom: 20px;
+    right: 20px;
     font-size: 12px;
-    color: rgba(255,255,255,0.6);
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
     background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
     padding: 4px 12px;
     border-radius: 12px;
     z-index: 10;
