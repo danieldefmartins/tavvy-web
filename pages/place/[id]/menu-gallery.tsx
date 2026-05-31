@@ -683,22 +683,22 @@ const galleryStyles = `
    */
   .gallery-card-text-block {
     position: absolute;
-    bottom: 16px;
+    bottom: 20px;
     left: 20px;
     right: 70px;
-    height: 90px;
+    height: 110px;
     z-index: 2;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    gap: 4px;
+    gap: 8px;
   }
   .gallery-card-name {
     margin: 0;
     font-size: 22px;
     font-weight: 800;
     color: #fff;
-    line-height: 1.2;
+    line-height: 1.25;
     letter-spacing: -0.5px;
     text-shadow: 0 2px 12px rgba(0,0,0,0.8);
     white-space: nowrap;
@@ -706,11 +706,11 @@ const galleryStyles = `
     text-overflow: ellipsis;
   }
   .gallery-card-desc {
-    font-size: 12px;
+    font-size: 13px;
     color: rgba(255,255,255,0.65);
     margin: 0;
     line-height: 1.4;
-    height: 34px;
+    height: 36px;
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -720,7 +720,7 @@ const galleryStyles = `
     display: flex;
     gap: 5px;
     flex-wrap: nowrap;
-    height: 20px;
+    height: 22px;
     align-items: center;
     overflow: hidden;
   }
