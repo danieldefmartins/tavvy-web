@@ -672,37 +672,45 @@ const galleryStyles = `
     background: rgba(138, 5, 190, 0.7);
   }
 
-  /* Dish name — overlaid at bottom of image */
+  /*
+   * Bottom content layout (from bottom up):
+   * - Footer (Tavvy logo) — outside the card
+   * - Info block: description + dietary tags (bottom: 16px)
+   * - Dish name (above info block, bottom: 90px)
+   * - Counter/dots (above name, bottom: 140px)
+   */
+
+  /* Dish name — overlaid, well above the description */
   .gallery-card-name {
     position: absolute;
-    bottom: 60px;
+    bottom: 100px;
     left: 20px;
     right: 20px;
     margin: 0;
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 800;
     color: #fff;
     line-height: 1.2;
     letter-spacing: -0.5px;
-    text-shadow: 0 2px 16px rgba(0,0,0,0.7);
+    text-shadow: 0 2px 16px rgba(0,0,0,0.8);
     z-index: 2;
   }
 
-  /* Small text info area — bottom of the card, overlaid on image */
+  /* Small description + tags — anchored at bottom with padding */
   .gallery-card-info {
     position: absolute;
-    bottom: 0;
+    bottom: 16px;
     left: 0;
     right: 0;
-    padding: 0 20px 20px;
+    padding: 0 20px;
     z-index: 2;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
   }
   .gallery-card-desc {
     font-size: 13px;
-    color: rgba(255,255,255,0.75);
+    color: rgba(255,255,255,0.7);
     margin: 0;
     line-height: 1.4;
     display: -webkit-box;
@@ -726,10 +734,10 @@ const galleryStyles = `
     border: 1px solid rgba(255,255,255,0.1);
   }
 
-  /* Dot indicators */
+  /* Counter / dots — positioned above the dish name */
   .gallery-dots {
     position: absolute;
-    bottom: 80px;
+    bottom: 145px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -751,7 +759,7 @@ const galleryStyles = `
   /* Counter for large menus */
   .gallery-counter {
     position: absolute;
-    bottom: 80px;
+    bottom: 145px;
     left: 50%;
     transform: translateX(-50%);
     font-size: 12px;
