@@ -19,6 +19,8 @@ import Link from 'next/link';
 import { supabase } from '../../../lib/supabaseClient';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import MenuLanguageToggle from '../../../components/MenuLanguageToggle';
+import { trackMenuView, trackMenuShare } from '../../../lib/menuAnalytics';
 
 interface MenuItem {
   id: string;
@@ -115,6 +117,13 @@ export default function MenuGalleryPage() {
       loadMenu(id as string);
     }
   }, [id]);
+
+  // Track menu view
+  useEffect(() => {
+    if (id && !loading && !noMenu) {
+      trackMenuView(id as string);
+    }
+  }, [id, loading, noMenu]);
 
   const loadMenu = async (placeId: string) => {
     setLoading(true);
@@ -272,6 +281,7 @@ export default function MenuGalleryPage() {
 
   // Share a dish
   const handleShareDish = async (item: MenuItem) => {
+    trackMenuShare(id as string);
     const shareUrl = `https://tavvy.com/place/${id}/menu-gallery?dish=${item.id}`;
     const priceStr = formatPrice(item.price, item.price_label);
     const shareText = `${item.name} at ${placeName}${priceStr ? ` — ${priceStr}` : ''}`;
@@ -348,6 +358,7 @@ export default function MenuGalleryPage() {
             </svg>
           </button>
           <Link href={`/place/${id}`} className="gallery-nav-title">{placeName}</Link>
+          <MenuLanguageToggle variant="dark" />
           <Link href={`/place/${id}/menu`} className="gallery-nav-classic">
             Classic
           </Link>

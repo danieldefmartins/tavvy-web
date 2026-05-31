@@ -20,6 +20,8 @@ import AppLayout from '../../../components/AppLayout';
 import { supabase } from '../../../lib/supabaseClient';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import MenuLanguageToggle from '../../../components/MenuLanguageToggle';
+import { trackMenuView, trackMenuShare } from '../../../lib/menuAnalytics';
 
 interface MenuItem {
   id: string;
@@ -32,6 +34,8 @@ interface MenuItem {
   is_new: boolean;
   dietary_tags: string[] | null;
   linked_photo_ids: string[] | null;
+  calories: number | null; // TODO: add `calories integer` column to menu_items table
+  order_url: string | null; // TODO: add `order_url text` column to menu_items table
 }
 
 interface MenuCategory {
@@ -80,6 +84,16 @@ interface PlacePhoto {
 
 type MealPeriod = 'all' | 'breakfast' | 'lunch' | 'dinner' | 'all_day';
 
+type AllergenFilter = 'nut_free' | 'gluten_free' | 'dairy_free' | 'vegan' | 'vegetarian';
+
+const ALLERGEN_FILTERS: { key: AllergenFilter; label: string; icon: string }[] = [
+  { key: 'nut_free', label: 'Nut-Free', icon: '🌰' },
+  { key: 'gluten_free', label: 'Gluten-Free', icon: '🌾' },
+  { key: 'dairy_free', label: 'Dairy-Free', icon: '🥛' },
+  { key: 'vegan', label: 'Vegan', icon: '🌱' },
+  { key: 'vegetarian', label: 'Vegetarian', icon: '🌱' },
+];
+
 const MEAL_PERIOD_LABELS: Record<MealPeriod, string> = {
   all: 'All',
   breakfast: 'Breakfast',
@@ -119,12 +133,21 @@ export default function MenuPage() {
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
   const [chefDish, setChefDish] = useState<FeaturedDish | null>(null);
   const [dayDish, setDayDish] = useState<FeaturedDish | null>(null);
+  const [activeFilters, setActiveFilters] = useState<AllergenFilter[]>([]);
+  const [showFullMenu, setShowFullMenu] = useState(false);
 
   useEffect(() => {
     if (id) {
       loadMenu(id as string);
     }
   }, [id]);
+
+  // Track menu view
+  useEffect(() => {
+    if (id && !loading && !noMenu) {
+      trackMenuView(id as string);
+    }
+  }, [id, loading, noMenu]);
 
   const loadMenu = async (placeId: string) => {
     setLoading(true);
@@ -253,6 +276,22 @@ export default function MenuPage() {
     return tags.map(tag => DIETARY_ICONS[tag.toLowerCase()] || '').filter(Boolean).join(' ');
   };
 
+  const itemMatchesFilters = (item: MenuItem): boolean => {
+    if (activeFilters.length === 0) return true;
+    const tags = (item.dietary_tags || []).map(t => t.toLowerCase().replace('-', '_'));
+    return activeFilters.every(filter => {
+      // Match filter key against dietary tags (handle gf alias)
+      if (filter === 'gluten_free') return tags.includes('gluten_free') || tags.includes('gf') || tags.includes('gluten-free');
+      return tags.includes(filter);
+    });
+  };
+
+  const toggleFilter = (filter: AllergenFilter) => {
+    setActiveFilters(prev =>
+      prev.includes(filter) ? prev.filter(f => f !== filter) : [...prev, filter]
+    );
+  };
+
   // Auto-scroll to dish from ?dish= query param
   const [highlightedDish, setHighlightedDish] = useState<string | null>(null);
   useEffect(() => {
@@ -273,6 +312,7 @@ export default function MenuPage() {
   // Share a menu item
   const handleShareItem = async (item: MenuItem, e: React.MouseEvent) => {
     e.stopPropagation();
+    trackMenuShare(id as string);
     const slug = placeSlug || id;
     const shareUrl = `https://tavvy.com/place/${id}/menu?dish=${item.id}`;
     const priceStr = formatPrice(item.price, item.price_label);
@@ -355,110 +395,146 @@ export default function MenuPage() {
       <style jsx global>{menuStyles}</style>
 
       <div className="menu-container">
-        {/* Cover Page */}
-        {menu?.show_cover && (
+        {/* Cover Page — Visual, Luxury Landing */}
+        {menu?.show_cover && !showFullMenu && (
           <div className="menu-cover-page">
-            {/* Hero Image */}
-            {menu.cover_image_url && (
-              <div className="menu-cover">
-                <img src={menu.cover_image_url} alt={`${placeName} menu`} className="menu-cover-img" />
-                <div className="menu-cover-overlay" />
+            {/* Full-Width Hero with Gradient Overlay */}
+            <div className="menu-hero">
+              {menu.cover_image_url && (
+                <img src={menu.cover_image_url} alt={`${placeName}`} className="menu-hero-img" />
+              )}
+              <div className="menu-hero-gradient" />
+              <div className="menu-hero-text">
+                <h1 className="menu-hero-name">{placeName}</h1>
+                {menu.tagline && <p className="menu-hero-tagline">{menu.tagline}</p>}
               </div>
-            )}
-
-            {/* Restaurant Name + Tagline */}
-            <div className="menu-cover-intro">
-              <h1 className="menu-cover-name">{placeName}</h1>
-              {menu.tagline && <p className="menu-cover-tagline">{menu.tagline}</p>}
-              {menu.welcome_message && <p className="menu-cover-welcome">{menu.welcome_message}</p>}
             </div>
 
-            {/* Promotional Cards Row */}
+            {/* See Full Menu CTA */}
+            <div className="menu-cover-cta-wrap">
+              <button className="menu-cover-cta" onClick={() => setShowFullMenu(true)}>
+                See Full Menu
+              </button>
+            </div>
+
+            {/* Visual Promo Tiles Grid */}
             {(menu.happy_hour_enabled || chefDish || dayDish || menu.promo_banner_enabled || menu.seasonal_special_enabled) && (
-              <div className="menu-cover-cards">
+              <div className="menu-promo-grid">
                 {menu.happy_hour_enabled && menu.happy_hour_text && (
-                  <div className="menu-promo-card card-happy-hour">
-                    <div className="menu-promo-card-icon">🍸</div>
-                    <div className="menu-promo-card-content">
-                      <span className="menu-promo-card-label">Happy Hour</span>
-                      <span className="menu-promo-card-text">{menu.happy_hour_text}</span>
+                  <div className="menu-tile tile-happy-hour">
+                    <div className="menu-tile-bg-icon">🍸</div>
+                    <div className="menu-tile-content">
+                      <span className="menu-tile-label">Happy Hour</span>
+                      <span className="menu-tile-headline">{menu.happy_hour_text}</span>
                       {menu.happy_hour_times && (
-                        <span className="menu-promo-card-times">{menu.happy_hour_times}</span>
+                        <span className="menu-tile-sub">{menu.happy_hour_times}</span>
                       )}
                     </div>
                   </div>
                 )}
 
                 {chefDish && (
-                  <div className="menu-promo-card card-chef">
-                    {chefDish.image_url && (
-                      <img src={chefDish.image_url} alt={chefDish.name} className="menu-promo-card-dish-img" />
+                  <div
+                    className="menu-tile tile-chef"
+                    onClick={() => {
+                      setShowFullMenu(true);
+                      setTimeout(() => {
+                        const el = document.getElementById(`menu-item-${chefDish.id}`);
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }, 100);
+                    }}
+                  >
+                    {chefDish.image_url ? (
+                      <img src={chefDish.image_url} alt={chefDish.name} className="menu-tile-img" />
+                    ) : (
+                      <div className="menu-tile-img-placeholder" />
                     )}
-                    <div className="menu-promo-card-content">
-                      <span className="menu-promo-card-label">👨‍🍳 Chef&apos;s Pick</span>
-                      <span className="menu-promo-card-text">{chefDish.name}</span>
+                    <div className="menu-tile-img-overlay" />
+                    <div className="menu-tile-content overlay-content">
+                      <span className="menu-tile-label">Chef&apos;s Pick</span>
+                      <span className="menu-tile-headline">{chefDish.name}</span>
                       {(chefDish.price || chefDish.price_label) && (
-                        <span className="menu-promo-card-price">{formatPrice(chefDish.price, chefDish.price_label)}</span>
+                        <span className="menu-tile-price">{formatPrice(chefDish.price, chefDish.price_label)}</span>
                       )}
                     </div>
                   </div>
                 )}
 
                 {dayDish && (
-                  <div className="menu-promo-card card-day">
-                    {dayDish.image_url && (
-                      <img src={dayDish.image_url} alt={dayDish.name} className="menu-promo-card-dish-img" />
+                  <div
+                    className="menu-tile tile-day"
+                    onClick={() => {
+                      setShowFullMenu(true);
+                      setTimeout(() => {
+                        const el = document.getElementById(`menu-item-${dayDish.id}`);
+                        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }, 100);
+                    }}
+                  >
+                    {dayDish.image_url ? (
+                      <img src={dayDish.image_url} alt={dayDish.name} className="menu-tile-img" />
+                    ) : (
+                      <div className="menu-tile-img-placeholder" />
                     )}
-                    <div className="menu-promo-card-content">
-                      <span className="menu-promo-card-label">⭐ Dish of the Day</span>
-                      <span className="menu-promo-card-text">{dayDish.name}</span>
+                    <div className="menu-tile-img-overlay" />
+                    <div className="menu-tile-content overlay-content">
+                      <span className="menu-tile-label">Dish of the Day</span>
+                      <span className="menu-tile-headline">{dayDish.name}</span>
                       {(dayDish.price || dayDish.price_label) && (
-                        <span className="menu-promo-card-price">{formatPrice(dayDish.price, dayDish.price_label)}</span>
+                        <span className="menu-tile-price">{formatPrice(dayDish.price, dayDish.price_label)}</span>
                       )}
                     </div>
                   </div>
                 )}
 
                 {menu.promo_banner_enabled && menu.promo_banner_text && (
-                  <div className="menu-promo-card card-promo">
-                    <div className="menu-promo-card-icon">🎉</div>
-                    <div className="menu-promo-card-content">
-                      <span className="menu-promo-card-label">Special Offer</span>
-                      <span className="menu-promo-card-text">{menu.promo_banner_text}</span>
+                  <div className="menu-tile tile-promo">
+                    <div className="menu-tile-bg-icon">🎉</div>
+                    <div className="menu-tile-content">
+                      <span className="menu-tile-label">Special Offer</span>
+                      <span className="menu-tile-headline">{menu.promo_banner_text}</span>
                     </div>
                   </div>
                 )}
 
                 {menu.seasonal_special_enabled && menu.seasonal_special_text && (
-                  <div className="menu-promo-card card-seasonal">
-                    <div className="menu-promo-card-icon">🌿</div>
-                    <div className="menu-promo-card-content">
-                      <span className="menu-promo-card-label">Seasonal Special</span>
-                      <span className="menu-promo-card-text">{menu.seasonal_special_text}</span>
+                  <div className="menu-tile tile-seasonal">
+                    <div className="menu-tile-bg-icon">🌿</div>
+                    <div className="menu-tile-content">
+                      <span className="menu-tile-label">Seasonal</span>
+                      <span className="menu-tile-headline">{menu.seasonal_special_text}</span>
                     </div>
                   </div>
                 )}
               </div>
             )}
+
+            {/* Powered by footer on cover */}
+            <div className="menu-cover-footer">
+              <span className="menu-powered">Powered by <strong>Tavvy</strong></span>
+            </div>
           </div>
         )}
 
-        {/* Cover image (fallback when show_cover is off) */}
-        {!menu?.show_cover && menu?.cover_image_url && (
+        {/* Cover image (fallback when show_cover is off, or after user taps See Full Menu) */}
+        {((!menu?.show_cover || showFullMenu) && menu?.cover_image_url) && (
           <div className="menu-cover">
             <img src={menu.cover_image_url} alt={`${placeName} menu`} className="menu-cover-img" />
             <div className="menu-cover-overlay" />
           </div>
         )}
 
+        {(!menu?.show_cover || showFullMenu) && (
+        <>
         <div className="menu-header">
-          <button className="menu-back-btn" onClick={() => router.back()}>
-            ← Back
+          <button className="menu-back-btn" onClick={() => menu?.show_cover ? setShowFullMenu(false) : router.back()}>
+            ← {menu?.show_cover ? 'Cover' : 'Back'}
           </button>
           <div className="menu-title-section">
             <h1 className="menu-title">{menu?.name || `${placeName} Menu`}</h1>
             {placeName && <Link href={`/place/${id}`}><p className="menu-subtitle" style={{ cursor: 'pointer' }}>{placeName}</p></Link>}
           </div>
+          <MenuLanguageToggle variant="light" />
           <Link href={`/place/${id}/menu-gallery`} className="menu-gallery-link">
             View Gallery Mode
           </Link>
@@ -478,6 +554,19 @@ export default function MenuPage() {
             ))}
           </div>
         )}
+
+        {/* Allergen Filter Row */}
+        <div className="menu-allergen-filters">
+          {ALLERGEN_FILTERS.map(f => (
+            <button
+              key={f.key}
+              className={`menu-allergen-pill ${activeFilters.includes(f.key) ? 'active' : ''}`}
+              onClick={() => toggleFilter(f.key)}
+            >
+              {activeFilters.includes(f.key) ? '✓ ' : `${f.icon} `}{f.label}
+            </button>
+          ))}
+        </div>
 
         {/* Categories & Items */}
         <div className="menu-content">
@@ -505,19 +594,21 @@ export default function MenuPage() {
                   const displayImage = item.image_url || (itemPhotos.length > 0 ? itemPhotos[0].url : null);
                   const dietaryStr = getDietaryIcons(item.dietary_tags);
                   const isExpanded = expandedItem === item.id;
+                  const matchesFilter = itemMatchesFilters(item);
 
                   return (
                     <div
                       key={item.id}
                       id={`menu-item-${item.id}`}
-                      className={`menu-item ${displayImage ? 'has-image' : ''} ${isExpanded ? 'expanded' : ''} ${highlightedDish === item.id ? 'highlighted' : ''}`}
+                      className={`menu-item ${displayImage ? 'has-image' : ''} ${isExpanded ? 'expanded' : ''} ${highlightedDish === item.id ? 'highlighted' : ''} ${!matchesFilter ? 'filtered-out' : ''}`}
                       onClick={() => router.push(`/place/${id}/menu-gallery?dish=${item.id}`)}
                     >
+                      {!matchesFilter && <span className="menu-item-allergen-warn">⚠️</span>}
                       <div className="menu-item-content">
                         <div className="menu-item-text">
                           <div className="menu-item-name-row">
                             <span className="menu-item-name">{item.name}</span>
-                            {item.is_popular && <span className="menu-badge popular" title="Popular">{'\u{1F525}'}</span>}
+                            {item.is_popular && <span className="menu-badge popular" title="Popular">🔥 Popular</span>}
                             {item.is_new && <span className="menu-badge new" title="New">{'\u2728'}</span>}
                             <button
                               className="menu-item-share"
@@ -540,8 +631,22 @@ export default function MenuPage() {
                                 {formatPrice(item.price, item.price_label)}
                               </span>
                             )}
+                            {item.calories && (
+                              <span className="menu-item-calories">{item.calories} cal</span>
+                            )}
                             {dietaryStr && (
                               <span className="menu-item-dietary">{dietaryStr}</span>
+                            )}
+                            {item.order_url && (
+                              <a
+                                href={item.order_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="menu-item-order-btn"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                🛒 Order
+                              </a>
                             )}
                           </div>
                         </div>
@@ -582,6 +687,8 @@ export default function MenuPage() {
           <p>Prices may vary. Ask your server for today&apos;s specials.</p>
           <span className="menu-powered">Powered by <strong>Tavvy</strong></span>
         </div>
+        </>
+        )}
       </div>
     </AppLayout>
   );
@@ -1012,44 +1119,181 @@ const menuStyles = `
     font-weight: 700;
   }
 
-  /* Cover Page */
+  /* ===== NEW VISUAL COVER PAGE ===== */
   .menu-cover-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #000;
+  }
+  .menu-hero {
     position: relative;
+    height: 56vh;
+    min-height: 320px;
     overflow: hidden;
   }
-  .menu-cover-page .menu-cover {
-    height: 280px;
+  .menu-hero-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
-  .menu-cover-page .menu-cover-overlay {
-    background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%);
+  .menu-hero-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.0) 30%, rgba(0,0,0,0.5) 70%, rgba(0,0,0,0.9) 100%);
   }
-  .menu-cover-intro {
-    padding: 28px 24px 20px;
-    text-align: center;
-    background: #fff;
+  .menu-hero-text {
+    position: absolute;
+    bottom: 32px;
+    left: 24px;
+    right: 24px;
+    z-index: 2;
   }
-  .menu-cover-name {
+  .menu-hero-name {
     margin: 0;
-    font-size: 28px;
-    font-weight: 700;
-    color: #1a1a1a;
+    font-size: 36px;
+    font-weight: 800;
+    color: #fff;
     font-family: 'Georgia', serif;
-    letter-spacing: -0.5px;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    text-shadow: 0 4px 20px rgba(0,0,0,0.5);
   }
-  .menu-cover-tagline {
-    margin: 6px 0 0;
-    font-size: 15px;
-    color: #666;
+  .menu-hero-tagline {
+    margin: 8px 0 0;
+    font-size: 16px;
+    color: rgba(255,255,255,0.8);
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     font-weight: 400;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
   }
-  .menu-cover-welcome {
-    margin: 14px auto 0;
-    font-size: 14px;
-    color: #555;
-    font-style: italic;
-    line-height: 1.6;
-    max-width: 480px;
+  .menu-cover-cta-wrap {
+    padding: 24px 24px 20px;
+    background: #000;
+  }
+  .menu-cover-cta {
+    display: block;
+    width: 100%;
+    padding: 18px 32px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #8A05BE 0%, #a855f7 100%);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 8px 32px rgba(138, 5, 190, 0.4);
+    letter-spacing: -0.3px;
+  }
+  .menu-cover-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(138, 5, 190, 0.5);
+  }
+  .menu-cover-cta:active {
+    transform: translateY(0);
+  }
+  .menu-promo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 0 24px 32px;
+    background: #000;
+  }
+  .menu-tile {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .menu-tile:hover { transform: scale(1.02); }
+  .menu-tile-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .menu-tile-img-placeholder {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  }
+  .menu-tile-img-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 60%, transparent 100%);
+  }
+  .menu-tile-bg-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -60%);
+    font-size: 48px;
+    opacity: 0.3;
+  }
+  .menu-tile-content {
+    position: relative;
+    z-index: 2;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .menu-tile-content.overlay-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+  .menu-tile-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.7);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .menu-tile-headline {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .menu-tile-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .menu-tile-price {
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .tile-happy-hour {
+    background: linear-gradient(135deg, #92400e 0%, #78350f 100%);
+  }
+  .tile-happy-hour .menu-tile-label { color: #fbbf24; }
+  .tile-promo {
+    background: linear-gradient(135deg, #9d174d 0%, #be185d 50%, #ec4899 100%);
+  }
+  .tile-promo .menu-tile-label { color: #fce7f3; }
+  .tile-seasonal {
+    background: linear-gradient(135deg, #064e3b 0%, #065f46 50%, #059669 100%);
+  }
+  .tile-seasonal .menu-tile-label { color: #a7f3d0; }
+  .menu-cover-footer {
+    padding: 16px 24px 32px;
+    text-align: center;
+    background: #000;
   }
 
   /* Promo Cards Row */
