@@ -1,0 +1,801 @@
+/**
+ * Menu Gallery Page - Full-Screen Image-First Experience
+ * Path: pages/place/[id]/menu-gallery.tsx
+ * URL: tavvy.com/place/[uuid]/menu-gallery
+ *
+ * Features:
+ * - Full-screen horizontal scroll (Instagram Stories style)
+ * - Big food images on black background
+ * - Scroll-snap for one-card-at-a-time swiping
+ * - Category filter pills, meal period toggle
+ * - Dot indicators for position
+ * - Dark, minimal, premium feel
+ */
+
+import React, { useState, useEffect, useRef } from 'react';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
+import { supabase } from '../../../lib/supabaseClient';
+import { useTranslation } from 'next-i18next';
+import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+
+interface MenuItem {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number | null;
+  price_label: string | null;
+  image_url: string | null;
+  is_popular: boolean;
+  is_new: boolean;
+  dietary_tags: string[] | null;
+  category_id: string;
+  category_name?: string;
+  meal_period?: string | null;
+}
+
+interface MenuCategory {
+  id: string;
+  name: string;
+  description: string | null;
+  sort_order: number;
+  image_url: string | null;
+  meal_period: string | null;
+}
+
+interface Menu {
+  id: string;
+  place_id: string;
+  name: string;
+  style: string | null;
+  cover_image_url: string | null;
+}
+
+type MealPeriod = 'all' | 'breakfast' | 'lunch' | 'dinner' | 'all_day';
+
+const DIETARY_LABELS: Record<string, { icon: string; label: string }> = {
+  vegan: { icon: '\u{1F331}', label: 'Vegan' },
+  vegetarian: { icon: '\u{1F331}', label: 'Veggie' },
+  gluten_free: { icon: '\u{1F33E}', label: 'GF' },
+  gf: { icon: '\u{1F33E}', label: 'GF' },
+  dairy_free: { icon: '\u{1F95B}', label: 'DF' },
+  nut_free: { icon: '\u{1F330}', label: 'NF' },
+  spicy: { icon: '\u{1F336}\uFE0F', label: 'Spicy' },
+};
+
+export default function MenuGalleryPage() {
+  const { t } = useTranslation();
+  const router = useRouter();
+  const { id } = router.query;
+
+  const [menu, setMenu] = useState<Menu | null>(null);
+  const [categories, setCategories] = useState<MenuCategory[]>([]);
+  const [allItems, setAllItems] = useState<MenuItem[]>([]);
+  const [placeName, setPlaceName] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [noMenu, setNoMenu] = useState(false);
+
+  // Filters
+  const [activePeriod, setActivePeriod] = useState<MealPeriod>('all');
+  const [activeCategory, setActiveCategory] = useState<string>('all');
+
+  // Scroll position
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (id) {
+      loadMenu(id as string);
+    }
+  }, [id]);
+
+  const loadMenu = async (placeId: string) => {
+    setLoading(true);
+    try {
+      const { data: placeData } = await supabase
+        .from('places')
+        .select('name, slug')
+        .eq('id', placeId)
+        .maybeSingle();
+
+      if (placeData) {
+        setPlaceName(placeData.name || '');
+      }
+
+      const { data: menuData } = await supabase
+        .from('menus')
+        .select('*')
+        .eq('place_id', placeId)
+        .maybeSingle();
+
+      if (!menuData) {
+        setNoMenu(true);
+        setLoading(false);
+        return;
+      }
+
+      setMenu(menuData);
+
+      const { data: categoriesData } = await supabase
+        .from('menu_categories')
+        .select('*')
+        .eq('menu_id', menuData.id)
+        .order('sort_order', { ascending: true });
+
+      if (categoriesData && categoriesData.length > 0) {
+        setCategories(categoriesData);
+
+        const categoryIds = categoriesData.map((c: any) => c.id);
+        const { data: itemsData } = await supabase
+          .from('menu_items')
+          .select('*')
+          .in('category_id', categoryIds)
+          .order('sort_order', { ascending: true });
+
+        if (itemsData) {
+          // Attach category name and meal_period to each item
+          const catMap: Record<string, MenuCategory> = {};
+          categoriesData.forEach((c: any) => { catMap[c.id] = c; });
+
+          const enrichedItems: MenuItem[] = itemsData.map((item: any) => ({
+            ...item,
+            category_name: catMap[item.category_id]?.name || '',
+            meal_period: catMap[item.category_id]?.meal_period || null,
+          }));
+
+          setAllItems(enrichedItems);
+        }
+      }
+    } catch (error) {
+      console.error('[MenuGallery] Error loading menu:', error);
+      setNoMenu(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filtered items
+  const filteredItems = allItems.filter(item => {
+    // Meal period filter
+    if (activePeriod !== 'all') {
+      if (item.meal_period !== activePeriod && item.meal_period !== 'all_day' && item.meal_period !== null) {
+        return false;
+      }
+    }
+    // Category filter
+    if (activeCategory !== 'all') {
+      if (item.category_id !== activeCategory) return false;
+    }
+    return true;
+  });
+
+  // Available periods
+  const availablePeriods: MealPeriod[] = ['all'];
+  const periodsInData = new Set(categories.map(c => c.meal_period).filter(Boolean));
+  if (periodsInData.has('dinner')) availablePeriods.push('dinner');
+  if (periodsInData.has('lunch')) availablePeriods.push('lunch');
+  if (periodsInData.has('breakfast')) availablePeriods.push('breakfast');
+  if (periodsInData.has('all_day')) availablePeriods.push('all_day');
+
+  const PERIOD_LABELS: Record<MealPeriod, string> = {
+    all: 'All',
+    dinner: 'Dinner',
+    lunch: 'Lunch',
+    breakfast: 'Breakfast',
+    all_day: 'All Day',
+  };
+
+  // Handle scroll to track active index
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    const el = scrollRef.current;
+    const cardWidth = el.clientWidth;
+    const index = Math.round(el.scrollLeft / cardWidth);
+    setActiveIndex(index);
+  };
+
+  // Reset index when filters change
+  useEffect(() => {
+    setActiveIndex(0);
+    if (scrollRef.current) {
+      scrollRef.current.scrollLeft = 0;
+    }
+  }, [activePeriod, activeCategory]);
+
+  const formatPrice = (price: number | null, priceLabel: string | null): string => {
+    if (priceLabel) return priceLabel;
+    if (price === null || price === undefined) return '';
+    return `$${price.toFixed(2)}`;
+  };
+
+  // Loading
+  if (loading) {
+    return (
+      <>
+        <style jsx global>{galleryStyles}</style>
+        <div className="gallery-loading">
+          <div className="gallery-spinner" />
+        </div>
+      </>
+    );
+  }
+
+  // No menu
+  if (noMenu) {
+    return (
+      <>
+        <style jsx global>{galleryStyles}</style>
+        <Head>
+          <title>{placeName ? `${placeName} Menu` : 'Menu'} | Tavvy</title>
+        </Head>
+        <div className="gallery-shell">
+          <div className="gallery-empty">
+            <p>No menu available yet.</p>
+            <button onClick={() => router.back()} className="gallery-back-link">
+              Go Back
+            </button>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Head>
+        <title>{placeName ? `${placeName} Menu` : 'Menu Gallery'} | Tavvy</title>
+        <meta name="description" content={`Browse the menu at ${placeName} in a beautiful gallery view.`} />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <meta name="theme-color" content="#000000" />
+      </Head>
+
+      <style jsx global>{galleryStyles}</style>
+
+      <div className="gallery-shell">
+        {/* Top Navigation */}
+        <div className="gallery-nav">
+          <button className="gallery-nav-back" onClick={() => router.back()}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <span className="gallery-nav-title">{placeName}</span>
+          <Link href={`/place/${id}/menu`} className="gallery-nav-classic">
+            Classic
+          </Link>
+        </div>
+
+        {/* Filter Bar */}
+        <div className="gallery-filters">
+          {/* Meal period toggle */}
+          {availablePeriods.length > 2 && (
+            <div className="gallery-periods">
+              {availablePeriods.map(period => (
+                <button
+                  key={period}
+                  className={`gallery-period-btn ${activePeriod === period ? 'active' : ''}`}
+                  onClick={() => setActivePeriod(period)}
+                >
+                  {PERIOD_LABELS[period]}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Category pills */}
+          <div className="gallery-categories">
+            <button
+              className={`gallery-cat-pill ${activeCategory === 'all' ? 'active' : ''}`}
+              onClick={() => setActiveCategory('all')}
+            >
+              All
+            </button>
+            {categories
+              .filter(cat => {
+                if (activePeriod === 'all') return true;
+                return cat.meal_period === activePeriod || cat.meal_period === 'all_day' || !cat.meal_period;
+              })
+              .map(cat => (
+                <button
+                  key={cat.id}
+                  className={`gallery-cat-pill ${activeCategory === cat.id ? 'active' : ''}`}
+                  onClick={() => setActiveCategory(cat.id)}
+                >
+                  {cat.name}
+                </button>
+              ))}
+          </div>
+        </div>
+
+        {/* Gallery Cards - Horizontal Scroll */}
+        {filteredItems.length > 0 ? (
+          <>
+            <div
+              className="gallery-scroll"
+              ref={scrollRef}
+              onScroll={handleScroll}
+            >
+              {filteredItems.map((item, idx) => {
+                const priceStr = formatPrice(item.price, item.price_label);
+                const imageUrl = item.image_url || menu?.cover_image_url || null;
+
+                return (
+                  <div key={item.id} className="gallery-card">
+                    {/* Image area */}
+                    <div className="gallery-card-image">
+                      {imageUrl ? (
+                        <img src={imageUrl} alt={item.name} />
+                      ) : (
+                        <div className="gallery-card-placeholder">
+                          <span>{item.category_name}</span>
+                        </div>
+                      )}
+                      {/* Gradient overlay */}
+                      <div className="gallery-card-gradient" />
+
+                      {/* Price badge (top right) */}
+                      {priceStr && (
+                        <div className="gallery-card-price">{priceStr}</div>
+                      )}
+
+                      {/* Badges (top left) */}
+                      <div className="gallery-card-badges-top">
+                        {item.is_popular && <span className="gallery-badge fire">{'\u{1F525}'} Popular</span>}
+                        {item.is_new && <span className="gallery-badge new">{'\u2728'} New</span>}
+                      </div>
+
+                      {/* Dish name overlaid at bottom */}
+                      <h2 className="gallery-card-name">{item.name}</h2>
+                    </div>
+
+                    {/* Info area below image */}
+                    <div className="gallery-card-info">
+                      {item.description && (
+                        <p className="gallery-card-desc">{item.description}</p>
+                      )}
+                      {item.dietary_tags && item.dietary_tags.length > 0 && (
+                        <div className="gallery-card-dietary">
+                          {item.dietary_tags.map(tag => {
+                            const info = DIETARY_LABELS[tag.toLowerCase()];
+                            if (!info) return null;
+                            return (
+                              <span key={tag} className="gallery-dietary-pill">
+                                {info.icon} {info.label}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Dot indicators */}
+            {filteredItems.length > 1 && filteredItems.length <= 20 && (
+              <div className="gallery-dots">
+                {filteredItems.map((_, idx) => (
+                  <span
+                    key={idx}
+                    className={`gallery-dot ${idx === activeIndex ? 'active' : ''}`}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Counter for large menus */}
+            {filteredItems.length > 20 && (
+              <div className="gallery-counter">
+                {activeIndex + 1} / {filteredItems.length}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="gallery-empty-items">
+            <p>No dishes in this category.</p>
+          </div>
+        )}
+
+        {/* Powered by footer */}
+        <div className="gallery-footer">
+          <span>Powered by <strong>Tavvy</strong></span>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ===== STYLES =====
+const galleryStyles = `
+  * {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .gallery-shell {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+    color: #fff;
+    overflow: hidden;
+  }
+
+  /* Loading */
+  .gallery-loading {
+    position: fixed;
+    inset: 0;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .gallery-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #222;
+    border-top-color: #8A05BE;
+    border-radius: 50%;
+    animation: gspin 0.7s linear infinite;
+  }
+  @keyframes gspin { to { transform: rotate(360deg); } }
+
+  /* Empty state */
+  .gallery-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: #888;
+  }
+  .gallery-back-link {
+    background: none;
+    border: 1px solid #333;
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 24px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  /* Navigation bar */
+  .gallery-nav {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    padding-top: max(12px, env(safe-area-inset-top));
+    z-index: 20;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .gallery-nav-back {
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+  }
+  .gallery-nav-title {
+    flex: 1;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 8px;
+  }
+  .gallery-nav-classic {
+    font-size: 12px;
+    color: #8A05BE;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 6px 12px;
+    border: 1px solid rgba(138, 5, 190, 0.4);
+    border-radius: 16px;
+    white-space: nowrap;
+  }
+
+  /* Filters */
+  .gallery-filters {
+    flex-shrink: 0;
+    padding: 0 16px 10px;
+    z-index: 10;
+  }
+  .gallery-periods {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .gallery-period-btn {
+    padding: 6px 14px;
+    border: none;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #888;
+    background: #1a1a1a;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .gallery-period-btn.active {
+    background: #8A05BE;
+    color: #fff;
+  }
+  .gallery-categories {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 2px;
+  }
+  .gallery-categories::-webkit-scrollbar { display: none; }
+  .gallery-cat-pill {
+    padding: 6px 14px;
+    border: 1px solid #333;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #aaa;
+    background: transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .gallery-cat-pill.active {
+    background: #8A05BE;
+    border-color: #8A05BE;
+    color: #fff;
+  }
+
+  /* Gallery Scroll Container */
+  .gallery-scroll {
+    flex: 1;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .gallery-scroll::-webkit-scrollbar { display: none; }
+
+  /* Each Card */
+  .gallery-card {
+    min-width: 100%;
+    width: 100%;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* Image area - takes ~70% of available space */
+  .gallery-card-image {
+    position: relative;
+    flex: 7;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .gallery-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    inset: 0;
+  }
+  .gallery-card-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #333;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .gallery-card-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.3) 0%,
+      transparent 30%,
+      transparent 50%,
+      rgba(0,0,0,0.7) 85%,
+      rgba(0,0,0,0.9) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Price badge */
+  .gallery-card-price {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    z-index: 2;
+  }
+
+  /* Badges top left */
+  .gallery-card-badges-top {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    display: flex;
+    gap: 6px;
+    z-index: 2;
+  }
+  .gallery-badge {
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 5px 10px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .gallery-badge.fire {
+    background: rgba(255, 80, 0, 0.7);
+  }
+  .gallery-badge.new {
+    background: rgba(138, 5, 190, 0.7);
+  }
+
+  /* Dish name */
+  .gallery-card-name {
+    position: absolute;
+    bottom: 16px;
+    left: 20px;
+    right: 20px;
+    margin: 0;
+    font-size: 28px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.15;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+    z-index: 2;
+  }
+
+  /* Info below image */
+  .gallery-card-info {
+    flex: 3;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: flex-start;
+    background: #000;
+  }
+  .gallery-card-desc {
+    font-size: 15px;
+    color: #999;
+    margin: 0;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .gallery-card-dietary {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .gallery-dietary-pill {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    background: #1a1a1a;
+    color: #ccc;
+    border: 1px solid #333;
+  }
+
+  /* Dot indicators */
+  .gallery-dots {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 5px;
+    z-index: 10;
+  }
+  .gallery-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transition: all 0.2s;
+  }
+  .gallery-dot.active {
+    background: #fff;
+    transform: scale(1.3);
+  }
+
+  /* Counter for large menus */
+  .gallery-counter {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    background: rgba(0,0,0,0.5);
+    padding: 4px 12px;
+    border-radius: 12px;
+    z-index: 10;
+  }
+
+  /* Empty items */
+  .gallery-empty-items {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #555;
+    font-size: 15px;
+  }
+
+  /* Footer */
+  .gallery-footer {
+    flex-shrink: 0;
+    padding: 8px 16px;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    text-align: center;
+    font-size: 11px;
+    color: #444;
+    z-index: 10;
+  }
+  .gallery-footer strong {
+    color: #8A05BE;
+  }
+
+  /* Smooth momentum scrolling feel */
+  @media (hover: hover) {
+    .gallery-scroll {
+      scroll-behavior: smooth;
+    }
+  }
+`;
+
+export const getServerSideProps = async ({ locale }: { locale: string }) => ({
+  props: {
+    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
+  },
+});

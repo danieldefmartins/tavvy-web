@@ -15,6 +15,7 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import AppLayout from '../../../components/AppLayout';
 import { supabase } from '../../../lib/supabaseClient';
 import { useTranslation } from 'next-i18next';
@@ -283,6 +284,9 @@ export default function MenuPage() {
             <h1 className="menu-title">{menu?.name || `${placeName} Menu`}</h1>
             {placeName && <p className="menu-subtitle">{placeName}</p>}
           </div>
+          <Link href={`/place/${id}/menu-gallery`} className="menu-gallery-link">
+            View Gallery Mode
+          </Link>
         </div>
 
         {/* Meal Period Tabs */}
@@ -485,6 +489,21 @@ const menuStyles = `
     color: #666;
     margin: 2px 0 0;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .menu-gallery-link {
+    font-size: 12px;
+    color: #8A05BE;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 6px 12px;
+    border: 1px solid rgba(138, 5, 190, 0.3);
+    border-radius: 16px;
+    white-space: nowrap;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    transition: background 0.2s;
+  }
+  .menu-gallery-link:hover {
+    background: rgba(138, 5, 190, 0.08);
   }
 
   /* Meal Period Tabs */
