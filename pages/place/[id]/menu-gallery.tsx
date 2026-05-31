@@ -322,7 +322,7 @@ export default function MenuGalleryPage() {
 
                 return (
                   <div key={item.id} className="gallery-card">
-                    {/* Image area */}
+                    {/* Full 9:16 image */}
                     <div className="gallery-card-image">
                       {imageUrl ? (
                         <img src={imageUrl} alt={item.name} />
@@ -331,7 +331,7 @@ export default function MenuGalleryPage() {
                           <span>{item.category_name}</span>
                         </div>
                       )}
-                      {/* Gradient overlay */}
+                      {/* Gradient overlay for text readability */}
                       <div className="gallery-card-gradient" />
 
                       {/* Price badge (top right) */}
@@ -345,28 +345,26 @@ export default function MenuGalleryPage() {
                         {item.is_new && <span className="gallery-badge new">{'\u2728'} New</span>}
                       </div>
 
-                      {/* Dish name overlaid at bottom */}
+                      {/* Dish name + small description overlaid at bottom */}
                       <h2 className="gallery-card-name">{item.name}</h2>
-                    </div>
-
-                    {/* Info area below image */}
-                    <div className="gallery-card-info">
-                      {item.description && (
-                        <p className="gallery-card-desc">{item.description}</p>
-                      )}
-                      {item.dietary_tags && item.dietary_tags.length > 0 && (
-                        <div className="gallery-card-dietary">
-                          {item.dietary_tags.map(tag => {
-                            const info = DIETARY_LABELS[tag.toLowerCase()];
-                            if (!info) return null;
-                            return (
-                              <span key={tag} className="gallery-dietary-pill">
-                                {info.icon} {info.label}
-                              </span>
-                            );
-                          })}
-                        </div>
-                      )}
+                      <div className="gallery-card-info">
+                        {item.description && (
+                          <p className="gallery-card-desc">{item.description}</p>
+                        )}
+                        {item.dietary_tags && item.dietary_tags.length > 0 && (
+                          <div className="gallery-card-dietary">
+                            {item.dietary_tags.map(tag => {
+                              const info = DIETARY_LABELS[tag.toLowerCase()];
+                              if (!info) return null;
+                              return (
+                                <span key={tag} className="gallery-dietary-pill">
+                                  {info.icon} {info.label}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -398,9 +396,9 @@ export default function MenuGalleryPage() {
           </div>
         )}
 
-        {/* Powered by footer */}
+        {/* Powered by footer with logo */}
         <div className="gallery-footer">
-          <span>Powered by <strong>Tavvy</strong></span>
+          <img src="/tavvy-logo-white.png" alt="Tavvy" className="gallery-footer-logo" />
         </div>
       </div>
     </>
@@ -579,33 +577,29 @@ const galleryStyles = `
   }
   .gallery-scroll::-webkit-scrollbar { display: none; }
 
-  /* Each Card */
+  /* Each Card — 9:16 portrait ratio, image fills everything */
   .gallery-card {
     min-width: 100%;
     width: 100%;
     flex-shrink: 0;
     scroll-snap-align: start;
-    display: flex;
-    flex-direction: column;
     position: relative;
+    aspect-ratio: 9 / 16;
+    height: 100%;
+    overflow: hidden;
   }
 
-  /* Image area - takes ~70% of available space */
+  /* Image fills the entire 9:16 card — stretch smaller images to fit */
   .gallery-card-image {
-    position: relative;
-    flex: 7;
-    min-height: 0;
+    position: absolute;
+    inset: 0;
     overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
   .gallery-card-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    position: absolute;
-    inset: 0;
+    /* Forces all images to 9:16 regardless of source aspect ratio */
   }
   .gallery-card-placeholder {
     width: 100%;
@@ -619,16 +613,17 @@ const galleryStyles = `
     text-transform: uppercase;
     letter-spacing: 2px;
   }
+  /* Gradient only at the very bottom for text readability */
   .gallery-card-gradient {
     position: absolute;
     inset: 0;
     background: linear-gradient(
       to bottom,
-      rgba(0,0,0,0.3) 0%,
-      transparent 30%,
-      transparent 50%,
-      rgba(0,0,0,0.7) 85%,
-      rgba(0,0,0,0.9) 100%
+      rgba(0,0,0,0.2) 0%,
+      transparent 15%,
+      transparent 60%,
+      rgba(0,0,0,0.85) 90%,
+      rgba(0,0,0,0.95) 100%
     );
     pointer-events: none;
   }
@@ -675,37 +670,39 @@ const galleryStyles = `
     background: rgba(138, 5, 190, 0.7);
   }
 
-  /* Dish name */
+  /* Dish name — overlaid at bottom of image */
   .gallery-card-name {
     position: absolute;
-    bottom: 16px;
+    bottom: 60px;
     left: 20px;
     right: 20px;
     margin: 0;
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 800;
     color: #fff;
-    line-height: 1.15;
+    line-height: 1.2;
     letter-spacing: -0.5px;
-    text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+    text-shadow: 0 2px 16px rgba(0,0,0,0.7);
     z-index: 2;
   }
 
-  /* Info below image */
+  /* Small text info area — bottom of the card, overlaid on image */
   .gallery-card-info {
-    flex: 3;
-    padding: 16px 20px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0 20px 20px;
+    z-index: 2;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    justify-content: flex-start;
-    background: #000;
+    gap: 6px;
   }
   .gallery-card-desc {
-    font-size: 15px;
-    color: #999;
+    font-size: 13px;
+    color: rgba(255,255,255,0.75);
     margin: 0;
-    line-height: 1.5;
+    line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -717,13 +714,14 @@ const galleryStyles = `
     flex-wrap: wrap;
   }
   .gallery-dietary-pill {
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 10px;
     font-weight: 500;
-    background: #1a1a1a;
-    color: #ccc;
-    border: 1px solid #333;
+    background: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.8);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.1);
   }
 
   /* Dot indicators */
@@ -775,15 +773,18 @@ const galleryStyles = `
   /* Footer */
   .gallery-footer {
     flex-shrink: 0;
-    padding: 8px 16px;
-    padding-bottom: max(8px, env(safe-area-inset-bottom));
+    padding: 10px 16px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
     text-align: center;
-    font-size: 11px;
-    color: #444;
     z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  .gallery-footer strong {
-    color: #8A05BE;
+  .gallery-footer-logo {
+    height: 18px;
+    width: auto;
+    opacity: 0.5;
   }
 
   /* Smooth momentum scrolling feel */
