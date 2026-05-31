@@ -50,6 +50,26 @@ interface Menu {
   name: string;
   style: string | null;
   cover_image_url: string | null;
+  show_cover: boolean;
+  happy_hour_enabled: boolean;
+  happy_hour_text: string | null;
+  happy_hour_times: string | null;
+  chef_recommendation_id: string | null;
+  dish_of_day_id: string | null;
+  promo_banner_text: string | null;
+  promo_banner_enabled: boolean;
+  seasonal_special_text: string | null;
+  seasonal_special_enabled: boolean;
+  welcome_message: string | null;
+  tagline: string | null;
+}
+
+interface FeaturedDish {
+  id: string;
+  name: string;
+  price: number | null;
+  price_label: string | null;
+  image_url: string | null;
 }
 
 interface PlacePhoto {
@@ -97,6 +117,8 @@ export default function MenuPage() {
   const [activePeriod, setActivePeriod] = useState<MealPeriod>('all');
   const [linkedPhotos, setLinkedPhotos] = useState<Record<string, PlacePhoto>>({});
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [chefDish, setChefDish] = useState<FeaturedDish | null>(null);
+  const [dayDish, setDayDish] = useState<FeaturedDish | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -133,6 +155,23 @@ export default function MenuPage() {
       }
 
       setMenu(menuData);
+
+      // Load featured dishes if cover is enabled
+      if (menuData.show_cover) {
+        const featuredIds = [menuData.chef_recommendation_id, menuData.dish_of_day_id].filter(Boolean);
+        if (featuredIds.length > 0) {
+          const { data: featuredData } = await supabase
+            .from('menu_items')
+            .select('id, name, price, price_label, image_url')
+            .in('id', featuredIds);
+          if (featuredData) {
+            featuredData.forEach((dish: any) => {
+              if (dish.id === menuData.chef_recommendation_id) setChefDish(dish);
+              if (dish.id === menuData.dish_of_day_id) setDayDish(dish);
+            });
+          }
+        }
+      }
 
       // Get categories with items
       const { data: categoriesData } = await supabase
@@ -316,8 +355,96 @@ export default function MenuPage() {
       <style jsx global>{menuStyles}</style>
 
       <div className="menu-container">
-        {/* Header with cover image */}
-        {menu?.cover_image_url && (
+        {/* Cover Page */}
+        {menu?.show_cover && (
+          <div className="menu-cover-page">
+            {/* Hero Image */}
+            {menu.cover_image_url && (
+              <div className="menu-cover">
+                <img src={menu.cover_image_url} alt={`${placeName} menu`} className="menu-cover-img" />
+                <div className="menu-cover-overlay" />
+              </div>
+            )}
+
+            {/* Restaurant Name + Tagline */}
+            <div className="menu-cover-intro">
+              <h1 className="menu-cover-name">{placeName}</h1>
+              {menu.tagline && <p className="menu-cover-tagline">{menu.tagline}</p>}
+              {menu.welcome_message && <p className="menu-cover-welcome">{menu.welcome_message}</p>}
+            </div>
+
+            {/* Promotional Cards Row */}
+            {(menu.happy_hour_enabled || chefDish || dayDish || menu.promo_banner_enabled || menu.seasonal_special_enabled) && (
+              <div className="menu-cover-cards">
+                {menu.happy_hour_enabled && menu.happy_hour_text && (
+                  <div className="menu-promo-card card-happy-hour">
+                    <div className="menu-promo-card-icon">🍸</div>
+                    <div className="menu-promo-card-content">
+                      <span className="menu-promo-card-label">Happy Hour</span>
+                      <span className="menu-promo-card-text">{menu.happy_hour_text}</span>
+                      {menu.happy_hour_times && (
+                        <span className="menu-promo-card-times">{menu.happy_hour_times}</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {chefDish && (
+                  <div className="menu-promo-card card-chef">
+                    {chefDish.image_url && (
+                      <img src={chefDish.image_url} alt={chefDish.name} className="menu-promo-card-dish-img" />
+                    )}
+                    <div className="menu-promo-card-content">
+                      <span className="menu-promo-card-label">👨‍🍳 Chef&apos;s Pick</span>
+                      <span className="menu-promo-card-text">{chefDish.name}</span>
+                      {(chefDish.price || chefDish.price_label) && (
+                        <span className="menu-promo-card-price">{formatPrice(chefDish.price, chefDish.price_label)}</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {dayDish && (
+                  <div className="menu-promo-card card-day">
+                    {dayDish.image_url && (
+                      <img src={dayDish.image_url} alt={dayDish.name} className="menu-promo-card-dish-img" />
+                    )}
+                    <div className="menu-promo-card-content">
+                      <span className="menu-promo-card-label">⭐ Dish of the Day</span>
+                      <span className="menu-promo-card-text">{dayDish.name}</span>
+                      {(dayDish.price || dayDish.price_label) && (
+                        <span className="menu-promo-card-price">{formatPrice(dayDish.price, dayDish.price_label)}</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {menu.promo_banner_enabled && menu.promo_banner_text && (
+                  <div className="menu-promo-card card-promo">
+                    <div className="menu-promo-card-icon">🎉</div>
+                    <div className="menu-promo-card-content">
+                      <span className="menu-promo-card-label">Special Offer</span>
+                      <span className="menu-promo-card-text">{menu.promo_banner_text}</span>
+                    </div>
+                  </div>
+                )}
+
+                {menu.seasonal_special_enabled && menu.seasonal_special_text && (
+                  <div className="menu-promo-card card-seasonal">
+                    <div className="menu-promo-card-icon">🌿</div>
+                    <div className="menu-promo-card-content">
+                      <span className="menu-promo-card-label">Seasonal Special</span>
+                      <span className="menu-promo-card-text">{menu.seasonal_special_text}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Cover image (fallback when show_cover is off) */}
+        {!menu?.show_cover && menu?.cover_image_url && (
           <div className="menu-cover">
             <img src={menu.cover_image_url} alt={`${placeName} menu`} className="menu-cover-img" />
             <div className="menu-cover-overlay" />
@@ -384,7 +511,7 @@ export default function MenuPage() {
                       key={item.id}
                       id={`menu-item-${item.id}`}
                       className={`menu-item ${displayImage ? 'has-image' : ''} ${isExpanded ? 'expanded' : ''} ${highlightedDish === item.id ? 'highlighted' : ''}`}
-                      onClick={() => setExpandedItem(isExpanded ? null : item.id)}
+                      onClick={() => router.push(`/place/${id}/menu-gallery?dish=${item.id}`)}
                     >
                       <div className="menu-item-content">
                         <div className="menu-item-text">
@@ -885,6 +1012,175 @@ const menuStyles = `
     font-weight: 700;
   }
 
+  /* Cover Page */
+  .menu-cover-page {
+    position: relative;
+    overflow: hidden;
+  }
+  .menu-cover-page .menu-cover {
+    height: 280px;
+  }
+  .menu-cover-page .menu-cover-overlay {
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%);
+  }
+  .menu-cover-intro {
+    padding: 28px 24px 20px;
+    text-align: center;
+    background: #fff;
+  }
+  .menu-cover-name {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a1a;
+    font-family: 'Georgia', serif;
+    letter-spacing: -0.5px;
+  }
+  .menu-cover-tagline {
+    margin: 6px 0 0;
+    font-size: 15px;
+    color: #666;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 400;
+  }
+  .menu-cover-welcome {
+    margin: 14px auto 0;
+    font-size: 14px;
+    color: #555;
+    font-style: italic;
+    line-height: 1.6;
+    max-width: 480px;
+  }
+
+  /* Promo Cards Row */
+  .menu-cover-cards {
+    display: flex;
+    gap: 12px;
+    padding: 16px 20px 24px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    background: #fff;
+  }
+  .menu-cover-cards::-webkit-scrollbar { display: none; }
+
+  .menu-promo-card {
+    min-width: 200px;
+    max-width: 240px;
+    flex-shrink: 0;
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+  .menu-promo-card-icon {
+    font-size: 24px;
+  }
+  .menu-promo-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .menu-promo-card-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .menu-promo-card-text {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .menu-promo-card-times {
+    font-size: 12px;
+    opacity: 0.8;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .menu-promo-card-price {
+    font-size: 15px;
+    font-weight: 700;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .menu-promo-card-dish-img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 4px;
+  }
+
+  /* Card Variants */
+  .card-happy-hour {
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border: 1px solid #fcd34d;
+  }
+  .card-happy-hour .menu-promo-card-label {
+    color: #92400e;
+  }
+  .card-happy-hour .menu-promo-card-text {
+    color: #78350f;
+  }
+  .card-happy-hour .menu-promo-card-times {
+    color: #a16207;
+  }
+
+  .card-chef {
+    background: linear-gradient(135deg, #f5f0ff 0%, #ede9fe 100%);
+    border: 1px solid #c4b5fd;
+  }
+  .card-chef .menu-promo-card-label {
+    color: #6b21a8;
+  }
+  .card-chef .menu-promo-card-text {
+    color: #4c1d95;
+  }
+  .card-chef .menu-promo-card-price {
+    color: #7c3aed;
+  }
+
+  .card-day {
+    background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+    border: 1px solid #5eead4;
+  }
+  .card-day .menu-promo-card-label {
+    color: #115e59;
+  }
+  .card-day .menu-promo-card-text {
+    color: #134e4a;
+  }
+  .card-day .menu-promo-card-price {
+    color: #0d9488;
+  }
+
+  .card-promo {
+    background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+    border: 1px solid #f9a8d4;
+  }
+  .card-promo .menu-promo-card-label {
+    color: #9d174d;
+  }
+  .card-promo .menu-promo-card-text {
+    color: #831843;
+  }
+
+  .card-seasonal {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border: 1px solid #86efac;
+  }
+  .card-seasonal .menu-promo-card-label {
+    color: #166534;
+  }
+  .card-seasonal .menu-promo-card-text {
+    color: #14532d;
+  }
+
   /* Responsive */
   @media (min-width: 768px) {
     .menu-container {
@@ -898,6 +1194,54 @@ const menuStyles = `
 
   /* Dark mode support */
   @media (prefers-color-scheme: dark) {
+    .menu-cover-intro {
+      background: #0a0a0a;
+    }
+    .menu-cover-name {
+      color: #fff;
+    }
+    .menu-cover-tagline {
+      color: #999;
+    }
+    .menu-cover-welcome {
+      color: #888;
+    }
+    .menu-cover-cards {
+      background: #0a0a0a;
+    }
+    .card-happy-hour {
+      background: linear-gradient(135deg, #1a1500 0%, #2a1f00 100%);
+      border-color: #5c4a00;
+    }
+    .card-happy-hour .menu-promo-card-label { color: #fbbf24; }
+    .card-happy-hour .menu-promo-card-text { color: #fde68a; }
+    .card-happy-hour .menu-promo-card-times { color: #d97706; }
+    .card-chef {
+      background: linear-gradient(135deg, #1a0a2e 0%, #2d1254 100%);
+      border-color: #6b21a8;
+    }
+    .card-chef .menu-promo-card-label { color: #c4b5fd; }
+    .card-chef .menu-promo-card-text { color: #e9d5ff; }
+    .card-chef .menu-promo-card-price { color: #a78bfa; }
+    .card-day {
+      background: linear-gradient(135deg, #022c22 0%, #064e3b 100%);
+      border-color: #0d9488;
+    }
+    .card-day .menu-promo-card-label { color: #5eead4; }
+    .card-day .menu-promo-card-text { color: #99f6e4; }
+    .card-day .menu-promo-card-price { color: #2dd4bf; }
+    .card-promo {
+      background: linear-gradient(135deg, #2a0a1e 0%, #4a1035 100%);
+      border-color: #9d174d;
+    }
+    .card-promo .menu-promo-card-label { color: #f9a8d4; }
+    .card-promo .menu-promo-card-text { color: #fbcfe8; }
+    .card-seasonal {
+      background: linear-gradient(135deg, #052e16 0%, #14532d 100%);
+      border-color: #16a34a;
+    }
+    .card-seasonal .menu-promo-card-label { color: #86efac; }
+    .card-seasonal .menu-promo-card-text { color: #bbf7d0; }
     .menu-container {
       background: #0a0a0a;
     }

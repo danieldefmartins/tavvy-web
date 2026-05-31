@@ -50,6 +50,26 @@ interface Menu {
   name: string;
   style: string | null;
   cover_image_url: string | null;
+  show_cover: boolean;
+  happy_hour_enabled: boolean;
+  happy_hour_text: string | null;
+  happy_hour_times: string | null;
+  chef_recommendation_id: string | null;
+  dish_of_day_id: string | null;
+  promo_banner_text: string | null;
+  promo_banner_enabled: boolean;
+  seasonal_special_text: string | null;
+  seasonal_special_enabled: boolean;
+  welcome_message: string | null;
+  tagline: string | null;
+}
+
+interface FeaturedDish {
+  id: string;
+  name: string;
+  price: number | null;
+  price_label: string | null;
+  image_url: string | null;
 }
 
 type MealPeriod = 'all' | 'breakfast' | 'lunch' | 'dinner' | 'all_day';
@@ -79,6 +99,8 @@ export default function MenuGalleryPage() {
   const [placeSlug, setPlaceSlug] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [noMenu, setNoMenu] = useState(false);
+  const [chefDish, setChefDish] = useState<FeaturedDish | null>(null);
+  const [dayDish, setDayDish] = useState<FeaturedDish | null>(null);
 
   // Filters
   const [activePeriod, setActivePeriod] = useState<MealPeriod>('all');
@@ -121,6 +143,23 @@ export default function MenuGalleryPage() {
       }
 
       setMenu(menuData);
+
+      // Load featured dishes if cover is enabled
+      if (menuData.show_cover) {
+        const featuredIds = [menuData.chef_recommendation_id, menuData.dish_of_day_id].filter(Boolean);
+        if (featuredIds.length > 0) {
+          const { data: featuredData } = await supabase
+            .from('menu_items')
+            .select('id, name, price, price_label, image_url')
+            .in('id', featuredIds);
+          if (featuredData) {
+            featuredData.forEach((dish: any) => {
+              if (dish.id === menuData.chef_recommendation_id) setChefDish(dish);
+              if (dish.id === menuData.dish_of_day_id) setDayDish(dish);
+            });
+          }
+        }
+      }
 
       const { data: categoriesData } = await supabase
         .from('menu_categories')
@@ -175,12 +214,12 @@ export default function MenuGalleryPage() {
     return true;
   });
 
-  // Available periods
+  // Available periods — fixed order: Breakfast, Lunch, Dinner, All Day
   const availablePeriods: MealPeriod[] = ['all'];
   const periodsInData = new Set(categories.map(c => c.meal_period).filter(Boolean));
-  if (periodsInData.has('dinner')) availablePeriods.push('dinner');
-  if (periodsInData.has('lunch')) availablePeriods.push('lunch');
   if (periodsInData.has('breakfast')) availablePeriods.push('breakfast');
+  if (periodsInData.has('lunch')) availablePeriods.push('lunch');
+  if (periodsInData.has('dinner')) availablePeriods.push('dinner');
   if (periodsInData.has('all_day')) availablePeriods.push('all_day');
 
   const PERIOD_LABELS: Record<MealPeriod, string> = {
@@ -360,6 +399,40 @@ export default function MenuGalleryPage() {
               ref={scrollRef}
               onScroll={handleScroll}
             >
+              {/* Cover Card */}
+              {menu?.show_cover && (
+                <div className="gallery-card gallery-cover-card">
+                  <div className="gallery-card-image">
+                    <div className="gallery-cover-bg" />
+                    <div className="gallery-cover-content">
+                      <h1 className="gallery-cover-name">{placeName}</h1>
+                      {menu.tagline && <p className="gallery-cover-tagline">{menu.tagline}</p>}
+                      {menu.welcome_message && <p className="gallery-cover-welcome">{menu.welcome_message}</p>}
+
+                      <div className="gallery-cover-pills">
+                        {menu.happy_hour_enabled && menu.happy_hour_times && (
+                          <span className="gallery-cover-pill pill-happy">🍸 Happy Hour {menu.happy_hour_times}</span>
+                        )}
+                        {chefDish && (
+                          <span className="gallery-cover-pill pill-chef">👨‍🍳 Chef Picks: {chefDish.name}</span>
+                        )}
+                        {dayDish && (
+                          <span className="gallery-cover-pill pill-day">⭐ Today: {dayDish.name}</span>
+                        )}
+                        {menu.promo_banner_enabled && menu.promo_banner_text && (
+                          <span className="gallery-cover-pill pill-promo">🎉 {menu.promo_banner_text}</span>
+                        )}
+                        {menu.seasonal_special_enabled && menu.seasonal_special_text && (
+                          <span className="gallery-cover-pill pill-seasonal">🌿 {menu.seasonal_special_text}</span>
+                        )}
+                      </div>
+
+                      <p className="gallery-cover-swipe">Swipe to start →</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {filteredItems.map((item, idx) => {
                 const priceStr = formatPrice(item.price, item.price_label);
                 const imageUrl = item.image_url || menu?.cover_image_url || null;
