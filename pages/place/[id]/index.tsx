@@ -410,7 +410,7 @@ export default function PlaceDetailsScreen() {
           <div className="pd-hero-text">
             <h1 className="pd-hero-name">{place.name}</h1>
             <div className="pd-hero-meta">
-              <span>{categoryEmoji} {place.category}</span>
+              <span>{categoryEmoji} {place.tavvy_subcategory ? `${place.tavvy_subcategory.charAt(0).toUpperCase() + place.tavvy_subcategory.slice(1).replace(/_/g, ' ')} Restaurant` : place.category}</span>
               {distanceMiles && <span>📍 {distanceMiles} mi</span>}
             </div>
           </div>
