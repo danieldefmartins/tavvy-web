@@ -19,8 +19,7 @@ import { fetchPlaceById } from '../../../lib/placeService';
 import { supabase } from '../../../lib/supabaseClient';
 import { Place } from '../../../types';
 import { fetchPlaceSignals, SignalAggregate, SIGNAL_LABELS } from '../../../lib/signalService';
-import dynamic from 'next/dynamic';
-const DeliveryLinks = dynamic(() => import('../../../components/DeliveryLinks'), { ssr: false });
+// DeliveryLinks removed temporarily to debug client error
 import SignalPill, { SignalPillsGrid, SignalDetailRow, getSignalCategory, inferCategoryFromLabel, SignalCategory } from '../../../components/SignalPill';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -584,12 +583,7 @@ export default function PlaceDetailsScreen() {
             </button>
           </div>
 
-          {/* Delivery Links — only if no Tavvy ordering */}
-          <DeliveryLinks
-            restaurantName={place.name}
-            address={place.address_line1}
-            orderingEnabled={(place as any).ordering_enabled}
-          />
+          {/* Delivery links placeholder */}
         </div>
 
         {/* ===== 5. FULL SIGNAL BREAKDOWN (expandable) ===== */}
