@@ -27,6 +27,7 @@ export interface Place {
   photos?: string[];
   tavvy_category?: string;
   tavvy_subcategory?: string;
+  slug?: string;
 }
 
 export interface SearchSuggestion {

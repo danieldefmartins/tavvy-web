@@ -152,15 +152,35 @@ export default function PlaceDetailsScreen() {
   };
 
   const handleShare = async () => {
-    if (navigator.share && place) {
+    if (!place) return;
+    const shareUrl = place.slug
+      ? `https://tavvy.com/${place.slug}`
+      : window.location.href;
+    const shareText = `${place.name} on Tavvy — see what people are really saying`;
+
+    if (navigator.share) {
       try {
         await navigator.share({
           title: place.name,
-          text: `Check out ${place.name} on TavvY`,
-          url: window.location.href,
+          text: shareText,
+          url: shareUrl,
         });
       } catch (error) {
-        console.log('Share cancelled');
+        // User cancelled or share failed
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        alert('Link copied to clipboard!');
+      } catch {
+        // Fallback for older browsers
+        const input = document.createElement('input');
+        input.value = shareUrl;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        alert('Link copied to clipboard!');
       }
     }
   };

@@ -76,6 +76,7 @@ export default function MenuGalleryPage() {
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [allItems, setAllItems] = useState<MenuItem[]>([]);
   const [placeName, setPlaceName] = useState<string>('');
+  const [placeSlug, setPlaceSlug] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [noMenu, setNoMenu] = useState(false);
 
@@ -104,6 +105,7 @@ export default function MenuGalleryPage() {
 
       if (placeData) {
         setPlaceName(placeData.name || '');
+        setPlaceSlug(placeData.slug || '');
       }
 
       const { data: menuData } = await supabase
@@ -210,6 +212,46 @@ export default function MenuGalleryPage() {
     if (priceLabel) return priceLabel;
     if (price === null || price === undefined) return '';
     return `$${price.toFixed(2)}`;
+  };
+
+  // Auto-scroll to dish from ?dish= query param
+  useEffect(() => {
+    if (!router.isReady || loading || filteredItems.length === 0) return;
+    const dishId = router.query.dish as string;
+    if (!dishId || !scrollRef.current) return;
+    const index = filteredItems.findIndex(item => item.id === dishId);
+    if (index > 0) {
+      const cardWidth = scrollRef.current.clientWidth;
+      scrollRef.current.scrollLeft = cardWidth * index;
+      setActiveIndex(index);
+    }
+  }, [router.isReady, loading, filteredItems.length]);
+
+  // Share a dish
+  const handleShareDish = async (item: MenuItem) => {
+    const slug = placeSlug || id;
+    const shareUrl = `https://tavvy.com/${slug}/menu-gallery?dish=${item.id}`;
+    const priceStr = formatPrice(item.price, item.price_label);
+    const shareText = `${item.name} at ${placeName}${priceStr ? ` — ${priceStr}` : ''}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: item.name, text: shareText, url: shareUrl });
+      } catch {}
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        alert('Link copied to clipboard!');
+      } catch {
+        const input = document.createElement('input');
+        input.value = shareUrl;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        alert('Link copied to clipboard!');
+      }
+    }
   };
 
   // Loading
@@ -337,10 +379,23 @@ export default function MenuGalleryPage() {
                       {/* Gradient overlay for text readability */}
                       <div className="gallery-card-gradient" />
 
-                      {/* Price badge (top right) */}
-                      {priceStr && (
-                        <div className="gallery-card-price">{priceStr}</div>
-                      )}
+                      {/* Price badge + share (top right) */}
+                      <div className="gallery-card-top-right">
+                        {priceStr && (
+                          <div className="gallery-card-price">{priceStr}</div>
+                        )}
+                        <button
+                          className="gallery-card-share"
+                          onClick={(e) => { e.stopPropagation(); handleShareDish(item); }}
+                          aria-label="Share dish"
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                            <polyline points="16 6 12 2 8 6"/>
+                            <line x1="12" y1="2" x2="12" y2="15"/>
+                          </svg>
+                        </button>
+                      </div>
 
                       {/* Badges (top left) */}
                       <div className="gallery-card-badges-top">
@@ -635,11 +690,17 @@ const galleryStyles = `
     pointer-events: none;
   }
 
-  /* Price badge */
-  .gallery-card-price {
+  /* Price badge + share top right group */
+  .gallery-card-top-right {
     position: absolute;
     top: 12px;
     right: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 2;
+  }
+  .gallery-card-price {
     background: rgba(0,0,0,0.6);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -648,7 +709,24 @@ const galleryStyles = `
     font-size: 16px;
     font-weight: 700;
     color: #fff;
-    z-index: 2;
+  }
+  .gallery-card-share {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: none;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .gallery-card-share:hover {
+    background: rgba(138, 5, 190, 0.7);
   }
 
   /* Badges top left */

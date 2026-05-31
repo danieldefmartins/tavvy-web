@@ -214,6 +214,51 @@ export default function MenuPage() {
     return tags.map(tag => DIETARY_ICONS[tag.toLowerCase()] || '').filter(Boolean).join(' ');
   };
 
+  // Auto-scroll to dish from ?dish= query param
+  const [highlightedDish, setHighlightedDish] = useState<string | null>(null);
+  useEffect(() => {
+    if (!router.isReady || loading || categories.length === 0) return;
+    const dishId = router.query.dish as string;
+    if (!dishId) return;
+    setHighlightedDish(dishId);
+    setTimeout(() => {
+      const el = document.getElementById(`menu-item-${dishId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 300);
+    // Clear highlight after 3s
+    setTimeout(() => setHighlightedDish(null), 3300);
+  }, [router.isReady, loading, categories.length]);
+
+  // Share a menu item
+  const handleShareItem = async (item: MenuItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const slug = placeSlug || id;
+    const shareUrl = `https://tavvy.com/${slug}/menu?dish=${item.id}`;
+    const priceStr = formatPrice(item.price, item.price_label);
+    const shareText = `${item.name} at ${placeName}${priceStr ? ` — ${priceStr}` : ''}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: item.name, text: shareText, url: shareUrl });
+      } catch {}
+    } else {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        alert('Link copied to clipboard!');
+      } catch {
+        const input = document.createElement('input');
+        input.value = shareUrl;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        alert('Link copied to clipboard!');
+      }
+    }
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -337,7 +382,8 @@ export default function MenuPage() {
                   return (
                     <div
                       key={item.id}
-                      className={`menu-item ${displayImage ? 'has-image' : ''} ${isExpanded ? 'expanded' : ''}`}
+                      id={`menu-item-${item.id}`}
+                      className={`menu-item ${displayImage ? 'has-image' : ''} ${isExpanded ? 'expanded' : ''} ${highlightedDish === item.id ? 'highlighted' : ''}`}
                       onClick={() => setExpandedItem(isExpanded ? null : item.id)}
                     >
                       <div className="menu-item-content">
@@ -346,6 +392,17 @@ export default function MenuPage() {
                             <span className="menu-item-name">{item.name}</span>
                             {item.is_popular && <span className="menu-badge popular" title="Popular">{'\u{1F525}'}</span>}
                             {item.is_new && <span className="menu-badge new" title="New">{'\u2728'}</span>}
+                            <button
+                              className="menu-item-share"
+                              onClick={(e) => handleShareItem(item, e)}
+                              aria-label="Share item"
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                                <polyline points="16 6 12 2 8 6"/>
+                                <line x1="12" y1="2" x2="12" y2="15"/>
+                              </svg>
+                            </button>
                           </div>
                           {item.description && (
                             <p className="menu-item-desc">{item.description}</p>
@@ -631,6 +688,28 @@ const menuStyles = `
     font-size: 14px;
     display: inline-flex;
     align-items: center;
+  }
+  .menu-item.highlighted {
+    background: rgba(138, 5, 190, 0.08);
+    border-radius: 8px;
+    transition: background 0.5s ease;
+  }
+  .menu-item-share {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    padding: 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: color 0.2s, background 0.2s;
+    margin-left: auto;
+  }
+  .menu-item-share:hover {
+    color: #8A05BE;
+    background: rgba(138, 5, 190, 0.08);
   }
   .menu-badge.popular {
     animation: menu-pulse 2s ease-in-out infinite;
