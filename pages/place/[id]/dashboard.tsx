@@ -201,6 +201,56 @@ export default function OrderDashboard({ place }: { place: PlaceInfo }) {
     };
   }, [placeId, loadOrders, playNotification, place?.name]);
 
+  // ── Print ticket ──────────────────────────────────────────────────────────
+
+  const printTicket = (order: any) => {
+    const items = order.order_items || [];
+    const time = new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const orderNum = order.order_number || order.id.slice(0, 6).toUpperCase();
+
+    const ticketHtml = `
+      <html><head><title>Order ${orderNum}</title>
+      <style>
+        body { font-family: 'Courier New', monospace; padding: 8px; max-width: 300px; margin: 0 auto; }
+        .header { text-align: center; border-bottom: 2px dashed #000; padding-bottom: 8px; margin-bottom: 8px; }
+        .table-num { font-size: 28px; font-weight: bold; }
+        .order-num { font-size: 14px; color: #555; }
+        .time { font-size: 14px; }
+        .items { margin: 12px 0; }
+        .item { margin-bottom: 8px; }
+        .item-name { font-weight: bold; font-size: 16px; }
+        .item-note { font-size: 13px; color: #555; padding-left: 12px; }
+        .notes { border-top: 1px dashed #000; padding-top: 8px; margin-top: 12px; font-size: 13px; }
+        .footer { text-align: center; border-top: 2px dashed #000; padding-top: 8px; margin-top: 12px; font-size: 11px; color: #999; }
+        @media print { body { padding: 0; } }
+      </style></head><body>
+      <div class="header">
+        <div class="table-num">TABLE ${order.table_number || '—'}</div>
+        <div class="order-num">#${orderNum}</div>
+        <div class="time">${time}</div>
+      </div>
+      <div class="items">
+        ${items.map((item: any) => `
+          <div class="item">
+            <div class="item-name">${item.quantity}x ${item.name}</div>
+            ${item.notes ? `<div class="item-note">→ ${item.notes}</div>` : ''}
+          </div>
+        `).join('')}
+      </div>
+      ${order.special_requests ? `<div class="notes"><strong>NOTES:</strong> ${order.special_requests}</div>` : ''}
+      <div class="footer">Tavvy · ${place?.name || ''}</div>
+      </body></html>
+    `;
+
+    const printWindow = window.open('', '_blank', 'width=350,height=500');
+    if (printWindow) {
+      printWindow.document.write(ticketHtml);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => { printWindow.print(); printWindow.close(); }, 300);
+    }
+  };
+
   // ── Order actions ─────────────────────────────────────────────────────────
 
   const updateOrderStatus = async (
@@ -326,7 +376,7 @@ export default function OrderDashboard({ place }: { place: PlaceInfo }) {
                 <OrderCard
                   key={order.id}
                   order={order}
-                  onConfirm={() => updateOrderStatus(order.id, 'confirmed')}
+                  onConfirm={() => { updateOrderStatus(order.id, 'confirmed'); printTicket(order); }}
                   onCancel={() => setCancelModal(order.id)}
                   column="pending"
                 />
