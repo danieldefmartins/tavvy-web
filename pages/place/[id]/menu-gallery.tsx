@@ -19,7 +19,7 @@ import Link from 'next/link';
 import { supabase } from '../../../lib/supabaseClient';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import MenuLanguageToggle from '../../../components/MenuLanguageToggle';
+// MenuLanguageToggle removed — cleaner 2-row header
 import { trackMenuView, trackMenuShare } from '../../../lib/menuAnalytics';
 import { trackItemView, trackItemShare } from '../../../lib/menuItemAnalytics';
 
@@ -120,6 +120,7 @@ export default function MenuGalleryPage() {
   // Filters
   const [activePeriod, setActivePeriod] = useState<MealPeriod>('all');
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [showCategoryPanel, setShowCategoryPanel] = useState(false);
   const [activeFilters, setActiveFilters] = useState<AllergenFilter[]>([]);
 
   // Scroll position
@@ -386,25 +387,23 @@ export default function MenuGalleryPage() {
       <style jsx global>{galleryStyles}</style>
 
       <div className="gallery-shell">
-        {/* Top Navigation */}
+        {/* ROW 1: Navigation */}
         <div className="gallery-nav">
           <button className="gallery-nav-back" onClick={() => router.back()}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
             </svg>
           </button>
           <Link href={`/place/${id}`} className="gallery-nav-title">{placeName}</Link>
-          <MenuLanguageToggle variant="dark" />
           <Link href={`/place/${id}/menu`} className="gallery-nav-classic">
             Classic
           </Link>
         </div>
 
-        {/* Filter Bar */}
-        <div className="gallery-filters">
-          {/* Meal period toggle */}
+        {/* ROW 2: Meal periods + filter icon */}
+        <div style={{ display: 'flex', alignItems: 'center', padding: '0 12px', gap: 6, flexShrink: 0, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
           {availablePeriods.length > 2 && (
-            <div className="gallery-periods">
+            <div className="gallery-periods" style={{ flex: 1 }}>
               {availablePeriods.map(period => (
                 <button
                   key={period}
@@ -416,12 +415,35 @@ export default function MenuGalleryPage() {
               ))}
             </div>
           )}
+          {/* Filter icon — toggles category panel */}
+          <button
+            onClick={() => setShowCategoryPanel(!showCategoryPanel)}
+            style={{
+              width: 34, height: 34, borderRadius: 8,
+              border: activeCategory !== 'all' ? '2px solid #8A05BE' : '1px solid rgba(255,255,255,0.2)',
+              background: activeCategory !== 'all' ? 'rgba(138,5,190,0.2)' : 'rgba(255,255,255,0.06)',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0, position: 'relative',
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={activeCategory !== 'all' ? '#8A05BE' : '#aaa'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+            </svg>
+            {activeCategory !== 'all' && (
+              <span style={{
+                position: 'absolute', top: -4, right: -4, width: 8, height: 8,
+                borderRadius: '50%', background: '#8A05BE',
+              }} />
+            )}
+          </button>
+        </div>
 
-          {/* Category pills */}
-          <div className="gallery-categories">
+        {/* Category panel — hidden by default */}
+        {showCategoryPanel && (
+          <div style={{ display: 'flex', gap: 6, padding: '8px 12px', overflowX: 'auto', flexShrink: 0, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
             <button
               className={`gallery-cat-pill ${activeCategory === 'all' ? 'active' : ''}`}
-              onClick={() => setActiveCategory('all')}
+              onClick={() => { setActiveCategory('all'); setShowCategoryPanel(false); }}
             >
               All
             </button>
@@ -434,7 +456,7 @@ export default function MenuGalleryPage() {
                 <button
                   key={cat.id}
                   className={`gallery-cat-pill ${activeCategory === cat.id ? 'active' : ''}`}
-                  onClick={() => setActiveCategory(cat.id)}
+                  onClick={() => { setActiveCategory(cat.id); setShowCategoryPanel(false); }}
                 >
                   {cat.name}
                 </button>
