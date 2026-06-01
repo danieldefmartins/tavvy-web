@@ -7,7 +7,7 @@ import { Place } from '../../../types';
 import { fetchPlaceSignals, SignalAggregate } from '../../../lib/signalService';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { ChevronLeft, Share2, Heart, Phone, Navigation, BookOpen, Camera, Globe, MapPin, ShoppingBag, PenLine } from 'lucide-react';
+import { ChevronLeft, Heart, Phone, BookOpen, Globe, MapPin } from 'lucide-react';
 
 const categoryEmoji: Record<string, string> = {
   restaurant: '\uD83C\uDF7D\uFE0F',
@@ -226,7 +226,11 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
             </button>
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={handleShare} style={iconBtnStyle} aria-label="Share">
-                <Share2 size={18} color="#333" />
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/>
+                  <polyline points="16 6 12 2 8 6"/>
+                  <line x1="12" y1="2" x2="12" y2="15"/>
+                </svg>
               </button>
               <button style={iconBtnStyle} aria-label="Save">
                 <Heart size={18} color="#333" />
@@ -286,25 +290,18 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
           {place.phone && (
             <button onClick={handleCall} style={{
               width: 44, height: 44, borderRadius: 12, border: '1px solid #ECECEC',
-              background: '#fff', cursor: 'pointer', fontSize: 17,
+              background: '#fff', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }} aria-label="Call">
-              📞
+              <Phone size={18} color="#444" />
             </button>
           )}
           <button onClick={handleDirections} style={{
             width: 44, height: 44, borderRadius: 12, border: '1px solid #ECECEC',
-            background: '#fff', cursor: 'pointer', fontSize: 17,
+            background: '#fff', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }} aria-label="Directions">
-            🧭
-          </button>
-          <button onClick={handleShare} style={{
-            width: 44, height: 44, borderRadius: 12, border: '1px solid #ECECEC',
-            background: '#fff', cursor: 'pointer', fontSize: 17,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }} aria-label="Share">
-            📤
+            <MapPin size={18} color="#444" />
           </button>
         </div>
 
@@ -552,7 +549,7 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
                 /* hover: { background: '#F5F5F5' } */
               }}
             >
-              <Navigation size={18} color="#8A05BE" />
+              <MapPin size={18} color="#8A05BE" />
               <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#8A05BE' }}>
                 Get Directions
               </p>
