@@ -132,6 +132,7 @@ export default function MenuPage() {
   const [activePeriod, setActivePeriod] = useState<MealPeriod>('all');
   const [linkedPhotos, setLinkedPhotos] = useState<Record<string, PlacePhoto>>({});
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [showAllergenPanel, setShowAllergenPanel] = useState(false);
   const [chefDish, setChefDish] = useState<FeaturedDish | null>(null);
   const [dayDish, setDayDish] = useState<FeaturedDish | null>(null);
   const [activeFilters, setActiveFilters] = useState<AllergenFilter[]>([]);
@@ -528,6 +529,7 @@ export default function MenuPage() {
 
         {(!menu?.show_cover || showFullMenu) && (
         <>
+        {/* ROW 1: Header */}
         <div className="menu-header">
           <button className="menu-back-btn" onClick={() => menu?.show_cover ? setShowFullMenu(false) : router.back()}>
             ← {menu?.show_cover ? 'Cover' : 'Back'}
@@ -536,39 +538,64 @@ export default function MenuPage() {
             <h1 className="menu-title">{menu?.name || `${placeName} Menu`}</h1>
             {placeName && <Link href={`/place/${id}`}><p className="menu-subtitle" style={{ cursor: 'pointer' }}>{placeName}</p></Link>}
           </div>
-          <MenuLanguageToggle variant="light" />
           <Link href={`/place/${id}/menu-gallery`} className="menu-gallery-link">
-            View Gallery Mode
+            Gallery
           </Link>
         </div>
 
-        {/* Meal Period Tabs */}
-        {availablePeriods.length > 2 && (
-          <div className="menu-periods">
-            {availablePeriods.map(period => (
+        {/* ROW 2: Meal periods + filter icon */}
+        <div style={{ display: 'flex', alignItems: 'center', padding: '0 16px', gap: 8, borderBottom: '1px solid #f0f0f0' }}>
+          {availablePeriods.length > 2 && (
+            <div className="menu-periods" style={{ flex: 1, borderBottom: 'none' }}>
+              {availablePeriods.map(period => (
+                <button
+                  key={period}
+                  className={`menu-period-tab ${activePeriod === period ? 'active' : ''}`}
+                  onClick={() => setActivePeriod(period)}
+                >
+                  {MEAL_PERIOD_LABELS[period]}
+                </button>
+              ))}
+            </div>
+          )}
+          {/* Filter icon — toggles allergen panel */}
+          <button
+            onClick={() => setShowAllergenPanel(!showAllergenPanel)}
+            style={{
+              width: 36, height: 36, borderRadius: 8, border: activeFilters.length > 0 ? '2px solid #8A05BE' : '1px solid #ddd',
+              background: activeFilters.length > 0 ? 'rgba(138,5,190,0.08)' : '#fff',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0, position: 'relative',
+            }}
+            aria-label="Filters"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={activeFilters.length > 0 ? '#8A05BE' : '#666'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+            </svg>
+            {activeFilters.length > 0 && (
+              <span style={{
+                position: 'absolute', top: -4, right: -4, width: 16, height: 16,
+                borderRadius: '50%', background: '#8A05BE', color: '#fff',
+                fontSize: 10, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>{activeFilters.length}</span>
+            )}
+          </button>
+        </div>
+
+        {/* Allergen filter panel — hidden by default, shown on filter icon tap */}
+        {showAllergenPanel && (
+          <div className="menu-allergen-filters">
+            {ALLERGEN_FILTERS.map(f => (
               <button
-                key={period}
-                className={`menu-period-tab ${activePeriod === period ? 'active' : ''}`}
-                onClick={() => setActivePeriod(period)}
+                key={f.key}
+                className={`menu-allergen-pill ${activeFilters.includes(f.key) ? 'active' : ''}`}
+                onClick={() => toggleFilter(f.key)}
               >
-                {MEAL_PERIOD_LABELS[period]}
+                {activeFilters.includes(f.key) ? '✓ ' : `${f.icon} `}{f.label}
               </button>
             ))}
           </div>
         )}
-
-        {/* Allergen Filter Row */}
-        <div className="menu-allergen-filters">
-          {ALLERGEN_FILTERS.map(f => (
-            <button
-              key={f.key}
-              className={`menu-allergen-pill ${activeFilters.includes(f.key) ? 'active' : ''}`}
-              onClick={() => toggleFilter(f.key)}
-            >
-              {activeFilters.includes(f.key) ? '✓ ' : `${f.icon} `}{f.label}
-            </button>
-          ))}
-        </div>
 
         {/* Categories & Items */}
         <div className="menu-content">
