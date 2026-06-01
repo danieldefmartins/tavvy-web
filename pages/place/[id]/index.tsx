@@ -76,24 +76,46 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
   }>({ best_for: [], vibe: [], heads_up: [], medals: [] });
   const [photos, setPhotos] = useState<string[]>([]);
   const [isSaved, setIsSaved] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // Check if place is saved in localStorage
+  // Check auth + saved status
   useEffect(() => {
-    if (id && typeof window !== 'undefined') {
-      const saved = JSON.parse(localStorage.getItem('tavvy_saved_places') || '[]');
-      setIsSaved(saved.includes(id));
-    }
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) {
+        setUserId(data.user.id);
+        // Check if this place is saved
+        if (id) {
+          supabase.from('saved_places')
+            .select('id')
+            .eq('user_id', data.user.id)
+            .eq('place_id', id)
+            .maybeSingle()
+            .then(({ data: saved }) => {
+              setIsSaved(!!saved);
+            });
+        }
+      }
+    });
   }, [id]);
 
-  const toggleSave = () => {
-    if (!id || typeof window === 'undefined') return;
-    const saved = JSON.parse(localStorage.getItem('tavvy_saved_places') || '[]');
+  const toggleSave = async () => {
+    if (!id) return;
+
+    // Not logged in → redirect to login
+    if (!userId) {
+      router.push(`/app/login?redirect=${encodeURIComponent(`/place/${id}`)}`);
+      return;
+    }
+
     if (isSaved) {
-      localStorage.setItem('tavvy_saved_places', JSON.stringify(saved.filter((s: string) => s !== id)));
+      await supabase.from('saved_places')
+        .delete()
+        .eq('user_id', userId)
+        .eq('place_id', id);
       setIsSaved(false);
     } else {
-      saved.push(id);
-      localStorage.setItem('tavvy_saved_places', JSON.stringify(saved));
+      await supabase.from('saved_places')
+        .insert({ user_id: userId, place_id: id });
       setIsSaved(true);
     }
   };
