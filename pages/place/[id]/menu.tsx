@@ -513,7 +513,7 @@ export default function MenuPage() {
 
             {/* Powered by footer on cover */}
             <div className="menu-cover-footer">
-              <span className="menu-powered">Powered by <strong>Tavvy</strong></span>
+              <img src="/tavvy-logo-white.png" alt="Tavvy" style={{ height: 18, opacity: 0.5 }} />
             </div>
           </div>
         )}
@@ -687,7 +687,7 @@ export default function MenuPage() {
         {/* Footer */}
         <div className="menu-footer">
           <p>Prices may vary. Ask your server for today&apos;s specials.</p>
-          <span className="menu-powered">Powered by <strong>Tavvy</strong></span>
+          <img src="/tavvy-logo-white.png" alt="Tavvy" style={{ height: 18, opacity: 0.5 }} />
         </div>
         </>
         )}
