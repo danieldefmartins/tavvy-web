@@ -403,13 +403,22 @@ export default function MenuPage() {
           <div className="menu-cover-page">
             {/* Full-Width Hero with Gradient Overlay */}
             <div className="menu-hero">
-              {menu.cover_image_url && (
-                <img src={menu.cover_image_url} alt={`${placeName}`} className="menu-hero-img" />
-              )}
+              <img
+                src={menu.cover_image_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&q=80&fit=crop'}
+                alt={placeName}
+                className="menu-hero-img"
+              />
               <div className="menu-hero-gradient" />
               <div className="menu-hero-text">
-                <h1 className="menu-hero-name">{placeName}</h1>
+                <Link href={`/place/${id}`}>
+                  <h1 className="menu-hero-name" style={{ cursor: 'pointer' }}>{placeName}</h1>
+                </Link>
                 {menu.tagline && <p className="menu-hero-tagline">{menu.tagline}</p>}
+                {menu.welcome_message && (
+                  <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, fontStyle: 'italic', margin: '8px 0 0', maxWidth: 360 }}>
+                    {menu.welcome_message}
+                  </p>
+                )}
               </div>
             </div>
 
