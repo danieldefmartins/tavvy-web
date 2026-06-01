@@ -331,7 +331,7 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
           {livingSignals.best_for.length > 0 && (
             <div style={{ marginBottom: 24 }}>
               <p style={sectionTitleStyle}>
-                ✅ The Good
+                The Good
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {livingSignals.best_for.slice(0, 5).map(s => (
@@ -353,7 +353,7 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
           {livingSignals.vibe.length > 0 && (
             <div style={{ marginBottom: 24 }}>
               <p style={sectionTitleStyle}>
-                💜 The Vibe
+                The Vibe
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {livingSignals.vibe.slice(0, 3).map(s => (
@@ -375,7 +375,7 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
           {livingSignals.heads_up.length > 0 && (
             <div style={{ marginBottom: 24 }}>
               <p style={sectionTitleStyle}>
-                ⚠️ Heads Up
+                Heads Up
               </p>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {livingSignals.heads_up.slice(0, 2).map(s => (
@@ -405,7 +405,7 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
                 alignItems: 'center', justifyContent: 'center', gap: 6,
               }}
             >
-              ✏️ Add Your Signal
+              Add Your Signal
             </button>
           </div>
         </div>
@@ -413,7 +413,7 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
         {/* ===== PHOTOS ===== */}
         {photos.length > 0 && (
           <div style={{ padding: '0 16px 24px' }}>
-            <p style={sectionTitleStyle}>📸 Photos</p>
+            <p style={sectionTitleStyle}>Photos</p>
             <div style={{
               display: 'flex', gap: 10, overflowX: 'auto',
               paddingBottom: 6,
@@ -486,7 +486,7 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
         <div style={{
           padding: '0 16px 32px',
         }}>
-          <p style={sectionTitleStyle}>ℹ️ Info</p>
+          <p style={sectionTitleStyle}>Info</p>
 
           <div style={{
             background: '#FAFAFA', borderRadius: 16, overflow: 'hidden',
@@ -563,7 +563,7 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
         {/* ===== DESCRIPTION ===== */}
         {place.description && (
           <div style={{ padding: '0 16px 32px' }}>
-            <p style={sectionTitleStyle}>📝 About</p>
+            <p style={sectionTitleStyle}>About</p>
             <p style={{
               margin: 0, fontSize: 14, lineHeight: 1.7, color: '#444',
             }}>
