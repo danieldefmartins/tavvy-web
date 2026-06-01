@@ -8,6 +8,7 @@ import { AuthProvider } from '../contexts/AuthContext';
 import { ProAuthProvider } from '../contexts/ProAuthContext';
 import { ThemeProvider } from '../contexts/ThemeContext';
 import '../styles/globals.css';
+import '../styles/place-details.css';
 
 // Create QueryClient instance
 const queryClient = new QueryClient({

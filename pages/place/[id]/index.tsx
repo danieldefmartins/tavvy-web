@@ -14,10 +14,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+// CSS in styles/place-details.css loaded via _app
 import { fetchPlaceById } from '../../../lib/placeService';
 import { supabase } from '../../../lib/supabaseClient';
 import { Place } from '../../../types';
 import { fetchPlaceSignals, SignalAggregate, SIGNAL_LABELS } from '../../../lib/signalService';
+
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
@@ -290,28 +292,28 @@ export default function PlaceDetailsScreen({ placeId: propPlaceId }: { placeId?:
   // Loading state
   if (loading) {
     return (
-      <div>
-        <style jsx global>{pageStyles}</style>
+      <>
+        
         <div className="pd-loading">
           <div className="pd-spinner" />
           <p>Loading place...</p>
         </div>
-      </div>
+      </>
     );
   }
 
   // Error state
   if (!place) {
     return (
-      <div>
-        <style jsx global>{pageStyles}</style>
+      <>
+        
         <div className="pd-error">
           <span className="pd-error-icon">😕</span>
           <h1>Place not found</h1>
           <p>This place may have been removed or doesn&apos;t exist.</p>
           <button onClick={() => router.push('/app')}>Go Home</button>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -405,7 +407,7 @@ export default function PlaceDetailsScreen({ placeId: propPlaceId }: { placeId?:
         />
       </Head>
 
-      <style jsx global>{pageStyles}</style>
+      
 
       <div className="pd-container">
         {/* ===== 1. HERO IMAGE (40vh) ===== */}
@@ -534,7 +536,7 @@ export default function PlaceDetailsScreen({ placeId: propPlaceId }: { placeId?:
               >
                 See all signals →
               </button>
-            </div>
+            </>
           ) : (
             <div className="pd-no-signals">
               <p>No signals yet — be the first to share!</p>
@@ -593,11 +595,7 @@ export default function PlaceDetailsScreen({ placeId: propPlaceId }: { placeId?:
                 </div>
                 {livingSignals.best_for.length > 0 ? (
                   livingSignals.best_for.map((signal) => (
-                    <div key={signal.signal_id} className="pd-breakdown-row">
-                      <span className="pd-breakdown-emoji">{signal.icon}</span>
-                      <span className="pd-breakdown-label">{signal.label || signal.signal_id}</span>
-                      <span className="pd-breakdown-count">×{signal.review_count}</span>
-                    </div>
+                    <div key={signal.signal_id} className="pd-breakdown-row"><span>{signal.icon}</span><span className="pd-breakdown-label">{signal.label || signal.signal_id}</span><span className="pd-breakdown-count">×{signal.review_count}</span></div>
                   ))
                 ) : (
                   <p className="pd-empty-signal">Be the first to tap!</p>
@@ -614,11 +612,7 @@ export default function PlaceDetailsScreen({ placeId: propPlaceId }: { placeId?:
                 </div>
                 {livingSignals.vibe.length > 0 ? (
                   livingSignals.vibe.map((signal) => (
-                    <div key={signal.signal_id} className="pd-breakdown-row">
-                      <span className="pd-breakdown-emoji">{signal.icon}</span>
-                      <span className="pd-breakdown-label">{signal.label || signal.signal_id}</span>
-                      <span className="pd-breakdown-count">×{signal.review_count}</span>
-                    </div>
+                    <div key={signal.signal_id} className="pd-breakdown-row"><span>{signal.icon}</span><span className="pd-breakdown-label">{signal.label || signal.signal_id}</span><span className="pd-breakdown-count">×{signal.review_count}</span></div>
                   ))
                 ) : (
                   <p className="pd-empty-signal">Be the first to tap!</p>
@@ -635,11 +629,7 @@ export default function PlaceDetailsScreen({ placeId: propPlaceId }: { placeId?:
                 </div>
                 {livingSignals.heads_up.length > 0 ? (
                   livingSignals.heads_up.map((signal) => (
-                    <div key={signal.signal_id} className="pd-breakdown-row">
-                      <span className="pd-breakdown-emoji">{signal.icon}</span>
-                      <span className="pd-breakdown-label">{signal.label || signal.signal_id}</span>
-                      <span className="pd-breakdown-count">×{signal.review_count}</span>
-                    </div>
+                    <div key={signal.signal_id} className="pd-breakdown-row"><span>{signal.icon}</span><span className="pd-breakdown-label">{signal.label || signal.signal_id}</span><span className="pd-breakdown-count">×{signal.review_count}</span></div>
                   ))
                 ) : (
                   <p className="pd-empty-signal">Be the first to tap!</p>
@@ -692,7 +682,7 @@ export default function PlaceDetailsScreen({ placeId: propPlaceId }: { placeId?:
                     </div>
                   ))}
                 </div>
-              </div>
+              </>
             ) : (
               <p className="pd-no-photos">No photos yet</p>
             )}
@@ -783,660 +773,6 @@ export default function PlaceDetailsScreen({ placeId: propPlaceId }: { placeId?:
 }
 
 // ===== ALL STYLES =====
-const pageStyles = `
-  /* Reset & base */
-  .pd-container {
-    min-height: 100vh;
-    background-color: #F8F9FA;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
-  }
-  @media (prefers-color-scheme: dark) {
-    .pd-container { background-color: #0A0A0A; }
-  }
-
-  /* ===== LOADING ===== */
-  .pd-loading {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: #000;
-    color: #999;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
-  }
-  .pd-spinner {
-    width: 36px;
-    height: 36px;
-    border: 3px solid #333;
-    border-top-color: #8A05BE;
-    border-radius: 50%;
-    animation: pd-spin 0.8s linear infinite;
-    margin-bottom: 16px;
-  }
-  @keyframes pd-spin {
-    to { transform: rotate(360deg); }
-  }
-
-  /* ===== ERROR ===== */
-  .pd-error {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: #000;
-    color: #fff;
-    text-align: center;
-    padding: 20px;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
-  }
-  .pd-error-icon { font-size: 64px; margin-bottom: 16px; }
-  .pd-error h1 { margin: 0 0 8px; font-size: 24px; }
-  .pd-error p { margin: 0 0 24px; color: #999; }
-  .pd-error button {
-    background: none;
-    border: none;
-    color: #8A05BE;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  /* ===== 1. HERO SECTION (40vh) ===== */
-  .pd-hero {
-    position: relative;
-    height: 40vh;
-    min-height: 260px;
-    max-height: 360px;
-    background: #000;
-    overflow: hidden;
-  }
-  .pd-hero-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .pd-hero-gradient {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 60%;
-    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
-    pointer-events: none;
-  }
-  .pd-hero-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.92);
-    backdrop-filter: blur(8px);
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    cursor: pointer;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-    z-index: 2;
-    color: #1a1a1a;
-  }
-  .pd-hero-back {
-    position: absolute;
-    top: max(env(safe-area-inset-top, 12px), 12px);
-    left: 16px;
-  }
-  .pd-hero-actions {
-    position: absolute;
-    top: max(env(safe-area-inset-top, 12px), 12px);
-    right: 16px;
-    display: flex;
-    gap: 8px;
-    z-index: 2;
-  }
-  .pd-hero-text {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    right: 20px;
-    z-index: 2;
-  }
-  .pd-hero-name {
-    font-size: 28px;
-    font-weight: 800;
-    color: #fff;
-    margin: 0 0 4px;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
-    line-height: 1.15;
-    letter-spacing: -0.3px;
-  }
-  .pd-hero-category {
-    font-size: 15px;
-    color: rgba(255,255,255,0.85);
-    margin: 0;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
-  }
-
-  /* ===== 2. ACTION BAR (sticky) ===== */
-  .pd-action-bar {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 20px;
-    background: rgba(255,255,255,0.97);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(0,0,0,0.06);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  }
-  @media (prefers-color-scheme: dark) {
-    .pd-action-bar {
-      background: rgba(20,20,20,0.97);
-      border-bottom-color: rgba(255,255,255,0.08);
-    }
-  }
-  .pd-action-btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    border: 1px solid #E5E7EB;
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.15s;
-  }
-  .pd-action-btn:active {
-    transform: scale(0.93);
-  }
-  @media (prefers-color-scheme: dark) {
-    .pd-action-btn {
-      background: #1a1a1a;
-      border-color: #333;
-    }
-  }
-  .pd-action-primary {
-    flex: 1;
-    width: auto;
-    flex-direction: row;
-    gap: 8px;
-    background: #8A05BE;
-    border-color: #8A05BE;
-    color: #fff;
-    font-weight: 700;
-    font-size: 15px;
-    box-shadow: 0 4px 16px rgba(138, 5, 190, 0.3);
-  }
-  .pd-action-primary .pd-action-icon {
-    font-size: 18px;
-  }
-  .pd-action-primary .pd-action-label {
-    font-size: 15px;
-    font-weight: 700;
-    color: #fff;
-  }
-  .pd-action-icon {
-    font-size: 20px;
-    line-height: 1;
-  }
-  .pd-action-label {
-    display: none;
-  }
-  .pd-action-primary .pd-action-label {
-    display: inline;
-  }
-
-  /* ===== 3. SIGNAL SUMMARY ===== */
-  .pd-signals-summary {
-    padding: 24px 20px;
-    background: #fff;
-    border-bottom: 1px solid rgba(0,0,0,0.04);
-  }
-  @media (prefers-color-scheme: dark) {
-    .pd-signals-summary {
-      background: #111;
-      border-bottom-color: rgba(255,255,255,0.06);
-    }
-  }
-  .pd-signal-group {
-    margin-bottom: 12px;
-  }
-  .pd-signal-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  .pd-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 16px;
-    border-radius: 24px;
-    font-size: 15px;
-    font-weight: 600;
-    line-height: 1;
-    transition: transform 0.15s;
-  }
-  .pd-pill:active { transform: scale(0.95); }
-  .pd-pill-count {
-    font-size: 12px;
-    font-weight: 700;
-    opacity: 0.7;
-    margin-left: 2px;
-  }
-  .pd-pill-good {
-    background: rgba(0, 194, 203, 0.12);
-    color: #00A5AD;
-    border: 1px solid rgba(0, 194, 203, 0.25);
-  }
-  @media (prefers-color-scheme: dark) {
-    .pd-pill-good {
-      background: rgba(0, 194, 203, 0.15);
-      color: #00D4DE;
-    }
-  }
-  .pd-pill-vibe {
-    background: rgba(138, 5, 190, 0.1);
-    color: #8A05BE;
-    border: 1px solid rgba(138, 5, 190, 0.2);
-  }
-  @media (prefers-color-scheme: dark) {
-    .pd-pill-vibe {
-      background: rgba(138, 5, 190, 0.18);
-      color: #B44CE0;
-    }
-  }
-  .pd-pill-headsup {
-    background: rgba(245, 166, 35, 0.1);
-    color: #D4850A;
-    border: 1px solid rgba(245, 166, 35, 0.2);
-  }
-  @media (prefers-color-scheme: dark) {
-    .pd-pill-headsup {
-      background: rgba(245, 166, 35, 0.15);
-      color: #F5A623;
-    }
-  }
-  .pd-see-all-link {
-    display: block;
-    margin-top: 16px;
-    background: none;
-    border: none;
-    color: #8A05BE;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 0;
-  }
-  .pd-no-signals {
-    text-align: center;
-    padding: 12px 0;
-  }
-  .pd-no-signals p {
-    color: #9CA3AF;
-    font-size: 15px;
-    margin: 0 0 16px;
-  }
-
-  /* ===== MEDALS ===== */
-  .pd-medals {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
-  }
-  .pd-medal {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: linear-gradient(135deg, #FFD700, #FFA500);
-    color: #1a1a1a;
-    font-size: 13px;
-    font-weight: 700;
-    padding: 6px 14px;
-    border-radius: 20px;
-    box-shadow: 0 2px 8px rgba(255, 165, 0, 0.3);
-  }
-
-  /* ===== SECTIONS ===== */
-  .pd-section {
-    padding: 16px 20px;
-  }
-
-  /* ===== 4. MENU PREVIEW CARD ===== */
-  .pd-menu-card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  }
-  @media (prefers-color-scheme: dark) {
-    .pd-menu-card { background: #161616; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
-  }
-  .pd-menu-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-  }
-  .pd-menu-header h2 {
-    font-size: 20px;
-    font-weight: 700;
-    margin: 0;
-    color: #1F2937;
-  }
-  @media (prefers-color-scheme: dark) {
-    .pd-menu-header h2 { color: #F3F4F6; }
-  }
-  .pd-menu-count {
-    font-size: 13px;
-    color: #9CA3AF;
-    font-weight: 500;
-  }
-  .pd-menu-thumbnails {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    margin-bottom: 16px;
-    -webkit-overflow-scrolling: touch;
-  }
-  .pd-menu-thumbnails::-webkit-scrollbar { display: none; }
-  .pd-menu-thumb {
-    width: 80px;
-    height: 80px;
-    border-radius: 12px;
-    overflow: hidden;
-    flex-shrink: 0;
-  }
-  .pd-menu-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .pd-menu-cta {
-    width: 100%;
-    padding: 14px;
-    border-radius: 12px;
-    border: none;
-    background: #8A05BE;
-    color: #fff;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: opacity 0.15s;
-  }
-  .pd-menu-cta:active { opacity: 0.85; }
-
-  /* ===== 5. FULL SIGNAL BREAKDOWN ===== */
-  .pd-card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-  }
-  @media (prefers-color-scheme: dark) {
-    .pd-card { background: #161616; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
-  }
-  .pd-card-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: #1F2937;
-    margin: 0 0 16px;
-  }
-  @media (prefers-color-scheme: dark) {
-    .pd-card-title { color: #F3F4F6; }
-  }
-  .pd-breakdown-group {
-    margin-bottom: 8px;
-  }
-  .pd-breakdown-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
-  .pd-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .pd-dot-good { background-color: #00C2CB; }
-  .pd-dot-vibe { background-color: #8A05BE; }
-  .pd-dot-headsup { background-color: #F5A623; }
-  .pd-breakdown-title {
-    font-size: 18px;
-    font-weight: 800;
-    color: #1F2937;
-  }
-  @media (prefers-color-scheme: dark) {
-    .pd-breakdown-title { color: #F3F4F6; }
-  }
-  .pd-breakdown-divider {
-    height: 1px;
-    background: rgba(0,0,0,0.06);
-    margin: 16px 0;
-  }
-  @media (prefers-color-scheme: dark) {
-    .pd-breakdown-divider { background: rgba(255,255,255,0.08); }
-  }
-  .pd-breakdown-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(0,0,0,0.04);
-  }
-  .pd-breakdown-emoji { font-size: 18px; }
-  .pd-breakdown-label { flex: 1; font-size: 14px; font-weight: 500; }
-  .pd-breakdown-count { font-size: 13px; color: #999; font-weight: 600; }
-  @media (prefers-color-scheme: dark) {
-    .pd-breakdown-row { border-color: rgba(255,255,255,0.06); }
-    .pd-breakdown-label { color: #fff; }
-  }
-  .pd-empty-signal {
-    font-size: 14px;
-    font-style: italic;
-    opacity: 0.5;
-    margin: 0 0 14px;
-    padding-left: 16px;
-    color: #6B7280;
-  }
-  .pd-breakdown-cta {
-    margin-top: 20px;
-  }
-  .pd-expand-btn {
-    width: 100%;
-    padding: 14px;
-    border-radius: 12px;
-    border: 1px solid #E5E7EB;
-    background: #fff;
-    color: #1F2937;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-  .pd-expand-btn:hover { background: #F9FAFB; }
-  @media (prefers-color-scheme: dark) {
-    .pd-expand-btn {
-      background: #161616;
-      border-color: #333;
-      color: #F3F4F6;
-    }
-    .pd-expand-btn:hover { background: #1a1a1a; }
-  }
-
-  /* ===== ADD SIGNAL BUTTON ===== */
-  .pd-add-signal-btn {
-    width: 100%;
-    padding: 14px;
-    border: 1.5px solid #8A05BE;
-    border-radius: 12px;
-    background: none;
-    color: #8A05BE;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .pd-add-signal-btn:hover {
-    background: rgba(138, 5, 190, 0.05);
-  }
-
-  /* ===== 6. PHOTOS ===== */
-  .pd-photo-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
-  .pd-photo-item {
-    border-radius: 12px;
-    overflow: hidden;
-    aspect-ratio: 1;
-    position: relative;
-  }
-  .pd-photo-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .pd-photo-more {
-    position: absolute;
-    inset: 0;
-    background: rgba(0,0,0,0.55);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 20px;
-    font-weight: 700;
-  }
-  .pd-no-photos {
-    color: #9CA3AF;
-    font-style: italic;
-    font-size: 15px;
-    margin: 0 0 16px;
-  }
-  .pd-add-photo-btn {
-    width: 100%;
-    padding: 12px;
-    border: 1.5px solid #8A05BE;
-    border-radius: 12px;
-    background: none;
-    color: #8A05BE;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .pd-add-photo-btn:hover {
-    background: rgba(138, 5, 190, 0.05);
-  }
-
-  /* ===== 7. INFO SECTION ===== */
-  .pd-info-toggle {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-  }
-  .pd-chevron {
-    font-size: 18px;
-    color: #9CA3AF;
-    transition: transform 0.2s;
-  }
-  .pd-chevron-open {
-    transform: rotate(180deg);
-  }
-  .pd-info-content {
-    margin-top: 16px;
-  }
-  .pd-contact-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 14px;
-  }
-  .pd-contact-icon {
-    font-size: 18px;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-  .pd-contact-link {
-    color: #8A05BE;
-    font-size: 15px;
-    text-decoration: none;
-    line-height: 1.4;
-  }
-  .pd-contact-link:hover {
-    text-decoration: underline;
-  }
-  .pd-directions-btn {
-    width: 100%;
-    padding: 14px;
-    border-radius: 12px;
-    border: 1px solid #E5E7EB;
-    background: #F9FAFB;
-    color: #1F2937;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 8px;
-    transition: background 0.15s;
-  }
-  .pd-directions-btn:hover { background: #F3F4F6; }
-  @media (prefers-color-scheme: dark) {
-    .pd-directions-btn {
-      background: #1a1a1a;
-      border-color: #333;
-      color: #F3F4F6;
-    }
-  }
-  .pd-claim-divider {
-    height: 1px;
-    background: #E5E7EB;
-    margin: 20px 0;
-  }
-  @media (prefers-color-scheme: dark) {
-    .pd-claim-divider { background: #333; }
-  }
-  .pd-claim-btn {
-    display: block;
-    width: 100%;
-    background: none;
-    border: none;
-    color: #9CA3AF;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 0;
-    text-align: center;
-  }
-  .pd-claim-btn:hover {
-    color: #6B7280;
-  }
-
-  /* ===== RESPONSIVE ===== */
-  @media (min-width: 768px) {
-    .pd-container {
-      max-width: 480px;
-      margin: 0 auto;
-      box-shadow: 0 0 40px rgba(0,0,0,0.08);
-    }
-  }
-`;
 
 
 export const getServerSideProps = async ({ params, locale }: { params: { id: string }; locale: string }) => {
