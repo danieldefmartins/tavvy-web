@@ -75,6 +75,28 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
     medals: string[];
   }>({ best_for: [], vibe: [], heads_up: [], medals: [] });
   const [photos, setPhotos] = useState<string[]>([]);
+  const [isSaved, setIsSaved] = useState(false);
+
+  // Check if place is saved in localStorage
+  useEffect(() => {
+    if (id && typeof window !== 'undefined') {
+      const saved = JSON.parse(localStorage.getItem('tavvy_saved_places') || '[]');
+      setIsSaved(saved.includes(id));
+    }
+  }, [id]);
+
+  const toggleSave = () => {
+    if (!id || typeof window === 'undefined') return;
+    const saved = JSON.parse(localStorage.getItem('tavvy_saved_places') || '[]');
+    if (isSaved) {
+      localStorage.setItem('tavvy_saved_places', JSON.stringify(saved.filter((s: string) => s !== id)));
+      setIsSaved(false);
+    } else {
+      saved.push(id);
+      localStorage.setItem('tavvy_saved_places', JSON.stringify(saved));
+      setIsSaved(true);
+    }
+  };
 
   useEffect(() => {
     if (id) {
@@ -242,8 +264,8 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
                   <line x1="12" y1="2" x2="12" y2="15"/>
                 </svg>
               </button>
-              <button style={iconBtnStyle} aria-label="Save">
-                <Heart size={18} color="#333" />
+              <button onClick={toggleSave} style={iconBtnStyle} aria-label="Save">
+                <Heart size={18} color={isSaved ? '#E11D48' : '#333'} fill={isSaved ? '#E11D48' : 'none'} />
               </button>
             </div>
           </div>
