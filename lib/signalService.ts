@@ -481,6 +481,7 @@ export async function fetchPlaceSignals(placeId: string): Promise<{
     }
 
     // Query place_review_signal_taps joined with place_reviews for created_at
+    // Must set high limit — Supabase defaults to 1000 but popular places have 10K+ taps
     const { data: taps, error } = await supabase
       .from('place_review_signal_taps')
       .select(`
@@ -490,7 +491,8 @@ export async function fetchPlaceSignals(placeId: string): Promise<{
           created_at
         )
       `)
-      .eq('place_id', placeId);
+      .eq('place_id', placeId)
+      .limit(50000);
 
     if (error) {
       console.error('Error fetching signal taps:', error);
