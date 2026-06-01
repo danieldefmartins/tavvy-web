@@ -330,7 +330,7 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
           borderBottom: '1px solid #F0F0F0', alignItems: 'center',
         }}>
           <button
-            onClick={() => router.push(`/place/${id}/menu-gallery`)}
+            onClick={() => router.push(`/place/${id}/menu`)}
             style={{
               flex: 1, padding: '13px 0', background: '#8A05BE', color: '#fff',
               border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 700,
