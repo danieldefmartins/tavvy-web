@@ -165,7 +165,17 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
 
   const coverUrl = place.cover_image_url || getFallbackCover(place.category);
   const emoji = getCategoryEmoji(place.category);
-  const displayCategory = place.tavvy_subcategory || place.primary_category || place.category || 'Restaurant';
+  // Format subcategory: "italian" → "Italian Restaurant", "pizza" → "Pizza", etc.
+  const rawSub = place.tavvy_subcategory || '';
+  const formatSubcategory = (sub: string): string => {
+    if (!sub) return '';
+    const formatted = sub.charAt(0).toUpperCase() + sub.slice(1).replace(/_/g, ' ');
+    // Add "Restaurant" suffix for cuisine types
+    const cuisines = ['italian', 'mexican', 'chinese', 'japanese', 'thai', 'indian', 'french', 'korean', 'vietnamese', 'brazilian', 'mediterranean', 'greek', 'american'];
+    if (cuisines.includes(sub.toLowerCase())) return `${formatted} Restaurant`;
+    return formatted;
+  };
+  const displayCategory = formatSubcategory(rawSub) || place.primary_category || place.category || 'Restaurant';
 
   const iconBtnStyle: React.CSSProperties = {
     width: 38, height: 38, borderRadius: '50%', background: 'rgba(255,255,255,0.95)',
