@@ -438,44 +438,44 @@ export default function MenuGalleryPage() {
           </button>
         </div>
 
-        {/* Category panel — hidden by default */}
+        {/* Filter panel — categories + allergens, hidden by default */}
         {showCategoryPanel && (
-          <div style={{ display: 'flex', gap: 6, padding: '8px 12px', overflowX: 'auto', flexShrink: 0, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-            <button
-              className={`gallery-cat-pill ${activeCategory === 'all' ? 'active' : ''}`}
-              onClick={() => { setActiveCategory('all'); setShowCategoryPanel(false); }}
-            >
-              All
-            </button>
-            {categories
-              .filter(cat => {
-                if (activePeriod === 'all') return true;
-                return cat.meal_period === activePeriod || cat.meal_period === 'all_day' || !cat.meal_period;
-              })
-              .map(cat => (
+          <div style={{ flexShrink: 0, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <div style={{ display: 'flex', gap: 6, padding: '8px 12px', overflowX: 'auto' }}>
+              <button
+                className={`gallery-cat-pill ${activeCategory === 'all' ? 'active' : ''}`}
+                onClick={() => { setActiveCategory('all'); setShowCategoryPanel(false); }}
+              >
+                All
+              </button>
+              {categories
+                .filter(cat => {
+                  if (activePeriod === 'all') return true;
+                  return cat.meal_period === activePeriod || cat.meal_period === 'all_day' || !cat.meal_period;
+                })
+                .map(cat => (
+                  <button
+                    key={cat.id}
+                    className={`gallery-cat-pill ${activeCategory === cat.id ? 'active' : ''}`}
+                    onClick={() => { setActiveCategory(cat.id); setShowCategoryPanel(false); }}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+            </div>
+            <div style={{ display: 'flex', gap: 6, padding: '4px 12px 8px', overflowX: 'auto' }}>
+              {ALLERGEN_FILTERS.map(f => (
                 <button
-                  key={cat.id}
-                  className={`gallery-cat-pill ${activeCategory === cat.id ? 'active' : ''}`}
-                  onClick={() => { setActiveCategory(cat.id); setShowCategoryPanel(false); }}
+                  key={f.key}
+                  className={`gallery-allergen-pill ${activeFilters.includes(f.key) ? 'active' : ''}`}
+                  onClick={() => toggleFilter(f.key)}
                 >
-                  {cat.name}
+                  {activeFilters.includes(f.key) ? '✓ ' : `${f.icon} `}{f.label}
                 </button>
               ))}
+            </div>
           </div>
-
-          {/* Allergen Filter Pills */}
-          <div className="gallery-allergens">
-            {ALLERGEN_FILTERS.map(f => (
-              <button
-                key={f.key}
-                className={`gallery-allergen-pill ${activeFilters.includes(f.key) ? 'active' : ''}`}
-                onClick={() => toggleFilter(f.key)}
-              >
-                {activeFilters.includes(f.key) ? '✓ ' : `${f.icon} `}{f.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        )}
 
         {/* Gallery Cards - Horizontal Scroll */}
         {filteredItems.length > 0 ? (
