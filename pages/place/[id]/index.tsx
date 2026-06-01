@@ -93,10 +93,10 @@ const getDriveTime = (distanceMiles?: number): string => {
 
 // Info section collapsed state
 
-export default function PlaceDetailsScreen() {
+export default function PlaceDetailsScreen({ placeId: propPlaceId }: { placeId?: string }) {
   const { t } = useTranslation();
   const router = useRouter();
-  const { id } = router.query;
+  const id = propPlaceId || (router.query.id as string);
 
   const [place, setPlace] = useState<Place | null>(null);
   const [loading, setLoading] = useState(true);
@@ -1436,8 +1436,9 @@ const pageStyles = `
 `;
 
 
-export const getServerSideProps = async ({ locale }: { locale: string }) => ({
+export const getServerSideProps = async ({ params, locale }: { params: { id: string }; locale: string }) => ({
   props: {
+    placeId: params.id,
     ...(await serverSideTranslations(locale ?? 'en', ['common'])),
   },
 });
