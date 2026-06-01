@@ -74,7 +74,8 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
     heads_up: SignalAggregate[];
     medals: string[];
   }>({ best_for: [], vibe: [], heads_up: [], medals: [] });
-  const [photos, setPhotos] = useState<string[]>([]);
+  const [photos, setPhotos] = useState<{ url: string; caption?: string }[]>([]);
+  const [stories, setStories] = useState<{ id: string; url: string; thumbnail_url?: string; caption?: string }[]>([]);
   const [isSaved, setIsSaved] = useState(false);
   const [expandGood, setExpandGood] = useState(false);
   const [expandVibe, setExpandVibe] = useState(false);
@@ -130,14 +131,27 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
         setLoading(false);
         if (data?.id) {
           fetchPlaceSignals(data.id).then(setLivingSignals).catch(() => {});
+          // Load photos
           supabase
             .from('place_photos')
-            .select('photo_url')
+            .select('url, caption')
             .eq('place_id', data.id)
-            .order('display_order', { ascending: true })
-            .limit(6)
+            .eq('status', 'live')
+            .limit(12)
             .then(({ data: photoData }) => {
-              if (photoData) setPhotos(photoData.map((p: any) => p.photo_url));
+              if (photoData) setPhotos(photoData.filter((p: any) => p.url));
+            })
+            .catch(() => {});
+          // Load stories
+          supabase
+            .from('place_stories')
+            .select('id, url, thumbnail_url, caption')
+            .eq('place_id', data.id)
+            .eq('status', 'live')
+            .order('created_at', { ascending: false })
+            .limit(10)
+            .then(({ data: storyData }) => {
+              if (storyData) setStories(storyData);
             })
             .catch(() => {});
         }
@@ -310,6 +324,14 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
             }}>
               {emoji} {displayCategory}
             </div>
+            {/* Logo */}
+            {place.logo_url && (
+              <img src={place.logo_url} alt="" style={{
+                width: 48, height: 48, borderRadius: 12, objectFit: 'cover',
+                marginBottom: 8, border: '2px solid rgba(255,255,255,0.3)',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+              }} />
+            )}
             <h1 style={{
               margin: 0, fontSize: 32, fontWeight: 800, color: '#fff',
               lineHeight: 1.12, textShadow: '0 2px 12px rgba(0,0,0,0.4)',
@@ -485,19 +507,85 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
           </div>
         </div>
 
-        {/* ===== PHOTOS ===== */}
-        {photos.length > 0 && (
+        {/* ===== STORIES (latest videos) ===== */}
+        {stories.length > 0 && (
           <div style={{ padding: '0 16px 24px' }}>
-            <p style={sectionTitleStyle}>Photos</p>
-            <div style={{
-              display: 'flex', gap: 10, overflowX: 'auto',
+            <p style={sectionTitleStyle}>Latest Stories</p>
+            <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 6 }}>
+              {stories.map((story) => (
+                <div
+                  key={story.id}
+                  onClick={() => window.open(story.url, '_blank')}
+                  style={{
+                    width: 80, flexShrink: 0, cursor: 'pointer', textAlign: 'center',
+                  }}
+                >
+                  <div style={{
+                    width: 72, height: 72, borderRadius: '50%', overflow: 'hidden',
+                    border: '3px solid #8A05BE', padding: 2, margin: '0 auto 6px',
+                  }}>
+                    <img
+                      src={story.thumbnail_url || story.url}
+                      alt={story.caption || 'Story'}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+                    />
+                  </div>
+                  {story.caption && (
+                    <p style={{ fontSize: 11, color: '#666', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const }}>
+                      {story.caption}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ===== PHOTOS ===== */}
+        <div style={{ padding: '0 16px 24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <p style={{ ...sectionTitleStyle, margin: 0 }}>Photos {photos.length > 0 && `(${photos.length})`}</p>
+            <button
+              onClick={() => {
+                if (!userId) { router.push(`/app/login?redirect=${encodeURIComponent(`/place/${id}`)}`); return; }
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.onchange = async (e: any) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const ext = file.name.split('.').pop();
+                  const fileName = `${id}/${Date.now()}.${ext}`;
+                  const { error } = await supabase.storage.from('place-photos').upload(fileName, file, { contentType: file.type });
+                  if (error) { alert('Upload failed'); return; }
+                  const { data: urlData } = supabase.storage.from('place-photos').getPublicUrl(fileName);
+                  await supabase.from('place_photos').insert({ place_id: id, user_id: userId, url: urlData.publicUrl, status: 'live' });
+                  // Reload photos
+                  const { data: newPhotos } = await supabase.from('place_photos').select('url, caption').eq('place_id', id).eq('status', 'live').limit(12);
+                  if (newPhotos) setPhotos(newPhotos.filter((p: any) => p.url));
+                };
+                input.click();
+              }}
+              style={{
+                padding: '6px 14px', background: 'none', border: '1.5px solid #ddd',
+                borderRadius: 20, fontSize: 12, fontWeight: 600, color: '#666',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Add Photo
+            </button>
+          </div>
+          {photos.length > 0 ? (
+          <div style={{
+            display: 'flex', gap: 10, overflowX: 'auto',
               paddingBottom: 6,
             }}>
-              {photos.map((url, i) => (
+              {photos.map((p, i) => (
                 <img
                   key={i}
-                  src={url}
-                  alt={`${place.name} photo ${i + 1}`}
+                  src={p.url}
+                  alt={p.caption || `${place.name} photo ${i + 1}`}
                   style={{
                     width: 150, height: 160, objectFit: 'cover',
                     borderRadius: 14, flexShrink: 0,
@@ -506,8 +594,10 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
                 />
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <p style={{ fontSize: 13, color: '#999', margin: 0 }}>No photos yet — be the first to add one!</p>
+          )}
+        </div>
 
         {/* ===== MAP ===== */}
         {(place.latitude || place.lat) && (place.longitude || place.lng) && (
