@@ -485,51 +485,39 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
           </div>
         )}
 
-        {/* ===== MENU PREVIEW CARD ===== */}
-        <div style={{ padding: '0 16px 24px' }}>
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(138,5,190,0.04) 0%, #FFFFFF 60%, rgba(138,5,190,0.02) 100%)',
-            borderRadius: 18, padding: 24,
-            border: '1px solid #F0F0F0', textAlign: 'center',
-          }}>
-            <BookOpen size={32} color="#8A05BE" style={{ marginBottom: 6 }} />
-            <p style={{ margin: '0 0 4px', fontSize: 17, fontWeight: 800, color: '#222' }}>
-              Menu & Dishes
-            </p>
-            <p style={{ margin: '0 0 16px', fontSize: 13, color: '#888', lineHeight: 1.5 }}>
-              Browse the full menu with photos and signal highlights
-            </p>
-            <button
-              onClick={() => router.push(`/place/${id}/menu-gallery`)}
-              style={{
-                padding: '12px 30px', background: '#8A05BE', color: '#fff',
-                border: 'none', borderRadius: 24, fontSize: 14, fontWeight: 700,
-                cursor: 'pointer', letterSpacing: 0.3,
-                boxShadow: '0 4px 14px rgba(138,5,190,0.3)',
-              }}
-            >
-              View Full Menu
-            </button>
-          </div>
-        </div>
-
-        {/* ===== ORDER FROM TABLE ===== */}
-        {isRestaurantCategory(place.category) && (
+        {/* ===== MAP ===== */}
+        {(place.latitude || place.lat) && (place.longitude || place.lng) && (
           <div style={{ padding: '0 16px 24px' }}>
-            <button
-              onClick={() => router.push(`/place/${id}/order`)}
+            <div
+              onClick={handleDirections}
               style={{
-                width: '100%', padding: '14px 0',
-                background: 'linear-gradient(135deg, #FF6B35 0%, #FF8F5E 100%)',
-                color: '#fff', border: 'none', borderRadius: 14,
-                fontSize: 15, fontWeight: 700, cursor: 'pointer',
-                letterSpacing: 0.3, display: 'flex',
-                alignItems: 'center', justifyContent: 'center', gap: 8,
-                boxShadow: '0 3px 12px rgba(255,107,53,0.3)',
+                borderRadius: 16, overflow: 'hidden', cursor: 'pointer',
+                border: '1px solid #F0F0F0', position: 'relative',
               }}
             >
-              🍽️ Order from Table
-            </button>
+              <img
+                src={`https://maps.googleapis.com/maps/api/staticmap?center=${place.latitude || place.lat},${place.longitude || place.lng}&zoom=15&size=480x200&scale=2&markers=color:0x8A05BE%7C${place.latitude || place.lat},${place.longitude || place.lng}&style=feature:all%7Csaturation:-30&key=`}
+                alt="Map"
+                style={{ width: '100%', height: 160, objectFit: 'cover', display: 'block' }}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+              {/* Fallback if no Google API key */}
+              <div style={{
+                width: '100%', height: 160, background: 'linear-gradient(135deg, #f0f0f0, #e8e8e8)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                position: 'absolute', top: 0, left: 0, zIndex: -1,
+              }}>
+                <div style={{ textAlign: 'center' }}>
+                  <MapPin size={24} color="#8A05BE" />
+                  <p style={{ margin: '6px 0 0', fontSize: 13, color: '#666' }}>
+                    {place.address_line1}{place.city ? `, ${place.city}` : ''}
+                  </p>
+                  <p style={{ margin: '4px 0 0', fontSize: 12, color: '#8A05BE', fontWeight: 600 }}>
+                    Tap for directions
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
