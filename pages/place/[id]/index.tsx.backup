@@ -14,10 +14,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import AppLayout from '../../../components/AppLayout';
 import { fetchPlaceById } from '../../../lib/placeService';
 import { supabase } from '../../../lib/supabaseClient';
 import { Place } from '../../../types';
 import { fetchPlaceSignals, SignalAggregate, SIGNAL_LABELS } from '../../../lib/signalService';
+import SignalPill, { SignalPillsGrid, SignalDetailRow, getSignalCategory, inferCategoryFromLabel, SignalCategory } from '../../../components/SignalPill';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
@@ -290,20 +292,20 @@ export default function PlaceDetailsScreen({ placeId: propPlaceId }: { placeId?:
   // Loading state
   if (loading) {
     return (
-      <div>
+      <AppLayout>
         <style jsx global>{pageStyles}</style>
         <div className="pd-loading">
           <div className="pd-spinner" />
           <p>Loading place...</p>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
   // Error state
   if (!place) {
     return (
-      <div>
+      <AppLayout>
         <style jsx global>{pageStyles}</style>
         <div className="pd-error">
           <span className="pd-error-icon">😕</span>
@@ -311,7 +313,7 @@ export default function PlaceDetailsScreen({ placeId: propPlaceId }: { placeId?:
           <p>This place may have been removed or doesn&apos;t exist.</p>
           <button onClick={() => router.push('/app')}>Go Home</button>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
@@ -330,21 +332,21 @@ export default function PlaceDetailsScreen({ placeId: propPlaceId }: { placeId?:
     ...livingSignals.best_for.map(s => ({
       label: s.label || s.signal_id,
       tapCount: s.review_count,
-      category: 'good' as string,
+      category: 'good' as SignalCategory,
       emoji: s.icon,
       signalId: s.signal_id,
     })),
     ...livingSignals.vibe.map(s => ({
       label: s.label || s.signal_id,
       tapCount: s.review_count,
-      category: 'vibe' as string,
+      category: 'vibe' as SignalCategory,
       emoji: s.icon,
       signalId: s.signal_id,
     })),
     ...livingSignals.heads_up.map(s => ({
       label: s.label || s.signal_id,
       tapCount: s.review_count,
-      category: 'headsup' as string,
+      category: 'headsup' as SignalCategory,
       emoji: s.icon,
       signalId: s.signal_id,
     })),
@@ -359,7 +361,7 @@ export default function PlaceDetailsScreen({ placeId: propPlaceId }: { placeId?:
   const signalBreakdownRef = useRef<HTMLDivElement>(null);
 
   return (
-    <>
+    <AppLayout>
       <Head>
         <title>{place.name || 'Place'} | Tavvy</title>
         <meta name="description" content={`Discover ${place.name || 'this place'}${place.category ? ` (${place.category})` : ''} on Tavvy. See real signals from real people — what's great, the vibe, and what to watch out for.`} key="description" />
@@ -534,7 +536,7 @@ export default function PlaceDetailsScreen({ placeId: propPlaceId }: { placeId?:
               >
                 See all signals →
               </button>
-            </div>
+            </>
           ) : (
             <div className="pd-no-signals">
               <p>No signals yet — be the first to share!</p>
@@ -593,11 +595,14 @@ export default function PlaceDetailsScreen({ placeId: propPlaceId }: { placeId?:
                 </div>
                 {livingSignals.best_for.length > 0 ? (
                   livingSignals.best_for.map((signal) => (
-                    <div key={signal.signal_id} className="pd-breakdown-row">
-                      <span className="pd-breakdown-emoji">{signal.icon}</span>
-                      <span className="pd-breakdown-label">{signal.label || signal.signal_id}</span>
-                      <span className="pd-breakdown-count">×{signal.review_count}</span>
-                    </div>
+                    <SignalDetailRow
+                      key={signal.signal_id}
+                      label={signal.label || signal.signal_id}
+                      tapCount={signal.review_count}
+                      category="good"
+                      emoji={signal.icon}
+                      maxTapCount={maxTapCount}
+                    />
                   ))
                 ) : (
                   <p className="pd-empty-signal">Be the first to tap!</p>
@@ -614,11 +619,14 @@ export default function PlaceDetailsScreen({ placeId: propPlaceId }: { placeId?:
                 </div>
                 {livingSignals.vibe.length > 0 ? (
                   livingSignals.vibe.map((signal) => (
-                    <div key={signal.signal_id} className="pd-breakdown-row">
-                      <span className="pd-breakdown-emoji">{signal.icon}</span>
-                      <span className="pd-breakdown-label">{signal.label || signal.signal_id}</span>
-                      <span className="pd-breakdown-count">×{signal.review_count}</span>
-                    </div>
+                    <SignalDetailRow
+                      key={signal.signal_id}
+                      label={signal.label || signal.signal_id}
+                      tapCount={signal.review_count}
+                      category="vibe"
+                      emoji={signal.icon}
+                      maxTapCount={maxTapCount}
+                    />
                   ))
                 ) : (
                   <p className="pd-empty-signal">Be the first to tap!</p>
@@ -635,11 +643,14 @@ export default function PlaceDetailsScreen({ placeId: propPlaceId }: { placeId?:
                 </div>
                 {livingSignals.heads_up.length > 0 ? (
                   livingSignals.heads_up.map((signal) => (
-                    <div key={signal.signal_id} className="pd-breakdown-row">
-                      <span className="pd-breakdown-emoji">{signal.icon}</span>
-                      <span className="pd-breakdown-label">{signal.label || signal.signal_id}</span>
-                      <span className="pd-breakdown-count">×{signal.review_count}</span>
-                    </div>
+                    <SignalDetailRow
+                      key={signal.signal_id}
+                      label={signal.label || signal.signal_id}
+                      tapCount={signal.review_count}
+                      category="headsup"
+                      emoji={signal.icon}
+                      maxTapCount={maxTapCount}
+                    />
                   ))
                 ) : (
                   <p className="pd-empty-signal">Be the first to tap!</p>
@@ -692,7 +703,7 @@ export default function PlaceDetailsScreen({ placeId: propPlaceId }: { placeId?:
                     </div>
                   ))}
                 </div>
-              </div>
+              </>
             ) : (
               <p className="pd-no-photos">No photos yet</p>
             )}
@@ -778,7 +789,7 @@ export default function PlaceDetailsScreen({ placeId: propPlaceId }: { placeId?:
           </div>
         </div>
       </div>
-    </>
+    </AppLayout>
   );
 }
 
@@ -1225,20 +1236,6 @@ const pageStyles = `
   }
   @media (prefers-color-scheme: dark) {
     .pd-breakdown-divider { background: rgba(255,255,255,0.08); }
-  }
-  .pd-breakdown-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(0,0,0,0.04);
-  }
-  .pd-breakdown-emoji { font-size: 18px; }
-  .pd-breakdown-label { flex: 1; font-size: 14px; font-weight: 500; }
-  .pd-breakdown-count { font-size: 13px; color: #999; font-weight: 600; }
-  @media (prefers-color-scheme: dark) {
-    .pd-breakdown-row { border-color: rgba(255,255,255,0.06); }
-    .pd-breakdown-label { color: #fff; }
   }
   .pd-empty-signal {
     font-size: 14px;
