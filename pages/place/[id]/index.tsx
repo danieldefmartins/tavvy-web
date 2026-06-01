@@ -76,6 +76,9 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
   }>({ best_for: [], vibe: [], heads_up: [], medals: [] });
   const [photos, setPhotos] = useState<string[]>([]);
   const [isSaved, setIsSaved] = useState(false);
+  const [expandGood, setExpandGood] = useState(false);
+  const [expandVibe, setExpandVibe] = useState(false);
+  const [expandHeadsUp, setExpandHeadsUp] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
 
   // Check auth + saved status
@@ -378,14 +381,21 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
             </div>
           )}
 
-          {/* The Good */}
+          {/* The Good — expandable */}
           {livingSignals.best_for.length > 0 && (
-            <div style={{ marginBottom: 24 }}>
-              <p style={sectionTitleStyle}>
+            <div style={{ marginBottom: 20 }}>
+              <button onClick={() => setExpandGood(!expandGood)} style={{
+                ...sectionTitleStyle, display: 'flex', alignItems: 'center', gap: 6,
+                background: 'none', border: 'none', cursor: 'pointer', padding: 0, width: '100%',
+              }}>
                 The Good
-              </p>
+                <span style={{ fontSize: 12, color: '#00C2CB', fontWeight: 600 }}>({livingSignals.best_for.length})</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto', transform: expandGood ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {livingSignals.best_for.slice(0, 5).map(s => (
+                {livingSignals.best_for.slice(0, expandGood ? undefined : 3).map(s => (
                   <span key={s.signal_id} style={{
                     display: 'inline-flex', alignItems: 'center', gap: 5,
                     padding: '8px 16px', background: 'rgba(0,194,203,0.1)',
@@ -400,14 +410,21 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
             </div>
           )}
 
-          {/* The Vibe */}
+          {/* The Vibe — expandable */}
           {livingSignals.vibe.length > 0 && (
-            <div style={{ marginBottom: 24 }}>
-              <p style={sectionTitleStyle}>
+            <div style={{ marginBottom: 20 }}>
+              <button onClick={() => setExpandVibe(!expandVibe)} style={{
+                ...sectionTitleStyle, display: 'flex', alignItems: 'center', gap: 6,
+                background: 'none', border: 'none', cursor: 'pointer', padding: 0, width: '100%',
+              }}>
                 The Vibe
-              </p>
+                <span style={{ fontSize: 12, color: '#8A05BE', fontWeight: 600 }}>({livingSignals.vibe.length})</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto', transform: expandVibe ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {livingSignals.vibe.slice(0, 3).map(s => (
+                {livingSignals.vibe.slice(0, expandVibe ? undefined : 3).map(s => (
                   <span key={s.signal_id} style={{
                     display: 'inline-flex', alignItems: 'center', gap: 5,
                     padding: '8px 16px', background: 'rgba(138,5,190,0.08)',
@@ -422,14 +439,21 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
             </div>
           )}
 
-          {/* Heads Up */}
+          {/* Heads Up — expandable */}
           {livingSignals.heads_up.length > 0 && (
-            <div style={{ marginBottom: 24 }}>
-              <p style={sectionTitleStyle}>
+            <div style={{ marginBottom: 20 }}>
+              <button onClick={() => setExpandHeadsUp(!expandHeadsUp)} style={{
+                ...sectionTitleStyle, display: 'flex', alignItems: 'center', gap: 6,
+                background: 'none', border: 'none', cursor: 'pointer', padding: 0, width: '100%',
+              }}>
                 Heads Up
-              </p>
+                <span style={{ fontSize: 12, color: '#F5A623', fontWeight: 600 }}>({livingSignals.heads_up.length})</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto', transform: expandHeadsUp ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </button>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {livingSignals.heads_up.slice(0, 2).map(s => (
+                {livingSignals.heads_up.slice(0, expandHeadsUp ? undefined : 2).map(s => (
                   <span key={s.signal_id} style={{
                     display: 'inline-flex', alignItems: 'center', gap: 5,
                     padding: '8px 16px', background: 'rgba(245,166,35,0.1)',
