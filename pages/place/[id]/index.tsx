@@ -1436,9 +1436,20 @@ const pageStyles = `
 `;
 
 
-export const getServerSideProps = async ({ params, locale }: { params: { id: string }; locale: string }) => ({
-  props: {
-    placeId: params.id,
-    ...(await serverSideTranslations(locale ?? 'en', ['common'])),
-  },
-});
+export const getServerSideProps = async ({ params, locale }: { params: { id: string }; locale: string }) => {
+  try {
+    const translations = await serverSideTranslations(locale ?? 'en', ['common']);
+    return {
+      props: {
+        placeId: params?.id || '',
+        ...translations,
+      },
+    };
+  } catch (error) {
+    return {
+      props: {
+        placeId: params?.id || '',
+      },
+    };
+  }
+};
