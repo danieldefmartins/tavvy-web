@@ -1,12 +1,14 @@
 /**
- * Place Details Screen
- * Redesigned to match tavvy-mobile/screens/PlaceDetailsScreen.tsx
+ * Place Details Screen — Redesigned for clarity & hierarchy
  *
- * Layout:
- * 1. Hero section with cover photo + gradient overlay + text
- * 2. Quick info bar (Open / Call / Photos / Drive)
- * 3. Tab navigation (Reviews / Info / Photos)
- * 4. Tab content with white cards on light gray background
+ * Layout (single scrollable page, no tabs):
+ * 1. Hero Image (40vh) — photo + name + cuisine
+ * 2. Action Bar (sticky) — Menu (primary CTA), Call, Directions, Share
+ * 3. Signal Summary — top signals as prominent pills (Tavvy's signature)
+ * 4. Menu Preview Card — enticing preview with CTA
+ * 5. Full Signal Breakdown — expandable grouped signals
+ * 6. Photos Grid — 2x2 with "see more"
+ * 7. Info Section — collapsed by default
  */
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -89,7 +91,7 @@ const getDriveTime = (distanceMiles?: number): string => {
   return remainingMins > 0 ? `${hours}h ${remainingMins}m` : `${hours}h`;
 };
 
-type TabType = 'reviews' | 'info' | 'photos';
+// Info section collapsed state
 
 export default function PlaceDetailsScreen() {
   const { t } = useTranslation();
@@ -99,7 +101,8 @@ export default function PlaceDetailsScreen() {
   const [place, setPlace] = useState<Place | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabType>('reviews');
+  const [showFullSignals, setShowFullSignals] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const [placePhotosDB, setPlacePhotosDB] = useState<{id: string; url: string; caption?: string}[]>([]);
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -278,7 +281,6 @@ export default function PlaceDetailsScreen() {
         url: urlData.publicUrl, caption: null, is_owner_photo: false, status: 'live',
       });
       await loadPhotosFromDB(place.id);
-      setActiveTab('photos');
     } catch (err: any) {
       alert('Error uploading photo: ' + (err.message || 'Unknown error'));
     } finally {
@@ -324,6 +326,39 @@ export default function PlaceDetailsScreen() {
   const distanceMiles = place.distance ? (place.distance / 1609.34).toFixed(1) : undefined;
   const driveTime = getDriveTime(distanceMiles ? parseFloat(distanceMiles) : undefined);
   const categoryEmoji = getCategoryEmoji(place.category || '');
+
+  // Build signal arrays for display
+  const allSignals = [
+    ...livingSignals.best_for.map(s => ({
+      label: s.label || s.signal_id,
+      tapCount: s.review_count,
+      category: 'good' as SignalCategory,
+      emoji: s.icon,
+      signalId: s.signal_id,
+    })),
+    ...livingSignals.vibe.map(s => ({
+      label: s.label || s.signal_id,
+      tapCount: s.review_count,
+      category: 'vibe' as SignalCategory,
+      emoji: s.icon,
+      signalId: s.signal_id,
+    })),
+    ...livingSignals.heads_up.map(s => ({
+      label: s.label || s.signal_id,
+      tapCount: s.review_count,
+      category: 'headsup' as SignalCategory,
+      emoji: s.icon,
+      signalId: s.signal_id,
+    })),
+  ];
+  const maxTapCount = allSignals.reduce((max, s) => Math.max(max, s.tapCount), 0);
+
+  // Top signals for summary section
+  const topGood = livingSignals.best_for.slice(0, 5);
+  const topVibe = livingSignals.vibe.slice(0, 3);
+  const topHeadsUp = livingSignals.heads_up.slice(0, 2);
+
+  const signalBreakdownRef = useRef<HTMLDivElement>(null);
 
   return (
     <AppLayout>
@@ -375,241 +410,257 @@ export default function PlaceDetailsScreen() {
       <style jsx global>{pageStyles}</style>
 
       <div className="pd-container">
-        {/* ===== HERO SECTION ===== */}
+        {/* ===== 1. HERO IMAGE (40vh) ===== */}
         <div className="pd-hero">
-          <img
-            src={coverImage}
-            alt={place.name}
-            className="pd-hero-img"
-          />
+          <img src={coverImage} alt={place.name} className="pd-hero-img" />
           <div className="pd-hero-gradient" />
 
-          {/* Back button */}
           <button className="pd-hero-btn pd-hero-back" onClick={() => router.back()}>
-            ←
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
           </button>
 
-          {/* Top right buttons */}
           <div className="pd-hero-actions">
-            <button
-              className="pd-hero-btn"
-              onClick={() => setIsFavorite(!isFavorite)}
-            >
-              {isFavorite ? '❤️' : '🤍'}
-            </button>
             <button className="pd-hero-btn" onClick={handleShare} aria-label="Share">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
                 <polyline points="16 6 12 2 8 6"/>
                 <line x1="12" y1="2" x2="12" y2="15"/>
               </svg>
             </button>
+            <button className="pd-hero-btn" onClick={() => setIsFavorite(!isFavorite)} aria-label="Save">
+              {isFavorite ? '❤️' : '🤍'}
+            </button>
           </div>
 
-          {/* Hero text overlay */}
           <div className="pd-hero-text">
             <h1 className="pd-hero-name">{place.name}</h1>
-            <div className="pd-hero-meta">
-              <span>{categoryEmoji} {place.category}</span>
-              {distanceMiles && <span>📍 {distanceMiles} mi</span>}
+            <p className="pd-hero-category">
+              {categoryEmoji} {place.tavvy_subcategory ? `${place.tavvy_subcategory.charAt(0).toUpperCase() + place.tavvy_subcategory.slice(1).replace(/_/g, ' ')}` : place.category}
+            </p>
+          </div>
+        </div>
+
+        {/* ===== 2. ACTION BAR (sticky) ===== */}
+        <div className="pd-action-bar">
+          <button
+            className="pd-action-btn pd-action-primary"
+            onClick={() => router.push(`/place/${place.id}/menu-gallery`)}
+          >
+            <span className="pd-action-icon">📖</span>
+            <span className="pd-action-label">Menu</span>
+          </button>
+          <button className="pd-action-btn" onClick={handleCall}>
+            <span className="pd-action-icon">📞</span>
+          </button>
+          <button className="pd-action-btn" onClick={handleDirections}>
+            <span className="pd-action-icon">📍</span>
+          </button>
+          <button className="pd-action-btn" onClick={handleShare}>
+            <span className="pd-action-icon">↗️</span>
+          </button>
+        </div>
+
+        {/* ===== 3. SIGNAL SUMMARY (THE STAR SECTION) ===== */}
+        <div className="pd-signals-summary">
+          {/* Medals */}
+          {livingSignals.medals.length > 0 && (
+            <div className="pd-medals">
+              {livingSignals.medals.includes('vibe_check') && (
+                <span className="pd-medal">🏆 Vibe Check</span>
+              )}
+              {livingSignals.medals.includes('hidden_gem') && (
+                <span className="pd-medal">💎 Hidden Gem</span>
+              )}
+              {livingSignals.medals.includes('speed_demon') && (
+                <span className="pd-medal">⚡ Speed Demon</span>
+              )}
             </div>
-          </div>
-        </div>
+          )}
 
-        {/* ===== QUICK INFO BAR ===== */}
-        <div className="pd-quick-bar">
-          <div className="pd-quick-item" onClick={() => {}}>
-            <span className="pd-quick-icon">🕐</span>
-            <span className={`pd-quick-label ${isOpen ? 'pd-open' : ''}`}>
-              {isOpen ? 'Open' : 'Status'}
-            </span>
-          </div>
-          <div className="pd-quick-divider" />
-          <div className="pd-quick-item" onClick={handleCall}>
-            <span className="pd-quick-icon">📞</span>
-            <span className="pd-quick-value">Call</span>
-            <span className="pd-quick-sub">Business</span>
-          </div>
-          <div className="pd-quick-divider" />
-          <div className="pd-quick-item" onClick={() => setActiveTab('photos')}>
-            <span className="pd-quick-icon">📷</span>
-            <span className="pd-quick-value">{allPhotos.length}</span>
-            <span className="pd-quick-sub">Photos</span>
-          </div>
-          <div className="pd-quick-divider" />
-          <div className="pd-quick-item" onClick={() => router.push(`/place/${place.id}/menu-gallery`)}>
-            <span className="pd-quick-icon">📖</span>
-            <span className="pd-quick-value">Menu</span>
-            <span className="pd-quick-sub">View</span>
-          </div>
-        </div>
-
-        {/* ===== TAB NAVIGATION ===== */}
-        <div className="pd-tabs">
-          {(['reviews', 'info', 'photos'] as TabType[]).map((tab) => {
-            const labels: Record<TabType, string> = {
-              reviews: 'Reviews',
-              info: 'Info',
-              photos: 'Photos',
-            };
-            return (
-              <button
-                key={tab}
-                className={`pd-tab ${activeTab === tab ? 'pd-tab-active' : ''}`}
-                onClick={() => setActiveTab(tab)}
-              >
-                {labels[tab]}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* ===== TAB CONTENT ===== */}
-        <div className="pd-content">
-          {/* Reviews Tab */}
-          {activeTab === 'reviews' && (
-            <div className="pd-tab-content">
-              {/* Medals */}
-              {livingSignals.medals.length > 0 && (
-                <div className="pd-medals">
-                  {livingSignals.medals.includes('vibe_check') && (
-                    <span className="pd-medal">🏆 Vibe Check</span>
-                  )}
-                  {livingSignals.medals.includes('speed_demon') && (
-                    <span className="pd-medal">⚡ Speed Demon</span>
-                  )}
-                  {livingSignals.medals.includes('hidden_gem') && (
-                    <span className="pd-medal">💎 Hidden Gem</span>
-                  )}
+          {signalsLoading ? (
+            <div style={{ textAlign: 'center', padding: '24px 0' }}>
+              <div className="pd-spinner" style={{ width: 24, height: 24, margin: '0 auto' }} />
+            </div>
+          ) : hasLivingSignals ? (
+            <>
+              {/* The Good — teal pills */}
+              {topGood.length > 0 && (
+                <div className="pd-signal-group">
+                  <div className="pd-signal-pills">
+                    {topGood.map((s) => (
+                      <span key={s.signal_id} className="pd-pill pd-pill-good">
+                        {s.icon} {s.label || s.signal_id}
+                        <span className="pd-pill-count">{s.review_count}</span>
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
 
-              {/* Quick Glance Pills */}
-              {(() => {
-                const allSignals = [
-                  ...livingSignals.best_for.map(s => ({
-                    label: s.label || s.signal_id,
-                    tapCount: s.review_count,
-                    category: 'good' as SignalCategory,
-                    emoji: s.icon,
-                    signalId: s.signal_id,
-                  })),
-                  ...livingSignals.vibe.map(s => ({
-                    label: s.label || s.signal_id,
-                    tapCount: s.review_count,
-                    category: 'vibe' as SignalCategory,
-                    emoji: s.icon,
-                    signalId: s.signal_id,
-                  })),
-                  ...livingSignals.heads_up.map(s => ({
-                    label: s.label || s.signal_id,
-                    tapCount: s.review_count,
-                    category: 'headsup' as SignalCategory,
-                    emoji: s.icon,
-                    signalId: s.signal_id,
-                  })),
-                ];
-
-                const maxTapCount = allSignals.reduce((max, s) => Math.max(max, s.tapCount), 0);
-
-                return signalsLoading ? (
-                  <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                    <div className="pd-spinner" style={{ width: 24, height: 24, margin: '0 auto' }} />
+              {/* The Vibe — purple pills */}
+              {topVibe.length > 0 && (
+                <div className="pd-signal-group">
+                  <div className="pd-signal-pills">
+                    {topVibe.map((s) => (
+                      <span key={s.signal_id} className="pd-pill pd-pill-vibe">
+                        {s.icon} {s.label || s.signal_id}
+                        <span className="pd-pill-count">{s.review_count}</span>
+                      </span>
+                    ))}
                   </div>
+                </div>
+              )}
+
+              {/* Heads Up — amber pills */}
+              {topHeadsUp.length > 0 && (
+                <div className="pd-signal-group">
+                  <div className="pd-signal-pills">
+                    {topHeadsUp.map((s) => (
+                      <span key={s.signal_id} className="pd-pill pd-pill-headsup">
+                        {s.icon} {s.label || s.signal_id}
+                        <span className="pd-pill-count">{s.review_count}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <button
+                className="pd-see-all-link"
+                onClick={() => {
+                  setShowFullSignals(true);
+                  setTimeout(() => signalBreakdownRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+                }}
+              >
+                See all signals →
+              </button>
+            </>
+          ) : (
+            <div className="pd-no-signals">
+              <p>No signals yet — be the first to share!</p>
+              <button
+                className="pd-add-signal-btn"
+                onClick={() => router.push({
+                  pathname: '/app/add-review',
+                  query: {
+                    placeId: place.id,
+                    placeName: place.name,
+                    primaryCategory: place.tavvy_category || place.category || '',
+                    subcategory: place.tavvy_subcategory || '',
+                  },
+                })}
+              >
+                ✏️ Add Your Signal
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* ===== 4. MENU PREVIEW CARD ===== */}
+        <div className="pd-section">
+          <div className="pd-menu-card">
+            <div className="pd-menu-header">
+              <h2>Menu</h2>
+              {allPhotos.length > 0 && <span className="pd-menu-count">{allPhotos.length} items</span>}
+            </div>
+            {allPhotos.length > 0 && (
+              <div className="pd-menu-thumbnails">
+                {allPhotos.slice(0, 4).map((photo, idx) => (
+                  <div key={idx} className="pd-menu-thumb">
+                    <img src={photo} alt={`Dish ${idx + 1}`} />
+                  </div>
+                ))}
+              </div>
+            )}
+            <button
+              className="pd-menu-cta"
+              onClick={() => router.push(`/place/${place.id}/menu-gallery`)}
+            >
+              View Full Menu →
+            </button>
+          </div>
+        </div>
+
+        {/* ===== 5. FULL SIGNAL BREAKDOWN (expandable) ===== */}
+        <div className="pd-section" ref={signalBreakdownRef}>
+          {showFullSignals && (
+            <div className="pd-card pd-breakdown">
+              {/* The Good */}
+              <div className="pd-breakdown-group">
+                <div className="pd-breakdown-header">
+                  <span className="pd-dot pd-dot-good" />
+                  <span className="pd-breakdown-title">The Good</span>
+                </div>
+                {livingSignals.best_for.length > 0 ? (
+                  livingSignals.best_for.map((signal) => (
+                    <SignalDetailRow
+                      key={signal.signal_id}
+                      label={signal.label || signal.signal_id}
+                      tapCount={signal.review_count}
+                      category="good"
+                      emoji={signal.icon}
+                      maxTapCount={maxTapCount}
+                    />
+                  ))
                 ) : (
-                  <>
-                    {/* Quick Glance */}
-                    <div className="pd-card">
-                      <h2 className="pd-card-title">Community Signals</h2>
-                      <SignalPillsGrid
-                        signals={allSignals}
-                        maxVisible={6}
-                        showCounts
-                      />
-                    </div>
+                  <p className="pd-empty-signal">Be the first to tap!</p>
+                )}
+              </div>
 
-                    {/* Detailed Breakdown */}
-                    <div className="pd-card">
-                      {/* The Good */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-                        <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#00C2CB', display: 'inline-block', flexShrink: 0 }} />
-                        <span style={{ fontSize: 18, fontWeight: 800 }}>The Good</span>
-                      </div>
-                      {livingSignals.best_for.length > 0 ? (
-                        livingSignals.best_for.map((signal) => (
-                          <SignalDetailRow
-                            key={signal.signal_id}
-                            label={signal.label || signal.signal_id}
-                            tapCount={signal.review_count}
-                            category="good"
-                            emoji={signal.icon}
-                            maxTapCount={maxTapCount}
-                          />
-                        ))
-                      ) : (
-                        <div style={{ fontSize: 14, fontStyle: 'italic', opacity: 0.5, marginBottom: 14, paddingLeft: 16 }}>
-                          Be the first to tap!
-                        </div>
-                      )}
+              <div className="pd-breakdown-divider" />
 
-                      <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '16px 0' }} />
+              {/* The Vibe */}
+              <div className="pd-breakdown-group">
+                <div className="pd-breakdown-header">
+                  <span className="pd-dot pd-dot-vibe" />
+                  <span className="pd-breakdown-title">The Vibe</span>
+                </div>
+                {livingSignals.vibe.length > 0 ? (
+                  livingSignals.vibe.map((signal) => (
+                    <SignalDetailRow
+                      key={signal.signal_id}
+                      label={signal.label || signal.signal_id}
+                      tapCount={signal.review_count}
+                      category="vibe"
+                      emoji={signal.icon}
+                      maxTapCount={maxTapCount}
+                    />
+                  ))
+                ) : (
+                  <p className="pd-empty-signal">Be the first to tap!</p>
+                )}
+              </div>
 
-                      {/* The Vibe */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-                        <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#8A05BE', display: 'inline-block', flexShrink: 0 }} />
-                        <span style={{ fontSize: 18, fontWeight: 800 }}>The Vibe</span>
-                      </div>
-                      {livingSignals.vibe.length > 0 ? (
-                        livingSignals.vibe.map((signal) => (
-                          <SignalDetailRow
-                            key={signal.signal_id}
-                            label={signal.label || signal.signal_id}
-                            tapCount={signal.review_count}
-                            category="vibe"
-                            emoji={signal.icon}
-                            maxTapCount={maxTapCount}
-                          />
-                        ))
-                      ) : (
-                        <div style={{ fontSize: 14, fontStyle: 'italic', opacity: 0.5, marginBottom: 14, paddingLeft: 16 }}>
-                          Be the first to tap!
-                        </div>
-                      )}
+              <div className="pd-breakdown-divider" />
 
-                      <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '16px 0' }} />
+              {/* Heads Up */}
+              <div className="pd-breakdown-group">
+                <div className="pd-breakdown-header">
+                  <span className="pd-dot pd-dot-headsup" />
+                  <span className="pd-breakdown-title">Heads Up</span>
+                </div>
+                {livingSignals.heads_up.length > 0 ? (
+                  livingSignals.heads_up.map((signal) => (
+                    <SignalDetailRow
+                      key={signal.signal_id}
+                      label={signal.label || signal.signal_id}
+                      tapCount={signal.review_count}
+                      category="headsup"
+                      emoji={signal.icon}
+                      maxTapCount={maxTapCount}
+                    />
+                  ))
+                ) : (
+                  <p className="pd-empty-signal">Be the first to tap!</p>
+                )}
+              </div>
 
-                      {/* Heads Up */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-                        <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#F5A623', display: 'inline-block', flexShrink: 0 }} />
-                        <span style={{ fontSize: 18, fontWeight: 800 }}>Heads Up</span>
-                      </div>
-                      {livingSignals.heads_up.length > 0 ? (
-                        livingSignals.heads_up.map((signal) => (
-                          <SignalDetailRow
-                            key={signal.signal_id}
-                            label={signal.label || signal.signal_id}
-                            tapCount={signal.review_count}
-                            category="headsup"
-                            emoji={signal.icon}
-                            maxTapCount={maxTapCount}
-                          />
-                        ))
-                      ) : (
-                        <div style={{ fontSize: 14, fontStyle: 'italic', opacity: 0.5, marginBottom: 14, paddingLeft: 16 }}>
-                          Be the first to tap!
-                        </div>
-                      )}
-                    </div>
-                  </>
-                );
-              })()}
-
-              {/* Been here? card */}
-              <div className="pd-card">
-                <h2 className="pd-card-title">Been here?</h2>
-                <p className="pd-card-subtitle">Share your experience with the community</p>
+              {/* Add Signal CTA */}
+              <div className="pd-breakdown-cta">
                 <button
-                  className="pd-add-review-btn"
+                  className="pd-add-signal-btn"
                   onClick={() => router.push({
                     pathname: '/app/add-review',
                     query: {
@@ -626,12 +677,63 @@ export default function PlaceDetailsScreen() {
             </div>
           )}
 
-          {/* Info Tab */}
-          {activeTab === 'info' && (
-            <div className="pd-tab-content">
-              <div className="pd-card">
-                <h2 className="pd-card-title">Location &amp; Contact</h2>
+          {!showFullSignals && hasLivingSignals && (
+            <button
+              className="pd-expand-btn"
+              onClick={() => setShowFullSignals(true)}
+            >
+              Show Full Signal Breakdown
+            </button>
+          )}
+        </div>
 
+        {/* ===== 6. PHOTOS GRID ===== */}
+        <div className="pd-section">
+          <div className="pd-card">
+            <h2 className="pd-card-title">Photos</h2>
+            {allPhotos.length > 0 ? (
+              <>
+                <div className="pd-photo-grid">
+                  {allPhotos.slice(0, 4).map((photo, idx) => (
+                    <div key={idx} className="pd-photo-item">
+                      <img src={photo} alt={`${place.name} photo ${idx + 1}`} />
+                      {idx === 3 && allPhotos.length > 4 && (
+                        <div className="pd-photo-more">+{allPhotos.length - 4}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p className="pd-no-photos">No photos yet</p>
+            )}
+            <input
+              type="file"
+              ref={photoInputRef}
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handlePhotoUpload}
+            />
+            <button
+              className="pd-add-photo-btn"
+              onClick={() => { if (photoInputRef.current) photoInputRef.current.click(); }}
+              disabled={isUploadingPhoto}
+            >
+              {isUploadingPhoto ? '⏳ Uploading...' : '📷 Add a Photo'}
+            </button>
+          </div>
+        </div>
+
+        {/* ===== 7. INFO SECTION (collapsed by default) ===== */}
+        <div className="pd-section">
+          <div className="pd-card">
+            <button className="pd-info-toggle" onClick={() => setShowInfo(!showInfo)}>
+              <h2 className="pd-card-title" style={{ margin: 0 }}>Info &amp; Contact</h2>
+              <span className={`pd-chevron ${showInfo ? 'pd-chevron-open' : ''}`}>▾</span>
+            </button>
+
+            {showInfo && (
+              <div className="pd-info-content">
                 {fullAddress && (
                   <div className="pd-contact-item">
                     <span className="pd-contact-icon">📍</span>
@@ -649,9 +751,7 @@ export default function PlaceDetailsScreen() {
                 {place.phone && (
                   <div className="pd-contact-item">
                     <span className="pd-contact-icon">📞</span>
-                    <a href={`tel:${place.phone}`} className="pd-contact-link">
-                      {place.phone}
-                    </a>
+                    <a href={`tel:${place.phone}`} className="pd-contact-link">{place.phone}</a>
                   </div>
                 )}
 
@@ -672,67 +772,21 @@ export default function PlaceDetailsScreen() {
                 {place.instagram_url && (
                   <div className="pd-contact-item">
                     <span className="pd-contact-icon">📸</span>
-                    <a
-                      href={place.instagram_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="pd-contact-link"
-                    >
+                    <a href={place.instagram_url} target="_blank" rel="noopener noreferrer" className="pd-contact-link">
                       Instagram
                     </a>
                   </div>
                 )}
 
-                <div className="pd-contact-item" onClick={handleDirections} style={{ cursor: 'pointer' }}>
-                  <span className="pd-contact-icon">🚗</span>
-                  <span className="pd-contact-link">Get Directions{driveTime ? ` (${driveTime})` : ''}</span>
-                </div>
+                <button className="pd-directions-btn" onClick={handleDirections}>
+                  🚗 Get Directions{driveTime !== '—' ? ` (${driveTime})` : ''}
+                </button>
 
                 <div className="pd-claim-divider" />
-                <div className="pd-claim-section">
-                  <button className="pd-claim-btn">
-                    🏢 Claim This Business
-                  </button>
-                </div>
+                <button className="pd-claim-btn">🏢 Claim This Business</button>
               </div>
-            </div>
-          )}
-
-          {/* Photos Tab */}
-          {activeTab === 'photos' && (
-            <div className="pd-tab-content">
-              <div className="pd-card">
-                <h2 className="pd-card-title">Photos</h2>
-
-                {allPhotos.length > 0 ? (
-                  <div className="pd-photo-grid">
-                    {allPhotos.map((photo, idx) => (
-                      <div key={idx} className="pd-photo-item">
-                        <img src={photo} alt={`${place.name} photo ${idx + 1}`} />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="pd-no-photos">No photos yet</p>
-                )}
-
-                <input
-                  type="file"
-                  ref={photoInputRef}
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                  onChange={handlePhotoUpload}
-                />
-                <button
-                  className="pd-add-photo-btn"
-                  onClick={() => { if (photoInputRef.current) photoInputRef.current.click(); }}
-                  disabled={isUploadingPhoto}
-                >
-                  {isUploadingPhoto ? '⏳ Uploading...' : '📷 Add a Photo'}
-                </button>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </AppLayout>
@@ -744,8 +798,11 @@ const pageStyles = `
   /* Reset & base */
   .pd-container {
     min-height: 100vh;
-    background-color: #f5f5f5;
+    background-color: #F8F9FA;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    .pd-container { background-color: #0A0A0A; }
   }
 
   /* ===== LOADING ===== */
@@ -763,7 +820,7 @@ const pageStyles = `
     width: 36px;
     height: 36px;
     border: 3px solid #333;
-    border-top-color: #007AFF;
+    border-top-color: #8A05BE;
     border-radius: 50%;
     animation: pd-spin 0.8s linear infinite;
     margin-bottom: 16px;
@@ -791,16 +848,18 @@ const pageStyles = `
   .pd-error button {
     background: none;
     border: none;
-    color: #007AFF;
+    color: #8A05BE;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
   }
 
-  /* ===== HERO SECTION ===== */
+  /* ===== 1. HERO SECTION (40vh) ===== */
   .pd-hero {
     position: relative;
-    height: 320px;
+    height: 40vh;
+    min-height: 260px;
+    max-height: 360px;
     background: #000;
     overflow: hidden;
   }
@@ -814,32 +873,34 @@ const pageStyles = `
     bottom: 0;
     left: 0;
     right: 0;
-    height: 200px;
-    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 50%, transparent 100%);
+    height: 60%;
+    background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.3) 60%, transparent 100%);
     pointer-events: none;
   }
   .pd-hero-btn {
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
-    background: #fff;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(8px);
     border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
     z-index: 2;
+    color: #1a1a1a;
   }
   .pd-hero-back {
     position: absolute;
-    top: 16px;
+    top: max(env(safe-area-inset-top, 12px), 12px);
     left: 16px;
   }
   .pd-hero-actions {
     position: absolute;
-    top: 16px;
+    top: max(env(safe-area-inset-top, 12px), 12px);
     right: 16px;
     display: flex;
     gap: 8px;
@@ -847,135 +908,198 @@ const pageStyles = `
   }
   .pd-hero-text {
     position: absolute;
-    bottom: 16px;
-    left: 16px;
-    right: 16px;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
     z-index: 2;
   }
   .pd-hero-name {
-    font-size: 26px;
-    font-weight: 700;
+    font-size: 28px;
+    font-weight: 800;
     color: #fff;
-    margin: 0 0 6px;
+    margin: 0 0 4px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    line-height: 1.15;
+    letter-spacing: -0.3px;
+  }
+  .pd-hero-category {
+    font-size: 15px;
+    color: rgba(255,255,255,0.85);
+    margin: 0;
     text-shadow: 0 1px 4px rgba(0,0,0,0.5);
-    line-height: 1.2;
-  }
-  .pd-hero-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  .pd-hero-meta span {
-    font-size: 14px;
-    color: rgba(255,255,255,0.9);
-    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
   }
 
-  /* ===== QUICK INFO BAR ===== */
-  .pd-quick-bar {
+  /* ===== 2. ACTION BAR (sticky) ===== */
+  .pd-action-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
     display: flex;
     align-items: center;
-    background: #fff;
-    padding: 14px 0;
-    border-bottom: 1px solid #e5e5e5;
+    gap: 12px;
+    padding: 12px 20px;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   }
-  .pd-quick-item {
-    flex: 1;
+  @media (prefers-color-scheme: dark) {
+    .pd-action-bar {
+      background: rgba(20,20,20,0.97);
+      border-bottom-color: rgba(255,255,255,0.08);
+    }
+  }
+  .pd-action-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    border: 1px solid #E5E7EB;
+    background: #fff;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     cursor: pointer;
-    gap: 2px;
+    transition: transform 0.15s, box-shadow 0.15s;
   }
-  .pd-quick-icon {
+  .pd-action-btn:active {
+    transform: scale(0.93);
+  }
+  @media (prefers-color-scheme: dark) {
+    .pd-action-btn {
+      background: #1a1a1a;
+      border-color: #333;
+    }
+  }
+  .pd-action-primary {
+    flex: 1;
+    width: auto;
+    flex-direction: row;
+    gap: 8px;
+    background: #8A05BE;
+    border-color: #8A05BE;
+    color: #fff;
+    font-weight: 700;
+    font-size: 15px;
+    box-shadow: 0 4px 16px rgba(138, 5, 190, 0.3);
+  }
+  .pd-action-primary .pd-action-icon {
     font-size: 18px;
-    margin-bottom: 2px;
   }
-  .pd-quick-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: #333;
-  }
-  .pd-open {
-    color: #00C2CB;
-  }
-  .pd-quick-value {
+  .pd-action-primary .pd-action-label {
     font-size: 15px;
     font-weight: 700;
-    color: #333;
+    color: #fff;
   }
-  .pd-quick-sub {
-    font-size: 11px;
-    color: #666;
+  .pd-action-icon {
+    font-size: 20px;
+    line-height: 1;
   }
-  .pd-quick-divider {
-    width: 1px;
-    height: 36px;
-    background: #e5e5e5;
-    flex-shrink: 0;
+  .pd-action-label {
+    display: none;
+  }
+  .pd-action-primary .pd-action-label {
+    display: inline;
   }
 
-  /* ===== TAB NAVIGATION ===== */
-  .pd-tabs {
-    display: flex;
+  /* ===== 3. SIGNAL SUMMARY ===== */
+  .pd-signals-summary {
+    padding: 24px 20px;
     background: #fff;
-    border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
   }
-  .pd-tab {
-    flex: 1;
-    padding: 14px 0;
-    text-align: center;
-    font-size: 14px;
-    font-weight: 500;
-    color: #666;
+  @media (prefers-color-scheme: dark) {
+    .pd-signals-summary {
+      background: #111;
+      border-bottom-color: rgba(255,255,255,0.06);
+    }
+  }
+  .pd-signal-group {
+    margin-bottom: 12px;
+  }
+  .pd-signal-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .pd-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-radius: 24px;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1;
+    transition: transform 0.15s;
+  }
+  .pd-pill:active { transform: scale(0.95); }
+  .pd-pill-count {
+    font-size: 12px;
+    font-weight: 700;
+    opacity: 0.7;
+    margin-left: 2px;
+  }
+  .pd-pill-good {
+    background: rgba(0, 194, 203, 0.12);
+    color: #00A5AD;
+    border: 1px solid rgba(0, 194, 203, 0.25);
+  }
+  @media (prefers-color-scheme: dark) {
+    .pd-pill-good {
+      background: rgba(0, 194, 203, 0.15);
+      color: #00D4DE;
+    }
+  }
+  .pd-pill-vibe {
+    background: rgba(138, 5, 190, 0.1);
+    color: #8A05BE;
+    border: 1px solid rgba(138, 5, 190, 0.2);
+  }
+  @media (prefers-color-scheme: dark) {
+    .pd-pill-vibe {
+      background: rgba(138, 5, 190, 0.18);
+      color: #B44CE0;
+    }
+  }
+  .pd-pill-headsup {
+    background: rgba(245, 166, 35, 0.1);
+    color: #D4850A;
+    border: 1px solid rgba(245, 166, 35, 0.2);
+  }
+  @media (prefers-color-scheme: dark) {
+    .pd-pill-headsup {
+      background: rgba(245, 166, 35, 0.15);
+      color: #F5A623;
+    }
+  }
+  .pd-see-all-link {
+    display: block;
+    margin-top: 16px;
     background: none;
     border: none;
-    border-bottom: 2px solid transparent;
-    cursor: pointer;
-    transition: color 0.2s, border-color 0.2s;
-  }
-  .pd-tab-active {
-    color: #007AFF;
+    color: #8A05BE;
+    font-size: 14px;
     font-weight: 600;
-    border-bottom-color: #007AFF;
+    cursor: pointer;
+    padding: 0;
   }
-
-  /* ===== TAB CONTENT ===== */
-  .pd-content {
-    padding: 16px;
-    min-height: 300px;
+  .pd-no-signals {
+    text-align: center;
+    padding: 12px 0;
   }
-  .pd-tab-content {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  /* ===== CARD ===== */
-  .pd-card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  }
-  .pd-card-title {
-    font-size: 20px;
-    font-weight: 700;
-    color: #1F2937;
+  .pd-no-signals p {
+    color: #9CA3AF;
+    font-size: 15px;
     margin: 0 0 16px;
   }
-  .pd-card-subtitle {
-    font-size: 14px;
-    color: #6B7280;
-    margin: -8px 0 16px;
-  }
-
 
   /* ===== MEDALS ===== */
   .pd-medals {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    margin-bottom: 16px;
   }
   .pd-medal {
     display: inline-flex;
@@ -990,66 +1114,180 @@ const pageStyles = `
     box-shadow: 0 2px 8px rgba(255, 165, 0, 0.3);
   }
 
-  /* ===== ADD REVIEW BUTTON ===== */
-  .pd-add-review-btn {
+  /* ===== SECTIONS ===== */
+  .pd-section {
+    padding: 16px 20px;
+  }
+
+  /* ===== 4. MENU PREVIEW CARD ===== */
+  .pd-menu-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    .pd-menu-card { background: #161616; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+  }
+  .pd-menu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .pd-menu-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0;
+    color: #1F2937;
+  }
+  @media (prefers-color-scheme: dark) {
+    .pd-menu-header h2 { color: #F3F4F6; }
+  }
+  .pd-menu-count {
+    font-size: 13px;
+    color: #9CA3AF;
+    font-weight: 500;
+  }
+  .pd-menu-thumbnails {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin-bottom: 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .pd-menu-thumbnails::-webkit-scrollbar { display: none; }
+  .pd-menu-thumb {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .pd-menu-thumb img {
     width: 100%;
-    padding: 12px;
-    border: 1px solid #007AFF;
-    border-radius: 8px;
+    height: 100%;
+    object-fit: cover;
+  }
+  .pd-menu-cta {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: #8A05BE;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .pd-menu-cta:active { opacity: 0.85; }
+
+  /* ===== 5. FULL SIGNAL BREAKDOWN ===== */
+  .pd-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    .pd-card { background: #161616; box-shadow: 0 2px 12px rgba(0,0,0,0.3); }
+  }
+  .pd-card-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1F2937;
+    margin: 0 0 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    .pd-card-title { color: #F3F4F6; }
+  }
+  .pd-breakdown-group {
+    margin-bottom: 8px;
+  }
+  .pd-breakdown-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .pd-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .pd-dot-good { background-color: #00C2CB; }
+  .pd-dot-vibe { background-color: #8A05BE; }
+  .pd-dot-headsup { background-color: #F5A623; }
+  .pd-breakdown-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1F2937;
+  }
+  @media (prefers-color-scheme: dark) {
+    .pd-breakdown-title { color: #F3F4F6; }
+  }
+  .pd-breakdown-divider {
+    height: 1px;
+    background: rgba(0,0,0,0.06);
+    margin: 16px 0;
+  }
+  @media (prefers-color-scheme: dark) {
+    .pd-breakdown-divider { background: rgba(255,255,255,0.08); }
+  }
+  .pd-empty-signal {
+    font-size: 14px;
+    font-style: italic;
+    opacity: 0.5;
+    margin: 0 0 14px;
+    padding-left: 16px;
+    color: #6B7280;
+  }
+  .pd-breakdown-cta {
+    margin-top: 20px;
+  }
+  .pd-expand-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid #E5E7EB;
+    background: #fff;
+    color: #1F2937;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .pd-expand-btn:hover { background: #F9FAFB; }
+  @media (prefers-color-scheme: dark) {
+    .pd-expand-btn {
+      background: #161616;
+      border-color: #333;
+      color: #F3F4F6;
+    }
+    .pd-expand-btn:hover { background: #1a1a1a; }
+  }
+
+  /* ===== ADD SIGNAL BUTTON ===== */
+  .pd-add-signal-btn {
+    width: 100%;
+    padding: 14px;
+    border: 1.5px solid #8A05BE;
+    border-radius: 12px;
     background: none;
-    color: #007AFF;
+    color: #8A05BE;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
   }
-  .pd-add-review-btn:hover {
-    background: rgba(0, 122, 255, 0.05);
+  .pd-add-signal-btn:hover {
+    background: rgba(138, 5, 190, 0.05);
   }
 
-  /* ===== CONTACT / INFO ===== */
-  .pd-contact-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 12px;
-  }
-  .pd-contact-icon {
-    font-size: 18px;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-  .pd-contact-link {
-    color: #007AFF;
-    font-size: 15px;
-    text-decoration: none;
-    line-height: 1.4;
-  }
-  .pd-contact-link:hover {
-    text-decoration: underline;
-  }
-  .pd-claim-divider {
-    height: 1px;
-    background: #E5E7EB;
-    margin: 20px 0;
-  }
-  .pd-claim-section {
-    text-align: center;
-  }
-  .pd-claim-btn {
-    background: none;
-    border: none;
-    color: #6B7280;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 12px 20px;
-  }
-  .pd-claim-btn:hover {
-    color: #374151;
-  }
-
-  /* ===== PHOTOS ===== */
+  /* ===== 6. PHOTOS ===== */
   .pd-photo-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1057,14 +1295,26 @@ const pageStyles = `
     margin-bottom: 16px;
   }
   .pd-photo-item {
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
     aspect-ratio: 1;
+    position: relative;
   }
   .pd-photo-item img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+  .pd-photo-more {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 700;
   }
   .pd-no-photos {
     color: #9CA3AF;
@@ -1075,17 +1325,104 @@ const pageStyles = `
   .pd-add-photo-btn {
     width: 100%;
     padding: 12px;
-    border: 1px solid #007AFF;
-    border-radius: 8px;
+    border: 1.5px solid #8A05BE;
+    border-radius: 12px;
     background: none;
-    color: #007AFF;
-    font-size: 16px;
+    color: #8A05BE;
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
   }
   .pd-add-photo-btn:hover {
-    background: rgba(0, 122, 255, 0.05);
+    background: rgba(138, 5, 190, 0.05);
+  }
+
+  /* ===== 7. INFO SECTION ===== */
+  .pd-info-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+  .pd-chevron {
+    font-size: 18px;
+    color: #9CA3AF;
+    transition: transform 0.2s;
+  }
+  .pd-chevron-open {
+    transform: rotate(180deg);
+  }
+  .pd-info-content {
+    margin-top: 16px;
+  }
+  .pd-contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .pd-contact-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .pd-contact-link {
+    color: #8A05BE;
+    font-size: 15px;
+    text-decoration: none;
+    line-height: 1.4;
+  }
+  .pd-contact-link:hover {
+    text-decoration: underline;
+  }
+  .pd-directions-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid #E5E7EB;
+    background: #F9FAFB;
+    color: #1F2937;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background 0.15s;
+  }
+  .pd-directions-btn:hover { background: #F3F4F6; }
+  @media (prefers-color-scheme: dark) {
+    .pd-directions-btn {
+      background: #1a1a1a;
+      border-color: #333;
+      color: #F3F4F6;
+    }
+  }
+  .pd-claim-divider {
+    height: 1px;
+    background: #E5E7EB;
+    margin: 20px 0;
+  }
+  @media (prefers-color-scheme: dark) {
+    .pd-claim-divider { background: #333; }
+  }
+  .pd-claim-btn {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    color: #9CA3AF;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+    text-align: center;
+  }
+  .pd-claim-btn:hover {
+    color: #6B7280;
   }
 
   /* ===== RESPONSIVE ===== */
@@ -1093,7 +1430,7 @@ const pageStyles = `
     .pd-container {
       max-width: 480px;
       margin: 0 auto;
-      box-shadow: 0 0 40px rgba(0,0,0,0.1);
+      box-shadow: 0 0 40px rgba(0,0,0,0.08);
     }
   }
 `;
