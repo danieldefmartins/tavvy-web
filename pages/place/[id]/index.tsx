@@ -7,7 +7,7 @@ import { Place } from '../../../types';
 import { fetchPlaceSignals, SignalAggregate } from '../../../lib/signalService';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { ChevronLeft, Heart, Phone, BookOpen, Globe, MapPin } from 'lucide-react';
+import { ChevronLeft, Heart, Phone, BookOpen, Globe, MapPin, Scissors, Brush, Spa } from 'lucide-react';
 
 const categoryEmoji: Record<string, string> = {
   restaurant: '\uD83C\uDF7D\uFE0F',

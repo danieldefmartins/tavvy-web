@@ -1,7 +1,7 @@
 /**
- * Digital Menu Page - Magazine Style
+ * Digital Services Page - Magazine Style
  * Path: pages/place/[id]/menu.tsx
- * URL: tavvy.com/place/[uuid]/menu
+ * URL: tavvy.com/place/[uuid]/services
  *
  * Features:
  * - Meal period tabs (Breakfast, Lunch, Dinner, All Day)
