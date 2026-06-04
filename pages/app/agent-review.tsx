@@ -1,7 +1,7 @@
 /**
  * Agent Review Dashboard
  * Password-protected page for reviewing ideas from Tavvy's AI agents.
- * Supports approve, reject, and discuss actions with inline HTML mockups.
+ * Supports approve, reject, and discuss actions with DALL-E generated mockup images.
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
