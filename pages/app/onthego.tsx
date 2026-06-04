@@ -18,6 +18,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
+import { UnifiedHeader } from '../../components/UnifiedHeader';
 import { supabase } from '../../lib/supabaseClient';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
