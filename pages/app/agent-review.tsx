@@ -20,6 +20,14 @@ interface AgentIdea {
   created_at: string;
 }
 
+interface DiscussionMessage {
+  id: string;
+  idea_id: string;
+  sender: string;
+  message: string;
+  created_at: string;
+}
+
 const AGENT_COLORS: Record<string, { bg: string; border: string; text: string; label: string }> = {
   'improve': { bg: 'rgba(0, 194, 203, 0.12)', border: '#00C2CB', text: '#00C2CB', label: 'Improve' },
   'signal-design': { bg: 'rgba(138, 5, 190, 0.12)', border: '#8A05BE', text: '#8A05BE', label: 'Signal Design' },
@@ -31,6 +39,9 @@ const STATUS_COLORS: Record<string, string> = {
   rejected: '#EF4444',
   discuss: '#8A05BE',
   pending: '#9394A1',
+  implementing: '#F5A623',
+  implemented: '#00C2CB',
+  failed: '#EF4444',
 };
 
 export default function AgentReviewDashboard() {
@@ -47,6 +58,8 @@ export default function AgentReviewDashboard() {
 
   const [discussId, setDiscussId] = useState<string | null>(null);
   const [discussNote, setDiscussNote] = useState('');
+  const [discussMessages, setDiscussMessages] = useState<DiscussionMessage[]>([]);
+  const [discussLoading, setDiscussLoading] = useState(false);
   const [mockupId, setMockupId] = useState<string | null>(null);
 
   // Check if already authed
@@ -114,6 +127,45 @@ export default function AgentReviewDashboard() {
         setDiscussId(null);
         setDiscussNote('');
         fetchIdeas();
+      }
+    } catch {}
+  };
+
+  const openDiscussion = async (ideaId: string) => {
+    if (discussId === ideaId) {
+      setDiscussId(null);
+      return;
+    }
+    setDiscussId(ideaId);
+    setDiscussMessages([]);
+    setDiscussLoading(true);
+    try {
+      const res = await fetch(`/api/agent-review/discussions?idea_id=${ideaId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setDiscussMessages(data.messages || []);
+      }
+    } catch {}
+    setDiscussLoading(false);
+  };
+
+  const sendDiscussMessage = async (ideaId: string) => {
+    if (!discussNote.trim()) return;
+    try {
+      const res = await fetch('/api/agent-review/discussions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idea_id: ideaId, message: discussNote }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setDiscussMessages(prev => [...prev, data.message]);
+        setDiscussNote('');
+        // Also update idea status to discuss if it's still pending
+        const idea = ideas.find(i => i.id === ideaId);
+        if (idea?.status === 'pending') {
+          await handleAction(ideaId, 'discuss');
+        }
       }
     } catch {}
   };
@@ -332,7 +384,7 @@ export default function AgentReviewDashboard() {
                         Reject
                       </button>
                       <button
-                        onClick={() => setDiscussId(discussId === idea.id ? null : idea.id)}
+                        onClick={() => openDiscussion(idea.id)}
                         style={styles.discussBtn}
                       >
                         Discuss
@@ -340,27 +392,58 @@ export default function AgentReviewDashboard() {
                     </div>
                   )}
 
-                  {/* Discuss text box */}
+                  {/* Discussion thread */}
                   {discussId === idea.id && (
                     <div style={styles.discussBox}>
-                      <textarea
-                        value={discussNote}
-                        onChange={e => setDiscussNote(e.target.value)}
-                        placeholder="Share your thoughts on this idea..."
-                        style={styles.textarea}
-                        rows={3}
-                        autoFocus
-                      />
-                      <button
-                        onClick={() => handleAction(idea.id, 'discuss', discussNote)}
-                        disabled={!discussNote.trim()}
-                        style={{
-                          ...styles.sendBtn,
-                          opacity: discussNote.trim() ? 1 : 0.5,
-                        }}
-                      >
-                        Send
-                      </button>
+                      {/* Messages */}
+                      {discussLoading && (
+                        <div style={{ color: '#6B6B80', fontSize: 13, padding: 8 }}>Loading...</div>
+                      )}
+                      {discussMessages.length > 0 && (
+                        <div style={styles.chatThread}>
+                          {discussMessages.map(msg => (
+                            <div
+                              key={msg.id}
+                              style={{
+                                ...styles.chatBubble,
+                                ...(msg.sender === 'daniel' ? styles.chatBubbleDaniel : styles.chatBubbleAgent),
+                              }}
+                            >
+                              <div style={styles.chatSender}>
+                                {msg.sender === 'daniel' ? 'You' : 'Agent'}
+                              </div>
+                              <div style={styles.chatMessage}>{msg.message}</div>
+                              <div style={styles.chatTime}>{formatDate(msg.created_at)}</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {/* Input */}
+                      <div style={styles.chatInputRow}>
+                        <textarea
+                          value={discussNote}
+                          onChange={e => setDiscussNote(e.target.value)}
+                          placeholder="Share your thoughts..."
+                          style={styles.textarea}
+                          rows={2}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                              e.preventDefault();
+                              sendDiscussMessage(idea.id);
+                            }
+                          }}
+                        />
+                        <button
+                          onClick={() => sendDiscussMessage(idea.id)}
+                          disabled={!discussNote.trim()}
+                          style={{
+                            ...styles.sendBtn,
+                            opacity: discussNote.trim() ? 1 : 0.5,
+                          }}
+                        >
+                          Send
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -678,27 +761,76 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     gap: 8,
+    background: 'rgba(0,0,0,0.2)',
+    borderRadius: 12,
+    padding: 12,
+  },
+  chatThread: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+    maxHeight: 300,
+    overflowY: 'auto' as const,
+    marginBottom: 8,
+  },
+  chatBubble: {
+    padding: '8px 12px',
+    borderRadius: 10,
+    maxWidth: '85%',
+    fontSize: 13,
+    lineHeight: 1.4,
+  },
+  chatBubbleDaniel: {
+    alignSelf: 'flex-end',
+    background: 'rgba(138, 5, 190, 0.2)',
+    border: '1px solid rgba(138, 5, 190, 0.3)',
+  },
+  chatBubbleAgent: {
+    alignSelf: 'flex-start',
+    background: 'rgba(0, 194, 203, 0.12)',
+    border: '1px solid rgba(0, 194, 203, 0.2)',
+  },
+  chatSender: {
+    fontSize: 11,
+    fontWeight: 600,
+    color: '#9394A1',
+    marginBottom: 2,
+  },
+  chatMessage: {
+    color: '#F1F5F9',
+  },
+  chatTime: {
+    fontSize: 10,
+    color: '#6B6B80',
+    marginTop: 4,
+    textAlign: 'right' as const,
+  },
+  chatInputRow: {
+    display: 'flex',
+    gap: 8,
+    alignItems: 'flex-end',
   },
   textarea: {
+    flex: 1,
     padding: '10px 14px',
     background: '#0D0B1A',
     border: '1px solid rgba(255,255,255,0.1)',
     borderRadius: 10,
     color: '#F1F5F9',
     fontSize: 14,
-    resize: 'vertical' as const,
+    resize: 'none' as const,
     outline: 'none',
     fontFamily: 'inherit',
   },
   sendBtn: {
-    alignSelf: 'flex-end',
-    padding: '8px 20px',
+    padding: '10px 20px',
     background: '#8A05BE',
     border: 'none',
-    borderRadius: 8,
+    borderRadius: 10,
     color: '#fff',
     fontSize: 13,
     fontWeight: 600,
     cursor: 'pointer',
+    whiteSpace: 'nowrap' as const,
   },
 };

@@ -62,6 +62,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (response_note !== undefined) {
       update.response_note = response_note;
+
+      // Also insert into discussions thread
+      if (response_note.trim()) {
+        await supabase.from('idea_discussions').insert({
+          idea_id: id,
+          sender: 'daniel',
+          message: response_note.trim(),
+        });
+      }
     }
 
     const { data, error } = await supabase
