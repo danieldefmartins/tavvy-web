@@ -265,8 +265,6 @@ export default function AgentReviewDashboard() {
 
             {(tab === 'pending' ? ideas : history).map(idea => {
               const agent = AGENT_COLORS[idea.agent_name] || AGENT_COLORS['improve'];
-              const hasMockup = !!idea.metadata?.mockupHtml;
-
               return (
                 <div key={idea.id} style={styles.card}>
                   {/* Card Header */}
@@ -324,7 +322,7 @@ export default function AgentReviewDashboard() {
                   )}
 
                   {/* Mockup Toggle */}
-                  {hasMockup && (
+                  {idea.mockup_url && (
                     <div style={{ marginTop: 12 }}>
                       <button
                         onClick={() => setMockupId(mockupId === idea.id ? null : idea.id)}
@@ -334,11 +332,10 @@ export default function AgentReviewDashboard() {
                       </button>
                       {mockupId === idea.id && (
                         <div style={styles.mockupContainer}>
-                          <iframe
-                            srcDoc={idea.metadata.mockupHtml}
-                            style={styles.mockupIframe}
-                            sandbox="allow-same-origin"
-                            title={`Mockup: ${idea.title}`}
+                          <img
+                            src={idea.mockup_url}
+                            alt={`Mockup: ${idea.title}`}
+                            style={styles.mockupImage}
                           />
                         </div>
                       )}
@@ -684,12 +681,13 @@ const styles: Record<string, React.CSSProperties> = {
     overflow: 'hidden',
     border: '1px solid rgba(255,255,255,0.08)',
   },
-  mockupIframe: {
+  mockupImage: {
     width: '100%',
-    height: 600,
-    border: 'none',
+    maxWidth: 400,
+    height: 'auto',
     borderRadius: 12,
-    background: '#17013A',
+    display: 'block',
+    margin: '0 auto',
   },
 
   // Status
