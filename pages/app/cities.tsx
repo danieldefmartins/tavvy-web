@@ -15,7 +15,6 @@ import { FiSearch, FiMapPin, FiChevronRight } from 'react-icons/fi';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { UnifiedHeader } from '../../components/UnifiedHeader';
-import { supabase } from '../../lib/supabaseClient';
 
 interface City {
   id: string;
