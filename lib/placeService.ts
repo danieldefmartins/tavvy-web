@@ -399,8 +399,8 @@ export async function searchPlaces(
   try {
     const { data: placesData, error: placesError } = await supabase
       .from('places')
-      .select('id, name, city, region, tavvy_category, latitude, longitude, cover_image_url, street, phone, slug')
-      .or(`name.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`)
+      .select('id, name, city, region, tavvy_category, tavvy_subcategory, latitude, longitude, cover_image_url, street, phone, slug')
+      .or(`name.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%,tavvy_category.ilike.%${searchTerm}%,tavvy_subcategory.ilike.%${searchTerm}%`)
       .eq('status', 'active')
       .limit(limit);
 
@@ -417,7 +417,7 @@ export async function searchPlaces(
       const { data: fsqData, error: fsqError } = await supabase
         .from('fsq_places_raw')
         .select('fsq_place_id, name, locality, region, latitude, longitude, fsq_category_labels')
-        .or(`name.ilike.%${searchTerm}%,locality.ilike.%${searchTerm}%`)
+        .or(`name.ilike.%${searchTerm}%,locality.ilike.%${searchTerm}%,fsq_category_labels.ilike.%${searchTerm}%`)
         .is('date_closed', null)
         .limit(limit - resultsFromPlaces.length);
 
@@ -470,15 +470,15 @@ export async function searchSuggestions(
     // Build geo-bounded query if location available
     let placesQuery = supabase
       .from('places')
-      .select('id, name, city, region, tavvy_category, latitude, longitude, cover_image_url, street, phone, slug')
-      .or(`name.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%`)
+      .select('id, name, city, region, tavvy_category, tavvy_subcategory, latitude, longitude, cover_image_url, street, phone, slug')
+      .or(`name.ilike.%${searchTerm}%,city.ilike.%${searchTerm}%,tavvy_category.ilike.%${searchTerm}%,tavvy_subcategory.ilike.%${searchTerm}%`)
       .eq('status', 'active')
       .limit(limit);
 
     let fsqQuery = supabase
       .from('fsq_places_raw')
       .select('fsq_place_id, name, locality, region, latitude, longitude, fsq_category_labels')
-      .or(`name.ilike.%${searchTerm}%,locality.ilike.%${searchTerm}%`)
+      .or(`name.ilike.%${searchTerm}%,locality.ilike.%${searchTerm}%,fsq_category_labels.ilike.%${searchTerm}%`)
       .is('date_closed', null)
       .limit(limit);
 

@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { searchPlaces } from '../../lib/typesenseService';
 import { parseSearchQuery } from '../../lib/smartQueryParser';
+import { searchSuggestions } from '../../lib/placeService';
 
 interface SearchSuggestion {
   id: string;
@@ -52,7 +53,7 @@ export default async function handler(
       limit: limitNum,
     });
 
-    const suggestions: SearchSuggestion[] = result.places.map(place => ({
+    let suggestions: SearchSuggestion[] = result.places.map(place => ({
       id: place.id,
       name: place.name,
       category: place.subcategory || place.category || 'Place',
@@ -63,13 +64,59 @@ export default async function handler(
       longitude: place.longitude,
     }));
 
-    console.log(`[API/search] Returning ${suggestions.length} suggestions from Typesense (${result.searchTimeMs}ms)`);
+    // If Typesense returned no results, fall back to Supabase (searches name + category + subcategory)
+    if (suggestions.length === 0) {
+      console.log('[API/search] Typesense returned 0 results, falling back to Supabase');
+      const fallback = await searchSuggestions(
+        parsed.isParsed ? parsed.placeName : searchTerm,
+        limitNum,
+        userLocation,
+      );
+      suggestions = fallback.map(place => ({
+        id: place.id,
+        name: place.name,
+        category: place.subcategory || place.category || 'Place',
+        city: place.city,
+        address: [place.address, place.city, place.region].filter(Boolean).join(', '),
+        distance: place.distance,
+        latitude: place.latitude,
+        longitude: place.longitude,
+      }));
+      console.log(`[API/search] Supabase fallback returned ${suggestions.length} results`);
+    }
+
+    console.log(`[API/search] Returning ${suggestions.length} suggestions (${result.searchTimeMs}ms)`);
 
     return res.status(200).json({ suggestions });
   } catch (error: any) {
     console.error('[API/search] Typesense error:', error.message);
-    
-    // Return empty results instead of error to avoid breaking the UI
-    return res.status(200).json({ suggestions: [] });
+
+    // Typesense failed entirely — fall back to Supabase
+    try {
+      const searchTerm = (req.query.q as string)?.trim() || '';
+      const limitNum = parseInt((req.query.limit as string) || '8', 10);
+      const userLat = req.query.userLat as string | undefined;
+      const userLng = req.query.userLng as string | undefined;
+      const userLocation = userLat && userLng
+        ? { latitude: parseFloat(userLat), longitude: parseFloat(userLng) }
+        : undefined;
+
+      const fallback = await searchSuggestions(searchTerm, limitNum, userLocation);
+      const suggestions: SearchSuggestion[] = fallback.map(place => ({
+        id: place.id,
+        name: place.name,
+        category: place.subcategory || place.category || 'Place',
+        city: place.city,
+        address: [place.address, place.city, place.region].filter(Boolean).join(', '),
+        distance: place.distance,
+        latitude: place.latitude,
+        longitude: place.longitude,
+      }));
+      console.log(`[API/search] Supabase fallback (after Typesense error) returned ${suggestions.length} results`);
+      return res.status(200).json({ suggestions });
+    } catch (fallbackError: any) {
+      console.error('[API/search] Supabase fallback also failed:', fallbackError.message);
+      return res.status(200).json({ suggestions: [] });
+    }
   }
 }
