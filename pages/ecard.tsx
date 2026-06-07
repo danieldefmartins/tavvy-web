@@ -305,12 +305,16 @@ export default function EcardLanding() {
                 onMouseEnter={() => setHoveredTemplate(template.id)}
                 onMouseLeave={() => setHoveredTemplate(null)}
               >
-                <div className="template-preview">
-                  <img
-                    src={`/images/templates/${template.id}.png`}
-                    alt={template.name}
-                    loading="lazy"
-                  />
+                <div className="template-phone">
+                  {/* Phone frame */}
+                  <div className="phone-notch" />
+                  <div className="template-preview">
+                    <img
+                      src={`/images/templates/${template.id}.png`}
+                      alt={template.name}
+                      loading="lazy"
+                    />
+                  </div>
                   {template.isPremium && (
                     <span className="pro-badge">PRO</span>
                   )}
@@ -898,21 +902,42 @@ export default function EcardLanding() {
           gap: 24px;
         }
         .template-card {
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.06);
-          border-radius: 20px;
-          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
           transition: all 0.3s;
         }
         .template-card:hover {
-          border-color: rgba(138, 5, 190, 0.3);
-          transform: translateY(-4px);
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+          transform: translateY(-6px);
+        }
+        .template-phone {
+          position: relative;
+          width: 100%;
+          max-width: 240px;
+          margin: 0 auto;
+          background: #1a1a2e;
+          border-radius: 32px;
+          padding: 10px 8px 14px;
+          border: 2px solid rgba(255,255,255,0.1);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
+          transition: all 0.3s;
+        }
+        .template-card:hover .template-phone {
+          border-color: rgba(138, 5, 190, 0.4);
+          box-shadow: 0 16px 48px rgba(138, 5, 190, 0.15), 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .phone-notch {
+          width: 80px;
+          height: 6px;
+          background: rgba(255,255,255,0.12);
+          border-radius: 4px;
+          margin: 2px auto 8px;
         }
         .template-preview {
           position: relative;
-          aspect-ratio: 3 / 4;
+          aspect-ratio: 9 / 16;
           overflow: hidden;
+          border-radius: 22px;
           background: #0d0d15;
         }
         .template-preview img {
@@ -941,7 +966,8 @@ export default function EcardLanding() {
         .template-overlay {
           position: absolute;
           inset: 0;
-          background: rgba(0, 0, 0, 0.6);
+          background: rgba(0, 0, 0, 0.65);
+          backdrop-filter: blur(4px);
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -950,6 +976,7 @@ export default function EcardLanding() {
           opacity: 0;
           transition: opacity 0.3s;
           z-index: 2;
+          border-radius: 22px;
         }
         .template-overlay.show {
           opacity: 1;
@@ -978,17 +1005,18 @@ export default function EcardLanding() {
           background: #2563EB;
         }
         .template-info {
-          padding: 16px 20px;
+          padding: 14px 8px 0;
+          text-align: center;
         }
         .template-info h3 {
-          font-size: 16px;
+          font-size: 15px;
           font-weight: 700;
           margin-bottom: 4px;
         }
         .template-info p {
-          font-size: 13px;
-          color: rgba(255, 255, 255, 0.45);
-          line-height: 1.5;
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.4);
+          line-height: 1.4;
         }
 
         /* ===== ENDORSEMENT SECTION ===== */
