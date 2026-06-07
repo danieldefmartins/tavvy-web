@@ -16,6 +16,7 @@ import { useThemeContext } from '../contexts/ThemeContext';
 import { spacing, borderRadius, shadows, Colors } from '../constants/Colors';
 import { FiPhone, FiNavigation, FiGlobe, FiInstagram, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { SignalPillsGrid, inferCategoryFromLabel } from './SignalPill';
+import SignalMatrix from './SignalMatrix';
 
 interface Signal {
   bucket: string;
@@ -223,12 +224,11 @@ export default function PlaceCard({ place, onPress, showQuickActions = true, com
         </div>
       )}
       
-      {/* Signal Pills */}
+      {/* Signal Matrix — compact 2x2 grid */}
       <div className="signals-container">
-        <SignalPillsGrid
-          signals={pillSignals}
-          maxVisible={4}
-          showCounts={true}
+        <SignalMatrix
+          simpleSignals={place.signals || []}
+          compact={true}
         />
       </div>
 

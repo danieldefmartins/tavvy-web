@@ -7,7 +7,8 @@ import { Place } from '../../../types';
 import { fetchPlaceSignals, SignalAggregate } from '../../../lib/signalService';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { ChevronLeft, Heart, Phone, BookOpen, Globe, MapPin, Scissors, Brush, Spa, ExpandMore, ExpandLess } from 'lucide-react';
+import { ChevronLeft, Heart, Phone, BookOpen, Globe, MapPin, Scissors, Brush, Spa } from 'lucide-react';
+import SignalMatrix from '../../../components/SignalMatrix';
 
 const categoryEmoji: Record<string, string> = {
   restaurant: '\uD83C\uDF7D\uFE0F',
@@ -403,92 +404,11 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
             </div>
           )}
 
-          {/* The Good — expandable */}
-          {livingSignals.best_for.length > 0 && (
-            <div style={{ marginBottom: 20 }}>
-              <button onClick={() => setExpandGood(!expandGood)} style={{
-                ...sectionTitleStyle, display: 'flex', alignItems: 'center', gap: 6,
-                background: 'none', border: 'none', cursor: 'pointer', padding: 0, width: '100%',
-              }}>
-                The Good
-                <span style={{ fontSize: 12, color: '#00C2CB', fontWeight: 600 }}>({livingSignals.best_for.length})</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto', transform: expandGood ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              </button>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {livingSignals.best_for.slice(0, expandGood ? undefined : 3).map(s => (
-                  <span key={s.signal_id} style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 5,
-                    padding: '8px 16px', background: 'rgba(0,194,203,0.1)',
-                    borderRadius: 22, fontSize: 13.5, fontWeight: 600,
-                    color: '#0A8A8F', whiteSpace: 'nowrap' as const,
-                    border: '1px solid rgba(0,194,203,0.2)',
-                  }}>
-                    {s.icon} {s.label} <span style={{ opacity: 0.5, fontWeight: 500, fontSize: 12 }}>{s.review_count}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* The Vibe — expandable */}
-          {livingSignals.vibe.length > 0 && (
-            <div style={{ marginBottom: 20 }}>
-              <button onClick={() => setExpandVibe(!expandVibe)} style={{
-                ...sectionTitleStyle, display: 'flex', alignItems: 'center', gap: 6,
-                background: 'none', border: 'none', cursor: 'pointer', padding: 0, width: '100%',
-              }}>
-                The Vibe
-                <span style={{ fontSize: 12, color: '#8A05BE', fontWeight: 600 }}>({livingSignals.vibe.length})</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto', transform: expandVibe ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              </button>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {livingSignals.vibe.slice(0, expandVibe ? undefined : 3).map(s => (
-                  <span key={s.signal_id} style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 5,
-                    padding: '8px 16px', background: 'rgba(138,5,190,0.08)',
-                    borderRadius: 22, fontSize: 13.5, fontWeight: 600,
-                    color: '#6B04A0', whiteSpace: 'nowrap' as const,
-                    border: '1px solid rgba(138,5,190,0.2)',
-                  }}>
-                    {s.icon} {s.label} <span style={{ opacity: 0.5, fontWeight: 500, fontSize: 12 }}>{s.review_count}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Heads Up — expandable */}
-          {livingSignals.heads_up.length > 0 && (
-            <div style={{ marginBottom: 20 }}>
-              <button onClick={() => setExpandHeadsUp(!expandHeadsUp)} style={{
-                ...sectionTitleStyle, display: 'flex', alignItems: 'center', gap: 6,
-                background: 'none', border: 'none', cursor: 'pointer', padding: 0, width: '100%',
-              }}>
-                Heads Up
-                <span style={{ fontSize: 12, color: '#F5A623', fontWeight: 600 }}>({livingSignals.heads_up.length})</span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 'auto', transform: expandHeadsUp ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
-                  <polyline points="6 9 12 15 18 9"/>
-                </svg>
-              </button>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                {livingSignals.heads_up.slice(0, expandHeadsUp ? undefined : 2).map(s => (
-                  <span key={s.signal_id} style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 5,
-                    padding: '8px 16px', background: 'rgba(245,166,35,0.1)',
-                    borderRadius: 22, fontSize: 13.5, fontWeight: 600,
-                    color: '#9A6600', whiteSpace: 'nowrap' as const,
-                    border: '1px solid rgba(245,166,35,0.2)',
-                  }}>
-                    {s.icon} {s.label} <span style={{ opacity: 0.5, fontWeight: 500, fontSize: 12 }}>{s.review_count}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Signal Matrix — 2x2 Grid Reviews */}
+          <SignalMatrix
+            signals={livingSignals}
+            onReview={() => router.push(`/app/add-review?placeId=${id}&placeName=${encodeURIComponent(place.name || '')}`)}
+          />
 
           {/* Leave a Review CTA */}
           <div style={{ marginTop: 8, marginBottom: 8 }}>
