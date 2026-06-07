@@ -25,7 +25,7 @@ const FREE_TEMPLATES: TemplateInfo[] = [
   { id: 'basic', name: 'Link Page', description: 'Social-first layout perfect for creators who want all links in one place.', isPremium: false, slug: 'sarah-mitchell' },
   { id: 'blogger', name: 'Creative Page', description: 'Expressive layout for bloggers, coaches, and content creators.', isPremium: false, slug: 'emma-rodriguez' },
   { id: 'business-card', name: 'Executive Card', description: 'Formal, executive-style card for finance, law, and consulting professionals.', isPremium: false, slug: 'james-chen' },
-  { id: 'church', name: 'Faith Page', description: 'Purpose-built for churches and faith communities. Service times, sermons, giving, and events.', isPremium: false, slug: 'tdm-church' },
+  // { id: 'church', name: 'Faith Page' } — hidden until template screenshot is ready
 ];
 
 const PRO_TEMPLATES: TemplateInfo[] = [
@@ -82,15 +82,15 @@ export default function EcardLanding() {
     <>
       <Head>
         <title>Digital Business Cards — Tavvy eCard</title>
-        <meta name="description" content="Create a stunning digital business card in minutes. 14 professional templates, endorsement system, NFC sharing, Apple & Google Wallet. Free to start." />
+        <meta name="description" content="Create a stunning digital business card in minutes. 13 professional templates, endorsement system, NFC sharing, Apple & Google Wallet. Free to start." />
         <meta property="og:title" content="Digital Business Cards — Tavvy eCard" />
-        <meta property="og:description" content="Create a stunning digital business card in minutes. 14 professional templates, endorsement system, NFC sharing. Free to start." />
+        <meta property="og:description" content="Create a stunning digital business card in minutes. 13 professional templates, endorsement system, NFC sharing. Free to start." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://tavvy.com/ecard" />
         <meta property="og:image" content="https://tavvy.com/api/og/david-kim" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Digital Business Cards — Tavvy eCard" />
-        <meta name="twitter:description" content="14 professional templates. Endorsement system. NFC sharing. Free to start." />
+        <meta name="twitter:description" content="13 professional templates. Endorsement system. NFC sharing. Free to start." />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -115,7 +115,7 @@ export default function EcardLanding() {
           <div className="hero-content">
             <div className="hero-badge">
               <span className="badge-dot" />
-              Now with 14 Professional Templates
+              Now with 13 Professional Templates
             </div>
             <h1 className="hero-title">
               Your Digital<br />
@@ -202,7 +202,7 @@ export default function EcardLanding() {
               { feature: 'NFC Tap Sharing', tavvy: true, linktree: false, bento: false },
               { feature: 'Apple & Google Wallet', tavvy: true, linktree: false, bento: false },
               { feature: 'Endorsement System', tavvy: true, linktree: false, bento: false },
-              { feature: 'Professional Templates', tavvy: '14', linktree: '5', bento: '3' },
+              { feature: 'Professional Templates', tavvy: '13', linktree: '5', bento: '3' },
               { feature: 'Save to Contacts (vCard)', tavvy: true, linktree: false, bento: false },
               { feature: 'Photo Gallery', tavvy: true, linktree: false, bento: true },
               { feature: 'Video Embed', tavvy: true, linktree: true, bento: true },
@@ -484,7 +484,7 @@ export default function EcardLanding() {
             <div className="step-card">
               <div className="step-number">1</div>
               <h3>Pick a Template</h3>
-              <p>Choose from 14 professionally designed templates. 7 are free forever — no strings attached.</p>
+              <p>Choose from 13 professionally designed templates. 6 are free forever — no strings attached.</p>
             </div>
             <div className="step-arrow">→</div>
             <div className="step-card">
@@ -506,7 +506,7 @@ export default function EcardLanding() {
           <div className="cta-glow" />
           <div className="cta-content">
             <h2>Stop Paying for a Page of Links</h2>
-            <p>Linktree charges $24/month for what Tavvy gives you free. Professional digital business cards with NFC, QR, Wallet, endorsements, and 14 templates. Zero cost to start. Zero reason to wait.</p>
+            <p>Linktree charges $24/month for what Tavvy gives you free. Professional digital business cards with NFC, QR, Wallet, endorsements, and 13 templates. Zero cost to start. Zero reason to wait.</p>
             <div className="cta-buttons">
               <Link href="/app/ecard" className="btn-primary-lg btn-white">
                 Create Your Free Card Now
@@ -911,9 +911,9 @@ export default function EcardLanding() {
         }
         .template-preview {
           position: relative;
-          aspect-ratio: 9 / 16;
+          aspect-ratio: 3 / 4;
           overflow: hidden;
-          background: #111;
+          background: #0d0d15;
         }
         .template-preview img {
           width: 100%;
