@@ -177,6 +177,94 @@ export default function EcardLanding() {
           </div>
         </section>
 
+        {/* Why Switch Section — Competitor Comparison */}
+        <section id="why-switch" className={`why-switch-section animate-section ${isVisible['why-switch'] ? 'visible' : ''}`}>
+          <div className="section-header">
+            <div className="section-badge">Why Tavvy?</div>
+            <h2 className="section-title">Everything Linktree Does.<br /><span className="gradient-text">Plus Everything It Doesn't.</span></h2>
+            <p className="section-subtitle">
+              Stop paying $24/month for a page of links. Tavvy gives you a real digital business card — free.
+            </p>
+          </div>
+
+          <div className="comparison-table">
+            <div className="compare-header">
+              <div className="compare-feature-col">Feature</div>
+              <div className="compare-col compare-tavvy">Tavvy</div>
+              <div className="compare-col compare-other">Linktree</div>
+              <div className="compare-col compare-other">Bento</div>
+            </div>
+            {[
+              { feature: 'Custom Links', tavvy: true, linktree: true, bento: true },
+              { feature: 'QR Code', tavvy: true, linktree: true, bento: false },
+              { feature: 'NFC Tap Sharing', tavvy: true, linktree: false, bento: false },
+              { feature: 'Apple & Google Wallet', tavvy: true, linktree: false, bento: false },
+              { feature: 'Endorsement System', tavvy: true, linktree: false, bento: false },
+              { feature: 'Professional Templates', tavvy: '13', linktree: '5', bento: '3' },
+              { feature: 'Save to Contacts (vCard)', tavvy: true, linktree: false, bento: false },
+              { feature: 'Photo Gallery', tavvy: true, linktree: false, bento: true },
+              { feature: 'Video Embed', tavvy: true, linktree: true, bento: true },
+              { feature: 'Custom Domain', tavvy: true, linktree: '$$$', bento: false },
+              { feature: 'Analytics', tavvy: true, linktree: true, bento: true },
+              { feature: 'Free Plan', tavvy: 'Forever', linktree: 'Limited', bento: 'Limited' },
+              { feature: 'Price', tavvy: 'Free', linktree: '$24/mo', bento: '$8/mo' },
+            ].map((row, i) => (
+              <div key={i} className="compare-row">
+                <div className="compare-feature-col">{row.feature}</div>
+                <div className="compare-col compare-tavvy">
+                  {row.tavvy === true ? <span className="check-yes">&#10003;</span> :
+                   row.tavvy === false ? <span className="check-no">&#10007;</span> :
+                   <span className="check-text">{row.tavvy}</span>}
+                </div>
+                <div className="compare-col compare-other">
+                  {row.linktree === true ? <span className="check-yes dim">&#10003;</span> :
+                   row.linktree === false ? <span className="check-no">&#10007;</span> :
+                   <span className="check-text dim">{row.linktree}</span>}
+                </div>
+                <div className="compare-col compare-other">
+                  {row.bento === true ? <span className="check-yes dim">&#10003;</span> :
+                   row.bento === false ? <span className="check-no">&#10007;</span> :
+                   <span className="check-text dim">{row.bento}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: 40 }}>
+            <Link href="/app/ecard" className="btn-primary-lg">
+              Create Your Free Card — No Credit Card
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+              </svg>
+            </Link>
+          </div>
+        </section>
+
+        {/* Social Proof Numbers */}
+        <section className="social-proof-strip">
+          <div className="proof-inner">
+            <div className="proof-item">
+              <span className="proof-number">13</span>
+              <span className="proof-label">Professional Templates</span>
+            </div>
+            <div className="proof-divider" />
+            <div className="proof-item">
+              <span className="proof-number">4</span>
+              <span className="proof-label">Sharing Methods</span>
+            </div>
+            <div className="proof-divider" />
+            <div className="proof-item">
+              <span className="proof-number">100%</span>
+              <span className="proof-label">Free to Start</span>
+            </div>
+            <div className="proof-divider" />
+            <div className="proof-item">
+              <span className="proof-number">2min</span>
+              <span className="proof-label">Setup Time</span>
+            </div>
+          </div>
+        </section>
+
         {/* Template Gallery */}
         <section id="templates" className={`templates-section animate-section ${isVisible['templates'] ? 'visible' : ''}`}>
           <div className="section-header">
@@ -384,21 +472,48 @@ export default function EcardLanding() {
           </div>
         </section>
 
-        {/* CTA Section */}
+        {/* How It Works */}
+        <section className={`how-it-works animate-section ${isVisible['how-it-works'] ? 'visible' : ''}`} id="how-it-works">
+          <div className="section-header">
+            <h2 className="section-title">Ready in 3 Steps</h2>
+            <p className="section-subtitle">No design skills needed. No developers. Just you and 2 minutes.</p>
+          </div>
+          <div className="steps-grid">
+            <div className="step-card">
+              <div className="step-number">1</div>
+              <h3>Pick a Template</h3>
+              <p>Choose from 13 professionally designed templates. 6 are free forever — no strings attached.</p>
+            </div>
+            <div className="step-arrow">→</div>
+            <div className="step-card">
+              <div className="step-number">2</div>
+              <h3>Add Your Info</h3>
+              <p>Name, photo, links, social media — fill in what you want. Skip what you don't. It auto-saves.</p>
+            </div>
+            <div className="step-arrow">→</div>
+            <div className="step-card">
+              <div className="step-number">3</div>
+              <h3>Share Everywhere</h3>
+              <p>Get your tavvy.com/yourname link, QR code, NFC, and wallet pass. Share it however you want.</p>
+            </div>
+          </div>
+        </section>
+
+        {/* Final CTA Section */}
         <section className="final-cta">
           <div className="cta-glow" />
           <div className="cta-content">
-            <h2>Ready to Go Digital?</h2>
-            <p>Create your professional digital business card in under 2 minutes. Free forever — upgrade anytime.</p>
+            <h2>Stop Paying for a Page of Links</h2>
+            <p>Linktree charges $24/month for what Tavvy gives you free. Professional digital business cards with NFC, QR, Wallet, endorsements, and 13 templates. Zero cost to start. Zero reason to wait.</p>
             <div className="cta-buttons">
               <Link href="/app/ecard" className="btn-primary-lg btn-white">
-                Create Your Free Card
+                Create Your Free Card Now
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
                 </svg>
               </Link>
             </div>
-            <p className="cta-note">No credit card required. 6 templates free forever.</p>
+            <p className="cta-note">No credit card. No trial. Free forever. Upgrade only if you want Pro features.</p>
           </div>
         </section>
 
@@ -1163,6 +1278,160 @@ export default function EcardLanding() {
         }
 
         /* ===== RESPONSIVE ===== */
+        /* ===== WHY SWITCH / COMPARISON ===== */
+        .why-switch-section {
+          padding: 100px 32px;
+          max-width: 900px;
+          margin: 0 auto;
+        }
+        .comparison-table {
+          border-radius: 16px;
+          overflow: hidden;
+          border: 1px solid rgba(255,255,255,0.08);
+          background: rgba(255,255,255,0.02);
+        }
+        .compare-header {
+          display: grid;
+          grid-template-columns: 2fr 1fr 1fr 1fr;
+          padding: 16px 20px;
+          background: rgba(138,5,190,0.1);
+          border-bottom: 1px solid rgba(255,255,255,0.08);
+          font-weight: 700;
+          font-size: 14px;
+        }
+        .compare-row {
+          display: grid;
+          grid-template-columns: 2fr 1fr 1fr 1fr;
+          padding: 12px 20px;
+          border-bottom: 1px solid rgba(255,255,255,0.04);
+          font-size: 14px;
+          transition: background 0.15s;
+        }
+        .compare-row:hover {
+          background: rgba(255,255,255,0.03);
+        }
+        .compare-feature-col {
+          color: rgba(255,255,255,0.8);
+        }
+        .compare-col {
+          text-align: center;
+        }
+        .compare-tavvy {
+          color: #8A05BE;
+          font-weight: 600;
+        }
+        .compare-other {
+          color: rgba(255,255,255,0.4);
+        }
+        .check-yes {
+          color: #22C55E;
+          font-size: 18px;
+          font-weight: 700;
+        }
+        .check-yes.dim {
+          color: rgba(34,197,94,0.4);
+        }
+        .check-no {
+          color: #EF4444;
+          font-size: 16px;
+          opacity: 0.5;
+        }
+        .check-text {
+          font-weight: 600;
+        }
+        .check-text.dim {
+          opacity: 0.5;
+        }
+
+        /* ===== SOCIAL PROOF STRIP ===== */
+        .social-proof-strip {
+          padding: 40px 24px;
+          background: rgba(138,5,190,0.06);
+          border-top: 1px solid rgba(138,5,190,0.1);
+          border-bottom: 1px solid rgba(138,5,190,0.1);
+        }
+        .proof-inner {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 40px;
+          max-width: 800px;
+          margin: 0 auto;
+        }
+        .proof-item {
+          text-align: center;
+        }
+        .proof-number {
+          display: block;
+          font-size: 32px;
+          font-weight: 800;
+          color: #8A05BE;
+          line-height: 1;
+        }
+        .proof-label {
+          display: block;
+          font-size: 13px;
+          color: rgba(255,255,255,0.5);
+          margin-top: 6px;
+          font-weight: 500;
+        }
+        .proof-divider {
+          width: 1px;
+          height: 40px;
+          background: rgba(255,255,255,0.08);
+        }
+
+        /* ===== HOW IT WORKS ===== */
+        .how-it-works {
+          padding: 100px 32px;
+          max-width: 900px;
+          margin: 0 auto;
+        }
+        .steps-grid {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          margin-top: 48px;
+        }
+        .step-card {
+          flex: 1;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.06);
+          border-radius: 16px;
+          padding: 28px 24px;
+          text-align: center;
+        }
+        .step-card h3 {
+          font-size: 18px;
+          margin-bottom: 8px;
+          font-weight: 700;
+        }
+        .step-card p {
+          font-size: 14px;
+          color: rgba(255,255,255,0.5);
+          line-height: 1.6;
+        }
+        .step-number {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: rgba(138,5,190,0.15);
+          border: 2px solid #8A05BE;
+          color: #8A05BE;
+          font-weight: 800;
+          font-size: 18px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 16px;
+        }
+        .step-arrow {
+          color: rgba(255,255,255,0.15);
+          font-size: 24px;
+          font-weight: 300;
+          flex-shrink: 0;
+        }
+
         @media (max-width: 1024px) {
           .hero {
             flex-direction: column;
@@ -1207,6 +1476,32 @@ export default function EcardLanding() {
           .hero-title {
             font-size: 42px;
             letter-spacing: -1px;
+          }
+          .why-switch-section,
+          .how-it-works {
+            padding: 60px 16px;
+          }
+          .compare-header,
+          .compare-row {
+            grid-template-columns: 1.5fr 1fr 1fr 1fr;
+            padding: 10px 12px;
+            font-size: 12px;
+          }
+          .proof-inner {
+            flex-wrap: wrap;
+            gap: 24px;
+          }
+          .proof-divider {
+            display: none;
+          }
+          .proof-item {
+            width: 40%;
+          }
+          .steps-grid {
+            flex-direction: column;
+          }
+          .step-arrow {
+            transform: rotate(90deg);
           }
           .section-title {
             font-size: 32px;
