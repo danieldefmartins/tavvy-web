@@ -100,8 +100,7 @@ export default function EcardLanding() {
         {/* Navigation */}
         <nav className="landing-nav">
           <Link href="/" className="nav-logo">
-            <img src="/brand/logo-icon.png" alt="Tavvy" className="nav-logo-icon" />
-            <span className="nav-logo-text">tavvy</span>
+            <img src="/brand/tavvy-logo-horizontal-light.png" alt="Tavvy" className="nav-logo-img" />
           </Link>
           <div className="nav-actions">
             <Link href="/app/ecard" className="nav-cta">
@@ -524,8 +523,7 @@ export default function EcardLanding() {
         <footer className="landing-footer">
           <div className="footer-inner">
             <div className="footer-brand">
-              <img src="/brand/logo-icon.png" alt="Tavvy" className="footer-logo" />
-              <span>tavvy</span>
+              <img src="/brand/tavvy-logo-horizontal-light.png" alt="Tavvy" className="footer-logo-img" />
             </div>
             <div className="footer-links">
               <Link href="/about-us">About</Link>
@@ -568,22 +566,12 @@ export default function EcardLanding() {
         .nav-logo {
           display: flex;
           align-items: center;
-          gap: 8px;
           text-decoration: none;
-          color: #fff;
           flex-shrink: 0;
         }
-        .nav-logo-icon {
-          height: 28px;
-          width: 28px;
-          object-fit: contain;
-          border-radius: 6px;
-        }
-        .nav-logo-text {
-          font-size: 20px;
-          font-weight: 800;
-          color: #fff;
-          letter-spacing: -0.5px;
+        .nav-logo-img {
+          height: 32px;
+          width: auto;
         }
         .nav-cta {
           padding: 10px 24px;
@@ -856,13 +844,19 @@ export default function EcardLanding() {
 
         /* Animate sections */
         .animate-section {
-          opacity: 0;
-          transform: translateY(30px);
-          transition: opacity 0.8s ease, transform 0.8s ease;
-        }
-        .animate-section.visible {
           opacity: 1;
           transform: translateY(0);
+          transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        @media (prefers-reduced-motion: no-preference) {
+          .animate-section:not(.visible) {
+            opacity: 0.05;
+            transform: translateY(20px);
+          }
+          .animate-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         /* ===== TEMPLATE GALLERY ===== */
@@ -1263,11 +1257,9 @@ export default function EcardLanding() {
           font-weight: 700;
           font-size: 16px;
         }
-        .footer-logo {
+        .footer-logo-img {
           height: 20px;
-          width: 20px;
-          object-fit: contain;
-          border-radius: 4px;
+          width: auto;
         }
         .footer-links {
           display: flex;
@@ -1552,12 +1544,8 @@ export default function EcardLanding() {
           .landing-nav {
             padding: 12px 16px;
           }
-          .nav-logo-icon {
-            height: 24px;
-            width: 24px;
-          }
-          .nav-logo-text {
-            font-size: 17px;
+          .nav-logo-img {
+            height: 26px;
           }
           .nav-cta {
             padding: 8px 16px;
@@ -1568,12 +1556,8 @@ export default function EcardLanding() {
           .hero-title {
             font-size: 36px;
           }
-          .nav-logo-icon {
-            height: 22px;
-            width: 22px;
-          }
-          .nav-logo-text {
-            font-size: 16px;
+          .nav-logo-img {
+            height: 24px;
           }
           .nav-cta {
             padding: 7px 14px;
