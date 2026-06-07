@@ -1236,5 +1236,112 @@ export function FullCardPreview({ tmpl }: { tmpl: Template }) {
     );
   }
 
+  /* ═══════════════════════════════════════════════════════════
+     CHURCH — Faith community page
+     Cover banner top, circle church logo, name in elegant serif,
+     scripture/tagline, service times chip, stacked link buttons,
+     social icons row at bottom
+     ═══════════════════════════════════════════════════════════ */
+  if (tmpl.layout === 'church') {
+    const bgGrad = cs?.background || `linear-gradient(160deg, ${primary}, ${secondary})`;
+    const btnBg = 'rgba(255,255,255,0.12)';
+    const btnBorder = `1px solid rgba(255,255,255,0.18)`;
+    const churchLinks = ['Sunday Services', 'Watch Sermons Online', 'Give / Donate', 'Upcoming Events', 'Connect Groups', 'Contact & Location'];
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: bgGrad, minHeight: 700 }}>
+        {/* Banner top strip */}
+        <div style={{
+          width: '100%', height: 140, position: 'relative', overflow: 'hidden',
+          background: `linear-gradient(180deg, ${secondary}cc 0%, ${primary} 100%)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          {/* Cross watermark */}
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.08 }}>
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="white">
+              <path d="M10 2h4v7h7v4h-7v9h-4v-9H3v-4h7z"/>
+            </svg>
+          </div>
+          {/* Accent line at bottom */}
+          <div style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: 80, height: 2, background: accentCol, borderRadius: 2 }} />
+        </div>
+
+        {/* Logo / circle photo overlapping banner */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: -44, padding: '0 28px' }}>
+          <div style={{
+            width: 88, height: 88, borderRadius: '50%',
+            border: `4px solid ${accentCol}`,
+            boxShadow: '0 6px 24px rgba(0,0,0,0.35)',
+            overflow: 'hidden', background: primary, flexShrink: 0,
+          }}>
+            <img src={SAMPLE_AVATAR} alt="Church" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+
+          {/* Church name */}
+          <div style={{
+            fontSize: 22, fontWeight: 700, color: '#FFFFFF', marginTop: 14, textAlign: 'center',
+            fontFamily: "'Georgia', 'Times New Roman', serif", letterSpacing: 0.3, lineHeight: 1.2,
+          }}>
+            TDM Church
+          </div>
+          <div style={{ fontSize: 12, color: accentCol, marginTop: 5, textAlign: 'center', fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase' as const }}>
+            Where Faith Meets Community
+          </div>
+
+          {/* Scripture chip */}
+          <div style={{
+            marginTop: 14, padding: '8px 16px', borderRadius: 20,
+            background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)',
+          }}>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.85)', fontStyle: 'italic', textAlign: 'center' as const, lineHeight: 1.5 }}>
+              "Love one another as I have loved you." — John 13:34
+            </span>
+          </div>
+
+          {/* Service times row */}
+          <div style={{
+            marginTop: 16, display: 'flex', gap: 8, flexWrap: 'wrap' as const, justifyContent: 'center',
+          }}>
+            {['Sun 9AM', 'Sun 11AM', 'Wed 7PM'].map(t => (
+              <div key={t} style={{
+                padding: '5px 12px', borderRadius: 20,
+                background: `${accentCol}22`, border: `1px solid ${accentCol}55`,
+              }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: accentCol }}>{t}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Link buttons */}
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, marginTop: 20 }}>
+            {churchLinks.map(l => (
+              <div key={l} style={{
+                width: '100%', height: 48, borderRadius: 12,
+                background: btnBg, border: btnBorder,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                backdropFilter: 'blur(8px)',
+              }}>
+                <span style={{ fontSize: 13, fontWeight: 500, color: '#FFFFFF' }}>{l}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Social icons */}
+          <div style={{ display: 'flex', gap: 12, marginTop: 20, marginBottom: 28 }}>
+            {(['instagram', 'facebook', 'youtube', 'twitter'] as string[]).map(s => (
+              <div key={s} style={{
+                width: 34, height: 34, borderRadius: '50%',
+                background: 'rgba(255,255,255,0.12)',
+                border: '1px solid rgba(255,255,255,0.18)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <PreviewSocialIcon platform={s} size={15} color="#FFFFFF" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return null;
 }

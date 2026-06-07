@@ -25,7 +25,7 @@ interface TemplatePickerProps {
 // Group templates for filtering
 const TEMPLATE_CATEGORIES: Record<string, string[]> = {
   business: ['biz-traditional', 'biz-modern', 'biz-minimalist', 'business-card', 'pro-card', 'pro-corporate', 'pro-creative', 'cover-card', 'mobile-business'],
-  personal: ['basic', 'blogger', 'full-width', 'premium-static', 'pro-realtor'],
+  personal: ['basic', 'blogger', 'full-width', 'premium-static', 'pro-realtor', 'church'],
   politician: ['civic-card', 'civic-card-flag', 'civic-card-bold', 'civic-card-clean', 'civic-card-rally', 'politician-generic'],
 };
 

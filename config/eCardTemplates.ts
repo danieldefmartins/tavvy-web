@@ -39,7 +39,8 @@ export type TemplateLayout =
   | 'civic-card-clean'     // Clean modern card: white card on colored background, minimal and elegant
   | 'civic-card-rally'     // Rally/campaign style: diagonal cuts, bold CTA, high energy design
   | 'politician-generic'   // Generic politician card for all countries: photo, bio, platform, endorsements
-  | 'mobile-business';     // Mobile business (food trucks, pop-ups): cover photo, menu section, endorsements, no star reviews
+  | 'mobile-business'     // Mobile business (food trucks, pop-ups): cover photo, menu section, endorsements, no star reviews
+  | 'church';             // Church / faith community: cover banner, logo, service times, sermon links, give button, events
 
 export interface Template {
   id: string;
@@ -730,6 +731,39 @@ export const TEMPLATES: Template[] = [
       photoStyle: 'cover',
       buttonStyle: 'rounded',
       fontFamily: 'modern',
+      showBorder: false,
+      hasBannerImage: true,
+    },
+  },
+  // ============ CHURCH TEMPLATE ============
+  // Faith communities, churches, ministries — cover banner, logo, service times, links
+  {
+    id: 'church',
+    name: 'Faith Page',
+    description: 'Designed for churches and faith communities. Cover banner, service times, sermon links, give button, and events.',
+    category: 'free',
+    previewImage: 'church',
+    isPremium: false,
+    features: ['cover-banner', 'circle-logo', 'service-times', 'link-buttons', 'scripture-verse', 'social-icons'],
+    layout: 'church',
+    colorSchemes: [
+      // Royal Navy — classic church
+      { id: 'royal-navy', name: 'Royal Navy', primary: '#1a2a4a', secondary: '#243458', accent: '#c9a84c', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.75)', background: 'linear-gradient(160deg, #1a2a4a 0%, #243458 100%)', cardBg: 'rgba(255,255,255,0.06)', isFree: true },
+      // Deep Burgundy — traditional
+      { id: 'deep-burgundy', name: 'Deep Burgundy', primary: '#4a1020', secondary: '#5e1828', accent: '#d4af37', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.75)', background: 'linear-gradient(160deg, #4a1020 0%, #5e1828 100%)', cardBg: 'rgba(255,255,255,0.06)', isFree: true },
+      // Dark Forest — earthy
+      { id: 'dark-forest', name: 'Dark Forest', primary: '#1a3a28', secondary: '#234d35', accent: '#d4c5a0', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.75)', background: 'linear-gradient(160deg, #1a3a28 0%, #234d35 100%)', cardBg: 'rgba(255,255,255,0.06)', isFree: true },
+      // Modern Dark — contemporary church
+      { id: 'modern-dark', name: 'Modern Dark', primary: '#0f0f1a', secondary: '#1a1a2e', accent: '#7c3aed', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.7)', background: 'linear-gradient(160deg, #0f0f1a 0%, #1a1a2e 100%)', cardBg: 'rgba(255,255,255,0.05)' },
+      // Warm Gold — welcoming
+      { id: 'warm-gold', name: 'Warm Gold', primary: '#3d2a00', secondary: '#4f3700', accent: '#f59e0b', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.75)', background: 'linear-gradient(160deg, #3d2a00 0%, #4f3700 100%)', cardBg: 'rgba(255,255,255,0.06)' },
+    ],
+    layoutConfig: {
+      photoPosition: 'center',
+      photoSize: 'medium',
+      photoStyle: 'circle',
+      buttonStyle: 'rounded',
+      fontFamily: 'elegant',
       showBorder: false,
       hasBannerImage: true,
     },

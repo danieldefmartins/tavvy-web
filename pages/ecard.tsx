@@ -25,6 +25,7 @@ const FREE_TEMPLATES: TemplateInfo[] = [
   { id: 'basic', name: 'Link Page', description: 'Social-first layout perfect for creators who want all links in one place.', isPremium: false, slug: 'sarah-mitchell' },
   { id: 'blogger', name: 'Creative Page', description: 'Expressive layout for bloggers, coaches, and content creators.', isPremium: false, slug: 'emma-rodriguez' },
   { id: 'business-card', name: 'Executive Card', description: 'Formal, executive-style card for finance, law, and consulting professionals.', isPremium: false, slug: 'james-chen' },
+  { id: 'church', name: 'Faith Page', description: 'Purpose-built for churches and faith communities. Service times, sermons, giving, and events.', isPremium: false, slug: 'tdm-church' },
 ];
 
 const PRO_TEMPLATES: TemplateInfo[] = [
@@ -46,6 +47,7 @@ const USE_CASES = [
   { icon: '🏗️', title: 'Contractors & Trades', description: 'Display licenses, service areas, and project photos to win more jobs.' },
   { icon: '🩺', title: 'Healthcare Providers', description: 'Share practice details, specialties, and booking links with patients.' },
   { icon: '🎨', title: 'Creatives & Freelancers', description: 'Portfolio-ready cards that showcase your work and link to everything.' },
+  { icon: '⛪', title: 'Churches & Ministries', description: 'Share service times, sermons, giving links, and events — all on one beautiful Faith Page.' },
 ];
 
 export default function EcardLanding() {
@@ -80,15 +82,15 @@ export default function EcardLanding() {
     <>
       <Head>
         <title>Digital Business Cards — Tavvy eCard</title>
-        <meta name="description" content="Create a stunning digital business card in minutes. 13 professional templates, endorsement system, NFC sharing, Apple & Google Wallet. Free to start." />
+        <meta name="description" content="Create a stunning digital business card in minutes. 14 professional templates, endorsement system, NFC sharing, Apple & Google Wallet. Free to start." />
         <meta property="og:title" content="Digital Business Cards — Tavvy eCard" />
-        <meta property="og:description" content="Create a stunning digital business card in minutes. 13 professional templates, endorsement system, NFC sharing. Free to start." />
+        <meta property="og:description" content="Create a stunning digital business card in minutes. 14 professional templates, endorsement system, NFC sharing. Free to start." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://tavvy.com/ecard" />
         <meta property="og:image" content="https://tavvy.com/api/og/david-kim" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Digital Business Cards — Tavvy eCard" />
-        <meta name="twitter:description" content="13 professional templates. Endorsement system. NFC sharing. Free to start." />
+        <meta name="twitter:description" content="14 professional templates. Endorsement system. NFC sharing. Free to start." />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -98,7 +100,8 @@ export default function EcardLanding() {
         {/* Navigation */}
         <nav className="landing-nav">
           <Link href="/" className="nav-logo">
-            <img src="/brand/logo-horizontal.png" alt="Tavvy" />
+            <img src="/brand/logo-icon.png" alt="Tavvy" className="nav-logo-icon" />
+            <span className="nav-logo-text">tavvy</span>
           </Link>
           <div className="nav-actions">
             <Link href="/app/ecard" className="nav-cta">
@@ -113,7 +116,7 @@ export default function EcardLanding() {
           <div className="hero-content">
             <div className="hero-badge">
               <span className="badge-dot" />
-              Now with 13 Professional Templates
+              Now with 14 Professional Templates
             </div>
             <h1 className="hero-title">
               Your Digital<br />
@@ -136,12 +139,12 @@ export default function EcardLanding() {
             </div>
             <div className="hero-stats">
               <div className="stat">
-                <span className="stat-number">13</span>
+                <span className="stat-number">14</span>
                 <span className="stat-label">Templates</span>
               </div>
               <div className="stat-divider" />
               <div className="stat">
-                <span className="stat-number">6</span>
+                <span className="stat-number">7</span>
                 <span className="stat-label">Free Forever</span>
               </div>
               <div className="stat-divider" />
@@ -200,7 +203,7 @@ export default function EcardLanding() {
               { feature: 'NFC Tap Sharing', tavvy: true, linktree: false, bento: false },
               { feature: 'Apple & Google Wallet', tavvy: true, linktree: false, bento: false },
               { feature: 'Endorsement System', tavvy: true, linktree: false, bento: false },
-              { feature: 'Professional Templates', tavvy: '13', linktree: '5', bento: '3' },
+              { feature: 'Professional Templates', tavvy: '14', linktree: '5', bento: '3' },
               { feature: 'Save to Contacts (vCard)', tavvy: true, linktree: false, bento: false },
               { feature: 'Photo Gallery', tavvy: true, linktree: false, bento: true },
               { feature: 'Video Embed', tavvy: true, linktree: true, bento: true },
@@ -244,7 +247,7 @@ export default function EcardLanding() {
         <section className="social-proof-strip">
           <div className="proof-inner">
             <div className="proof-item">
-              <span className="proof-number">13</span>
+              <span className="proof-number">14</span>
               <span className="proof-label">Professional Templates</span>
             </div>
             <div className="proof-divider" />
@@ -482,7 +485,7 @@ export default function EcardLanding() {
             <div className="step-card">
               <div className="step-number">1</div>
               <h3>Pick a Template</h3>
-              <p>Choose from 13 professionally designed templates. 6 are free forever — no strings attached.</p>
+              <p>Choose from 14 professionally designed templates. 7 are free forever — no strings attached.</p>
             </div>
             <div className="step-arrow">→</div>
             <div className="step-card">
@@ -504,7 +507,7 @@ export default function EcardLanding() {
           <div className="cta-glow" />
           <div className="cta-content">
             <h2>Stop Paying for a Page of Links</h2>
-            <p>Linktree charges $24/month for what Tavvy gives you free. Professional digital business cards with NFC, QR, Wallet, endorsements, and 13 templates. Zero cost to start. Zero reason to wait.</p>
+            <p>Linktree charges $24/month for what Tavvy gives you free. Professional digital business cards with NFC, QR, Wallet, endorsements, and 14 templates. Zero cost to start. Zero reason to wait.</p>
             <div className="cta-buttons">
               <Link href="/app/ecard" className="btn-primary-lg btn-white">
                 Create Your Free Card Now
@@ -521,7 +524,8 @@ export default function EcardLanding() {
         <footer className="landing-footer">
           <div className="footer-inner">
             <div className="footer-brand">
-              <img src="/brand/logo-horizontal.png" alt="Tavvy" className="footer-logo" />
+              <img src="/brand/logo-icon.png" alt="Tavvy" className="footer-logo" />
+              <span>tavvy</span>
             </div>
             <div className="footer-links">
               <Link href="/about-us">About</Link>
@@ -564,15 +568,22 @@ export default function EcardLanding() {
         .nav-logo {
           display: flex;
           align-items: center;
+          gap: 8px;
           text-decoration: none;
           color: #fff;
           flex-shrink: 0;
         }
-        .nav-logo img {
+        .nav-logo-icon {
           height: 28px;
-          width: auto;
-          max-width: 120px;
+          width: 28px;
           object-fit: contain;
+          border-radius: 6px;
+        }
+        .nav-logo-text {
+          font-size: 20px;
+          font-weight: 800;
+          color: #fff;
+          letter-spacing: -0.5px;
         }
         .nav-cta {
           padding: 10px 24px;
@@ -1253,10 +1264,10 @@ export default function EcardLanding() {
           font-size: 16px;
         }
         .footer-logo {
-          height: 22px;
-          width: auto;
-          max-width: 100px;
+          height: 20px;
+          width: 20px;
           object-fit: contain;
+          border-radius: 4px;
         }
         .footer-links {
           display: flex;
@@ -1541,10 +1552,32 @@ export default function EcardLanding() {
           .landing-nav {
             padding: 12px 16px;
           }
+          .nav-logo-icon {
+            height: 24px;
+            width: 24px;
+          }
+          .nav-logo-text {
+            font-size: 17px;
+          }
+          .nav-cta {
+            padding: 8px 16px;
+            font-size: 13px;
+          }
         }
         @media (max-width: 480px) {
           .hero-title {
             font-size: 36px;
+          }
+          .nav-logo-icon {
+            height: 22px;
+            width: 22px;
+          }
+          .nav-logo-text {
+            font-size: 16px;
+          }
+          .nav-cta {
+            padding: 7px 14px;
+            font-size: 12px;
           }
           .template-grid {
             grid-template-columns: 1fr;
