@@ -427,6 +427,8 @@ export default function EcardLanding() {
           color: #ffffff;
           font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           overflow-x: hidden;
+          max-width: 100vw;
+          width: 100%;
         }
 
         /* ===== NAV ===== */
@@ -447,13 +449,14 @@ export default function EcardLanding() {
         .nav-logo {
           display: flex;
           align-items: center;
-          gap: 10px;
           text-decoration: none;
           color: #fff;
+          flex-shrink: 0;
         }
         .nav-logo img {
           height: 28px;
           width: auto;
+          max-width: 120px;
           object-fit: contain;
         }
         .nav-cta {
@@ -485,12 +488,13 @@ export default function EcardLanding() {
         }
         .hero-glow {
           position: absolute;
-          top: -200px;
-          right: -200px;
-          width: 600px;
-          height: 600px;
+          top: -100px;
+          right: -100px;
+          width: 400px;
+          height: 400px;
           background: radial-gradient(circle, rgba(138, 5, 190, 0.15) 0%, transparent 70%);
           pointer-events: none;
+          overflow: hidden;
         }
         .hero-content {
           flex: 1;
@@ -1136,6 +1140,7 @@ export default function EcardLanding() {
         .footer-logo {
           height: 22px;
           width: auto;
+          max-width: 100px;
           object-fit: contain;
         }
         .footer-links {
