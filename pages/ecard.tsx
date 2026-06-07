@@ -98,8 +98,7 @@ export default function EcardLanding() {
         {/* Navigation */}
         <nav className="landing-nav">
           <Link href="/" className="nav-logo">
-            <img src="/brand/logo-icon.png" alt="Tavvy" />
-            <span className="logo-text">Tavvy</span>
+            <img src="/brand/logo-horizontal.png" alt="Tavvy" />
           </Link>
           <div className="nav-actions">
             <Link href="/app/ecard" className="nav-cta">
@@ -407,8 +406,7 @@ export default function EcardLanding() {
         <footer className="landing-footer">
           <div className="footer-inner">
             <div className="footer-brand">
-              <img src="/brand/logo-icon.png" alt="Tavvy" className="footer-logo" />
-              <span>Tavvy</span>
+              <img src="/brand/logo-horizontal.png" alt="Tavvy" className="footer-logo" />
             </div>
             <div className="footer-links">
               <Link href="/about-us">About</Link>
@@ -454,16 +452,9 @@ export default function EcardLanding() {
           color: #fff;
         }
         .nav-logo img {
-          height: 32px;
-          width: 32px;
-          max-width: 32px;
-          max-height: 32px;
+          height: 28px;
+          width: auto;
           object-fit: contain;
-        }
-        .logo-text {
-          font-size: 20px;
-          font-weight: 700;
-          letter-spacing: -0.5px;
         }
         .nav-cta {
           padding: 10px 24px;
@@ -1143,10 +1134,8 @@ export default function EcardLanding() {
           font-size: 16px;
         }
         .footer-logo {
-          width: 24px;
-          height: 24px;
-          max-width: 24px;
-          max-height: 24px;
+          height: 22px;
+          width: auto;
           object-fit: contain;
         }
         .footer-links {
