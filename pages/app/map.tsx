@@ -18,6 +18,7 @@ import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
+import SignalMatrix from '../../components/SignalMatrix';
 // Using API routes instead of direct Supabase calls for runtime env var support
 import { PlaceCard as PlaceCardType, SearchResult } from '../../lib/placeService';
 import { useTranslation } from 'next-i18next';
@@ -1285,23 +1286,11 @@ export default function MapScreen() {
                       {place.city && ` • ${place.city}`}
                     </p>
                   </div>
-                  <div className="signal-buttons">
-                    {getDisplaySignals(place.signals as any).map((signal, idx) => (
-                      <div key={`${place.id}-sig-${idx}`} className="signal-pill-wrapper">
-                        <button 
-                          className={`signal-btn ${signal.type === 'positive' ? 'the-good' : signal.type === 'neutral' ? 'the-vibe' : 'heads-up'}`}
-                          style={{ opacity: signal.isEmpty ? 0.6 : 1 }}
-                        >
-                          {getSignalIcon(signal.type)}
-                          <span className={signal.isEmpty ? 'signal-empty' : ''}>
-                            {signal.isEmpty ? 'Be the first to tap!' : signal.bucket}
-                          </span>
-                        </button>
-                        {!signal.isEmpty && signal.tap_total > 0 && (
-                          <span className="signal-tap-count">x{signal.tap_total}</span>
-                        )}
-                      </div>
-                    ))}
+                  <div className="signal-matrix-wrapper">
+                    <SignalMatrix
+                      simpleSignals={place.signals as any || []}
+                      compact={true}
+                    />
                   </div>
                 </div>
               ))
