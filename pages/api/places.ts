@@ -189,7 +189,7 @@ export default async function handler(
         .eq('status', 'active')
         .limit(limitNum);
 
-      // For canonical places, use the canonicalCategory param (or derive from category)
+      // For canonical places, search both category AND subcategory
       const canonCat = canonicalCategory || category;
       if (canonCat && canonCat !== 'All') {
         // Map search terms to canonical category patterns
@@ -201,7 +201,9 @@ export default async function handler(
           'shop store': 'Retail',
         };
         const catFilter = canonicalMap[canonCat as string] || canonCat;
-        query = query.ilike('tavvy_category', `%${catFilter}%`);
+
+        // Search category, subcategory, and name for the filter term
+        query = query.or(`tavvy_category.ilike.%${catFilter}%,tavvy_subcategory.ilike.%${catFilter}%,name.ilike.%${catFilter}%`);
       }
 
       const { data: placesData, error: placesError } = await query;

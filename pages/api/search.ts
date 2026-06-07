@@ -64,15 +64,13 @@ export default async function handler(
       longitude: place.longitude,
     }));
 
-    // If Typesense returned no results, fall back to Supabase (searches name + category + subcategory)
-    if (suggestions.length === 0) {
-      console.log('[API/search] Typesense returned 0 results, falling back to Supabase');
-      const fallback = await searchSuggestions(
-        parsed.isParsed ? parsed.placeName : searchTerm,
-        limitNum,
-        userLocation,
-      );
-      suggestions = fallback.map(place => ({
+    // Always run Supabase search to catch places with subcategories (e.g. "Italian Restaurant")
+    // Typesense only indexes FSQ data, Supabase has agent-created places with tavvy_subcategory
+    {
+      const supabaseTerm = parsed.isParsed ? parsed.placeName : searchTerm;
+      console.log(`[API/search] Also searching Supabase for subcategories: "${supabaseTerm}"`);
+      const fallback = await searchSuggestions(supabaseTerm, limitNum, userLocation);
+      const fallbackMapped = fallback.map(place => ({
         id: place.id,
         name: place.name,
         category: place.subcategory || place.category || 'Place',
@@ -82,8 +80,22 @@ export default async function handler(
         latitude: place.latitude,
         longitude: place.longitude,
       }));
-      console.log(`[API/search] Supabase fallback returned ${suggestions.length} results`);
+
+      // Merge: add Supabase results that aren't already in Typesense results
+      const existingIds = new Set(suggestions.map(s => s.id));
+      const existingNames = new Set(suggestions.map(s => s.name.toLowerCase()));
+      for (const item of fallbackMapped) {
+        if (!existingIds.has(item.id) && !existingNames.has(item.name.toLowerCase())) {
+          suggestions.push(item);
+        }
+      }
+      if (fallbackMapped.length > 0) {
+        console.log(`[API/search] Supabase added ${fallbackMapped.length} additional results`);
+      }
     }
+
+    // Trim to limit
+    suggestions = suggestions.slice(0, limitNum);
 
     console.log(`[API/search] Returning ${suggestions.length} suggestions (${result.searchTimeMs}ms)`);
 
