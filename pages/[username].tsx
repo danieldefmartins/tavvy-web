@@ -1063,6 +1063,20 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
       };
     }
 
+    // Church / Faith Community
+    if (templateLayout === 'church') {
+      return {
+        isLuxury: false,
+        isDark: true,
+        hasOrnate: false,
+        accentColor: cs?.accent || '#c9a84c',
+        textColor: '#ffffff',
+        buttonBg: 'rgba(255,255,255,0.12)',
+        buttonBorder: 'rgba(255,255,255,0.2)',
+        photoStyle: 'rounded',
+      };
+    }
+
     // Civic Card — Brazilian Political Santinho
     if (isCivicCard) {
       // Flag template — card is white, page bg is green
@@ -2139,6 +2153,48 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             />
           )}
 
+          {/* ═══ CHURCH HEADER ═══ */}
+          {templateLayout === 'church' && (
+            <div style={{ width: '100%', textAlign: 'center' as const }}>
+              {/* Banner with cross accent */}
+              <div style={{
+                width: '100%', height: 180, position: 'relative',
+                background: `linear-gradient(135deg, ${activeColorScheme?.primary || '#1a1a2e'} 0%, ${activeColorScheme?.secondary || '#2d1b4e'} 100%)`,
+                overflow: 'hidden',
+              }}>
+                {cardData.bannerImageUrl && (
+                  <img src={cardData.bannerImageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.4 }} />
+                )}
+                {/* Cross watermark */}
+                <div style={{
+                  position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+                  fontSize: 80, opacity: 0.08, color: '#ffffff', fontWeight: 200,
+                }}>✝</div>
+                {/* Accent line */}
+                <div style={{
+                  position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)',
+                  width: 60, height: 3, background: templateStyles.accentColor, borderRadius: 2,
+                }} />
+              </div>
+              {/* Logo overlapping banner */}
+              {cardData.profilePhotoUrl && (
+                <div style={{
+                  width: 90, height: 90, borderRadius: '50%', overflow: 'hidden',
+                  border: `3px solid ${templateStyles.accentColor}`, margin: '-45px auto 0',
+                  position: 'relative', zIndex: 5, background: '#1a1a2e',
+                }}>
+                  <img src={cardData.profilePhotoUrl} alt={cardData.fullName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+              )}
+              {/* Church name + tagline */}
+              <div style={{ padding: '16px 24px 0' }}>
+                <h1 style={{ fontSize: 24, fontWeight: 800, color: '#ffffff', margin: 0, letterSpacing: -0.5, ...fontStyleOverrides }}>{cardData.fullName}</h1>
+                {cardData.title && <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.7)', margin: '6px 0 0', fontWeight: 500 }}>{cardData.title}</p>}
+                {cardData.bio && <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', margin: '8px 0 0', lineHeight: 1.5, fontStyle: 'italic' }}>{cardData.bio}</p>}
+              </div>
+            </div>
+          )}
+
           {/* Profile Section */}
           <div style={{
             ...styles.profileSection,
@@ -2153,6 +2209,7 @@ export default function PublicCardPage({ cardData: initialCardData, error: initi
             ...(templateLayout === 'biz-modern' ? { padding: '0', display: 'none' } : {}),
             ...(templateLayout === 'biz-minimalist' ? { padding: '0', display: 'none' } : {}),
             ...(templateLayout === 'mobile-business' ? { padding: '0', display: 'none' } : {}),
+            ...(templateLayout === 'church' ? { padding: '0', display: 'none' } : {}),
             ...(isNonClassicCivic ? { padding: '16px 20px 0' } : {}),
             ...(isFlagCivic ? { position: 'relative' as const, zIndex: 2, padding: '60px 24px 0' } : {}),
             ...(templateLayout === 'blogger' ? { paddingTop: 0 } : {}),
