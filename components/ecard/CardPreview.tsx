@@ -283,6 +283,184 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
     );
   }
 
+  // ===== CHURCH / FAITH PAGE TEMPLATE =====
+  if (template === 'church') {
+    const tagline = card.title;
+    const scripture = card.bio;
+    const location = (card as any).city || card.company;
+    const bgStyle = bannerImageUrl
+      ? `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.75)), url(${bannerImageUrl}) center/cover`
+      : `linear-gradient(160deg, ${c1} 0%, ${c2} 100%)`;
+
+    // Accent color: use c1 if dark enough, otherwise use a gold-ish default
+    const accentColor = hexLuminance(c1) < 0.3 ? c2 : c1;
+    // Button style: semi-transparent white for dark backgrounds
+    const linkBtnBg = 'rgba(255,255,255,0.12)';
+    const linkBtnBorder = 'rgba(255,255,255,0.2)';
+
+    const renderChurchLinks = () => {
+      if (!links.length) return null;
+      // Separate "give" link if present
+      const giveLink = links.find(l =>
+        l.title?.toLowerCase().includes('give') ||
+        l.title?.toLowerCase().includes('tithe') ||
+        l.title?.toLowerCase().includes('offering') ||
+        l.title?.toLowerCase().includes('donat')
+      );
+      const otherLinks = links.filter(l => l !== giveLink);
+
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 20 }}>
+          {/* Give button — prominent CTA */}
+          {giveLink && (
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              gap: 8, padding: '14px 20px',
+              background: accentColor,
+              borderRadius: 50, cursor: 'pointer',
+              fontWeight: 700, fontSize: 15, color: '#fff',
+              letterSpacing: 0.5,
+              boxShadow: `0 4px 20px ${accentColor}55`,
+            }}>
+              <span>🙏</span>
+              <span>{giveLink.title || 'Give'}</span>
+            </div>
+          )}
+          {/* All other links */}
+          {otherLinks.map((link) => (
+            <div key={link.id} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              gap: 10, padding: '13px 20px',
+              background: linkBtnBg,
+              border: `1px solid ${linkBtnBorder}`,
+              borderRadius: 50, cursor: 'pointer',
+              fontWeight: 500, fontSize: 14, color: '#fff',
+            }}>
+              <span style={{ flex: 1, textAlign: 'center' }}>{link.title || link.url}</span>
+            </div>
+          ))}
+        </div>
+      );
+    };
+
+    const renderChurchSocials = () => {
+      if (!showSocial) return null;
+      const socials: { platform: string; url: string }[] = [];
+      if (socialInstagram) socials.push({ platform: 'instagram', url: socialInstagram });
+      if (socialYoutube) socials.push({ platform: 'youtube', url: socialYoutube });
+      if (socialFacebook) socials.push({ platform: 'facebook', url: socialFacebook });
+      if (socialWhatsapp) socials.push({ platform: 'whatsapp', url: socialWhatsapp });
+      if (socialTiktok) socials.push({ platform: 'tiktok', url: socialTiktok });
+      if (socialTwitter) socials.push({ platform: 'twitter', url: socialTwitter });
+      if (!socials.length && !featuredSocials.length) return null;
+      const combined = [...featuredSocials.map(s => ({ platform: s.platform.toLowerCase(), url: s.url || '' })), ...socials.filter(s => !featuredPlatforms.has(s.platform))];
+      if (!combined.length) return null;
+      return (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 14, marginTop: 20 }}>
+          {combined.slice(0, 6).map((social, i) => (
+            <div key={i} style={{
+              width: 42, height: 42, borderRadius: '50%',
+              background: 'rgba(255,255,255,0.12)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(255,255,255,0.9)">
+                <path d={SOCIAL_ICONS[social.platform] || ''} />
+              </svg>
+            </div>
+          ))}
+        </div>
+      );
+    };
+
+    return (
+      <div style={{
+        background: bgStyle, borderRadius: 16, overflow: 'hidden',
+        minHeight: 400, padding: '32px 24px 36px',
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+      }}>
+        {/* Church logo / profile photo */}
+        {profilePhotoUrl ? (
+          <div style={{
+            width: 88, height: 88, borderRadius: '50%', overflow: 'hidden',
+            border: '3px solid rgba(255,255,255,0.35)',
+            marginBottom: 14, flexShrink: 0,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+          }}>
+            <img src={profilePhotoUrl} alt={card.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+        ) : (
+          <div style={{
+            width: 88, height: 88, borderRadius: '50%',
+            background: 'rgba(255,255,255,0.12)',
+            border: '3px solid rgba(255,255,255,0.3)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            marginBottom: 14, fontSize: 32,
+          }}>
+            ⛪
+          </div>
+        )}
+
+        {/* Church name */}
+        <h2 style={{
+          color: '#fff', fontSize: 22, fontWeight: 700,
+          margin: '0 0 6px', textAlign: 'center', letterSpacing: 0.3,
+        }}>
+          {card.full_name}
+        </h2>
+
+        {/* Tagline */}
+        {tagline && (
+          <p style={{
+            color: 'rgba(255,255,255,0.75)', fontSize: 13,
+            margin: '0 0 4px', textAlign: 'center', fontStyle: 'italic',
+          }}>
+            {tagline}
+          </p>
+        )}
+
+        {/* Location */}
+        {location && (
+          <p style={{
+            color: 'rgba(255,255,255,0.55)', fontSize: 11,
+            margin: '0 0 6px', textAlign: 'center',
+          }}>
+            📍 {location}
+          </p>
+        )}
+
+        {/* Scripture / bio */}
+        {scripture && (
+          <p style={{
+            color: 'rgba(255,255,255,0.65)', fontSize: 12,
+            margin: '8px 0 0', textAlign: 'center', lineHeight: 1.6,
+            maxWidth: 280,
+            borderTop: '1px solid rgba(255,255,255,0.1)',
+            paddingTop: 8,
+          }}>
+            &ldquo;{scripture}&rdquo;
+          </p>
+        )}
+
+        {/* Links */}
+        <div style={{ width: '100%' }}>
+          {renderChurchLinks()}
+        </div>
+
+        {/* Social icons */}
+        {renderChurchSocials()}
+
+        {/* Footer */}
+        <p style={{
+          color: 'rgba(255,255,255,0.25)', fontSize: 10,
+          marginTop: 24, letterSpacing: 1, textTransform: 'uppercase',
+        }}>
+          tavvy
+        </p>
+      </div>
+    );
+  }
+
   // ===== MOBILE BUSINESS TEMPLATE =====
   if (template === 'mobile-business') {
     return (
