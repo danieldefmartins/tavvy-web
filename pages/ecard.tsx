@@ -16,26 +16,27 @@ interface TemplateInfo {
   description: string;
   isPremium: boolean;
   slug: string; // live demo card slug
+  colors?: { name: string; c1: string; c2: string }[];
 }
 
 const FREE_TEMPLATES: TemplateInfo[] = [
-  { id: 'biz-traditional', name: 'Classic Card', description: 'Traditional business card with centered layout, company logo, and gold accents.', isPremium: false, slug: 'michael-harrison' },
-  { id: 'biz-modern', name: 'Modern Card', description: 'Split-layout design with colored header and clean white contact section.', isPremium: false, slug: 'rachel-torres' },
-  { id: 'biz-minimalist', name: 'Clean Card', description: 'Ultra-minimalist design with generous whitespace and refined typography.', isPremium: false, slug: 'anna-bergstrom' },
-  { id: 'basic', name: 'Link Page', description: 'Social-first layout perfect for creators who want all links in one place.', isPremium: false, slug: 'sarah-mitchell' },
-  { id: 'blogger', name: 'Creative Page', description: 'Expressive layout for bloggers, coaches, and content creators.', isPremium: false, slug: 'emma-rodriguez' },
-  { id: 'business-card', name: 'Executive Card', description: 'Formal, executive-style card for finance, law, and consulting professionals.', isPremium: false, slug: 'james-chen' },
-  // { id: 'church', name: 'Faith Page' } — hidden until template screenshot is ready
+  { id: 'biz-traditional', name: 'Classic Card', description: 'Traditional business card with centered layout, company logo, and gold accents.', isPremium: false, slug: 'michael-harrison', colors: [{ name: 'Navy & Gold', c1: '#0c1b3a', c2: '#c9a84c' }, { name: 'Charcoal', c1: '#2d2d2d', c2: '#a0a0a0' }, { name: 'Burgundy', c1: '#5a1a1a', c2: '#c8a87c' }, { name: 'Forest', c1: '#1a3c2a', c2: '#d4c5a0' }, { name: 'Black', c1: '#111111', c2: '#e0e0e0' }] },
+  { id: 'biz-modern', name: 'Modern Card', description: 'Split-layout design with colored header and clean white contact section.', isPremium: false, slug: 'rachel-torres', colors: [{ name: 'Deep Blue', c1: '#0f2b5b', c2: '#3b82f6' }, { name: 'Slate & Amber', c1: '#1e293b', c2: '#f59e0b' }, { name: 'Teal & Gold', c1: '#134e4a', c2: '#d4af37' }, { name: 'Purple', c1: '#4c1d95', c2: '#f43f5e' }, { name: 'Emerald', c1: '#064e3b', c2: '#fef3c7' }] },
+  { id: 'biz-minimalist', name: 'Clean Card', description: 'Ultra-minimalist design with generous whitespace and refined typography.', isPremium: false, slug: 'anna-bergstrom', colors: [{ name: 'White & Black', c1: '#ffffff', c2: '#111111' }, { name: 'Warm Gray', c1: '#fafaf9', c2: '#44403c' }, { name: 'Cream & Navy', c1: '#faf8f5', c2: '#1e3a5f' }, { name: 'Snow & Sage', c1: '#f8faf9', c2: '#3f6b5e' }] },
+  { id: 'basic', name: 'Link Page', description: 'Social-first layout perfect for creators who want all links in one place.', isPremium: false, slug: 'sarah-mitchell', colors: [{ name: 'Light', c1: '#FFFFFF', c2: '#2d3436' }, { name: 'Dark', c1: '#1a1a2e', c2: '#e94560' }, { name: 'Green', c1: '#00C853', c2: '#004D40' }, { name: 'Ocean', c1: '#1E90FF', c2: '#00BFFF' }, { name: 'Sunset', c1: '#f97316', c2: '#ec4899' }, { name: 'Purple', c1: '#581c87', c2: '#9333ea' }] },
+  { id: 'blogger', name: 'Creative Page', description: 'Expressive layout for bloggers, coaches, and content creators.', isPremium: false, slug: 'emma-rodriguez', colors: [{ name: 'Blush', c1: '#f8e8ee', c2: '#d4a0a0' }, { name: 'Lavender', c1: '#e8e0f0', c2: '#9575cd' }, { name: 'Mint', c1: '#e0f2f1', c2: '#80cbc4' }, { name: 'Peach', c1: '#fff3e0', c2: '#ff8a65' }] },
+  { id: 'business-card', name: 'Executive Card', description: 'Formal, executive-style card for finance, law, and consulting professionals.', isPremium: false, slug: 'james-chen', colors: [{ name: 'Navy & Gold', c1: '#0c1b3a', c2: '#c9a84c' }, { name: 'Charcoal', c1: '#2d2d2d', c2: '#a0a0a0' }, { name: 'Forest', c1: '#1a3c2a', c2: '#d4c5a0' }] },
+  { id: 'church', name: 'Faith Page', description: 'Beautiful church page with service times, sermons, giving button, and community events.', isPremium: false, slug: 'tdm-church', colors: [{ name: 'Deep Blue', c1: '#0a1628', c2: '#1e3a5f' }, { name: 'Warm Gold', c1: '#2d1810', c2: '#c9a84c' }, { name: 'Purple Grace', c1: '#1a0a2e', c2: '#8A05BE' }] },
 ];
 
 const PRO_TEMPLATES: TemplateInfo[] = [
-  { id: 'pro-card', name: 'Pro Card', description: 'Gradient header with endorsement badge, ideal for tech founders and consultants.', isPremium: true, slug: 'david-kim' },
-  { id: 'cover-card', name: 'Cover Card', description: 'Full-width banner image with wave divider for photographers and creatives.', isPremium: true, slug: 'maya-chen-photo' },
-  { id: 'full-width', name: 'Spotlight', description: 'Hero-image spotlight layout for chefs, artists, and public figures.', isPremium: true, slug: 'chef-marcus' },
-  { id: 'pro-realtor', name: 'Agent Card', description: 'Purpose-built for real estate agents with property showcase areas.', isPremium: true, slug: 'jennifer-walsh' },
-  { id: 'pro-creative', name: 'Bold Card', description: 'High-impact design for creative directors and brand strategists.', isPremium: true, slug: 'alex-rivera' },
-  { id: 'pro-corporate', name: 'Corporate Card', description: 'Polished corporate layout for doctors, executives, and enterprise teams.', isPremium: true, slug: 'dr-priya-sharma' },
-  { id: 'premium-static', name: 'Premium Hero', description: 'Large hero imagery with premium feel for fitness, wellness, and lifestyle pros.', isPremium: true, slug: 'maya-johnson' },
+  { id: 'pro-card', name: 'Pro Card', description: 'Gradient header with endorsement badge, ideal for tech founders and consultants.', isPremium: true, slug: 'david-kim', colors: [{ name: 'Electric Blue', c1: '#0066FF', c2: '#00D4FF' }, { name: 'Dark Gold', c1: '#1a1a2e', c2: '#d4af37' }, { name: 'Purple Fire', c1: '#4c1d95', c2: '#f43f5e' }] },
+  { id: 'cover-card', name: 'Cover Card', description: 'Full-width banner image with wave divider for photographers and creatives.', isPremium: true, slug: 'maya-chen-photo', colors: [{ name: 'Purple & Orange', c1: '#4c1d95', c2: '#f97316' }, { name: 'Dark Gold', c1: '#1a1a2e', c2: '#d4af37' }, { name: 'Blue', c1: '#0f2b5b', c2: '#3b82f6' }] },
+  { id: 'full-width', name: 'Spotlight', description: 'Hero-image spotlight layout for chefs, artists, and public figures.', isPremium: true, slug: 'chef-marcus', colors: [{ name: 'Noir', c1: '#0a0a0a', c2: '#333333' }, { name: 'Wine', c1: '#4a0e1c', c2: '#c2185b' }, { name: 'Gold', c1: '#1a1508', c2: '#d4af37' }] },
+  { id: 'pro-realtor', name: 'Agent Card', description: 'Purpose-built for real estate agents with property showcase areas.', isPremium: true, slug: 'jennifer-walsh', colors: [{ name: 'Navy', c1: '#0c1b3a', c2: '#3b82f6' }, { name: 'Green', c1: '#064e3b', c2: '#10b981' }, { name: 'Burgundy', c1: '#4a0e1c', c2: '#c8a87c' }] },
+  { id: 'pro-creative', name: 'Bold Card', description: 'High-impact design for creative directors and brand strategists.', isPremium: true, slug: 'alex-rivera', colors: [{ name: 'Neon', c1: '#0a0a0a', c2: '#00ff88' }, { name: 'Hot Pink', c1: '#1a1a2e', c2: '#ff006e' }, { name: 'Electric', c1: '#0f0f23', c2: '#00d4ff' }] },
+  { id: 'pro-corporate', name: 'Corporate Card', description: 'Polished corporate layout for doctors, executives, and enterprise teams.', isPremium: true, slug: 'dr-priya-sharma', colors: [{ name: 'Navy', c1: '#0c1b3a', c2: '#c9a84c' }, { name: 'Slate', c1: '#1e293b', c2: '#94a3b8' }, { name: 'Teal', c1: '#134e4a', c2: '#0d9488' }] },
+  { id: 'premium-static', name: 'Premium Hero', description: 'Large hero imagery with premium feel for fitness, wellness, and lifestyle pros.', isPremium: true, slug: 'maya-johnson', colors: [{ name: 'Dark', c1: '#0a0a0a', c2: '#ffffff' }, { name: 'Warm', c1: '#2d1810', c2: '#f59e0b' }, { name: 'Cool', c1: '#0f172a', c2: '#38bdf8' }] },
 ];
 
 const ALL_TEMPLATES = [...FREE_TEMPLATES, ...PRO_TEMPLATES];
@@ -335,6 +336,18 @@ export default function EcardLanding() {
                 <div className="template-info">
                   <h3>{template.name}</h3>
                   <p>{template.description}</p>
+                  {template.colors && template.colors.length > 0 && (
+                    <div className="color-scroll">
+                      {template.colors.map((color, i) => (
+                        <div
+                          key={i}
+                          className="color-swatch"
+                          title={color.name}
+                          style={{ background: `linear-gradient(135deg, ${color.c1}, ${color.c2})` }}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -1017,6 +1030,29 @@ export default function EcardLanding() {
           font-size: 12px;
           color: rgba(255, 255, 255, 0.4);
           line-height: 1.4;
+        }
+        .color-scroll {
+          display: flex;
+          gap: 6px;
+          justify-content: center;
+          margin-top: 10px;
+          overflow-x: auto;
+          padding: 2px 0;
+          scrollbar-width: none;
+        }
+        .color-scroll::-webkit-scrollbar { display: none; }
+        .color-swatch {
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          flex-shrink: 0;
+          border: 2px solid rgba(255,255,255,0.15);
+          cursor: pointer;
+          transition: transform 0.2s, border-color 0.2s;
+        }
+        .color-swatch:hover {
+          transform: scale(1.25);
+          border-color: rgba(255,255,255,0.5);
         }
 
         /* ===== ENDORSEMENT SECTION ===== */
