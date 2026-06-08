@@ -9,6 +9,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useAuth } from '../contexts/AuthContext';
+import { getUserCards, CardData } from '../lib/ecard';
 
 interface TemplateInfo {
   id: string;
@@ -56,6 +58,13 @@ export default function EcardLanding() {
   const [isVisible, setIsVisible] = useState<{ [key: string]: boolean }>({});
   const [hoveredTemplate, setHoveredTemplate] = useState<string | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
+  const [userCards, setUserCards] = useState<CardData[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    getUserCards(user.id).then(setUserCards).catch(() => {});
+  }, [user]);
 
   const filteredTemplates = activeFilter === 'all' ? ALL_TEMPLATES
     : activeFilter === 'free' ? FREE_TEMPLATES
@@ -109,6 +118,37 @@ export default function EcardLanding() {
             </Link>
           </div>
         </nav>
+
+        {/* Existing User Banner */}
+        {userCards.length > 0 && (
+          <div className="user-banner">
+            <div className="banner-inner">
+              <div className="banner-left">
+                <div className="banner-avatar">
+                  {userCards[0].profile_photo_url ? (
+                    <img src={userCards[0].profile_photo_url} alt="" />
+                  ) : (
+                    <span>{(userCards[0].full_name || 'U')[0].toUpperCase()}</span>
+                  )}
+                </div>
+                <div className="banner-text">
+                  <span className="banner-name">{userCards[0].full_name || 'Your Card'}</span>
+                  <span className="banner-count">
+                    {userCards.length} card{userCards.length !== 1 ? 's' : ''} &middot; {userCards.filter(c => c.is_published).length} live
+                  </span>
+                </div>
+              </div>
+              <div className="banner-actions">
+                <Link href={`/app/ecard/${userCards[0].id}/edit`} className="banner-btn banner-btn-edit">
+                  Edit My Card
+                </Link>
+                <Link href="/app/ecard" className="banner-btn banner-btn-manage">
+                  Manage All
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Hero Section */}
         <section className="hero" ref={heroRef}>
@@ -604,6 +644,108 @@ export default function EcardLanding() {
           background: #2563EB;
           text-decoration: none;
           transform: translateY(-1px);
+        }
+
+        /* ===== USER BANNER ===== */
+        .user-banner {
+          position: fixed;
+          top: 65px;
+          left: 0;
+          right: 0;
+          z-index: 99;
+          background: rgba(138, 5, 190, 0.12);
+          backdrop-filter: blur(20px);
+          border-bottom: 1px solid rgba(138, 5, 190, 0.2);
+          padding: 10px 32px;
+        }
+        .banner-inner {
+          max-width: 1280px;
+          margin: 0 auto;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+        .banner-left {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .banner-avatar {
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+          overflow: hidden;
+          background: linear-gradient(135deg, #8A05BE, #EC4899);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .banner-avatar img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+        .banner-avatar span {
+          font-size: 16px;
+          font-weight: 700;
+          color: #fff;
+        }
+        .banner-text {
+          display: flex;
+          flex-direction: column;
+        }
+        .banner-name {
+          font-size: 14px;
+          font-weight: 600;
+          color: #fff;
+        }
+        .banner-count {
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.5);
+        }
+        .banner-actions {
+          display: flex;
+          gap: 8px;
+        }
+        .banner-btn {
+          padding: 8px 18px;
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 600;
+          text-decoration: none;
+          transition: all 0.2s;
+        }
+        .banner-btn-edit {
+          background: #8A05BE;
+          color: #fff;
+        }
+        .banner-btn-edit:hover {
+          background: #7a04a8;
+          text-decoration: none;
+          transform: translateY(-1px);
+        }
+        .banner-btn-manage {
+          background: rgba(255, 255, 255, 0.08);
+          color: rgba(255, 255, 255, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .banner-btn-manage:hover {
+          background: rgba(255, 255, 255, 0.12);
+          color: #fff;
+          text-decoration: none;
+        }
+        @media (max-width: 480px) {
+          .user-banner {
+            padding: 8px 16px;
+          }
+          .banner-text {
+            display: none;
+          }
+          .banner-btn {
+            padding: 7px 14px;
+            font-size: 12px;
+          }
         }
 
         /* ===== HERO ===== */

@@ -50,7 +50,7 @@ const FEATURED_APPS = [
     nameKey: 'apps.ecard',
     icon: IoHeart,
     gradient: 'linear-gradient(135deg, #EC4899 0%, #DB2777 100%)',
-    href: '/app/ecard',
+    href: '/ecard',
   },
 ];
 
