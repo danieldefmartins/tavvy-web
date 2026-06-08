@@ -671,3 +671,43 @@ export async function getTopSignals(placeId: string, limit: number = 3): Promise
 export async function preloadSignalCache(): Promise<void> {
   await loadSignalCache();
 }
+
+/**
+ * Batch-fetch signals for multiple places (for search results / place cards).
+ * Returns a Map of placeId → Signal[] (bucket + tap_total).
+ * Uses a single Supabase query to avoid N+1.
+ */
+export async function fetchSignalsForPlaces(
+  placeIds: string[]
+): Promise<Map<string, { bucket: string; tap_total: number }[]>> {
+  const result = new Map<string, { bucket: string; tap_total: number }[]>();
+  if (!placeIds.length) return result;
+
+  try {
+    const { data: tapData } = await supabase
+      .from('tap_activity')
+      .select('place_id, signal_name')
+      .in('place_id', placeIds);
+
+    if (!tapData || tapData.length === 0) return result;
+
+    // Aggregate taps per place + signal
+    const counts = new Map<string, Map<string, number>>();
+    for (const tap of tapData) {
+      if (!counts.has(tap.place_id)) counts.set(tap.place_id, new Map());
+      const signalMap = counts.get(tap.place_id)!;
+      signalMap.set(tap.signal_name, (signalMap.get(tap.signal_name) || 0) + 1);
+    }
+
+    for (const [placeId, signalMap] of counts) {
+      const signals = Array.from(signalMap.entries())
+        .map(([name, count]) => ({ bucket: name, tap_total: count }))
+        .sort((a, b) => b.tap_total - a.tap_total);
+      result.set(placeId, signals);
+    }
+  } catch (e) {
+    console.warn('[fetchSignalsForPlaces] Error:', e);
+  }
+
+  return result;
+}

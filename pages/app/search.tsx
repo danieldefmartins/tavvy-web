@@ -13,6 +13,7 @@ import { supabase } from '../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../constants/Colors';
 import PlaceCard from '../../components/PlaceCard';
 import { FiSearch, FiX, FiFilter, FiMapPin } from 'react-icons/fi';
+import { fetchSignalsForPlaces } from '../../lib/signalService';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
@@ -64,8 +65,18 @@ export default function SearchScreen() {
         .or(`name.ilike.%${query}%,tavvy_category.ilike.%${query}%,city.ilike.%${query}%`)
         .limit(50);
 
-      if (!error) {
-        setResults(data || []);
+      if (!error && data) {
+        setResults(data);
+
+        // Enrich with signals
+        const ids = data.map((p: any) => p.id);
+        const signalsMap = await fetchSignalsForPlaces(ids);
+        if (signalsMap.size > 0) {
+          setResults(data.map((p: any) => {
+            const signals = signalsMap.get(p.id);
+            return signals ? { ...p, signals } : p;
+          }));
+        }
       }
     } catch (error) {
       console.error('Error searching:', error);

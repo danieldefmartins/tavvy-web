@@ -16,6 +16,7 @@ import { spacing, borderRadius } from '../../constants/Colors';
 import PlaceCard from '../../components/PlaceCard';
 import { FiSearch, FiX, FiFilter, FiMapPin, FiClock } from 'react-icons/fi';
 import type { PlaceCard as PlaceCardType } from '../../lib/placeService';
+import { fetchSignalsForPlaces } from '../../lib/signalService';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
@@ -87,11 +88,36 @@ export default function SearchScreen() {
         limit: 50,
       });
 
-      setResults(result.places as unknown as PlaceCardType[]);
+      const places = result.places as unknown as PlaceCardType[];
       setSearchTime(result.searchTimeMs);
       setTotalFound(result.totalFound);
-      
+
       console.log(`[Search] Typesense returned ${result.totalFound} results in ${result.searchTimeMs}ms`);
+
+      // Show results immediately, then enrich with signals
+      setResults(places);
+
+      // Batch-fetch signals for all results
+      const placeIds = places.map(p => {
+        // Strip prefixes to get clean IDs for Supabase lookup
+        let id = p.id;
+        if (id.startsWith('fsq-')) id = id.replace('fsq-', '');
+        if (id.startsWith('tavvy:')) id = id.replace('tavvy:', '');
+        return id;
+      });
+
+      const signalsMap = await fetchSignalsForPlaces(placeIds);
+
+      if (signalsMap.size > 0) {
+        const enriched = places.map(p => {
+          let cleanId = p.id;
+          if (cleanId.startsWith('fsq-')) cleanId = cleanId.replace('fsq-', '');
+          if (cleanId.startsWith('tavvy:')) cleanId = cleanId.replace('tavvy:', '');
+          const signals = signalsMap.get(cleanId);
+          return signals ? { ...p, signals } : p;
+        });
+        setResults(enriched);
+      }
     } catch (error) {
       console.error('Typesense search failed, falling back to Supabase:', error);
       
@@ -103,9 +129,19 @@ export default function SearchScreen() {
           .or(`name.ilike.%${query}%,tavvy_category.ilike.%${query}%,city.ilike.%${query}%`)
           .limit(50);
 
-        if (!supabaseError) {
-          setResults(data || []);
-          setTotalFound(data?.length || 0);
+        if (!supabaseError && data) {
+          setResults(data);
+          setTotalFound(data.length);
+
+          // Enrich with signals
+          const ids = data.map((p: any) => p.id);
+          const sMap = await fetchSignalsForPlaces(ids);
+          if (sMap.size > 0) {
+            setResults(data.map((p: any) => {
+              const signals = sMap.get(p.id);
+              return signals ? { ...p, signals } : p;
+            }));
+          }
         }
       } catch (fallbackError) {
         console.error('Fallback search also failed:', fallbackError);
