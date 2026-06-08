@@ -24,7 +24,7 @@ export const SAMPLE_DATA = {
   name: 'Jane Smith',
   title: 'Content Creator & Designer',
   company: 'Creative Studio',
-  bio: 'Helping brands tell their story through design and strategy.',
+  bio: 'Helping brands tell their story through design, strategy, and creative direction. 8+ years of experience working with Fortune 500 companies.',
   phone: '+1 (555) 123-4567',
   email: 'jane@creativestudio.com',
   website: 'www.janesmith.com',
@@ -115,6 +115,14 @@ export function FullCardPreview({ tmpl }: { tmpl: Template }) {
             </div>
           ))}
         </div>
+        {/* Social icons */}
+        <div style={{ display: 'flex', gap: 14, marginTop: 24 }}>
+          {SAMPLE_DATA.socials.map(s => (
+            <div key={s} style={{ width: 38, height: 38, borderRadius: '50%', background: btnBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <PreviewSocialIcon platform={s} size={16} color="#fff" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -157,6 +165,14 @@ export function FullCardPreview({ tmpl }: { tmpl: Template }) {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: cardTxt, letterSpacing: 1.5, textTransform: 'uppercase' as const }}>{l}</span>
+              </div>
+            ))}
+          </div>
+          {/* Social icons */}
+          <div style={{ display: 'flex', gap: 12, marginTop: 18 }}>
+            {['instagram', 'tiktok', 'youtube', 'twitter'].map(s => (
+              <div key={s} style={{ width: 32, height: 32, borderRadius: '50%', background: `${accentCol}30`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PreviewSocialIcon platform={s} size={14} color={accentCol} />
               </div>
             ))}
           </div>
@@ -208,6 +224,18 @@ export function FullCardPreview({ tmpl }: { tmpl: Template }) {
           <div style={{ fontSize: 13, color: '#666', lineHeight: 1.6 }}>
             I am a skilled Solutions Manager with seven years of experience in solving problems and engaging customers across industries.
           </div>
+          {/* Social icons */}
+          <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+            {['instagram', 'linkedin', 'twitter'].map(s => (
+              <div key={s} style={{ width: 32, height: 32, borderRadius: '50%', background: darkBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PreviewSocialIcon platform={s} size={14} color="#fff" />
+              </div>
+            ))}
+          </div>
+          {/* Save Contact */}
+          <div style={{ width: '100%', height: 44, borderRadius: 8, background: accentCol, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 14 }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>+ Save Contact</span>
+          </div>
         </div>
       </div>
     );
@@ -254,6 +282,18 @@ export function FullCardPreview({ tmpl }: { tmpl: Template }) {
           <div style={{ fontSize: 18, fontWeight: 700, color: '#111' }}>About Me</div>
           <div style={{ fontSize: 13, color: '#666', lineHeight: 1.6, marginTop: 8 }}>
             Hi, I am Jane, working as a marketing manager at {SAMPLE_DATA.company}. Expert in building client relationships and driving growth.
+          </div>
+          {/* Social icons */}
+          <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+            {['instagram', 'linkedin', 'twitter', 'facebook'].map(s => (
+              <div key={s} style={{ width: 34, height: 34, borderRadius: '50%', background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PreviewSocialIcon platform={s} size={14} color="#fff" />
+              </div>
+            ))}
+          </div>
+          {/* Save Contact */}
+          <div style={{ width: '100%', height: 44, borderRadius: 8, background: '#111', display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 14 }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>+ Save Contact</span>
           </div>
         </div>
       </div>
@@ -363,6 +403,18 @@ export function FullCardPreview({ tmpl }: { tmpl: Template }) {
               </div>
             ))}
           </div>
+          {/* Social icons */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 16 }}>
+            {['instagram', 'linkedin', 'tiktok', 'facebook'].map(s => (
+              <div key={s} style={{ width: 34, height: 34, borderRadius: '50%', background: accentCol, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PreviewSocialIcon platform={s} size={14} color="#fff" />
+              </div>
+            ))}
+          </div>
+          {/* Save Contact */}
+          <div style={{ width: '100%', height: 44, borderRadius: 10, background: accentCol, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 14 }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>+ Save Contact</span>
+          </div>
         </div>
       </div>
     );
@@ -423,6 +475,18 @@ export function FullCardPreview({ tmpl }: { tmpl: Template }) {
                 {service}
               </div>
             ))}
+          </div>
+          {/* Social icons */}
+          <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+            {['instagram', 'linkedin', 'facebook', 'youtube'].map(s => (
+              <div key={s} style={{ width: 32, height: 32, borderRadius: '50%', background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PreviewSocialIcon platform={s} size={14} color="#555" />
+              </div>
+            ))}
+          </div>
+          {/* Save Contact */}
+          <div style={{ width: '100%', height: 44, borderRadius: 10, background: accentCol, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 14 }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>+ Save Contact</span>
           </div>
         </div>
       </div>
@@ -515,8 +579,16 @@ export function FullCardPreview({ tmpl }: { tmpl: Template }) {
               </div>
             ))}
           </div>
+          {/* Social icons */}
+          <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+            {['instagram', 'linkedin', 'twitter', 'facebook'].map(s => (
+              <div key={s} style={{ width: 34, height: 34, borderRadius: '50%', background: darkBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PreviewSocialIcon platform={s} size={14} color={goldAccent} />
+              </div>
+            ))}
+          </div>
           {/* Add to Contacts button */}
-          <div style={{ width: '100%', height: 48, borderRadius: 10, background: darkBg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 20 }}>
+          <div style={{ width: '100%', height: 48, borderRadius: 10, background: darkBg, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 14 }}>
             <span style={{ fontSize: 15, fontWeight: 600, color: '#fff' }}>+ Add to Contacts</span>
           </div>
         </div>
@@ -545,22 +617,34 @@ export function FullCardPreview({ tmpl }: { tmpl: Template }) {
         </svg>
         {/* White bottom */}
         <div style={{ background: cardBgCol, padding: '4px 28px 28px' }}>
-          <div style={{ fontSize: 22, fontWeight: 700, color: '#1a1a2e', marginBottom: 2 }}>Arianne S. Richardson</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: '#1a1a2e', marginBottom: 2 }}>{SAMPLE_DATA.name}</div>
           <div style={{ fontSize: 13, fontWeight: 600, color: '#444', marginBottom: 2 }}>Founder & Principal Consultant</div>
-          <div style={{ fontSize: 12, color: '#888', fontStyle: 'italic', marginBottom: 8 }}>A.Rich Culture</div>
-          <div style={{ fontSize: 12, color: '#555', lineHeight: 1.6, marginBottom: 12 }}>Business Consulting & Talent Management for Caribbean Creatives</div>
+          <div style={{ fontSize: 12, color: '#888', fontStyle: 'italic', marginBottom: 8 }}>{SAMPLE_DATA.company}</div>
+          <div style={{ fontSize: 12, color: '#555', lineHeight: 1.6, marginBottom: 12 }}>Business consulting and creative strategy for brands that want to stand out.</div>
           {/* Contact rows */}
           {[
-            { icon: <PreviewEmailIcon size={14} />, text: 'mail@arichculture.com', bg: primary },
-            { icon: <PreviewPhoneIcon size={14} />, text: '+1 561 485 7408', bg: accentC },
+            { icon: <PreviewEmailIcon size={14} />, text: SAMPLE_DATA.email, bg: primary },
+            { icon: <PreviewPhoneIcon size={14} />, text: SAMPLE_DATA.phone, bg: accentC },
             { icon: <PreviewMsgIcon size={14} />, text: 'Send a Text', bg: primary },
-            { icon: <PreviewGlobeIcon size={14} />, text: 'www.arichculture.com', bg: accentC },
+            { icon: <PreviewGlobeIcon size={14} />, text: SAMPLE_DATA.website, bg: accentC },
           ].map((row, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
               <div style={{ width: 36, height: 36, borderRadius: '50%', background: row.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#fff' }}>{row.icon}</div>
               <span style={{ fontSize: 13, color: '#333', fontWeight: 500 }}>{row.text}</span>
             </div>
           ))}
+          {/* Social icons */}
+          <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+            {['instagram', 'linkedin', 'facebook'].map(s => (
+              <div key={s} style={{ width: 32, height: 32, borderRadius: '50%', background: primary, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <PreviewSocialIcon platform={s} size={14} color="#fff" />
+              </div>
+            ))}
+          </div>
+          {/* Save Contact */}
+          <div style={{ width: '100%', height: 44, borderRadius: 10, background: primary, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 14 }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>+ Save Contact</span>
+          </div>
         </div>
       </div>
     );
@@ -768,56 +852,73 @@ export function FullCardPreview({ tmpl }: { tmpl: Template }) {
      about section, action icons, social links
      ═══════════════════════════════════════════════════════════ */
   if (tmpl.layout === 'premium-static') {
-    const bgCol = cs?.background || '#0a0a0a';
     const accentC = accentCol;
     return (
-      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: bgCol }}>
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: primary }}>
         {/* Full-width hero photo with gradient overlay */}
-        <div style={{ width: '100%', height: 280, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ width: '100%', height: 260, position: 'relative', overflow: 'hidden' }}>
           <img src={SAMPLE_BANNER} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, transparent 30%, ${primary} 100%)` }} />
+          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, transparent 20%, ${primary} 100%)` }} />
           {/* Name overlay at bottom of hero */}
           <div style={{ position: 'absolute', bottom: 16, left: 20, right: 20 }}>
-            <div style={{ fontSize: 24, fontWeight: 800, color: '#fff', letterSpacing: -0.5, textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>Maya Johnson</div>
+            <div style={{ fontSize: 26, fontWeight: 800, color: '#fff', letterSpacing: -0.5, textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>{SAMPLE_DATA.name}</div>
             <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.85)', marginTop: 2 }}>Fitness Coach & Wellness Expert</div>
           </div>
         </div>
 
-        {/* Content area */}
-        <div style={{ padding: '20px 20px 24px', background: cardBgCol }}>
+        {/* Content area — always dark themed */}
+        <div style={{ padding: '20px 20px 24px', background: primary }}>
           {/* About card */}
-          <div style={{ background: `${primary}10`, borderRadius: 14, padding: '16px 18px', marginBottom: 16, borderLeft: `3px solid ${accentC}` }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: accentC, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>About</div>
-            <div style={{ fontSize: 12, color: cs?.text || '#FFFFFF', lineHeight: 1.6, opacity: 0.85 }}>Certified personal trainer helping you achieve your fitness goals. 10+ years of experience in strength training and nutrition.</div>
+          <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 14, padding: '16px 18px', marginBottom: 16, borderLeft: `3px solid ${accentC}` }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: accentC, textTransform: 'uppercase' as const, letterSpacing: 1, marginBottom: 6 }}>About</div>
+            <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6 }}>Certified personal trainer and nutrition specialist helping you achieve your fitness goals. 10+ years of experience in strength training, HIIT, and holistic wellness.</div>
+          </div>
+
+          {/* Contact rows */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+            {[
+              { icon: <PreviewPhoneIcon size={14} />, text: SAMPLE_DATA.phone },
+              { icon: <PreviewEmailIcon size={14} />, text: 'maya@fitlife.com' },
+              { icon: <PreviewGlobeIcon size={14} />, text: 'www.mayajohnson.fit' },
+              { icon: <PreviewLocationIcon size={14} />, text: 'Miami, FL' },
+            ].map((row, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: accentC }}>{row.icon}</div>
+                <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>{row.text}</span>
+              </div>
+            ))}
           </div>
 
           {/* Action buttons row */}
           <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
-            {['Call', 'Email', 'Website'].map((label, i) => (
+            {['Book Session', 'Programs', 'Free Guide'].map((label, i) => (
               <div key={i} style={{
                 flex: 1, padding: '12px 8px', borderRadius: 12,
-                background: i === 0 ? primary : 'rgba(255,255,255,0.08)',
-                border: i === 0 ? 'none' : `1px solid ${cs?.text || '#FFFFFF'}20`,
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                background: i === 0 ? accentC : 'rgba(255,255,255,0.06)',
+                border: i === 0 ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                {i === 0 && <PreviewPhoneIcon size={16} />}
-                {i === 1 && <PreviewEmailIcon size={16} />}
-                {i === 2 && <PreviewGlobeIcon size={16} />}
-                <span style={{ fontSize: 10, fontWeight: 600, color: i === 0 ? '#fff' : (cs?.text || '#FFFFFF') }}>{label}</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: i === 0 ? primary : 'rgba(255,255,255,0.7)' }}>{label}</span>
               </div>
             ))}
           </div>
 
           {/* Social icons */}
           <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
-            {['IG', 'FB', 'YT', 'TT'].map((s, i) => (
-              <div key={i} style={{
+            {['instagram', 'youtube', 'tiktok', 'facebook'].map((s) => (
+              <div key={s} style={{
                 width: 36, height: 36, borderRadius: '50%',
-                background: `${cs?.text || '#FFFFFF'}10`, border: `1px solid ${cs?.text || '#FFFFFF'}20`,
+                background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 10, fontWeight: 700, color: cs?.text || '#FFFFFF', opacity: 0.7,
-              }}>{s}</div>
+              }}>
+                <PreviewSocialIcon platform={s} size={15} color="rgba(255,255,255,0.7)" />
+              </div>
             ))}
+          </div>
+
+          {/* Save Contact */}
+          <div style={{ width: '100%', height: 44, borderRadius: 10, background: accentC, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 16 }}>
+            <span style={{ fontSize: 14, fontWeight: 600, color: primary }}>+ Save Contact</span>
           </div>
         </div>
       </div>
@@ -1237,104 +1338,152 @@ export function FullCardPreview({ tmpl }: { tmpl: Template }) {
   }
 
   /* ═══════════════════════════════════════════════════════════
-     CHURCH — Faith community page
-     Cover banner top, circle church logo, name in elegant serif,
-     scripture/tagline, service times chip, stacked link buttons,
-     social icons row at bottom
+     CHURCH — Faith community page (feature-rich)
+     Inspired by top church Linktree pages: banner, logo, name,
+     tagline, scripture, schedule, community groups, giving,
+     sermons, pastor, location, social — all filled to sell
      ═══════════════════════════════════════════════════════════ */
   if (tmpl.layout === 'church') {
     const bgGrad = cs?.background || `linear-gradient(160deg, ${primary}, ${secondary})`;
-    const btnBg = 'rgba(255,255,255,0.12)';
-    const btnBorder = `1px solid rgba(255,255,255,0.18)`;
-    const churchLinks = ['Sunday Services', 'Watch Sermons Online', 'Give / Donate', 'Upcoming Events', 'Connect Groups', 'Contact & Location'];
+    const btnBg = 'rgba(255,255,255,0.10)';
+    const btnBorder = '1px solid rgba(255,255,255,0.16)';
+    const sectionBg = 'rgba(255,255,255,0.06)';
+    const sectionBorder = '1px solid rgba(255,255,255,0.10)';
     return (
       <div style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: bgGrad, minHeight: 700 }}>
-        {/* Banner top strip */}
+        {/* Banner with cross watermark */}
         <div style={{
-          width: '100%', height: 140, position: 'relative', overflow: 'hidden',
+          width: '100%', height: 130, position: 'relative', overflow: 'hidden',
           background: `linear-gradient(180deg, ${secondary}cc 0%, ${primary} 100%)`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          {/* Cross watermark */}
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.08 }}>
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="white">
-              <path d="M10 2h4v7h7v4h-7v9h-4v-9H3v-4h7z"/>
-            </svg>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.06 }}>
+            <svg width="90" height="90" viewBox="0 0 24 24" fill="white"><path d="M10 2h4v7h7v4h-7v9h-4v-9H3v-4h7z"/></svg>
           </div>
-          {/* Accent line at bottom */}
           <div style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: 80, height: 2, background: accentCol, borderRadius: 2 }} />
         </div>
 
-        {/* Logo / circle photo overlapping banner */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: -44, padding: '0 28px' }}>
+        {/* Logo overlapping banner */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: -44, padding: '0 20px' }}>
           <div style={{
             width: 88, height: 88, borderRadius: '50%',
-            border: `4px solid ${accentCol}`,
+            border: `3px solid ${accentCol}`,
             boxShadow: '0 6px 24px rgba(0,0,0,0.35)',
             overflow: 'hidden', background: primary, flexShrink: 0,
           }}>
             <img src={SAMPLE_AVATAR} alt="Church" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
 
-          {/* Church name */}
-          <div style={{
-            fontSize: 22, fontWeight: 700, color: '#FFFFFF', marginTop: 14, textAlign: 'center',
-            fontFamily: "'Georgia', 'Times New Roman', serif", letterSpacing: 0.3, lineHeight: 1.2,
-          }}>
-            TDM Church
+          {/* Church name & tagline */}
+          <div style={{ fontSize: 22, fontWeight: 700, color: '#FFFFFF', marginTop: 12, textAlign: 'center', fontFamily: "'Georgia', 'Times New Roman', serif", letterSpacing: 0.3, lineHeight: 1.2 }}>
+            Grace Community Church
           </div>
-          <div style={{ fontSize: 12, color: accentCol, marginTop: 5, textAlign: 'center', fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase' as const }}>
-            Where Faith Meets Community
+          <div style={{ fontSize: 11, color: accentCol, marginTop: 5, textAlign: 'center', fontWeight: 600, letterSpacing: 1.5, textTransform: 'uppercase' as const }}>
+            A Place to Belong
+          </div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <PreviewLocationIcon size={10} /> Boston, MA
           </div>
 
           {/* Scripture chip */}
-          <div style={{
-            marginTop: 14, padding: '8px 16px', borderRadius: 20,
-            background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)',
-          }}>
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.85)', fontStyle: 'italic', textAlign: 'center' as const, lineHeight: 1.5 }}>
-              "Love one another as I have loved you." — John 13:34
+          <div style={{ marginTop: 12, padding: '8px 16px', borderRadius: 20, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
+            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.8)', fontStyle: 'italic' }}>
+              &ldquo;Love one another as I have loved you.&rdquo; — John 13:34
             </span>
           </div>
 
-          {/* Service times row */}
-          <div style={{
-            marginTop: 16, display: 'flex', gap: 8, flexWrap: 'wrap' as const, justifyContent: 'center',
-          }}>
-            {['Sun 9AM', 'Sun 11AM', 'Wed 7PM'].map(t => (
-              <div key={t} style={{
-                padding: '5px 12px', borderRadius: 20,
-                background: `${accentCol}22`, border: `1px solid ${accentCol}55`,
-              }}>
-                <span style={{ fontSize: 11, fontWeight: 600, color: accentCol }}>{t}</span>
+          {/* ── Service Schedule ── */}
+          <div style={{ width: '100%', marginTop: 18, background: sectionBg, borderRadius: 14, border: sectionBorder, padding: '14px 16px' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: accentCol, textTransform: 'uppercase' as const, letterSpacing: 1.2, marginBottom: 10 }}>Service Times</div>
+            {[
+              { day: 'Sunday', times: '9:30 AM & 11:00 AM', label: 'Worship Service' },
+              { day: 'Wednesday', times: '7:00 PM', label: 'Bible Study' },
+              { day: 'Friday', times: '7:30 PM', label: 'Youth Night' },
+            ].map((s, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderTop: i > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#fff' }}>{s.day}</div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>{s.label}</div>
+                </div>
+                <div style={{ padding: '4px 10px', borderRadius: 16, background: `${accentCol}22`, border: `1px solid ${accentCol}44` }}>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: accentCol }}>{s.times}</span>
+                </div>
               </div>
             ))}
           </div>
 
-          {/* Link buttons */}
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10, marginTop: 20 }}>
-            {churchLinks.map(l => (
-              <div key={l} style={{
-                width: '100%', height: 48, borderRadius: 12,
+          {/* ── Community Groups ── */}
+          <div style={{ width: '100%', marginTop: 12, background: sectionBg, borderRadius: 14, border: sectionBorder, padding: '14px 16px' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: accentCol, textTransform: 'uppercase' as const, letterSpacing: 1.2, marginBottom: 10 }}>Community Groups</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap' as const, gap: 6 }}>
+              {['General', 'Men', 'Women', 'Youth', 'Teens', 'Prayer'].map(g => (
+                <div key={g} style={{ padding: '5px 12px', borderRadius: 20, background: btnBg, border: btnBorder }}>
+                  <span style={{ fontSize: 10, fontWeight: 500, color: 'rgba(255,255,255,0.85)' }}>{g}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Link Buttons ── */}
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8, marginTop: 14 }}>
+            {[
+              { emoji: '\uD83D\uDCFA', label: 'Watch Sermons Live' },
+              { emoji: '\uD83D\uDCB3', label: 'Give / Tithes & Offerings' },
+              { emoji: '\uD83D\uDCC5', label: 'Upcoming Events' },
+              { emoji: '\uD83E\uDD1D', label: 'Connect & Volunteer' },
+              { emoji: '\uD83D\uDCF8', label: 'Photo Gallery' },
+              { emoji: '\uD83D\uDCDE', label: 'Contact & Location' },
+            ].map(l => (
+              <div key={l.label} style={{
+                width: '100%', height: 44, borderRadius: 12,
                 background: btnBg, border: btnBorder,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 backdropFilter: 'blur(8px)',
               }}>
-                <span style={{ fontSize: 13, fontWeight: 500, color: '#FFFFFF' }}>{l}</span>
+                <span style={{ fontSize: 14 }}>{l.emoji}</span>
+                <span style={{ fontSize: 12, fontWeight: 500, color: '#FFFFFF' }}>{l.label}</span>
               </div>
             ))}
           </div>
 
-          {/* Social icons */}
-          <div style={{ display: 'flex', gap: 12, marginTop: 20, marginBottom: 28 }}>
+          {/* ── Giving Section ── */}
+          <div style={{ width: '100%', marginTop: 14, background: sectionBg, borderRadius: 14, border: sectionBorder, padding: '14px 16px' }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: accentCol, textTransform: 'uppercase' as const, letterSpacing: 1.2, marginBottom: 10 }}>Giving Options</div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {['Online', 'Zelle', 'Venmo'].map((m, i) => (
+                <div key={m} style={{
+                  flex: 1, padding: '10px 8px', borderRadius: 10,
+                  background: i === 0 ? accentCol : btnBg,
+                  border: i === 0 ? 'none' : btnBorder,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: i === 0 ? primary : '#fff' }}>{m}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Pastor Section ── */}
+          <div style={{ width: '100%', marginTop: 14, background: sectionBg, borderRadius: 14, border: sectionBorder, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 48, height: 48, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: `2px solid ${accentCol}40` }}>
+              <img src={SAMPLE_AVATAR} alt="Pastor" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: accentCol, textTransform: 'uppercase' as const, letterSpacing: 1 }}>Senior Pastor</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: '#fff', marginTop: 2 }}>Pastor John Grace</div>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', marginTop: 1 }}>@pastorjohngrace</div>
+            </div>
+          </div>
+
+          {/* ── Social icons ── */}
+          <div style={{ display: 'flex', gap: 12, marginTop: 18, marginBottom: 28 }}>
             {(['instagram', 'facebook', 'youtube', 'twitter'] as string[]).map(s => (
               <div key={s} style={{
-                width: 34, height: 34, borderRadius: '50%',
-                background: 'rgba(255,255,255,0.12)',
-                border: '1px solid rgba(255,255,255,0.18)',
+                width: 36, height: 36, borderRadius: '50%',
+                background: 'rgba(255,255,255,0.10)',
+                border: '1px solid rgba(255,255,255,0.16)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <PreviewSocialIcon platform={s} size={15} color="#FFFFFF" />
+                <PreviewSocialIcon platform={s} size={16} color="#FFFFFF" />
               </div>
             ))}
           </div>

@@ -333,10 +333,10 @@ export const TEMPLATES: Template[] = [
     features: ['cover-photo', 'logo-overlay', 'contact-rows', 'wave-accent', 'clean-layout'],
     layout: 'cover-card',
     colorSchemes: [
-      // Purple & Orange (matches mockup)
-      { id: 'purple-orange', name: 'Purple & Orange', primary: '#7c3aed', secondary: '#6d28d9', accent: '#f97316', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF', border: '#f97316', isFree: false },
-      // Blue & Coral
-      { id: 'blue-coral', name: 'Blue & Coral', primary: '#1e40af', secondary: '#3b82f6', accent: '#f43f5e', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF', border: '#f43f5e' },
+      // Navy & Gold (professional default)
+      { id: 'navy-gold', name: 'Navy & Gold', primary: '#0f172a', secondary: '#1e293b', accent: '#d4af37', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF', border: '#d4af37', isFree: false },
+      // Blue & Slate
+      { id: 'blue-slate', name: 'Blue & Slate', primary: '#1e40af', secondary: '#3b82f6', accent: '#64748b', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF', border: '#64748b' },
       // Dark & Gold
       { id: 'dark-gold', name: 'Dark & Gold', primary: '#0f172a', secondary: '#1e293b', accent: '#d4af37', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF', border: '#d4af37' },
       // Teal & White
