@@ -25,7 +25,8 @@ import { IoArrowBack, IoClose } from 'react-icons/io5';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
-const ACCENT = '#00C853';
+const ACCENT = '#8A05BE';
+const CTA_GREEN = '#00C853';
 
 type WizardStep = 'type' | 'template' | 'setup';
 
@@ -164,15 +165,25 @@ export default function ECardNewPage() {
               <IoArrowBack size={22} color={textPrimary} />
             </button>
 
-            {/* Step indicator */}
-            <div style={{ display: 'flex', gap: 6 }}>
-              {[0, 1, 2].map((i) => (
-                <div key={i} style={{
-                  width: i === stepIndex ? 24 : 8, height: 8, borderRadius: 4,
-                  background: i <= stepIndex ? ACCENT : (isDark ? 'rgba(255,255,255,0.15)' : '#D1D5DB'),
-                  transition: 'all 0.3s',
-                }} />
-              ))}
+            {/* Step indicator with label */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+              <span style={{
+                fontSize: 11,
+                fontWeight: 600,
+                color: isDark ? 'rgba(255,255,255,0.5)' : '#6B7280',
+                letterSpacing: 0.5,
+              }}>
+                {step === 'type' ? 'Step 1 of 3' : step === 'template' ? 'Step 2 of 3' : 'Step 3 of 3'}
+              </span>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {[0, 1, 2].map((i) => (
+                  <div key={i} style={{
+                    width: i === stepIndex ? 24 : 8, height: 8, borderRadius: 4,
+                    background: i <= stepIndex ? ACCENT : (isDark ? 'rgba(255,255,255,0.15)' : '#D1D5DB'),
+                    transition: 'all 0.3s',
+                  }} />
+                ))}
+              </div>
             </div>
 
             <button
@@ -216,15 +227,17 @@ export default function ECardNewPage() {
                     <button
                       onClick={handleContinueToSetup}
                       style={{
-                        width: '100%', maxWidth: 480, margin: '0 auto', display: 'block',
+                        width: '100%', maxWidth: 480, margin: '0 auto', display: 'flex',
+                        alignItems: 'center', justifyContent: 'center', gap: 8,
                         padding: '16px 24px', border: 'none', borderRadius: 14,
                         fontSize: 16, fontWeight: 700, cursor: 'pointer',
-                        background: `linear-gradient(135deg, ${ACCENT}, #00A843)`,
+                        background: `linear-gradient(135deg, ${CTA_GREEN}, #00A843)`,
                         color: '#fff',
                         boxShadow: '0 4px 20px rgba(0,200,83,0.35)',
                       }}
                     >
-                      Continue
+                      Continue to Setup
+                      <span style={{ fontSize: 18 }}>&#8250;</span>
                     </button>
                   </div>
                 )}

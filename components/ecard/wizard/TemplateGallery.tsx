@@ -8,7 +8,7 @@ import { TEMPLATES, Template } from '../../../config/eCardTemplates';
 import { IoLockClosed, IoArrowBack } from 'react-icons/io5';
 import { FullCardPreview } from './FullCardPreview';
 
-const ACCENT = '#00C853';
+const ACCENT = '#8A05BE';
 
 // Same category mapping as TemplatePicker
 const TEMPLATE_CATEGORIES: Record<string, string[]> = {

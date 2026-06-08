@@ -396,7 +396,7 @@ export default function CardStudioLayout() {
           )}
         </div>
 
-        {/* Right: QR, Share, Preview, Save */}
+        {/* Right: QR, Share, Preview, Publish/Save */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           {cardId && (
             <button
@@ -434,6 +434,7 @@ export default function CardStudioLayout() {
               <IoEye size={20} color="rgba(255,255,255,0.5)" />
             </button>
           )}
+          {/* Save button */}
           <button
             onClick={saveNow}
             disabled={isSaving || !isDirty}
@@ -452,6 +453,46 @@ export default function CardStudioLayout() {
           >
             {saveStatusText}
           </button>
+          {/* Publish button — prominent in header so users don't have to hunt for it */}
+          {cardId && !isPublished && (
+            <button
+              onClick={handlePublish}
+              disabled={publishing}
+              style={{
+                padding: '8px 16px',
+                borderRadius: 10,
+                border: 'none',
+                background: ACCENT,
+                color: '#FFFFFF',
+                fontSize: 14,
+                fontWeight: 700,
+                cursor: 'pointer',
+                opacity: publishing ? 0.5 : 1,
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+              }}
+            >
+              {publishing ? 'Publishing...' : 'Publish'}
+            </button>
+          )}
+          {cardId && isPublished && (
+            <div
+              style={{
+                padding: '8px 12px',
+                borderRadius: 10,
+                background: 'rgba(0,200,83,0.12)',
+                border: `1px solid ${ACCENT}44`,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+              }}
+            >
+              <IoCloudDoneOutline size={14} color={ACCENT} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: ACCENT }}>Live</span>
+            </div>
+          )}
         </div>
       </header>
 

@@ -8,8 +8,8 @@ import { IoArrowBack, IoCamera } from 'react-icons/io5';
 const ACCENT = '#00C853';
 
 const QUICK_COLORS = [
-  '#8A05BE', '#8A05BE', '#00C853', '#EF4444', '#F59E0B',
-  '#EC4899', '#14B8A6', '#1E0A3C', '#D4AF37', '#8A05BE',
+  '#8A05BE', '#00C2CB', '#00C853', '#EF4444', '#F59E0B',
+  '#EC4899', '#14B8A6', '#1E40AF', '#D4AF37', '#17013A',
 ];
 
 interface QuickSetupProps {
