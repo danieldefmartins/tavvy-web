@@ -6,11 +6,13 @@
  * Showcases all 13 eCard templates, endorsement system,
  * use cases, and drives signups.
  */
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserCards, CardData } from '../lib/ecard';
+import { getTemplateById } from '../config/eCardTemplates';
+import { FullCardPreview } from '../components/ecard/wizard/FullCardPreview';
 
 interface TemplateInfo {
   id: string;
@@ -57,9 +59,16 @@ export default function EcardLanding() {
   const [activeFilter, setActiveFilter] = useState<'all' | 'free' | 'pro'>('all');
   const [isVisible, setIsVisible] = useState<{ [key: string]: boolean }>({});
   const [hoveredTemplate, setHoveredTemplate] = useState<string | null>(null);
+  const [visibleCards, setVisibleCards] = useState<Set<string>>(new Set());
+  const cardRefs = useRef<Map<string, HTMLElement>>(new Map());
   const heroRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const [userCards, setUserCards] = useState<CardData[]>([]);
+
+  const setCardRef = useCallback((id: string, el: HTMLElement | null) => {
+    if (el) cardRefs.current.set(id, el);
+    else cardRefs.current.delete(id);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -87,6 +96,24 @@ export default function EcardLanding() {
 
     return () => observer.disconnect();
   }, []);
+
+  // Stagger animation for template cards
+  useEffect(() => {
+    const cardObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const id = entry.target.getAttribute('data-card-id');
+          if (id && entry.isIntersecting) {
+            setVisibleCards((prev) => new Set(prev).add(id));
+          }
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -5% 0px' }
+    );
+
+    cardRefs.current.forEach((el) => cardObserver.observe(el));
+    return () => cardObserver.disconnect();
+  }, [activeFilter]);
 
   return (
     <>
@@ -341,58 +368,69 @@ export default function EcardLanding() {
           </div>
 
           <div className="template-grid">
-            {filteredTemplates.map((template) => (
-              <div
-                key={template.id}
-                className="template-card"
-                onMouseEnter={() => setHoveredTemplate(template.id)}
-                onMouseLeave={() => setHoveredTemplate(null)}
-              >
-                <div className="template-phone">
-                  {/* Phone frame */}
-                  <div className="phone-notch" />
-                  <div className="template-preview">
-                    <img
-                      src={`/images/templates/${template.id}.png`}
-                      alt={template.name}
-                      loading="lazy"
-                    />
-                  </div>
-                  {template.isPremium && (
-                    <span className="pro-badge">PRO</span>
-                  )}
-                  <div className={`template-overlay ${hoveredTemplate === template.id ? 'show' : ''}`}>
-                    <a
-                      href={`https://tavvy.com/${template.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="overlay-btn"
-                    >
-                      Live Preview
-                    </a>
-                    <Link href="/app/ecard/create" className="overlay-btn overlay-btn-primary">
-                      Use Template
-                    </Link>
-                  </div>
-                </div>
-                <div className="template-info">
-                  <h3>{template.name}</h3>
-                  <p>{template.description}</p>
-                  {template.colors && template.colors.length > 0 && (
-                    <div className="color-scroll">
-                      {template.colors.map((color, i) => (
-                        <div
-                          key={i}
-                          className="color-swatch"
-                          title={color.name}
-                          style={{ background: `linear-gradient(135deg, ${color.c1}, ${color.c2})` }}
+            {filteredTemplates.map((template, idx) => {
+              const tmplConfig = getTemplateById(template.id);
+              const isCardVisible = visibleCards.has(template.id);
+              return (
+                <div
+                  key={template.id}
+                  className={`template-card ${isCardVisible ? 'card-visible' : ''}`}
+                  style={{ transitionDelay: `${(idx % 3) * 0.1}s` }}
+                  data-card-id={template.id}
+                  ref={(el) => setCardRef(template.id, el)}
+                  onMouseEnter={() => setHoveredTemplate(template.id)}
+                  onMouseLeave={() => setHoveredTemplate(null)}
+                >
+                  <div className="template-phone">
+                    {/* Phone frame */}
+                    <div className="phone-notch" />
+                    <div className="template-preview">
+                      {tmplConfig ? (
+                        <FullCardPreview tmpl={tmplConfig} />
+                      ) : (
+                        <img
+                          src={`/images/templates/${template.id}.png`}
+                          alt={template.name}
+                          loading="lazy"
                         />
-                      ))}
+                      )}
                     </div>
-                  )}
+                    {template.isPremium && (
+                      <span className="pro-badge">PRO</span>
+                    )}
+                    <div className={`template-overlay ${hoveredTemplate === template.id ? 'show' : ''}`}>
+                      <a
+                        href={`https://tavvy.com/${template.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="overlay-btn"
+                      >
+                        Live Preview
+                      </a>
+                      <Link href="/app/ecard/create" className="overlay-btn overlay-btn-primary">
+                        Use Template
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="template-info">
+                    <h3>{template.name}</h3>
+                    <p>{template.description}</p>
+                    {template.colors && template.colors.length > 0 && (
+                      <div className="color-scroll">
+                        {template.colors.map((color, i) => (
+                          <div
+                            key={i}
+                            className="color-swatch"
+                            title={color.name}
+                            style={{ background: `linear-gradient(135deg, ${color.c1}, ${color.c2})` }}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 
@@ -1055,10 +1093,17 @@ export default function EcardLanding() {
           display: flex;
           flex-direction: column;
           align-items: center;
-          transition: all 0.3s;
+          opacity: 0;
+          transform: translateY(50px) scale(0.95);
+          transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .template-card:hover {
-          transform: translateY(-6px);
+        .template-card.card-visible {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+        .template-card.card-visible:hover {
+          transform: translateY(-8px) scale(1.02);
         }
         .template-phone {
           position: relative;
