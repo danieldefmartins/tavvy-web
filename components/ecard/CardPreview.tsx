@@ -284,23 +284,19 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
   }
 
   // ===== CHURCH / FAITH PAGE TEMPLATE =====
+  // Inspired by TDM Church Linktree — dark bg, white filled buttons, clean sections
   if (template === 'church') {
     const tagline = card.title;
     const scripture = card.bio;
     const location = (card as any).city || card.company;
     const bgStyle = bannerImageUrl
-      ? `linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.75)), url(${bannerImageUrl}) center/cover`
+      ? `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url(${bannerImageUrl}) center/cover`
       : `linear-gradient(160deg, ${c1} 0%, ${c2} 100%)`;
 
-    // Accent color: use c1 if dark enough, otherwise use a gold-ish default
     const accentColor = hexLuminance(c1) < 0.3 ? c2 : c1;
-    // Button style: semi-transparent white for dark backgrounds
-    const linkBtnBg = 'rgba(255,255,255,0.12)';
-    const linkBtnBorder = 'rgba(255,255,255,0.2)';
 
     const renderChurchLinks = () => {
       if (!links.length) return null;
-      // Separate "give" link if present
       const giveLink = links.find(l =>
         l.title?.toLowerCase().includes('give') ||
         l.title?.toLowerCase().includes('tithe') ||
@@ -311,32 +307,32 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
 
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 20 }}>
-          {/* Give button — prominent CTA */}
+          {/* Give button — prominent gold CTA */}
           {giveLink && (
             <div style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              gap: 8, padding: '14px 20px',
+              gap: 8, padding: '15px 20px',
               background: accentColor,
-              borderRadius: 50, cursor: 'pointer',
-              fontWeight: 700, fontSize: 15, color: '#fff',
-              letterSpacing: 0.5,
-              boxShadow: `0 4px 20px ${accentColor}55`,
+              borderRadius: 12, cursor: 'pointer',
+              boxShadow: `0 4px 16px ${accentColor}44`,
             }}>
-              <span>🙏</span>
-              <span>{giveLink.title || 'Give'}</span>
+              <span style={{ fontWeight: 700, fontSize: 15, color: '#fff', letterSpacing: 0.3 }}>
+                {giveLink.title || 'Give'}
+              </span>
             </div>
           )}
-          {/* All other links */}
+          {/* White filled buttons — Linktree style */}
           {otherLinks.map((link) => (
             <div key={link.id} style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              gap: 10, padding: '13px 20px',
-              background: linkBtnBg,
-              border: `1px solid ${linkBtnBorder}`,
-              borderRadius: 50, cursor: 'pointer',
-              fontWeight: 500, fontSize: 14, color: '#fff',
+              padding: '14px 20px',
+              background: '#FFFFFF',
+              borderRadius: 12, cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
             }}>
-              <span style={{ flex: 1, textAlign: 'center' }}>{link.title || link.url}</span>
+              <span style={{ fontWeight: 600, fontSize: 14, color: '#1a1a1a', letterSpacing: 0.2 }}>
+                {link.title || link.url}
+              </span>
             </div>
           ))}
         </div>
@@ -356,15 +352,15 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
       const combined = [...featuredSocials.map(s => ({ platform: s.platform.toLowerCase(), url: s.url || '' })), ...socials.filter(s => !featuredPlatforms.has(s.platform))];
       if (!combined.length) return null;
       return (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 14, marginTop: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 24 }}>
           {combined.slice(0, 6).map((social, i) => (
             <div key={i} style={{
               width: 42, height: 42, borderRadius: '50%',
-              background: 'rgba(255,255,255,0.12)',
-              border: '1px solid rgba(255,255,255,0.2)',
+              background: '#FFFFFF',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="rgba(255,255,255,0.9)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={SOCIAL_COLORS[social.platform] || '#333'}>
                 <path d={SOCIAL_ICONS[social.platform] || ''} />
               </svg>
             </div>
@@ -376,26 +372,26 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
     return (
       <div style={{
         background: bgStyle, borderRadius: 16, overflow: 'hidden',
-        minHeight: 400, padding: '32px 24px 36px',
+        minHeight: 400, padding: '36px 24px 40px',
         display: 'flex', flexDirection: 'column', alignItems: 'center',
       }}>
         {/* Church logo / profile photo */}
         {profilePhotoUrl ? (
           <div style={{
-            width: 88, height: 88, borderRadius: '50%', overflow: 'hidden',
-            border: '3px solid rgba(255,255,255,0.35)',
-            marginBottom: 14, flexShrink: 0,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+            width: 96, height: 96, borderRadius: '50%', overflow: 'hidden',
+            border: '3px solid rgba(255,255,255,0.4)',
+            marginBottom: 16, flexShrink: 0,
+            boxShadow: '0 6px 24px rgba(0,0,0,0.4)',
           }}>
             <img src={profilePhotoUrl} alt={card.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
         ) : (
           <div style={{
-            width: 88, height: 88, borderRadius: '50%',
-            background: 'rgba(255,255,255,0.12)',
-            border: '3px solid rgba(255,255,255,0.3)',
+            width: 96, height: 96, borderRadius: '50%',
+            background: 'rgba(255,255,255,0.1)',
+            border: '3px solid rgba(255,255,255,0.25)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            marginBottom: 14, fontSize: 32,
+            marginBottom: 16, fontSize: 36,
           }}>
             ⛪
           </div>
@@ -405,6 +401,7 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
         <h2 style={{
           color: '#fff', fontSize: 22, fontWeight: 700,
           margin: '0 0 6px', textAlign: 'center', letterSpacing: 0.3,
+          fontFamily: "'Georgia', 'Times New Roman', serif",
         }}>
           {card.full_name}
         </h2>
@@ -412,8 +409,8 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
         {/* Tagline */}
         {tagline && (
           <p style={{
-            color: 'rgba(255,255,255,0.75)', fontSize: 13,
-            margin: '0 0 4px', textAlign: 'center', fontStyle: 'italic',
+            color: 'rgba(255,255,255,0.85)', fontSize: 13, fontWeight: 500,
+            margin: '0 0 4px', textAlign: 'center',
           }}>
             {tagline}
           </p>
@@ -422,8 +419,8 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
         {/* Location */}
         {location && (
           <p style={{
-            color: 'rgba(255,255,255,0.55)', fontSize: 11,
-            margin: '0 0 6px', textAlign: 'center',
+            color: 'rgba(255,255,255,0.5)', fontSize: 11,
+            margin: '0 0 8px', textAlign: 'center',
           }}>
             📍 {location}
           </p>
@@ -431,15 +428,18 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
 
         {/* Scripture / bio */}
         {scripture && (
-          <p style={{
-            color: 'rgba(255,255,255,0.65)', fontSize: 12,
-            margin: '8px 0 0', textAlign: 'center', lineHeight: 1.6,
-            maxWidth: 280,
-            borderTop: '1px solid rgba(255,255,255,0.1)',
-            paddingTop: 8,
+          <div style={{
+            marginTop: 8, padding: '10px 18px', borderRadius: 20,
+            background: 'rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.12)',
           }}>
-            &ldquo;{scripture}&rdquo;
-          </p>
+            <p style={{
+              color: 'rgba(255,255,255,0.75)', fontSize: 11,
+              margin: 0, textAlign: 'center', fontStyle: 'italic', lineHeight: 1.5,
+            }}>
+              &ldquo;{scripture}&rdquo;
+            </p>
+          </div>
         )}
 
         {/* Links */}
@@ -450,10 +450,10 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
         {/* Social icons */}
         {renderChurchSocials()}
 
-        {/* Footer */}
+        {/* Tavvy watermark */}
         <p style={{
-          color: 'rgba(255,255,255,0.25)', fontSize: 10,
-          marginTop: 24, letterSpacing: 1, textTransform: 'uppercase',
+          color: 'rgba(255,255,255,0.2)', fontSize: 10,
+          marginTop: 28, letterSpacing: 1.5, textTransform: 'uppercase', fontWeight: 600,
         }}>
           tavvy
         </p>
@@ -504,25 +504,34 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
       <div style={{ background: '#f5f5f5', borderRadius: 16, overflow: 'hidden' }}>
         {/* Header with gradient or banner */}
         <div style={{
-          position: 'relative', padding: '40px 24px 60px',
+          position: 'relative', padding: '28px 24px 50px',
           background: bannerImageUrl
             ? `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(${bannerImageUrl}) center/cover`
             : `linear-gradient(135deg, ${c1}, ${c2})`,
         }}>
+          {/* Name + Title on left */}
+          <div style={{ paddingRight: profilePhotoUrl ? 100 : 0 }}>
+            <h2 style={{ color: '#fff', fontSize: 22, fontWeight: 700, margin: 0 }}>{card.full_name}</h2>
+            {card.title && <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 13, margin: '4px 0 0' }}>{card.title}</p>}
+            {card.company && <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12, margin: '2px 0 0' }}>{card.company}</p>}
+          </div>
+          {/* Profile photo on right, overlapping */}
           {profilePhotoUrl && (
-            <div style={{ position: 'absolute', bottom: -30, right: 24 }}>
-              {renderProfilePhoto(60)}
+            <div style={{ position: 'absolute', right: 24, bottom: -35 }}>
+              <div style={{
+                width: 90, height: 90, borderRadius: '50%', overflow: 'hidden',
+                border: '4px solid #fff', boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+              }}>
+                <img src={profilePhotoUrl} alt={card.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
             </div>
           )}
-          <h2 style={{ color: '#fff', fontSize: 22, fontWeight: 700, margin: 0 }}>{card.full_name}</h2>
-          {card.title && <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: 13, margin: '4px 0 0' }}>{card.title}</p>}
-          {card.company && <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: 12, margin: '2px 0 0' }}>{card.company}</p>}
         </div>
 
         {/* Body */}
-        <div style={{ padding: '40px 24px 24px', background: '#fff' }}>
+        <div style={{ padding: `${profilePhotoUrl ? '44px' : '20px'} 24px 24px`, background: '#fff' }}>
           {card.bio && <p style={{ fontSize: 13, color: '#4B5563', lineHeight: 1.5, margin: '0 0 16px' }}>{card.bio}</p>}
-          
+
           {showContact && (
             <div>
               {card.phone && renderContactRow('📞', card.phone, 'Phone')}
@@ -653,7 +662,287 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
     );
   }
 
-  // ===== DEFAULT / CLASSIC / PRO-REALTOR / PREMIUM-STATIC =====
+  // ===== PREMIUM HERO (premium-static) =====
+  if (template === 'premium-static') {
+    return (
+      <div style={{ borderRadius: 16, overflow: 'hidden', background: c1 }}>
+        {/* Full-width hero photo with gradient overlay */}
+        <div style={{
+          height: 260, position: 'relative', overflow: 'hidden',
+        }}>
+          {(bannerImageUrl || profilePhotoUrl) ? (
+            <img src={bannerImageUrl || profilePhotoUrl} alt={card.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${c1}, ${c2})` }} />
+          )}
+          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(to bottom, transparent 20%, ${c1} 100%)` }} />
+          {/* Name overlay at bottom */}
+          <div style={{ position: 'absolute', bottom: 16, left: 20, right: 20, zIndex: 1 }}>
+            <h2 style={{ fontSize: 26, fontWeight: 800, color: '#fff', margin: 0, letterSpacing: -0.5, textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>{card.full_name}</h2>
+            {card.title && <p style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.85)', margin: '2px 0 0' }}>{card.title}</p>}
+          </div>
+        </div>
+
+        {/* Content area */}
+        <div style={{ padding: '20px', background: c1 }}>
+          {/* About card */}
+          {card.bio && (
+            <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 14, padding: '16px 18px', marginBottom: 16, borderLeft: `3px solid ${c2}` }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: c2, textTransform: 'uppercase' as const, letterSpacing: 1, marginBottom: 6 }}>About</div>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6, margin: 0 }}>{card.bio}</p>
+            </div>
+          )}
+
+          {/* Contact rows */}
+          {showContact && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+              {card.phone && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: 14 }}>📞</span>
+                  </div>
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>{card.phone}</span>
+                </div>
+              )}
+              {card.email && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: 14 }}>✉️</span>
+                  </div>
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>{card.email}</span>
+                </div>
+              )}
+              {card.website && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: 14 }}>🌐</span>
+                  </div>
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>{card.website}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {renderFeaturedSocials()}
+          {renderSocialLinks()}
+          {renderLinks()}
+        </div>
+      </div>
+    );
+  }
+
+  // ===== BOLD CARD (pro-creative) — Wave divider, bold colors =====
+  if (template === 'pro-creative') {
+    return (
+      <div style={{ borderRadius: 16, overflow: 'hidden' }}>
+        {/* Colored top with photo */}
+        <div style={{
+          position: 'relative', padding: '28px 24px 60px',
+          background: bannerImageUrl
+            ? `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url(${bannerImageUrl}) center/cover`
+            : `linear-gradient(135deg, ${c1}, ${c2})`,
+          display: 'flex', justifyContent: 'center',
+        }}>
+          {profilePhotoUrl && (
+            <div style={{
+              width: 130, height: 130, borderRadius: '50%', overflow: 'hidden',
+              border: '4px solid rgba(255,255,255,0.3)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.25)',
+            }}>
+              <img src={profilePhotoUrl} alt={card.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+          )}
+        </div>
+        {/* White bottom */}
+        <div style={{ background: '#fff', padding: '20px 28px 28px' }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: '#1a1a1a', margin: '0 0 4px' }}>{card.full_name}</h2>
+          {card.title && <p style={{ fontSize: 14, color: '#555', fontWeight: 500, margin: '0 0 2px' }}>{card.title}</p>}
+          {card.company && <p style={{ fontSize: 13, color: c1, fontStyle: 'italic', margin: '0 0 8px' }}>{card.company}</p>}
+          {card.bio && <p style={{ fontSize: 12, color: '#777', lineHeight: 1.5, margin: '0 0 16px' }}>{card.bio}</p>}
+
+          {showContact && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 16 }}>
+              {card.phone && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#4CAF50', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: 14 }}>📞</span>
+                  </div>
+                  <span style={{ fontSize: 13, color: '#444' }}>{card.phone}</span>
+                </div>
+              )}
+              {card.email && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#FF6B35', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: 14 }}>✉️</span>
+                  </div>
+                  <span style={{ fontSize: 13, color: '#444' }}>{card.email}</span>
+                </div>
+              )}
+              {card.website && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: c1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: 14 }}>🌐</span>
+                  </div>
+                  <span style={{ fontSize: 13, color: '#444' }}>{card.website}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {renderFeaturedSocials()}
+          {renderSocialLinks()}
+          {renderLinks()}
+        </div>
+      </div>
+    );
+  }
+
+  // ===== CORPORATE CARD (pro-corporate) — Structured with profile photo =====
+  if (template === 'pro-corporate') {
+    return (
+      <div style={{ borderRadius: 16, overflow: 'hidden' }}>
+        {/* Gradient top with decorative elements and photo */}
+        <div style={{
+          position: 'relative', padding: '24px 24px 20px',
+          background: bannerImageUrl
+            ? `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(${bannerImageUrl}) center/cover`
+            : `linear-gradient(135deg, ${c1}, ${c2})`,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden',
+        }}>
+          {/* Decorative circles */}
+          <div style={{ position: 'absolute', top: -20, left: -30, width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }} />
+          <div style={{ position: 'absolute', top: 10, right: -10, width: 60, height: 60, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }} />
+          {/* Profile photo */}
+          {profilePhotoUrl ? (
+            <div style={{
+              width: 100, height: 100, borderRadius: '50%', overflow: 'hidden',
+              border: '4px solid rgba(255,255,255,0.9)',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+              marginTop: 16, position: 'relative', zIndex: 1,
+            }}>
+              <img src={profilePhotoUrl} alt={card.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+          ) : (
+            <div style={{
+              width: 100, height: 100, borderRadius: '50%',
+              background: 'rgba(255,255,255,0.15)', border: '4px solid rgba(255,255,255,0.3)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              marginTop: 16, position: 'relative', zIndex: 1,
+              fontSize: 36, color: 'rgba(255,255,255,0.5)',
+            }}>
+              {card.full_name?.charAt(0) || '?'}
+            </div>
+          )}
+        </div>
+
+        {/* Name + info */}
+        <div style={{ background: '#fff', padding: '16px 24px 8px', textAlign: 'center' }}>
+          <h2 style={{ fontSize: 24, fontWeight: 700, color: '#1a1a1a', margin: '0 0 4px' }}>{card.full_name}</h2>
+          {card.title && <p style={{ fontSize: 14, color: '#777', margin: '0 0 2px' }}>{card.title}</p>}
+          {card.company && <p style={{ fontSize: 12, color: '#999', margin: 0 }}>{card.company}</p>}
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: '12px 24px 24px', background: '#fff' }}>
+          {card.bio && <p style={{ fontSize: 13, color: '#4B5563', lineHeight: 1.5, margin: '0 0 16px', textAlign: 'center' }}>{card.bio}</p>}
+
+          {showContact && (
+            <div>
+              {card.phone && renderContactRow('📞', card.phone, 'Phone')}
+              {card.email && renderContactRow('✉️', card.email, 'Email')}
+              {card.website && renderContactRow('🌐', card.website, 'Website')}
+            </div>
+          )}
+
+          {renderFeaturedSocials()}
+          {renderSocialLinks()}
+          {renderLinks()}
+        </div>
+      </div>
+    );
+  }
+
+  // ===== LINK PAGE (basic) — Linktree-style with photo & background =====
+  if (template === 'basic') {
+    const hasGradientBg = c1 !== '#FFFFFF';
+    const txtColor = hasGradientBg ? '#FFFFFF' : '#2d3436';
+    const subColor = hasGradientBg ? 'rgba(255,255,255,0.8)' : '#636e72';
+    const btnBg = hasGradientBg ? 'rgba(255,255,255,0.15)' : '#2d3436';
+    const btnBorder = hasGradientBg ? '1px solid rgba(255,255,255,0.2)' : 'none';
+    const btnText = hasGradientBg ? '#FFFFFF' : '#FFFFFF';
+
+    return (
+      <div style={{
+        borderRadius: 16, overflow: 'hidden',
+        background: bannerImageUrl
+          ? `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6)), url(${bannerImageUrl}) center/cover`
+          : hasGradientBg
+            ? `linear-gradient(165deg, ${c1} 0%, ${c2} 50%, #0a0f1e 100%)`
+            : '#FFFFFF',
+        padding: '40px 24px 36px',
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+      }}>
+        {/* Profile photo */}
+        {profilePhotoUrl && (
+          <div style={{
+            width: 100, height: 100, borderRadius: '50%', overflow: 'hidden',
+            border: hasGradientBg ? '3px solid rgba(255,255,255,0.3)' : '3px solid rgba(0,0,0,0.06)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.15)', marginBottom: 16,
+          }}>
+            <img src={profilePhotoUrl} alt={card.full_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+        )}
+
+        <h2 style={{ color: txtColor, fontSize: 20, fontWeight: 700, margin: '0 0 4px', textAlign: 'center' }}>{card.full_name}</h2>
+        {card.title && <p style={{ color: subColor, fontSize: 13, margin: '0 0 4px', textAlign: 'center' }}>{card.title}</p>}
+        {card.bio && <p style={{ color: subColor, fontSize: 12, margin: '0 0 16px', textAlign: 'center', lineHeight: 1.5, maxWidth: 280 }}>{card.bio}</p>}
+
+        {/* Link buttons */}
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {links.map((link) => (
+            <div key={link.id} style={{
+              width: '100%', padding: '14px 16px', borderRadius: 12,
+              background: btnBg, border: btnBorder,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer',
+            }}>
+              <span style={{ fontSize: 14, fontWeight: 500, color: btnText }}>{link.title || link.url}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Social icons */}
+        {showSocial && (
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 20 }}>
+            {[
+              socialInstagram && 'instagram',
+              socialFacebook && 'facebook',
+              socialTwitter && 'twitter',
+              socialTiktok && 'tiktok',
+              socialYoutube && 'youtube',
+              socialLinkedin && 'linkedin',
+              socialWhatsapp && 'whatsapp',
+            ].filter(Boolean).map((platform) => (
+              <div key={platform} style={{
+                width: 38, height: 38, borderRadius: '50%',
+                background: hasGradientBg ? 'rgba(255,255,255,0.15)' : '#2d3436',
+                border: hasGradientBg ? '1px solid rgba(255,255,255,0.2)' : 'none',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill={hasGradientBg ? '#fff' : '#fff'}>
+                  <path d={SOCIAL_ICONS[platform as string] || ''} />
+                </svg>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {renderFeaturedSocials()}
+      </div>
+    );
+  }
+
+  // ===== DEFAULT / CLASSIC / PRO-REALTOR =====
   return (
     <div style={{ borderRadius: 16, overflow: 'hidden' }}>
       {/* Header with gradient */}

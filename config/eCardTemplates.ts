@@ -435,14 +435,14 @@ export const TEMPLATES: Template[] = [
     features: ['wave-divider', 'logo-badge', 'contact-rows', 'colored-icons', 'bold-colors'],
     layout: 'pro-creative',
     colorSchemes: [
-      // Purple & Orange
-      { id: 'purple-orange', name: 'Purple & Orange', primary: '#6b21a8', secondary: '#7c3aed', accent: '#f97316', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#6b21a8', cardBg: '#FFFFFF', border: '#f97316', isFree: false },
-      // Blue & Teal
-      { id: 'blue-teal', name: 'Blue & Teal', primary: '#1e40af', secondary: '#3b82f6', accent: '#14b8a6', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#1e40af', cardBg: '#FFFFFF', border: '#14b8a6' },
-      // Red & Gold
-      { id: 'red-gold', name: 'Red & Gold', primary: '#991b1b', secondary: '#dc2626', accent: '#d4af37', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#991b1b', cardBg: '#FFFFFF', border: '#d4af37' },
+      // Blue & Teal (default — clean, professional)
+      { id: 'blue-teal', name: 'Blue & Teal', primary: '#1e40af', secondary: '#3b82f6', accent: '#14b8a6', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#1e40af', cardBg: '#FFFFFF', border: '#14b8a6', isFree: false },
       // Dark & Neon
       { id: 'dark-neon', name: 'Dark & Neon', primary: '#0a0a0a', secondary: '#1a1a1a', accent: '#22d3ee', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#0a0a0a', cardBg: '#1a1a1a', border: '#22d3ee' },
+      // Red & Gold
+      { id: 'red-gold', name: 'Red & Gold', primary: '#991b1b', secondary: '#dc2626', accent: '#d4af37', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#991b1b', cardBg: '#FFFFFF', border: '#d4af37' },
+      // Navy & Silver
+      { id: 'navy-silver', name: 'Navy & Silver', primary: '#0f172a', secondary: '#1e293b', accent: '#94a3b8', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#0f172a', cardBg: '#FFFFFF', border: '#94a3b8' },
       // Green & White
       { id: 'green-white', name: 'Green & White', primary: '#166534', secondary: '#22c55e', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#166534', cardBg: '#FFFFFF', border: '#22c55e' },
     ],
