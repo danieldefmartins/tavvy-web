@@ -6,7 +6,7 @@
  * Premium showcase of ALL eCard templates in every color scheme variation.
  * Horizontal scroll rows with phone frames and scroll-snap.
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { TEMPLATES, Template, ColorScheme } from '../../config/eCardTemplates';
@@ -17,6 +17,63 @@ type FilterType = 'all' | 'free' | 'pro';
 export default function TemplatesHub() {
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
+  const [visibleCards, setVisibleCards] = useState<Set<string>>(new Set());
+  const [currentTemplate, setCurrentTemplate] = useState<string>('');
+  const sectionRefs = useRef<Map<string, HTMLElement>>(new Map());
+  const cardRefs = useRef<Map<string, HTMLElement>>(new Map());
+
+  // Intersection Observer for section reveal animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const id = entry.target.getAttribute('data-section-id');
+          if (!id) return;
+          if (entry.isIntersecting) {
+            setVisibleSections((prev) => new Set(prev).add(id));
+            // Track which template is currently in view for the progress indicator
+            if (entry.intersectionRatio > 0.3) {
+              setCurrentTemplate(id);
+            }
+          }
+        });
+      },
+      { threshold: [0.1, 0.3], rootMargin: '0px 0px -10% 0px' }
+    );
+
+    sectionRefs.current.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [activeFilter]);
+
+  // Intersection Observer for individual card stagger animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const id = entry.target.getAttribute('data-card-id');
+          if (!id) return;
+          if (entry.isIntersecting) {
+            setVisibleCards((prev) => new Set(prev).add(id));
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -5% 0px' }
+    );
+
+    cardRefs.current.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [activeFilter]);
+
+  const setSectionRef = useCallback((id: string, el: HTMLElement | null) => {
+    if (el) sectionRefs.current.set(id, el);
+    else sectionRefs.current.delete(id);
+  }, []);
+
+  const setCardRef = useCallback((id: string, el: HTMLElement | null) => {
+    if (el) cardRefs.current.set(id, el);
+    else cardRefs.current.delete(id);
+  }, []);
 
   const filteredTemplates = useMemo(() => {
     if (activeFilter === 'free') return TEMPLATES.filter((t) => !t.isPremium);
@@ -102,56 +159,86 @@ export default function TemplatesHub() {
         </button>
       </div>
 
+      {/* ---- Floating Progress Indicator ---- */}
+      {currentTemplate && (
+        <div className="scroll-progress">
+          <div className="progress-inner">
+            <span className="progress-label">
+              {TEMPLATES.find((t) => t.id === currentTemplate)?.name || ''}
+            </span>
+            <div className="progress-dots">
+              {filteredTemplates.map((t, i) => (
+                <div key={t.id} className={`progress-dot ${t.id === currentTemplate ? 'active' : ''}`} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ---- Template Rows ---- */}
       <div className="template-rows">
-        {filteredTemplates.map((template) => (
-          <section key={template.id} className="template-section">
-            <div className="section-head">
-              <div className="section-title-row">
-                <h2 className="section-name">{template.name}</h2>
-                {template.isPremium && <span className="pro-tag">PRO</span>}
+        {filteredTemplates.map((template, sectionIdx) => {
+          const isVisible = visibleSections.has(template.id);
+          return (
+            <section
+              key={template.id}
+              className={`template-section ${isVisible ? 'section-visible' : ''}`}
+              data-section-id={template.id}
+              ref={(el) => setSectionRef(template.id, el)}
+            >
+              <div className="section-head" style={{ transitionDelay: '0.1s' }}>
+                <div className="section-number">{String(sectionIdx + 1).padStart(2, '0')}</div>
+                <div className="section-title-row">
+                  <h2 className="section-name">{template.name}</h2>
+                  {template.isPremium && <span className="pro-tag">PRO</span>}
+                </div>
+                <p className="section-desc">{template.description}</p>
+                <span className="scheme-count">{template.colorSchemes.length} color schemes</span>
+                <div className="section-line" />
               </div>
-              <p className="section-desc">{template.description}</p>
-              <span className="scheme-count">{template.colorSchemes.length} color schemes</span>
-            </div>
 
-            <div className="scroll-row">
-              {template.colorSchemes.map((scheme) => {
-                const cardKey = `${template.id}-${scheme.id}`;
-                const isHovered = hoveredCard === cardKey;
-                return (
-                  <div
-                    key={cardKey}
-                    className="card-slot"
-                    onMouseEnter={() => setHoveredCard(cardKey)}
-                    onMouseLeave={() => setHoveredCard(null)}
-                  >
-                    <div className="phone-frame">
-                      <div className="phone-notch" />
-                      <div className="phone-screen">
-                        <FullCardPreview tmpl={withColorScheme(template, scheme)} />
+              <div className="scroll-row">
+                {template.colorSchemes.map((scheme, cardIdx) => {
+                  const cardKey = `${template.id}-${scheme.id}`;
+                  const isHovered = hoveredCard === cardKey;
+                  const isCardVisible = visibleCards.has(cardKey);
+                  return (
+                    <div
+                      key={cardKey}
+                      className={`card-slot ${isCardVisible ? 'card-visible' : ''}`}
+                      style={{ transitionDelay: `${cardIdx * 0.08}s` }}
+                      data-card-id={cardKey}
+                      ref={(el) => setCardRef(cardKey, el)}
+                      onMouseEnter={() => setHoveredCard(cardKey)}
+                      onMouseLeave={() => setHoveredCard(null)}
+                    >
+                      <div className="phone-frame">
+                        <div className="phone-notch" />
+                        <div className="phone-screen">
+                          <FullCardPreview tmpl={withColorScheme(template, scheme)} />
+                        </div>
+                        {/* Hover overlay */}
+                        <div className={`card-overlay ${isHovered ? 'visible' : ''}`}>
+                          <Link href="/app/ecard/create" className="overlay-cta">
+                            Use This Template
+                          </Link>
+                        </div>
                       </div>
-                      {/* Hover overlay */}
-                      <div className={`card-overlay ${isHovered ? 'visible' : ''}`}>
-                        <Link href="/app/ecard/create" className="overlay-cta">
-                          Use This Template
-                        </Link>
+                      <div className="card-label">
+                        <div
+                          className="swatch"
+                          style={{ background: scheme.primary }}
+                        />
+                        <span className="scheme-name">{scheme.name}</span>
+                        {scheme.isFree && <span className="free-chip">Free</span>}
                       </div>
                     </div>
-                    <div className="card-label">
-                      <div
-                        className="swatch"
-                        style={{ background: scheme.primary }}
-                      />
-                      <span className="scheme-name">{scheme.name}</span>
-                      {scheme.isFree && <span className="free-chip">Free</span>}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        ))}
+                  );
+                })}
+              </div>
+            </section>
+          );
+        })}
       </div>
 
       {/* ---- Bottom CTA ---- */}
@@ -351,16 +438,90 @@ export default function TemplatesHub() {
           color: #fff;
         }
 
+        /* ===== FLOATING PROGRESS INDICATOR ===== */
+        .scroll-progress {
+          position: fixed;
+          bottom: 28px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 95;
+          pointer-events: none;
+          animation: progressFadeIn 0.6s ease;
+        }
+        @keyframes progressFadeIn {
+          from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+          to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        .progress-inner {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          padding: 10px 20px;
+          background: rgba(20, 20, 30, 0.85);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 100px;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        .progress-label {
+          font-size: 12px;
+          font-weight: 600;
+          color: rgba(255,255,255,0.8);
+          letter-spacing: 0.3px;
+          white-space: nowrap;
+        }
+        .progress-dots {
+          display: flex;
+          gap: 4px;
+        }
+        .progress-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: rgba(255,255,255,0.15);
+          transition: all 0.3s ease;
+        }
+        .progress-dot.active {
+          background: #8A05BE;
+          width: 18px;
+          border-radius: 3px;
+          box-shadow: 0 0 8px rgba(138,5,190,0.5);
+        }
+
         /* ===== TEMPLATE ROWS ===== */
         .template-rows {
           max-width: 100%;
           padding: 40px 0 60px;
         }
         .template-section {
-          margin-bottom: 64px;
+          margin-bottom: 80px;
+          opacity: 0;
+          transform: translateY(60px);
+          transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .template-section.section-visible {
+          opacity: 1;
+          transform: translateY(0);
         }
         .section-head {
           padding: 0 48px 20px;
+          position: relative;
+        }
+        .section-number {
+          font-size: 48px;
+          font-weight: 900;
+          color: rgba(255,255,255,0.04);
+          letter-spacing: -2px;
+          line-height: 1;
+          margin-bottom: -8px;
+          font-family: 'Inter', monospace;
+        }
+        .section-visible .section-number {
+          animation: numberSlide 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes numberSlide {
+          from { opacity: 0; transform: translateX(-20px); }
+          to { opacity: 1; transform: translateX(0); }
         }
         .section-title-row {
           display: flex;
@@ -395,6 +556,17 @@ export default function TemplatesHub() {
           color: rgba(255,255,255,0.25);
           font-weight: 500;
         }
+        .section-line {
+          width: 0;
+          height: 2px;
+          background: linear-gradient(90deg, #8A05BE, #00C2CB);
+          margin-top: 14px;
+          border-radius: 2px;
+          transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+        }
+        .section-visible .section-line {
+          width: 80px;
+        }
 
         /* ===== SCROLL ROW ===== */
         .scroll-row {
@@ -427,10 +599,17 @@ export default function TemplatesHub() {
           flex-shrink: 0;
           width: 280px;
           scroll-snap-align: start;
-          transition: transform 0.3s ease;
+          opacity: 0;
+          transform: translateY(40px) scale(0.95);
+          transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+                      transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .card-slot:hover {
-          transform: translateY(-6px);
+        .card-slot.card-visible {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+        .card-slot.card-visible:hover {
+          transform: translateY(-8px) scale(1.02);
         }
 
         /* ===== PHONE FRAME ===== */
@@ -651,6 +830,9 @@ export default function TemplatesHub() {
           .section-name {
             font-size: 22px;
           }
+          .section-number {
+            font-size: 36px;
+          }
           .scroll-row {
             padding: 8px 20px 16px;
             gap: 16px;
@@ -682,6 +864,15 @@ export default function TemplatesHub() {
             flex-direction: column;
             gap: 16px;
             text-align: center;
+          }
+          .scroll-progress {
+            bottom: 16px;
+          }
+          .progress-inner {
+            padding: 8px 14px;
+          }
+          .progress-label {
+            font-size: 11px;
           }
         }
         @media (max-width: 480px) {
