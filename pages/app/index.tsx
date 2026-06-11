@@ -34,10 +34,11 @@ import {
   FiSearch, FiX, FiMapPin, FiUser, FiChevronRight, FiMenu,
   FiCoffee, FiHome as FiHotel, FiShoppingBag, FiDroplet
 } from 'react-icons/fi';
-import { 
+import {
   IoRestaurant, IoCafe, IoBeer, IoCarSport, IoBed,
   IoBonfire, IoStorefront, IoSparkles, IoChevronForward,
-  IoLocationSharp, IoSearch, IoHeart
+  IoLocationSharp, IoSearch, IoHeart,
+  IoRocket, IoPlanet, IoConstruct, IoBusiness, IoEarth, IoRadio
 } from 'react-icons/io5';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -85,15 +86,29 @@ const exploreItems = [
 
 // Featured carousel — showcases the BREADTH of Tavvy (rides + every other feature)
 // Rides leads, but the rotation makes clear Tavvy is for everyone, not just thrill-seekers.
+const ASSET_BASE = 'https://scasgwrikoqdwlwlwcff.supabase.co/storage/v1/object/public/tavvy-assets/features';
 const featureSlides = [
-  { id: 'rides', tag: 'New', title: 'Rides', subtitle: 'Rate every ride — thrill, wait, theming', icon: '🎢', gradient: 'linear-gradient(135deg, #8A05BE 0%, #EC4899 100%)', route: '/app/rides' },
-  { id: 'restaurants', tag: 'Popular', title: 'Restaurants', subtitle: 'Real signals, not star ratings', icon: '🍽️', gradient: 'linear-gradient(135deg, #EF4444 0%, #F59E0B 100%)', route: '/app/map?category=Restaurants' },
-  { id: 'universes', tag: 'Explore', title: 'Universes', subtitle: 'Theme parks, airports & themed worlds', icon: '🌌', gradient: 'linear-gradient(135deg, #6366F1 0%, #8A05BE 100%)', route: '/app/universes' },
-  { id: 'hotels', tag: 'Stay', title: 'Hotels', subtitle: 'Find where to stay, by the signals that matter', icon: '🏨', gradient: 'linear-gradient(135deg, #0EA5E9 0%, #6366F1 100%)', route: '/app/map?category=Hotels' },
-  { id: 'pros', tag: 'Hire', title: 'Pros', subtitle: 'Plumbers, electricians & trusted contractors', icon: '🛠️', gradient: 'linear-gradient(135deg, #00C2CB 0%, #6366F1 100%)', route: '/app/pros' },
-  { id: 'cities', tag: 'Discover', title: 'Cities', subtitle: 'Compare livability, food & culture', icon: '🌆', gradient: 'linear-gradient(135deg, #8A05BE 0%, #0EA5E9 100%)', route: '/app/cities' },
-  { id: 'atlas', tag: 'Travel', title: 'Atlas', subtitle: 'Bucket-list destinations worldwide', icon: '✈️', gradient: 'linear-gradient(135deg, #F59E0B 0%, #EF4444 100%)', route: '/app/atlas' },
-  { id: 'rv-camping', tag: 'Outdoors', title: 'RV & Camping', subtitle: 'Campgrounds, sites & boondocking', icon: '🏕️', gradient: 'linear-gradient(135deg, #00C2CB 0%, #10B981 100%)', route: '/app/rv-camping' },
+  { id: 'rides', tag: 'New', title: 'Rides', subtitle: 'Rate every ride — thrill, wait, theming', icon: '🎢', image: `${ASSET_BASE}/rides.png`, gradient: 'linear-gradient(135deg, #8A05BE 0%, #EC4899 100%)', route: '/app/rides' },
+  { id: 'restaurants', tag: 'Popular', title: 'Restaurants', subtitle: 'Real signals, not star ratings', icon: '🍽️', image: `${ASSET_BASE}/restaurants.png`, gradient: 'linear-gradient(135deg, #EF4444 0%, #F59E0B 100%)', route: '/app/map?category=Restaurants' },
+  { id: 'universes', tag: 'Explore', title: 'Universes', subtitle: 'Theme parks, airports & themed worlds', icon: '🌌', image: `${ASSET_BASE}/universes.png`, gradient: 'linear-gradient(135deg, #6366F1 0%, #8A05BE 100%)', route: '/app/universes' },
+  { id: 'hotels', tag: 'Stay', title: 'Hotels', subtitle: 'Find where to stay, by the signals that matter', icon: '🏨', image: `${ASSET_BASE}/hotels.png`, gradient: 'linear-gradient(135deg, #0EA5E9 0%, #6366F1 100%)', route: '/app/map?category=Hotels' },
+  { id: 'pros', tag: 'Hire', title: 'Pros', subtitle: 'Plumbers, electricians & trusted contractors', icon: '🛠️', image: `${ASSET_BASE}/pros.png`, gradient: 'linear-gradient(135deg, #00C2CB 0%, #6366F1 100%)', route: '/app/pros' },
+  { id: 'cities', tag: 'Discover', title: 'Cities', subtitle: 'Compare livability, food & culture', icon: '🌆', image: `${ASSET_BASE}/cities.png`, gradient: 'linear-gradient(135deg, #8A05BE 0%, #0EA5E9 100%)', route: '/app/cities' },
+  { id: 'atlas', tag: 'Travel', title: 'Atlas', subtitle: 'Bucket-list destinations worldwide', icon: '✈️', image: `${ASSET_BASE}/atlas.png`, gradient: 'linear-gradient(135deg, #F59E0B 0%, #EF4444 100%)', route: '/app/atlas' },
+  { id: 'rv-camping', tag: 'Outdoors', title: 'RV & Camping', subtitle: 'Campgrounds, sites & boondocking', icon: '🏕️', image: `${ASSET_BASE}/rv-camping.png`, gradient: 'linear-gradient(135deg, #00C2CB 0%, #10B981 100%)', route: '/app/rv-camping' },
+];
+
+// Category grid — the mockup's centerpiece. Theme-adaptive monochrome icons.
+const featureGrid = [
+  { id: 'restaurants', label: 'Restaurants', Icon: IoRestaurant, route: '/app/map?category=Restaurants' },
+  { id: 'hotels', label: 'Hotels', Icon: IoBed, route: '/app/map?category=Hotels' },
+  { id: 'rides', label: 'Rides', Icon: IoRocket, route: '/app/rides' },
+  { id: 'universes', label: 'Universes', Icon: IoPlanet, route: '/app/universes' },
+  { id: 'pros', label: 'Pros', Icon: IoConstruct, route: '/app/pros' },
+  { id: 'cities', label: 'Cities', Icon: IoBusiness, route: '/app/cities' },
+  { id: 'atlas', label: 'Atlas', Icon: IoEarth, route: '/app/atlas' },
+  { id: 'rv-camping', label: 'RV & Camping', Icon: IoBonfire, route: '/app/rv-camping' },
+  { id: 'signals', label: 'Signals', Icon: IoRadio, route: '/app/signal-search' },
 ];
 
 // Top contributors mock data
@@ -660,6 +675,9 @@ export default function HomeScreen() {
                     onClick={() => router.push(slide.route, undefined, { locale })}
                     aria-label={`${slide.title} — ${slide.subtitle}`}
                   >
+                    <span className="feature-slide-bg" style={{ backgroundImage: `url(${slide.image})` }} />
+                    <span className="feature-slide-tint" style={{ background: slide.gradient }} />
+                    <span className="feature-slide-scrim" />
                     <span className="feature-slide-tag">{slide.tag}</span>
                     <div className="feature-slide-body">
                       <span className="feature-slide-icon">{slide.icon}</span>
@@ -680,6 +698,24 @@ export default function HomeScreen() {
                     onClick={() => goToSlide(i)}
                     aria-label={`Go to ${slide.title}`}
                   />
+                ))}
+              </div>
+            </section>
+
+            {/* Category Grid — explore all of Tavvy (theme-adaptive icons) */}
+            <section className="feature-grid-section">
+              <h2 className="section-title">{t('home.exploreTavvy', 'Explore Tavvy')}</h2>
+              <div className="feature-grid">
+                {featureGrid.map((item) => (
+                  <button
+                    key={item.id}
+                    className="feature-grid-tile"
+                    onClick={() => router.push(item.route, undefined, { locale })}
+                    aria-label={item.label}
+                  >
+                    <span className="feature-grid-icon"><item.Icon size={24} /></span>
+                    <span className="feature-grid-label">{item.label}</span>
+                  </button>
                 ))}
               </div>
             </section>
@@ -1230,6 +1266,30 @@ export default function HomeScreen() {
             background: radial-gradient(120% 120% at 100% 0%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 45%);
             pointer-events: none;
           }
+          .feature-slide-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: 0;
+            pointer-events: none;
+          }
+          .feature-slide-tint {
+            position: absolute;
+            inset: 0;
+            opacity: 0.5;
+            mix-blend-mode: multiply;
+            z-index: 0;
+            pointer-events: none;
+          }
+          .feature-slide-scrim {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0) 22%, rgba(0,0,0,0.62) 100%);
+            z-index: 0;
+            pointer-events: none;
+          }
           .feature-slide-tag {
             align-self: flex-start;
             font-size: 11px;
@@ -1296,6 +1356,50 @@ export default function HomeScreen() {
           .feature-dot.active {
             width: 22px;
             background: #8A05BE;
+          }
+
+          /* Category Grid */
+          .feature-grid-section {
+            margin: 26px 0 6px;
+          }
+          .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+          }
+          .feature-grid-tile {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            padding: 18px 8px;
+            border: 1px solid ${isDark ? 'rgba(255,255,255,0.07)' : '#EDEDED'};
+            border-radius: 18px;
+            background: ${isDark ? 'rgba(255,255,255,0.035)' : '#FFFFFF'};
+            cursor: pointer;
+            transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+          }
+          .feature-grid-tile:hover {
+            transform: translateY(-2px);
+            border-color: rgba(138, 5, 190, 0.4);
+            background: ${isDark ? 'rgba(138, 5, 190, 0.12)' : 'rgba(138, 5, 190, 0.05)'};
+          }
+          .feature-grid-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            color: ${isDark ? '#FFFFFF' : '#17013A'};
+            background: ${isDark ? 'rgba(255,255,255,0.07)' : 'rgba(23, 1, 58, 0.05)'};
+          }
+          .feature-grid-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            color: ${isDark ? 'rgba(255,255,255,0.85)' : '#17013A'};
           }
 
           .section-title {
