@@ -19,40 +19,48 @@ import { UnifiedHeader } from '../../components/UnifiedHeader';
 interface City {
   id: string;
   name: string;
+  slug?: string;
   state?: string;
   country?: string;
-  image_url?: string;
+  cover_image_url?: string;
+  thumbnail_image_url?: string;
   total_signals?: number;
   population?: number;
+  culture?: string;
+  best_time_to_visit?: string;
 }
 
-// Featured cities for display
-const FEATURED_CITIES = [
-  { id: '1', name: 'New York', state: 'NY', country: 'USA', image_url: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=800' },
-  { id: '2', name: 'Los Angeles', state: 'CA', country: 'USA', image_url: 'https://images.unsplash.com/photo-1534190760961-74e8c1c5c3da?w=800' },
-  { id: '3', name: 'Chicago', state: 'IL', country: 'USA', image_url: 'https://images.unsplash.com/photo-1494522855154-9297ac14b55f?w=800' },
-  { id: '4', name: 'Miami', state: 'FL', country: 'USA', image_url: 'https://images.unsplash.com/photo-1506966953602-c20cc11f75e3?w=800' },
-  { id: '5', name: 'San Francisco', state: 'CA', country: 'USA', image_url: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800' },
-  { id: '6', name: 'Seattle', state: 'WA', country: 'USA', image_url: 'https://images.unsplash.com/photo-1502175353174-a7a70e73b362?w=800' },
+// Editorial "Featured this month" picks — curated for the current month with a real
+// recurring event/festival so there's a reason to read about each city.
+const FEATURED_MONTH_LABEL = 'June';
+const FEATURED_THIS_MONTH = [
+  { slug: 'new-york-city', event: 'NYC Pride', reason: "June ends with the world's largest Pride march — over two million people fill the streets for the final-Sunday parade." },
+  { slug: 'chicago', event: 'Chicago Blues Festival', reason: 'The world’s largest free blues festival takes over Millennium Park in early June — three days of legendary live music.' },
+  { slug: 'nashville', event: 'CMA Fest', reason: 'Four nights of country music and stadium shows turn downtown Music City into its biggest party every June.' },
+  { slug: 'san-francisco', event: 'SF Pride', reason: "One of the planet's largest Pride celebrations paints the city in color across the last weekend of June." },
+  { slug: 'new-orleans', event: 'Creole Tomato Festival', reason: 'The historic French Market celebrates summer’s first harvest with Creole cooking, live jazz, and parades in mid-June.' },
 ];
+const FEATURED_SLUGS = FEATURED_THIS_MONTH.map((f) => f.slug);
 
 export default function CitiesBrowseScreen() {
   const router = useRouter();
   const { locale } = router;
-  const { theme } = useThemeContext();
-  const [cities, setCities] = useState<City[]>(FEATURED_CITIES);
+  const { theme, isDark } = useThemeContext();
+  const [cities, setCities] = useState<City[]>([]);
+  const [featured, setFeatured] = useState<City[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchCities();
+    fetchFeatured();
   }, []);
 
   const fetchCities = async () => {
     try {
       const { data, error } = await supabase
         .from('tavvy_cities')
-        .select('*')
+        .select('id,name,slug,state,country,cover_image_url,thumbnail_image_url,total_signals,population,culture,best_time_to_visit')
         .eq('is_active', true)
         .order('population', { ascending: false })
         .limit(50);
@@ -64,6 +72,25 @@ export default function CitiesBrowseScreen() {
       console.error('Error fetching cities:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Pull the curated featured cities (by slug) so we always have their real cover image + data
+  const fetchFeatured = async () => {
+    try {
+      const { data } = await supabase
+        .from('tavvy_cities')
+        .select('id,name,slug,state,country,cover_image_url,culture')
+        .in('slug', FEATURED_SLUGS);
+      if (data) {
+        // keep them in the curated order
+        const ordered = FEATURED_THIS_MONTH
+          .map((f) => data.find((c) => c.slug === f.slug))
+          .filter(Boolean) as City[];
+        setFeatured(ordered);
+      }
+    } catch (error) {
+      console.error('Error fetching featured cities:', error);
     }
   };
 
@@ -89,29 +116,39 @@ export default function CitiesBrowseScreen() {
             onSearch={setSearchQuery}
           />
 
-          {/* Featured Section */}
-          {!searchQuery && (
+          {/* Featured This Month */}
+          {!searchQuery && featured.length > 0 && (
             <section className="featured-section">
-              <h2 style={{ color: theme.text }}>Featured Cities</h2>
+              <div className="featured-head">
+                <span className="featured-kicker">★ Featured in {FEATURED_MONTH_LABEL}</span>
+                <h2 style={{ color: theme.text }}>Where to go this month</h2>
+                <p className="featured-sub" style={{ color: theme.textSecondary }}>
+                  Cities worth a trip right now — picked for what’s happening this June.
+                </p>
+              </div>
               <div className="featured-scroll">
-                {cities.slice(0, 4).map((city) => (
-                  <Link 
-                    key={city.id}
-                    href={`/app/city/${city.id}`}
-                    locale={locale}
-                    className="featured-card"
-                  >
-                    <img 
-                      src={city.image_url || 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800'}
-                      alt={city.name}
-                      className="featured-image"
-                    />
-                    <div className="featured-overlay">
-                      <h3>{city.name}</h3>
-                      <span>{city.state}, {city.country || 'USA'}</span>
-                    </div>
-                  </Link>
-                ))}
+                {featured.map((city) => {
+                  const meta = FEATURED_THIS_MONTH.find((f) => f.slug === city.slug);
+                  return (
+                    <Link key={city.id} href={`/app/city/${city.id}`} locale={locale} className="feature-card">
+                      <div className="feature-card-media">
+                        <img src={city.cover_image_url} alt={city.name} className="feature-card-img" />
+                        <span className="feature-card-badge">{FEATURED_MONTH_LABEL}</span>
+                      </div>
+                      <div className="feature-card-body">
+                        <h3 className="feature-card-title" style={{ color: theme.text }}>{city.name}</h3>
+                        <span className="feature-card-loc" style={{ color: theme.textSecondary }}>
+                          <FiMapPin size={11} /> {city.state}
+                        </span>
+                        {meta && <span className="feature-card-event">{meta.event}</span>}
+                        {meta && (
+                          <p className="feature-card-reason" style={{ color: theme.textSecondary }}>{meta.reason}</p>
+                        )}
+                        <span className="feature-card-cta">Read about {city.name} →</span>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             </section>
           )}
@@ -138,20 +175,32 @@ export default function CitiesBrowseScreen() {
                     key={city.id}
                     href={`/app/city/${city.id}`}
                     locale={locale}
-                    className="city-card"
+                    className="city-row"
+                    style={{
+                      background: isDark ? 'rgba(255,255,255,0.04)' : '#fff',
+                      borderColor: isDark ? 'rgba(255,255,255,0.07)' : '#EDEDED',
+                    }}
                   >
                     <img
-                      className="city-card-image"
-                      src={city.image_url || 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600'}
+                      className="city-row-img"
+                      src={city.cover_image_url || city.thumbnail_image_url || 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400'}
                       alt={city.name}
                     />
-                    <div className="city-card-overlay">
-                      <h3>{city.name}</h3>
-                      <span><FiMapPin size={11} /> {city.state}, {city.country || 'USA'}</span>
+                    <div className="city-row-body">
+                      <h3 className="city-row-title" style={{ color: theme.text }}>{city.name}</h3>
+                      <span className="city-row-loc" style={{ color: theme.textSecondary }}>
+                        <FiMapPin size={11} /> {city.state}, {city.country || 'USA'}
+                      </span>
+                      {city.culture && (
+                        <p className="city-row-desc" style={{ color: theme.textSecondary }}>{city.culture}</p>
+                      )}
+                      {city.best_time_to_visit && (
+                        <span className="city-row-meta" style={{ color: theme.primary }}>
+                          Best time to visit: {city.best_time_to_visit}
+                        </span>
+                      )}
                     </div>
-                    {city.total_signals ? (
-                      <span className="city-card-badge">{city.total_signals} signals</span>
-                    ) : null}
+                    <FiChevronRight size={18} color={theme.textSecondary} className="city-row-chev" />
                   </Link>
                 ))}
               </div>
@@ -198,63 +247,96 @@ export default function CitiesBrowseScreen() {
           }
           
           .featured-section {
-            padding: 0 ${spacing.lg}px ${spacing.xl}px;
+            padding: 4px ${spacing.lg}px ${spacing.xl}px;
           }
-          
+
+          .featured-head { margin-bottom: 6px; }
+
+          .featured-kicker {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: #8A05BE;
+            margin-bottom: 6px;
+          }
+
           .featured-section h2 {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0 0 ${spacing.md}px;
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.4px;
+            margin: 0 0 4px;
           }
-          
+
+          .featured-sub {
+            font-size: 13px;
+            margin: 0;
+            line-height: 1.4;
+          }
+
           .featured-scroll {
             display: flex;
-            gap: ${spacing.md}px;
+            gap: 14px;
             overflow-x: auto;
-            padding-bottom: ${spacing.sm}px;
+            padding: 14px 2px 4px;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
           }
-          
-          .featured-scroll::-webkit-scrollbar {
-            display: none;
-          }
-          
-          .featured-card {
-            position: relative;
-            min-width: 200px;
-            height: 140px;
-            border-radius: ${borderRadius.lg}px;
+
+          .featured-scroll::-webkit-scrollbar { display: none; }
+
+          .feature-card {
+            display: flex;
+            flex-direction: column;
+            min-width: 270px;
+            max-width: 270px;
+            border-radius: 18px;
             overflow: hidden;
             text-decoration: none;
+            background: ${isDark ? 'rgba(255,255,255,0.04)' : '#fff'};
+            border: 1px solid ${isDark ? 'rgba(255,255,255,0.07)' : '#EDEDED'};
+            box-shadow: 0 8px 22px rgba(0,0,0,0.18);
+            transition: transform 0.2s ease;
           }
-          
-          .featured-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-          }
-          
-          .featured-overlay {
+          .feature-card:hover { transform: translateY(-3px); }
+
+          .feature-card-media { position: relative; height: 150px; }
+          .feature-card-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+          .feature-card-badge {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: ${spacing.md}px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            top: 10px;
+            left: 10px;
+            background: rgba(138,5,190,0.92);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            padding: 4px 10px;
+            border-radius: 999px;
+            backdrop-filter: blur(4px);
           }
-          
-          .featured-overlay h3 {
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            margin: 0;
+          .feature-card-body {
+            padding: 14px 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
           }
-          
-          .featured-overlay span {
-            color: rgba(255,255,255,0.8);
-            font-size: 12px;
+          .feature-card-title { font-size: 18px; font-weight: 800; margin: 0; letter-spacing: -0.3px; }
+          .feature-card-loc { font-size: 12px; display: flex; align-items: center; gap: 4px; }
+          .feature-card-event {
+            align-self: flex-start;
+            margin-top: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #00C2CB;
+            background: rgba(0,194,203,0.12);
+            padding: 3px 9px;
+            border-radius: 999px;
           }
+          .feature-card-reason { font-size: 13px; line-height: 1.45; margin: 6px 0 0; }
+          .feature-card-cta { margin-top: 10px; font-size: 13px; font-weight: 700; color: #8A05BE; }
           
           .cities-section {
             padding: 0 ${spacing.lg}px;
@@ -295,70 +377,55 @@ export default function CitiesBrowseScreen() {
           }
           
           .cities-list {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            display: flex;
+            flex-direction: column;
             gap: 12px;
           }
 
-          .city-card {
-            position: relative;
-            display: block;
-            height: 140px;
+          .city-row {
+            display: flex;
+            align-items: stretch;
+            gap: 14px;
+            padding: 12px;
             border-radius: 16px;
-            overflow: hidden;
+            border: 1px solid transparent;
             text-decoration: none;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-            transition: transform 0.2s ease;
+            transition: transform 0.15s ease, border-color 0.15s ease;
+          }
+          .city-row:hover {
+            transform: translateY(-2px);
+            border-color: rgba(138, 5, 190, 0.35);
           }
 
-          .city-card:hover {
-            transform: translateY(-3px);
-          }
-
-          .city-card-image {
-            width: 100%;
-            height: 100%;
+          .city-row-img {
+            width: 104px;
+            height: 104px;
+            flex-shrink: 0;
+            border-radius: 12px;
             object-fit: cover;
             display: block;
           }
 
-          .city-card-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 12px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.85));
-          }
-
-          .city-card-overlay h3 {
-            color: #fff;
-            font-size: 16px;
-            font-weight: 700;
-            margin: 0 0 3px;
-            letter-spacing: -0.2px;
-          }
-
-          .city-card-overlay span {
-            color: rgba(255,255,255,0.85);
-            font-size: 11px;
+          .city-row-body {
+            flex: 1;
+            min-width: 0;
             display: flex;
-            align-items: center;
-            gap: 4px;
+            flex-direction: column;
+            gap: 3px;
           }
-
-          .city-card-badge {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(138, 5, 190, 0.92);
-            color: #fff;
-            font-size: 10px;
-            font-weight: 600;
-            padding: 3px 9px;
-            border-radius: 999px;
-            backdrop-filter: blur(4px);
+          .city-row-title { font-size: 17px; font-weight: 700; margin: 0; letter-spacing: -0.2px; }
+          .city-row-loc { font-size: 12px; display: flex; align-items: center; gap: 4px; }
+          .city-row-desc {
+            font-size: 12.5px;
+            line-height: 1.4;
+            margin: 4px 0 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
           }
+          .city-row-meta { font-size: 11px; font-weight: 600; margin-top: 4px; }
+          .city-row-chev { flex-shrink: 0; align-self: center; }
         `}</style>
       </AppLayout>
   );
