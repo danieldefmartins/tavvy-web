@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { Search, ChevronLeft, User, MoreHorizontal } from 'lucide-react';
+import { useThemeContext } from '../contexts/ThemeContext';
 
 // Screen color configurations - matching mobile
 export const SCREEN_COLORS = {
@@ -44,7 +45,8 @@ export const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
 }) => {
   const router = useRouter();
   const { locale } = router;
-  const colors = SCREEN_COLORS[screenKey];
+  const { isDark } = useThemeContext();
+  const accent = SCREEN_COLORS[screenKey];
   const [searchValue, setSearchValue] = useState('');
 
   const handleBack = () => {
@@ -69,51 +71,34 @@ export const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
     }
   };
 
+  const textColor = isDark ? '#fff' : '#17013A';
   const iconBtnStyle: React.CSSProperties = {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 9999,
-    background: 'transparent',
+    background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
     border: 'none',
     cursor: 'pointer',
   };
 
   return (
-    <div
-      style={{
-        width: '100%',
-        background: `linear-gradient(135deg, ${colors.start} 0%, ${colors.end} 100%)`,
-      }}
-    >
-      {/* Row 1: Navigation */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56, padding: '0 16px' }}>
+    <div style={{ width: '100%', background: isDark ? '#000' : '#fff', padding: '14px 16px 10px' }}>
+      {/* Row 1: brand / back + profile — matches the home header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         {showBackButton ? (
           <button onClick={handleBack} aria-label="Go back" style={iconBtnStyle}>
-            <ChevronLeft size={24} color="#fff" />
+            <ChevronLeft size={22} color={textColor} />
           </button>
         ) : (
-          <div style={{ width: 44, height: 44 }} />
+          <img
+            src={isDark ? '/tavvy-logo-white.png' : '/tavvy-logo-dark.png'}
+            alt="Tavvy"
+            style={{ height: 26, width: 'auto' }}
+          />
         )}
-
-        <h1
-          style={{
-            fontSize: 20,
-            fontWeight: 700,
-            color: '#fff',
-            textAlign: 'center',
-            flex: 1,
-            padding: '0 8px',
-            margin: 0,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          {title}
-        </h1>
 
         <button
           onClick={handleProfilePress}
@@ -121,44 +106,50 @@ export const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
           style={iconBtnStyle}
         >
           {rightIcon === 'menu' ? (
-            <MoreHorizontal size={28} color="#fff" />
+            <MoreHorizontal size={22} color={textColor} />
           ) : (
-            <User size={28} color="#fff" />
+            <User size={22} color={textColor} />
           )}
         </button>
       </div>
 
-      {/* Row 2: Search Bar */}
+      {/* Title with a per-screen accent dot */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+        <span style={{ width: 10, height: 10, borderRadius: 9999, background: `linear-gradient(135deg, ${accent.start}, ${accent.end})`, flexShrink: 0 }} />
+        <h1 style={{ fontSize: 28, fontWeight: 800, color: textColor, margin: 0, letterSpacing: -0.6 }}>
+          {title}
+        </h1>
+      </div>
+
+      {/* Search Bar — same dark surface style as the home page */}
       {showSearch && (
-        <div style={{ padding: '0 16px 12px' }}>
-          <div
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            background: isDark ? 'rgba(255,255,255,0.10)' : '#F5F5F5',
+            border: `1px solid ${isDark ? 'rgba(255,255,255,0.18)' : 'transparent'}`,
+            borderRadius: 16,
+            height: 50,
+            padding: '0 16px',
+          }}
+        >
+          <Search size={20} color={isDark ? 'rgba(255,255,255,0.6)' : '#999'} style={{ flexShrink: 0 }} />
+          <input
+            type="text"
+            value={searchValue}
+            onChange={handleSearchChange}
+            placeholder={searchPlaceholder}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              background: '#fff',
-              borderRadius: 12,
-              height: 44,
-              padding: '0 12px',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+              flex: 1,
+              marginLeft: 10,
+              fontSize: 16,
+              color: textColor,
+              background: 'transparent',
+              border: 'none',
+              outline: 'none',
             }}
-          >
-            <Search size={20} color="#9ca3af" style={{ flexShrink: 0 }} />
-            <input
-              type="text"
-              value={searchValue}
-              onChange={handleSearchChange}
-              placeholder={searchPlaceholder}
-              style={{
-                flex: 1,
-                marginLeft: 8,
-                fontSize: 16,
-                color: '#1f2937',
-                background: 'transparent',
-                border: 'none',
-                outline: 'none',
-              }}
-            />
-          </div>
+          />
         </div>
       )}
     </div>
