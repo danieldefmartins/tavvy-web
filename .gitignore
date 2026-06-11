@@ -36,3 +36,9 @@ next-env.d.ts
 # OS
 .DS_Store
 Thumbs.db
+
+# next-pwa generated service worker (regenerated on build)
+public/sw.js
+public/sw.js.map
+public/workbox-*.js
+public/workbox-*.js.map

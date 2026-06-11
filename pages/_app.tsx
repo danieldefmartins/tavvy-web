@@ -121,6 +121,22 @@ function LocaleManager() {
 }
 
 function App({ Component, pageProps }: AppProps) {
+  // PWA freshness: when a NEW service worker takes over (i.e. a new deploy),
+  // reload once so users get the fresh version instead of the old cached page.
+  // Guarded on an existing controller so first-install does NOT trigger a reload.
+  useEffect(() => {
+    if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
+    if (!navigator.serviceWorker.controller) return; // first install — nothing stale to replace
+    let refreshing = false;
+    const onControllerChange = () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    };
+    navigator.serviceWorker.addEventListener('controllerchange', onControllerChange);
+    return () => navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
+  }, []);
+
   return (
     <>
       <Head>
