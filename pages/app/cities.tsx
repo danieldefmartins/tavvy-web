@@ -60,7 +60,7 @@ export default function CitiesBrowseScreen() {
     try {
       const { data, error } = await supabase
         .from('tavvy_cities')
-        .select('id,name,slug,state,country,cover_image_url,thumbnail_image_url,total_signals,population,culture,best_time_to_visit')
+        .select('id,name,slug,state,country,cover_image_url,thumbnail_image_url,population,culture,best_time_to_visit')
         .eq('is_active', true)
         .order('population', { ascending: false })
         .limit(50);
