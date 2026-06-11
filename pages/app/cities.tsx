@@ -130,7 +130,16 @@ export default function CitiesBrowseScreen() {
                 {featured.map((city) => {
                   const meta = FEATURED_THIS_MONTH.find((f) => f.slug === city.slug);
                   return (
-                    <Link key={city.id} href={`/app/city/${city.id}`} locale={locale} className="feature-card">
+                    <Link
+                      key={city.id}
+                      href={`/app/city/${city.id}`}
+                      locale={locale}
+                      className="feature-card"
+                      style={{
+                        background: isDark ? 'rgba(255,255,255,0.05)' : '#fff',
+                        borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#EDEDED',
+                      }}
+                    >
                       <div className="feature-card-media">
                         <img src={city.cover_image_url} alt={city.name} className="feature-card-img" />
                         <span className="feature-card-badge">{FEATURED_MONTH_LABEL}</span>
@@ -296,8 +305,7 @@ export default function CitiesBrowseScreen() {
             border-radius: 20px;
             overflow: hidden;
             text-decoration: none;
-            background: ${isDark ? 'rgba(255,255,255,0.04)' : '#fff'};
-            border: 1px solid ${isDark ? 'rgba(255,255,255,0.07)' : '#EDEDED'};
+            border: 1px solid transparent;
             box-shadow: 0 10px 26px rgba(0,0,0,0.22);
             transition: transform 0.2s ease;
           }
