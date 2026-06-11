@@ -69,55 +69,94 @@ export const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
     }
   };
 
+  const iconBtnStyle: React.CSSProperties = {
+    width: 44,
+    height: 44,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 9999,
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+  };
+
   return (
     <div
-      className="w-full"
       style={{
+        width: '100%',
         background: `linear-gradient(135deg, ${colors.start} 0%, ${colors.end} 100%)`,
       }}
     >
       {/* Row 1: Navigation */}
-      <div className="flex items-center justify-between h-14 px-4">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56, padding: '0 16px' }}>
         {showBackButton ? (
-          <button
-            onClick={handleBack}
-            className="w-11 h-11 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
-            aria-label="Go back"
-          >
-            <ChevronLeft className="w-6 h-6 text-white" />
+          <button onClick={handleBack} aria-label="Go back" style={iconBtnStyle}>
+            <ChevronLeft size={24} color="#fff" />
           </button>
         ) : (
-          <div className="w-11 h-11" />
+          <div style={{ width: 44, height: 44 }} />
         )}
 
-        <h1 className="text-xl font-bold text-white text-center flex-1 truncate px-2">
+        <h1
+          style={{
+            fontSize: 20,
+            fontWeight: 700,
+            color: '#fff',
+            textAlign: 'center',
+            flex: 1,
+            padding: '0 8px',
+            margin: 0,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
           {title}
         </h1>
 
         <button
           onClick={handleProfilePress}
-          className="w-11 h-11 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
           aria-label={rightIcon === 'menu' ? 'Open menu' : 'Profile'}
+          style={iconBtnStyle}
         >
           {rightIcon === 'menu' ? (
-            <MoreHorizontal className="w-7 h-7 text-white" />
+            <MoreHorizontal size={28} color="#fff" />
           ) : (
-            <User className="w-7 h-7 text-white" />
+            <User size={28} color="#fff" />
           )}
         </button>
       </div>
 
       {/* Row 2: Search Bar */}
       {showSearch && (
-        <div className="px-4 pb-3">
-          <div className="flex items-center bg-white rounded-xl h-11 px-3 shadow-sm">
-            <Search className="w-5 h-5 text-gray-400 flex-shrink-0" />
+        <div style={{ padding: '0 16px 12px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              background: '#fff',
+              borderRadius: 12,
+              height: 44,
+              padding: '0 12px',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+            }}
+          >
+            <Search size={20} color="#9ca3af" style={{ flexShrink: 0 }} />
             <input
               type="text"
               value={searchValue}
               onChange={handleSearchChange}
               placeholder={searchPlaceholder}
-              className="flex-1 ml-2 text-base text-gray-800 placeholder-gray-400 bg-transparent outline-none"
+              style={{
+                flex: 1,
+                marginLeft: 8,
+                fontSize: 16,
+                color: '#1f2937',
+                background: 'transparent',
+                border: 'none',
+                outline: 'none',
+              }}
             />
           </div>
         </div>
