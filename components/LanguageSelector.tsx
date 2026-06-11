@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useTranslation } from 'next-i18next';
+import { useThemeContext } from '../contexts/ThemeContext';
 
 interface Language {
   code: string;
@@ -40,6 +41,7 @@ export default function LanguageSelector({
   const router = useRouter();
   const { locale } = router;
   const { i18n } = useTranslation();
+  const { isDark } = useThemeContext();
   const [isOpen, setIsOpen] = useState(false);
 
   const currentLanguage = languages.find(l => l.code === router.locale) || languages[0];
@@ -51,44 +53,79 @@ export default function LanguageSelector({
   };
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={className} style={{ position: 'relative' }}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          padding: '8px 12px',
+          borderRadius: 8,
+          background: isDark ? '#1f2937' : '#f3f4f6',
+          color: isDark ? '#fff' : '#111827',
+          border: 'none',
+          cursor: 'pointer',
+        }}
       >
-        <span className="text-sm font-medium">
+        <span style={{ fontSize: 14, fontWeight: 500 }}>
           {showNativeName ? currentLanguage.nativeName : currentLanguage.name}
         </span>
         <svg
-          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          width={16}
+          height={16}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
+          style={{ transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}
         >
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
       {isOpen && (
-        <div className="absolute top-full mt-2 right-0 w-48 max-h-64 overflow-y-auto bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
-          {languages.map((language) => (
-            <button
-              key={language.code}
-              onClick={() => handleLanguageChange(language.code)}
-              className={`w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${
-                language.code === router.locale
-                  ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                  : ''
-              }`}
-            >
-              <span className="font-medium">{language.nativeName}</span>
-              {showNativeName && language.name !== language.nativeName && (
-                <span className="text-gray-500 dark:text-gray-400 ml-2">
-                  ({language.name})
-                </span>
-              )}
-            </button>
-          ))}
+        <div
+          style={{
+            position: 'absolute',
+            top: '100%',
+            marginTop: 8,
+            right: 0,
+            width: 192,
+            maxHeight: 256,
+            overflowY: 'auto',
+            background: isDark ? '#111827' : '#fff',
+            borderRadius: 8,
+            boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+            border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+            zIndex: 50,
+          }}
+        >
+          {languages.map((language) => {
+            const active = language.code === router.locale;
+            return (
+              <button
+                key={language.code}
+                onClick={() => handleLanguageChange(language.code)}
+                style={{
+                  width: '100%',
+                  padding: '8px 16px',
+                  textAlign: 'left',
+                  fontSize: 14,
+                  background: active ? (isDark ? 'rgba(59,130,246,0.2)' : '#eff6ff') : 'transparent',
+                  color: active ? (isDark ? '#60a5fa' : '#2563eb') : (isDark ? '#e5e7eb' : '#111827'),
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                <span style={{ fontWeight: 500 }}>{language.nativeName}</span>
+                {showNativeName && language.name !== language.nativeName && (
+                  <span style={{ color: isDark ? '#9ca3af' : '#6b7280', marginLeft: 8 }}>
+                    ({language.name})
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
