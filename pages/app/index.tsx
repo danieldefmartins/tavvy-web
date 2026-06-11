@@ -980,22 +980,24 @@ export default function HomeScreen() {
           .hero-search {
             display: flex;
             align-items: center;
-            background: ${isDark ? 'rgba(255,255,255,0.06)' : '#F5F5F5'};
+            background: ${isDark ? 'rgba(255,255,255,0.10)' : '#F5F5F5'};
             border-radius: 16px;
             padding: 0 16px;
             height: 52px;
             margin-bottom: 20px;
-            border: 1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'transparent'};
-            transition: border-color 0.2s;
+            border: 1px solid ${isDark ? 'rgba(255,255,255,0.20)' : 'transparent'};
+            box-shadow: ${isDark ? '0 2px 10px rgba(0,0,0,0.35)' : 'none'};
+            transition: border-color 0.2s, background 0.2s;
             position: relative;
           }
 
           .hero-search:focus-within {
-            border-color: ${isDark ? 'rgba(138, 5, 190, 0.4)' : 'rgba(138, 5, 190, 0.3)'};
+            border-color: ${isDark ? 'rgba(138, 5, 190, 0.7)' : 'rgba(138, 5, 190, 0.3)'};
+            background: ${isDark ? 'rgba(255,255,255,0.13)' : '#F5F5F5'};
           }
 
           .hero-search .search-icon {
-            color: ${isDark ? 'rgba(255,255,255,0.3)' : '#999'};
+            color: ${isDark ? 'rgba(255,255,255,0.6)' : '#999'};
             flex-shrink: 0;
           }
 
@@ -1011,7 +1013,7 @@ export default function HomeScreen() {
           }
 
           .hero-search .search-input::placeholder {
-            color: ${isDark ? 'rgba(255,255,255,0.3)' : '#999'};
+            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#999'};
           }
 
           .hero-search .clear-btn {
