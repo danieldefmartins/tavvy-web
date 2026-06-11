@@ -134,32 +134,24 @@ export default function CitiesBrowseScreen() {
             ) : (
               <div className="cities-list">
                 {filteredCities.map((city) => (
-                  <Link 
+                  <Link
                     key={city.id}
                     href={`/app/city/${city.id}`}
                     locale={locale}
-                    className="city-item"
-                    style={{ backgroundColor: theme.cardBackground }}
+                    className="city-card"
                   >
-                    <div className="city-image-container">
-                      <img 
-                        src={city.image_url || 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400'}
-                        alt={city.name}
-                        className="city-image"
-                      />
+                    <img
+                      className="city-card-image"
+                      src={city.image_url || 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600'}
+                      alt={city.name}
+                    />
+                    <div className="city-card-overlay">
+                      <h3>{city.name}</h3>
+                      <span><FiMapPin size={11} /> {city.state}, {city.country || 'USA'}</span>
                     </div>
-                    <div className="city-info">
-                      <h3 style={{ color: theme.text }}>{city.name}</h3>
-                      <p style={{ color: theme.textSecondary }}>
-                        <FiMapPin size={12} /> {city.state}, {city.country || 'USA'}
-                      </p>
-                      {city.total_signals && (
-                        <span className="city-signals" style={{ color: theme.primary }}>
-                          {city.total_signals} signals
-                        </span>
-                      )}
-                    </div>
-                    <FiChevronRight size={20} color={theme.textTertiary} />
+                    {city.total_signals ? (
+                      <span className="city-card-badge">{city.total_signals} signals</span>
+                    ) : null}
                   </Link>
                 ))}
               </div>
@@ -303,59 +295,69 @@ export default function CitiesBrowseScreen() {
           }
           
           .cities-list {
-            display: flex;
-            flex-direction: column;
-            gap: ${spacing.sm}px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
           }
-          
-          .city-item {
-            display: flex;
-            align-items: center;
-            gap: ${spacing.md}px;
-            padding: ${spacing.md}px;
-            border-radius: ${borderRadius.lg}px;
-            text-decoration: none;
-            transition: transform 0.2s;
-          }
-          
-          .city-item:hover {
-            transform: translateX(4px);
-          }
-          
-          .city-image-container {
-            width: 60px;
-            height: 60px;
-            border-radius: ${borderRadius.md}px;
+
+          .city-card {
+            position: relative;
+            display: block;
+            height: 140px;
+            border-radius: 16px;
             overflow: hidden;
+            text-decoration: none;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+            transition: transform 0.2s ease;
           }
-          
-          .city-image {
+
+          .city-card:hover {
+            transform: translateY(-3px);
+          }
+
+          .city-card-image {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            display: block;
           }
-          
-          .city-info {
-            flex: 1;
+
+          .city-card-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 12px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.85));
           }
-          
-          .city-info h3 {
+
+          .city-card-overlay h3 {
+            color: #fff;
             font-size: 16px;
-            font-weight: 600;
-            margin: 0 0 4px;
+            font-weight: 700;
+            margin: 0 0 3px;
+            letter-spacing: -0.2px;
           }
-          
-          .city-info p {
-            font-size: 13px;
-            margin: 0;
+
+          .city-card-overlay span {
+            color: rgba(255,255,255,0.85);
+            font-size: 11px;
             display: flex;
             align-items: center;
             gap: 4px;
           }
-          
-          .city-signals {
-            font-size: 12px;
-            font-weight: 500;
+
+          .city-card-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(138, 5, 190, 0.92);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 9px;
+            border-radius: 999px;
+            backdrop-filter: blur(4px);
           }
         `}</style>
       </AppLayout>
