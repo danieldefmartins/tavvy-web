@@ -277,9 +277,10 @@ export default function CitiesBrowseScreen() {
 
           .featured-scroll {
             display: flex;
-            gap: 14px;
+            gap: 12px;
             overflow-x: auto;
-            padding: 14px 2px 4px;
+            scroll-snap-type: x mandatory;
+            padding: 14px 0 4px;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
           }
@@ -289,19 +290,19 @@ export default function CitiesBrowseScreen() {
           .feature-card {
             display: flex;
             flex-direction: column;
-            min-width: 270px;
-            max-width: 270px;
-            border-radius: 18px;
+            flex: 0 0 88%;
+            scroll-snap-align: start;
+            border-radius: 20px;
             overflow: hidden;
             text-decoration: none;
             background: ${isDark ? 'rgba(255,255,255,0.04)' : '#fff'};
             border: 1px solid ${isDark ? 'rgba(255,255,255,0.07)' : '#EDEDED'};
-            box-shadow: 0 8px 22px rgba(0,0,0,0.18);
+            box-shadow: 0 10px 26px rgba(0,0,0,0.22);
             transition: transform 0.2s ease;
           }
           .feature-card:hover { transform: translateY(-3px); }
 
-          .feature-card-media { position: relative; height: 150px; }
+          .feature-card-media { position: relative; height: 190px; }
           .feature-card-img { width: 100%; height: 100%; object-fit: cover; display: block; }
           .feature-card-badge {
             position: absolute;
@@ -386,22 +387,25 @@ export default function CitiesBrowseScreen() {
             display: flex;
             align-items: stretch;
             gap: 14px;
-            padding: 12px;
-            border-radius: 16px;
+            padding: 10px;
+            border-radius: 18px;
             border: 1px solid transparent;
             text-decoration: none;
-            transition: transform 0.15s ease, border-color 0.15s ease;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
           }
           .city-row:hover {
             transform: translateY(-2px);
-            border-color: rgba(138, 5, 190, 0.35);
+            border-color: rgba(138, 5, 190, 0.4);
+            box-shadow: 0 8px 22px rgba(0,0,0,0.14);
           }
 
           .city-row-img {
-            width: 104px;
-            height: 104px;
+            width: 112px;
+            min-height: 112px;
+            align-self: stretch;
             flex-shrink: 0;
-            border-radius: 12px;
+            border-radius: 14px;
             object-fit: cover;
             display: block;
           }
@@ -411,7 +415,9 @@ export default function CitiesBrowseScreen() {
             min-width: 0;
             display: flex;
             flex-direction: column;
+            justify-content: center;
             gap: 3px;
+            padding: 2px 0;
           }
           .city-row-title { font-size: 17px; font-weight: 700; margin: 0; letter-spacing: -0.2px; }
           .city-row-loc { font-size: 12px; display: flex; align-items: center; gap: 4px; }
