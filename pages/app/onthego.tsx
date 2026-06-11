@@ -167,7 +167,7 @@ export default function OnTheGoScreen() {
   };
 
   return (
-    <>
+    <div style={{ display: 'contents' }}>
       <Head>
         <title>On The Go | TavvY</title>
         <meta name="description" content="Find mobile businesses near you - food trucks, coffee carts, and more" />
@@ -681,7 +681,7 @@ export default function OnTheGoScreen() {
           `}</style>
         </div>
       </AppLayout>
-    </>
+    </div>
   );
 }
 

@@ -395,7 +395,7 @@ export default function RidesScreen() {
   };
 
   return (
-    <>
+    <div style={{ display: 'contents' }}>
       <Head>
         <title>Rides & Attractions | TavvY</title>
         <meta name="description" content="Browse theme park rides and attractions on TavvY" />
@@ -764,7 +764,7 @@ export default function RidesScreen() {
           to { transform: rotate(360deg); }
         }
       `}</style>
-    </>
+    </div>
   );
 }
 

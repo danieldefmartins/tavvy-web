@@ -175,7 +175,7 @@ export default function UniverseDiscoveryScreen() {
     : popularUniverses;
 
   return (
-    <>
+    <div style={{ display: 'contents' }}>
       <Head>
         <title>Universes | TavvY</title>
         <meta name="description" content="Explore curated worlds on TavvY" />
@@ -615,7 +615,7 @@ export default function UniverseDiscoveryScreen() {
           }
         `}</style>
       </AppLayout>
-    </>
+    </div>
   );
 }
 

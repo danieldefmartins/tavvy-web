@@ -73,13 +73,12 @@ export default function CitiesBrowseScreen() {
   );
 
   return (
-    <>
+    <AppLayout>
       <Head>
         <title>Cities | TavvY</title>
         <meta name="description" content="Explore and rate cities on TavvY" />
       </Head>
 
-      <AppLayout>
         <div className="cities-screen" style={{ backgroundColor: theme.background }}>
           {/* Unified Header */}
           <UnifiedHeader
@@ -360,7 +359,6 @@ export default function CitiesBrowseScreen() {
           }
         `}</style>
       </AppLayout>
-    </>
   );
 }
 

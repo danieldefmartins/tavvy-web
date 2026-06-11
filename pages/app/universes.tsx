@@ -249,7 +249,7 @@ export default function UniversesScreen() {
   };
 
   return (
-    <>
+    <div style={{ display: 'contents' }}>
       <Head>
         <title>Universes | TavvY</title>
         <meta name="description" content="Explore curated worlds" />
@@ -723,7 +723,7 @@ export default function UniversesScreen() {
           }
         `}</style>
       </AppLayout>
-    </>
+    </div>
   );
 }
 

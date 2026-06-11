@@ -11,7 +11,7 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
 import PlaceCard from '../../components/PlaceCard';
 import { supabase } from '../../lib/supabaseClient';
-import { spacing, borderRadius, colors } from '../../constants/Colors';
+import { spacing, borderRadius } from '../../constants/Colors';
 import { FiSearch, FiMapPin, FiFilter } from 'react-icons/fi';
 import { UnifiedHeader } from '../../components/UnifiedHeader';
 import { useTranslation } from 'next-i18next';
@@ -81,7 +81,7 @@ export default function RVCampingScreen() {
   );
 
   return (
-    <>
+    <div style={{ display: 'contents' }}>
       <Head>
         <title>RV & Camping | TavvY</title>
         <meta name="description" content="Find RV parks, campgrounds, and outdoor destinations on TavvY" />
@@ -278,7 +278,7 @@ export default function RVCampingScreen() {
           }
         `}</style>
       </AppLayout>
-    </>
+    </div>
   );
 }
 

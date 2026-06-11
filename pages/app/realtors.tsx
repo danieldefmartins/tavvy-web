@@ -94,7 +94,7 @@ export default function RealtorsHubScreen() {
   const popularRealtors = filteredRealtors.filter(r => r.id !== featuredRealtor?.id).slice(0, 4);
 
   return (
-    <>
+    <div style={{ display: 'contents' }}>
       <Head>
         <title>Realtors | TavvY</title>
         <meta name="description" content="Find trusted real estate professionals on TavvY" />
@@ -622,7 +622,7 @@ export default function RealtorsHubScreen() {
           }
         `}</style>
       </AppLayout>
-    </>
+    </div>
   );
 }
 
