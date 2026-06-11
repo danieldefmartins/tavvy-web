@@ -1248,7 +1248,7 @@ export default function HomeScreen() {
             flex-direction: column;
             justify-content: space-between;
             text-align: left;
-            min-height: 168px;
+            aspect-ratio: 3 / 2;
             padding: 18px 20px;
             border: none;
             border-radius: 22px;
@@ -1280,7 +1280,7 @@ export default function HomeScreen() {
           .feature-slide-tint {
             position: absolute;
             inset: 0;
-            opacity: 0.5;
+            opacity: 0.18;
             mix-blend-mode: multiply;
             z-index: 0;
             pointer-events: none;
