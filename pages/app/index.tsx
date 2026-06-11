@@ -83,6 +83,19 @@ const exploreItems = [
   { id: 'rv-camping', title: 'RV & Camping', subtitle: 'Parks, sites & amenities', icon: '🏕️', color: '#00C2CB', route: '/app/rv-camping' },
 ];
 
+// Featured carousel — showcases the BREADTH of Tavvy (rides + every other feature)
+// Rides leads, but the rotation makes clear Tavvy is for everyone, not just thrill-seekers.
+const featureSlides = [
+  { id: 'rides', tag: 'New', title: 'Rides', subtitle: 'Rate every ride — thrill, wait, theming', icon: '🎢', gradient: 'linear-gradient(135deg, #8A05BE 0%, #EC4899 100%)', route: '/app/rides' },
+  { id: 'restaurants', tag: 'Popular', title: 'Restaurants', subtitle: 'Real signals, not star ratings', icon: '🍽️', gradient: 'linear-gradient(135deg, #EF4444 0%, #F59E0B 100%)', route: '/app/map?category=Restaurants' },
+  { id: 'universes', tag: 'Explore', title: 'Universes', subtitle: 'Theme parks, airports & themed worlds', icon: '🌌', gradient: 'linear-gradient(135deg, #6366F1 0%, #8A05BE 100%)', route: '/app/universes' },
+  { id: 'hotels', tag: 'Stay', title: 'Hotels', subtitle: 'Find where to stay, by the signals that matter', icon: '🏨', gradient: 'linear-gradient(135deg, #0EA5E9 0%, #6366F1 100%)', route: '/app/map?category=Hotels' },
+  { id: 'pros', tag: 'Hire', title: 'Pros', subtitle: 'Plumbers, electricians & trusted contractors', icon: '🛠️', gradient: 'linear-gradient(135deg, #00C2CB 0%, #6366F1 100%)', route: '/app/pros' },
+  { id: 'cities', tag: 'Discover', title: 'Cities', subtitle: 'Compare livability, food & culture', icon: '🌆', gradient: 'linear-gradient(135deg, #8A05BE 0%, #0EA5E9 100%)', route: '/app/cities' },
+  { id: 'atlas', tag: 'Travel', title: 'Atlas', subtitle: 'Bucket-list destinations worldwide', icon: '✈️', gradient: 'linear-gradient(135deg, #F59E0B 0%, #EF4444 100%)', route: '/app/atlas' },
+  { id: 'rv-camping', tag: 'Outdoors', title: 'RV & Camping', subtitle: 'Campgrounds, sites & boondocking', icon: '🏕️', gradient: 'linear-gradient(135deg, #00C2CB 0%, #10B981 100%)', route: '/app/rv-camping' },
+];
+
 // Top contributors mock data
 const topContributors = [
   { rank: 1, name: 'Sarah M.', taps: 1247, badge: '🥇', streak: 45 },
@@ -152,6 +165,24 @@ export default function HomeScreen() {
   
   // Greeting
   const [greeting, setGreeting] = useState('');
+
+  // Featured carousel (rides + all Tavvy features)
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [carouselPaused, setCarouselPaused] = useState(false);
+  const carouselTouchX = useRef<number | null>(null);
+
+  // Auto-advance the carousel every 4.5s unless paused (hover / touch)
+  useEffect(() => {
+    if (carouselPaused) return;
+    const id = setInterval(() => {
+      setActiveSlide((s) => (s + 1) % featureSlides.length);
+    }, 4500);
+    return () => clearInterval(id);
+  }, [carouselPaused]);
+
+  const goToSlide = useCallback((i: number) => {
+    setActiveSlide(((i % featureSlides.length) + featureSlides.length) % featureSlides.length);
+  }, []);
 
   // Set greeting based on time of day
   useEffect(() => {
@@ -601,6 +632,55 @@ export default function HomeScreen() {
                   </div>
                   <span>{t('home.saved')}</span>
                 </button>
+              </div>
+            </section>
+
+            {/* Featured Carousel — rides + every Tavvy feature (broad appeal) */}
+            <section
+              className="feature-carousel"
+              onMouseEnter={() => setCarouselPaused(true)}
+              onMouseLeave={() => setCarouselPaused(false)}
+              onTouchStart={(e) => { carouselTouchX.current = e.touches[0].clientX; setCarouselPaused(true); }}
+              onTouchEnd={(e) => {
+                const start = carouselTouchX.current;
+                if (start != null) {
+                  const dx = e.changedTouches[0].clientX - start;
+                  if (Math.abs(dx) > 40) goToSlide(activeSlide + (dx < 0 ? 1 : -1));
+                }
+                carouselTouchX.current = null;
+                setCarouselPaused(false);
+              }}
+            >
+              <div className="feature-carousel-track" style={{ transform: `translateX(-${activeSlide * 100}%)` }}>
+                {featureSlides.map((slide) => (
+                  <button
+                    key={slide.id}
+                    className="feature-slide"
+                    style={{ background: slide.gradient }}
+                    onClick={() => router.push(slide.route, undefined, { locale })}
+                    aria-label={`${slide.title} — ${slide.subtitle}`}
+                  >
+                    <span className="feature-slide-tag">{slide.tag}</span>
+                    <div className="feature-slide-body">
+                      <span className="feature-slide-icon">{slide.icon}</span>
+                      <div className="feature-slide-text">
+                        <h2 className="feature-slide-title">{slide.title}</h2>
+                        <p className="feature-slide-subtitle">{slide.subtitle}</p>
+                      </div>
+                    </div>
+                    <span className="feature-slide-cta">Explore <IoChevronForward size={16} /></span>
+                  </button>
+                ))}
+              </div>
+              <div className="feature-dots">
+                {featureSlides.map((slide, i) => (
+                  <button
+                    key={slide.id}
+                    className={`feature-dot ${i === activeSlide ? 'active' : ''}`}
+                    onClick={() => goToSlide(i)}
+                    aria-label={`Go to ${slide.title}`}
+                  />
+                ))}
               </div>
             </section>
 
@@ -1108,6 +1188,114 @@ export default function HomeScreen() {
           /* Mood Section - iOS Style */
           .mood-section {
             margin-bottom: 32px;
+          }
+
+          /* Featured Carousel */
+          .feature-carousel {
+            position: relative;
+            margin: 4px 0 28px;
+            overflow: hidden;
+          }
+          .feature-carousel-track {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform;
+          }
+          .feature-slide {
+            position: relative;
+            flex: 0 0 100%;
+            min-width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: left;
+            min-height: 168px;
+            padding: 18px 20px;
+            border: none;
+            border-radius: 22px;
+            cursor: pointer;
+            color: #fff;
+            overflow: hidden;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+          }
+          .feature-slide:active {
+            transform: scale(0.99);
+          }
+          .feature-slide::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(120% 120% at 100% 0%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 45%);
+            pointer-events: none;
+          }
+          .feature-slide-tag {
+            align-self: flex-start;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            padding: 5px 11px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.22);
+            backdrop-filter: blur(4px);
+            z-index: 1;
+          }
+          .feature-slide-body {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 1;
+          }
+          .feature-slide-icon {
+            font-size: 46px;
+            line-height: 1;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
+          }
+          .feature-slide-title {
+            font-size: 26px;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.5px;
+          }
+          .feature-slide-subtitle {
+            font-size: 14px;
+            margin: 3px 0 0;
+            opacity: 0.92;
+            line-height: 1.3;
+          }
+          .feature-slide-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            align-self: flex-start;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.22);
+            z-index: 1;
+          }
+          .feature-dots {
+            display: flex;
+            justify-content: center;
+            gap: 7px;
+            margin-top: 14px;
+          }
+          .feature-dot {
+            width: 7px;
+            height: 7px;
+            padding: 0;
+            border: none;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.25);
+            cursor: pointer;
+            transition: width 0.3s ease, background 0.3s ease;
+          }
+          .feature-dot.active {
+            width: 22px;
+            background: #8A05BE;
           }
 
           .section-title {
