@@ -226,7 +226,17 @@ export default function MapScreen() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const mapBoundsRef = useRef<{ minLat: number; maxLat: number; minLng: number; maxLng: number; center: [number, number] } | null>(null);
   const initialLoadDone = useRef(false);
-  
+
+  // Apply ?q= from the URL (e.g. arriving from the home search bar via Enter)
+  useEffect(() => {
+    if (!router.isReady) return;
+    const q = router.query.q;
+    if (typeof q === 'string' && q.trim()) {
+      setSearchQuery(q.trim());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.isReady]);
+
   // Filter states
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState('relevance');

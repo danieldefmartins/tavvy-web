@@ -95,7 +95,7 @@ export default function AtlasHomeScreen() {
       // Fetch all published articles
       const { data: articles } = await supabase
         .from('atlas_articles')
-        .select('id, title, slug, excerpt, content, cover_image_url, author_name, author_avatar_url, read_time_minutes, view_count, love_count, category_id, published_at, article_template_type')
+        .select('id, title, slug, excerpt, cover_image_url, author_name, author_avatar_url, read_time_minutes, view_count, love_count, category_id, published_at, article_template_type')
         .eq('status', 'published')
         .order('published_at', { ascending: false });
 

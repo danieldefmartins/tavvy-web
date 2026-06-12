@@ -578,7 +578,12 @@ export default function HomeScreen() {
                   onBlur={() => {
                     setTimeout(() => setIsSearchFocused(false), 200);
                   }}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const q = searchQuery.trim();
+                      if (q) router.push(`/app/map?q=${encodeURIComponent(q)}`, undefined, { locale });
+                    }
+                  }}
                   className="search-input"
                 />
                 {searchQuery && (
@@ -1073,7 +1078,7 @@ export default function HomeScreen() {
             top: calc(100% + 6px);
             left: 0;
             right: 0;
-            background: ${isDark ? '#1E0A3C' : '#fff'};
+            background: ${isDark ? '#1c1c1e' : '#F5F5F5'};
             border-radius: 16px;
             border: 1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#eee'};
             box-shadow: 0 8px 32px rgba(0,0,0,0.2);
