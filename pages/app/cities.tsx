@@ -34,11 +34,11 @@ interface City {
 // recurring event/festival so there's a reason to read about each city.
 const FEATURED_MONTH_LABEL = 'June';
 const FEATURED_THIS_MONTH = [
-  { slug: 'new-york-city', event: 'NYC Pride', reason: "June ends with the world's largest Pride march — over two million people fill the streets for the final-Sunday parade." },
-  { slug: 'chicago', event: 'Chicago Blues Festival', reason: 'The world’s largest free blues festival takes over Millennium Park in early June — three days of legendary live music.' },
-  { slug: 'nashville', event: 'CMA Fest', reason: 'Four nights of country music and stadium shows turn downtown Music City into its biggest party every June.' },
-  { slug: 'san-francisco', event: 'SF Pride', reason: "One of the planet's largest Pride celebrations paints the city in color across the last weekend of June." },
-  { slug: 'new-orleans', event: 'Creole Tomato Festival', reason: 'The historic French Market celebrates summer’s first harvest with Creole cooking, live jazz, and parades in mid-June.' },
+  { slug: 'new-york-city', event: 'Summer in the City', reason: "Summer kicks off with free SummerStage concerts in Central Park, rooftop dining, and golden evenings strolling the High Line." },
+  { slug: 'chicago', event: 'Chicago Blues Festival', reason: "The world's largest free blues festival fills Millennium Park in early June — live music, food trucks, and lakefront fun for everyone." },
+  { slug: 'nashville', event: 'CMA Fest', reason: "Four days of country music and family-friendly block parties turn downtown Music City into one big celebration." },
+  { slug: 'san-francisco', event: 'Golden Gate Summer', reason: "Sunny days for biking across the Golden Gate Bridge, exploring Golden Gate Park, and free Sunday concerts at Stern Grove." },
+  { slug: 'new-orleans', event: 'Creole Tomato Festival', reason: "The historic French Market celebrates summer's harvest with Creole cooking, live jazz, and family fun in mid-June." },
 ];
 const FEATURED_SLUGS = FEATURED_THIS_MONTH.map((f) => f.slug);
 const CITY_FALLBACK_IMG = 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600';
