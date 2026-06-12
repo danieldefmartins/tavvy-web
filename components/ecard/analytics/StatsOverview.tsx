@@ -12,7 +12,7 @@ interface StatsOverviewProps {
 }
 
 export default function StatsOverview({ viewCount, tapCount, isDark }: StatsOverviewProps) {
-  const cardBg = isDark ? '#1E0A3C' : '#FFFFFF';
+  const cardBg = isDark ? '#1E1E1E' : '#FFFFFF';
   const textPrimary = isDark ? '#FFFFFF' : '#111111';
   const textSecondary = isDark ? '#94A3B8' : '#6B7280';
 

@@ -457,7 +457,7 @@ export default function EditorLayout() {
             onClick={(e) => e.stopPropagation()}
             style={{
               width: '100%', maxWidth: 380, borderRadius: 24, padding: 28,
-              background: isDark ? '#1E0A3C' : '#FFFFFF', textAlign: 'center',
+              background: isDark ? '#1E1E1E' : '#FFFFFF', textAlign: 'center',
               position: 'relative', boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
             }}
           >
@@ -515,7 +515,7 @@ export default function EditorLayout() {
               maxWidth: 340,
               borderRadius: 24,
               padding: 28,
-              background: isDark ? '#1E0A3C' : '#FFFFFF',
+              background: isDark ? '#1E1E1E' : '#FFFFFF',
               textAlign: 'center',
               position: 'relative',
               boxShadow: '0 20px 60px rgba(0,0,0,0.3)',

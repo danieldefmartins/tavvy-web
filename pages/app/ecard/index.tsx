@@ -388,7 +388,7 @@ export default function ECardHubScreen() {
               left: contextMenu.x,
               zIndex: 10000,
               minWidth: 180,
-              background: isDark ? '#1E0A3C' : '#FFFFFF',
+              background: isDark ? '#1E1E1E' : '#FFFFFF',
               borderRadius: 12,
               boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
               border: `1px solid ${border}`,

@@ -502,7 +502,7 @@ export default function ECardPreviewPage() {
           {/* Premium Required Modal */}
           {showPremiumModal && (
             <div className="modal-overlay" onClick={() => setShowPremiumModal(false)}>
-              <div className="modal" onClick={e => e.stopPropagation()} style={{ backgroundColor: isDark ? '#1E0A3C' : '#fff', maxWidth: 380 }}>
+              <div className="modal" onClick={e => e.stopPropagation()} style={{ backgroundColor: isDark ? '#1E1E1E' : '#fff', maxWidth: 380 }}>
                 <button className="modal-close" onClick={() => setShowPremiumModal(false)}>
                   <IoClose size={24} color={isDark ? '#fff' : '#333'} />
                 </button>
@@ -540,7 +540,7 @@ export default function ECardPreviewPage() {
           {/* QR Code Modal */}
           {showQRModal && cardData?.slug && (
             <div className="modal-overlay" onClick={() => setShowQRModal(false)}>
-              <div className="modal qr-modal" onClick={e => e.stopPropagation()} style={{ backgroundColor: isDark ? '#1E0A3C' : '#fff', maxWidth: 420 }}>
+              <div className="modal qr-modal" onClick={e => e.stopPropagation()} style={{ backgroundColor: isDark ? '#1E1E1E' : '#fff', maxWidth: 420 }}>
                 <button className="modal-close" onClick={() => setShowQRModal(false)}>
                   <IoClose size={24} color={isDark ? '#fff' : '#333'} />
                 </button>
@@ -705,7 +705,7 @@ export default function ECardPreviewPage() {
             border-radius: 20px;
             overflow: hidden;
             position: relative;
-            background: ${isDark ? '#1E0A3C' : '#fff'};
+            background: ${isDark ? '#1E1E1E' : '#fff'};
             border: 1px solid ${isDark ? '#250E45' : '#E5E7EB'};
             box-shadow: 0 4px 24px rgba(0,0,0,0.08);
           }
@@ -838,7 +838,7 @@ export default function ECardPreviewPage() {
             width: calc(100% - 32px);
             margin: 0 16px 8px;
             padding: 12px;
-            background: ${isDark ? '#1E0A3C' : '#fff'};
+            background: ${isDark ? '#1E1E1E' : '#fff'};
             border: 1px solid ${isDark ? '#250E45' : '#E5E7EB'};
             border-radius: 12px;
             color: ${isDark ? '#E2E8F0' : '#374151'};
@@ -859,7 +859,7 @@ export default function ECardPreviewPage() {
 
           .quick-edit-toolbar {
             margin: 0 16px 16px;
-            background: ${isDark ? '#1E0A3C' : '#fff'};
+            background: ${isDark ? '#1E1E1E' : '#fff'};
             border: 1px solid ${isDark ? '#250E45' : '#E5E7EB'};
             border-radius: 16px;
             overflow: hidden;
@@ -1050,7 +1050,7 @@ export default function ECardPreviewPage() {
             justify-content: center;
             gap: 8px;
             padding: 14px;
-            background: ${isDark ? '#1E0A3C' : '#fff'};
+            background: ${isDark ? '#1E1E1E' : '#fff'};
             border: none;
             border-radius: 12px;
             color: ${isDark ? '#fff' : '#333'};

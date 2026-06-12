@@ -37,7 +37,7 @@ export default function ZipCodePrompt({ isOpen, isDark, onSubmit, onClose }: Zip
     );
   };
 
-  const bg = isDark ? '#1E0A3C' : '#fff';
+  const bg = isDark ? '#1E1E1E' : '#fff';
   const text = isDark ? '#F1F5F9' : '#1F2937';
   const textSec = isDark ? '#94A3B8' : '#6B7280';
   const inputBg = isDark ? '#0F172A' : '#F9FAFB';

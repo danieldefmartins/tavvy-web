@@ -29,7 +29,7 @@ export default function QuickSetup({ onBack, onCreate, creating, isDark }: Quick
 
   const textPrimary = isDark ? '#FFFFFF' : '#111111';
   const textSecondary = isDark ? '#94A3B8' : '#6B7280';
-  const inputBg = isDark ? '#1E0A3C' : '#FFFFFF';
+  const inputBg = isDark ? '#1E1E1E' : '#FFFFFF';
   const inputColor = isDark ? '#fff' : '#333';
   const borderColor = isDark ? '#250E45' : '#E5E7EB';
 

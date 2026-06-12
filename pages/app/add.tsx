@@ -169,7 +169,7 @@ export default function UniversalAddScreen() {
   const bgColor = isDark ? BG_DARK : BG_LIGHT;
   const textColor = isDark ? '#FFFFFF' : '#000000';
   const subtextColor = isDark ? '#9CA3AF' : '#6B7280';
-  const cardBg = isDark ? '#1E0A3C' : '#FFFFFF';
+  const cardBg = isDark ? '#1E1E1E' : '#FFFFFF';
 
   // Show resume modal when there's a pending draft
   useEffect(() => {

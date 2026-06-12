@@ -171,7 +171,7 @@ export default function SignalBar({
       {expanded && details && !isCompact && (
         <div 
           className="signal-expanded-content"
-          style={{ backgroundColor: isDark ? '#1E0A3C' : '#F4F0FF' }}
+          style={{ backgroundColor: isDark ? '#1E1E1E' : '#F4F0FF' }}
         >
           {(details.intensity1Count || details.intensity2Count || details.intensity3Count) && (
             <div className="intensity-section">

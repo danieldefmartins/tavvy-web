@@ -193,7 +193,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
         }
 
         .onboarding-modal {
-          background: #1E0A3C;
+          background: #1E1E1E;
           border-radius: 28px;
           padding: 40px 32px 32px;
           max-width: 420px;
