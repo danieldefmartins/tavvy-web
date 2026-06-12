@@ -67,10 +67,11 @@ export default function ProviderProfileScreen() {
     setLoading(true);
     try {
       // Fetch provider details
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(id));
       const { data: providerData, error: providerError } = await supabase
         .from('pro_providers')
         .select('*')
-        .or(`id.eq.${id},slug.eq.${id}`)
+        .eq(isUuid ? 'id' : 'slug', String(id))
         .single();
 
       if (!providerError && providerData) {

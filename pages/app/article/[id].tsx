@@ -167,10 +167,13 @@ export default function ArticleDetailScreen() {
   const fetchArticle = async () => {
     setLoading(true);
     try {
+      // The URL param is usually a slug; only match by id when it's a real UUID
+      // (comparing the uuid `id` column to a slug string errors out the whole query).
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(id));
       const { data: articleData, error: articleError } = await supabase
         .from('atlas_articles')
         .select('*')
-        .or(`id.eq.${id},slug.eq.${id}`)
+        .eq(isUuid ? 'id' : 'slug', String(id))
         .single();
 
       if (!articleError && articleData) {

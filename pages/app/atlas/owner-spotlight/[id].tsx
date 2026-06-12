@@ -112,11 +112,12 @@ export default function OwnerSpotlightScreen() {
   const loadArticle = async () => {
     setLoading(true);
     try {
-      // Fetch the article
+      // Fetch the article (param is usually a slug; only match by id for real UUIDs)
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(id));
       const { data: articleData, error: articleError } = await supabase
         .from('atlas_articles')
         .select('*')
-        .or(`id.eq.${id},slug.eq.${id}`)
+        .eq(isUuid ? 'id' : 'slug', String(id))
         .single();
 
       if (!articleError && articleData) {
