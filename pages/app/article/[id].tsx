@@ -31,6 +31,7 @@ import {
   IoMoon
 } from 'react-icons/io5';
 import { ContentBlockRenderer, ContentBlock } from '../../../components/atlas/ContentBlockRenderer';
+import AudioPlayer from '../../../components/atlas/AudioPlayer';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
@@ -93,6 +94,8 @@ interface Article {
   read_time_minutes?: number;
   love_count?: number;
   tags?: string[];
+  audio_url?: string | null;
+  audio_duration?: number | null;
   article_template_type?: string;
 }
 
@@ -391,9 +394,6 @@ export default function ArticleDetailScreen() {
                   <IoArrowBack size={24} color="white" />
                 </button>
                 <div className="right-actions">
-                  <button className="action-btn" onClick={() => setShowSettingsModal(true)}>
-                    <IoSettingsOutline size={20} color="white" />
-                  </button>
                   <button className="action-btn" onClick={toggleSave}>
                     {isSaved ? (
                       <IoBookmark size={20} color="white" />
@@ -449,6 +449,23 @@ export default function ArticleDetailScreen() {
                   </span>
                 </button>
               </div>
+            </div>
+
+            {/* Audiobook player (Listen to this article) */}
+            {article.audio_url && (
+              <AudioPlayer audioUrl={article.audio_url} isDark={isDark} durationSeconds={article.audio_duration} />
+            )}
+
+            {/* Reading options — right by the text, clear "Aa" control */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, margin: '2px 0 10px' }}>
+              <span style={{ color: colors.metaText, fontSize: 12 }}>Reading</span>
+              <button
+                onClick={() => setShowSettingsModal(true)}
+                aria-label="Reading options"
+                style={{ display: 'flex', alignItems: 'baseline', gap: 1, padding: '5px 12px', borderRadius: 999, border: `1px solid ${colors.divider}`, background: 'transparent', color: colors.text, cursor: 'pointer' }}
+              >
+                <span style={{ fontSize: 16, fontWeight: 800 }}>A</span><span style={{ fontSize: 11, fontWeight: 800 }}>a</span>
+              </button>
             </div>
 
             {/* Excerpt */}

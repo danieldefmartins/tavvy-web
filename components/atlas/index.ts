@@ -8,3 +8,4 @@ export { default as UniverseCard } from './UniverseCard';
 export { default as CategoryCard } from './CategoryCard';
 export { ContentBlockRenderer } from './ContentBlockRenderer';
 export type { ContentBlock } from './ContentBlockRenderer';
+export { default as AudioPlayer } from './AudioPlayer';
