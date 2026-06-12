@@ -299,8 +299,8 @@ export default function CitiesBrowseScreen() {
           .feature-card {
             display: flex;
             flex-direction: column;
-            flex: 0 0 85vw;
-            max-width: 460px;
+            flex: 0 0 90vw;
+            max-width: 480px;
             scroll-snap-align: start;
             border-radius: 20px;
             overflow: hidden;
