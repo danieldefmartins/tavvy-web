@@ -136,6 +136,9 @@ export default function CitiesBrowseScreen() {
                       locale={locale}
                       className="feature-card"
                       style={{
+                        flex: '0 0 90vw',
+                        maxWidth: 480,
+                        scrollSnapAlign: 'start',
                         background: isDark ? 'rgba(255,255,255,0.05)' : '#fff',
                         borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#EDEDED',
                       }}
