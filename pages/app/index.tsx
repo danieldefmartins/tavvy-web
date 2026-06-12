@@ -566,6 +566,7 @@ export default function HomeScreen() {
               </p>
 
               {/* Search */}
+              <div style={{ position: 'relative' }}>
               <div className="hero-search">
                 <IoSearch size={20} className="search-icon" />
                 <input
@@ -620,6 +621,7 @@ export default function HomeScreen() {
                   ))}
                 </div>
               )}
+              </div>
 
               {/* Quick Actions */}
               <div className="hero-quick-actions">
@@ -1068,15 +1070,16 @@ export default function HomeScreen() {
           /* Autocomplete below search */
           .autocomplete-dropdown {
             position: absolute;
-            top: calc(100% + 4px);
+            top: calc(100% + 6px);
             left: 0;
             right: 0;
             background: ${isDark ? '#1E0A3C' : '#fff'};
             border-radius: 16px;
             border: 1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#eee'};
             box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-            z-index: 50;
-            overflow: hidden;
+            z-index: 1000;
+            max-height: 360px;
+            overflow-y: auto;
           }
 
           /* Legacy compat */
@@ -1123,19 +1126,6 @@ export default function HomeScreen() {
           }
 
           /* Autocomplete Dropdown */
-          .autocomplete-dropdown {
-            position: absolute;
-            top: 76px;
-            left: 20px;
-            right: 20px;
-            background: ${isDark ? '#2C2C2E' : '#fff'};
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-            overflow: hidden;
-            z-index: 1000;
-            max-height: 400px;
-            overflow-y: auto;
-          }
 
           .suggestion-item {
             display: flex;
