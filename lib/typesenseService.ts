@@ -172,9 +172,15 @@ export async function searchPlaces(options: SearchOptions): Promise<SearchResult
       query_by: 'name,categories,location_locality,location_region',
       query_by_weights: '4,3,1,1',
 
-      sort_by: hasGeoLocation
-        ? `location(${latitude}, ${longitude}):asc,popularity:desc`
-        : 'popularity:desc',
+      // For a real text query, rank by relevance then popularity (Tavvy's own
+      // reviewed places carry a popularity boost, so they win ties) — this makes
+      // a specific place like "Riva Cucina" findable no matter how far away it is.
+      // For location-only browsing, sort by proximity.
+      sort_by: hasTextQuery
+        ? '_text_match:desc,popularity:desc'
+        : hasGeoLocation
+          ? `location(${latitude}, ${longitude}):asc,popularity:desc`
+          : 'popularity:desc',
       per_page: limit,
       page: Math.floor(offset / limit) + 1,
 
