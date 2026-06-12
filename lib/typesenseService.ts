@@ -160,6 +160,11 @@ export async function searchPlaces(options: SearchOptions): Promise<SearchResult
   } = options;
 
   const hasGeoLocation = latitude !== undefined && longitude !== undefined && radiusKm !== undefined;
+  // When the user types an actual search term, find matches ANYWHERE (ranked by
+  // proximity) instead of hard-filtering to a radius — so a specific place like
+  // "Riva Cucina" is findable even if it's not nearby. The radius filter is only
+  // applied for location-only browsing (no text query).
+  const hasTextQuery = !!(query && query.trim() && query.trim() !== '*');
 
   try {
     const searchParams: any = {
@@ -183,7 +188,7 @@ export async function searchPlaces(options: SearchOptions): Promise<SearchResult
     // Build all filters
     const filters = [];
 
-    if (hasGeoLocation) {
+    if (hasGeoLocation && !hasTextQuery) {
       filters.push(`location:(${latitude}, ${longitude}, ${radiusKm} km)`);
     }
 
