@@ -95,6 +95,7 @@ interface Article {
   love_count?: number;
   tags?: string[];
   audio_url?: string | null;
+  audio_url_male?: string | null;
   audio_duration?: number | null;
   article_template_type?: string;
 }
@@ -451,9 +452,14 @@ export default function ArticleDetailScreen() {
               </div>
             </div>
 
-            {/* Audiobook player (Listen to this article) */}
-            {article.audio_url && (
-              <AudioPlayer audioUrl={article.audio_url} isDark={isDark} durationSeconds={article.audio_duration} />
+            {/* Audiobook player (Listen to this article) — free edge-tts narration, female/male */}
+            {(article.audio_url || article.audio_url_male) && (
+              <AudioPlayer
+                femaleUrl={article.audio_url}
+                maleUrl={article.audio_url_male}
+                isDark={isDark}
+                durationSeconds={article.audio_duration}
+              />
             )}
 
             {/* Reading options — right by the text, clear "Aa" control */}
