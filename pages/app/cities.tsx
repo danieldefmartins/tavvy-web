@@ -41,6 +41,7 @@ const FEATURED_THIS_MONTH = [
   { slug: 'new-orleans', event: 'Creole Tomato Festival', reason: 'The historic French Market celebrates summer’s first harvest with Creole cooking, live jazz, and parades in mid-June.' },
 ];
 const FEATURED_SLUGS = FEATURED_THIS_MONTH.map((f) => f.slug);
+const CITY_FALLBACK_IMG = 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600';
 
 export default function CitiesBrowseScreen() {
   const router = useRouter();
@@ -136,15 +137,20 @@ export default function CitiesBrowseScreen() {
                       locale={locale}
                       className="feature-card"
                       style={{
-                        flex: '0 0 90vw',
-                        maxWidth: 480,
+                        flex: '0 0 82vw',
+                        maxWidth: 420,
                         scrollSnapAlign: 'start',
                         background: isDark ? 'rgba(255,255,255,0.05)' : '#fff',
                         borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#EDEDED',
                       }}
                     >
                       <div className="feature-card-media">
-                        <img src={city.cover_image_url} alt={city.name} className="feature-card-img" />
+                        <img
+                          src={city.cover_image_url || CITY_FALLBACK_IMG}
+                          alt={city.name}
+                          className="feature-card-img"
+                          onError={(e) => { if (!e.currentTarget.src.includes('photo-1477959858617')) e.currentTarget.src = CITY_FALLBACK_IMG; }}
+                        />
                         <span className="feature-card-badge">{FEATURED_MONTH_LABEL}</span>
                       </div>
                       <div className="feature-card-body">
@@ -189,30 +195,39 @@ export default function CitiesBrowseScreen() {
                     locale={locale}
                     className="city-row"
                     style={{
+                      display: 'block',
+                      overflow: 'hidden',
+                      padding: 14,
+                      borderRadius: 18,
+                      border: `1px solid ${isDark ? 'rgba(255,255,255,0.07)' : '#EDEDED'}`,
                       background: isDark ? 'rgba(255,255,255,0.04)' : '#fff',
-                      borderColor: isDark ? 'rgba(255,255,255,0.07)' : '#EDEDED',
+                      textDecoration: 'none',
+                      boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
                     }}
                   >
                     <img
-                      className="city-row-img"
-                      src={city.cover_image_url || city.thumbnail_image_url || 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400'}
+                      src={city.cover_image_url || city.thumbnail_image_url || CITY_FALLBACK_IMG}
                       alt={city.name}
+                      onError={(e) => { if (!e.currentTarget.src.includes('photo-1477959858617')) e.currentTarget.src = CITY_FALLBACK_IMG; }}
+                      style={{ float: 'right', width: 120, height: 120, borderRadius: 14, objectFit: 'cover', margin: '0 0 10px 14px' }}
                     />
-                    <div className="city-row-body">
-                      <h3 className="city-row-title" style={{ color: theme.text }}>{city.name}</h3>
-                      <span className="city-row-loc" style={{ color: theme.textSecondary }}>
-                        <FiMapPin size={11} /> {city.state}, {city.country || 'USA'}
-                      </span>
-                      {city.culture && (
-                        <p className="city-row-desc" style={{ color: theme.textSecondary }}>{city.culture}</p>
-                      )}
-                      {city.best_time_to_visit && (
-                        <span className="city-row-meta" style={{ color: theme.primary }}>
-                          Best time to visit: {city.best_time_to_visit}
-                        </span>
-                      )}
+                    <h3 style={{ color: theme.text, fontSize: 17, fontWeight: 700, margin: '0 0 2px', letterSpacing: '-0.2px' }}>
+                      {city.name}
+                    </h3>
+                    <div style={{ color: theme.textSecondary, fontSize: 12, marginBottom: 7 }}>
+                      <FiMapPin size={11} style={{ verticalAlign: -1, marginRight: 3 }} />
+                      {city.state}, {city.country || 'USA'}
                     </div>
-                    <FiChevronRight size={18} color={theme.textSecondary} className="city-row-chev" />
+                    {city.culture && (
+                      <p style={{ color: theme.textSecondary, fontSize: 13, lineHeight: 1.5, margin: 0 }}>
+                        {city.culture.length > 240 ? city.culture.slice(0, 240).trim() + '…' : city.culture}
+                      </p>
+                    )}
+                    {city.best_time_to_visit && (
+                      <div style={{ color: theme.primary, fontSize: 11, fontWeight: 600, marginTop: 8, clear: 'both' }}>
+                        Best time to visit: {city.best_time_to_visit}
+                      </div>
+                    )}
                   </Link>
                 ))}
               </div>
@@ -395,55 +410,13 @@ export default function CitiesBrowseScreen() {
             gap: 12px;
           }
 
-          .city-row {
-            display: flex;
-            align-items: stretch;
-            gap: 14px;
-            padding: 10px;
-            border-radius: 18px;
-            border: 1px solid transparent;
-            text-decoration: none;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-          }
+          /* Row layout is inline (styled-jsx scoping is unreliable on this page);
+             this only adds a hover nicety. */
+          .city-row { transition: transform 0.15s ease, box-shadow 0.15s ease; }
           .city-row:hover {
             transform: translateY(-2px);
-            border-color: rgba(138, 5, 190, 0.4);
-            box-shadow: 0 8px 22px rgba(0,0,0,0.14);
+            box-shadow: 0 8px 22px rgba(0,0,0,0.14) !important;
           }
-
-          .city-row-img {
-            width: 112px;
-            min-height: 112px;
-            align-self: stretch;
-            flex-shrink: 0;
-            border-radius: 14px;
-            object-fit: cover;
-            display: block;
-          }
-
-          .city-row-body {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 3px;
-            padding: 2px 0;
-          }
-          .city-row-title { font-size: 17px; font-weight: 700; margin: 0; letter-spacing: -0.2px; }
-          .city-row-loc { font-size: 12px; display: flex; align-items: center; gap: 4px; }
-          .city-row-desc {
-            font-size: 12.5px;
-            line-height: 1.4;
-            margin: 4px 0 0;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-          }
-          .city-row-meta { font-size: 11px; font-weight: 600; margin-top: 4px; }
-          .city-row-chev { flex-shrink: 0; align-self: center; }
         `}</style>
       </AppLayout>
   );
