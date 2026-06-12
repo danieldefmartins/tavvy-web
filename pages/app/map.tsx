@@ -254,72 +254,115 @@ export default function MapScreen() {
   // Snap points: collapsed (120px peek), half (50vh), expanded (85vh)
   const SNAP_COLLAPSED = 120;
   const SNAP_HALF = typeof window !== 'undefined' ? window.innerHeight * 0.5 : 400;
-  const SNAP_EXPANDED = typeof window !== 'undefined' ? window.innerHeight * 0.85 : 680;
   const [sheetHeightPx, setSheetHeightPx] = useState(SNAP_HALF);
   const sheetRef = useRef<HTMLDivElement>(null);
   const dragStartY = useRef<number>(0);
   const dragStartHeight = useRef<number>(0);
   const isDragging = useRef(false);
 
-  // Snap to nearest snap point
-  const snapToNearest = (height: number) => {
+  // --- Smooth, velocity-aware bottom-sheet dragging ---
+  // During a drag we write the height straight to the DOM (rAF-coalesced) so we
+  // never trigger a React re-render per frame. On release we pick a snap point
+  // based on the FLICK velocity (not just nearest), then let one CSS transition
+  // settle it with an iOS-style spring curve.
+  const lastY = useRef(0);
+  const lastT = useRef(0);
+  const velocity = useRef(0);          // px/ms, positive = dragging upward (growing)
+  const didDrag = useRef(false);
+  const rafId = useRef<number | null>(null);
+  const pendingHeight = useRef<number | null>(null);
+  const SHEET_EASE = 'height 0.42s cubic-bezier(0.32, 0.72, 0, 1)';
+
+  const getSnapPoints = () => {
     const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
-    const snapPoints = [SNAP_COLLAPSED, vh * 0.5, vh * 0.85];
-    let closest = snapPoints[0];
-    let minDist = Math.abs(height - closest);
-    for (const sp of snapPoints) {
-      const dist = Math.abs(height - sp);
-      if (dist < minDist) {
-        minDist = dist;
-        closest = sp;
-      }
+    return [SNAP_COLLAPSED, vh * 0.5, vh * 0.88];
+  };
+
+  const flushHeight = () => {
+    rafId.current = null;
+    if (pendingHeight.current != null && sheetRef.current) {
+      sheetRef.current.style.transition = 'none';
+      sheetRef.current.style.height = `${pendingHeight.current}px`;
     }
-    setSheetHeightPx(closest);
   };
 
-  // Touch handlers for dragging
-  const handleTouchStart = (e: React.TouchEvent) => {
+  const chooseSnap = (height: number, vel: number) => {
+    const snaps = getSnapPoints().sort((a, b) => a - b);
+    const FLICK = 0.4; // px/ms
+    if (vel > FLICK) return snaps.find((s) => s > height + 8) ?? snaps[snaps.length - 1];
+    if (vel < -FLICK) return [...snaps].reverse().find((s) => s < height - 8) ?? snaps[0];
+    return snaps.reduce((best, s) => (Math.abs(s - height) < Math.abs(best - height) ? s : best), snaps[0]);
+  };
+
+  const beginDrag = (clientY: number) => {
     isDragging.current = true;
-    dragStartY.current = e.touches[0].clientY;
-    dragStartHeight.current = sheetHeightPx;
+    didDrag.current = false;
+    dragStartY.current = clientY;
+    dragStartHeight.current = sheetRef.current
+      ? sheetRef.current.getBoundingClientRect().height
+      : sheetHeightPx;
+    lastY.current = clientY;
+    lastT.current = performance.now();
+    velocity.current = 0;
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
+  const moveDrag = (clientY: number) => {
     if (!isDragging.current) return;
-    const deltaY = dragStartY.current - e.touches[0].clientY;
-    const newHeight = Math.max(SNAP_COLLAPSED, Math.min(dragStartHeight.current + deltaY, SNAP_EXPANDED));
-    setSheetHeightPx(newHeight);
+    const now = performance.now();
+    const dt = now - lastT.current;
+    if (dt > 0) {
+      const v = (lastY.current - clientY) / dt; // upward positive
+      velocity.current = velocity.current * 0.7 + v * 0.3; // smoothed
+    }
+    lastY.current = clientY;
+    lastT.current = now;
+
+    const deltaY = dragStartY.current - clientY;
+    if (Math.abs(deltaY) > 5) didDrag.current = true;
+
+    const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
+    const min = SNAP_COLLAPSED;
+    const max = vh * 0.88;
+    let newHeight = dragStartHeight.current + deltaY;
+    // Rubber-band resistance past the limits so it feels elastic, not stuck.
+    if (newHeight < min) newHeight = min - (min - newHeight) * 0.35;
+    if (newHeight > max) newHeight = max + (newHeight - max) * 0.18;
+    newHeight = Math.max(70, Math.min(newHeight, vh * 0.95));
+
+    pendingHeight.current = newHeight;
+    if (rafId.current == null) rafId.current = requestAnimationFrame(flushHeight);
   };
 
-  const handleTouchEnd = () => {
+  const endDrag = () => {
     if (!isDragging.current) return;
     isDragging.current = false;
-    snapToNearest(sheetHeightPx);
+    if (rafId.current != null) { cancelAnimationFrame(rafId.current); rafId.current = null; }
+    const currentHeight = sheetRef.current
+      ? sheetRef.current.getBoundingClientRect().height
+      : sheetHeightPx;
+    const target = chooseSnap(currentHeight, velocity.current);
+    if (sheetRef.current) {
+      sheetRef.current.style.transition = SHEET_EASE;
+      sheetRef.current.style.height = `${target}px`;
+    }
+    setSheetHeightPx(target);
   };
 
-  // Mouse handlers for desktop dragging
+  // Handle event bindings (whole header is grabbable, not just the pill)
+  const handleTouchStart = (e: React.TouchEvent) => beginDrag(e.touches[0].clientY);
+  const handleTouchMove = (e: React.TouchEvent) => moveDrag(e.touches[0].clientY);
+  const handleTouchEnd = () => endDrag();
   const handleMouseDown = (e: React.MouseEvent) => {
-    isDragging.current = true;
-    dragStartY.current = e.clientY;
-    dragStartHeight.current = sheetHeightPx;
-    document.addEventListener('mousemove', handleMouseMoveGlobal);
-    document.addEventListener('mouseup', handleMouseUpGlobal);
-  };
-
-  const handleMouseMoveGlobal = (e: MouseEvent) => {
-    if (!isDragging.current) return;
-    const deltaY = dragStartY.current - e.clientY;
-    const vh = window.innerHeight;
-    const newHeight = Math.max(SNAP_COLLAPSED, Math.min(dragStartHeight.current + deltaY, vh * 0.85));
-    setSheetHeightPx(newHeight);
-  };
-
-  const handleMouseUpGlobal = () => {
-    if (!isDragging.current) return;
-    isDragging.current = false;
-    snapToNearest(sheetHeightPx);
-    document.removeEventListener('mousemove', handleMouseMoveGlobal);
-    document.removeEventListener('mouseup', handleMouseUpGlobal);
+    e.preventDefault();
+    beginDrag(e.clientY);
+    const onMove = (ev: MouseEvent) => moveDrag(ev.clientY);
+    const onUp = () => {
+      endDrag();
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
   };
   
   // Popup states for map controls
@@ -667,9 +710,9 @@ export default function MapScreen() {
 
   // Dynamic sheet height based on drag state
   const getSheetStyle = () => {
-    return { 
+    return {
       height: `${sheetHeightPx}px`,
-      transition: isDragging.current ? 'none' : 'height 0.3s ease',
+      transition: isDragging.current ? 'none' : SHEET_EASE,
     };
   };
 
@@ -793,7 +836,15 @@ export default function MapScreen() {
               }}
             >
               <FiSearch size={18} className="search-icon" />
-              <span className="search-placeholder-text">
+              <span
+                className="search-placeholder-text"
+                style={{
+                  color: searchQuery
+                    ? (isDark ? '#FFFFFF' : '#111111')
+                    : (isDark ? '#9A9AA0' : '#8A8A8E'),
+                  fontWeight: searchQuery ? 600 : 400,
+                }}
+              >
                 {searchQuery || 'Search places or locations'}
               </span>
               {searchQuery && (
@@ -1148,17 +1199,19 @@ export default function MapScreen() {
           ref={sheetRef}
           style={getSheetStyle()}
         >
-          {/* Draggable Handle — tap to toggle between collapsed/half */}
-          <div 
+          {/* Draggable Handle — drag anywhere on this header; tap to toggle */}
+          <div
             className="sheet-handle"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             onMouseDown={handleMouseDown}
             onClick={() => {
-              // Tap to toggle: if collapsed → expand to half, if half/expanded → collapse
+              // Ignore the click that follows a real drag — only treat true taps as toggles
+              if (didDrag.current) { didDrag.current = false; return; }
+              const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
               if (sheetHeightPx <= SNAP_COLLAPSED + 20) {
-                setSheetHeightPx(SNAP_HALF);
+                setSheetHeightPx(vh * 0.5);
               } else {
                 setSheetHeightPx(SNAP_COLLAPSED);
               }
@@ -1366,12 +1419,13 @@ export default function MapScreen() {
           flex: 1;
           display: flex;
           align-items: center;
-          background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.95)'};
+          background: ${isDark ? 'rgba(44,44,46,0.92)' : 'rgba(255,255,255,0.97)'};
+          border: 1px solid ${isDark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.06)'};
           border-radius: 10px;
           padding: 10px 14px;
           gap: 10px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-          backdrop-filter: blur(8px);
+          box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+          backdrop-filter: blur(12px);
         }
 
         .search-bar.focused {
@@ -1915,9 +1969,10 @@ export default function MapScreen() {
           bottom: 0;
           left: 0;
           right: 0;
-          background: #fff;
+          background: ${isDark ? '#1C1C1E' : '#fff'};
           border-radius: 20px 20px 0 0;
-          box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+          box-shadow: 0 -4px 24px rgba(0,0,0,${isDark ? '0.5' : '0.15'});
+          border-top: 1px solid ${isDark ? 'rgba(255,255,255,0.08)' : 'transparent'};
           z-index: 1001;
           display: flex;
           flex-direction: column;
@@ -1926,7 +1981,7 @@ export default function MapScreen() {
         }
 
         .sheet-handle {
-          padding: 14px 12px 10px;
+          padding: 12px 12px 8px;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -1937,24 +1992,26 @@ export default function MapScreen() {
           flex-shrink: 0;
         }
 
-        .sheet-handle:hover {
-          background: rgba(0,0,0,0.03);
-        }
-
         .sheet-handle:active {
           cursor: grabbing;
         }
 
         .handle-bar {
-          width: 40px;
-          height: 4px;
-          background: #D1D1D6;
-          border-radius: 2px;
+          width: 44px;
+          height: 5px;
+          background: ${isDark ? '#5A5A5E' : '#D1D1D6'};
+          border-radius: 3px;
+          transition: background 0.2s, width 0.2s;
+        }
+
+        .sheet-handle:hover .handle-bar {
+          background: ${isDark ? '#7A7A7E' : '#B0B0B6'};
+          width: 52px;
         }
 
         .handle-hint {
           font-size: 11px;
-          color: #8E8E93;
+          color: ${isDark ? '#8E8E93' : '#8E8E93'};
           text-transform: uppercase;
           letter-spacing: 0.5px;
         }
@@ -1970,7 +2027,7 @@ export default function MapScreen() {
         .sheet-title {
           font-size: 24px;
           font-weight: 700;
-          color: #111;
+          color: ${isDark ? '#fff' : '#111'};
           margin: 0;
         }
 
@@ -1978,13 +2035,13 @@ export default function MapScreen() {
           width: 32px;
           height: 32px;
           border-radius: 50%;
-          background: #F2F2F7;
+          background: ${isDark ? 'rgba(255,255,255,0.1)' : '#F2F2F7'};
           border: none;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          color: #666;
+          color: ${isDark ? '#ccc' : '#666'};
         }
 
         /* Filter Row */
@@ -2006,13 +2063,13 @@ export default function MapScreen() {
           width: 40px;
           height: 40px;
           border-radius: 10px;
-          background: #F2F2F7;
+          background: ${isDark ? 'rgba(255,255,255,0.08)' : '#F2F2F7'};
           border: none;
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          color: #333;
+          color: ${isDark ? '#ddd' : '#333'};
         }
 
         .dropdown-wrapper {
@@ -2025,11 +2082,11 @@ export default function MapScreen() {
           gap: 4px;
           padding: 10px 14px;
           border-radius: 20px;
-          border: 1px solid #E5E5EA;
-          background: #fff;
+          border: 1px solid ${isDark ? 'rgba(255,255,255,0.14)' : '#E5E5EA'};
+          background: ${isDark ? 'rgba(255,255,255,0.06)' : '#fff'};
           font-size: 14px;
           font-weight: 500;
-          color: #333;
+          color: ${isDark ? '#ddd' : '#333'};
           cursor: pointer;
           white-space: nowrap;
         }
@@ -2039,9 +2096,9 @@ export default function MapScreen() {
           top: 100%;
           left: 0;
           margin-top: 4px;
-          background: #fff;
+          background: ${isDark ? '#2C2C2E' : '#fff'};
           border-radius: 12px;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+          box-shadow: 0 4px 20px rgba(0,0,0,${isDark ? '0.4' : '0.15'});
           min-width: 150px;
           z-index: 1002;
           overflow: hidden;
@@ -2055,27 +2112,27 @@ export default function MapScreen() {
           background: none;
           text-align: left;
           font-size: 14px;
-          color: #333;
+          color: ${isDark ? '#ddd' : '#333'};
           cursor: pointer;
         }
 
         .dropdown-item:hover {
-          background: #F2F2F7;
+          background: ${isDark ? 'rgba(255,255,255,0.06)' : '#F2F2F7'};
         }
 
         .dropdown-item.selected {
-          color: ${BLUE};
+          color: ${ACCENT_CYAN};
           font-weight: 600;
         }
 
         .filter-pill {
           padding: 10px 14px;
           border-radius: 20px;
-          border: 1px solid #E5E5EA;
-          background: #fff;
+          border: 1px solid ${isDark ? 'rgba(255,255,255,0.14)' : '#E5E5EA'};
+          background: ${isDark ? 'rgba(255,255,255,0.06)' : '#fff'};
           font-size: 14px;
           font-weight: 500;
-          color: #333;
+          color: ${isDark ? '#ddd' : '#333'};
           cursor: pointer;
           white-space: nowrap;
         }
@@ -2090,7 +2147,7 @@ export default function MapScreen() {
         .places-count {
           padding: 0 20px 12px;
           font-size: 14px;
-          color: #666;
+          color: ${isDark ? '#9A9AA0' : '#666'};
           margin: 0;
         }
 
@@ -2107,7 +2164,7 @@ export default function MapScreen() {
           align-items: center;
           justify-content: center;
           padding: 40px;
-          color: #666;
+          color: ${isDark ? '#9A9AA0' : '#666'};
         }
 
         .spinner {
@@ -2127,22 +2184,22 @@ export default function MapScreen() {
         .empty-state {
           text-align: center;
           padding: 40px;
-          color: #666;
+          color: ${isDark ? '#9A9AA0' : '#666'};
         }
 
         .empty-hint {
           font-size: 14px;
-          color: #999;
+          color: ${isDark ? '#6A6A70' : '#999'};
           margin-top: 8px;
         }
 
         /* Place Card */
         .place-card {
-          background: #fff;
+          background: ${isDark ? '#2C2C2E' : '#fff'};
           border-radius: 16px;
           overflow: hidden;
           margin-bottom: 16px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+          box-shadow: 0 2px 8px rgba(0,0,0,${isDark ? '0.3' : '0.08'});
           cursor: pointer;
           transition: transform 0.2s;
         }
@@ -2187,13 +2244,13 @@ export default function MapScreen() {
         .place-name {
           font-size: 18px;
           font-weight: 600;
-          color: #111;
+          color: ${isDark ? '#fff' : '#111'};
           margin: 0 0 4px;
         }
 
         .place-category {
           font-size: 14px;
-          color: #666;
+          color: ${isDark ? '#9A9AA0' : '#666'};
           margin: 0;
         }
 
