@@ -617,7 +617,7 @@ export function FullCardPreview({ tmpl }: { tmpl: Template }) {
         </svg>
         {/* White bottom */}
         <div style={{ background: cardBgCol, padding: '4px 28px 28px' }}>
-          <div style={{ fontSize: 22, fontWeight: 700, color: '#1a1a2e', marginBottom: 2 }}>{SAMPLE_DATA.name}</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: '#121212', marginBottom: 2 }}>{SAMPLE_DATA.name}</div>
           <div style={{ fontSize: 13, fontWeight: 600, color: '#444', marginBottom: 2 }}>Founder & Principal Consultant</div>
           <div style={{ fontSize: 12, color: '#888', fontStyle: 'italic', marginBottom: 8 }}>{SAMPLE_DATA.company}</div>
           <div style={{ fontSize: 12, color: '#555', lineHeight: 1.6, marginBottom: 12 }}>Business consulting and creative strategy for brands that want to stand out.</div>
@@ -676,7 +676,7 @@ export function FullCardPreview({ tmpl }: { tmpl: Template }) {
         <PhotoAvatar size={100} border={`3px solid ${borderC}`} shadow="0 4px 16px rgba(0,0,0,0.1)" />
         {/* Name / Title / Company */}
         <div style={{ textAlign: 'center', padding: '14px 28px 0' }}>
-          <div style={{ fontSize: 22, fontWeight: 700, color: '#1a1a2e' }}>{SAMPLE_DATA.name}</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: '#121212' }}>{SAMPLE_DATA.name}</div>
           <div style={{ fontSize: 13, fontWeight: 600, color: darkBg, marginTop: 4 }}>Solutions Manager</div>
           <div style={{ fontSize: 12, color: '#888', marginTop: 2 }}>{SAMPLE_DATA.company}</div>
         </div>

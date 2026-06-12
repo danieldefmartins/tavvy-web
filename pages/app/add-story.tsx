@@ -52,7 +52,7 @@ export default function AddStoryPage() {
 
   const colors = {
     background: isDark ? '#0D0D1A' : '#FFFFFF',
-    card: isDark ? '#1A1A2E' : '#F8F9FA',
+    card: isDark ? '#121212' : '#F8F9FA',
     text: isDark ? '#FFFFFF' : '#1B2B5B',
     textSecondary: isDark ? '#AAAAAA' : '#666666',
     border: isDark ? '#333' : '#E5E7EB',
@@ -429,7 +429,7 @@ export default function AddStoryPage() {
         {universeName && (
           <div style={{
             padding: '12px 16px',
-            backgroundColor: isDark ? '#1A1A2E' : '#F0F9FF',
+            backgroundColor: isDark ? '#121212' : '#F0F9FF',
             borderBottom: `1px solid ${colors.border}`,
           }}>
             <p style={{
@@ -578,7 +578,7 @@ export default function AddStoryPage() {
                     left: 0,
                     right: 0,
                     zIndex: 50,
-                    backgroundColor: isDark ? '#1A1A2E' : 'white',
+                    backgroundColor: isDark ? '#121212' : 'white',
                     border: `1px solid ${colors.border}`,
                     borderRadius: '12px',
                     boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
@@ -698,7 +698,7 @@ export default function AddStoryPage() {
                     width: '100%',
                     height: '200px',
                     borderRadius: '12px',
-                    backgroundColor: isDark ? '#1A1A2E' : '#F0F0F0',
+                    backgroundColor: isDark ? '#121212' : '#F0F0F0',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
@@ -865,7 +865,7 @@ export default function AddStoryPage() {
           {/* Info */}
           <div style={{
             padding: '16px',
-            backgroundColor: isDark ? '#1A1A2E' : '#F0F9FF',
+            backgroundColor: isDark ? '#121212' : '#F0F9FF',
             borderRadius: '12px',
           }}>
             <p style={{

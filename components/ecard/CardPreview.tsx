@@ -71,9 +71,9 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
   // Determine text colors based on background
   const isBiz = template.startsWith('biz-');
   const avgLum = (hexLuminance(c1) + hexLuminance(c2)) / 2;
-  const headerTextColor = avgLum > 0.4 ? '#1a1a2e' : '#ffffff';
+  const headerTextColor = avgLum > 0.4 ? '#121212' : '#ffffff';
   const bodyBg = isBiz ? '#ffffff' : 'transparent';
-  const bodyTextColor = isBiz ? '#1a1a2e' : headerTextColor;
+  const bodyTextColor = isBiz ? '#121212' : headerTextColor;
 
   // Social links from card data
   const socialInstagram = (card as any).social_instagram;
@@ -156,7 +156,7 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
     if (!socials.length) return null;
 
     const btnBg = isBiz ? 'rgba(0,0,0,0.06)' : `${c1}33`;
-    const iconColor = isLightColor(btnBg.includes('rgba') ? '#f0f0f0' : c1) ? '#1a1a2e' : bodyTextColor;
+    const iconColor = isLightColor(btnBg.includes('rgba') ? '#f0f0f0' : c1) ? '#121212' : bodyTextColor;
 
     return (
       <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 12 }}>
@@ -213,7 +213,7 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
     const isClean = template === 'civic-card-clean';
     const isBold = template === 'civic-card-bold';
     const accentColor = isFlag ? '#009739' : isRally ? '#1a2744' : c1 || '#003366';
-    const pageBg = isFlag ? '#1a1a2e' : isRally ? '#F5C518' : isClean ? '#e8edf2' : '#f0f2f5';
+    const pageBg = isFlag ? '#121212' : isRally ? '#F5C518' : isClean ? '#e8edf2' : '#f0f2f5';
     const cardBg = '#FFFFFF';
 
     return (
@@ -223,7 +223,7 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
           background: isFlag
             ? 'linear-gradient(135deg, #009739 0%, #002776 50%, #FEDD00 100%)'
             : isRally
-              ? `linear-gradient(135deg, ${accentColor}, #1a1a2e)`
+              ? `linear-gradient(135deg, ${accentColor}, #121212)`
               : `linear-gradient(135deg, ${c1}, ${c2})`,
           padding: '24px 20px 16px',
           textAlign: 'center',
@@ -476,7 +476,7 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, background: 'linear-gradient(transparent, #fff)' }} />
         </div>
         <div style={{ padding: '0 24px 24px', background: '#fff' }}>
-          <h2 style={{ fontSize: 22, fontWeight: 700, color: '#1a1a2e', margin: '0 0 4px' }}>{card.full_name}</h2>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: '#121212', margin: '0 0 4px' }}>{card.full_name}</h2>
           {card.title && <p style={{ fontSize: 14, color: '#374151', margin: '0 0 2px' }}>{card.title}</p>}
           {card.company && <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 4px' }}>{card.company}</p>}
           {(card as any).city && <p style={{ fontSize: 12, color: '#9CA3AF', margin: '0 0 12px' }}>📍 {(card as any).city}</p>}
@@ -571,7 +571,7 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
             </div>
           )}
           <p style={{ fontSize: 11, letterSpacing: 2, color: '#9CA3AF', textTransform: 'uppercase', margin: '0 0 4px' }}>HI, I'M</p>
-          <h2 style={{ fontSize: 24, fontWeight: 700, color: '#1a1a2e', margin: '0 0 4px' }}>{card.full_name}</h2>
+          <h2 style={{ fontSize: 24, fontWeight: 700, color: '#121212', margin: '0 0 4px' }}>{card.full_name}</h2>
           {card.title && <p style={{ fontSize: 15, fontWeight: 600, color: '#374151', margin: '0 0 2px' }}>{card.title}</p>}
           {card.company && <p style={{ fontSize: 13, color: '#6B7280', margin: '0 0 12px' }}>{card.company}</p>}
           {card.bio && <p style={{ fontSize: 13, color: '#4B5563', lineHeight: 1.5, margin: '0 0 16px' }}>{card.bio}</p>}
@@ -641,7 +641,7 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 60, background: 'linear-gradient(transparent, #fff)' }} />
         </div>
         <div style={{ padding: '0 24px 24px', background: '#fff' }}>
-          <h2 style={{ fontSize: 22, fontWeight: 700, color: '#1a1a2e', margin: '0 0 4px' }}>{card.full_name}</h2>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: '#121212', margin: '0 0 4px' }}>{card.full_name}</h2>
           {card.title && <p style={{ fontSize: 14, color: '#374151', margin: '0 0 2px' }}>{card.title}</p>}
           {card.company && <p style={{ fontSize: 12, color: '#6B7280', margin: '0 0 12px' }}>{card.company}</p>}
           {card.bio && <p style={{ fontSize: 13, color: '#4B5563', lineHeight: 1.5, margin: '0 0 16px' }}>{card.bio}</p>}
@@ -981,7 +981,7 @@ export default function CardPreview({ card, links }: CardPreviewProps) {
 
         {/* Footer */}
         <div style={{ textAlign: 'center', marginTop: 24, paddingTop: 16, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#1a1a2e', letterSpacing: 1 }}>tavvy</p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: '#121212', letterSpacing: 1 }}>tavvy</p>
           <p style={{ fontSize: 11, color: '#9CA3AF' }}>Create your free digital card</p>
         </div>
       </div>

@@ -220,7 +220,7 @@ const ECardMessageButton: React.FC<ECardMessageButtonProps> = ({
               padding: '16px 20px', borderBottom: '1px solid #f0f0f0',
             }}>
               <div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: '#1a1a2e' }}>
+                <div style={{ fontSize: 16, fontWeight: 700, color: '#121212' }}>
                   {t('messaging.messageTo', { name: cardOwnerName, defaultValue: `Message ${cardOwnerName}` })}
                 </div>
                 <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>
@@ -278,7 +278,7 @@ const ECardMessageButton: React.FC<ECardMessageButtonProps> = ({
                   <div style={{
                     maxWidth: '80%', padding: '10px 14px', borderRadius: 16,
                     background: msg.isMine ? accentColor : '#f0f0f0',
-                    color: msg.isMine ? '#FFFFFF' : '#1a1a2e',
+                    color: msg.isMine ? '#FFFFFF' : '#121212',
                     borderBottomRightRadius: msg.isMine ? 4 : 16,
                     borderBottomLeftRadius: msg.isMine ? 16 : 4,
                   }}>

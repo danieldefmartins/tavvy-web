@@ -134,7 +134,7 @@ export default function LanguageSettingsPage() {
             .language-settings {
               min-height: 100vh;
               background: ${isDark ? '#0a0a0f' : '#f5f5f7'};
-              color: ${isDark ? '#ffffff' : '#1a1a2e'};
+              color: ${isDark ? '#ffffff' : '#121212'};
             }
 
             .header {
@@ -183,7 +183,7 @@ export default function LanguageSettingsPage() {
               display: flex;
               flex-direction: column;
               gap: 2px;
-              background: ${isDark ? '#1a1a2e' : '#ffffff'};
+              background: ${isDark ? '#121212' : '#ffffff'};
               border-radius: 16px;
               overflow: hidden;
             }

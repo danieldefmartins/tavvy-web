@@ -1877,7 +1877,7 @@ export default function MapScreen() {
         }
 
         .dark-preview {
-          background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+          background: linear-gradient(135deg, #121212 0%, #16213e 100%);
         }
 
         .satellite-preview {

@@ -58,12 +58,12 @@ const READING_MODES = {
     cardBg: '#F5EFE0',
   },
   dark: {
-    background: '#1A1A2E',
+    background: '#121212',
     text: '#F5F5F5',
     secondaryText: '#E8E6E3',
     metaText: '#B8B5B0',
-    divider: '#2D2D44',
-    cardBg: '#252540',
+    divider: '#2A2A2A',
+    cardBg: '#1E1E1E',
   },
 };
 

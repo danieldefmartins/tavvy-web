@@ -75,7 +75,7 @@ export default function GeoAnalyticsDashboard({ cardId, isDark }: Props) {
   };
 
   const bg = isDark ? '#1E293B' : '#fff';
-  const text = isDark ? '#fff' : '#1a1a2e';
+  const text = isDark ? '#fff' : '#121212';
   const subtext = isDark ? '#94A3B8' : '#6B7280';
   const border = isDark ? '#334155' : '#E5E7EB';
   const accent = '#6C63FF';

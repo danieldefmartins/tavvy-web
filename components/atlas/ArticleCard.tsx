@@ -115,7 +115,7 @@ export default function ArticleCard({ article, variant = 'horizontal', isDark = 
 
           .featured-label {
             display: inline-block;
-            background: #667EEA;
+            background: #0D9488;
             padding: 6px 12px;
             border-radius: 8px;
             margin-bottom: 12px;

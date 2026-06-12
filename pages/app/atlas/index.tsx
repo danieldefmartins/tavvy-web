@@ -25,7 +25,7 @@ import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 const COLORS = {
   primaryBlue: '#6B7FFF',
   accentTeal: '#00CED1',
-  accent: '#667EEA',
+  accent: '#0D9488',
   successGreen: '#10B981',
   warningAmber: '#F59E0B',
   errorRed: '#EF4444',
@@ -33,7 +33,7 @@ const COLORS = {
 
 // Default placeholder images
 const PLACEHOLDER_ARTICLE = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800';
-const PLACEHOLDER_AVATAR = 'https://ui-avatars.com/api/?name=T&background=667EEA&color=fff&size=100';
+const PLACEHOLDER_AVATAR = 'https://ui-avatars.com/api/?name=T&background=0D9488&color=fff&size=100';
 
 interface Category {
   id: string;
@@ -491,7 +491,7 @@ export default function AtlasHomeScreen() {
 
             .featured-label {
               display: inline-block;
-              background: rgba(102, 126, 234, 0.9);
+              background: rgba(13, 148, 136, 0.92);
               padding: 6px 12px;
               border-radius: 6px;
               margin-bottom: 16px;

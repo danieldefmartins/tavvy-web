@@ -218,7 +218,7 @@ const ECardInbox: React.FC<ECardInboxProps> = ({ cardId, isDark }) => {
 
   const bg = isDark ? '#0f172a' : '#f8f9fa';
   const cardBg = isDark ? '#1e293b' : '#ffffff';
-  const textPrimary = isDark ? '#f1f5f9' : '#1a1a2e';
+  const textPrimary = isDark ? '#f1f5f9' : '#121212';
   const textSecondary = isDark ? '#94a3b8' : '#666';
   const borderColor = isDark ? '#334155' : '#e8e8e8';
   const accentColor = '#1E90FF';

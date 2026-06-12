@@ -370,8 +370,8 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
         {/* Yellow VOTE badge */}
         {ballotNumber && (
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#FFD700', borderRadius: 12, padding: '10px 24px' }}>
-            <span style={{ fontSize: 13, fontWeight: 800, color: '#1a1a2e' }}>{t('civic.vote')}</span>
-            <span style={{ fontSize: 32, fontWeight: 900, color: '#1a1a2e', letterSpacing: 4, fontFamily: "'Inter', -apple-system, sans-serif" }}>{ballotNumber}</span>
+            <span style={{ fontSize: 13, fontWeight: 800, color: '#121212' }}>{t('civic.vote')}</span>
+            <span style={{ fontSize: 32, fontWeight: 900, color: '#121212', letterSpacing: 4, fontFamily: "'Inter', -apple-system, sans-serif" }}>{ballotNumber}</span>
           </div>
         )}
       </div>
@@ -400,7 +400,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
         )}
 
         {/* Name in bold black */}
-        <div style={{ fontSize: 26, fontWeight: 800, color: '#1a1a2e', marginBottom: 4 }}>{fullName}</div>
+        <div style={{ fontSize: 26, fontWeight: 800, color: '#121212', marginBottom: 4 }}>{fullName}</div>
 
         {/* Position in accent color */}
         <div style={{ fontSize: 15, fontWeight: 600, color: accentColor, marginBottom: 12 }}>{officeRunningFor}</div>
@@ -522,7 +522,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
             <span style={{ fontSize: 18 }}>🌡️</span>
-            <span style={{ fontSize: 15, fontWeight: 700, color: '#1a1a2e' }}>{t('civic.communityPulse')}</span>
+            <span style={{ fontSize: 15, fontWeight: 700, color: '#121212' }}>{t('civic.communityPulse')}</span>
             <span style={{ fontSize: 12, color: '#999', marginLeft: 'auto' }}>{totalVotes} {t('civic.votes')}</span>
           </div>
 
@@ -629,7 +629,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
                     }}
                   >
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 15, fontWeight: 700, color: '#1a1a2e', lineHeight: 1.3 }}>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: '#121212', lineHeight: 1.3 }}>
                         {proposal.title}
                       </div>
                       {pTotal > 0 && showVoteCounts && (
@@ -712,7 +712,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
             borderBottom: !useRoundedCards ? '1px solid #f0f0f0' : undefined,
             boxShadow: useRoundedCards ? '0 2px 8px rgba(0,0,0,0.04)' : 'none',
           }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: '#1a1a2e', marginBottom: 10 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: '#121212', marginBottom: 10 }}>
               {t('civic.ask')} {fullName.split(' ')[0]}
             </div>
             <textarea
@@ -783,11 +783,11 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={accentColor} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="18 15 12 9 6 15" />
                     </svg>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: '#1a1a2e' }}>{q.upvoteCount}</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#121212' }}>{q.upvoteCount}</span>
                   </button>
 
                   <div style={{ flex: 1 }}>
-                    <p style={{ fontSize: 14, color: '#1a1a2e', lineHeight: 1.5, margin: 0, fontWeight: 500 }}>
+                    <p style={{ fontSize: 14, color: '#121212', lineHeight: 1.5, margin: 0, fontWeight: 500 }}>
                       {q.questionText}
                     </p>
 
@@ -868,7 +868,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                     <span style={{ fontSize: 18, marginTop: 1 }}>{statusIcon(c.status)}</span>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: '#1a1a2e', lineHeight: 1.3 }}>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: '#121212', lineHeight: 1.3 }}>
                         {c.title}
                       </div>
                       {c.description && (
@@ -902,7 +902,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
           }}>
             <span style={{ fontSize: 20 }}>🤝</span>
             <h3 style={{
-              fontSize: 16, fontWeight: 700, color: '#1a1a2e', margin: 0,
+              fontSize: 16, fontWeight: 700, color: '#121212', margin: 0,
               letterSpacing: '-0.01em',
             }}>
               {t('civic.whoIRecommend', { defaultValue: 'Who I Recommend' })}
@@ -954,7 +954,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
                 {/* Info */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
-                    fontSize: 15, fontWeight: 700, color: '#1a1a2e',
+                    fontSize: 15, fontWeight: 700, color: '#121212',
                     lineHeight: 1.3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                   }}>
                     {rec.card.fullName}

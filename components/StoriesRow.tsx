@@ -307,7 +307,7 @@ export default function StoriesRow({
   }
 
   const colors = {
-    background: isDark ? '#1A1A2E' : '#FFFFFF',
+    background: isDark ? '#121212' : '#FFFFFF',
     text: isDark ? '#FFFFFF' : '#1B2B5B',
     textSecondary: isDark ? '#AAAAAA' : '#666666',
     border: isDark ? '#333' : '#E5E7EB',
