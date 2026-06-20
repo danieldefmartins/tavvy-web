@@ -322,7 +322,7 @@ export default function AgentReviewDashboard() {
                   )}
 
                   {/* Mockup Toggle */}
-                  {idea.mockup_url && (
+                  {(idea.metadata?.mockupHtml || idea.mockup_url) && (
                     <div style={{ marginTop: 12 }}>
                       <button
                         onClick={() => setMockupId(mockupId === idea.id ? null : idea.id)}
@@ -332,11 +332,22 @@ export default function AgentReviewDashboard() {
                       </button>
                       {mockupId === idea.id && (
                         <div style={styles.mockupContainer}>
-                          <img
-                            src={idea.mockup_url}
-                            alt={`Mockup: ${idea.title}`}
-                            style={styles.mockupImage}
-                          />
+                          {idea.metadata?.mockupHtml ? (
+                            // Real rendered HTML mockup (the actual design, not an AI image).
+                            // srcDoc renders the markup directly, sandboxed for safety.
+                            <iframe
+                              title={`Mockup: ${idea.title}`}
+                              srcDoc={idea.metadata.mockupHtml}
+                              sandbox=""
+                              style={styles.mockupFrame}
+                            />
+                          ) : (
+                            <img
+                              src={idea.mockup_url!}
+                              alt={`Mockup: ${idea.title}`}
+                              style={styles.mockupImage}
+                            />
+                          )}
                         </div>
                       )}
                     </div>
@@ -688,6 +699,16 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 12,
     display: 'block',
     margin: '0 auto',
+  },
+  mockupFrame: {
+    width: '100%',
+    maxWidth: 430,
+    height: 720,
+    border: 'none',
+    borderRadius: 12,
+    display: 'block',
+    margin: '0 auto',
+    background: '#fff',
   },
 
   // Status
