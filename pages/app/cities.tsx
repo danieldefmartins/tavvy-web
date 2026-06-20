@@ -47,6 +47,7 @@ export default function CitiesBrowseScreen() {
   const router = useRouter();
   const { locale } = router;
   const { theme, isDark } = useThemeContext();
+  const { t } = useTranslation('common');
   const [cities, setCities] = useState<City[]>([]);
   const [featured, setFeatured] = useState<City[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +57,10 @@ export default function CitiesBrowseScreen() {
     fetchCities();
     fetchFeatured();
   }, []);
+
+  const handleBackPress = () => {
+    router.push('/app');
+  };
 
   const fetchCities = async () => {
     try {

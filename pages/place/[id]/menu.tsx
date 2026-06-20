@@ -37,6 +37,7 @@ interface MenuItem {
   linked_photo_ids: string[] | null;
   calories: number | null; // TODO: add `calories integer` column to menu_items table
   order_url: string | null; // TODO: add `order_url text` column to menu_items table
+  duration_minutes: number | null;
 }
 
 interface MenuCategory {
@@ -67,6 +68,11 @@ interface Menu {
   seasonal_special_enabled: boolean;
   welcome_message: string | null;
   tagline: string | null;
+}
+
+interface Place {
+  id: string;
+  tavvy_category: string;
 }
 
 interface FeaturedDish {

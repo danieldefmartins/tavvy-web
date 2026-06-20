@@ -89,6 +89,71 @@ export default function RVCampingScreen() {
 
       <AppLayout>
         <div className="rv-screen" style={{ backgroundColor: theme.background }}>
+          {/* Standard App Header */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              paddingLeft: spacing.md,
+              paddingRight: spacing.md,
+              paddingTop: spacing.md,
+              paddingBottom: spacing.md,
+              height: '56px',
+              backgroundColor: theme.background,
+              borderBottomWidth: 1,
+              borderBottomColor: theme.border,
+              borderBottomStyle: 'solid',
+            }}
+          >
+            {/* Back Arrow */}
+            <button
+              onClick={() => router.back()}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: spacing.sm,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: theme.text,
+              }}
+              aria-label="Go back"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            {/* Page Title - Center */}
+            <h1
+              style={{
+                flex: 1,
+                textAlign: 'center',
+                fontSize: '18px',
+                fontWeight: '600',
+                color: theme.text,
+                margin: 0,
+                padding: `0 ${spacing.md}`,
+              }}
+            >
+              RV & Camping
+            </h1>
+
+            {/* Placeholder for alignment */}
+            <div style={{ width: '40px' }} />
+          </div>
+
           {/* Unified Header */}
           <UnifiedHeader
             screenKey="rvCamping"

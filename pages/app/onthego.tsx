@@ -79,6 +79,11 @@ interface LiveSession {
   phone?: string;
   service_area?: string;
   location_label?: string;
+}
+
+interface MapMarker extends LiveSession {
+  id: string;
+}g;
   session_address?: string;
   today_note?: string;
   started_at?: string;

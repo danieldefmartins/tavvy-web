@@ -55,11 +55,16 @@ function getFallbackCover(category?: string): string {
 /* SVG Icon Components */
 // Icons from lucide-react — clean, monochrome, Apple/Google style
 
-function isRestaurantCategory(category?: string): boolean {
-  if (!category) return true;
-  const lower = category.toLowerCase();
-  const restaurantTypes = ['restaurant', 'cafe', 'coffee', 'bar', 'bakery', 'pizza', 'sushi', 'mexican', 'italian', 'chinese', 'indian', 'thai', 'burger', 'seafood', 'steakhouse', 'brunch', 'vegan', 'dessert'];
-  return restaurantTypes.some(t => lower.includes(t));
+function isRestaurantCategory(tavvyCategory?: string): boolean {
+  if (!tavvyCategory) return true;
+  const lower = tavvyCategory.toLowerCase();
+  return lower === 'restaurants' || lower === 'cafes';
+}
+
+function isFoodBusiness(tavvyCategory?: string): boolean {
+  if (!tavvyCategory) return true;
+  const lower = tavvyCategory.toLowerCase();
+  return lower === 'restaurants' || lower === 'cafes';
 }
 
 export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
