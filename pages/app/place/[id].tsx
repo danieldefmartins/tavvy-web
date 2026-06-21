@@ -90,6 +90,9 @@ export default function PlaceDetail() {
   hrefs.menu = `/place/${pid}/menu`;
   if (p.ordering_enabled) hrefs.order = `/place/${pid}/order`;
   hrefs.directions = directions;
+  // This place hasn't claimed a Tavvy eCard yet — tapping eCard sells the free
+  // eCard with the place's name for context. (When places link real cards, branch here.)
+  hrefs.ecard = `/ecard?for=${encodeURIComponent(p.name || '')}`;
 
   return (
     <>

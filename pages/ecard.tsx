@@ -9,6 +9,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserCards, CardData } from '../lib/ecard';
 import { getTemplateById } from '../config/eCardTemplates';
@@ -64,6 +65,8 @@ export default function EcardLanding() {
   const heroRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const [userCards, setUserCards] = useState<CardData[]>([]);
+  const router = useRouter();
+  const forPlace = typeof router.query.for === 'string' ? router.query.for : '';
 
   const setCardRef = useCallback((id: string, el: HTMLElement | null) => {
     if (el) cardRefs.current.set(id, el);
@@ -145,6 +148,23 @@ export default function EcardLanding() {
             </Link>
           </div>
         </nav>
+
+        {/* Place-context banner — shown when someone taps the eCard on a place that hasn't claimed one */}
+        {forPlace && (
+          <div style={{ padding: '18px 16px 6px' }}>
+            <div style={{ maxWidth: 720, margin: '0 auto', background: 'linear-gradient(135deg, rgba(0,194,203,0.12), rgba(138,5,190,0.12))', border: '1px solid rgba(138,5,190,0.3)', borderRadius: 18, padding: '20px 22px' }}>
+              <span style={{ display: 'inline-block', fontSize: 12, fontWeight: 800, color: '#00C2CB', background: 'rgba(0,194,203,0.14)', border: '1px solid rgba(0,194,203,0.3)', padding: '4px 11px', borderRadius: 20 }}>🪪 Tavvy eCard</span>
+              <h2 style={{ fontSize: 20, fontWeight: 800, color: '#fff', margin: '12px 0 6px', lineHeight: 1.25 }}>{forPlace} hasn{'’'}t claimed their Tavvy eCard yet</h2>
+              <p style={{ fontSize: 14.5, lineHeight: 1.6, color: 'rgba(255,255,255,0.82)', margin: '0 0 16px' }}>
+                Own this place? Get a <strong style={{ color: '#fff' }}>free digital business card</strong> — share it with one tap (NFC/QR), add it to Apple &amp; Google Wallet, and collect endorsements. Set it up in minutes.
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                <Link href="/app/ecard" style={{ display: 'inline-block', padding: '11px 18px', borderRadius: 12, fontSize: 14, fontWeight: 700, textDecoration: 'none', background: '#00C2CB', color: '#06121a' }}>Create a free eCard</Link>
+                <a href="#templates" style={{ display: 'inline-block', padding: '11px 18px', borderRadius: 12, fontSize: 14, fontWeight: 700, textDecoration: 'none', background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)' }}>See templates</a>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Existing User Banner */}
         {userCards.length > 0 && (
