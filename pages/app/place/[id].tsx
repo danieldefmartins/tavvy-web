@@ -8,6 +8,9 @@ import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import PlaceScreen, { PlaceConfig, Cat } from '../../../components/PreviewPlace';
 import { useAuth } from '../../../contexts/AuthContext';
+import AddReviewSheet from '../../../components/AddReviewSheet';
+
+const AVATAR_COLORS = ['#00C2CB', '#8A05BE', '#F5A623', '#667EEA', '#EF4444'];
 
 const TYPE_LABEL: Record<string, string> = {
   restaurants: 'Restaurant', restaurant: 'Restaurant', hotels: 'Hotel', hotel: 'Hotel',
@@ -26,27 +29,33 @@ export default function PlaceDetail() {
   const { user } = useAuth();
   const [data, setData] = useState<any>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
-  const [showAuth, setShowAuth] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const redirectTo = typeof window !== 'undefined' ? encodeURIComponent(window.location.pathname + window.location.search) : '';
+
+  const load = (showSpinner = true) => {
+    if (!id) return;
+    if (showSpinner) setState('loading');
+    fetch(`/api/place/${encodeURIComponent(String(id))}`)
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(d => { setData(d); setState('ready'); })
+      .catch(() => setState('error'));
+  };
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [id]);
 
   const goBack = () => {
     if (typeof window !== 'undefined' && window.history.length > 1) router.back();
     else router.push('/app/map');
   };
   const onSave = () => {
-    if (!user) { setShowAuth(true); return; }
+    // Not signed in → send to the sign in / sign up page (returns here after).
+    if (!user) { router.push(`/app/login?redirect=${redirectTo}`); return; }
     setSaved(s => !s); // TODO: persist saved place for signed-in users
   };
-  const redirectTo = typeof window !== 'undefined' ? encodeURIComponent(window.location.pathname + window.location.search) : '';
-
-  useEffect(() => {
-    if (!id) return;
-    setState('loading');
-    fetch(`/api/place/${encodeURIComponent(String(id))}`)
-      .then(r => r.ok ? r.json() : Promise.reject(r.status))
-      .then(d => { setData(d); setState('ready'); })
-      .catch(() => setState('error'));
-  }, [id]);
+  const onAddReview = () => {
+    if (!user) { router.push(`/app/login?redirect=${redirectTo}`); return; }
+    setReviewOpen(true);
+  };
 
   if (state === 'loading') return <Centered>Loading…</Centered>;
   if (state === 'error' || !data?.place) return <Centered>Place not found.</Centered>;
@@ -72,12 +81,18 @@ export default function PlaceDetail() {
     ? `https://www.google.com/maps/dir/?api=1&destination=${p.latitude},${p.longitude}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([p.name, p.street, p.city, p.region].filter(Boolean).join(' '))}`;
 
+  const hoursPairs: [string, string][] = (p.hoursList || []).map((h: any) => [h.day, h.range]);
+  const recentReviews = (data.recentReviews || []).map((r: any, i: number) => ({
+    initial: r.initial || (r.name || 'T')[0], color: AVATAR_COLORS[i % AVATAR_COLORS.length],
+    name: r.name, when: r.when, signals: r.signals || [],
+  }));
+
   const config: PlaceConfig = {
     type: TYPE_LABEL[p.category] || 'Place',
     name: p.name,
-    photo: p.cover_image_url || (p.photos && p.photos[0]) || '',
+    photo: p.cover_image_url || (p.gallery && p.gallery[0]) || (p.photos && p.photos[0]) || '',
     meta,
-    openLine: '',
+    openLine: p.openLine || '',
     reviewsSub: `${data.totalTaps || 0} signals · ${data.reviewCount || 0} reviews`,
     actions,
     groups,
@@ -86,10 +101,11 @@ export default function PlaceDetail() {
     popular: (g.good || []).slice(0, 4).map((s: any) => s.label),
     info: [
       ...(p.street || p.city ? [{ icon: '📍', main: [p.street, p.city, p.region].filter(Boolean).join(', '), act: 'Directions' }] : []),
+      ...(p.openLine || hoursPairs.length ? [{ icon: '🕐', main: p.openLine || 'Hours', hours: hoursPairs.length ? hoursPairs : undefined }] : []),
       ...(p.phone ? [{ icon: '📞', main: p.phone }] : []),
       { icon: '🏷️', main: [TYPE_LABEL[p.category] || 'Place', p.subcategory].filter(Boolean).join(' · ') },
     ],
-    reviews: [],
+    reviews: recentReviews,
     cta: 'Add Review',
   };
 
@@ -114,28 +130,18 @@ export default function PlaceDetail() {
         <title>{p.name} — Tavvy</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </Head>
-      <PlaceScreen config={config} hrefs={hrefs} onBack={goBack} onSave={onSave} />
-      {showAuth && (
-        <div style={overlay} onClick={() => setShowAuth(false)}>
-          <div style={sheet} onClick={e => e.stopPropagation()}>
-            <div style={{ fontSize: 30, marginBottom: 6 }}>🔖</div>
-            <h3 style={{ margin: '0 0 6px', fontSize: 20, fontWeight: 800, color: '#fff' }}>Save {p.name}</h3>
-            <p style={{ margin: '0 0 20px', fontSize: 14.5, lineHeight: 1.5, color: 'rgba(255,255,255,0.7)' }}>
-              Create a free Tavvy account to save places, leave signals, and build your list.
-            </p>
-            <a href={`/app/signup?redirect=${redirectTo}`} style={{ ...btn, background: '#00C2CB', color: '#06121a' }}>Sign up — it&apos;s free</a>
-            <a href={`/app/login?redirect=${redirectTo}`} style={{ ...btn, background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)' }}>Log in</a>
-            <button onClick={() => setShowAuth(false)} style={{ ...btn, background: 'none', color: 'rgba(255,255,255,0.5)', border: 'none', fontWeight: 600 }}>Not now</button>
-          </div>
-        </div>
-      )}
+      <PlaceScreen config={config} hrefs={hrefs} onBack={goBack} onSave={onSave} onAddReview={onAddReview} />
+      <AddReviewSheet
+        placeId={p.id}
+        placeName={p.name}
+        category={p.category}
+        open={reviewOpen}
+        onClose={() => setReviewOpen(false)}
+        onSubmitted={() => load(false)}
+      />
     </>
   );
 }
-
-const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)', zIndex: 9999, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' };
-const sheet: React.CSSProperties = { width: '100%', maxWidth: 480, background: '#1b1b24', borderRadius: '22px 22px 0 0', padding: '26px 22px calc(26px + env(safe-area-inset-bottom))', textAlign: 'center', fontFamily: '-apple-system, sans-serif', boxShadow: '0 -10px 40px rgba(0,0,0,0.5)' };
-const btn: React.CSSProperties = { display: 'block', width: '100%', padding: '14px 0', borderRadius: 14, fontSize: 15, fontWeight: 700, textDecoration: 'none', textAlign: 'center', marginBottom: 10, cursor: 'pointer' };
 
 function Centered({ children }: { children: React.ReactNode }) {
   return (

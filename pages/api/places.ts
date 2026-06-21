@@ -451,7 +451,45 @@ export default async function handler(
       topSignals: topSignalsMap.get(place.source_id) || [],
     }));
 
-    console.log(`[API/places] Returning ${placesWithSignals.length} total places (deduped from ${rawPlaces.length})`);
+    // ============================================
+    // STEP: Reviewed-first ordering
+    // Surface places that HAVE signal reviews (non-empty topSignals) at the top
+    // of the list, sorted by review strength descending. Unreviewed places
+    // (mostly the 34.8M FSQ places with no signals) follow, preserving their
+    // existing relative order (distance order). Stable sort so ties don't
+    // reshuffle the prior ordering.
+    // ============================================
+    const reviewStrength = (p: any): number => {
+      // Prefer total tap counts across all signal aggregates; fall back to
+      // number of top signals so any reviewed place still ranks above unreviewed.
+      const signals = Array.isArray(p.signals) ? p.signals : [];
+      const tapTotal = signals.reduce((sum: number, s: any) => sum + (s?.tap_total || 0), 0);
+      const topCount = Array.isArray(p.topSignals) ? p.topSignals.length : 0;
+      return tapTotal > 0 ? tapTotal : topCount;
+    };
+    const hasReviews = (p: any): boolean =>
+      Array.isArray(p.topSignals) && p.topSignals.length > 0;
+
+    // Decorate with original index to make the sort stable across all JS engines.
+    placesWithSignals
+      .map((p, i) => ({ p, i }))
+      .sort((a, b) => {
+        const aReviewed = hasReviews(a.p);
+        const bReviewed = hasReviews(b.p);
+        // Reviewed places first.
+        if (aReviewed !== bReviewed) return aReviewed ? -1 : 1;
+        // Both reviewed: strongest review strength first.
+        if (aReviewed && bReviewed) {
+          const diff = reviewStrength(b.p) - reviewStrength(a.p);
+          if (diff !== 0) return diff;
+        }
+        // Stable tiebreak: keep existing relative order (distance order).
+        return a.i - b.i;
+      })
+      .forEach(({ p }, idx) => { placesWithSignals[idx] = p; });
+
+    const reviewedCount = placesWithSignals.filter(hasReviews).length;
+    console.log(`[API/places] Returning ${placesWithSignals.length} total places (deduped from ${rawPlaces.length}); ${reviewedCount} reviewed first`);
 
     return res.status(200).json({
       places: placesWithSignals,
