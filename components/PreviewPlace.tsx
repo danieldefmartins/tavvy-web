@@ -33,12 +33,13 @@ export const CAT: Record<Cat, { name: string; accent: string; strong: string; ti
   headsup: { name: 'Heads Up', accent: '#9A5600', strong: '#F5A623', tint: 'rgba(245,166,35,0.16)', border: 'rgba(245,166,35,0.42)' },
 };
 
+// All icons sit on the same grayish circle; the glyph carries the brand colour.
 export const SOCIALS = [
-  { key: 'instagram', label: 'Instagram', bg: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf)', fg: '#fff' },
-  { key: 'tiktok',    label: 'TikTok',    bg: '#000000', fg: '#fff' },
-  { key: 'youtube',   label: 'YouTube',   bg: 'rgba(23,1,58,0.05)', fg: '#fff' },
-  { key: 'whatsapp',  label: 'WhatsApp',  bg: '#25D366', fg: '#fff' },
-  { key: 'facebook',  label: 'Facebook',  bg: '#1877F2', fg: '#fff' },
+  { key: 'instagram', label: 'Instagram', color: '#E1306C' },
+  { key: 'tiktok',    label: 'TikTok',    color: '#17013A' },
+  { key: 'youtube',   label: 'YouTube',   color: '#FF0000' },
+  { key: 'whatsapp',  label: 'WhatsApp',  color: '#25D366' },
+  { key: 'facebook',  label: 'Facebook',  color: '#1877F2' },
 ];
 
 function Glyph({ name, color = '#fff', size = 26 }: { name: string; color?: string; size?: number }) {
@@ -79,6 +80,8 @@ function Glyph({ name, color = '#fff', size = 26 }: { name: string; color?: stri
       return sv(<path d="M14 3c.3 2 1.7 3.6 3.8 3.9V10c-1.5 0-2.8-.4-3.8-1.1v5.8a4.7 4.7 0 1 1-4.7-4.7c.3 0 .5 0 .8.1v3.1a1.7 1.7 0 1 0 1.2 1.6V3H14z" fill={color} />);
     case 'youtube': // recognizable red play-button badge (self-coloured)
       return sv(<><rect x="2.5" y="6.5" width="19" height="11" rx="3.4" fill="#FF0000" /><path d="M10.3 9.4l4.7 2.6-4.7 2.6V9.4z" fill="#fff" /></>);
+    case 'ecard': // Tavvy mark — two-tone check + dot (self-coloured)
+      return sv(<><path d="M11 15.7L17.7 8.4" stroke="#00C2CB" strokeWidth="5" strokeLinecap="round" fill="none" /><path d="M11 15.7L8 12.6" stroke="#8A05BE" strokeWidth="5" strokeLinecap="round" fill="none" /><circle cx="9.5" cy="14.3" r="1.7" fill="#fff" /></>);
     case 'facebook':
       return sv(<path d="M13.5 21v-7h2.3l.4-2.8h-2.7V9.4c0-.8.2-1.4 1.4-1.4h1.4V5.5c-.3 0-1.1-.1-2-.1-2 0-3.4 1.2-3.4 3.5v2.3H8.6V14h2.3v7h2.6z" fill={color} />);
     default: return null;
@@ -163,9 +166,9 @@ export default function PlaceScreen({ config }: { config: PlaceConfig }) {
   ].filter(Boolean) as Sig[];
 
   const bar = [
-    ...config.actions.map(a => ({ ...a, bg: 'rgba(23,1,58,0.05)', fg: '#17013A' as string, logo: false })),
-    { key: 'ecard', label: 'eCard', bg: 'transparent', fg: '#fff', logo: true },
-    ...SOCIALS.map(s => ({ ...s, logo: false })),
+    ...config.actions.map(a => ({ key: a.key, label: a.label, color: '#17013A' })),
+    { key: 'ecard', label: 'eCard', color: '' },
+    ...SOCIALS.map(s => ({ key: s.key, label: s.label, color: s.color })),
   ];
 
   return (
@@ -187,9 +190,7 @@ export default function PlaceScreen({ config }: { config: PlaceConfig }) {
           <div className="bar-scroll">
             {bar.map(b => (
               <button className="bi" key={b.key}>
-                <span className="bi-ic" style={{ background: b.bg }}>
-                  {b.logo ? <img src="/tavvy-icon.png" alt="Tavvy eCard" className="bi-logo" /> : <Glyph name={b.key} color={b.fg} size={26} />}
-                </span>
+                <span className="bi-ic"><Glyph name={b.key} color={b.color} size={26} /></span>
                 <span className="bi-lbl">{b.label}</span>
               </button>
             ))}
@@ -287,8 +288,7 @@ export default function PlaceScreen({ config }: { config: PlaceConfig }) {
         .bar-scroll { display: flex; gap: 16px; overflow-x: auto; scrollbar-width: none; }
         .bar-scroll::-webkit-scrollbar { display: none; }
         .bi { flex: 0 0 auto; width: 54px; display: flex; flex-direction: column; align-items: center; gap: 7px; background: none; border: none; cursor: pointer; padding: 0; }
-        .bi-ic { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .bi-logo { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .bi-ic { width: 50px; height: 50px; border-radius: 50%; background: rgba(23,1,58,0.05); display: flex; align-items: center; justify-content: center; }
         .bi-lbl { font-size: 11px; font-weight: 600; color: #4a475c; white-space: nowrap; }
         .section { padding: 16px 0 16px; }
         .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
