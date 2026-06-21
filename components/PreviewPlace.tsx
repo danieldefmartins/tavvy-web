@@ -4,6 +4,22 @@
  * from a config so they stay consistent and are easy to wire to real data later.
  */
 import React, { useState } from 'react';
+import { useThemeContext } from '../contexts/ThemeContext';
+
+// dark/light palette for the place screen surfaces
+function usePalette() {
+  let isDark = false;
+  try { isDark = useThemeContext().isDark; } catch { /* outside provider */ }
+  return isDark ? {
+    isDark, bg: '#0e0e14', sheet: '#15151d', text: '#FFFFFF', text2: '#a8a5b3', text3: '#7a7785',
+    border: 'rgba(255,255,255,0.09)', divider: 'rgba(255,255,255,0.08)', soft: 'rgba(255,255,255,0.05)',
+    softer: 'rgba(255,255,255,0.03)', tileText: '#FFFFFF', pillBg: 'rgba(255,255,255,0.06)',
+  } : {
+    isDark, bg: '#ffffff', sheet: '#ffffff', text: '#17013A', text2: '#8b8898', text3: '#b3b0bd',
+    border: 'rgba(23,1,58,0.08)', divider: 'rgba(23,1,58,0.07)', soft: 'rgba(23,1,58,0.05)',
+    softer: 'rgba(23,1,58,0.025)', tileText: '#17013A', pillBg: 'rgba(23,1,58,0.05)',
+  };
+}
 
 export type Cat = 'good' | 'vibe' | 'headsup';
 export type Sig = { label: string; tapCount: number; category: Cat; emoji: string };
@@ -89,17 +105,17 @@ function Glyph({ name, color = '#fff', size = 26 }: { name: string; color?: stri
 }
 
 function Tile({ s, onClick }: { s: Sig; onClick?: () => void }) {
-  const c = CAT[s.category];
+  const c = CAT[s.category]; const t = usePalette();
   return (
     <button className="tile" onClick={onClick} style={{ background: c.tint, borderColor: c.border }}>
       <span className="t-row"><span className="t-emoji">{s.emoji}</span><span className="t-label">{s.label}</span></span>
-      <span className="t-count" style={{ color: c.accent }}>{s.tapCount} taps</span>
+      <span className="t-count" style={{ color: t.isDark ? c.strong : c.accent }}>{s.tapCount} taps</span>
       <style jsx>{`
         .tile { display: flex; flex-direction: column; justify-content: space-between; gap: 10px; width: 100%; min-width: 0;
           min-height: 76px; padding: 13px; border-radius: 16px; border: 1px solid; cursor: pointer; text-align: left; font-family: inherit; }
         .t-row { display: flex; align-items: flex-start; gap: 8px; }
         .t-emoji { font-size: 18px; flex: none; line-height: 1.2; }
-        .t-label { font-size: 15px; font-weight: 700; color: #17013A; line-height: 1.25;
+        .t-label { font-size: 15px; font-weight: 700; color: ${t.text}; line-height: 1.25;
           display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .t-count { font-size: 12.5px; font-weight: 700; }
       `}</style>
@@ -108,7 +124,7 @@ function Tile({ s, onClick }: { s: Sig; onClick?: () => void }) {
 }
 
 function Row({ s, max }: { s: Sig; max: number }) {
-  const c = CAT[s.category];
+  const c = CAT[s.category]; const t = usePalette();
   const pct = Math.max(8, Math.round((s.tapCount / max) * 100));
   return (
     <div className="row">
@@ -119,16 +135,17 @@ function Row({ s, max }: { s: Sig; max: number }) {
       <style jsx>{`
         .row { display: flex; align-items: center; gap: 11px; padding: 9px 0; }
         .r-emoji { font-size: 16px; flex: none; width: 20px; text-align: center; }
-        .r-label { flex: 1; min-width: 0; font-size: 14.5px; font-weight: 600; color: #2A2440; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .r-bar { flex: none; width: 84px; height: 7px; border-radius: 4px; background: rgba(23,1,58,0.08); overflow: hidden; }
+        .r-label { flex: 1; min-width: 0; font-size: 14.5px; font-weight: 600; color: ${t.text}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .r-bar { flex: none; width: 84px; height: 7px; border-radius: 4px; background: ${t.soft}; overflow: hidden; }
         .r-fill { display: block; height: 100%; border-radius: 4px; }
-        .r-count { flex: none; width: 30px; text-align: right; font-size: 13px; font-weight: 800; color: #17013A; }
+        .r-count { flex: none; width: 30px; text-align: right; font-size: 13px; font-weight: 800; color: ${t.text}; }
       `}</style>
     </div>
   );
 }
 
 function Reviewer({ r }: { r: Review }) {
+  const t = usePalette();
   return (
     <div className="rv">
       <div className="rv-av" style={{ background: r.color }}>{r.initial}</div>
@@ -136,7 +153,7 @@ function Reviewer({ r }: { r: Review }) {
         <div className="rv-top"><span className="rv-name">{r.name}</span><span className="rv-when">{r.when}</span></div>
         <div className="rv-sigs">
           {r.signals.map((s, i) => { const c = CAT[s.category];
-            return <span className="rv-chip" key={i} style={{ background: c.tint, color: '#17013A', borderColor: c.border }}>{s.label}</span>; })}
+            return <span className="rv-chip" key={i} style={{ background: c.tint, color: t.text, borderColor: c.border }}>{s.label}</span>; })}
         </div>
       </div>
       <style jsx>{`
@@ -144,8 +161,8 @@ function Reviewer({ r }: { r: Review }) {
         .rv-av { flex: none; width: 38px; height: 38px; border-radius: 50%; color: #fff; font-weight: 800; font-size: 15px; display: flex; align-items: center; justify-content: center; }
         .rv-body { flex: 1; min-width: 0; }
         .rv-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-        .rv-name { font-size: 14.5px; font-weight: 800; color: #17013A; }
-        .rv-when { font-size: 12px; color: #9a97a6; flex: none; }
+        .rv-name { font-size: 14.5px; font-weight: 800; color: ${t.text}; }
+        .rv-when { font-size: 12px; color: ${t.text2}; flex: none; }
         .rv-sigs { display: flex; flex-wrap: wrap; gap: 6px; margin: 7px 0 0; }
         .rv-chip { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; border: 1px solid; }
       `}</style>
@@ -158,6 +175,7 @@ const EXTERNAL = ['website', 'instagram', 'tiktok', 'youtube', 'facebook', 'what
 export default function PlaceScreen({ config, hrefs, onAddReview }: { config: PlaceConfig; hrefs?: Record<string, string>; onAddReview?: () => void }) {
   const [open, setOpen] = useState(false);
   const [hoursOpen, setHoursOpen] = useState<number | null>(null);
+  const t = usePalette();
 
   const all = config.groups.flatMap(g => g.items);
   const top: Sig[] = [
@@ -286,7 +304,7 @@ export default function PlaceScreen({ config, hrefs, onAddReview }: { config: Pl
       </div>
 
       <style jsx>{`
-        .screen { max-width: 480px; margin: 0 auto; min-height: 100vh; background: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; position: relative; padding-bottom: 92px; }
+        .screen { max-width: 480px; margin: 0 auto; min-height: 100vh; background: ${t.bg}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; position: relative; padding-bottom: 92px; }
         .hero { position: relative; width: 100%; height: 33vh; min-height: 232px; }
         .hero-img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .hero-fallback { background: linear-gradient(135deg, #17013A 0%, #3a0a6b 50%, #8A05BE 100%); }
@@ -298,60 +316,60 @@ export default function PlaceScreen({ config, hrefs, onAddReview }: { config: Pl
         .name { color: #fff; font-size: 27px; font-weight: 800; margin: 0 0 2px; letter-spacing: -0.4px; text-shadow: 0 2px 12px rgba(0,0,0,0.45); }
         .meta { color: rgba(255,255,255,0.92); font-size: 14px; margin: 0; text-shadow: 0 1px 8px rgba(0,0,0,0.45); }
         .open { color: #4ADE80; font-weight: 700; }
-        .sheet { position: relative; margin-top: -22px; background: #fff; border-radius: 26px 26px 0 0; padding: 22px 20px 8px; box-shadow: 0 -8px 24px rgba(23,1,58,0.06); }
-        .quickbar { margin: 0 -20px; padding: 0 20px 16px; border-bottom: 1px solid rgba(23,1,58,0.07); }
+        .sheet { position: relative; margin-top: -22px; background: ${t.sheet}; border-radius: 26px 26px 0 0; padding: 22px 20px 8px; box-shadow: 0 -8px 24px rgba(0,0,0,0.12); }
+        .quickbar { margin: 0 -20px; padding: 0 20px 16px; border-bottom: 1px solid ${t.divider}; }
         .bar-scroll { display: flex; gap: 16px; overflow-x: auto; scrollbar-width: none; }
         .bar-scroll::-webkit-scrollbar { display: none; }
         .bi { flex: 0 0 auto; width: 54px; display: flex; flex-direction: column; align-items: center; gap: 7px; background: none; border: none; cursor: pointer; padding: 0; text-decoration: none; }
-        .bi-ic { width: 50px; height: 50px; border-radius: 50%; background: rgba(23,1,58,0.05); display: flex; align-items: center; justify-content: center; }
-        .bi-lbl { font-size: 11px; font-weight: 600; color: #4a475c; white-space: nowrap; }
+        .bi-ic { width: 50px; height: 50px; border-radius: 50%; background: ${t.pillBg}; display: flex; align-items: center; justify-content: center; }
+        .bi-lbl { font-size: 11px; font-weight: 600; color: ${t.text2}; white-space: nowrap; }
         .section { padding: 16px 0 16px; }
         .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
-        .section-title { font-size: 19px; font-weight: 800; color: #17013A; letter-spacing: -0.2px; }
-        .section-sub { font-size: 12.5px; font-weight: 600; color: #8b8898; }
-        .review-note { font-size: 12.5px; color: #8b8898; margin: 0 0 14px; line-height: 1.4; }
-        .learn { color: #00858C; font-weight: 700; }
+        .section-title { font-size: 19px; font-weight: 800; color: ${t.text}; letter-spacing: -0.2px; }
+        .section-sub { font-size: 12.5px; font-weight: 600; color: ${t.text2}; }
+        .review-note { font-size: 12.5px; color: ${t.text2}; margin: 0 0 14px; line-height: 1.4; }
+        .learn { color: ${t.isDark ? '#3FE0E8' : '#00858C'}; font-weight: 700; }
         .grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; }
-        .more { width: 100%; margin-top: 14px; padding: 13px 0; border-radius: 12px; border: 1px solid rgba(23,1,58,0.12); background: rgba(23,1,58,0.025); color: #17013A; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .more { width: 100%; margin-top: 14px; padding: 13px 0; border-radius: 12px; border: 1px solid ${t.border}; background: ${t.softer}; color: ${t.text}; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .chev { transition: transform 0.2s ease; font-size: 16px; }
         .chev.up { transform: rotate(180deg); }
         .dropdown { margin-top: 14px; }
         .group { padding: 6px 0 4px; }
-        .group + .group { border-top: 1px solid rgba(23,1,58,0.06); margin-top: 8px; padding-top: 14px; }
+        .group + .group { border-top: 1px solid ${t.divider}; margin-top: 8px; padding-top: 14px; }
         .group-head { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 6px; }
         .group-dot { width: 8px; height: 8px; border-radius: 50%; }
-        .group-n { margin-left: 6px; font-size: 11px; font-weight: 800; color: #b3b0bd; background: rgba(23,1,58,0.05); border-radius: 20px; padding: 1px 7px; }
+        .group-n { margin-left: 6px; font-size: 11px; font-weight: 800; color: ${t.text3}; background: ${t.soft}; border-radius: 20px; padding: 1px 7px; }
         .tp-head { margin-bottom: 10px; }
-        .tp-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 800; color: #00858C; background: rgba(0,194,203,0.10); border: 1px solid rgba(0,194,203,0.28); padding: 5px 12px; border-radius: 20px; }
-        .about { font-size: 14.5px; line-height: 1.6; color: #4a475c; margin: 0; }
+        .tp-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 800; color: ${t.isDark ? '#3FE0E8' : '#00858C'}; background: rgba(0,194,203,0.12); border: 1px solid rgba(0,194,203,0.28); padding: 5px 12px; border-radius: 20px; }
+        .about { font-size: 14.5px; line-height: 1.6; color: ${t.text2}; margin: 0; }
         .tags { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
-        .tags-label { font-size: 12px; font-weight: 700; color: #9a97a6; margin-right: 2px; }
-        .tag { font-size: 13px; font-weight: 700; color: #2A2440; background: rgba(23,1,58,0.05); padding: 6px 12px; border-radius: 20px; }
+        .tags-label { font-size: 12px; font-weight: 700; color: ${t.text2}; margin-right: 2px; }
+        .tag { font-size: 13px; font-weight: 700; color: ${t.text}; background: ${t.pillBg}; padding: 6px 12px; border-radius: 20px; }
         .xchips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
-        .xchip { font-size: 13px; font-weight: 700; color: #2A2440; background: rgba(23,1,58,0.05); padding: 7px 13px; border-radius: 12px; }
+        .xchip { font-size: 13px; font-weight: 700; color: ${t.text}; background: ${t.pillBg}; padding: 7px 13px; border-radius: 12px; }
         .xlist { display: flex; flex-direction: column; margin-top: 4px; }
-        .xrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 0; border-bottom: 1px solid rgba(23,1,58,0.06); }
+        .xrow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 0; border-bottom: 1px solid ${t.divider}; }
         .xrow:last-child { border-bottom: none; }
-        .xrow-l { font-size: 14.5px; font-weight: 600; color: #2A2440; }
-        .xrow-s { flex: none; font-size: 13px; font-weight: 800; color: #00858C; }
+        .xrow-l { font-size: 14.5px; font-weight: 600; color: ${t.text}; }
+        .xrow-s { flex: none; font-size: 13px; font-weight: 800; color: ${t.isDark ? '#3FE0E8' : '#00858C'}; }
         .info { margin-top: 8px; display: flex; flex-direction: column; }
         .info-row { display: flex; align-items: flex-start; gap: 12px; width: 100%; padding: 9px 0; background: none; border: none; cursor: pointer; text-align: left; }
         .info-row.static { cursor: default; }
         .info-ic { flex: none; font-size: 17px; width: 22px; text-align: center; line-height: 1.4; }
         .info-mid { flex: 1; min-width: 0; }
-        .info-main { font-size: 14.5px; font-weight: 600; color: #2A2440; line-height: 1.4; }
-        .info-act { flex: none; font-size: 13px; font-weight: 800; color: #00858C; }
+        .info-main { font-size: 14.5px; font-weight: 600; color: ${t.text}; line-height: 1.4; }
+        .info-act { flex: none; font-size: 13px; font-weight: 800; color: ${t.isDark ? '#3FE0E8' : '#00858C'}; }
         .hours { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
-        .hr { display: flex; justify-content: space-between; font-size: 13.5px; color: #6b6880; }
-        .hr span:first-child { font-weight: 600; color: #4a475c; }
-        .divider { height: 1px; background: rgba(23,1,58,0.07); margin: 0; }
-        .actionbar { position: fixed; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto; display: flex; gap: 12px; padding: 14px 20px calc(14px + env(safe-area-inset-bottom)); background: rgba(255,255,255,0.96); backdrop-filter: blur(10px); border-top: 1px solid rgba(23,1,58,0.07); }
+        .hr { display: flex; justify-content: space-between; font-size: 13.5px; color: ${t.text2}; }
+        .hr span:first-child { font-weight: 600; color: ${t.text}; }
+        .divider { height: 1px; background: ${t.divider}; margin: 0; }
+        .actionbar { position: fixed; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto; display: flex; gap: 12px; padding: 14px 20px calc(14px + env(safe-area-inset-bottom)); background: ${t.isDark ? 'rgba(18,18,24,0.96)' : 'rgba(255,255,255,0.96)'}; backdrop-filter: blur(10px); border-top: 1px solid ${t.divider}; }
         .act { flex: 1; padding: 15px 0; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; border: none; text-decoration: none; text-align: center; }
-        .act.ghost { background: rgba(23,1,58,0.06); color: #17013A; }
+        .act.ghost { background: ${t.pillBg}; color: ${t.text}; }
         .act.primary { background: #00C2CB; color: #fff; box-shadow: 0 6px 18px rgba(0,194,203,0.35); }
       `}</style>
       <style jsx global>{`
-        html, body { margin: 0; padding: 0; background: #fff; }
+        html, body { margin: 0; padding: 0; background: ${t.bg}; }
         *, *::before, *::after { box-sizing: border-box; }
       `}</style>
     </div>
