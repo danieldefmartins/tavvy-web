@@ -76,30 +76,30 @@ const REVIEWS: Review[] = [
     signals: [{ label: 'Fresh Ingredients', category: 'good' }, { label: 'Cash Only', category: 'headsup' }] },
 ];
 
-function Glyph({ name, color = '#fff' }: { name: string; color?: string }) {
+function Glyph({ name, color = '#fff', size = 18 }: { name: string; color?: string; size?: number }) {
   const s = { fill: 'none', stroke: color, strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
   switch (name) {
     case 'phone':
     case 'whatsapp':
-      return <svg viewBox="0 0 24 24" width="18" height="18"><path d="M6.5 10.8c1.4 2.8 3.9 5.3 6.7 6.7l2.1-2.1c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.5.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C11.5 21 3 12.5 3 2 3 1.4 3.4 1 4 1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.5.1.4 0 .8-.2 1l-2.4 2.3z" fill={color} /></svg>;
+      return <svg viewBox="0 0 24 24" width={size} height={size}><path d="M6.5 10.8c1.4 2.8 3.9 5.3 6.7 6.7l2.1-2.1c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.5.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C11.5 21 3 12.5 3 2 3 1.4 3.4 1 4 1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.5.1.4 0 .8-.2 1l-2.4 2.3z" fill={color} /></svg>;
     case 'website':
-      return <svg viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="9" {...s} /><path d="M3 12h18M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18" {...s} /></svg>;
+      return <svg viewBox="0 0 24 24" width={size} height={size}><circle cx="12" cy="12" r="9" {...s} /><path d="M3 12h18M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18" {...s} /></svg>;
     case 'menu':
-      return <svg viewBox="0 0 24 24" width="18" height="18"><path d="M7 3v8M5 3v3a2 2 0 0 0 4 0V3M7 11v10M16 3c-1.4 0-2 2.5-2 5s.7 3.5 2 3.7V21" {...s} /></svg>;
+      return <svg viewBox="0 0 24 24" width={size} height={size}><path d="M7 3v8M5 3v3a2 2 0 0 0 4 0V3M7 11v10M16 3c-1.4 0-2 2.5-2 5s.7 3.5 2 3.7V21" {...s} /></svg>;
     case 'share':
-      return <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 15V4M12 4l-3.3 3.3M12 4l3.3 3.3M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" {...s} /></svg>;
+      return <svg viewBox="0 0 24 24" width={size} height={size}><path d="M12 15V4M12 4l-3.3 3.3M12 4l3.3 3.3M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" {...s} /></svg>;
     case 'order':
-      return <svg viewBox="0 0 24 24" width="18" height="18"><path d="M6 8h12l-1 11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1L6 8zM9 8V6.5a3 3 0 0 1 6 0V8" {...s} /></svg>;
+      return <svg viewBox="0 0 24 24" width={size} height={size}><path d="M6 8h12l-1 11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1L6 8zM9 8V6.5a3 3 0 0 1 6 0V8" {...s} /></svg>;
     case 'ecard':
-      return <svg viewBox="0 0 24 24" width="18" height="18"><rect x="3" y="6" width="18" height="12" rx="2.5" {...s} /><circle cx="8" cy="11" r="1.7" {...s} /><path d="M5.5 15.5c.4-1.3 1.4-1.8 2.5-1.8s2.1.5 2.5 1.8M13.5 10.5h4.5M13.5 13.5h3" {...s} /></svg>;
+      return <svg viewBox="0 0 24 24" width={size} height={size}><rect x="3" y="6" width="18" height="12" rx="2.5" {...s} /><circle cx="8" cy="11" r="1.7" {...s} /><path d="M5.5 15.5c.4-1.3 1.4-1.8 2.5-1.8s2.1.5 2.5 1.8M13.5 10.5h4.5M13.5 13.5h3" {...s} /></svg>;
     case 'instagram':
-      return <svg viewBox="0 0 24 24" width="18" height="18"><rect x="3.5" y="3.5" width="17" height="17" rx="5" {...s} /><circle cx="12" cy="12" r="4" {...s} /><circle cx="17.2" cy="6.8" r="1.1" fill={color} /></svg>;
+      return <svg viewBox="0 0 24 24" width={size} height={size}><rect x="3.5" y="3.5" width="17" height="17" rx="5" {...s} /><circle cx="12" cy="12" r="4" {...s} /><circle cx="17.2" cy="6.8" r="1.1" fill={color} /></svg>;
     case 'tiktok':
-      return <svg viewBox="0 0 24 24" width="18" height="18"><path d="M14 3c.3 2 1.7 3.6 3.8 3.9V10c-1.5 0-2.8-.4-3.8-1.1v5.8a4.7 4.7 0 1 1-4.7-4.7c.3 0 .5 0 .8.1v3.1a1.7 1.7 0 1 0 1.2 1.6V3H14z" fill={color} /></svg>;
+      return <svg viewBox="0 0 24 24" width={size} height={size}><path d="M14 3c.3 2 1.7 3.6 3.8 3.9V10c-1.5 0-2.8-.4-3.8-1.1v5.8a4.7 4.7 0 1 1-4.7-4.7c.3 0 .5 0 .8.1v3.1a1.7 1.7 0 1 0 1.2 1.6V3H14z" fill={color} /></svg>;
     case 'youtube':
-      return <svg viewBox="0 0 24 24" width="18" height="18"><path d="M10 8.5l5.5 3.5L10 15.5v-7z" fill={color} /></svg>;
+      return <svg viewBox="0 0 24 24" width={size} height={size}><path d="M10 8.5l5.5 3.5L10 15.5v-7z" fill={color} /></svg>;
     case 'facebook':
-      return <svg viewBox="0 0 24 24" width="18" height="18"><path d="M13.5 21v-7h2.3l.4-2.8h-2.7V9.4c0-.8.2-1.4 1.4-1.4h1.4V5.5c-.3 0-1.1-.1-2-.1-2 0-3.4 1.2-3.4 3.5v2.3H8.6V14h2.3v7h2.6z" fill={color} /></svg>;
+      return <svg viewBox="0 0 24 24" width={size} height={size}><path d="M13.5 21v-7h2.3l.4-2.8h-2.7V9.4c0-.8.2-1.4 1.4-1.4h1.4V5.5c-.3 0-1.1-.1-2-.1-2 0-3.4 1.2-3.4 3.5v2.3H8.6V14h2.3v7h2.6z" fill={color} /></svg>;
     default:
       return null;
   }
@@ -206,7 +206,11 @@ export default function SignalSpectrumPreview() {
             <div className="bar-scroll">
               {BAR.map(b => (
                 <button className="bi" key={b.key}>
-                  <span className="bi-ic" style={{ background: b.bg }}><Glyph name={b.key} color={b.fg} /></span>
+                  <span className="bi-ic" style={{ background: b.key === 'ecard' ? 'transparent' : b.bg }}>
+                    {b.key === 'ecard'
+                      ? <img src="/brand/logo-icon-circle.png" alt="Tavvy eCard" className="bi-logo" />
+                      : <Glyph name={b.key} color={b.fg} size={26} />}
+                  </span>
                   <span className="bi-lbl">{b.label}</span>
                 </button>
               ))}
@@ -329,7 +333,8 @@ export default function SignalSpectrumPreview() {
         .bar-scroll { display: flex; gap: 16px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
         .bar-scroll::-webkit-scrollbar { display: none; }
         .bi { flex: 0 0 auto; width: 54px; display: flex; flex-direction: column; align-items: center; gap: 7px; background: none; border: none; cursor: pointer; padding: 0; }
-        .bi-ic { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .bi-ic { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .bi-logo { width: 100%; height: 100%; object-fit: cover; display: block; }
         .bi-lbl { font-size: 11px; font-weight: 600; color: #4a475c; white-space: nowrap; }
 
         .section { padding: 16px 0 16px; }

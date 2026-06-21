@@ -27,12 +27,14 @@ const PLACES: Place[] = [
   { photo: '/preview-cafe.jpg', name: 'George Howell Coffee', cat: 'Coffee Shop', dist: '0.6 mi', price: '$$', reviews: 318,
     signals: [
       { label: 'Great Coffee', count: 211, category: 'good', emoji: '☕' },
+      { label: 'Single Origin', count: 96, category: 'good', emoji: '🌱' },
       { label: 'Good for Work', count: 87, category: 'vibe', emoji: '💻' },
       { label: 'Cash Only', count: 19, category: 'headsup', emoji: '💵' },
     ] },
   { photo: '/preview-dinner.jpg', name: 'Sarma', cat: 'Mediterranean', dist: '1.2 mi', price: '$$$', reviews: 905,
     signals: [
       { label: 'Amazing Food', count: 402, category: 'good', emoji: '🍽️' },
+      { label: 'Great Wine', count: 187, category: 'good', emoji: '🍷' },
       { label: 'Romantic', count: 154, category: 'vibe', emoji: '🕯️' },
       { label: 'Hard to Book', count: 88, category: 'headsup', emoji: '📅' },
     ] },
@@ -42,12 +44,15 @@ function Chip({ s }: { s: Sig }) {
   const c = CAT[s.category];
   return (
     <span className="chip" style={{ background: c.tint, color: c.accent, borderColor: c.border }}>
-      <span className="chip-e">{s.emoji}</span>{s.label}<span className="chip-n">{s.count}</span>
+      <span className="chip-e">{s.emoji}</span>
+      <span className="chip-l">{s.label}</span>
+      <span className="chip-n">{s.count}</span>
       <style jsx>{`
-        .chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700;
-          padding: 5px 9px; border-radius: 20px; border: 1px solid; white-space: nowrap; }
-        .chip-e { font-size: 12px; }
-        .chip-n { font-weight: 800; opacity: 0.75; }
+        .chip { display: flex; align-items: center; gap: 6px; width: 100%; min-width: 0; font-size: 12px;
+          font-weight: 700; padding: 7px 10px; border-radius: 12px; border: 1px solid; }
+        .chip-e { flex: none; font-size: 12px; }
+        .chip-l { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .chip-n { flex: none; font-weight: 800; opacity: 0.75; }
       `}</style>
     </span>
   );
@@ -83,7 +88,8 @@ function Card({ p }: { p: Place }) {
         .name { font-size: 17px; font-weight: 800; color: #17013A; letter-spacing: -0.2px; }
         .dist { flex: none; font-size: 13px; color: #8b8898; font-weight: 600; }
         .meta { font-size: 13px; color: #8b8898; margin: 3px 0 11px; }
-        .chips { display: flex; flex-wrap: wrap; gap: 7px; }
+        /* 2x2 grid → every card shows 2 Good (top row) + 1 Vibe + 1 Heads Up (bottom), same size */
+        .chips { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 8px; }
       `}</style>
     </a>
   );
