@@ -364,15 +364,19 @@ export default async function handler(
       .filter(Boolean);
 
     let signalMap = new Map<string, Signal[]>();
-    
+    // Top signals WITH labels (joined to review_items) so cards can render the
+    // real signal-review design (2 Good + 1 Vibe + 1 Heads Up) instead of "Be the first".
+    const topSignalsMap = new Map<string, any[]>();
+    const BUCKET_CAT: Record<string, 'good' | 'vibe' | 'headsup'> = { positive: 'good', neutral: 'vibe', negative: 'headsup' };
+
     if (placeSourceIds.length > 0) {
       try {
         // First try place_signal_aggregates (pre-computed)
         const { data: aggData } = await supabase
           .from('place_signal_aggregates')
-          .select('place_id, bucket, tap_total')
+          .select('place_id, signal_id, bucket, tap_total')
           .in('place_id', placeSourceIds);
-        
+
         if (aggData && aggData.length > 0) {
           for (const s of aggData) {
             const existing = signalMap.get(s.place_id) || [];
@@ -381,6 +385,26 @@ export default async function handler(
               tap_total: s.tap_total || 0,
             });
             signalMap.set(s.place_id, existing);
+          }
+          // Join signal_id -> review_items for labels, then pick top 2 good + 1 vibe + 1 heads up per place
+          const sigIds = [...new Set(aggData.map((a: any) => a.signal_id).filter(Boolean))];
+          const labelMap = new Map<string, any>();
+          for (let i = 0; i < sigIds.length; i += 300) {
+            const { data: ri } = await supabase.from('review_items')
+              .select('id, label, icon_emoji').in('id', sigIds.slice(i, i + 300));
+            (ri || []).forEach((r: any) => labelMap.set(r.id, r));
+          }
+          const byPlace = new Map<string, { good: any[]; vibe: any[]; headsup: any[] }>();
+          for (const a of aggData as any[]) {
+            const cat = BUCKET_CAT[a.bucket]; const def = labelMap.get(a.signal_id);
+            if (!cat || !def) continue;
+            const g = byPlace.get(a.place_id) || { good: [], vibe: [], headsup: [] };
+            g[cat].push({ label: def.label, emoji: def.icon_emoji || '', category: cat, count: a.tap_total || 0 });
+            byPlace.set(a.place_id, g);
+          }
+          for (const [placeId, g] of Array.from(byPlace)) {
+            const srt = (arr: any[]) => arr.sort((x, y) => y.count - x.count);
+            topSignalsMap.set(placeId, [...srt(g.good).slice(0, 2), ...srt(g.vibe).slice(0, 1), ...srt(g.headsup).slice(0, 1)]);
           }
           console.log(`[API/places] Fetched signals from aggregates for ${signalMap.size} places`);
         } else {
@@ -423,6 +447,7 @@ export default async function handler(
     const placesWithSignals = allPlaces.map(place => ({
       ...place,
       signals: signalMap.get(place.source_id) || [],
+      topSignals: topSignalsMap.get(place.source_id) || [],
     }));
 
     console.log(`[API/places] Returning ${placesWithSignals.length} total places (deduped from ${rawPlaces.length})`);

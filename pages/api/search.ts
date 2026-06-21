@@ -97,6 +97,36 @@ export default async function handler(
     // Trim to limit
     suggestions = suggestions.slice(0, limitNum);
 
+    // Enrich with real top signals (labels) so result cards show the signal-review design.
+    try {
+      const ids = suggestions
+        .map(s => String(s.id).replace(/^(tavvy:|places-|fsq-)/, ''))
+        .filter(x => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(x));
+      if (ids.length) {
+        const { createClient } = await import('@supabase/supabase-js');
+        const sb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL || '', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '');
+        const { data: aggs } = await sb.from('place_signal_aggregates').select('place_id,signal_id,bucket,tap_total').in('place_id', ids);
+        if (aggs && aggs.length) {
+          const sigIds = [...new Set(aggs.map((a: any) => a.signal_id))];
+          const { data: ri } = await sb.from('review_items').select('id,label,icon_emoji').in('id', sigIds);
+          const lbl = new Map<string, any>(); (ri || []).forEach((r: any) => lbl.set(r.id, r));
+          const BC: Record<string, string> = { positive: 'good', neutral: 'vibe', negative: 'headsup' };
+          const byPlace = new Map<string, any>();
+          for (const a of aggs as any[]) {
+            const c = BC[a.bucket]; const d = lbl.get(a.signal_id); if (!c || !d) continue;
+            const g = byPlace.get(a.place_id) || { good: [], vibe: [], headsup: [] };
+            g[c].push({ label: d.label, emoji: d.icon_emoji || '', category: c, count: a.tap_total || 0 });
+            byPlace.set(a.place_id, g);
+          }
+          for (const s of suggestions as any[]) {
+            const key = String(s.id).replace(/^(tavvy:|places-|fsq-)/, '');
+            const g = byPlace.get(key);
+            if (g) { const srt = (arr: any[]) => arr.sort((x, y) => y.count - x.count); s.topSignals = [...srt(g.good).slice(0, 2), ...srt(g.vibe).slice(0, 1), ...srt(g.headsup).slice(0, 1)]; }
+          }
+        }
+      }
+    } catch { /* signal enrichment is best-effort */ }
+
     console.log(`[API/search] Returning ${suggestions.length} suggestions (${result.searchTimeMs}ms)`);
 
     return res.status(200).json({ suggestions });

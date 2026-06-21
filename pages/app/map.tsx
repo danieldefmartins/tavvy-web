@@ -19,6 +19,7 @@ import dynamic from 'next/dynamic';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
 import SignalMatrix from '../../components/SignalMatrix';
+import SignalCard from '../../components/SignalCard';
 // Using API routes instead of direct Supabase calls for runtime env var support
 import { PlaceCard as PlaceCardType, SearchResult } from '../../lib/placeService';
 import { useTranslation } from 'next-i18next';
@@ -602,6 +603,7 @@ export default function MapScreen() {
         city: (suggestion as any).city || '',
         address: (suggestion as any).address || '',
         signals: [],
+        topSignals: (suggestion as any).topSignals || [],
       };
       
       setPlaces([placeCard]);
@@ -648,6 +650,7 @@ export default function MapScreen() {
               address: s.address || '',
               distance: s.distance,
               signals: [],
+              topSignals: s.topSignals || [],
             }));
           
           setPlaces(searchPlaces);
@@ -1321,41 +1324,11 @@ export default function MapScreen() {
               </div>
             ) : (
               places.map((place) => (
-                <div 
-                  key={place.id} 
-                  id={`place-card-${place.id}`}
-                  className={`place-card ${selectedPlaceId === place.id ? 'selected' : ''}`}
-                  onClick={() => {
-                    console.log('[MapScreen] Place card clicked:', place.id);
-                    router.push(`/app/place/${place.id}`, undefined, { locale });
-                  }}
-                >
-                  <div className="place-image">
-                    <img 
-                      src={place.cover_image_url || place.photo_url || 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop'} 
-                      alt={place.name}
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400&h=300&fit=crop';
-                      }}
-                    />
-                    {place.distance && (
-                      <div className="place-distance">{formatDistance(place.distance)}</div>
-                    )}
-                  </div>
-                  <div className="place-info">
-                    <h3 className="place-name">{place.name}</h3>
-                    <p className="place-category">
-                      {place.category || place.primary_category || 'Place'} 
-                      {place.city && ` • ${place.city}`}
-                    </p>
-                  </div>
-                  <div className="signal-matrix-wrapper">
-                    <SignalMatrix
-                      simpleSignals={place.signals as any || []}
-                      compact={true}
-                    />
-                  </div>
-                </div>
+                <SignalCard
+                  key={place.id}
+                  place={place as any}
+                  onClick={() => router.push(`/app/place/${place.id}`, undefined, { locale })}
+                />
               ))
             )}
           </div>
