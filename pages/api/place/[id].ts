@@ -15,11 +15,34 @@ const isUuid = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
-  // Links across the app use several id forms: raw uuid, slug, tavvy:<uuid>, places-<uuid>
-  const raw = String(req.query.id || '').replace(/^(tavvy:|places-)/, '');
+  // Links across the app use several id forms: raw uuid, slug, tavvy:<uuid>, places-<uuid>, fsq-<id>, fsq:<id>
+  const rawId = String(req.query.id || '');
+  const isFsq = /^fsq[-:]/.test(rawId);
+  const raw = rawId.replace(/^(tavvy:|places-|fsq[-:])/, '');
   if (!raw) return res.status(400).json({ error: 'missing id' });
 
   try {
+    // FSQ (Foursquare) places aren't in the Tavvy `places` table — resolve them
+    // from fsq_places_raw and render with no signals ("Be the first").
+    if (isFsq || (!isUuid(raw) && /^[0-9a-f]{24}$/i.test(raw))) {
+      const { data: f } = await supabase.from('fsq_places_raw').select('*').eq('fsq_place_id', raw).maybeSingle();
+      if (f) {
+        const rawCat = Array.isArray(f.fsq_category_labels) ? f.fsq_category_labels[0] : f.fsq_category_labels;
+        const cat = rawCat ? String(rawCat).replace(/[\[\]']/g, '').split('>')[0].trim() : 'Place';
+        return res.status(200).json({
+          place: {
+            id: rawId, name: f.name, category: cat, subcategory: undefined,
+            street: f.address, city: f.locality, region: f.region, country: f.country,
+            phone: f.tel, website: f.website, email: f.email,
+            cover_image_url: null, photos: null, description: null,
+            latitude: f.latitude, longitude: f.longitude,
+          },
+          groups: { good: [], vibe: [], headsup: [] }, totalTaps: 0, reviewCount: 0,
+        });
+      }
+      return res.status(404).json({ error: 'not found' });
+    }
+
     // Resolve by UUID id, else by slug (never .or(id.eq.slug) — that crashes on uuid columns)
     let q = supabase.from('places').select('*').limit(1);
     q = isUuid(raw) ? q.eq('id', raw) : q.eq('slug', raw);

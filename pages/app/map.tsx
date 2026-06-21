@@ -2026,6 +2026,7 @@ export default function MapScreen() {
           overflow-x: auto;
           -webkit-overflow-scrolling: touch;
           scrollbar-width: none;
+          flex-shrink: 0;
         }
 
         .filter-row::-webkit-scrollbar {

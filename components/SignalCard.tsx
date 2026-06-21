@@ -28,8 +28,8 @@ export default function SignalCard({ place, onClick }: { place: SignalCardPlace;
   const meta = [place.category, place.city].filter(Boolean).join(' · ');
 
   const t = isDark
-    ? { cardBg: '#1b1b24', name: '#FFFFFF', meta: '#9a97a6', border: 'rgba(255,255,255,0.09)', chip: '#F2F0F7', empty: '#7a7785', badgeBg: 'rgba(0,0,0,0.6)', badgeText: '#fff', shadow: '0 4px 16px rgba(0,0,0,0.35)' }
-    : { cardBg: '#FFFFFF', name: '#17013A', meta: '#8b8898', border: 'rgba(23,1,58,0.06)', chip: '#17013A', empty: '#b3b0bd', badgeBg: 'rgba(255,255,255,0.92)', badgeText: '#17013A', shadow: '0 4px 16px rgba(23,1,58,0.06)' };
+    ? { cardBg: '#26262f', name: '#FFFFFF', meta: '#a8a5b3', border: 'rgba(255,255,255,0.12)', chip: '#F2F0F7', empty: '#7a7785', badgeBg: 'rgba(0,0,0,0.6)', badgeText: '#fff', shadow: '0 6px 18px rgba(0,0,0,0.45)' }
+    : { cardBg: '#FFFFFF', name: '#17013A', meta: '#8b8898', border: 'rgba(23,1,58,0.08)', chip: '#17013A', empty: '#b3b0bd', badgeBg: 'rgba(255,255,255,0.92)', badgeText: '#17013A', shadow: '0 6px 18px rgba(23,1,58,0.10)' };
 
   return (
     <button className="card" onClick={onClick}>
