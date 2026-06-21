@@ -187,10 +187,12 @@ export default function PlaceScreen({ config, hrefs, onAddReview }: { config: Pl
 
   // In real mode (hrefs provided) only show socials that actually have a link.
   const socialItems = SOCIALS.filter(s => !hrefs || hrefs[s.key]);
+  const actionColor = t.isDark ? '#EDEBF5' : '#17013A';
   const bar = [
-    ...config.actions.map(a => ({ key: a.key, label: a.label, color: '#17013A' })),
+    ...config.actions.map(a => ({ key: a.key, label: a.label, color: actionColor })),
     { key: 'ecard', label: 'eCard', color: '' },
-    ...socialItems.map(s => ({ key: s.key, label: s.label, color: s.color })),
+    // TikTok's glyph is near-black; in dark mode use white so it's visible
+    ...socialItems.map(s => ({ key: s.key, label: s.label, color: (s.key === 'tiktok' && t.isDark) ? '#FFFFFF' : s.color })),
   ];
 
   return (
@@ -225,7 +227,7 @@ export default function PlaceScreen({ config, hrefs, onAddReview }: { config: Pl
 
         <div className="section">
           <div className="section-head"><span className="section-title">Reviews</span><span className="section-sub">{config.reviewsSub}</span></div>
-          <p className="review-note">Signal-based reviews — tap what's true, no fake stars. <span className="learn">How it works</span></p>
+          <p className="review-note">Signal-based reviews — tap what's true, no fake stars. <a className="learn" href="/app/help">How it works</a></p>
           <div className="grid">{top.map((s, i) => <Tile key={i} s={s} onClick={() => setOpen(o => !o)} />)}</div>
           <button className="more" onClick={() => setOpen(o => !o)}>
             {open ? 'Hide signals' : `See all ${all.length} signals`}<span className={`chev ${open ? 'up' : ''}`}>⌄</span>
@@ -328,7 +330,7 @@ export default function PlaceScreen({ config, hrefs, onAddReview }: { config: Pl
         .section-title { font-size: 19px; font-weight: 800; color: ${t.text}; letter-spacing: -0.2px; }
         .section-sub { font-size: 12.5px; font-weight: 600; color: ${t.text2}; }
         .review-note { font-size: 12.5px; color: ${t.text2}; margin: 0 0 14px; line-height: 1.4; }
-        .learn { color: ${t.isDark ? '#3FE0E8' : '#00858C'}; font-weight: 700; }
+        .learn { color: ${t.isDark ? '#3FE0E8' : '#00858C'}; font-weight: 700; text-decoration: none; }
         .grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; }
         .more { width: 100%; margin-top: 14px; padding: 13px 0; border-radius: 12px; border: 1px solid ${t.border}; background: ${t.softer}; color: ${t.text}; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .chev { transition: transform 0.2s ease; font-size: 16px; }

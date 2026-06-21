@@ -289,7 +289,7 @@ export default function MapScreen() {
 
   const chooseSnap = (height: number, vel: number) => {
     const snaps = getSnapPoints().sort((a, b) => a - b);
-    const FLICK = 0.4; // px/ms
+    const FLICK = 0.28; // px/ms — easier to flick the sheet up/down
     if (vel > FLICK) return snaps.find((s) => s > height + 8) ?? snaps[snaps.length - 1];
     if (vel < -FLICK) return [...snaps].reverse().find((s) => s < height - 8) ?? snaps[0];
     return snaps.reduce((best, s) => (Math.abs(s - height) < Math.abs(best - height) ? s : best), snaps[0]);
@@ -319,7 +319,7 @@ export default function MapScreen() {
     lastT.current = now;
 
     const deltaY = dragStartY.current - clientY;
-    if (Math.abs(deltaY) > 5) didDrag.current = true;
+    if (Math.abs(deltaY) > 12) didDrag.current = true;
 
     const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
     const min = SNAP_COLLAPSED;
