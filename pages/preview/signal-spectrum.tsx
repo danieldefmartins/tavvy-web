@@ -1,88 +1,106 @@
 /**
- * PREVIEW ONLY — full-screen design proposal. Not linked anywhere in the app.
- * Proposed "Signal Spectrum": a symmetrical top-4 grid of the strongest signals,
- * tappable to expand a dropdown with the full signal list (grouped by category).
- * Built from the REAL SignalPill / SignalDetailRow components. Delete after the
- * design decision is made.
+ * PREVIEW ONLY — full-screen design proposal for the "Signal Spectrum" place screen.
+ * Not linked in the app. One consistent, readable light-theme signal system:
+ *  - top 2×2 tiles (the strongest signals, full label on 2 lines)
+ *  - a legend so the colour code (Good / Vibe / Heads Up) is learnable
+ *  - tap to expand a grouped, readable dropdown with consensus bars
+ * Delete after the design decision is made.
  */
 import React, { useState } from 'react';
 import Head from 'next/head';
-import { SignalDetailRow, SignalCategory } from '../../components/SignalPill';
 
-type Sig = { label: string; tapCount: number; category: SignalCategory; emoji?: string };
+type Cat = 'good' | 'vibe' | 'headsup';
+type Sig = { label: string; tapCount: number; category: Cat; emoji: string };
 
-// Readable tile colors: dark text on a light tint of the brand accent (the old
-// dark-mode pills put light text on a faint tint → washed out on a white screen).
-const TILE: Record<SignalCategory, { bg: string; border: string; count: string }> = {
-  good:    { bg: 'rgba(0, 194, 203, 0.12)', border: 'rgba(0, 194, 203, 0.32)', count: '#00858C' },
-  vibe:    { bg: 'rgba(138, 5, 190, 0.10)', border: 'rgba(138, 5, 190, 0.28)', count: '#7A05A8' },
-  headsup: { bg: 'rgba(245, 166, 35, 0.16)', border: 'rgba(245, 166, 35, 0.40)', count: '#A85D00' },
+// One palette, all readable on a white screen:
+//  accent  -> text/count/headers (dark enough for contrast)
+//  strong  -> dots & consensus-bar fills (full brand colour)
+//  tint/bd -> tile background / border
+const CAT: Record<Cat, { name: string; accent: string; strong: string; tint: string; border: string }> = {
+  good:    { name: 'The Good', accent: '#067A80', strong: '#00C2CB', tint: 'rgba(0,194,203,0.12)',  border: 'rgba(0,194,203,0.34)' },
+  vibe:    { name: 'The Vibe', accent: '#7A05A8', strong: '#8A05BE', tint: 'rgba(138,5,190,0.10)',  border: 'rgba(138,5,190,0.28)' },
+  headsup: { name: 'Heads Up', accent: '#9A5600', strong: '#F5A623', tint: 'rgba(245,166,35,0.16)', border: 'rgba(245,166,35,0.42)' },
 };
 
-function SignalTile({ s, onClick }: { s: Sig; onClick?: () => void }) {
-  const c = TILE[s.category];
+const GROUPS: { key: Cat; items: Sig[] }[] = [
+  { key: 'good', items: [
+    { label: 'Amazing Pastries', tapCount: 142, category: 'good', emoji: '🥐' },
+    { label: 'Great Coffee', tapCount: 98, category: 'good', emoji: '☕' },
+    { label: 'Fresh Ingredients', tapCount: 64, category: 'good', emoji: '🥗' },
+    { label: 'Friendly Staff', tapCount: 52, category: 'good', emoji: '😊' },
+    { label: 'Good Wifi', tapCount: 31, category: 'good', emoji: '📶' },
+  ]},
+  { key: 'vibe', items: [
+    { label: 'Cozy', tapCount: 76, category: 'vibe', emoji: '🛋️' },
+    { label: 'Instagrammable', tapCount: 58, category: 'vibe', emoji: '📸' },
+    { label: 'Good for Work', tapCount: 40, category: 'vibe', emoji: '💻' },
+  ]},
+  { key: 'headsup', items: [
+    { label: 'Long Wait', tapCount: 45, category: 'headsup', emoji: '⏳' },
+    { label: 'Cash Only', tapCount: 22, category: 'headsup', emoji: '💵' },
+    { label: 'Cramped', tapCount: 14, category: 'headsup', emoji: '🪑' },
+  ]},
+];
+
+const ALL = GROUPS.flatMap(g => g.items);
+const TOTAL_TAPS = ALL.reduce((n, s) => n + s.tapCount, 0);
+// the at-a-glance top row: 2 strongest Good + strongest Vibe + strongest Heads Up
+const TOP: Sig[] = [GROUPS[0].items[0], GROUPS[0].items[1], GROUPS[1].items[0], GROUPS[2].items[0]];
+const PHOTO = '/preview-bakery.jpg';
+
+function Tile({ s, onClick }: { s: Sig; onClick?: () => void }) {
+  const c = CAT[s.category];
   return (
-    <button className="tile" onClick={onClick} style={{ background: c.bg, borderColor: c.border }}>
-      <span className="tile-emoji">{s.emoji}</span>
-      <span className="tile-label">{s.label}</span>
-      <span className="tile-count" style={{ color: c.count }}>×{s.tapCount}</span>
+    <button className="tile" onClick={onClick} style={{ background: c.tint, borderColor: c.border }}>
+      <span className="t-cat" style={{ color: c.accent }}>
+        <span className="t-dot" style={{ background: c.strong }} />{c.name}
+      </span>
+      <span className="t-row">
+        <span className="t-emoji">{s.emoji}</span>
+        <span className="t-label">{s.label}</span>
+      </span>
+      <span className="t-count" style={{ color: c.accent }}>{s.tapCount} taps</span>
       <style jsx>{`
         .tile {
-          display: flex; align-items: center; gap: 9px; width: 100%; min-width: 0;
-          min-height: 62px; padding: 12px 14px; border-radius: 16px;
-          border: 1px solid; cursor: pointer; text-align: left;
-          font-family: inherit; transition: transform 0.15s ease, filter 0.15s ease;
+          display: flex; flex-direction: column; gap: 4px; width: 100%; min-width: 0;
+          min-height: 96px; padding: 12px 13px; border-radius: 16px; border: 1px solid;
+          cursor: pointer; text-align: left; font-family: inherit;
+          transition: transform 0.12s ease; align-items: stretch;
         }
         .tile:active { transform: scale(0.98); }
-        .tile-emoji { font-size: 19px; flex: none; line-height: 1; }
-        .tile-label {
-          flex: 1; min-width: 0; font-size: 14px; font-weight: 700;
-          color: #17013A; line-height: 1.25;
-          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-        }
-        .tile-count { font-size: 13px; font-weight: 800; flex: none; }
+        .t-cat { display: inline-flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; }
+        .t-dot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+        .t-row { display: flex; align-items: flex-start; gap: 8px; flex: 1; }
+        .t-emoji { font-size: 18px; line-height: 1.2; flex: none; }
+        .t-label { font-size: 15px; font-weight: 700; color: #17013A; line-height: 1.25;
+          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .t-count { font-size: 12px; font-weight: 700; opacity: 0.85; }
       `}</style>
     </button>
   );
 }
 
-// Top 4 — the symmetrical at-a-glance row (2 Good · 1 Vibe · 1 Heads Up)
-const TOP: Sig[] = [
-  { label: 'Amazing Pastries', tapCount: 142, category: 'good', emoji: '🥐' },
-  { label: 'Great Coffee', tapCount: 98, category: 'good', emoji: '☕' },
-  { label: 'Cozy', tapCount: 76, category: 'vibe', emoji: '🛋️' },
-  { label: 'Long Wait', tapCount: 45, category: 'headsup', emoji: '⏳' },
-];
-
-// The full list revealed in the dropdown, grouped by category
-const GROUPS: { key: SignalCategory; title: string; items: Sig[] }[] = [
-  {
-    key: 'good', title: 'The Good', items: [
-      { label: 'Amazing Pastries', tapCount: 142, category: 'good', emoji: '🥐' },
-      { label: 'Great Coffee', tapCount: 98, category: 'good', emoji: '☕' },
-      { label: 'Fresh Ingredients', tapCount: 64, category: 'good', emoji: '🥗' },
-      { label: 'Friendly Staff', tapCount: 52, category: 'good', emoji: '😊' },
-      { label: 'Good Wifi', tapCount: 31, category: 'good', emoji: '📶' },
-    ],
-  },
-  {
-    key: 'vibe', title: 'The Vibe', items: [
-      { label: 'Cozy', tapCount: 76, category: 'vibe', emoji: '🛋️' },
-      { label: 'Instagrammable', tapCount: 58, category: 'vibe', emoji: '📸' },
-      { label: 'Good for Work', tapCount: 40, category: 'vibe', emoji: '💻' },
-    ],
-  },
-  {
-    key: 'headsup', title: 'Heads Up', items: [
-      { label: 'Long Wait', tapCount: 45, category: 'headsup', emoji: '⏳' },
-      { label: 'Cash Only', tapCount: 22, category: 'headsup', emoji: '💵' },
-      { label: 'Cramped', tapCount: 14, category: 'headsup', emoji: '🪑' },
-    ],
-  },
-];
-
-const TOTAL = GROUPS.reduce((n, g) => n + g.items.length, 0);
-const PHOTO = '/preview-bakery.jpg';
+function Row({ s, max }: { s: Sig; max: number }) {
+  const c = CAT[s.category];
+  const pct = Math.max(8, Math.round((s.tapCount / max) * 100));
+  return (
+    <div className="row">
+      <span className="r-emoji">{s.emoji}</span>
+      <span className="r-label">{s.label}</span>
+      <span className="r-bar"><span className="r-fill" style={{ width: `${pct}%`, background: c.strong }} /></span>
+      <span className="r-count">{s.tapCount}</span>
+      <style jsx>{`
+        .row { display: flex; align-items: center; gap: 11px; padding: 9px 0; }
+        .r-emoji { font-size: 16px; flex: none; width: 20px; text-align: center; }
+        .r-label { flex: 1; min-width: 0; font-size: 14.5px; font-weight: 600; color: #2A2440;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .r-bar { flex: none; width: 84px; height: 7px; border-radius: 4px; background: rgba(23,1,58,0.08); overflow: hidden; }
+        .r-fill { display: block; height: 100%; border-radius: 4px; }
+        .r-count { flex: none; width: 30px; text-align: right; font-size: 13px; font-weight: 800; color: #17013A; }
+      `}</style>
+    </div>
+  );
+}
 
 export default function SignalSpectrumPreview() {
   const [open, setOpen] = useState(false);
@@ -102,48 +120,49 @@ export default function SignalSpectrumPreview() {
           <button className="icon-btn save" aria-label="Save">♡</button>
           <div className="hero-text">
             <h1 className="name">Tatte Bakery &amp; Café</h1>
-            <p className="meta">Bakery · Boston, MA · 0.4 mi · Open till 8pm</p>
+            <p className="meta">Bakery · Boston, MA · 0.4 mi · <span className="open">Open till 8pm</span></p>
           </div>
         </div>
 
         <div className="sheet">
           <div className="section">
             <div className="section-head">
-              <span className="section-title">Signal Spectrum</span>
-              <span className="section-sub">361 taps</span>
+              <span className="section-title">Signals</span>
+              <span className="section-sub">{TOTAL_TAPS} taps · 142 visitors</span>
             </div>
 
-            {/* Symmetrical top-4 grid — equal-height tiles that fit the full label on 2 lines */}
-            <div className="grid">
-              {TOP.map((s, i) => (
-                <SignalTile key={i} s={s} onClick={() => setOpen(o => !o)} />
+            {/* legend — teaches the colour code */}
+            <div className="legend">
+              {(['good', 'vibe', 'headsup'] as Cat[]).map(k => (
+                <span className="leg" key={k}>
+                  <span className="leg-dot" style={{ background: CAT[k].strong }} />
+                  <span style={{ color: CAT[k].accent }}>{CAT[k].name}</span>
+                </span>
               ))}
             </div>
 
-            {/* Expand toggle */}
+            {/* top 4 — symmetrical, readable, full labels */}
+            <div className="grid">
+              {TOP.map((s, i) => <Tile key={i} s={s} onClick={() => setOpen(o => !o)} />)}
+            </div>
+
             <button className="more" onClick={() => setOpen(o => !o)}>
-              {open ? 'Hide signals' : `See all ${TOTAL} signals`}
+              {open ? 'Hide signals' : `See all ${ALL.length} signals`}
               <span className={`chev ${open ? 'up' : ''}`}>⌄</span>
             </button>
 
-            {/* Dropdown: full signal list, grouped */}
             {open && (
               <div className="dropdown">
-                {GROUPS.map((g) => {
+                {GROUPS.map(g => {
+                  const c = CAT[g.key];
                   const max = Math.max(...g.items.map(i => i.tapCount));
                   return (
                     <div className="group" key={g.key}>
-                      <div className={`group-title ${g.key}`}>{g.title}</div>
-                      {g.items.map((s, i) => (
-                        <SignalDetailRow
-                          key={i}
-                          label={s.label}
-                          tapCount={s.tapCount}
-                          category={s.category}
-                          emoji={s.emoji}
-                          maxTapCount={max}
-                        />
-                      ))}
+                      <div className="group-head" style={{ color: c.accent }}>
+                        <span className="group-dot" style={{ background: c.strong }} />{c.name}
+                        <span className="group-n">{g.items.length}</span>
+                      </div>
+                      {g.items.map((s, i) => <Row key={i} s={s} max={max} />)}
                     </div>
                   );
                 })}
@@ -166,63 +185,55 @@ export default function SignalSpectrumPreview() {
       </div>
 
       <style jsx>{`
-        .screen {
-          max-width: 480px; margin: 0 auto; min-height: 100vh; background: #fff;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          position: relative; padding-bottom: 92px;
-        }
-        .hero { position: relative; width: 100%; height: 42vh; min-height: 280px; }
+        .screen { max-width: 480px; margin: 0 auto; min-height: 100vh; background: #fff;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; position: relative; padding-bottom: 92px; }
+        .hero { position: relative; width: 100%; height: 40vh; min-height: 270px; }
         .hero-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .hero-scrim { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.55) 100%); }
-        .icon-btn {
-          position: absolute; top: 18px; width: 40px; height: 40px; border-radius: 50%;
-          border: none; background: rgba(255,255,255,0.92); font-size: 22px; line-height: 1;
-          color: #17013A; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.18);
-          display: flex; align-items: center; justify-content: center;
-        }
+        .hero-scrim { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0) 32%, rgba(0,0,0,0.58) 100%); }
+        .icon-btn { position: absolute; top: 18px; width: 40px; height: 40px; border-radius: 50%; border: none;
+          background: rgba(255,255,255,0.92); font-size: 22px; line-height: 1; color: #17013A; cursor: pointer;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.18); display: flex; align-items: center; justify-content: center; }
         .back { left: 16px; } .save { right: 16px; font-size: 19px; }
         .hero-text { position: absolute; left: 20px; right: 20px; bottom: 18px; }
-        .name { color: #fff; font-size: 28px; font-weight: 800; margin: 0 0 6px; letter-spacing: -0.4px; text-shadow: 0 2px 12px rgba(0,0,0,0.4); }
-        .meta { color: rgba(255,255,255,0.92); font-size: 14px; margin: 0; text-shadow: 0 1px 8px rgba(0,0,0,0.4); }
-        .sheet { position: relative; margin-top: -22px; background: #fff; border-radius: 26px 26px 0 0; padding: 26px 20px 8px; box-shadow: 0 -8px 24px rgba(23,1,58,0.06); }
-        .section { padding: 6px 0 18px; }
-        .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 16px; }
-        .section-title { font-size: 18px; font-weight: 800; color: #17013A; letter-spacing: -0.2px; }
-        .section-sub { font-size: 13px; font-weight: 700; color: #00C2CB; }
+        .name { color: #fff; font-size: 27px; font-weight: 800; margin: 0 0 6px; letter-spacing: -0.4px; text-shadow: 0 2px 12px rgba(0,0,0,0.45); }
+        .meta { color: rgba(255,255,255,0.92); font-size: 14px; margin: 0; text-shadow: 0 1px 8px rgba(0,0,0,0.45); }
+        .open { color: #4ADE80; font-weight: 700; }
 
-        /* symmetrical 2-column grid, equal-width pills */
-        .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; align-items: stretch; }
+        .sheet { position: relative; margin-top: -22px; background: #fff; border-radius: 26px 26px 0 0; padding: 24px 20px 8px; box-shadow: 0 -8px 24px rgba(23,1,58,0.06); }
+        .section { padding: 4px 0 18px; }
+        .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+        .section-title { font-size: 19px; font-weight: 800; color: #17013A; letter-spacing: -0.2px; }
+        .section-sub { font-size: 12.5px; font-weight: 600; color: #8b8898; }
 
-        .more {
-          width: 100%; margin-top: 14px; padding: 12px 0; border-radius: 12px;
-          border: 1px solid rgba(23,1,58,0.10); background: rgba(23,1,58,0.02);
-          color: #17013A; font-size: 14px; font-weight: 700; cursor: pointer;
-          display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
+        .legend { display: flex; gap: 16px; margin-bottom: 14px; }
+        .leg { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; }
+        .leg-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+        .grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; }
+
+        .more { width: 100%; margin-top: 14px; padding: 13px 0; border-radius: 12px;
+          border: 1px solid rgba(23,1,58,0.12); background: rgba(23,1,58,0.025); color: #17013A;
+          font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .chev { transition: transform 0.2s ease; font-size: 16px; }
         .chev.up { transform: rotate(180deg); }
 
-        .dropdown { margin-top: 16px; animation: drop 0.18s ease; }
+        .dropdown { margin-top: 14px; animation: drop 0.18s ease; }
         @keyframes drop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
-        .group { margin-bottom: 18px; }
-        .group-title { font-size: 12px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 12px; }
-        .group-title.good { color: #00C2CB; }
-        .group-title.vibe { color: #8A05BE; }
-        .group-title.headsup { color: #F5A623; }
+        .group { padding: 6px 0 4px; }
+        .group + .group { border-top: 1px solid rgba(23,1,58,0.06); margin-top: 8px; padding-top: 14px; }
+        .group-head { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 6px; }
+        .group-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .group-n { margin-left: 6px; font-size: 11px; font-weight: 800; color: #b3b0bd; background: rgba(23,1,58,0.05); border-radius: 20px; padding: 1px 7px; }
 
         .divider { height: 1px; background: rgba(23,1,58,0.07); margin: 2px 0; }
         .about { font-size: 14.5px; line-height: 1.6; color: #4a475c; margin: 8px 0 0; }
-        .actionbar {
-          position: fixed; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto;
-          display: flex; gap: 12px; padding: 14px 20px calc(14px + env(safe-area-inset-bottom));
-          background: rgba(255,255,255,0.96); backdrop-filter: blur(10px); border-top: 1px solid rgba(23,1,58,0.07);
-        }
+        .actionbar { position: fixed; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto; display: flex; gap: 12px;
+          padding: 14px 20px calc(14px + env(safe-area-inset-bottom)); background: rgba(255,255,255,0.96);
+          backdrop-filter: blur(10px); border-top: 1px solid rgba(23,1,58,0.07); }
         .act { flex: 1; padding: 15px 0; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; border: none; }
         .act.ghost { background: rgba(23,1,58,0.06); color: #17013A; }
         .act.primary { background: #00C2CB; color: #fff; box-shadow: 0 6px 18px rgba(0,194,203,0.35); }
       `}</style>
-
-      {/* global so it can reach into the SignalPill button DOM for equal widths */}
       <style jsx global>{`
         html, body { margin: 0; padding: 0; background: #fff; }
         *, *::before, *::after { box-sizing: border-box; }
