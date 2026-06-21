@@ -50,28 +50,20 @@ const HOURS: [string, string][] = [
   ['Sunday', '8:00 AM – 6:00 PM'],
 ];
 
-// quick-action icons on top of reviews
-const ACTIONS = [
-  { key: 'phone', label: 'Call' },
-  { key: 'website', label: 'Website' },
-  { key: 'menu', label: 'Menu' },
-  { key: 'share', label: 'Share' },
-  { key: 'order', label: 'Order' },
-];
-const SOCIALS = [
-  { key: 'instagram', bg: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf)', label: 'Instagram', value: '@tattebakery' },
-  { key: 'tiktok', bg: '#000000', label: 'TikTok', value: '@tatte' },
-  { key: 'youtube', bg: '#FF0000', label: 'YouTube', value: 'Tatte Bakery' },
-];
-// the full directory (Tavvy shows everything)
-const LINKS: { key: string; bg: string; label: string; value: string }[] = [
-  { key: 'phone',     bg: '#0E7C86', label: 'Call',      value: '(617) 555-0192' },
-  { key: 'whatsapp',  bg: '#25D366', label: 'WhatsApp',  value: 'Message us' },
-  { key: 'website',   bg: '#00C2CB', label: 'Website',   value: 'tattebakery.com' },
-  { key: 'instagram', bg: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf)', label: 'Instagram', value: '@tattebakery · 248k' },
-  { key: 'tiktok',    bg: '#000000', label: 'TikTok',    value: '@tatte · 92k' },
-  { key: 'youtube',   bg: '#FF0000', label: 'YouTube',   value: 'Tatte Bakery' },
-  { key: 'facebook',  bg: '#1877F2', label: 'Facebook',  value: 'Tatte Bakery & Café' },
+// one horizontal-scroll row of EVERYTHING — info actions + socials together,
+// so the reviews sit higher on the first screen. Tavvy still shows it all.
+const BAR: { key: string; label: string; bg: string; fg: string }[] = [
+  { key: 'phone',     label: 'Call',      bg: 'rgba(23,1,58,0.05)', fg: '#17013A' },
+  { key: 'website',   label: 'Website',   bg: 'rgba(23,1,58,0.05)', fg: '#17013A' },
+  { key: 'menu',      label: 'Menu',      bg: 'rgba(23,1,58,0.05)', fg: '#17013A' },
+  { key: 'ecard',     label: 'eCard',     bg: 'linear-gradient(135deg,#00C2CB,#8A05BE)', fg: '#fff' },
+  { key: 'order',     label: 'Order',     bg: 'rgba(23,1,58,0.05)', fg: '#17013A' },
+  { key: 'share',     label: 'Share',     bg: 'rgba(23,1,58,0.05)', fg: '#17013A' },
+  { key: 'instagram', label: 'Instagram', bg: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf)', fg: '#fff' },
+  { key: 'tiktok',    label: 'TikTok',    bg: '#000000', fg: '#fff' },
+  { key: 'youtube',   label: 'YouTube',   bg: '#FF0000', fg: '#fff' },
+  { key: 'whatsapp',  label: 'WhatsApp',  bg: '#25D366', fg: '#fff' },
+  { key: 'facebook',  label: 'Facebook',  bg: '#1877F2', fg: '#fff' },
 ];
 
 type Review = { initial: string; color: string; name: string; when: string; signals: { label: string; category: Cat }[] };
@@ -98,6 +90,8 @@ function Glyph({ name, color = '#fff' }: { name: string; color?: string }) {
       return <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 15V4M12 4l-3.3 3.3M12 4l3.3 3.3M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" {...s} /></svg>;
     case 'order':
       return <svg viewBox="0 0 24 24" width="18" height="18"><path d="M6 8h12l-1 11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1L6 8zM9 8V6.5a3 3 0 0 1 6 0V8" {...s} /></svg>;
+    case 'ecard':
+      return <svg viewBox="0 0 24 24" width="18" height="18"><rect x="3" y="6" width="18" height="12" rx="2.5" {...s} /><circle cx="8" cy="11" r="1.7" {...s} /><path d="M5.5 15.5c.4-1.3 1.4-1.8 2.5-1.8s2.1.5 2.5 1.8M13.5 10.5h4.5M13.5 13.5h3" {...s} /></svg>;
     case 'instagram':
       return <svg viewBox="0 0 24 24" width="18" height="18"><rect x="3.5" y="3.5" width="17" height="17" rx="5" {...s} /><circle cx="12" cy="12" r="4" {...s} /><circle cx="17.2" cy="6.8" r="1.1" fill={color} /></svg>;
     case 'tiktok':
@@ -156,24 +150,6 @@ function Row({ s, max }: { s: Sig; max: number }) {
   );
 }
 
-function LinkRow({ l }: { l: typeof LINKS[number] }) {
-  return (
-    <button className="lk">
-      <span className="lk-ic" style={{ background: l.bg }}><Glyph name={l.key} /></span>
-      <span className="lk-mid"><span className="lk-label">{l.label}</span><span className="lk-val">{l.value}</span></span>
-      <span className="lk-chev">›</span>
-      <style jsx>{`
-        .lk { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 0; background: none; border: none; cursor: pointer; text-align: left; }
-        .lk-ic { flex: none; width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; }
-        .lk-mid { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-        .lk-label { font-size: 14.5px; font-weight: 800; color: #17013A; }
-        .lk-val { font-size: 13px; color: #8b8898; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .lk-chev { flex: none; font-size: 22px; color: #c7c4d0; font-weight: 400; }
-      `}</style>
-    </button>
-  );
-}
-
 function Reviewer({ r }: { r: Review }) {
   return (
     <div className="rv">
@@ -225,21 +201,13 @@ export default function SignalSpectrumPreview() {
         </div>
 
         <div className="sheet">
-          {/* quick actions + socials, on top of the reviews */}
+          {/* one horizontal-scroll row: actions + socials + eCard, on top of the reviews */}
           <div className="quickbar">
-            <div className="qa-row">
-              {ACTIONS.map(a => (
-                <button className="qa" key={a.key}>
-                  <span className="qa-ic"><Glyph name={a.key} color="#17013A" /></span>
-                  <span className="qa-lbl">{a.label}</span>
-                </button>
-              ))}
-            </div>
-            <div className="so-row">
-              {SOCIALS.map(s => (
-                <button className="so" key={s.key}>
-                  <span className="so-ic" style={{ background: s.bg }}><Glyph name={s.key} /></span>
-                  <span className="so-mid"><span className="so-lbl">{s.label}</span><span className="so-val">{s.value}</span></span>
+            <div className="bar-scroll">
+              {BAR.map(b => (
+                <button className="bi" key={b.key}>
+                  <span className="bi-ic" style={{ background: b.bg }}><Glyph name={b.key} color={b.fg} /></span>
+                  <span className="bi-lbl">{b.label}</span>
                 </button>
               ))}
             </div>
@@ -321,15 +289,6 @@ export default function SignalSpectrumPreview() {
 
           <div className="divider" />
 
-          {/* Connect — the complete link directory */}
-          <div className="section">
-            <span className="section-title">Connect</span>
-            <p className="connect-sub">Everywhere this place is — all in one tap.</p>
-            <div className="links">{LINKS.map((l, i) => <LinkRow key={i} l={l} />)}</div>
-          </div>
-
-          <div className="divider" />
-
           {/* Recent reviews */}
           <div className="section">
             <div className="section-head">
@@ -350,7 +309,7 @@ export default function SignalSpectrumPreview() {
       <style jsx>{`
         .screen { max-width: 480px; margin: 0 auto; min-height: 100vh; background: #fff;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; position: relative; padding-bottom: 92px; }
-        .hero { position: relative; width: 100%; height: 40vh; min-height: 270px; }
+        .hero { position: relative; width: 100%; height: 33vh; min-height: 232px; }
         .hero-img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .hero-scrim { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.6) 100%); }
         .icon-btn { position: absolute; top: 18px; width: 40px; height: 40px; border-radius: 50%; border: none;
@@ -365,18 +324,13 @@ export default function SignalSpectrumPreview() {
 
         .sheet { position: relative; margin-top: -22px; background: #fff; border-radius: 26px 26px 0 0; padding: 22px 20px 8px; box-shadow: 0 -8px 24px rgba(23,1,58,0.06); }
 
-        /* quick actions + socials */
-        .quickbar { padding-bottom: 18px; border-bottom: 1px solid rgba(23,1,58,0.07); }
-        .qa-row { display: flex; justify-content: space-between; gap: 4px; }
-        .qa { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 7px; background: none; border: none; cursor: pointer; padding: 0; }
-        .qa-ic { width: 48px; height: 48px; border-radius: 50%; background: rgba(23,1,58,0.05); display: flex; align-items: center; justify-content: center; }
-        .qa-lbl { font-size: 11.5px; font-weight: 600; color: #4a475c; }
-        .so-row { display: flex; gap: 9px; margin-top: 16px; }
-        .so { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-radius: 12px; background: rgba(23,1,58,0.04); border: none; cursor: pointer; text-align: left; }
-        .so-ic { flex: none; width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-        .so-mid { display: flex; flex-direction: column; min-width: 0; }
-        .so-lbl { font-size: 12.5px; font-weight: 800; color: #17013A; line-height: 1.2; }
-        .so-val { font-size: 11px; color: #8b8898; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* one horizontal-scroll row of actions + socials + eCard */
+        .quickbar { margin: 0 -20px; padding: 0 20px 16px; border-bottom: 1px solid rgba(23,1,58,0.07); }
+        .bar-scroll { display: flex; gap: 16px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        .bar-scroll::-webkit-scrollbar { display: none; }
+        .bi { flex: 0 0 auto; width: 54px; display: flex; flex-direction: column; align-items: center; gap: 7px; background: none; border: none; cursor: pointer; padding: 0; }
+        .bi-ic { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .bi-lbl { font-size: 11px; font-weight: 600; color: #4a475c; white-space: nowrap; }
 
         .section { padding: 16px 0 16px; }
         .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
