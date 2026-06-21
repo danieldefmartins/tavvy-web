@@ -7,9 +7,44 @@
  */
 import React, { useState } from 'react';
 import Head from 'next/head';
-import SignalPill, { SignalDetailRow, SignalCategory } from '../../components/SignalPill';
+import { SignalDetailRow, SignalCategory } from '../../components/SignalPill';
 
 type Sig = { label: string; tapCount: number; category: SignalCategory; emoji?: string };
+
+// Readable tile colors: dark text on a light tint of the brand accent (the old
+// dark-mode pills put light text on a faint tint → washed out on a white screen).
+const TILE: Record<SignalCategory, { bg: string; border: string; count: string }> = {
+  good:    { bg: 'rgba(0, 194, 203, 0.12)', border: 'rgba(0, 194, 203, 0.32)', count: '#00858C' },
+  vibe:    { bg: 'rgba(138, 5, 190, 0.10)', border: 'rgba(138, 5, 190, 0.28)', count: '#7A05A8' },
+  headsup: { bg: 'rgba(245, 166, 35, 0.16)', border: 'rgba(245, 166, 35, 0.40)', count: '#A85D00' },
+};
+
+function SignalTile({ s, onClick }: { s: Sig; onClick?: () => void }) {
+  const c = TILE[s.category];
+  return (
+    <button className="tile" onClick={onClick} style={{ background: c.bg, borderColor: c.border }}>
+      <span className="tile-emoji">{s.emoji}</span>
+      <span className="tile-label">{s.label}</span>
+      <span className="tile-count" style={{ color: c.count }}>×{s.tapCount}</span>
+      <style jsx>{`
+        .tile {
+          display: flex; align-items: center; gap: 9px; width: 100%; min-width: 0;
+          min-height: 62px; padding: 12px 14px; border-radius: 16px;
+          border: 1px solid; cursor: pointer; text-align: left;
+          font-family: inherit; transition: transform 0.15s ease, filter 0.15s ease;
+        }
+        .tile:active { transform: scale(0.98); }
+        .tile-emoji { font-size: 19px; flex: none; line-height: 1; }
+        .tile-label {
+          flex: 1; min-width: 0; font-size: 14px; font-weight: 700;
+          color: #17013A; line-height: 1.25;
+          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .tile-count { font-size: 13px; font-weight: 800; flex: none; }
+      `}</style>
+    </button>
+  );
+}
 
 // Top 4 — the symmetrical at-a-glance row (2 Good · 1 Vibe · 1 Heads Up)
 const TOP: Sig[] = [
@@ -78,20 +113,10 @@ export default function SignalSpectrumPreview() {
               <span className="section-sub">361 taps</span>
             </div>
 
-            {/* Symmetrical top-4 grid */}
+            {/* Symmetrical top-4 grid — equal-height tiles that fit the full label on 2 lines */}
             <div className="grid">
               {TOP.map((s, i) => (
-                <div className="cell" key={i}>
-                  <SignalPill
-                    label={s.label}
-                    tapCount={s.tapCount}
-                    category={s.category}
-                    emoji={s.emoji}
-                    size="md"
-                    showCount
-                    onClick={() => setOpen(o => !o)}
-                  />
-                </div>
+                <SignalTile key={i} s={s} onClick={() => setOpen(o => !o)} />
               ))}
             </div>
 
@@ -166,8 +191,7 @@ export default function SignalSpectrumPreview() {
         .section-sub { font-size: 13px; font-weight: 700; color: #00C2CB; }
 
         /* symmetrical 2-column grid, equal-width pills */
-        .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
-        .cell { display: flex; min-width: 0; }
+        .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; align-items: stretch; }
 
         .more {
           width: 100%; margin-top: 14px; padding: 12px 0; border-radius: 12px;
@@ -201,7 +225,7 @@ export default function SignalSpectrumPreview() {
       {/* global so it can reach into the SignalPill button DOM for equal widths */}
       <style jsx global>{`
         html, body { margin: 0; padding: 0; background: #fff; }
-        .grid .signal-pill { width: 100%; justify-content: flex-start; }
+        *, *::before, *::after { box-sizing: border-box; }
       `}</style>
     </>
   );

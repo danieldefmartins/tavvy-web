@@ -322,7 +322,20 @@ export default function AgentReviewDashboard() {
                   )}
 
                   {/* Mockup Toggle */}
-                  {(idea.metadata?.mockupHtml || idea.mockup_url) && (
+                  {idea.metadata?.previewUrl ? (
+                    // Real, full-screen design preview — opens the actual page (built
+                    // from real components) in a new tab so it can be judged at full size.
+                    <div style={{ marginTop: 12 }}>
+                      <a
+                        href={idea.metadata.previewUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ ...styles.mockupBtn, display: 'inline-block', textDecoration: 'none' }}
+                      >
+                        Open full preview ↗
+                      </a>
+                    </div>
+                  ) : (idea.metadata?.mockupHtml || idea.mockup_url) ? (
                     <div style={{ marginTop: 12 }}>
                       <button
                         onClick={() => setMockupId(mockupId === idea.id ? null : idea.id)}
@@ -333,8 +346,6 @@ export default function AgentReviewDashboard() {
                       {mockupId === idea.id && (
                         <div style={styles.mockupContainer}>
                           {idea.metadata?.mockupHtml ? (
-                            // Real rendered HTML mockup (the actual design, not an AI image).
-                            // srcDoc renders the markup directly, sandboxed for safety.
                             <iframe
                               title={`Mockup: ${idea.title}`}
                               srcDoc={idea.metadata.mockupHtml}
@@ -351,7 +362,7 @@ export default function AgentReviewDashboard() {
                         </div>
                       )}
                     </div>
-                  )}
+                  ) : null}
 
                   {/* Status badge for history */}
                   {idea.status !== 'pending' && (
