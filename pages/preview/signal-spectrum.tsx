@@ -117,6 +117,68 @@ function Row({ s, max }: { s: Sig; max: number }) {
   );
 }
 
+// Full place info — Tavvy displays EVERYTHING (unlike Google/Facebook, who hide
+// competitor links). The win is being the most useful hub for the customer.
+const PLACE = {
+  address: '399 Boylston St, Boston, MA 02116',
+  price: '$$',
+  phone: '(617) 555-0192',
+};
+const HOURS: [string, string][] = [
+  ['Mon – Fri', '7:00 AM – 8:00 PM'],
+  ['Saturday', '8:00 AM – 8:00 PM'],
+  ['Sunday', '8:00 AM – 6:00 PM'],
+];
+// Brand link rows. gradient is used for Instagram.
+const LINKS: { key: string; bg: string; label: string; value: string }[] = [
+  { key: 'phone',     bg: '#0E7C86', label: 'Call',      value: '(617) 555-0192' },
+  { key: 'whatsapp',  bg: '#25D366', label: 'WhatsApp',  value: 'Message us' },
+  { key: 'website',   bg: '#00C2CB', label: 'Website',   value: 'tattebakery.com' },
+  { key: 'instagram', bg: 'linear-gradient(45deg,#feda75,#fa7e1e,#d62976,#962fbf)', label: 'Instagram', value: '@tattebakery · 248k' },
+  { key: 'tiktok',    bg: '#000000', label: 'TikTok',    value: '@tatte · 92k' },
+  { key: 'youtube',   bg: '#FF0000', label: 'YouTube',   value: 'Tatte Bakery' },
+  { key: 'facebook',  bg: '#1877F2', label: 'Facebook',  value: 'Tatte Bakery & Café' },
+];
+
+function Glyph({ name }: { name: string }) {
+  const w = { fill: 'none', stroke: '#fff', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+  switch (name) {
+    case 'phone':
+    case 'whatsapp':
+      return <svg viewBox="0 0 24 24" width="18" height="18"><path d="M6.5 10.8c1.4 2.8 3.9 5.3 6.7 6.7l2.1-2.1c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.5.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C11.5 21 3 12.5 3 2 3 1.4 3.4 1 4 1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.5.1.4 0 .8-.2 1l-2.4 2.3z" fill="#fff" /></svg>;
+    case 'website':
+      return <svg viewBox="0 0 24 24" width="18" height="18"><circle cx="12" cy="12" r="9" {...w} /><path d="M3 12h18M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18" {...w} /></svg>;
+    case 'instagram':
+      return <svg viewBox="0 0 24 24" width="18" height="18"><rect x="3.5" y="3.5" width="17" height="17" rx="5" {...w} /><circle cx="12" cy="12" r="4" {...w} /><circle cx="17.2" cy="6.8" r="1.1" fill="#fff" /></svg>;
+    case 'tiktok':
+      return <svg viewBox="0 0 24 24" width="18" height="18"><path d="M14 3c.3 2 1.7 3.6 3.8 3.9V10c-1.5 0-2.8-.4-3.8-1.1v5.8a4.7 4.7 0 1 1-4.7-4.7c.3 0 .5 0 .8.1v3.1a1.7 1.7 0 1 0 1.2 1.6V3H14z" fill="#fff" /></svg>;
+    case 'youtube':
+      return <svg viewBox="0 0 24 24" width="18" height="18"><path d="M10 8.5l5.5 3.5L10 15.5v-7z" fill="#fff" /></svg>;
+    case 'facebook':
+      return <svg viewBox="0 0 24 24" width="18" height="18"><path d="M13.5 21v-7h2.3l.4-2.8h-2.7V9.4c0-.8.2-1.4 1.4-1.4h1.4V5.5c-.3 0-1.1-.1-2-.1-2 0-3.4 1.2-3.4 3.5v2.3H8.6V14h2.3v7h2.6z" fill="#fff" /></svg>;
+    default:
+      return null;
+  }
+}
+
+function LinkRow({ l }: { l: typeof LINKS[number] }) {
+  return (
+    <button className="lk">
+      <span className="lk-ic" style={{ background: l.bg }}><Glyph name={l.key} /></span>
+      <span className="lk-mid"><span className="lk-label">{l.label}</span><span className="lk-val">{l.value}</span></span>
+      <span className="lk-chev">›</span>
+      <style jsx>{`
+        .lk { display: flex; align-items: center; gap: 12px; width: 100%; padding: 10px 0; background: none; border: none; cursor: pointer; text-align: left; }
+        .lk-ic { flex: none; width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; }
+        .lk-mid { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+        .lk-label { font-size: 14.5px; font-weight: 800; color: #17013A; }
+        .lk-val { font-size: 13px; color: #8b8898; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .lk-chev { flex: none; font-size: 22px; color: #c7c4d0; font-weight: 400; }
+      `}</style>
+    </button>
+  );
+}
+
 function Reviewer({ r }: { r: Review }) {
   return (
     <div className="rv">
@@ -147,6 +209,7 @@ function Reviewer({ r }: { r: Review }) {
 
 export default function SignalSpectrumPreview() {
   const [open, setOpen] = useState(false);
+  const [hoursOpen, setHoursOpen] = useState(false);
 
   return (
     <>
@@ -230,6 +293,47 @@ export default function SignalSpectrumPreview() {
 
           <div className="divider" />
 
+          {/* Info — address, hours, price */}
+          <div className="section">
+            <span className="section-title">Info</span>
+            <div className="info">
+              <button className="info-row">
+                <span className="info-ic">📍</span>
+                <span className="info-mid"><span className="info-main">{PLACE.address}</span></span>
+                <span className="info-act">Directions</span>
+              </button>
+              <button className="info-row" onClick={() => setHoursOpen(o => !o)}>
+                <span className="info-ic">🕐</span>
+                <span className="info-mid">
+                  <span className="info-main"><b style={{ color: '#16a34a' }}>Open</b> · till 8:00 PM</span>
+                  {hoursOpen && (
+                    <span className="hours">
+                      {HOURS.map(([d, h], i) => <span className="hr" key={i}><span>{d}</span><span>{h}</span></span>)}
+                    </span>
+                  )}
+                </span>
+                <span className={`chev ${hoursOpen ? 'up' : ''}`}>⌄</span>
+              </button>
+              <div className="info-row static">
+                <span className="info-ic">💵</span>
+                <span className="info-mid"><span className="info-main">{PLACE.price} · Bakery, Café</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div className="divider" />
+
+          {/* Connect — every link the place has. Tavvy shows everything (Google/FB hide it). */}
+          <div className="section">
+            <span className="section-title">Connect</span>
+            <p className="connect-sub">Everywhere this place is — all in one tap.</p>
+            <div className="links">
+              {LINKS.map((l, i) => <LinkRow key={i} l={l} />)}
+            </div>
+          </div>
+
+          <div className="divider" />
+
           {/* Recent reviews — reviewer activity */}
           <div className="section">
             <div className="section-head">
@@ -299,6 +403,20 @@ export default function SignalSpectrumPreview() {
         .group-head { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 6px; }
         .group-dot { width: 8px; height: 8px; border-radius: 50%; }
         .group-n { margin-left: 6px; font-size: 11px; font-weight: 800; color: #b3b0bd; background: rgba(23,1,58,0.05); border-radius: 20px; padding: 1px 7px; }
+
+        .info { margin-top: 10px; display: flex; flex-direction: column; }
+        .info-row { display: flex; align-items: flex-start; gap: 12px; width: 100%; padding: 9px 0; background: none; border: none; cursor: pointer; text-align: left; }
+        .info-row.static { cursor: default; }
+        .info-ic { flex: none; font-size: 17px; width: 22px; text-align: center; line-height: 1.4; }
+        .info-mid { flex: 1; min-width: 0; }
+        .info-main { font-size: 14.5px; font-weight: 600; color: #2A2440; line-height: 1.4; }
+        .info-act { flex: none; font-size: 13px; font-weight: 800; color: #00858C; }
+        .hours { display: flex; flex-direction: column; gap: 5px; margin-top: 10px; }
+        .hr { display: flex; justify-content: space-between; font-size: 13.5px; color: #6b6880; }
+        .hr span:first-child { font-weight: 600; color: #4a475c; }
+
+        .connect-sub { font-size: 12.5px; color: #8b8898; margin: 4px 0 8px; }
+        .links { display: flex; flex-direction: column; }
 
         .divider { height: 1px; background: rgba(23,1,58,0.07); margin: 2px 0; }
         .about { font-size: 14.5px; line-height: 1.6; color: #4a475c; margin: 8px 0 0; }
