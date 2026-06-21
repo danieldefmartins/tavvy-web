@@ -412,7 +412,7 @@ export default function PlaceCard({ place, onPress, showQuickActions = true, com
   }
 
   return (
-    <Link href={`/place/${place.id}`} locale={locale} style={{ textDecoration: 'none' }}>
+    <Link href={`/app/place/${place.id}`} locale={locale} style={{ textDecoration: 'none' }}>
       {cardContent}
     </Link>
   );

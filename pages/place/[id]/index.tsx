@@ -657,15 +657,10 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
   );
 }
 
-export const getServerSideProps = async ({ params, locale }: { params: { id: string }; locale: string }) => {
-  try {
-    return {
-      props: {
-        placeId: params?.id || '',
-        ...(await serverSideTranslations(locale ?? 'en', ['common'])),
-      },
-    };
-  } catch {
-    return { props: { placeId: params?.id || '' } };
-  }
+export const getServerSideProps = async ({ params }: { params: { id: string }; locale: string }) => {
+  // The place detail now lives at /app/place/[id] (new signal-review design).
+  // Redirect the legacy /place/[id] URL there so old links keep working.
+  return {
+    redirect: { destination: `/app/place/${params?.id || ''}`, permanent: false },
+  };
 };

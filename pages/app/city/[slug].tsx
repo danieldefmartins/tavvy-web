@@ -245,7 +245,7 @@ export default function CityDetailScreen() {
             ) : (
               <div className={`places-${viewMode}`}>
                 {filteredPlaces.map((place) => (
-                  <Link key={place.id} href={`/place/${place.slug || place.id}`} locale={locale}>
+                  <Link key={place.id} href={`/app/place/`} locale={locale}>
                     <PlaceCard
                       place={{
                         id: place.id,

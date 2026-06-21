@@ -379,7 +379,7 @@ export default function UniverseDetailScreen() {
                     {places.map((place) => (
                       <Link
                         key={place.id}
-                        href={`/place/${place.id}`}
+                        href={`/app/place/`}
                         locale={locale}
                         className="place-card"
                       >

@@ -386,7 +386,7 @@ export default function OwnerSpotlightScreen() {
                       </div>
                     )}
 
-                    <Link href={`/place/${place.id}`} className="view-place-button" locale={locale}>
+                    <Link href={`/app/place/`} className="view-place-button" locale={locale}>
                       View on TavvY
                     </Link>
                   </div>

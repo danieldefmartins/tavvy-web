@@ -1327,7 +1327,7 @@ export default function MapScreen() {
                   className={`place-card ${selectedPlaceId === place.id ? 'selected' : ''}`}
                   onClick={() => {
                     console.log('[MapScreen] Place card clicked:', place.id);
-                    router.push(`/place/${place.id}`, undefined, { locale });
+                    router.push(`/app/place/${place.id}`, undefined, { locale });
                   }}
                 >
                   <div className="place-image">

@@ -219,7 +219,7 @@ export default function SearchScreen() {
                   {results.map((place) => (
                     <Link 
                       key={place.id}
-                      href={`/place/${place.slug || place.id}`}
+                      href={`/app/place/`}
                       locale={locale}
                       className="result-item"
                     >

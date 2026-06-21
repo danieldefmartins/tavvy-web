@@ -504,10 +504,10 @@ export default function HomeScreen() {
         if (place.fsq_place_id) {
           // Use fsq: prefix for consistency
           console.log('[HomeScreen] Navigating to place:', place.fsq_place_id);
-          router.push(`/place/fsq:${place.fsq_place_id}`, undefined, { locale });
+          router.push(`/app/place/fsq:${place.fsq_place_id}`, undefined, { locale });
         } else if (place.id) {
           console.log('[HomeScreen] Navigating to place by ID:', place.id);
-          router.push(`/place/${place.id}`, undefined, { locale });
+          router.push(`/app/place/${place.id}`, undefined, { locale });
         }
         break;
       case 'category':

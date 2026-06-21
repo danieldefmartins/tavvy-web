@@ -153,7 +153,9 @@ function Reviewer({ r }: { r: Review }) {
   );
 }
 
-export default function PlaceScreen({ config }: { config: PlaceConfig }) {
+const EXTERNAL = ['website', 'instagram', 'tiktok', 'youtube', 'facebook', 'whatsapp'];
+
+export default function PlaceScreen({ config, hrefs, onAddReview }: { config: PlaceConfig; hrefs?: Record<string, string>; onAddReview?: () => void }) {
   const [open, setOpen] = useState(false);
   const [hoursOpen, setHoursOpen] = useState<number | null>(null);
 
@@ -165,16 +167,20 @@ export default function PlaceScreen({ config }: { config: PlaceConfig }) {
     config.groups.find(g => g.key === 'headsup')?.items[0],
   ].filter(Boolean) as Sig[];
 
+  // In real mode (hrefs provided) only show socials that actually have a link.
+  const socialItems = SOCIALS.filter(s => !hrefs || hrefs[s.key]);
   const bar = [
     ...config.actions.map(a => ({ key: a.key, label: a.label, color: '#17013A' })),
     { key: 'ecard', label: 'eCard', color: '' },
-    ...SOCIALS.map(s => ({ key: s.key, label: s.label, color: s.color })),
+    ...socialItems.map(s => ({ key: s.key, label: s.label, color: s.color })),
   ];
 
   return (
     <div className="screen">
       <div className="hero">
-        <img src={config.photo} alt={config.name} className="hero-img" />
+        {config.photo
+          ? <img src={config.photo} alt={config.name} className="hero-img" />
+          : <div className="hero-img hero-fallback" />}
         <div className="hero-scrim" />
         <button className="icon-btn back" aria-label="Back">‹</button>
         <button className="icon-btn save" aria-label="Save">♡</button>
@@ -188,12 +194,14 @@ export default function PlaceScreen({ config }: { config: PlaceConfig }) {
       <div className="sheet">
         <div className="quickbar">
           <div className="bar-scroll">
-            {bar.map(b => (
-              <button className="bi" key={b.key}>
-                <span className="bi-ic"><Glyph name={b.key} color={b.color} size={26} /></span>
-                <span className="bi-lbl">{b.label}</span>
-              </button>
-            ))}
+            {bar.map(b => {
+              const href = hrefs?.[b.key];
+              const ext = EXTERNAL.includes(b.key);
+              const inner = (<><span className="bi-ic"><Glyph name={b.key} color={b.color} size={26} /></span><span className="bi-lbl">{b.label}</span></>);
+              return href
+                ? <a className="bi" key={b.key} href={href} target={ext ? '_blank' : undefined} rel={ext ? 'noopener noreferrer' : undefined}>{inner}</a>
+                : <button className="bi" key={b.key}>{inner}</button>;
+            })}
           </div>
         </div>
 
@@ -220,7 +228,7 @@ export default function PlaceScreen({ config }: { config: PlaceConfig }) {
         <div className="divider" />
         <div className="section">
           <div className="tp-head"><span className="tp-badge">✦ Tavvy Places</span></div>
-          <p className="about">{config.description}</p>
+          {config.description && <p className="about">{config.description}</p>}
           <div className="tags"><span className="tags-label">{config.popularLabel}</span>{config.popular.map((t, i) => <span className="tag" key={i}>{t}</span>)}</div>
         </div>
 
@@ -258,23 +266,30 @@ export default function PlaceScreen({ config }: { config: PlaceConfig }) {
           </div>
         </div>
 
-        <div className="divider" />
-        <div className="section">
-          <div className="section-head"><span className="section-title">Recent reviews</span><span className="section-sub">{config.reviews.length * 47}+ total</span></div>
-          {config.reviews.map((r, i) => <Reviewer key={i} r={r} />)}
-          <button className="more" style={{ marginTop: 6 }}>Read all reviews</button>
-        </div>
+        {config.reviews && config.reviews.length > 0 && (
+          <>
+            <div className="divider" />
+            <div className="section">
+              <div className="section-head"><span className="section-title">Recent reviews</span><span className="section-sub">{config.reviews.length * 47}+ total</span></div>
+              {config.reviews.map((r, i) => <Reviewer key={i} r={r} />)}
+              <button className="more" style={{ marginTop: 6 }}>Read all reviews</button>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="actionbar">
-        <button className="act ghost">Directions</button>
-        <button className="act primary">{config.cta}</button>
+        {hrefs?.directions
+          ? <a className="act ghost" href={hrefs.directions} target="_blank" rel="noopener noreferrer">Directions</a>
+          : <button className="act ghost">Directions</button>}
+        <button className="act primary" onClick={onAddReview}>{config.cta}</button>
       </div>
 
       <style jsx>{`
         .screen { max-width: 480px; margin: 0 auto; min-height: 100vh; background: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; position: relative; padding-bottom: 92px; }
         .hero { position: relative; width: 100%; height: 33vh; min-height: 232px; }
         .hero-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .hero-fallback { background: linear-gradient(135deg, #17013A 0%, #3a0a6b 50%, #8A05BE 100%); }
         .hero-scrim { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0) 32%, rgba(0,0,0,0.62) 100%); }
         .icon-btn { position: absolute; top: 18px; width: 40px; height: 40px; border-radius: 50%; border: none; background: rgba(255,255,255,0.92); font-size: 22px; line-height: 1; color: #17013A; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.18); display: flex; align-items: center; justify-content: center; }
         .back { left: 16px; } .save { right: 16px; font-size: 19px; }
@@ -287,7 +302,7 @@ export default function PlaceScreen({ config }: { config: PlaceConfig }) {
         .quickbar { margin: 0 -20px; padding: 0 20px 16px; border-bottom: 1px solid rgba(23,1,58,0.07); }
         .bar-scroll { display: flex; gap: 16px; overflow-x: auto; scrollbar-width: none; }
         .bar-scroll::-webkit-scrollbar { display: none; }
-        .bi { flex: 0 0 auto; width: 54px; display: flex; flex-direction: column; align-items: center; gap: 7px; background: none; border: none; cursor: pointer; padding: 0; }
+        .bi { flex: 0 0 auto; width: 54px; display: flex; flex-direction: column; align-items: center; gap: 7px; background: none; border: none; cursor: pointer; padding: 0; text-decoration: none; }
         .bi-ic { width: 50px; height: 50px; border-radius: 50%; background: rgba(23,1,58,0.05); display: flex; align-items: center; justify-content: center; }
         .bi-lbl { font-size: 11px; font-weight: 600; color: #4a475c; white-space: nowrap; }
         .section { padding: 16px 0 16px; }
@@ -331,7 +346,7 @@ export default function PlaceScreen({ config }: { config: PlaceConfig }) {
         .hr span:first-child { font-weight: 600; color: #4a475c; }
         .divider { height: 1px; background: rgba(23,1,58,0.07); margin: 0; }
         .actionbar { position: fixed; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto; display: flex; gap: 12px; padding: 14px 20px calc(14px + env(safe-area-inset-bottom)); background: rgba(255,255,255,0.96); backdrop-filter: blur(10px); border-top: 1px solid rgba(23,1,58,0.07); }
-        .act { flex: 1; padding: 15px 0; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; border: none; }
+        .act { flex: 1; padding: 15px 0; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; border: none; text-decoration: none; text-align: center; }
         .act.ghost { background: rgba(23,1,58,0.06); color: #17013A; }
         .act.primary { background: #00C2CB; color: #fff; box-shadow: 0 6px 18px rgba(0,194,203,0.35); }
       `}</style>
