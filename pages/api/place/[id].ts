@@ -14,6 +14,7 @@ const BUCKET: Record<string, 'good' | 'vibe' | 'headsup'> = {
 const isUuid = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  res.setHeader("Cache-Control", "no-store, max-age=0");
   // Links across the app use several id forms: raw uuid, slug, tavvy:<uuid>, places-<uuid>
   const raw = String(req.query.id || '').replace(/^(tavvy:|places-)/, '');
   if (!raw) return res.status(400).json({ error: 'missing id' });
