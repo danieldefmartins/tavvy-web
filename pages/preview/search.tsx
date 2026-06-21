@@ -43,16 +43,16 @@ const PLACES: Place[] = [
 function Chip({ s }: { s: Sig }) {
   const c = CAT[s.category];
   return (
-    <span className="chip" style={{ background: c.tint, color: c.accent, borderColor: c.border }}>
+    <span className="chip" style={{ background: c.tint, borderColor: c.border }}>
       <span className="chip-e">{s.emoji}</span>
       <span className="chip-l">{s.label}</span>
-      <span className="chip-n">{s.count}</span>
+      <span className="chip-n" style={{ color: c.accent }}>{s.count}</span>
       <style jsx>{`
         .chip { display: flex; align-items: center; gap: 6px; width: 100%; min-width: 0; font-size: 12px;
-          font-weight: 700; padding: 7px 10px; border-radius: 12px; border: 1px solid; }
+          font-weight: 700; padding: 7px 10px; border-radius: 12px; border: 1px solid; color: #17013A; }
         .chip-e { flex: none; font-size: 12px; }
         .chip-l { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .chip-n { flex: none; font-weight: 800; opacity: 0.75; }
+        .chip-n { flex: none; font-weight: 800; }
       `}</style>
     </span>
   );
