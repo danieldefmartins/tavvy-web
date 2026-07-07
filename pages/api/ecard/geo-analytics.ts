@@ -6,6 +6,15 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+async function getAuthUser(token: string) {
+  const { data: { user }, error } = await createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
+  ).auth.getUser(token);
+  if (error || !user) return null;
+  return user;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -17,7 +26,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'card_id is required' });
   }
 
+  // Require a valid Supabase session and card ownership — this endpoint
+  // exposes endorser ZIPs and IP-derived geo data.
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.replace('Bearer ', '') || req.cookies['sb-access-token'];
+  if (!token) return res.status(401).json({ error: 'Authentication required' });
+
   try {
+    const user = await getAuthUser(token);
+    if (!user) return res.status(401).json({ error: 'Invalid session' });
+
+    const { data: card } = await supabase
+      .from('digital_cards')
+      .select('id, user_id')
+      .eq('id', card_id)
+      .single();
+
+    if (!card || card.user_id !== user.id) {
+      return res.status(403).json({ error: 'Only the card owner can view geo analytics' });
+    }
     // 1. Endorsement geo breakdown by ZIP (self-reported)
     const { data: endorsementsByZip } = await supabase
       .from('ecard_endorsements')
