@@ -53,11 +53,12 @@ export default function CityDetailScreen() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
+  // Canonical categories are singular ('restaurant', 'hotel')
   const categories = [
     { id: 'all', name: 'All', icon: '🏠' },
-    { id: 'restaurants', name: 'Restaurants', icon: '🍽️' },
-    { id: 'hotels', name: 'Hotels', icon: '🏨' },
-    { id: 'attractions', name: 'Attractions', icon: '🎡' },
+    { id: 'restaurant', name: 'Restaurants', icon: '🍽️' },
+    { id: 'hotel', name: 'Hotels', icon: '🏨' },
+    { id: 'attraction', name: 'Attractions', icon: '🎡' },
     { id: 'shopping', name: 'Shopping', icon: '🛍️' },
     { id: 'nightlife', name: 'Nightlife', icon: '🌙' },
   ];
@@ -68,36 +69,59 @@ export default function CityDetailScreen() {
     }
   }, [slug]);
 
+  const isUuid = (v: string) =>
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+
+  const fetchPlacesForCity = async (cityName: string) => {
+    const { data: placesData, error: placesError } = await supabase
+      .from('places')
+      .select('id, name, slug, tavvy_category, street, city, cover_image_url, photos, status')
+      .ilike('city', cityName)
+      .eq('status', 'active')
+      .limit(50);
+
+    if (!placesError && placesData) {
+      setPlaces(
+        placesData.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          slug: p.slug,
+          category: p.tavvy_category,
+          address: p.street,
+          city: p.city,
+          photo_url: p.cover_image_url || (Array.isArray(p.photos) ? p.photos[0] : undefined),
+        }))
+      );
+    }
+  };
+
   const fetchCityData = async () => {
     setLoading(true);
     try {
-      // Fetch city info
-      const { data: cityData, error: cityError } = await supabase
-        .from('cities')
-        .select('*')
-        .or(`slug.eq.${slug},id.eq.${slug}`)
-        .single();
+      const rawSlug = slug as string;
+
+      // Fetch city info (never .or(id.eq.slug) — crashes on uuid columns)
+      let cityQuery = supabase
+        .from('tavvy_cities')
+        .select('id, name, slug, state, country, cover_image_url, description, population')
+        .limit(1);
+      cityQuery = isUuid(rawSlug) ? cityQuery.eq('id', rawSlug) : cityQuery.eq('slug', rawSlug);
+      const { data: cityData, error: cityError } = await cityQuery.maybeSingle();
+
+      // Derive a display name from the slug as fallback
+      const derivedName = rawSlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
       if (!cityError && cityData) {
         setCity(cityData);
-
-        // Fetch places in this city
-        const { data: placesData, error: placesError } = await supabase
-          .from('places')
-          .select('*')
-          .eq('city_slug', slug)
-          .limit(50);
-
-        if (!placesError) {
-          setPlaces(placesData || []);
-        }
+        await fetchPlacesForCity(cityData.name || derivedName);
       } else {
-        // Create a placeholder city from slug
+        // True fallback: placeholder city from slug; still try to load places by derived name
         setCity({
-          id: slug as string,
-          name: (slug as string).replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()),
-          slug: slug as string,
+          id: rawSlug,
+          name: derivedName,
+          slug: rawSlug,
         });
+        await fetchPlacesForCity(derivedName);
       }
     } catch (error) {
       console.error('Error fetching city:', error);
@@ -106,8 +130,14 @@ export default function CityDetailScreen() {
     }
   };
 
+  // Normalize so 'Restaurants'/'restaurant' both match the singular pill ids
+  const normalizeCategory = (c?: string) =>
+    (c || '').toLowerCase().replace(/s$/, '');
+
   const filteredPlaces = places.filter(place => {
-    const matchesCategory = selectedCategory === 'all' || place.category === selectedCategory;
+    const matchesCategory =
+      selectedCategory === 'all' ||
+      normalizeCategory(place.category) === normalizeCategory(selectedCategory);
     const matchesSearch = !searchQuery || 
       place.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       place.address?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -245,7 +275,7 @@ export default function CityDetailScreen() {
             ) : (
               <div className={`places-${viewMode}`}>
                 {filteredPlaces.map((place) => (
-                  <Link key={place.id} href={`/app/place/`} locale={locale}>
+                  <Link key={place.id} href={`/app/place/${place.slug || place.id}`} locale={locale}>
                     <PlaceCard
                       place={{
                         id: place.id,
