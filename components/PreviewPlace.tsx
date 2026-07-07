@@ -172,7 +172,7 @@ function Reviewer({ r }: { r: Review }) {
 
 const EXTERNAL = ['website', 'instagram', 'tiktok', 'youtube', 'facebook', 'whatsapp'];
 
-export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave }: { config: PlaceConfig; hrefs?: Record<string, string>; onAddReview?: () => void; onBack?: () => void; onSave?: () => void }) {
+export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave, saved }: { config: PlaceConfig; hrefs?: Record<string, string>; onAddReview?: () => void; onBack?: () => void; onSave?: () => void; saved?: boolean }) {
   const [open, setOpen] = useState(false);
   const [hoursOpen, setHoursOpen] = useState<number | null>(null);
   const t = usePalette();
@@ -203,7 +203,7 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
           : <div className="hero-img hero-fallback" />}
         <div className="hero-scrim" />
         <button className="icon-btn back" aria-label="Back" onClick={onBack}>‹</button>
-        <button className="icon-btn save" aria-label="Save" onClick={onSave}>♡</button>
+        <button className="icon-btn save" aria-label="Save" onClick={onSave}>{saved ? '♥' : '♡'}</button>
         <div className="hero-text">
           <span className="type-pill">{config.type}</span>
           <h1 className="name">{config.name}</h1>

@@ -9,6 +9,10 @@ import Head from 'next/head';
 import PlaceScreen, { PlaceConfig, Cat } from '../../../components/PreviewPlace';
 import { useAuth } from '../../../contexts/AuthContext';
 import AddReviewSheet from '../../../components/AddReviewSheet';
+import { supabase } from '../../../lib/supabaseClient';
+
+const isUuid = (v: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
 
 const AVATAR_COLORS = ['#00C2CB', '#8A05BE', '#F5A623', '#667EEA', '#EF4444'];
 
@@ -31,6 +35,7 @@ export default function PlaceDetail() {
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [saved, setSaved] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [ecardSlug, setEcardSlug] = useState<string | null>(null);
   const redirectTo = typeof window !== 'undefined' ? encodeURIComponent(window.location.pathname + window.location.search) : '';
 
   const load = (showSpinner = true) => {
@@ -47,10 +52,62 @@ export default function PlaceDetail() {
     if (typeof window !== 'undefined' && window.history.length > 1) router.back();
     else router.push('/app/map');
   };
-  const onSave = () => {
+  const placeUuid = data?.place?.id && isUuid(String(data.place.id)) ? String(data.place.id) : null;
+
+  // Load the initial Save-heart state for signed-in users.
+  useEffect(() => {
+    if (!user || !placeUuid) { setSaved(false); return; }
+    let cancelled = false;
+    supabase
+      .from('saved_places')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('place_id', placeUuid)
+      .maybeSingle()
+      .then(({ data: row }) => { if (!cancelled) setSaved(!!row); });
+    return () => { cancelled = true; };
+  }, [user, placeUuid]);
+
+  // If this place already has a claimed, published eCard, the eCard tile should
+  // open that card instead of the free-eCard upsell.
+  useEffect(() => {
+    if (!placeUuid) { setEcardSlug(null); return; }
+    let cancelled = false;
+    supabase
+      .from('digital_cards')
+      .select('slug')
+      .eq('place_id', placeUuid)
+      .eq('is_published', true)
+      .limit(1)
+      .maybeSingle()
+      .then(({ data: card }) => { if (!cancelled) setEcardSlug(card?.slug || null); });
+    return () => { cancelled = true; };
+  }, [placeUuid]);
+
+  const onSave = async () => {
     // Not signed in → send to the sign in / sign up page (returns here after).
     if (!user) { router.push(`/app/login?redirect=${redirectTo}`); return; }
-    setSaved(s => !s); // TODO: persist saved place for signed-in users
+    if (!placeUuid) { setSaved(s => !s); return; } // FSQ-only places can't be saved yet
+    const next = !saved;
+    setSaved(next); // optimistic
+    try {
+      if (next) {
+        const { error } = await supabase
+          .from('saved_places')
+          .insert({ user_id: user.id, place_id: placeUuid });
+        if (error && error.code !== '23505') throw error; // ignore already-saved
+      } else {
+        const { error } = await supabase
+          .from('saved_places')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('place_id', placeUuid);
+        if (error) throw error;
+      }
+    } catch (e) {
+      console.error('[place] save toggle failed:', e);
+      setSaved(!next); // roll back
+    }
   };
   const onAddReview = () => {
     if (!user) { router.push(`/app/login?redirect=${redirectTo}`); return; }
@@ -120,9 +177,12 @@ export default function PlaceDetail() {
   hrefs.menu = `/place/${pid}/menu`;
   if (p.ordering_enabled) hrefs.order = `/place/${pid}/order`;
   hrefs.directions = directions;
-  // This place hasn't claimed a Tavvy eCard yet — tapping eCard sells the free
-  // eCard with the place's name for context. (When places link real cards, branch here.)
-  hrefs.ecard = `/ecard?for=${encodeURIComponent(p.name || '')}`;
+  // eCard tile: if the place already has a claimed, published eCard
+  // (digital_cards.place_id), open the card; otherwise sell the free eCard
+  // with the place's name for context.
+  hrefs.ecard = ecardSlug
+    ? `/${encodeURIComponent(ecardSlug)}`
+    : `/ecard?for=${encodeURIComponent(p.name || '')}`;
 
   return (
     <>
@@ -130,7 +190,7 @@ export default function PlaceDetail() {
         <title>{p.name} — Tavvy</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </Head>
-      <PlaceScreen config={config} hrefs={hrefs} onBack={goBack} onSave={onSave} onAddReview={onAddReview} />
+      <PlaceScreen config={config} hrefs={hrefs} onBack={goBack} onSave={onSave} onAddReview={onAddReview} saved={saved} />
       <AddReviewSheet
         placeId={p.id}
         placeName={p.name}

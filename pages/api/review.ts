@@ -4,10 +4,12 @@
  * "Add Review" signal-tap submission for a web place page.
  * Mirrors the insert shape used by ~/Projects/tavvy-review-agent/src/submitter.js
  * and lib/reviews.ts:
- *   1. insert a place_reviews row  (place_id, user_id, source, status)
+ *   1. upsert a place_reviews row — one review per user per place; a repeat
+ *      submit UPDATES the existing review (old taps replaced) instead of
+ *      inserting a duplicate, so rankings can't be inflated
  *   2. insert place_review_signal_taps rows (review_id, place_id, signal_id, intensity)
- *   3. best-effort refresh of place_signal_aggregates (a DB trigger normally
- *      maintains this rollup; we upsert defensively but never fail the request on it)
+ *   3. best-effort recompute of place_signal_aggregates via the
+ *      aggregate_place_signals RPC (no DB trigger maintains this rollup)
  *
  * Body: { placeId: string, signalIds: string[], userId: string, intensities?: Record<signalId, 1|2|3> }
  *
@@ -25,14 +27,6 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-
-// review_items.signal_type -> place_signal_aggregates.bucket
-// (reverse of the BUCKET map in pages/api/place/[id].ts and endorse.ts)
-const SIGNAL_TYPE_TO_BUCKET: Record<string, 'positive' | 'neutral' | 'negative'> = {
-  best_for: 'positive',
-  vibe: 'neutral',
-  heads_up: 'negative',
-};
 
 const isUuid = (s: string) =>
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
@@ -98,26 +92,66 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return Math.min(3, Math.max(1, Math.round(raw)));
     };
 
-    // 1. Create the review row.
-    const { data: review, error: reviewError } = await db
+    // 1. Duplicate guard: one review per user per place. If the user already
+    //    reviewed this place, UPDATE that review (replace its taps) instead of
+    //    inserting a new one — repeat submits must not inflate rankings.
+    const { data: existingReviews } = await db
       .from('place_reviews')
-      .insert({
-        place_id: placeId,
-        user_id: user.id,
-        source: 'web_app',
-        status: 'live',
-      })
-      .select('id')
-      .single();
+      .select('id, created_at')
+      .eq('place_id', placeId)
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: true });
 
-    if (reviewError || !review) {
-      console.error('[api/review] review insert error:', reviewError);
-      return res.status(500).json({ error: 'Failed to create review' });
+    let reviewId: string;
+    let updated = false;
+
+    if (existingReviews && existingReviews.length > 0) {
+      updated = true;
+      reviewId = existingReviews[0].id; // keep the oldest review row
+      const allIds = existingReviews.map((r: any) => r.id);
+
+      // Replace their taps: delete old taps for all of this user's reviews here
+      const { error: delTapsError } = await db
+        .from('place_review_signal_taps')
+        .delete()
+        .in('review_id', allIds);
+      if (delTapsError) {
+        console.error('[api/review] old taps delete error:', delTapsError);
+        return res.status(500).json({ error: 'Failed to update review' });
+      }
+
+      // Clean up any duplicate review rows beyond the one we keep
+      if (allIds.length > 1) {
+        await db.from('place_reviews').delete().in('id', allIds.slice(1));
+      }
+
+      // Refresh the kept review's metadata
+      await db
+        .from('place_reviews')
+        .update({ source: 'web_app', status: 'live' })
+        .eq('id', reviewId);
+    } else {
+      const { data: review, error: reviewError } = await db
+        .from('place_reviews')
+        .insert({
+          place_id: placeId,
+          user_id: user.id,
+          source: 'web_app',
+          status: 'live',
+        })
+        .select('id')
+        .single();
+
+      if (reviewError || !review) {
+        console.error('[api/review] review insert error:', reviewError);
+        return res.status(500).json({ error: 'Failed to create review' });
+      }
+      reviewId = review.id;
     }
 
     // 2. Insert signal taps.
     const taps = uniqueSignalIds.map((sid) => ({
-      review_id: review.id,
+      review_id: reviewId,
       place_id: placeId,
       signal_id: sid,
       intensity: intensityFor(sid),
@@ -127,18 +161,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (tapsError) {
       console.error('[api/review] signal taps error:', tapsError);
       // Review row exists but taps failed — surface as error so the client can retry.
-      return res.status(500).json({ error: 'Failed to save signal taps', reviewId: review.id });
+      return res.status(500).json({ error: 'Failed to save signal taps', reviewId });
     }
 
-    // 3. Best-effort refresh of place_signal_aggregates.
-    //    A DB trigger normally maintains this rollup; if it does, our upsert is a
-    //    harmless no-op-equivalent. If it does not, this keeps the place page fresh.
-    //    Any failure here is swallowed — the review itself already succeeded.
-    await refreshAggregates(db, placeId, uniqueSignalIds, intensityFor).catch((e) =>
+    // 3. Recompute place_signal_aggregates atomically DB-side.
+    //    aggregate_place_signals(p_place_ids uuid[]) rebuilds the rollup from the
+    //    actual taps (no trigger maintains it), replacing the old racy
+    //    read-then-upsert. Failure is swallowed — the review already succeeded.
+    await refreshAggregates(db, placeId).catch((e) =>
       console.warn('[api/review] aggregate refresh skipped:', e?.message || e)
     );
 
-    return res.status(200).json({ success: true, reviewId: review.id, taps: taps.length });
+    return res.status(200).json({ success: true, reviewId, taps: taps.length, updated });
   } catch (err: any) {
     console.error('[api/review] unexpected error:', err);
     return res.status(500).json({ error: 'Internal server error' });
@@ -146,54 +180,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 }
 
 /**
- * Increment place_signal_aggregates for each tapped signal.
- * Reads the signal_type from review_items to derive the bucket, then upserts
- * (place_id, signal_id) with tap_total += intensity and review_count += 1.
+ * Recompute place_signal_aggregates for the place atomically via the
+ * aggregate_place_signals(p_place_ids uuid[]) DB function. Verified in prod:
+ * no trigger maintains this rollup, and the RPC rebuilds it from the actual
+ * taps — correct even after tap deletions (review updates).
  */
-async function refreshAggregates(
-  db: SupabaseClient,
-  placeId: string,
-  signalIds: string[],
-  intensityFor: (sid: string) => number
-): Promise<void> {
-  // Map each signal to its bucket via the catalog.
-  const { data: items } = await db
-    .from('review_items')
-    .select('id, signal_type')
-    .in('id', signalIds);
-
-  const bucketFor: Record<string, 'positive' | 'neutral' | 'negative'> = {};
-  (items || []).forEach((it: any) => {
-    const b = SIGNAL_TYPE_TO_BUCKET[it.signal_type];
-    if (b) bucketFor[it.id] = b;
-  });
-
-  // Pull current rows so we can increment (no atomic RPC available here).
-  const { data: existing } = await db
-    .from('place_signal_aggregates')
-    .select('signal_id, bucket, tap_total, review_count')
-    .eq('place_id', placeId)
-    .in('signal_id', signalIds);
-
-  const current: Record<string, { tap_total: number; review_count: number }> = {};
-  (existing || []).forEach((r: any) => {
-    current[r.signal_id] = { tap_total: r.tap_total || 0, review_count: r.review_count || 0 };
-  });
-
-  const rows = signalIds
-    .filter((sid) => bucketFor[sid])
-    .map((sid) => {
-      const prev = current[sid] || { tap_total: 0, review_count: 0 };
-      return {
-        place_id: placeId,
-        signal_id: sid,
-        bucket: bucketFor[sid],
-        tap_total: prev.tap_total + intensityFor(sid),
-        review_count: prev.review_count + 1,
-      };
-    });
-
-  if (rows.length === 0) return;
-
-  await db.from('place_signal_aggregates').upsert(rows, { onConflict: 'place_id,signal_id' });
+async function refreshAggregates(db: SupabaseClient, placeId: string): Promise<void> {
+  const { error } = await db.rpc('aggregate_place_signals', { p_place_ids: [placeId] });
+  if (error) throw error;
 }
