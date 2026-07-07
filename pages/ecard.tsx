@@ -136,6 +136,9 @@ export default function EcardLanding() {
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </Head>
 
+      {/* Root wrapper div: styled-jsx as a direct child of a fragment crashes in production */}
+      <div>
+
       <div className="ecard-landing">
         {/* Navigation */}
         <nav className="landing-nav">
@@ -1854,6 +1857,7 @@ export default function EcardLanding() {
           }
         }
       `}</style>
+    </div>
     </>
   );
 }

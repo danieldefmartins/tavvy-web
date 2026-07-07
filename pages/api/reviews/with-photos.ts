@@ -1,12 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
-// Mock data or actual database query
-const reviewsWithPhotos = [
-  // Example review objects
-  { id: 1, signals: ['Fresh Pasta'], photos: ['url1', 'url2'], content: 'Great pasta!' },
-  // More reviews
-];
-
+/**
+ * GET /api/reviews/with-photos
+ *
+ * Previously returned hardcoded mock reviews in production. There is no
+ * photo-bearing review pipeline wired up yet, so this returns an empty list —
+ * never fake data. When review photos ship (place_reviews joined to
+ * place_photos / review photo uploads), query them here.
+ */
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  res.status(200).json(reviewsWithPhotos);
+  res.status(200).json([]);
 }

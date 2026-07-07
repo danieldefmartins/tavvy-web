@@ -1,14 +1,16 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 
-const curatedSections = [
-  { title: 'Top-Rated Sites', description: 'Explore the best-rated places by our users.' },
-  { title: 'Hidden Gems', description: 'Discover lesser-known spots that are worth a visit.' },
-  { title: 'User-Recommended', description: 'Check out places recommended by our community.' },
-];
-
+/**
+ * GET /api/curated-sections
+ *
+ * Previously returned hardcoded mock sections in production. There is no
+ * curated-sections table/CMS source yet, so this returns an empty list —
+ * never fake data. Populate from a real source (e.g. a Supabase
+ * curated_sections table) when curation ships.
+ */
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
-    res.status(200).json(curatedSections);
+    res.status(200).json([]);
   } else {
     res.setHeader('Allow', ['GET']);
     res.status(405).end(`Method ${req.method} Not Allowed`);

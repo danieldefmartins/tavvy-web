@@ -47,6 +47,9 @@ export default function AboutUs() {
         <meta property="og:url" content="https://tavvy.com/about-us" />
       </Head>
 
+      {/* Root wrapper div: styled-jsx as a direct child of a fragment crashes in production */}
+      <div>
+
       <div className="about-page">
         {/* Floating Navigation */}
         <nav className="floating-nav">
@@ -1208,6 +1211,7 @@ export default function AboutUs() {
           }
         }
       `}</style>
+    </div>
     </>
   );
 }

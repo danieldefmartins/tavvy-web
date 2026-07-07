@@ -18,6 +18,9 @@ export default function Home() {
         <link rel="canonical" href="https://tavvy.com" />
       </Head>
 
+      {/* Root wrapper div: styled-jsx as a direct child of a fragment crashes in production */}
+      <div>
+
       <div className="landing">
         {/* Nav */}
         <nav className="landing-nav">
@@ -769,6 +772,7 @@ export default function Home() {
           .example-insight { margin: 0 20px 20px; }
         }
       `}</style>
+    </div>
     </>
   );
 }
