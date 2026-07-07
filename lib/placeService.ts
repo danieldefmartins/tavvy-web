@@ -15,6 +15,10 @@ import { Place, Signal } from '../types';
 // Debug flag for place fetching
 const DEBUG_PLACES = true;
 
+// uuid check — .or(id.eq.X) crashes PostgREST when X is not a uuid
+const isUuid = (v: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+
 // ============================================
 // TYPES
 // ============================================
@@ -639,12 +643,14 @@ export async function fetchPlaceById(placeId: string): Promise<Place | null> {
     // iOS uses: .or(`id.eq.${placeId},source_id.eq.${placeId}`)
     // This catches both UUID-based IDs and FSQ IDs that have been promoted
     // ============================================
-    const { data: canonicalData, error: canonicalError } = await supabase
-      .from('places')
-      .select('*')
-      .or(`id.eq.${cleanId},source_id.eq.${cleanId}`)
-      .limit(1);
-    
+    // uuid → may be places.id or a promoted source_id; non-uuid (e.g. FSQ id) →
+    // source_id only. (.or with id.eq on a non-uuid crashes the uuid comparison)
+    let canonicalQuery = supabase.from('places').select('*').limit(1);
+    canonicalQuery = isUuid(cleanId)
+      ? canonicalQuery.or(`id.eq.${cleanId},source_id.eq.${cleanId}`)
+      : canonicalQuery.eq('source_id', cleanId);
+    const { data: canonicalData, error: canonicalError } = await canonicalQuery;
+
     const canonicalPlace = canonicalData?.[0] || null;
 
     if (canonicalPlace && !canonicalError) {
@@ -652,23 +658,17 @@ export async function fetchPlaceById(placeId: string): Promise<Place | null> {
         console.log('[fetchPlaceById] Found in places table:', canonicalPlace.name);
       }
 
-      // Fetch signals for canonical place from tap_activity
-      // (place_signals_aggregated view doesn't exist, tap_activity has the raw data)
+      // Fetch signal counts via DB-side aggregation RPC (tap_activity is huge —
+      // pulling raw rows hits the PostgREST 1000-row cap and undercounts)
       let signals: { bucket: string; tap_total: number }[] = [];
       try {
-        const { data: tapData } = await supabase
-          .from('tap_activity')
-          .select('signal_name')
-          .eq('place_id', canonicalPlace.id);
-        
-        if (tapData && tapData.length > 0) {
-          // Aggregate: count taps per signal_name
-          const counts = new Map<string, number>();
-          for (const tap of tapData) {
-            counts.set(tap.signal_name, (counts.get(tap.signal_name) || 0) + 1);
-          }
-          signals = Array.from(counts.entries())
-            .map(([name, count]) => ({ bucket: name, tap_total: count }))
+        const { data: tapCounts } = await supabase.rpc('get_places_tap_activity_counts', {
+          p_place_ids: [canonicalPlace.id],
+        });
+
+        if (tapCounts && tapCounts.length > 0) {
+          signals = (tapCounts as { signal_name: string; tap_count: number }[])
+            .map((row) => ({ bucket: row.signal_name, tap_total: Number(row.tap_count) }))
             .sort((a, b) => b.tap_total - a.tap_total);
         }
       } catch (e) {

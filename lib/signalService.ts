@@ -114,10 +114,15 @@ async function loadSignalCache(): Promise<void> {
 // ============================================
 
 export const CATEGORY_SIGNAL_PREFIXES: Record<string, string[]> = {
-  // Core Categories
+  // Core Categories (canonical singular + legacy plural aliases —
+  // DB data is being migrated to singular 'restaurant'/'hotel')
+  restaurant: ['restaurant_', 'generic_'],
   restaurants: ['restaurant_', 'generic_'],
+  cafe: ['cafe_', 'generic_'],
   cafes: ['cafe_', 'generic_'],
   nightlife: ['bar_', 'generic_'],
+  hotel: ['hotel_', 'generic_'],
+  hotels: ['hotel_', 'generic_'],
   lodging: ['hotel_', 'generic_'],
   
   // RV & Camping

@@ -82,27 +82,33 @@ export default function AddStoryPage() {
       try {
         setLoading(true);
         const pid = String(initialPlaceId);
-        
-        // Try canonical places table first (match by id or source_id)
-        const { data: placeData } = await supabase
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(pid);
+
+        // Try canonical places table first
+        // uuid → id or source_id; non-uuid → source_id only (.or with id.eq crashes on non-uuid)
+        let placeQuery = supabase
           .from('places')
           .select('id, name, cover_image_url, category')
-          .or(`id.eq.${pid},source_id.eq.${pid}`)
-          .limit(1)
-          .single();
+          .limit(1);
+        placeQuery = isUuid
+          ? placeQuery.or(`id.eq.${pid},source_id.eq.${pid}`)
+          : placeQuery.eq('source_id', pid);
+        const { data: placeRows } = await placeQuery;
+        const placeData = placeRows?.[0] || null;
 
         if (placeData) {
           setSelectedPlace(placeData);
         } else {
-          // Try fsq_places_raw
-          const { data: fsqPlace } = await supabase
+          // Try fsq_places_raw (column is fsq_place_id, NOT fsq_id)
+          const { data: fsqRows } = await supabase
             .from('fsq_places_raw')
-            .select('fsq_id, name, category')
-            .eq('fsq_id', pid)
-            .single();
+            .select('fsq_place_id, name, category')
+            .eq('fsq_place_id', pid)
+            .limit(1);
+          const fsqPlace = fsqRows?.[0] || null;
           if (fsqPlace) {
             setSelectedPlace({
-              id: fsqPlace.fsq_id,
+              id: fsqPlace.fsq_place_id,
               name: fsqPlace.name,
               cover_image_url: null,
               category: fsqPlace.category,
@@ -182,16 +188,16 @@ export default function AddStoryPage() {
       if (results.length < 5) {
         const { data: fsqData } = await supabase
           .from('fsq_places_raw')
-          .select('fsq_id, name, category')
+          .select('fsq_place_id, name, category')
           .ilike('name', `%${query}%`)
           .limit(10);
-        
+
         if (fsqData && fsqData.length > 0) {
           const existingIds = new Set(results.map(r => r.id));
           const fsqMapped = fsqData
-            .filter(p => !existingIds.has(p.fsq_id))
+            .filter(p => !existingIds.has(p.fsq_place_id))
             .map(p => ({
-              id: p.fsq_id,
+              id: p.fsq_place_id,
               name: p.name,
               cover_image_url: null,
               category: p.category,
