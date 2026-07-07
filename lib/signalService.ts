@@ -485,31 +485,53 @@ export async function fetchPlaceSignals(placeId: string): Promise<{
       return { best_for: [], vibe: [], heads_up: [], medals: [] };
     }
 
-    // Query place_review_signal_taps joined with place_reviews for created_at
-    // Must set high limit — Supabase defaults to 1000 but popular places have 10K+ taps
+    // Accurate all-time tap totals via DB-side aggregation RPC
+    // (raw pulls on the 21M-row taps table hit the PostgREST row cap)
+    let tapTotals: Map<string, number> | undefined;
+    try {
+      const { data: rpcCounts } = await supabase.rpc('get_places_signal_counts', {
+        p_place_ids: [placeId],
+      });
+      if (rpcCounts && rpcCounts.length > 0) {
+        tapTotals = new Map(
+          (rpcCounts as { signal_id: string; tap_count: number }[]).map(r => [
+            r.signal_id,
+            Number(r.tap_count),
+          ])
+        );
+      }
+    } catch (e) {
+      console.warn('Error fetching signal counts RPC:', e);
+    }
+
+    // Raw per-tap rows are only needed for the time-decay score, and taps
+    // older than 180 days decay to 0 — so only fetch the decay window.
+    const decayCutoff = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString();
     const { data: taps, error } = await supabase
       .from('place_review_signal_taps')
       .select(`
         signal_id,
         intensity,
-        place_reviews (
+        place_reviews!inner (
           created_at
         )
       `)
       .eq('place_id', placeId)
-      .limit(50000);
+      .gte('place_reviews.created_at', decayCutoff)
+      .limit(20000);
 
     if (error) {
       console.error('Error fetching signal taps:', error);
     }
 
     // Fallback to tap_activity if place_review_signal_taps is empty
-    // tap_activity has 1600+ rows of real signal data
-    if (!taps || taps.length === 0) {
+    if ((!taps || taps.length === 0) && (!tapTotals || tapTotals.size === 0)) {
       const { data: tapActivity, error: tapError } = await supabase
         .from('tap_activity')
         .select('signal_id, signal_name, created_at')
-        .eq('place_id', placeId);
+        .eq('place_id', placeId)
+        .gte('created_at', decayCutoff)
+        .limit(20000);
 
       if (tapError || !tapActivity || tapActivity.length === 0) {
         return { best_for: [], vibe: [], heads_up: [], medals: [] };
@@ -526,17 +548,20 @@ export async function fetchPlaceSignals(placeId: string): Promise<{
       return processTaps(convertedTaps, placeId);
     }
 
-    return processTaps(taps, placeId);
+    return processTaps(taps || [], placeId, tapTotals);
   } catch (error) {
     console.error('Error fetching place signals:', error);
     return { best_for: [], vibe: [], heads_up: [], medals: [] };
   }
 }
 
-// Extracted tap processing logic for reuse
+// Extracted tap processing logic for reuse.
+// `tapTotals` (from the counts RPC) overrides the sampled tap_total when
+// available, so displayed totals stay accurate beyond the fetch window.
 function processTaps(
   taps: any[],
-  placeId: string
+  placeId: string,
+  tapTotals?: Map<string, number>
 ): {
   best_for: SignalAggregate[];
   vibe: SignalAggregate[];
@@ -606,7 +631,7 @@ function processTaps(
           const aggregate: SignalAggregate = {
             place_id: placeId,
             signal_id: signalId,
-            tap_total: data.tap_total,
+            tap_total: tapTotals?.get(signalId) ?? data.tap_total,
             current_score: parseFloat(data.current_score.toFixed(2)),
             review_count: data.review_count,
             last_tap_at: data.last_tap_at,
@@ -680,7 +705,8 @@ export async function preloadSignalCache(): Promise<void> {
 /**
  * Batch-fetch signals for multiple places (for search results / place cards).
  * Returns a Map of placeId → Signal[] (bucket + tap_total).
- * Uses a single Supabase query to avoid N+1.
+ * Aggregation happens DB-side via RPC — pulling raw tap_activity rows hits
+ * the PostgREST 1000-row cap and undercounts at scale.
  */
 export async function fetchSignalsForPlaces(
   placeIds: string[]
@@ -689,26 +715,22 @@ export async function fetchSignalsForPlaces(
   if (!placeIds.length) return result;
 
   try {
-    const { data: tapData } = await supabase
-      .from('tap_activity')
-      .select('place_id, signal_name')
-      .in('place_id', placeIds);
+    const uuidIds = placeIds.filter(isValidUUID);
+    if (!uuidIds.length) return result;
 
-    if (!tapData || tapData.length === 0) return result;
+    const { data: tapCounts } = await supabase.rpc('get_places_tap_activity_counts', {
+      p_place_ids: uuidIds,
+    });
 
-    // Aggregate taps per place + signal
-    const counts = new Map<string, Map<string, number>>();
-    for (const tap of tapData) {
-      if (!counts.has(tap.place_id)) counts.set(tap.place_id, new Map());
-      const signalMap = counts.get(tap.place_id)!;
-      signalMap.set(tap.signal_name, (signalMap.get(tap.signal_name) || 0) + 1);
+    if (!tapCounts || tapCounts.length === 0) return result;
+
+    for (const row of tapCounts as { place_id: string; signal_name: string; tap_count: number }[]) {
+      const existing = result.get(row.place_id) || [];
+      existing.push({ bucket: row.signal_name, tap_total: Number(row.tap_count) });
+      result.set(row.place_id, existing);
     }
-
-    for (const [placeId, signalMap] of counts) {
-      const signals = Array.from(signalMap.entries())
-        .map(([name, count]) => ({ bucket: name, tap_total: count }))
-        .sort((a, b) => b.tap_total - a.tap_total);
-      result.set(placeId, signals);
+    for (const signals of Array.from(result.values())) {
+      signals.sort((a, b) => b.tap_total - a.tap_total);
     }
   } catch (e) {
     console.warn('[fetchSignalsForPlaces] Error:', e);

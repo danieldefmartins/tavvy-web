@@ -409,34 +409,28 @@ export default async function handler(
           }
           console.log(`[API/places] Fetched signals from aggregates for ${signalMap.size} places`);
         } else {
-          // Fallback: aggregate from tap_activity directly
-          // This handles the case where place_signal_aggregates is empty
-          const { data: tapData } = await supabase
-            .from('tap_activity')
-            .select('place_id, signal_name')
-            .in('place_id', placeSourceIds);
-          
-          if (tapData && tapData.length > 0) {
-            // Manually aggregate: count taps per place_id + signal_name
-            const tapCounts = new Map<string, Map<string, number>>();
-            for (const tap of tapData) {
-              if (!tapCounts.has(tap.place_id)) {
-                tapCounts.set(tap.place_id, new Map());
+          // Fallback: DB-side aggregation of tap_activity via RPC.
+          // (Raw row pulls hit the PostgREST 1000-row cap on a 21M-row table.)
+          const uuidIds = placeSourceIds.filter((id: string) =>
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+          );
+          if (uuidIds.length > 0) {
+            const { data: tapCounts } = await supabase.rpc('get_places_tap_activity_counts', {
+              p_place_ids: uuidIds,
+            });
+
+            if (tapCounts && tapCounts.length > 0) {
+              for (const row of tapCounts as { place_id: string; signal_name: string; tap_count: number }[]) {
+                const existing = signalMap.get(row.place_id) || [];
+                existing.push({ bucket: row.signal_name, tap_total: Number(row.tap_count) });
+                signalMap.set(row.place_id, existing);
               }
-              const placeMap = tapCounts.get(tap.place_id)!;
-              placeMap.set(tap.signal_name, (placeMap.get(tap.signal_name) || 0) + 1);
-            }
-            
-            for (const [placeId, signals] of Array.from(tapCounts)) {
-              const signalArray: Signal[] = [];
-              for (const [name, count] of Array.from(signals)) {
-                signalArray.push({ bucket: name, tap_total: count });
+              // Sort each place's signals by tap_total descending
+              for (const arr of Array.from(signalMap.values())) {
+                arr.sort((a, b) => (b.tap_total || 0) - (a.tap_total || 0));
               }
-              // Sort by tap_total descending
-              signalArray.sort((a, b) => b.tap_total - a.tap_total);
-              signalMap.set(placeId, signalArray);
+              console.log(`[API/places] Aggregated signals via tap_activity RPC for ${signalMap.size} places`);
             }
-            console.log(`[API/places] Aggregated signals from tap_activity for ${signalMap.size} places`);
           }
         }
       } catch (e) {
