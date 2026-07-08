@@ -28,11 +28,16 @@ const styles = {
   },
 };
 
-const MenuInsights = ({ insights }) => {
+interface MenuInsight {
+  name: string;
+  quality: string;
+}
+
+const MenuInsights = ({ insights }: { insights: MenuInsight[] }) => {
   return (
     <div style={styles.container}>
       <div style={styles.title}>Recommended Dishes</div>
-      {insights.map((insight, index) => (
+      {insights.map((insight: MenuInsight, index: number) => (
         <div key={index} style={styles.item}>
           <div style={styles.itemName}>{insight.name}</div>
           <div style={styles.itemQuality}>{insight.quality}</div>
