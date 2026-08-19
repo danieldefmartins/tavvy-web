@@ -108,7 +108,7 @@ const featureGrid = [
   { id: 'cities', label: 'Cities', Icon: IoBusiness, route: '/app/cities' },
   { id: 'atlas', label: 'Atlas', Icon: IoEarth, route: '/app/atlas' },
   { id: 'rv-camping', label: 'RV & Camping', Icon: IoBonfire, route: '/app/rv-camping' },
-  { id: 'signals', label: 'Signals', Icon: IoRadio, route: '/app/signal-search' },
+  { id: 'signals', label: 'Signals', Icon: IoRadio, route: '/app/search' },
 ];
 
 // Top contributors mock data
@@ -630,7 +630,7 @@ export default function HomeScreen() {
 
               {/* Quick Actions */}
               <div className="hero-quick-actions">
-                <button className="hero-action" onClick={() => {}}>
+                <button className="hero-action" onClick={switchToMapMode}>
                   <div className="hero-action-icon" style={{ background: 'rgba(0, 194, 203, 0.12)' }}>
                     <IoLocationSharp size={20} color="#00C2CB" />
                   </div>
@@ -642,13 +642,13 @@ export default function HomeScreen() {
                   </div>
                   <span>{t('home.map')}</span>
                 </button>
-                <button className="hero-action" onClick={() => router.push('/app/signal-search', undefined, { locale })}>
+                <button className="hero-action" onClick={() => router.push('/app/search', undefined, { locale })}>
                   <div className="hero-action-icon" style={{ background: 'rgba(0, 194, 203, 0.12)' }}>
                     <IoSparkles size={20} color="#00C2CB" />
                   </div>
                   <span>{t('home.signals', 'Signals')}</span>
                 </button>
-                <button className="hero-action" onClick={() => {}}>
+                <button className="hero-action" onClick={() => router.push('/app/saved', undefined, { locale })}>
                   <div className="hero-action-icon" style={{ background: 'rgba(138, 5, 190, 0.12)' }}>
                     <IoHeart size={20} color="#8A05BE" />
                   </div>

@@ -115,7 +115,7 @@ export default function HelpScreen() {
           )}
 
           {/* FAQ */}
-          <section className="faq-section">
+          <section id="faq" className="faq-section">
             <h2 style={{ color: theme.text }}>
               {searchQuery ? 'Search Results' : 'Frequently Asked Questions'}
             </h2>
@@ -187,7 +187,7 @@ export default function HelpScreen() {
 
           {/* Documentation Link */}
           <section className="docs-section">
-            <Link href="/docs" locale={locale} className="docs-card" style={{ backgroundColor: theme.surface }}>
+            <Link href="/app/help#faq" locale={locale} className="docs-card" style={{ backgroundColor: theme.surface }}>
               <FiBook size={24} color={theme.primary} />
               <div>
                 <h3 style={{ color: theme.text }}>Documentation</h3>

@@ -263,7 +263,7 @@ export default function SettingsScreen() {
             <section className="section">
               <h2 className="section-label">{t("settings.helpSection")}</h2>
               <div className="settings-group">
-                <Link href="/app/support" locale={locale} className="setting-row clickable">
+                <Link href="/app/help" locale={locale} className="setting-row clickable">
                   <div className="row-left">
                     <div className="icon-container orange">
                       <FiHelpCircle size={20} />
@@ -287,7 +287,7 @@ export default function SettingsScreen() {
 
                 <div className="divider" />
 
-                <Link href="/app/privacy" locale={locale} className="setting-row clickable">
+                <Link href="/privacy" locale={locale} className="setting-row clickable">
                   <div className="row-left">
                     <div className="icon-container blue">
                       <FiShield size={20} />

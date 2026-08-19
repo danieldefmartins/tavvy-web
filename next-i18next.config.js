@@ -3,7 +3,9 @@ module.exports = {
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'es', 'pt', 'fr', 'de', 'it', 'ja', 'ko', 'zh', 'ru', 'ar', 'tr', 'hi', 'id', 'th', 'vi', 'nl'],
-    localeDetection: true,
+    // Locale detection is handled in pages/_app.tsx so it can respect the
+    // user's saved preference before falling back to the browser language.
+    localeDetection: false,
   },
   localePath: typeof window === 'undefined' 
     ? require('path').resolve('./public/locales') 

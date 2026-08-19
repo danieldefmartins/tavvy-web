@@ -42,7 +42,10 @@ export default function ECardStatsPage() {
 
   useEffect(() => {
     if (!router.isReady || authLoading || !cardId) return;
-    if (!user) { router.replace('/auth/login'); return; }
+    if (!user) {
+      router.replace(`/app/login?redirect=${encodeURIComponent(router.asPath)}`);
+      return;
+    }
 
     Promise.all([getCardById(cardId), getCardLinks(cardId)])
       .then(([card, cardLinks]) => {

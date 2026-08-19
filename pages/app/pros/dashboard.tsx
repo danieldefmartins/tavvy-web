@@ -194,7 +194,7 @@ export default function ProDashboardScreen() {
               <FiArrowLeft size={24} color={theme.text} />
             </button>
             <h1 style={{ color: theme.text }}>Pro Dashboard</h1>
-            <Link href="/app/pros/settings" locale={locale} className="settings-link">
+            <Link href="/app/pros/profile" locale={locale} className="settings-link">
               <FiSettings size={20} color={theme.textSecondary} />
             </Link>
           </header>
@@ -374,7 +374,7 @@ export default function ProDashboardScreen() {
                     <FiMapPin size={16} />
                     Update Service Areas
                   </Link>
-                  <Link href="/app/pros/settings" locale={locale} className="action-btn action-btn-outline" style={{ borderColor: theme.border || '#E5E7EB', color: theme.text }}>
+                  <Link href="/app/pros/profile" locale={locale} className="action-btn action-btn-outline" style={{ borderColor: theme.border || '#E5E7EB', color: theme.text }}>
                     <FiCalendar size={16} />
                     Set Availability
                   </Link>

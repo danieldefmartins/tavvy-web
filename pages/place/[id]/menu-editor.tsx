@@ -392,7 +392,7 @@ export default function MenuEditorPage() {
         <div className="me-auth-card">
           <h2>Sign In Required</h2>
           <p>You need to be signed in to manage your restaurant menu.</p>
-          <button className="me-btn-primary" onClick={() => router.push('/login')}>
+          <button className="me-btn-primary" onClick={() => router.push('/app/login')}>
             Sign In
           </button>
         </div>

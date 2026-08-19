@@ -27,7 +27,7 @@ function EditorShell() {
     if (!router.isReady || authLoading) return;
 
     if (!user) {
-      router.replace('/auth/login');
+      router.replace(`/app/login?redirect=${encodeURIComponent(router.asPath)}`);
       return;
     }
 

@@ -59,7 +59,7 @@ export const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
     } else if (onRightIconPress) {
       onRightIconPress();
     } else {
-      router.push('/profile', undefined, { locale });
+      router.push('/app/profile', undefined, { locale });
     }
   };
 
