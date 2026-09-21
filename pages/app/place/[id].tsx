@@ -21,6 +21,7 @@ import {CruiseVenueContext,cruiseVenueShipHref,CRUISE_VENUE_STORY_NOTICE,CRUISE_
 import { useAuth } from '../../../contexts/AuthContext';
 import AddReviewSheet from '../../../components/AddReviewSheet';
 import { supabase } from '../../../lib/supabaseClient';
+import {canGoBackInApp} from '../../../hooks/useAppNavigationHistory';
 
 const isUuid = (v: string) =>
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
@@ -51,6 +52,8 @@ function PlaceDetailContent({resolvedPlaceId}:{resolvedPlaceId?:string}) {
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [loadError,setLoadError] = useState('');
   const [saved, setSaved] = useState(false);
+  const [resolvedSaveId,setResolvedSaveId]=useState<string|null>(null);
+  const [saveMessage,setSaveMessage]=useState('');
   const [reviewOpen, setReviewOpen] = useState(false);
   const [ecardSlug, setEcardSlug] = useState<string | null>(null);
   const [hasActiveMenu, setHasActiveMenu] = useState(false);
@@ -69,25 +72,28 @@ function PlaceDetailContent({resolvedPlaceId}:{resolvedPlaceId?:string}) {
   useEffect(() => { load(); const changed=()=>load(false);window.addEventListener(CONTENT_SAFETY_CHANGED,changed);return()=>{++requestId.current;window.removeEventListener(CONTENT_SAFETY_CHANGED,changed)}; /* eslint-disable-next-line */ }, [id, resolvedPlaceId, user?.id]);
 
   const goBack = () => {
-    if (typeof window !== 'undefined' && window.history.length > 1) router.back();
-    else if (data?.cruiseVenue) router.push(cruiseVenueShipHref(data.cruiseVenue));
-    else router.push('/app/map');
+    const fallback = data?.cruiseVenue ? cruiseVenueShipHref(data.cruiseVenue) : '/app/search';
+    // Browser history length includes external sites. Tavvy's navigation
+    // marker counts only actual in-app route pushes.
+    if (canGoBackInApp()) router.back();
+    else router.push(fallback);
   };
   const placeUuid = data?.place?.id && isUuid(String(data.place.id)) ? String(data.place.id) : null;
+  const saveId=placeUuid||resolvedSaveId;
+  const externalSaveId=typeof data?.place?.id==='string'&&/^fsq:[0-9a-f]{24}$/i.test(data.place.id)?data.place.id.toLowerCase():null;
 
-  // Load the initial Save-heart state for signed-in users.
+  useEffect(()=>{const raw=typeof data?.place?.id==='string'&&data.place.id.startsWith('fsq:')?data.place.id.slice(4):null;if(!raw){setResolvedSaveId(null);return;}let active=true;supabase.from('places').select('id').eq('source_type','fsq').eq('source_id',raw).limit(1).maybeSingle().then(({data:row})=>{if(active)setResolvedSaveId(row?.id||null)});return()=>{active=false};},[data?.place?.id]);
+
+  // Canonical and indexed-only FSQ bookmarks share the same visible state.
   useEffect(() => {
-    if (!user || !placeUuid) { setSaved(false); return; }
+    if (!user || (!saveId&&!externalSaveId)) { setSaved(false); return; }
     let cancelled = false;
-    supabase
-      .from('saved_places')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('place_id', placeUuid)
-      .maybeSingle()
-      .then(({ data: row }) => { if (!cancelled) setSaved(!!row); });
+    Promise.all([
+      saveId?supabase.from('saved_places').select('id').eq('user_id',user.id).eq('place_id',saveId).maybeSingle():Promise.resolve({data:null,error:null}),
+      externalSaveId?supabase.from('saved_external_places').select('id').eq('user_id',user.id).eq('external_id',externalSaveId).maybeSingle():Promise.resolve({data:null,error:null}),
+    ]).then(([canonical,external])=>{if(!cancelled&&!canonical.error&&!external.error)setSaved(!!(canonical.data||external.data));});
     return () => { cancelled = true; };
-  }, [user, placeUuid]);
+  }, [user, saveId, externalSaveId]);
 
   // If this place already has a claimed, published eCard, the eCard tile should
   // open that card instead of the free-eCard upsell.
@@ -116,26 +122,24 @@ function PlaceDetailContent({resolvedPlaceId}:{resolvedPlaceId?:string}) {
   const onSave = async () => {
     // Not signed in → send to the sign in / sign up page (returns here after).
     if (!user) { router.push(`/app/login?redirect=${redirectTo}`); return; }
-    if (!placeUuid) { setSaved(s => !s); return; } // FSQ-only places can't be saved yet
+    setSaveMessage('');
+    if(!saveId&&!externalSaveId){setSaveMessage('This place cannot be saved yet.');return;}
     const next = !saved;
     setSaved(next); // optimistic
     try {
       if (next) {
-        const { error } = await supabase
-          .from('saved_places')
-          .insert({ user_id: user.id, place_id: placeUuid });
+        const { error } = saveId
+          ? await supabase.from('saved_places').insert({ user_id: user.id, place_id: saveId })
+          : await supabase.from('saved_external_places').insert({user_id:user.id,external_id:externalSaveId!,place_name:String(data.place.name).slice(0,200),category:String(data.place.category||'Place').slice(0,120),city:data.place.city?String(data.place.city).slice(0,120):null,region:data.place.region?String(data.place.region).slice(0,120):null});
         if (error && error.code !== '23505') throw error; // ignore already-saved
       } else {
-        const { error } = await supabase
-          .from('saved_places')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('place_id', placeUuid);
-        if (error) throw error;
+        if(saveId){const {error}=await supabase.from('saved_places').delete().eq('user_id',user.id).eq('place_id',saveId);if(error)throw error;}
+        if(externalSaveId){const {error}=await supabase.from('saved_external_places').delete().eq('user_id',user.id).eq('external_id',externalSaveId);if(error)throw error;}
       }
     } catch (e) {
       console.error('[place] save toggle failed:', e);
       setSaved(!next); // roll back
+      setSaveMessage('Save failed. Please try again.');
     }
   };
   const onAddReview = () => {
@@ -229,6 +233,11 @@ function PlaceDetailContent({resolvedPlaceId}:{resolvedPlaceId?:string}) {
   if (!cruiseVenue) hrefs.story = `/app/add-story?placeId=${pid}&placeName=${encodeURIComponent(p.name || '')}`;
   if (p.ordering_enabled) hrefs.order = `/place/${pid}/order`;
   if (directions) hrefs.directions = directions;
+  if (!cruiseVenue && (p.street || p.city || (p.latitude && p.longitude))) {
+    hrefs.address = p.latitude && p.longitude
+      ? `https://www.google.com/maps/search/?api=1&query=${p.latitude},${p.longitude}`
+      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([p.name,p.street,p.city,p.region].filter(Boolean).join(' '))}`;
+  }
   if (ecardSlug) hrefs.ecard = `/${encodeURIComponent(ecardSlug)}`;
   if (!cruiseVenue) hrefs.owner = `/app/business/claim?placeId=${pid}`;
   hrefs.share = placeShareUrl(p.id);
@@ -239,7 +248,7 @@ function PlaceDetailContent({resolvedPlaceId}:{resolvedPlaceId?:string}) {
         <title>{p.name} — Tavvy</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </Head>
-      <PlaceScreen config={config} hrefs={hrefs} onBack={goBack} onSave={onSave} onAddReview={onAddReview} saved={saved} />
+      <PlaceScreen config={config} hrefs={hrefs} onBack={goBack} onSave={onSave} onAddReview={onAddReview} saved={saved} saveMessage={saveMessage} />
       <AddReviewSheet
         placeId={p.id}
         placeName={p.name}

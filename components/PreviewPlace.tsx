@@ -98,6 +98,10 @@ function Glyph({ name, color = '#fff', size = 26 }: { name: string; color?: stri
       return sv(<><rect x="3" y="4" width="18" height="16" rx="3" {...s} /><path d="M12 8v8M8 12h8" {...s} /></>);
     case 'share':
       return sv(<path d="M12 15V4M12 4l-3.3 3.3M12 4l3.3 3.3M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" {...s} />);
+    case 'save':
+      return sv(<path d="M12 21s-8-5.2-8-11a4.6 4.6 0 0 1 8-3.1A4.6 4.6 0 0 1 20 10c0 5.8-8 11-8 11z" {...s} />);
+    case 'directions':
+      return sv(<><path d="M3 12 12 3l9 9-9 9-9-9zM8 14v-2a3 3 0 0 1 3-3h5M13 6l3 3-3 3" {...s}/></>);
     case 'order':
       return sv(<path d="M6 8h12l-1 11a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1L6 8zM9 8V6.5a3 3 0 0 1 6 0V8" {...s} />);
     case 'book':
@@ -203,7 +207,7 @@ function Reviewer({ r, allowSafety }: { r: Review; allowSafety?:boolean }) {
 
 const EXTERNAL = ['website', 'instagram', 'tiktok', 'youtube', 'facebook', 'whatsapp'];
 
-export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave, saved }: { config: PlaceConfig; hrefs?: Record<string, string>; onAddReview?: () => void; onBack?: () => void; onSave?: () => void; saved?: boolean }) {
+export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave, saved, saveMessage }: { config: PlaceConfig; hrefs?: Record<string, string>; onAddReview?: () => void; onBack?: () => void; onSave?: () => void; saved?: boolean; saveMessage?: string }) {
   type PlaceTab = 'overview' | 'media' | 'menu' | 'details';
   const [activeTab, setActiveTab] = useState<PlaceTab>('overview');
   const hasMedia = !!(config.gallery?.length || config.stories?.length);
@@ -228,7 +232,8 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
     const url = new URL(window.location.href);
     if (tab === 'overview') url.searchParams.delete('tab');
     else url.searchParams.set('tab', tab);
-    window.history.pushState(window.history.state, '', url.toString());
+    // Tabs are local page state. They should not consume the browser Back press.
+    window.history.replaceState(window.history.state, '', url.toString());
   };
   const handleBack = () => {
     if (onBack) return onBack();
@@ -289,7 +294,6 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
           : <div className="hero-img hero-fallback" />}
         <div className="hero-scrim" />
         <button className="icon-btn back" aria-label="Back" onClick={handleBack}>‹</button>
-        <button className="icon-btn save" aria-label="Save" onClick={onSave}>{saved ? '♥' : '♡'}</button>
         <div className="hero-text">
           <span className="type-pill">{config.type}</span>
           <h1 className="name">{config.name}</h1>
@@ -299,6 +303,21 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
 
       <div className="sheet">
         {config.demo && <DemoBanner />}
+        <nav className="quickbar" aria-label="Place actions">
+          <div className="bar-scroll">
+            {([
+              ['phone','Phone','phone'],['address','Address','map'],['website','Website','website'],
+              ['directions','Directions','directions'],['menu','Menu','menu'],['reservation','Reserve','book'],['order','Order','order'],
+              ['ecard','eCard','ecard'],
+            ] as const).filter(([key])=>!!hrefs?.[key]).map(([key,label,icon])=><a className="bi" key={key} href={hrefs![key]} target={hrefs![key].startsWith('http')?'_blank':undefined} rel={hrefs![key].startsWith('http')?'noopener noreferrer':undefined} aria-label={label}>
+              <span className="bi-ic"><Glyph name={icon} color={t.text} size={23}/></span><span className="bi-lbl">{label}</span>
+            </a>)}
+            <button className="bi" type="button" onClick={sharePlace} aria-label="Share place"><span className="bi-ic"><Glyph name="share" color={t.text} size={23}/></span><span className="bi-lbl">Share</span></button>
+            {onSave && <button className="bi" type="button" onClick={onSave} aria-label={saved?'Remove saved place':'Save place'} aria-pressed={!!saved}><span className="bi-ic"><Glyph name="save" color={saved?'#E24A72':t.text} size={23}/></span><span className="bi-lbl">{saved?'Saved':'Save'}</span></button>}
+          </div>
+          {shareMessage && <span role="status" className="share-status">{shareMessage}</span>}
+          {saveMessage && <span role="status" className="share-status">{saveMessage}</span>}
+        </nav>
         <section className="review-summary" aria-label="Tavvy review summary">
           <div className="section-head"><h2 className="section-title">What people experienced</h2><span className="section-sub">Last 6 months</span></div>
           <div className="grid summary-grid">
@@ -494,12 +513,13 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
         .demo-ecard h3 { margin: 4px 0; font-size: 22px; }
         .demo-links { display: flex; flex-wrap: wrap; gap: 8px; }
         .demo-links a, .demo-links button { color: #00AAB4; font-size: 13px; padding: 7px 10px; border: 1px solid #00AAB4; border-radius: 20px; text-decoration: none; background: transparent; cursor: pointer; }
-        .quickbar { margin: 0 -20px; padding: 0 20px 16px; border-bottom: 1px solid ${t.divider}; }
+        .quickbar { margin: 0 -20px; padding: 14px 20px 16px; border-bottom: 1px solid ${t.divider}; }
         .bar-scroll { display: flex; gap: 16px; overflow-x: auto; scrollbar-width: none; }
         .bar-scroll::-webkit-scrollbar { display: none; }
         .bi { flex: 0 0 auto; width: 68px; display: flex; flex-direction: column; align-items: center; gap: 7px; background: none; border: none; cursor: pointer; padding: 0; text-decoration: none; }
         .bi-ic { width: 50px; height: 50px; border-radius: 50%; background: ${t.pillBg}; display: flex; align-items: center; justify-content: center; }
         .bi-lbl { font-size: 11px; font-weight: 600; color: ${t.text2}; white-space: nowrap; }
+        .share-status { display:block; margin-top:8px; font-size:12px; color:${t.text2}; }
         .section { padding: 16px 0 16px; }
         .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
         .section-title { font-size: 19px; font-weight: 800; color: ${t.text}; letter-spacing: -0.2px; }

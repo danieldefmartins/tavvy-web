@@ -21,6 +21,7 @@ interface SavedPlace {
   id: string;
   place_id: string;
   created_at: string;
+  source?: 'canonical'|'external';
   place: {
     id: string;
     name: string;
@@ -53,7 +54,7 @@ export default function SavedScreen() {
 
   const fetchSavedPlaces = async () => {
     try {
-      const { data, error } = await supabase
+      const canonical = supabase
         .from('saved_places')
         .select(`
           id,
@@ -63,10 +64,11 @@ export default function SavedScreen() {
         `)
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
-
-      if (!error && data) {
-        setSavedPlaces(data as any);
-      }
+      const external=supabase.from('saved_external_places').select('id,external_id,place_name,category,city,region,created_at').eq('user_id',user?.id).order('created_at',{ascending:false});
+      const [known,indexed]=await Promise.all([canonical,external]);
+      if(known.error||indexed.error)throw known.error||indexed.error;
+      const externalRows=(indexed.data||[]).map(row=>({id:row.id,place_id:row.external_id,created_at:row.created_at,source:'external' as const,place:{id:row.external_id,name:row.place_name,category:row.category||'Place',city:[row.city,row.region].filter(Boolean).join(', ')}}));
+      setSavedPlaces([...(known.data||[]).map((row:any)=>({...row,source:'canonical' as const})),...externalRows].sort((a,b)=>Date.parse(b.created_at)-Date.parse(a.created_at)) as SavedPlace[]);
     } catch (error) {
       console.error('Error fetching saved places:', error);
     } finally {
@@ -74,13 +76,13 @@ export default function SavedScreen() {
     }
   };
 
-  const handleRemove = async (savedId: string) => {
+  const handleRemove = async (savedId: string,source:'canonical'|'external'='canonical') => {
     try {
-      await supabase
-        .from('saved_places')
+      const {error}=await supabase
+        .from(source==='external'?'saved_external_places':'saved_places')
         .delete()
         .eq('id', savedId);
-      
+      if(error)throw error;
       setSavedPlaces(prev => prev.filter(p => p.id !== savedId));
     } catch (error) {
       console.error('Error removing saved place:', error);
@@ -190,7 +192,7 @@ export default function SavedScreen() {
               <div className="places-list">
                 {filteredPlaces.map((saved) => (
                   <div key={saved.id} className="saved-item">
-                    <Link href={`/app/place/${saved.place?.slug || saved.place_id}`} className="place-link" locale={locale}>
+                    <Link href={`/app/place/${encodeURIComponent(saved.place?.slug || saved.place_id)}`} className="place-link" locale={locale}>
                       <PlaceCard
                         place={{
                           id: saved.place?.id || saved.place_id,
@@ -205,7 +207,7 @@ export default function SavedScreen() {
                     </Link>
                     <button 
                       className="remove-button"
-                      onClick={() => handleRemove(saved.id)}
+                      onClick={() => handleRemove(saved.id,saved.source)}
                       style={{ backgroundColor: theme.surface }}
                     >
                       <FiTrash2 size={18} color="#EF4444" />

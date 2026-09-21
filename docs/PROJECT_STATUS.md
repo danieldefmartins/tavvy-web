@@ -235,3 +235,9 @@ Migration 029 adds four optional-to-legacy typed tap columns and an authenticate
 Web commits `cc66cf6` and `b16b23c` were deployed; Railway deployment `778d0ae2-f718-4553-ace7-7084c35b016b` passed health. Public health and an existing Pros profile both returned HTTP 200. Matching mobile source is published at `d1035ab` for integration into the Apple branch; no new binary was built.
 
 A rollback-only production write test created a synthetic auth account, submitted and updated its review as `authenticated`, confirmed one reviewer/provider row with the updated tap and rating, then rolled the whole transaction back. Postcheck found zero synthetic accounts and zero synthetic reviews. Real device interaction remains open.
+
+## Place actions, Back and indexed-only saves — September 21
+
+The shared place layout now puts a horizontal row of actual Phone, Address, Website, Directions, Menu, Reserve, Order, eCard, Share and Save actions directly above “What people experienced”; absent links stay hidden. The place hero no longer duplicates Save. Web place tabs replace their URL entry instead of consuming Back, and the place Back button uses the existing in-app navigation marker rather than raw browser history length. Matching mobile source adds the same action row and a Home fallback when a place opens without a previous screen.
+
+Indexed-only FSQ places previously appeared saved locally without a durable record. Migration 030 adds private user-owned external bookmarks; web/mobile Save and both Saved lists now use it for unpromoted FSQ identities. Its live rollback rehearsal and ownership check passed, with zero test rows retained. Web production build and web/mobile TypeScript passed. Source deployment and device/browser journey verification are next.
