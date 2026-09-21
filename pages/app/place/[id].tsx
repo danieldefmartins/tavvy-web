@@ -72,10 +72,20 @@ function PlaceDetailContent({resolvedPlaceId}:{resolvedPlaceId?:string}) {
   useEffect(() => { load(); const changed=()=>load(false);window.addEventListener(CONTENT_SAFETY_CHANGED,changed);return()=>{++requestId.current;window.removeEventListener(CONTENT_SAFETY_CHANGED,changed)}; /* eslint-disable-next-line */ }, [id, resolvedPlaceId, user?.id]);
 
   const goBack = () => {
-    const fallback = data?.cruiseVenue ? cruiseVenueShipHref(data.cruiseVenue) : '/app/search';
+    const fallback = data?.cruiseVenue ? cruiseVenueShipHref(data.cruiseVenue) : '/app';
     // Browser history length includes external sites. Tavvy's navigation
     // marker counts only actual in-app route pushes.
     if (canGoBackInApp()) router.back();
+    else if (typeof document !== 'undefined' && document.referrer) {
+      try {
+        const previous = new URL(document.referrer);
+        if (previous.origin === window.location.origin && previous.pathname !== window.location.pathname && (previous.pathname === '/app' || previous.pathname.startsWith('/app/'))) {
+          router.back();
+          return;
+        }
+      } catch { /* Ignore invalid browser referrers. */ }
+      router.push(fallback);
+    }
     else router.push(fallback);
   };
   const placeUuid = data?.place?.id && isUuid(String(data.place.id)) ? String(data.place.id) : null;
