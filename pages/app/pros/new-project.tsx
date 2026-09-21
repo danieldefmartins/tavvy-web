@@ -220,6 +220,17 @@ export default function NewProjectPage() {
   const [addressLoading, setAddressLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
+  const addressRequest = useRef(0);
+  const [nearbyPosition, setNearbyPosition] = useState<{ lat: number; lon: number } | null>(null);
+
+  useEffect(() => {
+    if (step !== 6 || !navigator.geolocation) return;
+    navigator.permissions?.query({ name: 'geolocation' }).then(permission => {
+      if (permission.state === 'granted') {
+        navigator.geolocation.getCurrentPosition(position => setNearbyPosition({ lat: position.coords.latitude, lon: position.coords.longitude }));
+      }
+    }).catch(() => {});
+  }, [step]);
 
   // Step 6: Submit
   const [submitting, setSubmitting] = useState(false);
@@ -326,7 +337,7 @@ export default function NewProjectPage() {
     return [...tier1, ...tier2];
   }, [questions, formData.dynamicAnswers]);
 
-  // Address search with OpenStreetMap
+  // Photon supports address autocomplete and ranks results near a supplied position.
   const searchAddress = useCallback(async (text: string) => {
     if (text.length < 3) {
       setAddressSuggestions([]);
@@ -335,35 +346,43 @@ export default function NewProjectPage() {
     }
     setAddressLoading(true);
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(text)}&format=json&addressdetails=1&limit=5&countrycodes=us`
-      );
+      const request = ++addressRequest.current;
+      const params = new URLSearchParams({ q: text, limit: '8', lang: 'en' });
+      if (nearbyPosition) {
+        params.set('lat', String(nearbyPosition.lat));
+        params.set('lon', String(nearbyPosition.lon));
+      }
+      const response = await fetch(`https://photon.komoot.io/api/?${params}`);
       if (!response.ok) {
         console.error('Address search HTTP error:', response.status);
         return;
       }
       const data = await response.json();
-      setAddressSuggestions(data);
-      setShowSuggestions(data.length > 0);
+      if (request !== addressRequest.current) return;
+      const matches = (data.features || []).filter((item: any) => item.properties?.countrycode?.toUpperCase() === 'US' && item.properties?.street);
+      setAddressSuggestions(matches);
+      setShowSuggestions(matches.length > 0);
     } catch (err) {
       console.error('Address search error:', err);
     } finally {
       setAddressLoading(false);
     }
-  }, []);
+  }, [nearbyPosition]);
 
   const handleAddressTextChange = (text: string) => {
+    addressRequest.current++;
     setFormData(prev => ({ ...prev, address: text }));
     if (searchTimeout.current) clearTimeout(searchTimeout.current);
-    searchTimeout.current = setTimeout(() => searchAddress(text), 500);
+    searchTimeout.current = setTimeout(() => searchAddress(text), 700);
   };
 
   const handleSelectAddress = (item: any) => {
-    const addr = item.address || {};
+    addressRequest.current++;
+    const addr = item.properties || {};
     setFormData(prev => ({
       ...prev,
-      address: item.display_name?.split(',')[0] || '',
-      city: addr.city || addr.town || addr.village || '',
+      address: `${addr.housenumber || ''} ${addr.street || ''}`.trim(),
+      city: addr.city || addr.town || addr.village || addr.county || '',
       state: addr.state || '',
       zipCode: addr.postcode || '',
     }));
@@ -1009,6 +1028,9 @@ export default function NewProjectPage() {
 
               {/* Address with autocomplete */}
               <div style={{ marginBottom: '20px', position: 'relative' }}>
+                <button type="button" onClick={() => navigator.geolocation?.getCurrentPosition(position => setNearbyPosition({ lat: position.coords.latitude, lon: position.coords.longitude }))} style={{ border: 'none', background: 'transparent', color: ProsColors.primary, cursor: 'pointer', padding: '0 0 10px' }}>
+                  {nearbyPosition ? 'Using your location for nearby addresses' : 'Use my location for nearby addresses'}
+                </button>
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: ProsColors.textPrimary, marginBottom: '8px' }}>
                   Street Address
                 </label>
@@ -1053,7 +1075,7 @@ export default function NewProjectPage() {
                           fontSize: '14px', color: ProsColors.textPrimary,
                         }}
                       >
-                        {item.display_name}
+                        {[`${item.properties.housenumber || ''} ${item.properties.street || ''}`.trim(), item.properties.city || item.properties.town, item.properties.state, item.properties.postcode].filter(Boolean).join(', ')}
                       </button>
                     ))}
                   </div>
