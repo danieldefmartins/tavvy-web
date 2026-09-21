@@ -1,11 +1,11 @@
 import { supabase } from './supabaseClient';
 
-export type ContentKind = 'place_review' | 'story' | 'universe_review' | 'event_review' | 'civic_question' | 'cruise_visit' | 'place_photo' | 'ecard_endorsement' | 'ecard';
+export type ContentKind = 'place_review' | 'story' | 'universe_review' | 'event_review' | 'civic_question' | 'cruise_visit' | 'place_photo' | 'ecard_endorsement' | 'ecard' | 'pro_review';
 export type ContentReportReason = 'spam' | 'fake' | 'offensive' | 'harassment' | 'wrong_place' | 'conflict_of_interest' | 'sexual' | 'violent' | 'other';
 export type BlockedAuthor = { id: string; displayName: string; createdAt: string };
 type SafetyClient = { rpc(name: string, args?: Record<string, unknown>): PromiseLike<{ data: any; error: any }> };
 const uuid = (value: unknown): value is string => typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
-const kinds: ContentKind[] = ['place_review','story','universe_review','event_review','civic_question','cruise_visit','place_photo','ecard_endorsement','ecard'];
+const kinds: ContentKind[] = ['place_review','story','universe_review','event_review','civic_question','cruise_visit','place_photo','ecard_endorsement','ecard','pro_review'];
 const reasons: ContentReportReason[] = ['spam','fake','offensive','harassment','wrong_place','conflict_of_interest','sexual','violent','other'];
 export const CONTENT_BLOCK_SCOPE = 'Blocked authors are hidden from your reviews, stories, photos, eCards and community comments. Place summaries still include all eligible public experiences.';
 function target(kind: ContentKind, id: string) { if (!kinds.includes(kind) || !uuid(id)) throw new Error('This content could not be identified. Refresh and try again.'); }

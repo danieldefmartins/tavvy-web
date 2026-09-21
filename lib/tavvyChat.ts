@@ -5,7 +5,6 @@ export type Conversation = { id: string; pro_id: string; customer_id: string; st
 export type Message = { id: string; conversation_id: string; sender_id: string; sender_type: string; content: string; created_at: string };
 export const MESSAGE_TABLE = 'pro_messages';
 export const MESSAGE_SCOPE_COLUMN = 'match_id';
-const matchSelect = 'id,request_id,pro_id,pro_status,updated_at,project:project_requests!pro_request_matches_request_id_fkey(user_id,customer_name,description),provider:pro_providers!pro_request_matches_pro_id_fkey(user_id,business_name)';
 export function participantRole(c: Conversation, uid: string): 'pro' | 'customer' {
   if (c.pro_id === uid) return 'pro';
   if (c.customer_id === uid) return 'customer';
@@ -22,25 +21,25 @@ function normalizeMatch(row: any): Conversation {
 function normalizeMessage(row: any): Message {
   return { id: row.id, conversation_id: row.match_id, sender_id: row.sender_id, sender_type: row.sender_type, content: row.content, created_at: row.created_at || '' };
 }
-export async function listConversations(uid: string): Promise<Conversation[]> {
-  const [providers, requests] = await Promise.all([
-    supabase.from('pro_providers').select('id').eq('user_id', uid),
-    supabase.from('project_requests').select('id').eq('user_id', uid)
-  ]);
-  if (providers.error) throw providers.error;
-  if (requests.error) throw requests.error;
-  const filters: string[] = [];
-  if (providers.data?.length) filters.push(`pro_id.in.(${providers.data.map(p => p.id).join(',')})`);
-  if (requests.data?.length) filters.push(`request_id.in.(${requests.data.map(p => p.id).join(',')})`);
-  if (!filters.length) return [];
-  const { data, error } = await supabase.from('pro_request_matches').select(matchSelect).or(filters.join(',')).order('updated_at', { ascending: false });
+async function readConversationPage(id: string | null, offset: number): Promise<any[]> {
+  const { data, error } = await supabase.rpc('get_my_pro_match_summaries_v1', { p_match_id: id, p_offset: offset, p_limit: 100 });
   if (error) throw error;
-  return (data || []).map(normalizeMatch).filter(c => c.pro_id === uid || c.customer_id === uid);
+  if (!Array.isArray(data)) throw new Error('Conversations are unavailable. Please try again.');
+  return data;
+}
+export async function listConversations(uid: string): Promise<Conversation[]> {
+  const rows: any[] = [];
+  for (let offset = 0; offset <= 10000; offset += 100) {
+    const page = await readConversationPage(null, offset);
+    rows.push(...page);
+    if (page.length < 100) return rows.map(normalizeMatch).filter(c => c.pro_id === uid || c.customer_id === uid);
+  }
+  throw new Error('Too many conversations to load. Please contact support.');
 }
 export async function getConversation(id: string, uid: string): Promise<Conversation> {
-  const { data, error } = await supabase.from('pro_request_matches').select(matchSelect).eq('id', id).single();
-  if (error) throw error;
-  const match = normalizeMatch(data);
+  const rows = await readConversationPage(id, 0);
+  if (rows.length !== 1) throw new Error('Conversation unavailable for this account.');
+  const match = normalizeMatch(rows[0]);
   const role = participantRole(match, uid);
   const { data: serverRole, error: roleError } = await supabase.rpc('tavvy_chat_role', { match_uuid: id });
   if (roleError) throw roleError;
