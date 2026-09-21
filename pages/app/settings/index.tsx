@@ -15,7 +15,6 @@ import { useThemeContext } from '../../../contexts/ThemeContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import AppLayout from '../../../components/AppLayout';
 import BlockedAuthors from '../../../components/BlockedAuthors';
-import AppearanceSelector from '../../../components/AppearanceSelector';
 import { 
   FiArrowLeft, FiGlobe, FiBell, FiMail, FiMapPin, 
   FiTrendingUp, FiMap, FiHelpCircle, FiFileText, FiShield,
@@ -74,11 +73,6 @@ export default function SettingsScreen() {
                   <FiChevronRight size={20} className="chevron" />
                 </div>
               </Link>
-            </section>
-
-            {/* Theme Section */}
-            <section className="section">
-              <AppearanceSelector />
             </section>
 
             <BlockedAuthors />
