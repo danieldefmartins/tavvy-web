@@ -138,6 +138,7 @@ export default function HomeScreen() {
   
   // Search states
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchWhere, setSearchWhere] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [searchSuggestions, setSearchSuggestions] = useState<SearchSuggestion[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -360,7 +361,8 @@ export default function HomeScreen() {
   // Handle search submission
   const handleSearch = (query = searchQuery) => {
     if (!query.trim()) return;
-    router.push({ pathname: '/app/search', query: { q: query.trim(), ...(userLocation ? { location: 'current', lat: String(userLocation[1]), lng: String(userLocation[0]) } : {}) } }, undefined, { locale });
+    const where = searchWhere.trim();
+    router.push({ pathname: '/app/search', query: { q: query.trim(), ...(where ? { where } : userLocation ? { location: 'current', lat: String(userLocation[1]), lng: String(userLocation[0]) } : {}) } }, undefined, { locale });
   };
 
   // Handle category selection
@@ -477,6 +479,18 @@ export default function HomeScreen() {
                   </button>
                 )}
               </div>
+
+              <label className="hero-where" htmlFor="hero-search-where">
+                <span>{t('search.where', 'Where')}</span>
+                <input
+                  id="hero-search-where"
+                  value={searchWhere}
+                  onChange={(event) => setSearchWhere(event.target.value)}
+                  onKeyDown={(event) => { if (event.key === 'Enter') handleSearch(); }}
+                  placeholder={t('search.cityStateOrLocation', 'City, state or any location')}
+                  autoComplete="off"
+                />
+              </label>
 
               {/* Autocomplete Suggestions */}
               {isSearchFocused && searchSuggestions.length > 0 && (
@@ -861,6 +875,33 @@ export default function HomeScreen() {
             padding: 4px;
             display: flex;
           }
+
+          .hero-where {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 46px;
+            margin: -8px 0 18px;
+            padding: 0 14px;
+            border: 1px solid ${theme.border};
+            border-radius: 13px;
+            background: ${theme.surface};
+            color: ${theme.textSecondary};
+            font-size: 13px;
+            font-weight: 700;
+          }
+          .hero-where input {
+            min-width: 0;
+            flex: 1;
+            border: 0;
+            outline: none;
+            background: transparent;
+            color: ${theme.text};
+            font: inherit;
+            font-weight: 500;
+          }
+          .hero-where input::placeholder { color: ${theme.textSecondary}; opacity: 1; }
+          .hero-where:focus-within { border-color: ${theme.primary}; box-shadow: 0 0 0 3px rgba(138,5,190,0.12); }
 
           /* Quick Actions */
           .hero-quick-actions {
