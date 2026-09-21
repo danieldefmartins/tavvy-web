@@ -3,7 +3,7 @@ import { supabase } from '../supabaseClient';
 import { CruiseKind, CruiseShipDetail, cruisePublicationProblems } from './catalog';
 import { FEATURED_CRUISE_SHIP_IDS } from './featured';
 type ReadClient = { rpc: (name: string, args: Record<string,unknown>) => PromiseLike<{data: any; error: any}> };
-export type CruiseSearch = { query?: string; kind?: CruiseKind; status?: 'operating'|'announced'; operatorId?: string; offset?: number; limit?: number; shipIds?: readonly string[] };
+export type CruiseSearch = { query?: string; kind?: CruiseKind; status?: 'operating'|'announced'; operatorId?: string; length?: 'under150'|'150to250'|'over250'|''; year?: '2020plus'|'2010s'|'before2010'|''; audience?: 'family_activities'|'adults_only'|''; offset?: number; limit?: number; shipIds?: readonly string[] };
 export class CruiseUnavailableError extends Error { constructor() { super('Cruise information is temporarily unavailable. Please try again.'); this.name='CruiseUnavailableError'; } }
 function detail(value: any): CruiseShipDetail | null {
  if (!value || !value.ship || !Array.isArray(value.sources) || !Array.isArray(value.venues)) return null;
@@ -15,7 +15,7 @@ function detail(value: any): CruiseShipDetail | null {
 /** Read-only RPC validates public identity and paginates before returning results. */
 export async function searchCruiseShips(search: CruiseSearch = {}, client: ReadClient = supabase): Promise<{ships: CruiseShipDetail[]; hasMore: boolean}> {
  const limit=Math.max(1,Math.min(50,Math.trunc(search.limit||24))),offset=Math.max(0,Math.trunc(search.offset||0));
- const {data,error}=await client.rpc('search_cruise_ships_v2',{p_query:(search.query||'').trim().slice(0,160),p_kind:search.kind||null,p_status:search.status||'operating',p_operator_id:search.operatorId||null,p_ship_ids:search.shipIds ? [...search.shipIds] : null,p_offset:offset,p_limit:limit+1});
+ const {data,error}=await client.rpc('search_cruise_ships_v3',{p_length:search.length||null,p_year:search.year||null,p_audience:search.audience||null,p_query:(search.query||'').trim().slice(0,160),p_kind:search.kind||null,p_status:search.status||'operating',p_operator_id:search.operatorId||null,p_ship_ids:search.shipIds ? [...search.shipIds] : null,p_offset:offset,p_limit:limit+1});
  if(error || !Array.isArray(data)) throw new CruiseUnavailableError();
  const rows=data.map(detail);if(rows.some(row=>!row))throw new CruiseUnavailableError();
  return {ships:rows.slice(0,limit) as CruiseShipDetail[],hasMore:rows.length>limit};
