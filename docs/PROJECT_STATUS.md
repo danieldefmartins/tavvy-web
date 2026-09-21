@@ -88,14 +88,18 @@ Restaurant membership remains a separate offer with unresolved final pricing.
 - Native 688 Cruise entry/navigation passed on iPhone and iPad. The new 705-file
   candidate includes the current Cruise, eCard, Atlas taxonomy and truthful account
   deletion UI work. Typecheck, 23 focused handler checks and configured Xcode build
-  passed. Actual testing caught a Photos & stories raw-text crash in the earlier704
-  candidate. Native705 fixes it, including a regression that failed before the fix.
-  iPhone photo-tab verification passed; final iPhone/iPad workflow checks and EAS
-  upload remain pending.
+  passed. Actual testing caught a Photos & stories raw-text crash in the earlier 704
+  candidate. Native 705 fixes it, including a regression that failed before the fix.
+  All required English Cruise, Photos & stories, Back/filter/query, chooser-repeat,
+  preview Close and exact unsaved-input retention cases passed on both iPhone and
+  iPad. The initial input test dropped simulated keystrokes; a corrected targeted
+  test verified the exact value both before navigation and after return without any
+  app change or draft creation. EAS preview connection settings are being verified
+  before the authorized internal upload.
 - Public client settings were verified in the binary; privileged server keys are absent.
 - Native 687 has 32 screenshots, including 28 Store candidates and 4 Atlas QA-only
-  captures. Final screenshots must match the submitted binary. New Cruise/eCard
-  captures are workflow evidence, not automatically a complete Store screenshot set.
+  captures. Final screenshots must match the submitted binary. Native705 adds 12 archived frames: 4 English chooser candidates and 8 Cruise QA
+  captures. These are not a complete final Store screenshot set.
 - Full 17-language/RTL coverage remains incomplete; several new flows use English
   fallback outside EN/PT/ES. Atlas category label translations are in the current web release and native candidate.
 - Earlier Apple navigation/sign-in checks used iPad Air 11-inch M4/iOS 26.5, not the
