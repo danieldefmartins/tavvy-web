@@ -1,3 +1,4 @@
+import { useReleaseCopy } from '../../../hooks/useReleaseCopy';
 import ToolHeader from '../../../components/ToolHeader';
 /**
  * ATLAS HOME SCREEN - Web Version V2
@@ -63,6 +64,7 @@ interface AtlasArticle {
 
 export default function AtlasHomeScreen() {
   const { t } = useTranslation();
+  const copy = useReleaseCopy();
   const router = useRouter();
   const { locale } = router;
   const { theme, isDark } = useThemeContext();
@@ -175,7 +177,7 @@ export default function AtlasHomeScreen() {
       <AppLayout>
         <div style={{ backgroundColor: bgColor, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 14, color: secondaryTextColor }}>Loading articles...</div>
+            <div style={{ fontSize: 14, color: secondaryTextColor }}>{copy('Loading articles...')}</div>
           </div>
         </div>
       </AppLayout>
@@ -204,7 +206,7 @@ export default function AtlasHomeScreen() {
               <input
                 type="text"
                 className="search-input"
-                aria-label="Search articles" placeholder="Search articles..."
+                aria-label={copy("Search articles...")} placeholder={copy("Search articles...")}
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
                 style={{ color: textColor }}
@@ -226,7 +228,7 @@ export default function AtlasHomeScreen() {
               style={{ backgroundColor: selectedCategory === null ? COLORS.accent : surfaceColor }}
             >
               <span className="chip-icon">📚</span>
-              <span className="chip-text">All</span>
+              <span className="chip-text">{copy('All')}</span>
             </button>
             
             {/* Category chips */}
@@ -247,7 +249,7 @@ export default function AtlasHomeScreen() {
           {searchQuery.length > 0 && (
             <div className="results-count">
               <p className="results-text" style={{ color: secondaryTextColor }}>
-                {displayedArticles.length} result{displayedArticles.length !== 1 ? 's' : ''} for "{searchQuery}"
+                {copy('Search Results')} ({displayedArticles.length}) · “{searchQuery}”
               </p>
             </div>
           )}
@@ -257,7 +259,7 @@ export default function AtlasHomeScreen() {
             <div className="empty-state">
               <IoDocumentTextOutline size={48} color={secondaryTextColor} />
               <p className="empty-text" style={{ color: secondaryTextColor }}>
-                No articles found{searchQuery ? ` matching "${searchQuery}"` : ' in this category'}.
+                {copy('No articles found.')} {searchQuery ? `“${searchQuery}”` : ''}
               </p>
             </div>
           ) : (
@@ -275,7 +277,7 @@ export default function AtlasHomeScreen() {
                   />
                   <div className="featured-gradient">
                     <div className="featured-label">
-                      <span className="featured-label-text">FEATURED STORY</span>
+                      <span className="featured-label-text">{copy("FEATURED STORY")}</span>
                     </div>
                     <h2 className="featured-title">{featuredArticle.title}</h2>
                     <div className="author-row">
@@ -285,14 +287,14 @@ export default function AtlasHomeScreen() {
                         className="author-avatar"
                       />
                       <span className="author-name">
-                        By {featuredArticle.author_name || 'Tavvy Team'}
+                        {copy('By')} {featuredArticle.author_name || 'Tavvy Team'}
                       </span>
                     </div>
                     <button 
                       className="read-button"
                       onClick={() => navigateToArticle(featuredArticle)}
                     >
-                      Read Article
+                      {copy('Read Article')}
                     </button>
                   </div>
                 </div>
@@ -302,7 +304,7 @@ export default function AtlasHomeScreen() {
               {gridArticles.length > 0 && (
                 <div className="articles-section">
                   <h2 className="section-title" style={{ color: textColor }}>
-                    {searchQuery ? 'Search Results' : 'All Articles'}
+                    {copy(searchQuery ? 'Search Results' : 'All Articles')}
                   </h2>
                   <div className="articles-grid">
                     {gridArticles.map((article) => (

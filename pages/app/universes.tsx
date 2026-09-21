@@ -25,6 +25,7 @@ import {
 } from 'react-icons/md';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { useReleaseCopy } from '../../hooks/useReleaseCopy';
 
 // Theme colors
 const COLORS = {
@@ -65,6 +66,7 @@ interface Category {
 
 // Category configuration matching iOS
 const CATEGORY_CONFIG: { [key: string]: { icon: any; label: string } } = {
+  'cruises': { icon: MdDirectionsBoat, label: 'Cruises' },
   'theme-parks': { icon: MdAttractions, label: 'Theme Parks' },
   'airports': { icon: MdFlight, label: 'Airports' },
   'national-parks': { icon: MdPark, label: 'Parks' },
@@ -78,6 +80,7 @@ const CATEGORY_CONFIG: { [key: string]: { icon: any; label: string } } = {
 const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800';
 
 export default function UniversesScreen() {
+  const copy = useReleaseCopy();
   const router = useRouter();
   const { t } = useTranslation('common');
   const { isDark } = useThemeContext();
@@ -268,7 +271,6 @@ export default function UniversesScreen() {
 
           <ToolHeader title="Universes" subtitle="Explore curated worlds." />
 
-          <Link href="/app/cruises" locale={locale} style={{display:'block',margin:'16px 24px',padding:16,borderRadius:14,border:`1px solid ${isDark?'#524260':'#d7c9e4'}`,color:isDark?'#e2b8f4':'#74129b',textDecoration:'none'}}>Explore cruise ships →</Link>
           {/* Search Bar */}
           <div style={{ padding: '12px 16px 16px' }}>
             <div style={{
@@ -539,12 +541,12 @@ export default function UniversesScreen() {
                   paddingRight: '16px',
                   paddingBottom: '4px'
                 }}>
-                  {Object.entries(CATEGORY_CONFIG).slice(0, 6).map(([slug, config]) => {
+                  {Object.entries(CATEGORY_CONFIG).slice(0, 7).map(([slug, config]) => {
                     const isActive = activeCategory === config.label;
                     return (
                       <button
                         key={slug}
-                        onClick={() => setActiveCategory(isActive ? 'All' : config.label)}
+                        onClick={() => slug === 'cruises' ? router.push('/app/cruises', undefined, { locale }) : setActiveCategory(isActive ? 'All' : config.label)}
                         style={{
                           display: 'flex',
                           flexDirection: 'column',
@@ -569,7 +571,7 @@ export default function UniversesScreen() {
                           textAlign: 'center',
                           color: isActive ? COLORS.accent : secondaryTextColor
                         }}>
-                          {config.label.split(' ')[0]}
+                          {slug === 'cruises' ? copy('Cruises') : config.label.split(' ')[0]}
                         </span>
                       </button>
                     );

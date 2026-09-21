@@ -1,4 +1,5 @@
 import ToolHeader from '../../components/ToolHeader';
+import { useReleaseCopy } from '../../hooks/useReleaseCopy';
 /**
  * Universes Screen - Explore curated worlds
  * Fixed layout with proper structure
@@ -12,7 +13,7 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
-import { IoSearch, IoRocketOutline, IoAirplaneOutline, IoLeafOutline, IoBusinessOutline, IoChevronBack, IoPersonCircleOutline } from 'react-icons/io5';
+import { IoSearch, IoRocketOutline, IoAirplaneOutline, IoLeafOutline, IoBusinessOutline, IoChevronBack, IoPersonCircleOutline, IoBoatOutline } from 'react-icons/io5';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
@@ -36,6 +37,7 @@ interface Universe {
 }
 
 const CATEGORY_FILTERS = [
+  { id: 'cruises', icon: IoBoatOutline, label: 'Cruises' },
   { id: 'theme-parks', icon: IoRocketOutline, label: 'Theme Parks' },
   { id: 'airports', icon: IoAirplaneOutline, label: 'Airports' },
   { id: 'national-parks', icon: IoLeafOutline, label: 'Parks' },
@@ -45,6 +47,7 @@ const CATEGORY_FILTERS = [
 const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800';
 
 export default function ExploreScreen() {
+  const copy = useReleaseCopy();
   const router = useRouter();
   const locale = router.locale || 'en';
   const { theme, isDark } = useThemeContext();
@@ -289,7 +292,7 @@ export default function ExploreScreen() {
                     return (
                       <button
                         key={filter.id}
-                        onClick={() => setActiveCategory(isActive ? null : filter.id)}
+                        onClick={() => filter.id === 'cruises' ? router.push('/app/cruises', undefined, { locale: router.locale }) : setActiveCategory(isActive ? null : filter.id)}
                         style={{
                           display: 'flex',
                           flexDirection: 'column',
@@ -306,7 +309,7 @@ export default function ExploreScreen() {
                       >
                         <Icon size={22} />
                         <span style={{ fontSize: 10, fontWeight: 500, textAlign: 'center' }}>
-                          {filter.label}
+                          {copy(filter.label)}
                         </span>
                       </button>
                     );

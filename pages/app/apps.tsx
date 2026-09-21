@@ -18,7 +18,7 @@ import {
 import { 
   IoConstruct, IoCar, IoPlanet, IoTrain, IoWallet, 
   IoBusinessOutline, IoHeart, IoPersonOutline, IoAddCircle,
-  IoHome, IoSparkles, IoBook, IoSettings, IoRestaurant
+  IoHome, IoSparkles, IoBook, IoSettings, IoRestaurant, IoBoat
 } from 'react-icons/io5';
 
 // Featured apps (large cards, horizontal scroll)
@@ -48,6 +48,7 @@ const FEATURED_APPS = [
 
 // All apps grid
 const ALL_APPS = [
+  { id: 'cruises', nameKey: 'release.cruiseToolTitle', icon: IoBoat, color: '#167C9C', href: '/app/cruises' },
   { id: 'experiences', nameKey: 'apps.experiences', icon: IoSparkles, color: '#007F86', href: '/app/experiences' },
   {
     id: 'food-menu',

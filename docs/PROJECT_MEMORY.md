@@ -139,9 +139,11 @@ publish, shorter setup with the full path preserved, easy Links & actions/reorde
 better Edit/Preview and mobile Publish access, and clearly grouped advanced controls.
 Saved link identity and hidden content must survive changes.
 
-Keep the Free allowance of five active links. Galleries, embedded videos, forms and
-professional credentials are Pro extras with labels before addition; existing published
-content remains intact. Existing web Pro pricing is $4.99/month or $39.99/year.
+The user approved unlimited basic links on Free and at least one polished Free design
+in every browse category on September 21, 2026. This supersedes the five-link allowance;
+consult PROJECT_STATUS for implementation status. Galleries, embedded videos, forms and
+professional credentials remain Pro extras, labeled before addition. Preserve existing
+published content and saved design rights. Existing web Pro pricing is $4.99/month or $39.99/year.
 Restaurant membership is a separate offer whose final pricing is unresolved; do not
 reuse Tavvy Pros billing for it. New eCard features and pricing changes require a decision.
 
@@ -158,7 +160,9 @@ reuse Tavvy Pros billing for it. New eCard features and pricing changes require 
 - **Cruises:** include overnight ocean, river and expedition ships; exclude private
   charters and day trips. Verify identity, dimensions/capacity, years, decks, dining,
   shopping and entertainment, preserving unknown values and source dates. A ship can
-  contain canonical onboard venues through a Universe-style hierarchy.
+  contain canonical onboard venues through a Universe-style hierarchy. Creating those
+  clickable venue places and their separate reviews is explicitly deferred. Cruise-line
+  filtering, curated featured ships and admin ship/image management are now requested.
 - **Atlas:** readable Light / Sepia / Dark themes and text size, discoverable reading
   controls, and complete audio for both voices. There is no verified evidence of a
   previously shipped font-family selector in the history examined.

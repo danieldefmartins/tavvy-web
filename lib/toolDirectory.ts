@@ -5,6 +5,7 @@ export const TOOL_GROUPS = [
   { id: 'personal', title: 'Your everyday essentials', description: 'Keep useful things close and make Tavvy yours.' },
 ];
 export const TOOL_DETAILS: Record<string, { name: string; description: string; group: string }> = {
+  cruises: { name: 'Cruises', description: 'Explore ocean, river and expedition ships.', group: 'discover' },
   'food-menu': { name: 'Food Menu', description: 'Find a dish you’re craving nearby.', group: 'discover' },
   universes: { name: 'Universes', description: 'Explore parks, airports and places within them.', group: 'discover' },
   onthego: { name: 'On The Go', description: 'Find food trucks and mobile businesses.', group: 'discover' },

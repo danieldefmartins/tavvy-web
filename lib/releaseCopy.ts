@@ -1,5 +1,47 @@
 /** Explicit UI copy only. Never apply to user or place content. */
 export const RELEASE_COPY_KEYS: Record<string, string> = {
+  "Cruises": "cruiseToolTitle",
+  "Explore ocean, river and expedition ships.": "cruiseToolDescription",
+  "Good night": "publicFinishGoodNight",
+  "What are you in the mood for?": "publicFinishMoodSearch",
+  "Your guide to the exceptional.": "publicFinishAtlasTagline",
+  "Search articles...": "publicFinishAtlasSearch",
+  "Loading articles...": "publicFinishAtlasLoading",
+  "FEATURED STORY": "publicFinishAtlasFeatured",
+  "Read Article": "publicFinishAtlasRead",
+  "All Articles": "publicFinishAtlasAll",
+  "No articles found.": "publicFinishAtlasEmpty",
+  "Find your perfect campsite.": "publicFinishRVTagline",
+  "Search places or cities": "publicFinishPlacesOrCities",
+  "Browse all locations. Search a place or city to narrow the list.": "publicFinishBrowseScope",
+  "RV Parks": "publicFinishRVParks",
+  "Campgrounds": "publicFinishCampgrounds",
+  "National Parks": "publicFinishNationalParks",
+  "Beaches": "publicFinishBeaches",
+  "Boondocking": "publicFinishBoondocking",
+  "Overnight Parking": "publicFinishOvernightParking",
+  "Dump Stations": "publicFinishDumpStations",
+  "Loading places…": "publicFinishPlacesLoading",
+  "Load more places": "publicFinishPlacesMore",
+  "Try another place, city or category.": "publicFinishPlacesEmptyHint",
+  "Places are temporarily unavailable. Please try again.": "publicFinishPlacesUnavailable",
+  "Recent reviews": "publicFinishRecentReviews",
+  "The Main Thing": "publicFinishMainThing",
+  "The Good": "publicFinishTheGood",
+  "The Vibe": "publicFinishTheVibe",
+  "Heads Up": "publicFinishHeadsUp",
+  "Loading recent reviews…": "publicFinishReviewsLoading",
+  "Recent reviews unavailable": "publicFinishReviewsUnavailable",
+  "More recent reviews needed": "publicFinishReviewsNeeded",
+  "Recent concerns reported": "publicFinishConcernsRecent",
+  "No recent concerns reported": "publicFinishNoConcernsRecent",
+  "The campsite": "publicFinishCampsite",
+  "The beach experience": "publicFinishBeachExperience",
+  "The food": "publicFinishFood",
+  "One person mentioned this": "publicFinishMentionedOne",
+  "{{count}} people mentioned this": "publicFinishMentionedMany",
+  "By": "publicFinishByAuthor",
+
   "Discover": "navDiscover",
   "Tools": "navTools",
   "Saved": "navSaved",
@@ -1274,3 +1316,12 @@ Object.assign(RELEASE_COPY_KEYS, {
 Object.assign(RELEASE_COPY_KEYS, {"Business": "creationBusiness", "Card for": "creationCardFor"});
 
 Object.assign(RELEASE_COPY_KEYS, {"Joined": "accountFinishJoined", "Deleting...": "accountFinishDeleting"});
+
+// Equivalent app-authored discovery labels share existing translations.
+Object.assign(RELEASE_COPY_KEYS, {
+  "Search Results": "publicFinishSearchResults",
+  "Search results": "publicFinishSearchResults",
+  "Search places or locations": "publicFinishSearchLocations",
+  "Location is off. Enter a city to find places.": "locationDenied",
+  "Location is unavailable. Enter a city to find places.": "locationUnavailable"
+});
