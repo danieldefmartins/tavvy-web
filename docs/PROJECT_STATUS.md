@@ -1,6 +1,6 @@
 # Tavvy current engineering status
 
-As of September 21, 2026, 00:16 America/New_York (04:16 UTC).
+As of September 21, 2026, 00:37 America/New_York (04:37 UTC).
 Read [PROJECT_MEMORY.md](PROJECT_MEMORY.md) for product decisions and architecture.
 This is a dated checkpoint, not a claim that the full requested release is complete.
 
@@ -27,13 +27,14 @@ local migration has been applied.
 | Native internal preview | Latest uploaded internal iOS preview finished: app version 1.0.1, build 26, from the 616-file snapshot. | Later 617-file candidate tested locally only; no App Store submission. |
 | iPad navigation | Account, RV & Camping, Universes, Realtors, Saved and personal sign-in passed fresh-install landscape and update portrait checks on the later local candidate. | Tested on iPad Air 11-inch M4 / iOS 26.5, not the original reviewer device/OS. |
 
-The latest verified web eCard gallery release was deployed September 21 at 04:06 UTC;
-its public Next build identifier is `oavnoo53VCKsT1-PCtvd8`. It includes design-first
+The latest verified web eCard gallery release was deployed September 21 after 04:13 UTC;
+its public Next build identifier is `Wqqvxviynheqtl3oYWT94`. It includes design-first
 creation, all 21 layouts / 123 palettes, fictional portrait/background examples and
 real 9:16 gallery previews. Five unit checks, 17 creation-flow browser checks and
 21 real renderer checks passed before deployment; live gallery/image checks passed.
-A subsequent image-optimizer performance release is building. Release evidence is
-held with the maintainer. Check the serving build before making a new live claim.
+The image-optimizer performance release also passed production checks: tested 640px
+portraits now load as WebP at about 39KB and 77KB. All layouts/palettes remain available.
+Release evidence is held with the maintainer.
 
 ## Active work and next actions
 
@@ -43,7 +44,7 @@ The interrupted import resumed from its verified 6,180,000-record checkpoint.
 The full saved prefix was audited, two text fields restored from backup, and all
 6,180,000 complete records rechecked with zero differences. A later interruption at
 6,348,000 was reconciled by exact readback of its unfinished batch, preserving all
-acknowledged progress. The latest continuation passed 6.7 million of 34,883,915
+acknowledged progress. The latest continuation passed 7.7 million of 34,883,915
 records at this checkpoint. This is not a completed migration. Serving search remains
 unchanged. The full backup's immutable content-hash ledger is complete.
 
