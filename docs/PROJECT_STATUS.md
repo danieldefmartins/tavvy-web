@@ -195,3 +195,7 @@ Save requirement. Backend/admin023 implementation is isolated and not deployed y
 Deletion must clear the matching cover and remove the stored file, with explicit
 cleanup status if storage fails. Successful photo operations must preserve unrelated
 unsaved information/fact/source edits. No actual customer photos are deleted for tests.
+
+## Cruise discovery filters — September 21 afternoon
+
+Web cruise directory now offers sourced ship-length and build-year bands, plus official-line family-activities and adults-only (18+) choices. These audience choices describe programs and booking policy, not guest-rated quality. Unknown/unverified facts do not match. The public v3 database reader filters before pagination; v2 remains for older clients. The six verified editorial starting ships lead Explore ships when there is no name search. Web commit `179597e` is live as Railway deployment `1ae20a56-c55e-447d-8a76-9009d8ae282e`. A live phone-width browser check passed first-six order, active chips/URL, combined empty state and adults-only results. Some combinations are empty because catalog fact coverage is incomplete. Matching mobile source is published at `5bde784`, with app TypeScript passing, but no new EAS build yet.
