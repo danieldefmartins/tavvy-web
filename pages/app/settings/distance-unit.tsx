@@ -28,8 +28,7 @@ const distanceUnits: DistanceUnit[] = [
 export default function DistanceUnitSettingsPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { themeMode } = useThemeContext();
-  const isDark = themeMode === 'dark';
+  const { isDark } = useThemeContext();
   
   const [selectedUnit, setSelectedUnit] = useState('miles');
 

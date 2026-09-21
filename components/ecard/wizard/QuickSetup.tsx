@@ -1,158 +1,31 @@
-/**
- * QuickSetup — Step 3 of creation wizard: name, photo, primary color, create.
- */
-
-import React, { useRef, useState } from 'react';
-import { IoArrowBack, IoCamera } from 'react-icons/io5';
-
-const ACCENT = '#00C853';
-
-const QUICK_COLORS = [
-  '#8A05BE', '#00C2CB', '#00C853', '#EF4444', '#F59E0B',
-  '#EC4899', '#14B8A6', '#1E40AF', '#D4AF37', '#17013A',
-];
-
+import { useReleaseCopy } from '../../../hooks/useReleaseCopy';
+/** Short setup. Its parent owns values so choosing a template never erases them. */
+import React, { useEffect, useRef, useState } from 'react';
+import { IoCamera } from 'react-icons/io5';
+export interface QuickSetupData { fullName: string; title: string; photoFile: File | null; primaryColor: string; }
+export const EMPTY_QUICK_SETUP: QuickSetupData = {fullName:'',title:'',photoFile:null,primaryColor:'#8A05BE'};
+const QUICK_COLORS=['#8A05BE','#00C2CB','#00C853','#EF4444','#F59E0B','#EC4899','#14B8A6','#1E40AF','#D4AF37','#17013A'];
 interface QuickSetupProps {
-  onBack: () => void;
-  onCreate: (data: { fullName: string; title: string; photoFile: File | null; primaryColor: string }) => void;
-  creating: boolean;
-  isDark: boolean;
+  value: QuickSetupData; onChange:(value:QuickSetupData)=>void;
+  onCreate:(data:QuickSetupData)=>void; creating:boolean; disabled?:boolean; isDark:boolean;
 }
-
-export default function QuickSetup({ onBack, onCreate, creating, isDark }: QuickSetupProps) {
-  const [fullName, setFullName] = useState('');
-  const [title, setTitle] = useState('');
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [primaryColor, setPrimaryColor] = useState(QUICK_COLORS[0]);
-  const photoInputRef = useRef<HTMLInputElement>(null);
-
-  const textPrimary = isDark ? '#FFFFFF' : '#111111';
-  const textSecondary = isDark ? '#94A3B8' : '#6B7280';
-  const inputBg = isDark ? '#1E1E1E' : '#FFFFFF';
-  const inputColor = isDark ? '#fff' : '#333';
-  const borderColor = isDark ? '#250E45' : '#E5E7EB';
-
-  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setPhotoFile(file);
-      setPhotoPreview(URL.createObjectURL(file));
-    }
-  };
-
-  const canCreate = fullName.trim().length >= 2;
-
-  return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
-        <button onClick={onBack} style={{ background: 'none', border: 'none', padding: 6, cursor: 'pointer', borderRadius: 8, display: 'flex' }}>
-          <IoArrowBack size={22} color={textPrimary} />
-        </button>
-        <div>
-          <h2 style={{ fontSize: 22, fontWeight: 700, color: textPrimary, margin: 0 }}>Quick Setup</h2>
-          <p style={{ fontSize: 14, color: textSecondary, margin: '2px 0 0' }}>You can edit everything later</p>
-        </div>
-      </div>
-
-      {/* Photo */}
-      <input ref={photoInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoSelect} />
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
-        <div
-          onClick={() => photoInputRef.current?.click()}
-          style={{
-            width: 100, height: 100, borderRadius: '50%', cursor: 'pointer',
-            background: photoPreview ? 'none' : (isDark ? 'rgba(255,255,255,0.06)' : '#F3F4F6'),
-            border: `2px dashed ${photoPreview ? 'transparent' : (isDark ? 'rgba(255,255,255,0.1)' : '#D1D5DB')}`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            overflow: 'hidden',
-          }}
-        >
-          {photoPreview ? (
-            <img src={photoPreview} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          ) : (
-            <div style={{ textAlign: 'center' }}>
-              <IoCamera size={28} color={isDark ? '#64748B' : '#9CA3AF'} />
-              <div style={{ fontSize: 10, color: textSecondary, marginTop: 2 }}>Photo</div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Name */}
-      <div style={{ marginBottom: 14 }}>
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: textSecondary, marginBottom: 6 }}>
-          Full Name *
-        </label>
-        <input
-          type="text"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-          placeholder="Your full name"
-          autoFocus
-          style={{
-            width: '100%', padding: '14px 16px', border: `1px solid ${borderColor}`,
-            borderRadius: 12, fontSize: 16, backgroundColor: inputBg, color: inputColor,
-            outline: 'none',
-          }}
-        />
-      </div>
-
-      {/* Title */}
-      <div style={{ marginBottom: 20 }}>
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: textSecondary, marginBottom: 6 }}>
-          Title / Role
-        </label>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="e.g. CEO, Designer, Agent"
-          style={{
-            width: '100%', padding: '14px 16px', border: `1px solid ${borderColor}`,
-            borderRadius: 12, fontSize: 16, backgroundColor: inputBg, color: inputColor,
-            outline: 'none',
-          }}
-        />
-      </div>
-
-      {/* Primary Color */}
-      <div style={{ marginBottom: 28 }}>
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: textSecondary, marginBottom: 10 }}>
-          Primary Color
-        </label>
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          {QUICK_COLORS.map((color) => (
-            <button
-              key={color}
-              onClick={() => setPrimaryColor(color)}
-              style={{
-                width: 38, height: 38, borderRadius: 12, border: `2px solid ${primaryColor === color ? '#fff' : 'transparent'}`,
-                background: color, cursor: 'pointer', padding: 0,
-                boxShadow: primaryColor === color ? `0 0 0 2px ${color}` : 'none',
-                transition: 'all 0.2s',
-              }}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Create button */}
-      <button
-        onClick={() => onCreate({ fullName, title, photoFile, primaryColor })}
-        disabled={!canCreate || creating}
-        style={{
-          width: '100%', padding: '16px 24px', border: 'none', borderRadius: 14,
-          fontSize: 16, fontWeight: 700, cursor: canCreate ? 'pointer' : 'not-allowed',
-          background: canCreate ? `linear-gradient(135deg, ${ACCENT}, #00A843)` : (isDark ? '#250E45' : '#D1D5DB'),
-          color: canCreate ? '#fff' : textSecondary,
-          boxShadow: canCreate ? '0 4px 20px rgba(0,200,83,0.35)' : 'none',
-          opacity: creating ? 0.6 : 1,
-          transition: 'all 0.2s',
-        }}
-      >
-        {creating ? 'Creating...' : 'Create Card'}
-      </button>
-    </div>
-  );
+export default function QuickSetup({value,onChange,onCreate,creating,disabled=false,isDark}:QuickSetupProps) {
+  const copy = useReleaseCopy();
+  const [photoPreview,setPhotoPreview]=useState<string|null>(null),photoInput=useRef<HTMLInputElement>(null);
+  useEffect(()=>{if(!value.photoFile){setPhotoPreview(null);return;}const url=URL.createObjectURL(value.photoFile);setPhotoPreview(url);return()=>URL.revokeObjectURL(url);},[value.photoFile]);
+  const update=(part:Partial<QuickSetupData>)=>onChange({...value,...part});
+  const text=isDark?'#F8FAFC':'#202124',muted=isDark?'#BCC5D3':'#596170',border=isDark?'#475569':'#D1D5DB';
+  const input:React.CSSProperties={boxSizing:'border-box',width:'100%',padding:'13px 14px',border:`1px solid ${border}`,borderRadius:10,fontSize:16,background:isDark?'#1E293B':'#fff',color:text,marginTop:6};
+  const canCreate=value.fullName.trim().length>=2&&!creating&&!disabled;
+  return <form onSubmit={event=>{event.preventDefault();if(canCreate)onCreate(value);}} style={{color:text}}>
+    <h1 style={{fontSize:26,margin:'0 0 8px'}}>{copy("Create your eCard")}</h1><p style={{fontSize:15,lineHeight:1.5,color:muted,margin:'0 0 24px'}}>{copy("Start with your name. Add links and customize your card next.")}</p>
+    <input ref={photoInput} type="file" accept="image/*" aria-label={copy('Profile photo file')} hidden onChange={event=>{const file=event.target.files?.[0];if(file)update({photoFile:file});}}/>
+    <button type="button" aria-label={copy('Choose optional profile photo')} onClick={()=>photoInput.current?.click()} style={{width:88,height:88,borderRadius:'50%',border:`1px dashed ${border}`,background:isDark?'#1E293B':'#F3F4F6',color:muted,overflow:'hidden',padding:0,display:'flex',alignItems:'center',justifyContent:'center',cursor:'pointer',marginBottom:8}}>{photoPreview?<img src={photoPreview} alt={copy('Selected profile')} style={{width:'100%',height:'100%',objectFit:'cover'}}/>:<IoCamera size={30}/>}</button>
+    <p style={{fontSize:12,color:muted,margin:'0 0 22px'}}>{copy("Photo is optional")}</p>
+    <label style={{display:'block',fontSize:14,marginBottom:18}}>{copy("Full name")}<span aria-hidden="true">*</span><input name="fullName" autoComplete={"name"} required minLength={2} maxLength={200} value={value.fullName} onChange={event=>update({fullName:event.target.value})} placeholder={copy("Your full name")} style={input}/></label>
+    <label style={{display:'block',fontSize:14,marginBottom:18}}>{copy("Title / role")} <span style={{color:muted}}>{copy("(optional)")}</span><input name={"title"} value={value.title} onChange={event=>update({title:event.target.value})} placeholder={copy('e.g. Designer, Founder, Agent')} style={input}/></label>
+    <details style={{margin:'0 0 24px',borderTop:`1px solid ${border}`,borderBottom:`1px solid ${border}`}}><summary style={{padding:'16px 0',cursor:'pointer',fontSize:14}}>{copy("Primary color")}</summary><div style={{display:'flex',gap:10,flexWrap:'wrap',paddingBottom:18}}>{QUICK_COLORS.map(color=><button type="button" key={color} aria-label={copy('Use {{color}} as primary color').replace('{{color}}',color)} aria-pressed={value.primaryColor===color} onClick={()=>update({primaryColor:color})} style={{width:44,height:44,borderRadius:12,border:`3px solid ${value.primaryColor===color?text:"transparent"}`,background:color,cursor:'pointer',boxShadow:value.primaryColor===color?`0 0 0 2px ${border}`:"none"}}/>)}</div></details>
+    <button type={"submit"} disabled={!canCreate} style={{width:'100%',minHeight:48,padding:'14px 20px',border:0,borderRadius:12,fontSize:16,fontWeight:650,background:'#6C2496',color:'#fff',opacity:canCreate?1:.5,cursor:canCreate?'pointer':'default'}}>{creating?copy("Creating draft…"):copy("Create draft")}</button>
+    <p style={{textAlign:'center',fontSize:12,lineHeight:1.5,color:muted}}>{copy("Your card stays private until you publish.")}</p>
+  </form>;
 }

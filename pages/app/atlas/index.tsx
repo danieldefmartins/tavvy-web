@@ -1,3 +1,4 @@
+import ToolHeader from '../../../components/ToolHeader';
 /**
  * ATLAS HOME SCREEN - Web Version V2
  * Port from iOS AtlasHomeScreen.tsx with V2 dark design system
@@ -12,6 +13,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import AppLayout from '../../../components/AppLayout';
@@ -22,7 +24,7 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
 // V2 Design System Colors
-const COLORS = {
+const BASE_COLORS = {
   primaryBlue: '#6B7FFF',
   accentTeal: '#00CED1',
   accent: '#0D9488',
@@ -64,6 +66,8 @@ export default function AtlasHomeScreen() {
   const router = useRouter();
   const { locale } = router;
   const { theme, isDark } = useThemeContext();
+  const COLORS = { ...BASE_COLORS, accent: '#006B72' };
+  const readableAccent = isDark ? '#43D8CA' : '#006B72';
   const [loading, setLoading] = useState(true);
 
   // Search and filter states
@@ -158,13 +162,13 @@ export default function AtlasHomeScreen() {
     }
   };
 
-  const bgColor = isDark ? '#121212' : '#FAFAFA';
-  const surfaceColor = isDark ? '#1E1E1E' : '#FFFFFF';
+  const bgColor = theme.background;
+  const surfaceColor = theme.surface;
   const surfaceAltColor = isDark ? '#2A2A2A' : '#F3F4F6';
-  const textColor = isDark ? '#FFFFFF' : '#111827';
-  const secondaryTextColor = isDark ? '#9CA3AF' : '#6B7280';
-  const borderColor = isDark ? '#333333' : '#E5E7EB';
-  const inputBgColor = isDark ? '#2C2C2E' : '#E5E5EA';
+  const textColor = theme.text;
+  const secondaryTextColor = theme.textSecondary;
+  const borderColor = theme.border;
+  const inputBgColor = theme.surface;
 
   if (loading) {
     return (
@@ -191,11 +195,7 @@ export default function AtlasHomeScreen() {
 
       <AppLayout>
         <div className="atlas-screen" style={{ backgroundColor: bgColor, minHeight: '100vh' }}>
-          {/* Header */}
-          <div className="header">
-            <h1 className="title">Atlas</h1>
-            <p className="tagline">Your guide to the exceptional.</p>
-          </div>
+          <ToolHeader title="Atlas" subtitle="Your guide to the exceptional." />
 
           {/* Search Bar */}
           <div className="search-container">
@@ -204,7 +204,7 @@ export default function AtlasHomeScreen() {
               <input
                 type="text"
                 className="search-input"
-                placeholder="Search articles..."
+                aria-label="Search articles" placeholder="Search articles..."
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
                 style={{ color: textColor }}
@@ -352,7 +352,7 @@ export default function AtlasHomeScreen() {
             .tagline {
               font-size: 16px;
               font-weight: 500;
-              color: ${COLORS.accent};
+              color: ${readableAccent};
               margin: 8px 0 0;
             }
 
@@ -491,7 +491,7 @@ export default function AtlasHomeScreen() {
 
             .featured-label {
               display: inline-block;
-              background: rgba(13, 148, 136, 0.92);
+              background: #006B72;
               padding: 6px 12px;
               border-radius: 6px;
               margin-bottom: 16px;

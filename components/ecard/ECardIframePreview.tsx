@@ -1,7 +1,7 @@
 /**
  * ECardIframePreview — renders a card preview using CardPreview component.
- * Originally used an iframe approach, but switched to direct rendering
- * to avoid locale redirect loops and SSR hydration issues.
+ * Uses the isolated actual renderer inside a9:16 phone viewport.
+ * Draft data is sent locally to the same-origin preview page, never published.
  * Exposes a reload() method for API compatibility with the dashboard.
  */
 
@@ -47,20 +47,7 @@ const ECardIframePreview = forwardRef<ECardIframePreviewHandle, ECardIframePrevi
       );
     }
 
-    return (
-      <div style={{
-        width: '100%',
-        maxWidth: 375,
-        margin: '0 auto',
-        borderRadius: 20,
-        overflow: 'hidden',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
-        maxHeight: height,
-        overflowY: 'auto',
-      }}>
-        <CardPreview card={fallbackCard} links={fallbackLinks || []} />
-      </div>
-    );
+    return <CardPreview card={fallbackCard} links={fallbackLinks || []} maxHeight={height} />;
   }
 );
 

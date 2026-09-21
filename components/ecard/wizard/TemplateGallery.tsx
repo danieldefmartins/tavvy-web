@@ -1,365 +1,67 @@
-/**
- * TemplateGallery — Step 2 of creation wizard: choose template.
- * Full-size realistic card previews in a horizontal scroll-snap carousel.
- */
-
-import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import { TEMPLATES, Template } from '../../../config/eCardTemplates';
-import { IoLockClosed, IoArrowBack } from 'react-icons/io5';
-import { FullCardPreview } from './FullCardPreview';
-
-const ACCENT = '#8A05BE';
-
-// Same category mapping as TemplatePicker
-const TEMPLATE_CATEGORIES: Record<string, string[]> = {
-  business: ['biz-traditional', 'biz-modern', 'biz-minimalist', 'business-card', 'pro-card', 'pro-corporate', 'pro-creative', 'cover-card', 'mobile-business'],
-  personal: ['basic', 'blogger', 'full-width', 'premium-static', 'pro-realtor', 'church'],
-  politician: ['civic-card', 'civic-card-flag', 'civic-card-bold', 'civic-card-clean', 'civic-card-rally', 'politician-generic'],
-};
-
+/** Real phone previews; browsing a locked design never silently selects a different card. */
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useReleaseCopy } from '../../../hooks/useReleaseCopy';
+import { TEMPLATES } from '../../../config/eCardTemplates';
+import { TEMPLATE_CATEGORIES, canUseTemplate } from '../../../lib/ecard/templateSelection';
+import TemplateExamplePreview from '../shared/TemplateExamplePreview';
 interface TemplateGalleryProps {
-  cardType: string;
-  countryTemplate?: string; // Pre-selected template for politician flow
-  selectedTemplateId: string | null;
-  selectedColorSchemeId: string | null;
-  onSelect: (templateId: string, colorSchemeId: string) => void;
-  onBack: () => void;
-  isPro: boolean;
-  isDark: boolean;
+  cardType: string; countryTemplate?: string; selectedTemplateId: string | null; selectedColorSchemeId: string | null;
+  onSelect: (templateId: string, colorSchemeId: string) => void; onBack: () => void;
+  isPro: boolean; isDark: boolean; onAvailabilityChange?: (available: boolean) => void;
 }
-
-export default function TemplateGallery({
-  cardType,
-  countryTemplate,
-  selectedTemplateId,
-  selectedColorSchemeId,
-  onSelect,
-  onBack,
-  isPro,
-  isDark,
-}: TemplateGalleryProps) {
-  const textPrimary = isDark ? '#FFFFFF' : '#111111';
-  const textSecondary = isDark ? '#94A3B8' : '#6B7280';
-  const border = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
-  const surfaceBg = isDark ? '#1A1A1A' : '#F5F5F5';
-
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const isInitialMount = useRef(true);
-
-  // Filter templates by card type (memoized to stabilize useEffect deps)
-  const sorted = useMemo(() => {
+export default function TemplateGallery({ cardType, countryTemplate, selectedTemplateId, selectedColorSchemeId, onSelect, onBack, isPro, isDark, onAvailabilityChange }: TemplateGalleryProps) {
+  const copy = useReleaseCopy();
+  const templates = useMemo(() => {
     const category = TEMPLATE_CATEGORIES[cardType];
-    const filtered = category
-      ? TEMPLATES.filter(t => category.includes(t.id))
-      : TEMPLATES;
-
-    // If politician with specific country template, put that first
-    return countryTemplate
-      ? [...filtered.filter(t => t.id === countryTemplate), ...filtered.filter(t => t.id !== countryTemplate)]
-      : filtered;
+    const filtered = category ? TEMPLATES.filter(template => category.includes(template.id)) : TEMPLATES;
+    return countryTemplate ? [...filtered.filter(template => template.id === countryTemplate), ...filtered.filter(template => template.id !== countryTemplate)] : filtered;
   }, [cardType, countryTemplate]);
-
-  // Set up IntersectionObserver to track the current visible card
+  const [index, setIndex] = useState(() => Math.max(0, templates.findIndex(template => template.id === selectedTemplateId)));
+  const scroll = useRef<HTMLDivElement>(null), cards = useRef<(HTMLDivElement | null)[]>([]);
+  const initialized = useRef(false);
   useEffect(() => {
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-            const idx = Number(entry.target.getAttribute('data-index'));
-            if (!isNaN(idx)) {
-              setCurrentIndex(idx);
-            }
-          }
-        });
-      },
-      {
-        root: scrollRef.current,
-        threshold: 0.5,
-      }
-    );
-
-    cardRefs.current.forEach((ref) => {
-      if (ref) observerRef.current!.observe(ref);
-    });
-
-    return () => {
-      observerRef.current?.disconnect();
-    };
-  }, [sorted.length]);
-
-  // Auto-select when the current visible card changes
-  useEffect(() => {
-    if (sorted.length === 0) return;
-    const template = sorted[currentIndex];
-    if (!template) return;
-
-    const isLocked = template.isPremium && !isPro;
-    if (isLocked) return;
-
-    // On initial mount, select the first template or the pre-selected one
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      if (selectedTemplateId) {
-        // If we already have a selection, scroll to it
-        const existingIdx = sorted.findIndex(t => t.id === selectedTemplateId);
-        if (existingIdx >= 0 && existingIdx !== 0) {
-          setTimeout(() => {
-            cardRefs.current[existingIdx]?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-          }, 100);
-          return;
-        }
-      }
-    }
-
-    // Select the current scheme or fall back to the first
-    const currentSchemeId = selectedTemplateId === template.id && selectedColorSchemeId
-      ? selectedColorSchemeId
-      : template.colorSchemes[0]?.id;
-
-    if (currentSchemeId) {
-      onSelect(template.id, currentSchemeId);
-    }
-  }, [currentIndex, sorted, isPro]);
-
-  // Get the currently visible template for showing color schemes
-  const visibleTemplate = sorted[currentIndex] || null;
-  const visibleSchemes = visibleTemplate?.colorSchemes || [];
-
-  // Scroll to a specific dot
-  const scrollToIndex = useCallback((index: number) => {
-    cardRefs.current[index]?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    const initial = Math.max(0, templates.findIndex(template => template.id === selectedTemplateId));
+    setIndex(initial);
+    if (scroll.current && cards.current[initial]) scroll.current.scrollLeft = cards.current[initial]!.offsetLeft;
+    initialized.current = true;
+    // Parent remounts this carousel only when the category changes. Selection changes must not reset a swipe.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  return (
-    <div>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
-        <button onClick={onBack} style={{ background: 'none', border: 'none', padding: 6, cursor: 'pointer', borderRadius: 8, display: 'flex' }}>
-          <IoArrowBack size={22} color={textPrimary} />
-        </button>
-        <div>
-          <h2 style={{ fontSize: 22, fontWeight: 700, color: textPrimary, margin: 0 }}>Choose your look</h2>
-          <p style={{ fontSize: 14, color: textSecondary, margin: '2px 0 0' }}>Swipe to browse templates</p>
-        </div>
-      </div>
-
-      {/* Horizontal scroll-snap carousel */}
-      <div
-        ref={scrollRef}
-        style={{
-          display: 'flex',
-          overflowX: 'auto',
-          scrollSnapType: 'x mandatory',
-          WebkitOverflowScrolling: 'touch',
-          gap: 16,
-          padding: '0 5vw',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-        }}
-        className="template-gallery-scroll"
-      >
-        {sorted.map((template, index) => {
-          const isSelected = selectedTemplateId === template.id;
-          const isLocked = template.isPremium && !isPro;
-
-          return (
-            <div
-              key={template.id}
-              ref={(el) => { cardRefs.current[index] = el; }}
-              data-index={index}
-              style={{
-                flexShrink: 0,
-                width: '90vw',
-                maxWidth: 380,
-                scrollSnapAlign: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-              }}
-            >
-              {/* Phone frame */}
-              <div
-                onClick={() => {
-                  if (!isLocked) {
-                    onSelect(template.id, template.colorSchemes[0]?.id || '');
-                  }
-                }}
-                style={{
-                  width: '100%',
-                  maxHeight: 540,
-                  borderRadius: 28,
-                  border: `3px solid ${isSelected ? ACCENT : border}`,
-                  background: isDark ? '#111' : '#fff',
-                  overflow: 'hidden',
-                  boxShadow: isSelected
-                    ? `0 8px 32px ${ACCENT}30`
-                    : '0 4px 24px rgba(0,0,0,0.08)',
-                  cursor: isLocked ? 'not-allowed' : 'pointer',
-                  opacity: isLocked ? 0.65 : 1,
-                  position: 'relative',
-                  transition: 'border-color 0.25s, box-shadow 0.25s',
-                }}
-              >
-                {/* Scaled preview container */}
-                <div style={{
-                  width: '181.8%', // ~100/0.55 to reverse the scale
-                  transformOrigin: 'top left',
-                  transform: 'scale(0.55)',
-                  pointerEvents: 'none',
-                }}>
-                  <FullCardPreview tmpl={template} />
-                </div>
-
-                {/* Lock overlay for premium templates */}
-                {isLocked && (
-                  <div style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'rgba(0,0,0,0.35)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    borderRadius: 25,
-                  }}>
-                    <div style={{
-                      padding: '8px 18px',
-                      borderRadius: 12,
-                      background: 'rgba(0,0,0,0.6)',
-                      backdropFilter: 'blur(6px)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 6,
-                    }}>
-                      <IoLockClosed size={16} color="#fff" />
-                      <span style={{ fontSize: 14, color: '#fff', fontWeight: 700 }}>Pro</span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Selection checkmark */}
-                {isSelected && (
-                  <div style={{
-                    position: 'absolute', top: 12, right: 12,
-                    width: 30, height: 30, borderRadius: 15, background: ACCENT,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                  }}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  </div>
-                )}
-              </div>
-
-              {/* Template name + badge below card */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 12 }}>
-                <span style={{
-                  fontSize: 15,
-                  fontWeight: isSelected ? 700 : 500,
-                  color: isSelected ? textPrimary : textSecondary,
-                  textAlign: 'center',
-                }}>
-                  {template.name}
-                </span>
-                {isLocked && (
-                  <div style={{
-                    padding: '2px 8px', borderRadius: 6,
-                    background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)',
-                    display: 'flex', alignItems: 'center', gap: 3,
-                  }}>
-                    <IoLockClosed size={10} color={textSecondary} />
-                    <span style={{ fontSize: 10, color: textSecondary, fontWeight: 600 }}>Pro</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Dot indicators */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        gap: 6,
-        marginTop: 16,
-        flexWrap: 'wrap',
-        padding: '0 20px',
-      }}>
-        {sorted.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => scrollToIndex(index)}
-            style={{
-              width: currentIndex === index ? 20 : 8,
-              height: 8,
-              borderRadius: 4,
-              background: currentIndex === index ? ACCENT : (isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.12)'),
-              border: 'none',
-              padding: 0,
-              cursor: 'pointer',
-              transition: 'width 0.25s, background 0.25s',
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Color scheme swatches for the currently visible template */}
-      {visibleTemplate && visibleSchemes.length > 1 && (
-        <div style={{ marginTop: 16, padding: '0 20px' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: textSecondary, marginBottom: 8, textAlign: 'center' }}>
-            Color schemes
-          </div>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-            {visibleSchemes.map((scheme) => {
-              const isSchemeSelected = selectedTemplateId === visibleTemplate.id && selectedColorSchemeId === scheme.id;
-              const schemeLocked = !scheme.isFree && !isPro;
-              return (
-                <button
-                  key={scheme.id}
-                  onClick={() => !schemeLocked && onSelect(visibleTemplate.id, scheme.id)}
-                  title={scheme.name}
-                  style={{
-                    width: 36, height: 36, borderRadius: 12, padding: 0,
-                    border: `2.5px solid ${isSchemeSelected ? ACCENT : 'transparent'}`,
-                    background: `linear-gradient(135deg, ${scheme.primary}, ${scheme.secondary || scheme.primary})`,
-                    cursor: schemeLocked ? 'not-allowed' : 'pointer',
-                    opacity: schemeLocked ? 0.35 : 1,
-                    transition: 'border-color 0.2s, transform 0.15s',
-                    transform: isSchemeSelected ? 'scale(1.15)' : 'scale(1)',
-                    boxShadow: isSchemeSelected ? `0 2px 8px ${ACCENT}40` : '0 1px 4px rgba(0,0,0,0.1)',
-                    position: 'relative',
-                  }}
-                >
-                  {schemeLocked && (
-                    <div style={{
-                      position: 'absolute', inset: 0, borderRadius: 10,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      background: 'rgba(0,0,0,0.3)',
-                    }}>
-                      <IoLockClosed size={10} color="#fff" />
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Hide scrollbar with injected style */}
-      <style>{`
-        .template-gallery-scroll::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
+  const visible = templates[index];
+  const schemeFor = (template: typeof TEMPLATES[number]) => template.id === selectedTemplateId
+    ? template.colorSchemes.find(scheme => scheme.id === selectedColorSchemeId) || template.colorSchemes[0]
+    : template.colorSchemes.find(scheme => isPro || scheme.isFree) || template.colorSchemes[0];
+  const scheme = visible && schemeFor(visible);
+  const available = !!visible && visible.id === selectedTemplateId && canUseTemplate(visible, selectedColorSchemeId, isPro);
+  useEffect(() => { onAvailabilityChange?.(available); }, [available, onAvailabilityChange]);
+  const chooseIndex = (next: number) => {
+    const template = templates[next];
+    if (!template) return;
+    setIndex(next);
+    const nextScheme = schemeFor(template);
+    if (template.id !== selectedTemplateId && canUseTemplate(template, nextScheme?.id, isPro)) onSelect(template.id, nextScheme.id);
+  };
+  const move = (next: number) => {
+    chooseIndex(next);
+    scroll.current?.scrollTo({ left: cards.current[next]?.offsetLeft || 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  };
+  return <div className={`template-gallery ${isDark ? 'dark' : ''}`}>
+    <div className="gallery-heading"><div><h1>{copy('Choose your look')}</h1><p>{copy('Swipe through real phone previews.')}</p></div><button type="button" onClick={onBack}>{copy('Card type')}</button></div>
+    <div className="gallery-navigation"><button type="button" aria-label={copy('Previous template')} disabled={index === 0} onClick={() => move(index - 1)}>‹</button><div aria-live="polite"><strong>{visible?.name}</strong><span>{index + 1} / {templates.length} · {visible?.isPremium ? 'Pro' : copy('Free')}</span></div><button type="button" aria-label={copy('Next template')} disabled={index === templates.length - 1} onClick={() => move(index + 1)}>›</button></div>
+    <div className="template-gallery-scroll" ref={scroll} onScroll={() => {
+      if (!initialized.current || !scroll.current) return;
+      const left = scroll.current.scrollLeft;
+      const nearest = cards.current.reduce((best, card, i) => card && Math.abs(card.offsetLeft - left) < Math.abs((cards.current[best]?.offsetLeft || 0) - left) ? i : best, 0);
+      if (nearest !== index) chooseIndex(nearest);
+    }}>
+      {templates.map((template, i) => <div className="gallery-slide" key={template.id} ref={element => { cards.current[i] = element; }}><div className="gallery-phone"><TemplateExamplePreview template={template} schemeId={schemeFor(template)?.id}/></div></div>)}
     </div>
-  );
+    <div className="gallery-dots" aria-label={copy('Browse templates')}>{templates.map((template, i) => <button type="button" key={template.id} aria-label={copy('Preview {{name}}').replace('{{name}}',template.name)} aria-pressed={index === i} onClick={() => move(i)}><span/></button>)}</div>
+    {visible && <div className="schemes"><p>{copy('Color')} · <strong>{scheme?.name}</strong>{(visible.isPremium || !scheme?.isFree) && ' · Pro'}</p><div>{visible.colorSchemes.map(color => {
+      const locked = !canUseTemplate(visible, color.id, isPro);
+      return <button type="button" key={color.id} title={color.name} aria-label={`${color.name}${locked ? ' · Pro' : ''}`} aria-pressed={scheme?.id === color.id} aria-disabled={locked} onClick={() => { if (!locked) onSelect(visible.id, color.id); }} style={{ background: `linear-gradient(135deg,${color.primary},${color.secondary || color.primary})` }}>{locked && <span aria-hidden="true">Pro</span>}</button>;
+    })}</div></div>}
+    <p className="example-note">{copy(available ? 'Example content only. Your details will appear on your card.' : 'This design or color requires Pro. Choose a Free option to continue.')}</p>
+    <style jsx>{`.template-gallery{--text:#26212d;--muted:#655d6c;--panel:#fff;--line:#d8d1df;color:var(--text);min-width:0}.template-gallery.dark{--text:#f8f5fc;--muted:#bdb3c9;--panel:#211e29;--line:#504557}.gallery-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.gallery-heading h1{font-size:25px;letter-spacing:-.025em;margin:0 0 6px}.gallery-heading p{font-size:13px;color:var(--muted);margin:0}.template-gallery button{font:inherit;cursor:pointer;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:10px;min-height:44px;min-width:44px}.gallery-heading button{padding:8px 12px;font-size:13px}.gallery-navigation{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.gallery-navigation button{font-size:28px}.gallery-navigation button:disabled{opacity:.35;cursor:default}.gallery-navigation>div{display:flex;flex-direction:column;text-align:center;gap:4px}.gallery-navigation strong{font-size:15px}.gallery-navigation span{font-size:12px;color:var(--muted)}.template-gallery-scroll{position:relative;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;gap:16px}.template-gallery-scroll::-webkit-scrollbar{display:none}.gallery-slide{flex:0 0 100%;min-width:0;scroll-snap-align:center;display:flex;justify-content:center}.gallery-phone{position:relative;width:100%;max-width:min(330px,calc(clamp(260px,100dvh - 360px,520px)*9/16 + 18px))}.gallery-dots{display:flex;justify-content:center;flex-wrap:wrap;margin-top:8px;gap:0}.gallery-dots button{min-width:22px;min-height:28px;border:0;background:transparent;padding:7px}.gallery-dots span{display:block;width:7px;height:7px;background:var(--line);border-radius:5px}.gallery-dots button[aria-pressed=true] span{background:#8a05be}.schemes{text-align:center;margin-top:8px}.schemes p{font-size:12px;color:var(--muted);margin:0 0 10px}.schemes>div{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}.schemes button{position:relative;width:44px;height:44px;border:3px solid transparent;box-shadow:0 0 0 1px var(--line)}.schemes button[aria-pressed=true]{box-shadow:0 0 0 2px #9b50bd;border-color:var(--panel)}.schemes button[aria-disabled=true]{cursor:not-allowed}.schemes button span{position:absolute;bottom:1px;right:1px;border-radius:4px;background:#211e29;color:#fff;padding:2px 3px;font-size:9px}.example-note{text-align:center;font-size:12px;line-height:1.5;color:var(--muted);margin:14px 0 0}`}</style>
+  </div>;
 }

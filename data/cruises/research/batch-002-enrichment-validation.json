@@ -1,0 +1,98 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-09-21",
+  "scope": "Offline contract, preservation, provenance linkage and real display-function checks. Live collision/import/publication not executed here.",
+  "checks_passed": 15,
+  "worldwideComplete": false,
+  "summary": {
+    "before": {
+      "ships": 59,
+      "verified_facts": 127,
+      "conflicting_facts": 0,
+      "unknown_facts": 994,
+      "venues": 88,
+      "programs": 3,
+      "cabin_categories": 24,
+      "photos": 0
+    },
+    "after": {
+      "ships": 59,
+      "verified_facts": 191,
+      "conflicting_facts": 3,
+      "unknown_facts": 927,
+      "venues": 318,
+      "programs": 34,
+      "cabin_categories": 24,
+      "photos": 0
+    },
+    "enriched_ships": 59,
+    "unique_enrichment_primary_source_urls": 40
+  },
+  "checks": [
+    {
+      "name": "Original frozen batch002, batch001 and registry are unchanged",
+      "status": "PASS"
+    },
+    {
+      "name": "Enriched59 retain exact identities and replay every sourced change",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject changed ship identity",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject silent publication",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject removal of a prior venue",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject an unsourced invented venue",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject missing source provenance",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject third-party source masquerading as operator",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject guessed date on known-year brochure",
+      "status": "PASS"
+    },
+    {
+      "name": "Capacity basis is explicit; ranges, staff and guest estimates remain observations",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual public renderer omits three conflicting facts",
+      "status": "PASS"
+    },
+    {
+      "name": "Builder construction year remains separate from delayed maiden voyage",
+      "status": "PASS"
+    },
+    {
+      "name": "Half-deck convention and approximate GT retain visible qualifications",
+      "status": "PASS"
+    },
+    {
+      "name": "Do not infer total restaurants, shops or pools from partial venue lists",
+      "status": "PASS"
+    },
+    {
+      "name": "Music programs respect ship-specific columns and retain variable schedules",
+      "status": "PASS"
+    }
+  ],
+  "files": {
+    "data/cruises/staged/verified-operating-batch-002-enriched.json": "3fd875b18bd5a0234502dae66256fa9081b3195e09431b962c67bd4e87d73dea",
+    "data/cruises/research/batch-002-enrichment-evidence.json": "d91e58af8c684660464056f8e565b140e6a75137766a230549362dad815c3b30",
+    "data/cruises/research/batch-002-enrichment-validate.cjs": "6f42b10eac351103977ac2f5f8db94fc3fe3f3d11d84dd36a72498f68c4aaf46"
+  }
+}

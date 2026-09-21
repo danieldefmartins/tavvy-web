@@ -1,10 +1,11 @@
 /**
- * SignalCard — search/result card that surfaces a place's top signals (2 Good,
- * 1 Vibe, 1 Heads Up) in the agreed design. Used on the map results + search.
+ * Search results use the same main experience and recent reports as place details.
  * Dark/light aware.
  */
 import React from 'react';
 import { useThemeContext } from '../contexts/ThemeContext';
+import PlaceReviewGrid from './PlaceReviewGrid';
+import { buildPlaceReviewSummary, PlaceReviewSummary, ReviewSummaryStatus } from '../lib/placeReviewSummary';
 
 type Cat = 'good' | 'vibe' | 'headsup';
 // tint/border work on both themes; accent is the count colour (brightened in dark)
@@ -18,12 +19,15 @@ export type CardSignal = { label: string; emoji?: string; category: Cat; count: 
 export type SignalCardPlace = {
   id: string; name: string; category?: string; city?: string;
   distance?: number; cover_image_url?: string; photo?: string; topSignals?: CardSignal[];
+  tavvy_category?: string; subcategory?: string; reviewSummary?: PlaceReviewSummary; evidenceStatus?: ReviewSummaryStatus;
 };
 
 export default function SignalCard({ place, onClick }: { place: SignalCardPlace; onClick?: () => void }) {
   const { isDark } = useThemeContext();
   const photo = place.cover_image_url || place.photo || '';
-  const sigs = (place.topSignals || []).slice(0, 4);
+  const summary = place.reviewSummary && (!place.evidenceStatus || place.reviewSummary.status === place.evidenceStatus)
+    ? place.reviewSummary
+    : buildPlaceReviewSummary(null, { category: place.tavvy_category || place.category, subcategory: place.subcategory }, place.evidenceStatus || 'unavailable');
   const dist = place.distance != null ? `${place.distance.toFixed(1)} mi` : '';
   const meta = [place.category, place.city].filter(Boolean).join(' · ');
 
@@ -40,22 +44,7 @@ export default function SignalCard({ place, onClick }: { place: SignalCardPlace;
       <div className="body">
         <div className="top"><span className="name">{place.name}</span>{dist && <span className="dist">{dist}</span>}</div>
         {meta && <p className="meta">{meta}</p>}
-        {sigs.length > 0 ? (
-          <div className="chips">
-            {sigs.map((s, i) => {
-              const c = CAT[s.category];
-              return (
-                <span className="chip" key={i} style={{ background: c.tint, borderColor: c.border }}>
-                  {s.emoji && <span className="chip-e">{s.emoji}</span>}
-                  <span className="chip-l">{s.label}</span>
-                  <span className="chip-n" style={{ color: isDark ? c.accentDark : c.accentLight }}>{s.count}</span>
-                </span>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="empty">Be the first to review this place</p>
-        )}
+        <PlaceReviewGrid summary={summary} />
       </div>
       <style jsx>{`
         .card { display: block; width: 100%; text-align: left; background: ${t.cardBg}; border: 1px solid ${t.border};

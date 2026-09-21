@@ -11,7 +11,8 @@
     "build": "next build",
     "start": "next start -p ${PORT:-3000}",
     "lint": "next lint",
-    "postbuild": "next-sitemap"
+    "postbuild": "next-sitemap",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
@@ -38,6 +39,7 @@
     "react-icons": "^5.5.0",
     "react-leaflet": "^4.2.1",
     "satori": "^0.19.1",
+    "sharp": "0.34.5",
     "typesense": "^2.1.0",
     "zustand": "^5.0.10"
   },

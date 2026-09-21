@@ -1,0 +1,3285 @@
+{
+  "date": "2026-09-21",
+  "platform": "web",
+  "scope": "Application source, configuration, tests, migrations and assets from the reviewed snapshot; historical documentation and marketing captures preserved separately. Migration files are source history, not replay instructions.",
+  "status": "Reviewed web release; see PROJECT_STATUS for exact deployment",
+  "snapshot_files": 674,
+  "copied_files": 655,
+  "files": [
+    {
+      "path": ".buildtrigger",
+      "sha256": "439a67cbf22a95a1086f867fad1db416309921543418bb43b6f4d30383cc8c30",
+      "bytes": 19
+    },
+    {
+      "path": ".dockerignore",
+      "sha256": "ded9dbc1a1a36160105505915c099cc978259e25eb0305071025b7a801155b88",
+      "bytes": 399
+    },
+    {
+      "path": ".github/workflows/docker-image.yml",
+      "sha256": "bb082d7ffa47049096526367c6ec845f4b4ceba144f5bd23a5db96c978873dba",
+      "bytes": 767
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "1652fca7c879d400283ef5b8d88dd7b2cc9ec14b27b5a64ab82856d84f0c3cbb",
+      "bytes": 526
+    },
+    {
+      "path": ".node-version",
+      "sha256": "5378796307535df3ec8d8b15a2e2dc5641419c3d3060cfe32238c0fa973f7aa3",
+      "bytes": 3
+    },
+    {
+      "path": ".nvmrc",
+      "sha256": "5378796307535df3ec8d8b15a2e2dc5641419c3d3060cfe32238c0fa973f7aa3",
+      "bytes": 3
+    },
+    {
+      "path": "Dockerfile",
+      "sha256": "341b2a26339ccd61216a304eb2e0b18e4ac1596d78d3f53eda534471f5baa25e",
+      "bytes": 1489
+    },
+    {
+      "path": "components/AddReviewSheet.tsx",
+      "sha256": "cc82880201f808ca3ce9717dde35b83d9c4cc39c2d58fe193aad6be7c9a66ea7",
+      "bytes": 21689
+    },
+    {
+      "path": "components/AdvancedSignalFilter.tsx",
+      "sha256": "1274c632c70ce4abc6157b01c2d4ec14af7f1d2947ae0ca3e36e63507b547c6a",
+      "bytes": 1871
+    },
+    {
+      "path": "components/AppLayout.tsx",
+      "sha256": "e37625679968103a8e8792f4c67c3fa5ec80ef2a75b40c7f9b2783f6e812f756",
+      "bytes": 7078
+    },
+    {
+      "path": "components/AppearanceSelector.tsx",
+      "sha256": "9c8e1959507ea394dcb1055a7c068579dbb44fb1dfe085c5e08acc69d227e1a9",
+      "bytes": 1946
+    },
+    {
+      "path": "components/BlockedAuthors.tsx",
+      "sha256": "cd7da62dae47e393983446f5768d46a406be2f0a51a1a1cf2f7cd45f2ef2f00d",
+      "bytes": 3980
+    },
+    {
+      "path": "components/CivicCardSection.tsx",
+      "sha256": "4e94933a6754e87101e813eb8484fbaca3c449a7cb8f194f53b0b0d0dd51dd34",
+      "bytes": 48411
+    },
+    {
+      "path": "components/ContentSafetyActions.tsx",
+      "sha256": "0afa70ee5527f69f7db8fcb018ef15435dedce6f62bde451028863a5e67a6ca7",
+      "bytes": 4344
+    },
+    {
+      "path": "components/DeliveryLinks.tsx",
+      "sha256": "ade539006706865fd15be27c6163f9588323578d3b7a781d5b2fb0211e125252",
+      "bytes": 4110
+    },
+    {
+      "path": "components/ECardInbox.tsx",
+      "sha256": "9e8a2da9bffab0f4d1894e7e0c8447e266e29b55dfa9a1d821445fb99b7670b2",
+      "bytes": 21351
+    },
+    {
+      "path": "components/ECardMessageButton.tsx",
+      "sha256": "d527a4b3fdb8d1892dd2defd4b5a333f032545eb0543387c2b40e1ce25a8473f",
+      "bytes": 13439
+    },
+    {
+      "path": "components/ExperiencePathEditor.tsx",
+      "sha256": "f102ba667e2a4a1700b3df1b97ec76bc272e39087277a4c82e9871877e74bc47",
+      "bytes": 6742
+    },
+    {
+      "path": "components/GeoAnalyticsDashboard.tsx",
+      "sha256": "d0449c54bd0c42d738336cf7725a5f5755cdf6e5a324a0846cd9466e0f3b3146",
+      "bytes": 16845
+    },
+    {
+      "path": "components/LanguageSelector.tsx",
+      "sha256": "5137d420d9a9c5d49e89a6a8eef562480636f58cf1c6625cab3fda033f8cb410",
+      "bytes": 4661
+    },
+    {
+      "path": "components/LocaleLink.tsx",
+      "sha256": "9d5609085c71dab912236771079c702bed0b446cb22dbf61af6fc911e30ddf5f",
+      "bytes": 802
+    },
+    {
+      "path": "components/MenuAppearanceSettings.tsx",
+      "sha256": "caecf948901d3655775c03126d88942534878791b787c5cce2502f647bc4d378",
+      "bytes": 2916
+    },
+    {
+      "path": "components/MenuInsights.tsx",
+      "sha256": "16842f2645553d8fd52a09984dc66a540d0d2002d11a57f68b0ff76a108553f9",
+      "bytes": 1064
+    },
+    {
+      "path": "components/MenuLanguageToggle.tsx",
+      "sha256": "96028a1514d10bece6a7ed7a60ca393ec4f816c2e417e8bfbfa6453b97efff12",
+      "bytes": 2607
+    },
+    {
+      "path": "components/OnTheGoMap.tsx",
+      "sha256": "3ba325eb7ea752142953cfa48476bec0d3ba4923e8a3f0670f93e02f42c03ea3",
+      "bytes": 4124
+    },
+    {
+      "path": "components/OnTheGoOwner.tsx",
+      "sha256": "26e5d5fc30da37912b42f5ad9bf27219cd5ea2410a7e9f7df5ffe85ff9505dd8",
+      "bytes": 5705
+    },
+    {
+      "path": "components/OnTheGoProfileEditor.tsx",
+      "sha256": "ec2ea81ac024dee3e22e4853df03460a4761f62741301549fb912f648c912cec",
+      "bytes": 2824
+    },
+    {
+      "path": "components/OnTheGoSchedule.tsx",
+      "sha256": "5e2f684244d5f46428c897af1f44a85ee49c88af3f6cd6697d9efe7bdfccd8ae",
+      "bytes": 2516
+    },
+    {
+      "path": "components/OnTheGoStatus.tsx",
+      "sha256": "4f56afbea08bf09c15cfca0700324c662f54b79055da72ff9339f4489e7606b0",
+      "bytes": 4427
+    },
+    {
+      "path": "components/Onboarding.tsx",
+      "sha256": "3ad495c76f4a359983deeedfda29898fd9df9e93d0091d7af9cf7450b524e24f",
+      "bytes": 10586
+    },
+    {
+      "path": "components/PlaceCard.tsx",
+      "sha256": "b1863fac925aeae37ad8d0f0c244ea789b4b154c1c936291fd92292f63a45f6e",
+      "bytes": 4168
+    },
+    {
+      "path": "components/PlaceReviewGrid.tsx",
+      "sha256": "e23cef2168002cad90cd8104cc06b8ae98922994dc1c7033777597732278ebcf",
+      "bytes": 1737
+    },
+    {
+      "path": "components/PlaceShareHead.tsx",
+      "sha256": "adc2cec0c18f0fc4e67e98eebcb4cec2f27c258a44eca4a270f6609bf3caca77",
+      "bytes": 1786
+    },
+    {
+      "path": "components/PreviewPlace.tsx",
+      "sha256": "cca6f9ef2601bdc600b2caf5f50ac4ae972f251f1d7775fb00d69a6d34abe7bb",
+      "bytes": 44557
+    },
+    {
+      "path": "components/ProtectedRoute.tsx",
+      "sha256": "88d5f072bdb2a2efde87ed7c6daef3959b9bfdfef321347340c2f5c5bc0af04e",
+      "bytes": 4919
+    },
+    {
+      "path": "components/RestaurantCard.tsx",
+      "sha256": "a69a90305d2473abbbbc18b2546e8ca5e54b7f1bf0271fecaed118864075856b",
+      "bytes": 1892
+    },
+    {
+      "path": "components/RestaurantCreateForm.tsx",
+      "sha256": "0380bd939230deffa3eba6e0a693e0e944c60767a14e7fb30ba34802c96029c8",
+      "bytes": 9080
+    },
+    {
+      "path": "components/RestaurantLocationMap.tsx",
+      "sha256": "35904032ea87d85748e27280b935b9e1c2c5ebc245e4ca795623c67cd86ae5d5",
+      "bytes": 1473
+    },
+    {
+      "path": "components/RestaurantOwnerLayout.tsx",
+      "sha256": "e6f101074de783a3daf30a8cd209dbe016de4b393a132883dcf52e92bd510831",
+      "bytes": 2579
+    },
+    {
+      "path": "components/RestaurantProfileEditor.tsx",
+      "sha256": "b63b6912ea6d279e06bacdcae7f59427f1240c6d8414dad4e47759b0147ca039",
+      "bytes": 4758
+    },
+    {
+      "path": "components/ShareButton.tsx",
+      "sha256": "d923985774497e389d2623dcd00ad4e7f46b1a266183fff5a25c3130cd103ea0",
+      "bytes": 895
+    },
+    {
+      "path": "components/SignalBar.tsx",
+      "sha256": "5c71b3a60acce7a3af30969eba5b461ab0dce7a7da4c2f1a7b7f78a4f57caaa3",
+      "bytes": 13808
+    },
+    {
+      "path": "components/SignalCard.tsx",
+      "sha256": "ec05a7f718a83895836f9bf748214019d3b9a120c42dbf9ebdafabfc0a3cdde9",
+      "bytes": 4819
+    },
+    {
+      "path": "components/SignalMatrix.tsx",
+      "sha256": "4869cb136092d144d0739c0bec1378db9916d207b63c5f07560ad467fd0586e3",
+      "bytes": 9987
+    },
+    {
+      "path": "components/SignalPill.tsx",
+      "sha256": "a3219a4d3e2d297092523102e567e4900b1e48f2359c3d219931b64317c680ff",
+      "bytes": 11980
+    },
+    {
+      "path": "components/StoriesRow.tsx",
+      "sha256": "e6216b2f699d819b5bd76fb20853a4100f835b2cded5178be425a949cc29c98a",
+      "bytes": 18913
+    },
+    {
+      "path": "components/TabBar.tsx",
+      "sha256": "92257e65ff8df809be6a3a543cc105b89f87882033a9c4e451a6965f2da1dadf",
+      "bytes": 1791
+    },
+    {
+      "path": "components/ToolHeader.tsx",
+      "sha256": "0feae94004cc381535d6de254759057c4349609ed16b029be61b204234a6341b",
+      "bytes": 2718
+    },
+    {
+      "path": "components/TrendingRidesCarousel.tsx",
+      "sha256": "b64a56b56b526f4d7ce02dd9156afd4891bc8a74e62a494d0331370f48d03e8c",
+      "bytes": 1913
+    },
+    {
+      "path": "components/TrendingRidesSection.tsx",
+      "sha256": "81a44cb2a852717ec86dad5fe9e3ab7f4ae1a08584d71838232214ca3f3b9527",
+      "bytes": 2166
+    },
+    {
+      "path": "components/UnifiedHeader.tsx",
+      "sha256": "e49210e8a4ebf4031520e9aa6bd43b9c8174d41e35e3fa54c1e85c8f592d26de",
+      "bytes": 4937
+    },
+    {
+      "path": "components/UniverseMap.tsx",
+      "sha256": "3975a71e031eef2ab5ea961520232680cc03259c736683399d4ebdadb85d12c0",
+      "bytes": 1490
+    },
+    {
+      "path": "components/ZipCodePrompt.tsx",
+      "sha256": "d4c0feed74c602a7fa11377095d1c40fff2bfdf81afde42a9b92a5b69760a184",
+      "bytes": 6878
+    },
+    {
+      "path": "components/atlas/ArticleCard.tsx",
+      "sha256": "9cad3bb07dd270345ed2b5cb0955887900a8660c869a0339daf620f2c1d13b12",
+      "bytes": 10257
+    },
+    {
+      "path": "components/atlas/AudioPlayer.tsx",
+      "sha256": "834c9df913737716662266b0ff738966ad9fb3bd43a243899da8d5dece35e1fa",
+      "bytes": 8545
+    },
+    {
+      "path": "components/atlas/CategoryCard.tsx",
+      "sha256": "e5848c7007dfdb398f1362b6ca377410333de0f8cf3dcc2842f3fa954d92f576",
+      "bytes": 5356
+    },
+    {
+      "path": "components/atlas/ContentBlockRenderer.tsx",
+      "sha256": "447066e0b1260c897e73f2851c5b71be5f5bcbe6832129e274958e3ee7f412a6",
+      "bytes": 23050
+    },
+    {
+      "path": "components/atlas/ECardAddressAutocomplete.tsx",
+      "sha256": "ed893fa9c965ae9edff6d4bb79e3821bd4de1a8bacdad5faaa6a19a0fe5718f3",
+      "bytes": 13254
+    },
+    {
+      "path": "components/atlas/UniverseCard.tsx",
+      "sha256": "88ad164d149ac83c4458dc88f5b6c0cec189195aa52dd085853bc3911e45bd91",
+      "bytes": 7771
+    },
+    {
+      "path": "components/atlas/index.ts",
+      "sha256": "de618cae5340eb4e80d43cb2f760097e69730f4079c4d99f0592ed3838c84d4a",
+      "bytes": 444
+    },
+    {
+      "path": "components/cruises/CruiseReviewPanel.tsx",
+      "sha256": "1516b22c88c74aa965b1b6734cd7b20bef8a8b1ed001226ca047fe80fddcd25c",
+      "bytes": 9878
+    },
+    {
+      "path": "components/cruises/CruiseShipView.tsx",
+      "sha256": "e68d651b219bb104be9179901087a5f6d55001451384b298a7b1d430e0727da0",
+      "bytes": 10557
+    },
+    {
+      "path": "components/cruises/CruiseUniverseEntry.tsx",
+      "sha256": "ca2b40414307c68bc83b9599840d21a4900af39d8b9de19822d12f081e98aa2b",
+      "bytes": 1583
+    },
+    {
+      "path": "components/demo/DemoBanner.tsx",
+      "sha256": "fe8a8ab2a0521952abb74e2c95471b1621a54882b198f91ff93b5958595be813",
+      "bytes": 820
+    },
+    {
+      "path": "components/demo/DemoContact.tsx",
+      "sha256": "50114d5c0362c81057f5dd24e58a12ff052108aa130866421a471eb3a9119f38",
+      "bytes": 4269
+    },
+    {
+      "path": "components/demo/DemoDialog.tsx",
+      "sha256": "376c75e3183971c21a2628bcacb53328c3c5af0861a0e44e9570a4ecdbbf5719",
+      "bytes": 1414
+    },
+    {
+      "path": "components/demo/DemoQR.tsx",
+      "sha256": "f3247aca54a234ac0e31c00219f6ffe5cd83a9f80455f959beebdb7f139e597a",
+      "bytes": 1511
+    },
+    {
+      "path": "components/demo/DemoReview.tsx",
+      "sha256": "111cee69a11451a98e883031f2279fa21470e1e2a0b398063cc6d14eceb2e1a5",
+      "bytes": 1719
+    },
+    {
+      "path": "components/ecard/CardPreview.tsx",
+      "sha256": "89324d8f10c83d4977fd2308ef655e918ce20c0168aa701756fc8d099480421f",
+      "bytes": 6058
+    },
+    {
+      "path": "components/ecard/ECardIframePreview.tsx",
+      "sha256": "00e2df44463c545e679931ebf21497a4dd1025a5583ddd5e06a2437be0c45a26",
+      "bytes": 1698
+    },
+    {
+      "path": "components/ecard/PublicCardUnavailable.tsx",
+      "sha256": "b466dadb5da60829f1de77fd7916e3341a91f184d441dd40fd8f897e7c105e50",
+      "bytes": 1443
+    },
+    {
+      "path": "components/ecard/PublicCardView.tsx",
+      "sha256": "257bade50ebfd1d404eafa8cf2f6cb532ebda57bb1a9cfc1f74bc8895c60d45e",
+      "bytes": 290609
+    },
+    {
+      "path": "components/ecard/StyledQRCode.tsx",
+      "sha256": "c16470f577ba00ce925421c86161ec2efaab77663b88d2077f9b88cc18dbf7d2",
+      "bytes": 6420
+    },
+    {
+      "path": "components/ecard/WalletButtons.tsx",
+      "sha256": "baf5389d7baaba177c31dc249ab86b78f25a185d1adcac1b54f20d4a60e49363",
+      "bytes": 6553
+    },
+    {
+      "path": "components/ecard/analytics/LinkPerformance.tsx",
+      "sha256": "3a6195376b64f91f0d0c0d184667051778557634fe98d0603477f8c46ba69137",
+      "bytes": 1413
+    },
+    {
+      "path": "components/ecard/analytics/ProBanner.tsx",
+      "sha256": "b77ff3364550f302e7eb13b2e23f0339bb6e5269c8d72326e5bef49cd30409c2",
+      "bytes": 1227
+    },
+    {
+      "path": "components/ecard/analytics/StatsOverview.tsx",
+      "sha256": "71f0f23474a1b48400a703aa3ad73c8d76a90c10cb92394e31233c5b9ddd94d0",
+      "bytes": 1661
+    },
+    {
+      "path": "components/ecard/editor/CardStudioLayout.tsx",
+      "sha256": "c9820d0328e19c64e9ec25d3a06b031deacb71240b2b801bcd9ac3de956a4c52",
+      "bytes": 18408
+    },
+    {
+      "path": "components/ecard/editor/EditorLayout.tsx",
+      "sha256": "688921ffeecd31172f249ac71dee587a26c5c58cb7a68c45f00d37c2f83c1538",
+      "bytes": 21904
+    },
+    {
+      "path": "components/ecard/editor/LivePreviewCard.tsx",
+      "sha256": "2c8a47800ad11ae2e9ba7af154131d7fc823791d8e207ee8aa05f4e1df691623",
+      "bytes": 9306
+    },
+    {
+      "path": "components/ecard/editor/SectionNavigator.tsx",
+      "sha256": "46c90caf7ad4a5ad4007ec6b6ccde0de1f1ac705250ce607b7db95d061352061",
+      "bytes": 2633
+    },
+    {
+      "path": "components/ecard/editor/sections/AdvancedSection.tsx",
+      "sha256": "c83baea2aa623f7a4b55be8a1ce5aa01767ec3bce1eaf6787d0cc119236173be",
+      "bytes": 5396
+    },
+    {
+      "path": "components/ecard/editor/sections/CivicSection.tsx",
+      "sha256": "4c0b8a6feec9dead2bea672162d3dc0d08fbb5aed1c0f4c566b408bcebad5f99",
+      "bytes": 1930
+    },
+    {
+      "path": "components/ecard/editor/sections/ContactSection.tsx",
+      "sha256": "c7c6a220b67cdc3c48b524db3de20beffbf8c28651db6f2aa81d2bbce0a8fc05",
+      "bytes": 5820
+    },
+    {
+      "path": "components/ecard/editor/sections/ImagesLayoutSection.tsx",
+      "sha256": "f46b81e730d8911eebe5d0a657af97b56922bdb826cdf04d61311b5560a88be3",
+      "bytes": 4103
+    },
+    {
+      "path": "components/ecard/editor/sections/LinksSection.tsx",
+      "sha256": "c8c9a3503eee6595fcd81c690dcc8f29646911fd306b859f4755b3db9c1d5bca",
+      "bytes": 6234
+    },
+    {
+      "path": "components/ecard/editor/sections/MediaSection.tsx",
+      "sha256": "fe861287d6f65d2e1c565c142d6c2ff1957b6a1bed039dfe6bb9e0c1d49a2ca1",
+      "bytes": 20039
+    },
+    {
+      "path": "components/ecard/editor/sections/MobileBusinessSection.tsx",
+      "sha256": "aa967a2c99370f1f40d337252e2f0c1495853f23c4d7724fb9d397388b95f47b",
+      "bytes": 1416
+    },
+    {
+      "path": "components/ecard/editor/sections/ProfileSection.tsx",
+      "sha256": "4177c9bc46ab6761788b0b130d032611708996f7dd49fb741b1c453d99fd1e1a",
+      "bytes": 3161
+    },
+    {
+      "path": "components/ecard/editor/sections/SocialSection.tsx",
+      "sha256": "23c8d975674ca15beef6bfa3ca764b17334373d4f301572cd449bcad0238c258",
+      "bytes": 8065
+    },
+    {
+      "path": "components/ecard/editor/sections/StyleSection.tsx",
+      "sha256": "bb8dd0f03574b8d2ca887027ca5b88301fe58b6fe23390fae3d72fef164221a3",
+      "bytes": 22857
+    },
+    {
+      "path": "components/ecard/editor/sections/TemplateColorSection.tsx",
+      "sha256": "78affdfd6999b147a5525de4b73f7f7494e7895794b2dc1f6eec71ee70f34fcc",
+      "bytes": 5020
+    },
+    {
+      "path": "components/ecard/editor/sections/TypographySection.tsx",
+      "sha256": "5ae36905bed066c25c879af58df17bd1ee687250624d6ffc43f3dac56bb64127",
+      "bytes": 19803
+    },
+    {
+      "path": "components/ecard/editor/shared/ColorSchemePicker.tsx",
+      "sha256": "f8958a8650038ff44d0b0e06eb0882dab168e71d4939b3367d541f16991ab974",
+      "bytes": 2639
+    },
+    {
+      "path": "components/ecard/editor/shared/EditorField.tsx",
+      "sha256": "4f0bac83644515fdefd18cdd5ed27588a8865896a834cccb80ce76c6bf9cf595",
+      "bytes": 2071
+    },
+    {
+      "path": "components/ecard/editor/shared/EditorSection.tsx",
+      "sha256": "9054259c81ccd5657210dc3e2507a204d1b31fa42d2ca48fbb7bc203f923a921",
+      "bytes": 2251
+    },
+    {
+      "path": "components/ecard/editor/shared/ImageUploader.tsx",
+      "sha256": "3d3fbf0c48935fa5b1bd4d69b9803b5843eb80726fe7151e8f2a3abc33cd37e4",
+      "bytes": 3498
+    },
+    {
+      "path": "components/ecard/editor/shared/LinkEditor.tsx",
+      "sha256": "33682218952b0144b497aee32fdc586796de88251932c179641f1eb7042b5a54",
+      "bytes": 2789
+    },
+    {
+      "path": "components/ecard/editor/shared/PlatformPicker.tsx",
+      "sha256": "f9b24bbe43a430b48f8fb66283fcc1e09d26097ae82a2f45f60bed6d515bfd7b",
+      "bytes": 5087
+    },
+    {
+      "path": "components/ecard/editor/shared/ProExtraNotice.tsx",
+      "sha256": "35bd41bdb811acb0e12e247fe372a77a30c1bb661d53ad8c58a9678ca97920df",
+      "bytes": 1231
+    },
+    {
+      "path": "components/ecard/editor/shared/TemplatePicker.tsx",
+      "sha256": "dccd06f20bead4b5661eb8c2dc4f2c9d7f53358fe436b6686178ff1fa3363a1d",
+      "bytes": 2767
+    },
+    {
+      "path": "components/ecard/shared/TemplateExamplePreview.tsx",
+      "sha256": "fcee2a824d2d9fa11899a951d71a68b89960c3398a1b4a401b15a893786f65ad",
+      "bytes": 1670
+    },
+    {
+      "path": "components/ecard/wizard/FullCardPreview.tsx",
+      "sha256": "dbb8ea2e43c8498c97b4d626b783a3f0ff77d08ae418013c08905e0b3306ae39",
+      "bytes": 101473
+    },
+    {
+      "path": "components/ecard/wizard/QuickSetup.tsx",
+      "sha256": "8e761f9031f490241bcc68cd8fe35ba226c2c864da0e2275b4e21df5f324a736",
+      "bytes": 4697
+    },
+    {
+      "path": "components/ecard/wizard/TemplateGallery.tsx",
+      "sha256": "bdf19b7a5891d30aaa3a351fa2c03565fcb134b3f1692a97b6923398f35e8f5f",
+      "bytes": 8451
+    },
+    {
+      "path": "components/ecard/wizard/TypePicker.tsx",
+      "sha256": "26e5fe80e871a0e8771be4f5300c2fab224b43226eb46c9548bc55a575400121",
+      "bytes": 9542
+    },
+    {
+      "path": "components/previewConfigs.ts",
+      "sha256": "bb12a3b9952f0ea45af340dfc1614858262bbfa1cdb9dbc7091dae86e0a647b0",
+      "bytes": 15986
+    },
+    {
+      "path": "config/communityGuidelines.json",
+      "sha256": "585f94fd05f4a7c5034089181603de246740b37e745769e0323f8ad25a2f9211",
+      "bytes": 1305
+    },
+    {
+      "path": "config/design.json",
+      "sha256": "ee8b49e84b2a1e85a8b981ea38f26b5569d87911b1ab6bd620cd55f728cdcd16",
+      "bytes": 527
+    },
+    {
+      "path": "config/discovery.json",
+      "sha256": "61ff60ab2203b7c29375ff1a0aab3721bee9dd5420c01e777dd11824a089f9bc",
+      "bytes": 217
+    },
+    {
+      "path": "config/eCardFonts.ts",
+      "sha256": "f0f5a6e714d86f39211a398640175c8878758dfc6a246965a48f8b04d3bc3c9c",
+      "bytes": 7319
+    },
+    {
+      "path": "config/eCardTemplates.ts",
+      "sha256": "23e400ccfd3cf06066baee45fa759a604e8e4bcf78865aeae1e50ec4f5fc5dd3",
+      "bytes": 52194
+    },
+    {
+      "path": "config/featureCards.json",
+      "sha256": "6542a52f169bfb6ab342d7dcde91b1a6b7edc178eacb19f9d98a0a2532c98671",
+      "bytes": 1363
+    },
+    {
+      "path": "config/reservedUsernames.ts",
+      "sha256": "946a7d13f9272760cb2b72c539a10abf38bc11a36ac4f8e32ea0d3d30306d826",
+      "bytes": 3127
+    },
+    {
+      "path": "constants/Colors.ts",
+      "sha256": "38b5d4a2dae17d86d340a92f8c603f08fe5cf181c34459473f1ca3969e803319",
+      "bytes": 14788
+    },
+    {
+      "path": "contexts/AuthContext.tsx",
+      "sha256": "1502faeab253a58c5b39a770bed0af371cb1c720f7e398d026b920699a262aa3",
+      "bytes": 7521
+    },
+    {
+      "path": "contexts/ProAuthContext.tsx",
+      "sha256": "1ccaa4bfd4726e3318f13846ae7bec9bf297c6d938e2d87cded5f87ebc132a34",
+      "bytes": 4072
+    },
+    {
+      "path": "contexts/ThemeContext.tsx",
+      "sha256": "55475c9765fc2f0bf092aeb3106e1bfaa71a9b87dccea83394c72eb68eee9550",
+      "bytes": 3933
+    },
+    {
+      "path": "demo-release-checksums.json",
+      "sha256": "1e7c0e8fd94f807e696d8f98cfd79b587f0ef40a70f388a920fbc7c4712e3ab4",
+      "bytes": 1456
+    },
+    {
+      "path": "demo-release-manifest.json",
+      "sha256": "6a982e7370d1d9e78c82dc54d064b50827a488d6e9e2d9acf267e1b54cc1261b",
+      "bytes": 504
+    },
+    {
+      "path": "hooks/useAppNavigationHistory.ts",
+      "sha256": "8686f48da8b1edcf417d4c13e2489eb8bb1ad104d7fb94cd70362f5fc73ff465",
+      "bytes": 1395
+    },
+    {
+      "path": "hooks/useAtlas.ts",
+      "sha256": "7750f5744e70e23dccbb2f049d34ec6c3e29d7c83338729dccaaaa9246eb3b44",
+      "bytes": 8077
+    },
+    {
+      "path": "hooks/useDrafts.ts",
+      "sha256": "22aa56458138602fab0f7cb954b55943bc11622da9f2c7319f70b3610e6faf31",
+      "bytes": 23210
+    },
+    {
+      "path": "hooks/useECardEntitlement.ts",
+      "sha256": "7086f485c26beb0f3f42e9c2df9771091d2a93ba22c95735c4afed336c3a8c8c",
+      "bytes": 1048
+    },
+    {
+      "path": "hooks/useECardPlan.ts",
+      "sha256": "a6a45b52d5cbcc61893f5bbfc28403e57fe6a1f8cf83702122a15a458f934e45",
+      "bytes": 1255
+    },
+    {
+      "path": "hooks/useOwnerRequestScope.ts",
+      "sha256": "9fe06c24b1b838f882f824061c4c694b52b4e9e9d51a01a4720ee194cc079561",
+      "bytes": 452
+    },
+    {
+      "path": "hooks/useProSubscription.ts",
+      "sha256": "e54a3721ba4418f9a9aa7ea123cabd9f174e14595a06eea76a5b9077426c33c4",
+      "bytes": 4357
+    },
+    {
+      "path": "hooks/usePublicCardSafety.ts",
+      "sha256": "6f515bdd0f8eb31a8adad20a8175666f6f67852bb8e8cab323c614d8164b0046",
+      "bytes": 1463
+    },
+    {
+      "path": "hooks/useRVCatalog.ts",
+      "sha256": "91195430559603d60c0e09e292498a31ae4b4dfd656dd7c57f6c61ef535205b4",
+      "bytes": 3360
+    },
+    {
+      "path": "hooks/useReleaseCopy.ts",
+      "sha256": "27fac52b60c348d16e641c238c815bfd4780872ac5e8b68cd48df3e9466bb921",
+      "bytes": 632
+    },
+    {
+      "path": "hooks/useRoles.ts",
+      "sha256": "388787ba63f492ed61d1aab4f058dc866dbba061afca5751ba2f9ebe18d4eef5",
+      "bytes": 3182
+    },
+    {
+      "path": "hooks/useTavvyChat.ts",
+      "sha256": "7583ff72e626d8816c3451fb7a8c9c5e3224950bfbc9beb126b8cf50a858807b",
+      "bytes": 5275
+    },
+    {
+      "path": "hooks/useTranslation.ts",
+      "sha256": "d56592cd774f47b39c2070bbbf8c535a41db01735b53550c854190b4b282338d",
+      "bytes": 519
+    },
+    {
+      "path": "lib/atlas.ts",
+      "sha256": "c060646c10cf54a4f1aa324182ba9e1995ee23be4d856badd7e5063dd7f45316",
+      "bytes": 14791
+    },
+    {
+      "path": "lib/authRedirect.ts",
+      "sha256": "514bb4046107911947c74513d1324a27ec67fb7a4fda6a544aa7cdf24c15ea61",
+      "bytes": 525
+    },
+    {
+      "path": "lib/cities.ts",
+      "sha256": "3cb3ee1428a638e4cfeb3b1dc172c6dd5eb4384cb2740d5ae2154702a3b2c19d",
+      "bytes": 4073
+    },
+    {
+      "path": "lib/cityCountryCodes.ts",
+      "sha256": "13e2e29dab1613fcf5d3795b852ebf7820b04ab5b5f5612bf45df7b59072f839",
+      "bytes": 5995
+    },
+    {
+      "path": "lib/contentSafety.ts",
+      "sha256": "fe749248ca4c627eb94a2413ba8241196045e3916305d42d9170b81c7915af50",
+      "bytes": 4185
+    },
+    {
+      "path": "lib/contentSafetyServer.ts",
+      "sha256": "fb3a67f020cbfcad55c6b20bb90da8098c175def4500cae67d471347cba529ed",
+      "bytes": 902
+    },
+    {
+      "path": "lib/cruises/catalog.ts",
+      "sha256": "8bf89e2bde03811de1a18ad2aba008cfb9e0a47efbc6e1fae4ef917ad413f00c",
+      "bytes": 8347
+    },
+    {
+      "path": "lib/cruises/reviews.ts",
+      "sha256": "f76a08e82de21a92cc98e34cb89676e6f0f347bad6a95460ddeb6329d0b95889",
+      "bytes": 4625
+    },
+    {
+      "path": "lib/cruises/service.ts",
+      "sha256": "df05ac1d5c477b43b0bcfaea16325f3fd4c86754c1095be0be8aede67557cc06",
+      "bytes": 2349
+    },
+    {
+      "path": "lib/cruises/share.ts",
+      "sha256": "887e93789ae2a6df00431cbd13de1c29aec6674c34e58bc779be98c0307436e8",
+      "bytes": 875
+    },
+    {
+      "path": "lib/demoPlace.ts",
+      "sha256": "bc67bbc9448a562e397e920968ee103dc6bae9ba374d1bcd1c5364c0b7a76d14",
+      "bytes": 503
+    },
+    {
+      "path": "lib/demoRestaurant.ts",
+      "sha256": "30d91bee4deb1d9cc388d0dd9b1a7005f2070b6b32554c1d50edca79ac6345ec",
+      "bytes": 8150
+    },
+    {
+      "path": "lib/discoveryEvidence.ts",
+      "sha256": "376078861ec69113182851e75fd279af987508615fad666dea170651bcc51c0b",
+      "bytes": 2085
+    },
+    {
+      "path": "lib/ecard/EditorContext.tsx",
+      "sha256": "8ea2e3ca6b90cb3fe6b37fae2bd751340801b306f5d1ff36b2c24f5d7954a431",
+      "bytes": 2926
+    },
+    {
+      "path": "lib/ecard/editorReducer.ts",
+      "sha256": "5a0c491a6cb02a90ab33cda3250def200c8aec95938f782706a7c2d60c00729d",
+      "bytes": 9287
+    },
+    {
+      "path": "lib/ecard/formBlock.ts",
+      "sha256": "8f5b3d1633d09a07c9c0a4ae66b1e08840deb528eac4f0a252586b0d9039ea12",
+      "bytes": 870
+    },
+    {
+      "path": "lib/ecard/premiumContent.ts",
+      "sha256": "dcfe43302fd12ed18681fd64cbbc599b0dfaaec589d9a236b81a6aa22e54c7b0",
+      "bytes": 3922
+    },
+    {
+      "path": "lib/ecard/previewBridge.ts",
+      "sha256": "880e1f846c678259e6bcec2b51114867f25631ea97ff581906bc4ece34f059b2",
+      "bytes": 6907
+    },
+    {
+      "path": "lib/ecard/publicCardMapping.ts",
+      "sha256": "fb83024d6532059ce2c08f9e6fd40f9816480fbf0ccc95d4a7bb58d01a094951",
+      "bytes": 6652
+    },
+    {
+      "path": "lib/ecard/publicCardTypes.ts",
+      "sha256": "b871e2d33b9e59dc0b1e1b999131c448784135e5001c9cdb73d65f63a3021d29",
+      "bytes": 5640
+    },
+    {
+      "path": "lib/ecard/publicExport.ts",
+      "sha256": "d05d296adc88ee6527d06b9a039552794c01de51dba3b4adf832c865e7d1d26c",
+      "bytes": 2227
+    },
+    {
+      "path": "lib/ecard/publicLookup.ts",
+      "sha256": "c90efc91c060f9630c96f8c16e86527a8753b7bc2781754fb791020a63b64b3f",
+      "bytes": 3249
+    },
+    {
+      "path": "lib/ecard/publicSafety.ts",
+      "sha256": "9dee7d7c8efb1a091caf4bddd99f05bfd59c67ccf22a8eee61bedfcf6b0a6ab7",
+      "bytes": 863
+    },
+    {
+      "path": "lib/ecard/templateExamples.ts",
+      "sha256": "00153648fd1a958c05b5854fb6b25569554af2636ee218f92bbfb38ce285c797",
+      "bytes": 6352
+    },
+    {
+      "path": "lib/ecard/templatePreviewData.ts",
+      "sha256": "543cd348ee17f2565e5b6a0af80ed8ff058d06f9a6128d174fe707562bf11cab",
+      "bytes": 2305
+    },
+    {
+      "path": "lib/ecard/templateSelection.ts",
+      "sha256": "201b3f899d8f818a1e55f3369997e4ac1f1afa8c64a65249cdc0b476e456e8af",
+      "bytes": 2640
+    },
+    {
+      "path": "lib/ecard/useAutoSave.ts",
+      "sha256": "bdadcca36d6edd218b9fe23bf06a13186660b2fc1105bd2c71e8f4d90fee8317",
+      "bytes": 9184
+    },
+    {
+      "path": "lib/ecard/useEditorField.ts",
+      "sha256": "d5a9d2e72097cb243a1ea0b8d7f08fbff8a698ef70a87f8fc17758ac6511e282",
+      "bytes": 777
+    },
+    {
+      "path": "lib/ecard.ts",
+      "sha256": "c863710359e69ee94f56ea9eb77a059968b7900e139addf4e0ed5a8dda1cc4e1",
+      "bytes": 24375
+    },
+    {
+      "path": "lib/ecardEntitlement.ts",
+      "sha256": "e69e4fd32d8201e1fa99aa9939f0e7401afda58654324a28f66b89199a0a4617",
+      "bytes": 541
+    },
+    {
+      "path": "lib/eventProviderServer.ts",
+      "sha256": "2bcc8b14a11fe83f36764b38e0c4e4c89ccdfc0a12e54b541769e498af3e13fd",
+      "bytes": 2904
+    },
+    {
+      "path": "lib/eventReviews.ts",
+      "sha256": "657bd75c7a1c8796e4de709a23bd213daf5769afd688ef710adfd14b05dd150a",
+      "bytes": 12163
+    },
+    {
+      "path": "lib/eventsService.ts",
+      "sha256": "457c45ba620e745b6a2272046b0a2a66f211fae0c1dec3b3b478ddfc1aee09be",
+      "bytes": 20284
+    },
+    {
+      "path": "lib/experiencePaths.ts",
+      "sha256": "60f4857448152547822516853e9f12f10785ffa35e0e6458c553e44a3f710a05",
+      "bytes": 6477
+    },
+    {
+      "path": "lib/foodMenu.ts",
+      "sha256": "b58dbe9adf3d398c58a130fbed56a9c44b1f7fce15de6bfe232f648f4bab1c99",
+      "bytes": 1188
+    },
+    {
+      "path": "lib/geoip.ts",
+      "sha256": "c14bda4d83b18c433a7715e52709cb0c03fc4406998f280f205ae9475dea36e7",
+      "bytes": 1861
+    },
+    {
+      "path": "lib/menuAnalytics.ts",
+      "sha256": "48c16d157fa24941e2cb9e38054d83663e04f48082a878e466fc98dd9e91ac95",
+      "bytes": 1775
+    },
+    {
+      "path": "lib/menuAppearance.ts",
+      "sha256": "2cf82b2bf1248eb5ea5ebc1ea7908b43ef00ac507def53014a2223cad0ae0151",
+      "bytes": 1504
+    },
+    {
+      "path": "lib/menuItemAnalytics.ts",
+      "sha256": "ceaa6fb92c1ad1c188f2b31b93d6b83e97ca40a32a1b0fdef228babd9860c795",
+      "bytes": 1599
+    },
+    {
+      "path": "lib/menuPopularity.ts",
+      "sha256": "4682fe192bf7d95d3884e6c90adede8543d163d9752487b77b3fd2cdc2bf3c80",
+      "bytes": 4160
+    },
+    {
+      "path": "lib/onthego.ts",
+      "sha256": "eb804247bc119619ca36e4d953ceac5823e3c3a13d038c1c0b6fb744fc8e4a7c",
+      "bytes": 6334
+    },
+    {
+      "path": "lib/onthegoDetails.ts",
+      "sha256": "d91a8cb5b2bbeb86247c2898a2e9e92519f67739a609cf5982930e89c4754462",
+      "bytes": 4157
+    },
+    {
+      "path": "lib/onthegoOwnerContract.ts",
+      "sha256": "ec5bf9322c568230b7962cde994ebbcb0eda32751ab1876ef96b69dafaa812b9",
+      "bytes": 2058
+    },
+    {
+      "path": "lib/orderService.ts",
+      "sha256": "33877a0e4fead9238d0506d63e6f5b80234c1055dfac7ee7890408c602afa82b",
+      "bytes": 8213
+    },
+    {
+      "path": "lib/ownerRequestScope.ts",
+      "sha256": "452801e6c60842c816581db35e11d6108769c229e1d39b86fc16271b76c261cf",
+      "bytes": 467
+    },
+    {
+      "path": "lib/placeCategories.ts",
+      "sha256": "c467bf29a41439e3339947eada19a2eb4274bb34d508d808bfc0fa266311c4a5",
+      "bytes": 819
+    },
+    {
+      "path": "lib/placeEvidence.ts",
+      "sha256": "78e0e66161ddb14547aa0043ed126a08b9d131bd09d55aed313c2396a59673d7",
+      "bytes": 17563
+    },
+    {
+      "path": "lib/placeEvidenceService.ts",
+      "sha256": "a65ca106d6adc2196a4a466866945244f2b895d76dd29af5d5227163a75042b4",
+      "bytes": 7652
+    },
+    {
+      "path": "lib/placeHours.ts",
+      "sha256": "30242aa4ccba27ab4bcb082da46655c58e88fdc6e1cedaed2c6b1d23fff1b934",
+      "bytes": 6934
+    },
+    {
+      "path": "lib/placePresentation.ts",
+      "sha256": "eb7e8b86e94c00dc09c1be145e5ccdc7403a2d9da4689cbbcc4c9fb86bec60fc",
+      "bytes": 1611
+    },
+    {
+      "path": "lib/placeReviewSummary.ts",
+      "sha256": "b38578b37669d3761c603f64a517737539106c26cf5667a4e6d46f25bcfb7d60",
+      "bytes": 2264
+    },
+    {
+      "path": "lib/placeSearch.ts",
+      "sha256": "a946d836837af0c17c6f7ebab9008471a659ae38703ef5df30395ed770b49497",
+      "bytes": 5738
+    },
+    {
+      "path": "lib/placeService.ts",
+      "sha256": "843b37f2861ecf2525addb64f34868c039b73e173351ad5bfc175ea8513444d8",
+      "bytes": 19180
+    },
+    {
+      "path": "lib/placeShare.ts",
+      "sha256": "aa8c40918f04c27177a3afe1af029b179f7e4b378689496996f22c432dc04b78",
+      "bytes": 757
+    },
+    {
+      "path": "lib/placeShareImage.ts",
+      "sha256": "07c4d315791b4350f967ddd894f7e8c70dff4db7111f6c699527845b931f479a",
+      "bytes": 10370
+    },
+    {
+      "path": "lib/placeShareLookup.ts",
+      "sha256": "6cf4a8adbaa00e933dcbf2d587ccb86f74f6ef9dd142527fb0eefef87e15415b",
+      "bytes": 3761
+    },
+    {
+      "path": "lib/placeShareMetadata.ts",
+      "sha256": "3096892df4cb3987d59ffed3dc359240425fe020d467abfccb72cfed25decaf6",
+      "bytes": 5465
+    },
+    {
+      "path": "lib/placeSharePhoto.ts",
+      "sha256": "30bc803cbdf6c618f8a1331905d616199b3f2f5e311ca2f5de64e6f7ccf82bb4",
+      "bytes": 1457
+    },
+    {
+      "path": "lib/releaseCopy.ts",
+      "sha256": "ab1863dd0efeff2a7b0bb1a58da8a98affa5eed4588c8451b3db4d82c71d2e6f",
+      "bytes": 56145
+    },
+    {
+      "path": "lib/restaurantOwner.ts",
+      "sha256": "3b0f6ebd84b13dc2416fde6b8bdca859a4bb5b7a480fb547fd36a9fb58ee92a0",
+      "bytes": 12442
+    },
+    {
+      "path": "lib/restaurantOwnerApi.ts",
+      "sha256": "d8c62711003dcd3c2cf6be126e89e9c6caf549c377b736913c7696224f4af2c2",
+      "bytes": 3159
+    },
+    {
+      "path": "lib/restaurantOwnerMedia.ts",
+      "sha256": "b356a9899f887c48c6929411a4ac45d100cf5197556a2e3973333aa9c2cc3534",
+      "bytes": 5336
+    },
+    {
+      "path": "lib/restaurantProfile.ts",
+      "sha256": "766fda262c1ce0ae422e81c8ad38097a96c018ae746226a2254570abc29f7f1c",
+      "bytes": 1596
+    },
+    {
+      "path": "lib/reviewApi.ts",
+      "sha256": "949b6b927f68ff260b99c9a0333d44efda46834a5a741f48a515ed6138d1735d",
+      "bytes": 2923
+    },
+    {
+      "path": "lib/reviewPersistence.ts",
+      "sha256": "cf148894646116145b2528bb0a4ed86081d70899ac7fa479a59d41ebc121bff1",
+      "bytes": 6743
+    },
+    {
+      "path": "lib/reviewRequestStore.ts",
+      "sha256": "d2d2b0d0b86b9b1b8c550c06ca2d643541c64be3c23598d0e1250a996d627c0b",
+      "bytes": 1641
+    },
+    {
+      "path": "lib/reviewSummaryLoader.ts",
+      "sha256": "3c01cacd1f19a3b295f537c27d0e254141b818eff9d1aa1472a036f2326a3db7",
+      "bytes": 1051
+    },
+    {
+      "path": "lib/reviews.ts",
+      "sha256": "a1ebf4fde6694ac3aa2611d3b470964e677372fd124c81535f875ac8a3eaaadd",
+      "bytes": 4537
+    },
+    {
+      "path": "lib/roleService.ts",
+      "sha256": "a52407ad5eacacc24b91a5f8e815d877bf3d03294583dc8be5a61c556cb67e2d",
+      "bytes": 9184
+    },
+    {
+      "path": "lib/rvCatalog.ts",
+      "sha256": "cb19f8d363fb87c3dd709779b717cccef48878ba7b4685056259b597f2ecd812",
+      "bytes": 1221
+    },
+    {
+      "path": "lib/rvCategories.ts",
+      "sha256": "6271e3b371f54ed8a6ac8637bca43f6e42e11fd891a002f0efccae607260196d",
+      "bytes": 4832
+    },
+    {
+      "path": "lib/searchCache.ts",
+      "sha256": "2d4ec7569827e765462bb3c916882b3400ffd879fe003d17fe3d7fccd055e867",
+      "bytes": 1026
+    },
+    {
+      "path": "lib/searchIntent.ts",
+      "sha256": "de4cc52f37df8d94f43bd5c9c71cca5e136bc73dcbbd48e47dcb4eb0487d5e33",
+      "bytes": 6634
+    },
+    {
+      "path": "lib/signalCatalog.ts",
+      "sha256": "cbf2800817b01cbe2d82891393bdb2fc1910c4561993d6d45ed58bd23bf1720e",
+      "bytes": 11782
+    },
+    {
+      "path": "lib/signalService.ts",
+      "sha256": "9064bece3d1bca80c10952e3e403bebc357dc9d0fc8ebab7e03fab5b0a8c3a4e",
+      "bytes": 15278
+    },
+    {
+      "path": "lib/signalTapSelection.ts",
+      "sha256": "87adc58bec8155010ebbb24b8db0b0aab87a8e738e5f23cc5978cc6fc414e3ef",
+      "bytes": 1224
+    },
+    {
+      "path": "lib/smartQueryParser.ts",
+      "sha256": "4b41073fb14fcb77a3e5b2d02b960890843515bbf6c925c1c45633abd8044c68",
+      "bytes": 6575
+    },
+    {
+      "path": "lib/startOAuth.ts",
+      "sha256": "e28e2dd365c6d26c789932a010f172deb6f65f70a9b78e8a9a5528ad659ae2b4",
+      "bytes": 465
+    },
+    {
+      "path": "lib/storyPublishing.ts",
+      "sha256": "f43adffb922c1f55bb7f3bcbb4e5349f79f7bf446c3eb066e9064113bb260e39",
+      "bytes": 8941
+    },
+    {
+      "path": "lib/supabaseClient.ts",
+      "sha256": "0e0514701936945bba9fc1703e19d7336d23bc62d6bbef36130efc561443678a",
+      "bytes": 2869
+    },
+    {
+      "path": "lib/supabaseServer.ts",
+      "sha256": "44484802c093991dbb0343a418139af7058a5a6fe73fd187725d8638dbe3dceb",
+      "bytes": 688
+    },
+    {
+      "path": "lib/tavvyChat.ts",
+      "sha256": "ac297def2b276ac4b9895c2aac17ed2916885918813b261a86332e4ec08976c2",
+      "bytes": 5281
+    },
+    {
+      "path": "lib/toolDirectory.ts",
+      "sha256": "67b3f47043d41648909987989ccb608e582d1638718286442ae99ac526bdb718",
+      "bytes": 2850
+    },
+    {
+      "path": "lib/typesenseService.ts",
+      "sha256": "9486725fb287fcdf1474ef79328e8866b11064f21e521b63860dc50f690687d3",
+      "bytes": 13550
+    },
+    {
+      "path": "lib/universePlaces.ts",
+      "sha256": "3959a590d8991cfe54c37250cbe189ab373f87a06c5cebead85c4f93e6c91735",
+      "bytes": 1592
+    },
+    {
+      "path": "lib/useBusinessReviewSummaries.ts",
+      "sha256": "4f04f470cdef08ca1922da8eba411ef6e625860c17c3f18c52f71f2f6d30de16",
+      "bytes": 1353
+    },
+    {
+      "path": "lib/useExperienceEditor.ts",
+      "sha256": "3a878e5f8aa67e631fffc0ecbae46aef56974ccd44c15dd0787bac4797a78013",
+      "bytes": 4097
+    },
+    {
+      "path": "lib/useOnTheGoDetails.ts",
+      "sha256": "27c750580f1e7c02315788022ba64e8b9cfe0c7c43707e2e4957f110e42285ac",
+      "bytes": 1884
+    },
+    {
+      "path": "lib/useOnTheGoDiscovery.ts",
+      "sha256": "c6ea6c2d8e50b732be7a9218cdf115ca7f66b8c74a36b1fe82ba24c68de12291",
+      "bytes": 2074
+    },
+    {
+      "path": "lib/useOnTheGoOwner.ts",
+      "sha256": "de03776adc934969fb4d1b2a6a22e28aba5212e01d35b5358e308ab1e28bbf04",
+      "bytes": 10589
+    },
+    {
+      "path": "lib/useOnTheGoSchedule.ts",
+      "sha256": "f7f3bb2fcd60672f9368beba8b07b19df5967009da5e463b7e44bb8cd7fd6898",
+      "bytes": 4654
+    },
+    {
+      "path": "lib/wallet.ts",
+      "sha256": "240b79e696062faa4ac8ca4d0a548c47f7423a6a5681c516a3cf991804bbd8a0",
+      "bytes": 3996
+    },
+    {
+      "path": "next-i18next.config.js",
+      "sha256": "5d92a23880cbad6df0b00d6ae3d0c21dcf4da31134a62f1c0250b58f4591f567",
+      "bytes": 582
+    },
+    {
+      "path": "next-sitemap.config.js",
+      "sha256": "34aa24d02d037c484c2da9f4e6bb47249097ab8529dc0ee08d2366028da3e95d",
+      "bytes": 766
+    },
+    {
+      "path": "next.config.js",
+      "sha256": "1dfd48679ab6f6aaa6f8d0589fbef3cff8836fd2cea611cbb641eb0d1a1d6025",
+      "bytes": 2385
+    },
+    {
+      "path": "nixpacks.toml",
+      "sha256": "a80c8be8597164773f330b44f6af596eaa1f3156fdca4029e9c3522fb3354539",
+      "bytes": 173
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "fb159cefaf2f4bff54b316132652796d1fe2a8b8f30c909e4c6f3a8ee4f854da",
+      "bytes": 314622
+    },
+    {
+      "path": "package.json",
+      "sha256": "cb8c2b5b0322cf37a4a55e8341638fb58f6b175884ddf3007815428a72bb2ccd",
+      "bytes": 1395
+    },
+    {
+      "path": "pages/404.tsx",
+      "sha256": "d14ba25890ab49a47b96069f72ebfbaa91ea7062c237aca417dacc65d8bf9136",
+      "bytes": 3066
+    },
+    {
+      "path": "pages/500.tsx",
+      "sha256": "f6be51c0868801c105ff98a39571999c6e8bc4e7a5135c4979a46ea93ea3d872",
+      "bytes": 2331
+    },
+    {
+      "path": "pages/[username].tsx",
+      "sha256": "048538f73aecc54d3cbd380101a77e167eb67601c9cd013babc67deba95c3624",
+      "bytes": 15982
+    },
+    {
+      "path": "pages/_app.tsx",
+      "sha256": "c8817ac0ebc4f4737e979e3ad0126c4d77d3b381571ac34c01229e2351503a2a",
+      "bytes": 8796
+    },
+    {
+      "path": "pages/_document.tsx",
+      "sha256": "6a5cec8c67dce8f369b10f14eff8cfbb784242ab64fdc5e69e913e3a914f7b9d",
+      "bytes": 462
+    },
+    {
+      "path": "pages/about-us.tsx",
+      "sha256": "f2f638e42d9a7df69de7fe30e1aaff2ba3ef7acfd2f284c6fb530e04a2b164e8",
+      "bytes": 38759
+    },
+    {
+      "path": "pages/api/agent-review/auth.ts",
+      "sha256": "6fd0077218478623105cf79cc211501ddf8b198d5d31c2463ee44f47fd579b7f",
+      "bytes": 3784
+    },
+    {
+      "path": "pages/api/agent-review/discussions.ts",
+      "sha256": "411df07618a15560424d93673ca57ed0558c3a7115889941f1898fc6fc7dbcd9",
+      "bytes": 1784
+    },
+    {
+      "path": "pages/api/agent-review/ideas.ts",
+      "sha256": "23f6d71d77fb2f2544c0b96fb04ce98ccf11028d359eafada75e91b2741c6a44",
+      "bytes": 2437
+    },
+    {
+      "path": "pages/api/civic/moderate-question.ts",
+      "sha256": "35fed7c91cc5bc427579bd44e99a64ad21349744a386847c03081a047f369ca4",
+      "bytes": 3453
+    },
+    {
+      "path": "pages/api/civic/pending-questions.ts",
+      "sha256": "15228ddc90cf88b2d02ee1290200941ff2cb8731876ef9c054ea21edb77fa3ad",
+      "bytes": 3465
+    },
+    {
+      "path": "pages/api/civic/question.ts",
+      "sha256": "6246c1b0ade6aff881c65a160e2910fdf29287f84a43819d87955050511c16a6",
+      "bytes": 2371
+    },
+    {
+      "path": "pages/api/civic/react.ts",
+      "sha256": "f6f05d281fcfe0ccb92f6481d868df58b8d144f08601ca90d576d042f77b2408",
+      "bytes": 3498
+    },
+    {
+      "path": "pages/api/civic/recommendations.ts",
+      "sha256": "8d3bf04360e8a92fe80bf1948e77626e5e5f14f65bc99f5e4389ffacad836660",
+      "bytes": 6695
+    },
+    {
+      "path": "pages/api/civic/upvote.ts",
+      "sha256": "54da0539ced4d632421ef3e455d60102911b4e3e74a15f50cda89cd51aefcace",
+      "bytes": 3235
+    },
+    {
+      "path": "pages/api/curated-sections.ts",
+      "sha256": "400b08da6253f97b65a53dc2ec3134d1aa493d0862bb7cdf748770e80423e2b0",
+      "bytes": 612
+    },
+    {
+      "path": "pages/api/ecard/endorse.ts",
+      "sha256": "9b79abc67cfb0eef82d88220145a419c1446d8b8df3e8b6a43a8ece685ac3e3d",
+      "bytes": 8753
+    },
+    {
+      "path": "pages/api/ecard/geo-analytics.ts",
+      "sha256": "536b8fc9eca853619d90236571553816552f87a27dd0a8724b3d1b1496ef8905",
+      "bytes": 8316
+    },
+    {
+      "path": "pages/api/ecard/wallet/apple-pass.ts",
+      "sha256": "64bd3d86d9d8887a09104805620528d8c4fc3f27e607360e44b9228518f2c4fe",
+      "bytes": 6258
+    },
+    {
+      "path": "pages/api/ecard/wallet/google-pass.ts",
+      "sha256": "14d2cd4a2d7bebc08cbb5339ddee8dcd652ce6bc221591942be7821d05e89cae",
+      "bytes": 6801
+    },
+    {
+      "path": "pages/api/ecard/wallet/vcard.ts",
+      "sha256": "75b231687721e11b15126002c4aa63e5bb556d0a5ca0f6644a7d4dfebfb1ed80",
+      "bytes": 1481
+    },
+    {
+      "path": "pages/api/ecard-messaging/messages.ts",
+      "sha256": "7eda9d2bb6614db2d1853ede8e0d5a35ca86c94f55536c1b27769b10c0da29bd",
+      "bytes": 6269
+    },
+    {
+      "path": "pages/api/ecard-messaging/send.ts",
+      "sha256": "406687b9aed3dc1252587b55c9d213c6870a1e9adf24dd4e9611d3c42e971a04",
+      "bytes": 4678
+    },
+    {
+      "path": "pages/api/ecard-messaging/spam.ts",
+      "sha256": "e072a1ef4685c6263e51ad9174babd0900a269da49f241c957e801e0fae69e0b",
+      "bytes": 3275
+    },
+    {
+      "path": "pages/api/ecard-messaging/threads.ts",
+      "sha256": "7cf12b4961b8065886a17eac78b18f1270e14d05b718739e0040c922a61bbd96",
+      "bytes": 4663
+    },
+    {
+      "path": "pages/api/health.ts",
+      "sha256": "89538da43d223a8f31cf864c428dfd43e79df25b7e3417cf866a723805c1e99f",
+      "bytes": 344
+    },
+    {
+      "path": "pages/api/menu/sync-popularity.ts",
+      "sha256": "61e11decab3a31a08f8d4e509a0e7db5e7d642eec649d0609b83e7ca402df332",
+      "bytes": 2273
+    },
+    {
+      "path": "pages/api/og/[slug].tsx",
+      "sha256": "890825a6b96e5c9ce9322917f79182c2ef110170f9971ced45c3e6fb9b80a690",
+      "bytes": 23247
+    },
+    {
+      "path": "pages/api/og/cruise/[slug].tsx",
+      "sha256": "721392cf85b86fa9d82bcbb16b7c60b664563c373b5746753c2027378d1f1b14",
+      "bytes": 3141
+    },
+    {
+      "path": "pages/api/og/place/[id].tsx",
+      "sha256": "5a890f4dcaf4c57f59a4a38c27b5cc2d65c10a1695232fffc0cb90fff390ddce",
+      "bytes": 1894
+    },
+    {
+      "path": "pages/api/place/[id]/reviews.ts",
+      "sha256": "ad59905c10bdff2eeb9005e1ea538094c5b88f4f30426623d30636533afc84c5",
+      "bytes": 5050
+    },
+    {
+      "path": "pages/api/place/[id].ts",
+      "sha256": "973b83989e11d4ea3cb301b47c1efc37275b7ea3c96189e41f27cfd6c4284e3a",
+      "bytes": 12953
+    },
+    {
+      "path": "pages/api/places.ts",
+      "sha256": "b03a43126318cf3bcdd79fc0fee9fd197f04b06256cc65aff4f0e725618da78d",
+      "bytes": 19431
+    },
+    {
+      "path": "pages/api/pros/create-checkout.ts",
+      "sha256": "b36e1b3fdb265a0dcdb5a5be2d1700dde84c0a6ebb3036aa2d4ad907d1a644b7",
+      "bytes": 1871
+    },
+    {
+      "path": "pages/api/restaurant/claims.ts",
+      "sha256": "8fad32d9372864475da758d81ab6bab2d94872b867e7628de278e514952967fe",
+      "bytes": 115
+    },
+    {
+      "path": "pages/api/restaurant/workspace.ts",
+      "sha256": "a03cbc9a32e57ea6f04f72f034ac097b72338c92f459d1bf5b0453c8f64c6283",
+      "bytes": 118
+    },
+    {
+      "path": "pages/api/review.ts",
+      "sha256": "39620d1c4e92b7feede0d00f2db1bf39a914d00157138e90c1ad66d6c37c5ae5",
+      "bytes": 47
+    },
+    {
+      "path": "pages/api/reviews/filter.ts",
+      "sha256": "e462b98745c534e553029147ea495e78e69ad4907c1ed3cd3ef36cd615c38dc8",
+      "bytes": 668
+    },
+    {
+      "path": "pages/api/reviews/submit.ts",
+      "sha256": "25f24adb327e0ecc8df152f47771f90ec4897ed8902c6731efeda1374c7c84c7",
+      "bytes": 50
+    },
+    {
+      "path": "pages/api/reviews/with-photos.ts",
+      "sha256": "eb6b6c311616c45076c7733552200f5c9dcd8ac6678ac75e4111292575b0abbb",
+      "bytes": 488
+    },
+    {
+      "path": "pages/api/search.ts",
+      "sha256": "c126ed3babe5956349eea4ae8994ea9419ea20c2ae2e94607eaf78c5e3548792",
+      "bytes": 4543
+    },
+    {
+      "path": "pages/api/user/update-location.ts",
+      "sha256": "18e2f812fb0e42af2f14297b256e60d0aa41e4aba7d284ee5dc76d1ecd63f4d1",
+      "bytes": 2047
+    },
+    {
+      "path": "pages/app/account/email.tsx",
+      "sha256": "b5c051052f71606851ea67206fbd2a74a99e93287d2c52a1343ed38638955668",
+      "bytes": 5646
+    },
+    {
+      "path": "pages/app/account/index.tsx",
+      "sha256": "241feaa52bda0a71a93b54b6a7526eeb79d59a791fb4270f5784c6ab2b3a7bdd",
+      "bytes": 10682
+    },
+    {
+      "path": "pages/app/account/payments.tsx",
+      "sha256": "c35fa7eb06bcbe6a2c61516c6ba03c079630a06cc85550d7ea20c456713185c9",
+      "bytes": 3202
+    },
+    {
+      "path": "pages/app/add-review.tsx",
+      "sha256": "e6a92b44e4db565deb6bed57faa3e51c7534af13b37164023a8a83731f6aca5e",
+      "bytes": 27032
+    },
+    {
+      "path": "pages/app/add-story.tsx",
+      "sha256": "4977341bf1b214a5904ff800e743c7c52399ba7ad762c1ea539644907cbcedde",
+      "bytes": 35339
+    },
+    {
+      "path": "pages/app/add.tsx",
+      "sha256": "4d58ca65b9a44ad1a6f49b898db1119a1b98990ec62bc42fd61a1104b029d6de",
+      "bytes": 55065
+    },
+    {
+      "path": "pages/app/agent-review.tsx",
+      "sha256": "b9591decfb1f87dac082c21d4cdf5b6f792face25d6e90c15def29ddbbcbdc58",
+      "bytes": 24996
+    },
+    {
+      "path": "pages/app/apps.tsx",
+      "sha256": "79eae234b6d9b6c2ae871d52ebe0bd65ea9f733f901d32648439755b5e421f53",
+      "bytes": 11311
+    },
+    {
+      "path": "pages/app/article/[id].tsx",
+      "sha256": "b88ffbf3514fca42b5590a2dab864c9d096f34d572583fa32504047b20a35710",
+      "bytes": 30626
+    },
+    {
+      "path": "pages/app/atlas/category/[slug].tsx",
+      "sha256": "f720693ccd92efa66ea18e17fcdca36bfb38a1041eb300418454be821e902691",
+      "bytes": 15330
+    },
+    {
+      "path": "pages/app/atlas/index.tsx",
+      "sha256": "0166299fdefbea9b8efa700f8b76afd613515eea6c0bd72cb4d947cca23e6ea6",
+      "bytes": 19569
+    },
+    {
+      "path": "pages/app/atlas/owner-spotlight/[id].tsx",
+      "sha256": "fafa6145d853d1c6f0900e7cbbf893ac8324bee26f19aaef9cd332b782ab66cc",
+      "bytes": 21124
+    },
+    {
+      "path": "pages/app/atlas/search.tsx",
+      "sha256": "3bd259dbe9b836a8eb3e4a5f2efdc7026a0dd9ced9e839a324170044d4c52700",
+      "bytes": 13427
+    },
+    {
+      "path": "pages/app/atlas/universe/[slug].tsx",
+      "sha256": "6ebd4f7fd85ca0fd349811e5ee5066ab92bc4c8d64fa4caf7e87bffd9d3b9384",
+      "bytes": 24410
+    },
+    {
+      "path": "pages/app/business/[placeId]/media.tsx",
+      "sha256": "8e9eb35934437f852195344e75be4ea162f4f64b8868ae79207223acecfb5c57",
+      "bytes": 13647
+    },
+    {
+      "path": "pages/app/business/[placeId].tsx",
+      "sha256": "d0bb2cbb4ff4a51586d152c58c1cdae748043521829d0ea1e849f605b54969c3",
+      "bytes": 10789
+    },
+    {
+      "path": "pages/app/business/claim.tsx",
+      "sha256": "01cebe5999e390311aac364cce2f20acbb773a65f2760058875e6c45f3671be5",
+      "bytes": 4207
+    },
+    {
+      "path": "pages/app/business/index.tsx",
+      "sha256": "25215bb72dce470aa641ffae2706a5375aa9785a73a8789e4e538d2555e2c7ba",
+      "bytes": 4029
+    },
+    {
+      "path": "pages/app/cities.tsx",
+      "sha256": "29e6c36b38e8a5eb54723ac1b40bffdc332cf8e6f99ece71668353dba3a142c0",
+      "bytes": 14811
+    },
+    {
+      "path": "pages/app/city/[slug].tsx",
+      "sha256": "d8bce4bd039e04359fed8ab949ec81a29e741f274c6706d63fb37a08a040658d",
+      "bytes": 16117
+    },
+    {
+      "path": "pages/app/collections.tsx",
+      "sha256": "fff0b062332724e0636279a2bf2333c395d4cdc653d69edcc07ff6544da5e551",
+      "bytes": 1561
+    },
+    {
+      "path": "pages/app/cruises/[slug].tsx",
+      "sha256": "f3fff79456aeff958b25d1944adca0fe92af4a4aedd847ac866154ec568b2d3e",
+      "bytes": 1424
+    },
+    {
+      "path": "pages/app/cruises/index.tsx",
+      "sha256": "69c89f9a89fe6a37d54fd29e1658e23f1c2229615779d0b5d1ad0fe8d4c3ef5a",
+      "bytes": 5265
+    },
+    {
+      "path": "pages/app/demo/restaurant-card.tsx",
+      "sha256": "14b7d1d3ef90e944e2317eb1a7798b42174a88139979ad87417938b81187cc56",
+      "bytes": 5563
+    },
+    {
+      "path": "pages/app/demo/restaurant-showcase.tsx",
+      "sha256": "e3b98fe73b1097675205c93d7578a9332670655bed280d23231eee1355da1e8a",
+      "bytes": 12917
+    },
+    {
+      "path": "pages/app/demo/restaurant-website.tsx",
+      "sha256": "5e7b2e84f6366eaa4d001ea59fe009000c1a85ce61d095f3437dc8c0be8cd80e",
+      "bytes": 3248
+    },
+    {
+      "path": "pages/app/demo/restaurant.tsx",
+      "sha256": "e82caad82016b72ba8b1420a593e44a3acdf3a00f57c2f53e5817a138f58378c",
+      "bytes": 6571
+    },
+    {
+      "path": "pages/app/ecard/[cardId]/edit.tsx",
+      "sha256": "bc532ab2e2ee9375ad7c0d2f00dff3dde091d81791ace377193c5d83d65da260",
+      "bytes": 3915
+    },
+    {
+      "path": "pages/app/ecard/[cardId]/preview.tsx",
+      "sha256": "32169fa757edd58d2943e7ebb3ed0b219b31b86620af15a91e5b45fc16cad542",
+      "bytes": 42740
+    },
+    {
+      "path": "pages/app/ecard/[cardId]/stats.tsx",
+      "sha256": "a87bf08b4d7a5ca3446be1b1562a5e68e7f842a471222bde24532d502e278b95",
+      "bytes": 7417
+    },
+    {
+      "path": "pages/app/ecard/analytics-dashboard.tsx",
+      "sha256": "a0af683a22040f5810bb950403e890d3a53584548af13f179cddd5763c59a8a8",
+      "bytes": 1212
+    },
+    {
+      "path": "pages/app/ecard/create.tsx",
+      "sha256": "07080579e2f6a01d9ef569554df53f9f23cd609de1f60fa4a76bcce1eadf2798",
+      "bytes": 664
+    },
+    {
+      "path": "pages/app/ecard/dashboard.tsx",
+      "sha256": "eca9ad213c034637d67857c268b39f8f130d3ce1129174bb339e3f30a3320254",
+      "bytes": 872
+    },
+    {
+      "path": "pages/app/ecard/index.tsx",
+      "sha256": "f1a06fe021f2d8066ac56ec22fc9c1a795185e3be179602ce5afa5bd00bc4e72",
+      "bytes": 26446
+    },
+    {
+      "path": "pages/app/ecard/new.tsx",
+      "sha256": "820ea5143852c52db341b20600f4a5b431941cd160fb583cc60b87fa2bb51896",
+      "bytes": 11726
+    },
+    {
+      "path": "pages/app/ecard/premium.tsx",
+      "sha256": "84374043cdca173e4c11ca0b48651b2e581a08f7a0c7a5300321e546d4459b8f",
+      "bytes": 15915
+    },
+    {
+      "path": "pages/app/ecard/preview.tsx",
+      "sha256": "e59a4abc0f6f886df7fd094181ad8ac03d086a15eea69201ee3e57f20f764794",
+      "bytes": 874
+    },
+    {
+      "path": "pages/app/ecard/studio-preview.tsx",
+      "sha256": "d0db6931c7d148c4b930800dc56e7f64fa88e655eed2e6d5f2e73636923525c5",
+      "bytes": 2405
+    },
+    {
+      "path": "pages/app/experience/[id].tsx",
+      "sha256": "f3d04b3a9f282233e8655eb2eee46e1618e3b5a28c7ffa3130a5252f9a55e440",
+      "bytes": 3953
+    },
+    {
+      "path": "pages/app/experiences.tsx",
+      "sha256": "36526cc5658716f68a004fe1e5713d1561aac5fe1a2d84ffe9bfb89ec00d3493",
+      "bytes": 13060
+    },
+    {
+      "path": "pages/app/explore.tsx",
+      "sha256": "390d3fe278aabf8185b6e5c6bc9dffdde4e67c2f65ee54f96c62fb87d2cdf01c",
+      "bytes": 15679
+    },
+    {
+      "path": "pages/app/food-menu.tsx",
+      "sha256": "9d9412dea98b3a8bd9116d933f476ecdab208ff2feb8a993963d2eac345ebe72",
+      "bytes": 6408
+    },
+    {
+      "path": "pages/app/forgot-password.tsx",
+      "sha256": "31e91fb178f1f70936d149d2c101e2b3aa04871120f94799f2ae27cb78511296",
+      "bytes": 10020
+    },
+    {
+      "path": "pages/app/guidelines.tsx",
+      "sha256": "c82aa6d77914c2f41f775e1bbe69c5459043b53c89f394b80777548e358d5144",
+      "bytes": 2075
+    },
+    {
+      "path": "pages/app/happening-now.tsx",
+      "sha256": "db196f15550ba256a5f2ea15c45caa5e547a6a2cc6a5efd1258da2ff3b2c99df",
+      "bytes": 18935
+    },
+    {
+      "path": "pages/app/help.tsx",
+      "sha256": "cbc757e75cf630617496b842fe27e3fc130d68be44af341fb532752acc03994e",
+      "bytes": 12875
+    },
+    {
+      "path": "pages/app/index.tsx",
+      "sha256": "ded570e19cc3ee252f6ae3d462c006f1eca92ba0384d160c88b6b5db728f76e8",
+      "bytes": 57413
+    },
+    {
+      "path": "pages/app/login.tsx",
+      "sha256": "9f3dd380a2b3d6e9e456fca6de61c6bd4023236a56e31f2fe987b01e3e785f60",
+      "bytes": 15697
+    },
+    {
+      "path": "pages/app/map.tsx",
+      "sha256": "6667be91bffe018f11c43cb752f75da19908c36c44bcf6b14c86399ba60c89b3",
+      "bytes": 88301
+    },
+    {
+      "path": "pages/app/messages.tsx",
+      "sha256": "fd73afedb53c2f66eb7d3703f4d66e3d66846db5b5f988c8daa1aca0095ba85d",
+      "bytes": 5303
+    },
+    {
+      "path": "pages/app/onthego/[id].tsx",
+      "sha256": "58a6fda27052618ce83342e6402d74b12e4eda24c2bf6ba132f61a096ef399d7",
+      "bytes": 3773
+    },
+    {
+      "path": "pages/app/onthego.tsx",
+      "sha256": "d48d24edfcc667f68b0b93fadc9f23f9113548e8aff23277d43be5bc75259d2b",
+      "bytes": 9884
+    },
+    {
+      "path": "pages/app/personal-signal-preferences.tsx",
+      "sha256": "844746d125c8e6416f88fc7ee4b3178e3a4fa68b310e75bca553230cb5ebfa73",
+      "bytes": 1874
+    },
+    {
+      "path": "pages/app/place/[id]/reviews.tsx",
+      "sha256": "8d64cb1f838ef1c512035c285c2524766f4ebc4b006bc18e418342d932ba13e6",
+      "bytes": 4579
+    },
+    {
+      "path": "pages/app/place/[id].tsx",
+      "sha256": "7e9d79ed8cf202fdd4536a0dea74604e34c3fa2d8bea966a714661aba96329e2",
+      "bytes": 12155
+    },
+    {
+      "path": "pages/app/profile/edit.tsx",
+      "sha256": "0c5a031f5d40d84b0c1eda6044308d83573b60fa11f43f094c54b7a3fc151a33",
+      "bytes": 17530
+    },
+    {
+      "path": "pages/app/profile/index.tsx",
+      "sha256": "8f06417da11a84cc8a0c6ef4d02805f4d26eef6698e230c58eced50b18a30341",
+      "bytes": 19752
+    },
+    {
+      "path": "pages/app/pros/category/[slug].tsx",
+      "sha256": "e62549adeb01c07b031ce6981c26a44b51d9892c44808d94bb585a40e5f55ddb",
+      "bytes": 15844
+    },
+    {
+      "path": "pages/app/pros/dashboard.tsx",
+      "sha256": "6cbbbc54d099a1bd8322e45a0468053f302d0c281e54533b60fafc8c6b7794c2",
+      "bytes": 33361
+    },
+    {
+      "path": "pages/app/pros/forgot-password.tsx",
+      "sha256": "fc6d08f2bfc6b3c303089d90376e04a071095be2c3734d507a6087ed4373c062",
+      "bytes": 10332
+    },
+    {
+      "path": "pages/app/pros/index.tsx",
+      "sha256": "c2c54f609e6a89304aba23f7a608bf85419dab1470ad07c8674e4b5630dfeda8",
+      "bytes": 30317
+    },
+    {
+      "path": "pages/app/pros/login.tsx",
+      "sha256": "197ee06c0fdecbddd4ca2987100a60b52bf5a05b3c801d8f6da69ba9ebe9dbd0",
+      "bytes": 15351
+    },
+    {
+      "path": "pages/app/pros/new-project.tsx",
+      "sha256": "d62c419291b57f8f463aa1b4701436b10dd218437898994f381a8c29cb4c0ba6",
+      "bytes": 59730
+    },
+    {
+      "path": "pages/app/pros/profile.tsx",
+      "sha256": "b127b3416b2a364f9ea362dc8e9324ea9876a2b5b15fd3f53a4353cefe83fd51",
+      "bytes": 18892
+    },
+    {
+      "path": "pages/app/pros/project-submitted.tsx",
+      "sha256": "cc660a2dee50452972bcb79f079e20c1701710c39a18d8afb72913a979f036b6",
+      "bytes": 6717
+    },
+    {
+      "path": "pages/app/pros/provider/[id].tsx",
+      "sha256": "6a4242c0ab80a793e373ec5f332db39ef72bffebdc02bd67c2bc50a164d42f12",
+      "bytes": 21328
+    },
+    {
+      "path": "pages/app/pros/register.tsx",
+      "sha256": "53595a92bcb5e2aa02f425147b4abc87ba50e5ee7d179faad04a6349a40fd324",
+      "bytes": 16909
+    },
+    {
+      "path": "pages/app/pros/shield.tsx",
+      "sha256": "35bf5944c1934f32491e167ffc7b7f99ce83d44b63b806450857afb35aa00576",
+      "bytes": 23655
+    },
+    {
+      "path": "pages/app/quick-finds.tsx",
+      "sha256": "b56b31430e4cb3c752b2b1c774123c6c32a57156d40c27f47f16480bec6d3f04",
+      "bytes": 8652
+    },
+    {
+      "path": "pages/app/realtor/[id].tsx",
+      "sha256": "911703c58530d2ac0579e2a8a9f0db3d7da55ed4b6ed19c2ec0ed11f6a1b217e",
+      "bytes": 6880
+    },
+    {
+      "path": "pages/app/realtors/browse.tsx",
+      "sha256": "4a00caf99667808bd0cac1b6b73d7e8bb953cfdc2ae4548dabe131baf138c0b0",
+      "bytes": 7919
+    },
+    {
+      "path": "pages/app/realtors/match/complete.tsx",
+      "sha256": "0dbbc9331036af74d8ae463d0852c08a7525d990420875839c5630c5fdd2c37c",
+      "bytes": 2192
+    },
+    {
+      "path": "pages/app/realtors/match/contact.tsx",
+      "sha256": "acb6e9c4ad873433eea1e1b5d1bd10509fc3f95d972aeb7bf2b73bc79df21dfb",
+      "bytes": 4804
+    },
+    {
+      "path": "pages/app/realtors/match/q1.tsx",
+      "sha256": "76fafbb84b6a36c52ed31d7e7900e89f34bf304d8545b2d9c0b978937f640d38",
+      "bytes": 7093
+    },
+    {
+      "path": "pages/app/realtors/match/q2.tsx",
+      "sha256": "d3425583e334d6986756b52efb15af00dee0bcdf9cd167f878700937eefebc0d",
+      "bytes": 4774
+    },
+    {
+      "path": "pages/app/realtors/match/start.tsx",
+      "sha256": "a781f954cba17a91d154e1846190f75332f6730cc91e7aeb2c88c7a742737fcb",
+      "bytes": 6959
+    },
+    {
+      "path": "pages/app/realtors.tsx",
+      "sha256": "3a7b9a964e508964374e64e50f24256a47e8f958fc1b1c69de95ffb7c1754391",
+      "bytes": 19896
+    },
+    {
+      "path": "pages/app/reset-password.tsx",
+      "sha256": "5843140943efbb7a84fd473b3381aa304691531bec7fa39ab2f33ec342f9c32d",
+      "bytes": 16873
+    },
+    {
+      "path": "pages/app/ride/[id].tsx",
+      "sha256": "3b4836149891f944462e0144090acffaa5557276114b8871b8f89bf03c6fc188",
+      "bytes": 34346
+    },
+    {
+      "path": "pages/app/rides.tsx",
+      "sha256": "de37d053029fa1e9e6685d50c46f290447d43d483a3abd827b54face4ff20271",
+      "bytes": 29692
+    },
+    {
+      "path": "pages/app/rv-camping.tsx",
+      "sha256": "3b912b9e8e12028a9c73b47a5054b5a4db652bffcb1c1ff0b24ee14dd8ee9562",
+      "bytes": 5102
+    },
+    {
+      "path": "pages/app/saved.tsx",
+      "sha256": "6ec762534e30803f40aa88f994cb9281f3a1c64c22895547a8afc03236c272af",
+      "bytes": 10938
+    },
+    {
+      "path": "pages/app/search.tsx",
+      "sha256": "5083b3ec968eaaba1911cc9cea1846f1ed76deeddcbeecf112deed69d15e8f38",
+      "bytes": 22904
+    },
+    {
+      "path": "pages/app/settings/distance-unit.tsx",
+      "sha256": "7688de8cce535255f6b54a7d56154f42a712692c2f9afa46a66a9c2d4f959b48",
+      "bytes": 6154
+    },
+    {
+      "path": "pages/app/settings/index.tsx",
+      "sha256": "01f8d750ce58d454e12b34d475cc0828aa7629725078b6ce7aac5a9bb3e25fcd",
+      "bytes": 18086
+    },
+    {
+      "path": "pages/app/settings/language.tsx",
+      "sha256": "9628834aab4ec74e34342a2feaa48fa10d3da49f921700f299f7a94e4637cfbb",
+      "bytes": 8968
+    },
+    {
+      "path": "pages/app/settings/map-layer.tsx",
+      "sha256": "ba3212d54f4b440e363a0c620f61878ba9d8b488b0103777adde9ee2c068a3c9",
+      "bytes": 6249
+    },
+    {
+      "path": "pages/app/settings/notifications.tsx",
+      "sha256": "83e49f79ecb1e95427ce3a403795fea0300007357f6a327e7dd70a2147e1f025",
+      "bytes": 6592
+    },
+    {
+      "path": "pages/app/settings/password.tsx",
+      "sha256": "3607db97da0c12b09bf274e8a8a0b3bb79dc2cd87bc35c62819477ed3cc2943c",
+      "bytes": 6867
+    },
+    {
+      "path": "pages/app/signup.tsx",
+      "sha256": "c1e937c6082bf1c85f32d95834a08f5daf9e899b7d06209c410148c0a092ca6a",
+      "bytes": 13958
+    },
+    {
+      "path": "pages/app/universe/[slug].tsx",
+      "sha256": "68e536c9c5c3c3d5ca7e2fe3eeb241e0abe983bac40dea14be977d4c2a929236",
+      "bytes": 61538
+    },
+    {
+      "path": "pages/app/universes.tsx",
+      "sha256": "85ae47cfab58b03af9ff5ec10602f7f60991ebf7824fa7cf90f8540d8ab81f01",
+      "bytes": 24770
+    },
+    {
+      "path": "pages/app/wallet.tsx",
+      "sha256": "7ff85995ec49d8eb46f6b385559ec597bf900266500214964f76cbd81c9979ba",
+      "bytes": 9175
+    },
+    {
+      "path": "pages/auth/callback.tsx",
+      "sha256": "f046e46cab66aef03bc274f77635f37c36931a245e80c968c8ae784687a41cd3",
+      "bytes": 1766
+    },
+    {
+      "path": "pages/ecard/premium/cancel.tsx",
+      "sha256": "fb3c75497c9f0abdc62ac1b8bbe6f55b505a57f957753d462428df9a6364f3c5",
+      "bytes": 760
+    },
+    {
+      "path": "pages/ecard/premium/success.tsx",
+      "sha256": "adc4e9d15bcb72261b6adbef16b563505214149897780c9c9dd52e80c128d585",
+      "bytes": 1639
+    },
+    {
+      "path": "pages/ecard/templates.tsx",
+      "sha256": "60565562a238832f30b39d4c64a5869b4130a5149ff8f4cab2f0d994530069b8",
+      "bytes": 7481
+    },
+    {
+      "path": "pages/ecard.tsx",
+      "sha256": "245533b44052a6fa0f37251047fdcb988f83d76efa2189f8eb81540ea23b0032",
+      "bytes": 70344
+    },
+    {
+      "path": "pages/index.tsx",
+      "sha256": "aa7c90be1e1c5740dd2e9d8e0eeaa046db1431a2e481fc0cb52d74c18cb3876b",
+      "bytes": 28531
+    },
+    {
+      "path": "pages/place/[id]/dashboard.tsx",
+      "sha256": "b154a7afeb6e97472137718fd2d96054602e0ef29f3fb9b933e18b9bed3fba03",
+      "bytes": 6871
+    },
+    {
+      "path": "pages/place/[id]/index.tsx",
+      "sha256": "ee1332e7113fb857d9aafcca72052c48241b2b39138ddf81d99fb65660b3117d",
+      "bytes": 27131
+    },
+    {
+      "path": "pages/place/[id]/menu-editor.tsx",
+      "sha256": "6d03c9d67819eada04d5ebab06894ace9dc70cf6e687214f0101284504fa4333",
+      "bytes": 62374
+    },
+    {
+      "path": "pages/place/[id]/menu-gallery.tsx",
+      "sha256": "77fcc31f5e44bb502644240d3a18e67d0812ac8a8118ae08c24e1b7f15e08591",
+      "bytes": 46432
+    },
+    {
+      "path": "pages/place/[id]/menu.tsx",
+      "sha256": "00acd69643f1fa8b2572eb0a12d1e168f67fc3b2c2aa83130f6d3b12f7456823",
+      "bytes": 56835
+    },
+    {
+      "path": "pages/place/[id]/order.tsx",
+      "sha256": "4a445be87d6ab828f66bb976468bb7032e8072beab3d9bd8ffe186b145e3a6e8",
+      "bytes": 52397
+    },
+    {
+      "path": "pages/place/[id]/ordering-settings.tsx",
+      "sha256": "fc866884d6d7229f036a8c44548530ed710baabd5cab51562f4537738ca85f3d",
+      "bytes": 7059
+    },
+    {
+      "path": "pages/place/[id]/qr.tsx",
+      "sha256": "1ebd74dc03bae59a1464740d8b67982df91b8eb42196970674a7203adef1de20",
+      "bytes": 8642
+    },
+    {
+      "path": "pages/place/[id]/table/[tableNumber].tsx",
+      "sha256": "7de7daf4dc36f40866206795364239ad3a05ce983ffc7a79ab098c3ff3b0d190",
+      "bytes": 646
+    },
+    {
+      "path": "pages/preview/[type].tsx",
+      "sha256": "f745c0daa310dfbaa8dc95a6b09121176db61093c57c6ff3208756baa585513d",
+      "bytes": 878
+    },
+    {
+      "path": "pages/preview/index.tsx",
+      "sha256": "ed245f5294c822a8b6ba35a55b1f6f07fd2ff83896178e8ed48151b82060c1e8",
+      "bytes": 3865
+    },
+    {
+      "path": "pages/preview/search.tsx",
+      "sha256": "e5747113c20352dc0e82462c08b2c5bfe2d537a836758ad571c25d7baff268e2",
+      "bytes": 7991
+    },
+    {
+      "path": "pages/preview/signal-spectrum.tsx",
+      "sha256": "2e5e7f28b397de96b1e3bed7793ac701ccb20dafa48e6961865fdd68537f0bd6",
+      "bytes": 622
+    },
+    {
+      "path": "pages/privacy.tsx",
+      "sha256": "827c6422003e58ec566bca6e1e17678e222ebcec39dcefb6027e3b03de6f15bd",
+      "bytes": 8060
+    },
+    {
+      "path": "pages/terms.tsx",
+      "sha256": "4a799135c5e4337a8ba6563aa8ea30856b17c3d60a1f701a2aad8f03134cf503",
+      "bytes": 7157
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "bf61da65ee7e8112126c25b9def453544329142ef56b50374e32e53a6d3dda55",
+      "bytes": 31736
+    },
+    {
+      "path": "public/apple-wallet-icon.png",
+      "sha256": "b721858884b2643db9a780ea83f28465c5269e48433eb61a70f2dad293bfdc6f",
+      "bytes": 6717
+    },
+    {
+      "path": "public/brand/apple-wallet-icon.png",
+      "sha256": "a3d816af9e492dc70c5f879265d2a15ea42e73bf124940c0e51de35e84ae9667",
+      "bytes": 4079
+    },
+    {
+      "path": "public/brand/google-wallet-icon.png",
+      "sha256": "d9a999771af6dcf1b658d8f3b98864a9a920089340c5e1235b3380ab1d7ae6ab",
+      "bytes": 4069
+    },
+    {
+      "path": "public/brand/logo-full.png",
+      "sha256": "48c2df7a61a16cf4e3241c20dc793770233b71532e5c9631805a5193fa2ff44a",
+      "bytes": 1634095
+    },
+    {
+      "path": "public/brand/logo-horizontal.png",
+      "sha256": "a7b23db9773cdc90b35104d2d5419980da3e2b48ffc1374755a7e696c8321226",
+      "bytes": 8702
+    },
+    {
+      "path": "public/brand/logo-icon-circle.png",
+      "sha256": "783ed5b17d32fed51c32b16cf09ac2705b181b82f5331b203debd55ec69c9a68",
+      "bytes": 1348964
+    },
+    {
+      "path": "public/brand/logo-icon.png",
+      "sha256": "8e64d080d8de5d72e6bdf8138ea7517d3fb113e124b0a9ff87817deffa252e46",
+      "bytes": 4986
+    },
+    {
+      "path": "public/brand/logo-white.png",
+      "sha256": "b00f2b60552e0d5b0ffeb7f8a645aaf08265f9c48b7188b309b4db723a639c05",
+      "bytes": 9009
+    },
+    {
+      "path": "public/brand/tavvy-logo-horizontal-light.png",
+      "sha256": "a7b23db9773cdc90b35104d2d5419980da3e2b48ffc1374755a7e696c8321226",
+      "bytes": 8702
+    },
+    {
+      "path": "public/brazil-flag-1.jpg",
+      "sha256": "1527680a5444286b5a0ad761f76df22dbd3f61fe2010576a74db54ca74bf21d5",
+      "bytes": 941548
+    },
+    {
+      "path": "public/brazil-flag-2.jpg",
+      "sha256": "934ffdff6af479a1c92f6e3a8b8af153151ee06acf2aedd0e0de9562997ef046",
+      "bytes": 1118763
+    },
+    {
+      "path": "public/favicon-source.png",
+      "sha256": "8e64d080d8de5d72e6bdf8138ea7517d3fb113e124b0a9ff87817deffa252e46",
+      "bytes": 4986
+    },
+    {
+      "path": "public/favicon.png",
+      "sha256": "d78255a240a6a5bb81564bdde5d8bcab0083274b02bd1bf15180e3845db3c5a4",
+      "bytes": 1084
+    },
+    {
+      "path": "public/google-wallet-icon.png",
+      "sha256": "25c8942c8aa7a7ea9d225840f96b791be0ef6e0758a506ee1324af6ec1f01b07",
+      "bytes": 10666
+    },
+    {
+      "path": "public/images/brazil-flag-alt.jpg",
+      "sha256": "1527680a5444286b5a0ad761f76df22dbd3f61fe2010576a74db54ca74bf21d5",
+      "bytes": 941548
+    },
+    {
+      "path": "public/images/brazil-flag-horizontal.jpg",
+      "sha256": "2098310321e1029898042e35249a8dc8957ad294ca89f98dd021dc979d8fd201",
+      "bytes": 854743
+    },
+    {
+      "path": "public/images/brazil-flag-vertical.jpg",
+      "sha256": "9df0345e38369f78df8b36559eff25f949854bc97d73efdc3c9fc55b19099cf5",
+      "bytes": 857136
+    },
+    {
+      "path": "public/images/brazil-flag.jpg",
+      "sha256": "934ffdff6af479a1c92f6e3a8b8af153151ee06acf2aedd0e0de9562997ef046",
+      "bytes": 1118763
+    },
+    {
+      "path": "public/images/demo-trattoria/an-evening-at-tavvy.mp4",
+      "sha256": "9fe5a7acc89b117be857064ecf592e88b91ee90d97d2b351c254ec33940c25fe",
+      "bytes": 1539517
+    },
+    {
+      "path": "public/images/demo-trattoria/burrata.jpg",
+      "sha256": "449460ebcf70c5185caf4ebbfbcc855c9deb21d4e857207b5744beabb7b6ec02",
+      "bytes": 440210
+    },
+    {
+      "path": "public/images/demo-trattoria/dining-room.jpg",
+      "sha256": "a526a02483a8f6a78c12ef196315598ce4543203f4398fae99edf6276490ea83",
+      "bytes": 423460
+    },
+    {
+      "path": "public/images/demo-trattoria/dining-room.png",
+      "sha256": "58a3adaae1068c09e0414574799582c4691232af693f366614f7dde2e6a53968",
+      "bytes": 2106260
+    },
+    {
+      "path": "public/images/demo-trattoria/kitchen.jpg",
+      "sha256": "007d2ea57789bebbd08c9653a51a614e02c9089b3a16ccf76e2474847db19c79",
+      "bytes": 418345
+    },
+    {
+      "path": "public/images/demo-trattoria/pasta.jpg",
+      "sha256": "83d18c6f36d84bf433db9a4f5cb04ad3d85869361534b93f235627cdf51300d0",
+      "bytes": 473725
+    },
+    {
+      "path": "public/images/demo-trattoria/pasta.png",
+      "sha256": "df014b60eaff904915ebe062814b828f764473f8387525f641b4b274001dc7b5",
+      "bytes": 2353161
+    },
+    {
+      "path": "public/images/demo-trattoria/pizza.jpg",
+      "sha256": "11e4214e7092f8610d35e6697d93d22f092c6d9a9cfc6613c3cb100cf2829af1",
+      "bytes": 597639
+    },
+    {
+      "path": "public/images/demo-trattoria/tiramisu.jpg",
+      "sha256": "6929f0829b8fd784c200eac607144d448f0cb68e80f787f9c45aeb234c20bb6c",
+      "bytes": 434393
+    },
+    {
+      "path": "public/images/ecard-examples/cedar-mark.svg",
+      "sha256": "d125d4be5b78d570ea76159547103a98ab1859acb9ca65239813b1edd048f145",
+      "bytes": 203
+    },
+    {
+      "path": "public/images/ecard-examples/chef-marcus-clean.png",
+      "sha256": "66ef0b14e8f02f5e3764abb2c4d68dc7936240520eb36b488cac3c27adb4fb31",
+      "bytes": 1768095
+    },
+    {
+      "path": "public/images/ecard-examples/chef-marcus.png",
+      "sha256": "e5f36fc0bf6561c718b4870d1b4902baaee449d9552cf4bdc3c2923d4e2290ab",
+      "bytes": 5633449
+    },
+    {
+      "path": "public/images/ecard-examples/david-kim.png",
+      "sha256": "fe52e2735ea49692b053c0fc71b1c578d03e6b640aae3ca15dfc0cda54e926bf",
+      "bytes": 6050491
+    },
+    {
+      "path": "public/images/ecard-examples/emma-rodriguez.png",
+      "sha256": "4261412b45dac8c9c5bc8cf14710f14641cd7f1e024970381f2747e2da12db25",
+      "bytes": 5644019
+    },
+    {
+      "path": "public/images/ecard-examples/jake-fitness-hero.png",
+      "sha256": "28250f867b63da4a8f701a3bccf9ad9b471dd75c791131d5a21ae18b664d4b11",
+      "bytes": 2068899
+    },
+    {
+      "path": "public/images/ecard-examples/james-chen.png",
+      "sha256": "d17d117c55b3e8bacddbcb249cf7cda1df75f7324e41f65820869a517e07420f",
+      "bytes": 6134340
+    },
+    {
+      "path": "public/images/ecard-examples/jennifer-walsh.png",
+      "sha256": "00f7bec112d6399751f5aad61ef85ce6540c5bec2c1aa12cbd1cc727b33ac3ff",
+      "bytes": 6025648
+    },
+    {
+      "path": "public/images/ecard-examples/kitchen-mark.svg",
+      "sha256": "a50f60e4c5cf483e4682c6d7d1942d469b82cef4528ddc85a75e5280171a4973",
+      "bytes": 298
+    },
+    {
+      "path": "public/images/ecard-examples/mobile-kitchen-cover.png",
+      "sha256": "0b524cfc7782ec7d2cdbdfbe8f3756dac346987aca57747f58651d51b5cc58c5",
+      "bytes": 2604709
+    },
+    {
+      "path": "public/images/ecard-examples/soft-folds.svg",
+      "sha256": "f275519d63dea893a3e6f6bdc3fcca677c3f9dacf62eebf5bc90909484aa353b",
+      "bytes": 483
+    },
+    {
+      "path": "public/images/ecards/aline-martins-profile.jpg",
+      "sha256": "8d585d6c13b14a6d1b6d1eb1adf7d3a6157afb0da155517c2fdc7f6945928660",
+      "bytes": 515915
+    },
+    {
+      "path": "public/images/features-v2/atlas.jpg",
+      "sha256": "e36c0bf9180952606f9e39a60b982b01db7a3bea50b96c27474af971b67afb0d",
+      "bytes": 408983
+    },
+    {
+      "path": "public/images/features-v2/cities.jpg",
+      "sha256": "d7f45c5db8ab39672e378bd4b0b4bb4bac9982dfd3bee704d3acb174d4b97fb9",
+      "bytes": 443572
+    },
+    {
+      "path": "public/images/features-v2/hotels.jpg",
+      "sha256": "c2eb0e0e48620ff7bad3c50a83424df13bb80a3921ef10bddaf0dd77ad9ff48f",
+      "bytes": 410749
+    },
+    {
+      "path": "public/images/features-v2/pros.jpg",
+      "sha256": "54a3c7d201d800856cb50b1de91ecd7ea5ba90eb80454938d64d74f386f6801a",
+      "bytes": 214131
+    },
+    {
+      "path": "public/images/features-v2/restaurants.jpg",
+      "sha256": "f666e505f7488ca4ba6e8e4a0cc19110c2231dbd681acedc17ddf83bc387e79a",
+      "bytes": 282906
+    },
+    {
+      "path": "public/images/features-v2/rides.jpg",
+      "sha256": "846d52bfdc35fba527fb5988df5ab8ccac5a7a38e5911fd19b4d544038da84f4",
+      "bytes": 417937
+    },
+    {
+      "path": "public/images/features-v2/rv-camping.jpg",
+      "sha256": "e0a8b24c7ba05864b6372878025f7876e8a2a1ad32f5b82107e0d947c5d3d5f8",
+      "bytes": 404458
+    },
+    {
+      "path": "public/images/features-v2/universes.jpg",
+      "sha256": "c8a8380f68fb8b749d539dd7003b52677ff64b8e33f220e1db4e99fe37bfe9bf",
+      "bytes": 337637
+    },
+    {
+      "path": "public/images/sample-avatar.png",
+      "sha256": "5c8fcf679b167940a166793c4b3198e3b2baf7383c3bb1ace91e3c00aed1d7c3",
+      "bytes": 5293719
+    },
+    {
+      "path": "public/images/sample-avatar_original.png",
+      "sha256": "b29906f31bfefe402eb21738b652e677b5b55329f3d847da966b84343be75dc6",
+      "bytes": 4216358
+    },
+    {
+      "path": "public/images/sample-banner.jpg",
+      "sha256": "d4c805aa78693c1a6418dfc488d510047a32b6433f851156013a9889095f6782",
+      "bytes": 5777095
+    },
+    {
+      "path": "public/images/templates/basic.png",
+      "sha256": "c04f6b3c3cad6ec9234fefd93ec0a953eb7df714d93343cd98a93a0ce2d1f082",
+      "bytes": 528853
+    },
+    {
+      "path": "public/images/templates/biz-minimalist.png",
+      "sha256": "35af98ee0049fa25d2cf85654c27e1c9ec69ecc70dbfe09f1c515600db5e0aba",
+      "bytes": 160086
+    },
+    {
+      "path": "public/images/templates/biz-modern.png",
+      "sha256": "4fc62bebd47c9ae53d5c1513063ff50aad56cd41e4370a0b747997cddc3a4583",
+      "bytes": 216457
+    },
+    {
+      "path": "public/images/templates/biz-traditional.png",
+      "sha256": "8bdc8f19f65f01a198afe667f8d5885f3d70b98ed41230c50cb2b2ff2a7ba42c",
+      "bytes": 166556
+    },
+    {
+      "path": "public/images/templates/blogger.png",
+      "sha256": "c46a762d71d1cc542349d2425c62e319171711a88d2c26453e33312eae6e0e4e",
+      "bytes": 374112
+    },
+    {
+      "path": "public/images/templates/business-card.png",
+      "sha256": "88762974a2e9729a83d3e62ddab2add494f01067a22ae6fb1bd55c524e8a6ea8",
+      "bytes": 302991
+    },
+    {
+      "path": "public/images/templates/church.png",
+      "sha256": "6d04099ceae06fe5e0928c75b0afb4ea9d248326956eda8b5bddd84349794fb5",
+      "bytes": 332289
+    },
+    {
+      "path": "public/images/templates/cover-card.png",
+      "sha256": "e88ae1d57ea2d03a214f4b74e3379cc485c09b9c3166a6145498b7116b4327d9",
+      "bytes": 504501
+    },
+    {
+      "path": "public/images/templates/full-width.png",
+      "sha256": "b80b1ed7887a561e6fd3946f22167c12179fc7d962aa55e9324b26184c916220",
+      "bytes": 1427958
+    },
+    {
+      "path": "public/images/templates/premium-static.png",
+      "sha256": "f03296e476bcaedf38932372dea8c107c95bfa455661028f7c07f7d5cb93a696",
+      "bytes": 200761
+    },
+    {
+      "path": "public/images/templates/pro-card.png",
+      "sha256": "991b1f6f268e61e5407eae42e7100b0c143b15d19ca9caa2fd102287659719e8",
+      "bytes": 392747
+    },
+    {
+      "path": "public/images/templates/pro-corporate.png",
+      "sha256": "99272eb0d8f56d22274e21baf2c10867d7e2e444445a250e62390e8064d291b8",
+      "bytes": 325733
+    },
+    {
+      "path": "public/images/templates/pro-creative.png",
+      "sha256": "014341842f6665d5806f8ed0bc9c3c90d8ec980ad0cc0dbc163ffa584c6a7569",
+      "bytes": 267248
+    },
+    {
+      "path": "public/images/templates/pro-realtor.png",
+      "sha256": "31720de0f0859fb0181222bd4ad7335b720d314324a584617f29b0d1b01fb817",
+      "bytes": 399899
+    },
+    {
+      "path": "public/locales/ar/common.json",
+      "sha256": "a207472cc90f959766a1cd60972e47a710763b4678c5f99e8c974cb2ba88919a",
+      "bytes": 48445
+    },
+    {
+      "path": "public/locales/de/common.json",
+      "sha256": "cd5601811fa29f4532029c2acdc0c5484244defcac912a1acebd608727e80e29",
+      "bytes": 41561
+    },
+    {
+      "path": "public/locales/en/common.json",
+      "sha256": "f95ce5eb606bc6e3ccda6697caa687a4919af114cc611d772b8974d38aa58e87",
+      "bytes": 57034
+    },
+    {
+      "path": "public/locales/es/common.json",
+      "sha256": "64e36185fee37f44d7687b36f7ccc2151b836abb3329b8dc4ac62065493e885e",
+      "bytes": 58121
+    },
+    {
+      "path": "public/locales/fr/common.json",
+      "sha256": "388188349f09ab84da00c29974b9c6ca5a441f9929654de3b3fde72d7c7938ad",
+      "bytes": 42649
+    },
+    {
+      "path": "public/locales/hi/common.json",
+      "sha256": "66d7a64b5dc7b8cd5ab6c9fc64270ba07858deb3386e9b05b24dd4fed1e78346",
+      "bytes": 63579
+    },
+    {
+      "path": "public/locales/id/common.json",
+      "sha256": "9dfba29c604a8fd335339cca465f44aee980ec04276e45207dc5333dea40e753",
+      "bytes": 36872
+    },
+    {
+      "path": "public/locales/it/common.json",
+      "sha256": "d04b4abb5e16815531a9d830d782baaee1ee989e995a4a8b291cc17eafb62282",
+      "bytes": 40868
+    },
+    {
+      "path": "public/locales/ja/common.json",
+      "sha256": "64551ffe85cd794f7d2e0c2c97651df4b48cfceb7397817cc5bf8e735b70877c",
+      "bytes": 44933
+    },
+    {
+      "path": "public/locales/ko/common.json",
+      "sha256": "fa2bce8a828f812dc4549109dc94d988c446650993f09f8d3063c50a47f41a74",
+      "bytes": 41738
+    },
+    {
+      "path": "public/locales/nl/common.json",
+      "sha256": "e636aea01c71ea46199ef3dbb33844495a576186ac76d82bff93b64ccb147df6",
+      "bytes": 40385
+    },
+    {
+      "path": "public/locales/pt/common.json",
+      "sha256": "a266e4175a3a38d61eb0756b3cad5dafdcdd2c5e2419ec4914f522ec57236ea6",
+      "bytes": 60998
+    },
+    {
+      "path": "public/locales/ru/common.json",
+      "sha256": "69e086ed1715c2d33ee8df8a208e95c61f075024077a0581ddd02293ba6fedf3",
+      "bytes": 54850
+    },
+    {
+      "path": "public/locales/th/common.json",
+      "sha256": "5bda153b06693f7bcfb917d540fba94a8102b1a341fdab4f095061c48aef9c9f",
+      "bytes": 61047
+    },
+    {
+      "path": "public/locales/tr/common.json",
+      "sha256": "dd49c3b77dd4ec362e44f4cedf39d310de0455489251642761dc301683db3701",
+      "bytes": 40716
+    },
+    {
+      "path": "public/locales/vi/common.json",
+      "sha256": "82eb590d8a89852e85dd7243ff9a9f185845e42ecf9b8b294e5bf48f715bb822",
+      "bytes": 41871
+    },
+    {
+      "path": "public/locales/zh/common.json",
+      "sha256": "05f35fc4ad008f50b7dc185bc313857a820a8147d943b31755ab18a706c7b464",
+      "bytes": 37447
+    },
+    {
+      "path": "public/manifest.json",
+      "sha256": "e05e4e27bf24a90a35f94fa361bd7205c1cb018c1121ed70b0a656f2000d480e",
+      "bytes": 688
+    },
+    {
+      "path": "public/og-image.html",
+      "sha256": "0a130b251e54c2287b818708c830a8ba01ae18c16f13eae27992ed245c5b63b4",
+      "bytes": 2623
+    },
+    {
+      "path": "public/og-image.png",
+      "sha256": "225cc8ba193d8a443f1387a453470a81064d4a59c81324fd499bf80872c57583",
+      "bytes": 64278
+    },
+    {
+      "path": "public/preview-airport.jpg",
+      "sha256": "8144d8f226276ef4c94909ade71b9fa201f6d00722ab7f389480e231ce2c7a78",
+      "bytes": 55152
+    },
+    {
+      "path": "public/preview-bakery.jpg",
+      "sha256": "d90254e308d93f7ec6ab5ea58f7d84f73a56061ca3658542dbc914a6e703860f",
+      "bytes": 143381
+    },
+    {
+      "path": "public/preview-cafe.jpg",
+      "sha256": "cda61580a8f4c5fea41718d12bf03aa813506f255222c3dcfe1c14bebe7795c3",
+      "bytes": 55381
+    },
+    {
+      "path": "public/preview-construction.jpg",
+      "sha256": "0a6e3ae57fa6d99aecae1dc2c5a67f56f52a27fedaceae1f474a86c838c2e336",
+      "bytes": 170945
+    },
+    {
+      "path": "public/preview-dinner.jpg",
+      "sha256": "dec199e7f86ff89ef70a39a99ad31c8cf4bea39738d184f8b6aa291139039840",
+      "bytes": 121359
+    },
+    {
+      "path": "public/preview-hotel.jpg",
+      "sha256": "a4a2a24846029c91b0184d4e49391fc0301d76213f6ccf1c3785081519f7786a",
+      "bytes": 137336
+    },
+    {
+      "path": "public/preview-service.jpg",
+      "sha256": "379d1bb8f81915e79c3927a90a787fb65529420fceca7cace0ce01b5ca40dc7a",
+      "bytes": 163639
+    },
+    {
+      "path": "public/restaurant-guide.html",
+      "sha256": "108a286b23b7776378268cf382ec9fcea2efb0582c59e97634f56f932f872bca",
+      "bytes": 29247
+    },
+    {
+      "path": "public/robots.txt",
+      "sha256": "9f736b5964d4d657649822d9b200ff6a6b150af739baeaefc337a9ee14776afe",
+      "bytes": 295
+    },
+    {
+      "path": "public/sitemap-0.xml",
+      "sha256": "cb73af9315c8c860b07b3e7d662984d04648cd15dc0181783220817a30d3aab4",
+      "bytes": 12286
+    },
+    {
+      "path": "public/sitemap.xml",
+      "sha256": "b23dcac84102eae7266ebcbd41252d77c3a14738c81e94829da962df5bf66ad9",
+      "bytes": 183
+    },
+    {
+      "path": "public/tavvy-icon.png",
+      "sha256": "72909eb07dcde5bea7d8deb2b3e4d2d01c4a10d9656adae0d12975d5456eec8c",
+      "bytes": 5058
+    },
+    {
+      "path": "public/tavvy-logo-dark.png",
+      "sha256": "b00f2b60552e0d5b0ffeb7f8a645aaf08265f9c48b7188b309b4db723a639c05",
+      "bytes": 9009
+    },
+    {
+      "path": "public/tavvy-logo-white.png",
+      "sha256": "a7b23db9773cdc90b35104d2d5419980da3e2b48ffc1374755a7e696c8321226",
+      "bytes": 8702
+    },
+    {
+      "path": "railway.json",
+      "sha256": "15277ad7ef36f3f860ff8aed0fed67d208d3a1528aa9e3389e8e84625322ee46",
+      "bytes": 232
+    },
+    {
+      "path": "railway.toml",
+      "sha256": "7e028da0f601de678704507574663d74f0ab0d47c3deb28cfaa9b500ae303690",
+      "bytes": 225
+    },
+    {
+      "path": "scripts/audit-column-contracts.mjs",
+      "sha256": "c2db364ca44b140a4ffdc7c55f496ef233118a7d3fe02f8cd17869de6e226413",
+      "bytes": 3583
+    },
+    {
+      "path": "scripts/audit-links.mjs",
+      "sha256": "367a7d6188ba1ce5451d0fef62bbeee8838ca00ce1498142ee93b594c89db506",
+      "bytes": 1424
+    },
+    {
+      "path": "scripts/audit-review-readers.cjs",
+      "sha256": "7755c992594d3c95916ec7862f9ee1975abb7fe646522370dcb5e76e2f4b05d0",
+      "bytes": 2557
+    },
+    {
+      "path": "scripts/audit-schema.mjs",
+      "sha256": "966d67d850bc3bad711aac6d6c169395edf1a34d08c868322e41bac262d1450e",
+      "bytes": 951
+    },
+    {
+      "path": "scripts/audit-system.mjs",
+      "sha256": "158f17a031a8ca58cfe59e0d524a7bbd859fe7ffd06b131049008c591aa11122",
+      "bytes": 3136
+    },
+    {
+      "path": "scripts/benchmark-search.mjs",
+      "sha256": "b3557b1c04d661f311a05b8b4e09fba27356b2fb6f4e5f0347aa37384e615c44",
+      "bytes": 1495
+    },
+    {
+      "path": "scripts/cruises/prepare-draft-import.cjs",
+      "sha256": "3221be31b8bb182b51aa50a510bfa9e4ff03f1f4887377fc05c5c0ebccaca5ad",
+      "bytes": 10015
+    },
+    {
+      "path": "scripts/cruises/validate-catalog.cjs",
+      "sha256": "236e222e328be0355b2ee36a09479007f1fcd3b1a22bec2e92bcdd5348623c76",
+      "bytes": 4307
+    },
+    {
+      "path": "scripts/test-account-deletion-sql.cjs",
+      "sha256": "897e01b1c996ecf82af18087242a165268ea0dac7d5d48fdcff67919a2d66fd4",
+      "bytes": 7421
+    },
+    {
+      "path": "scripts/test-account-deletion.cjs",
+      "sha256": "0ba2079ad50a76290644147c0aec3e376df4eadfdf1fbcfd9c6196771aa86cde",
+      "bytes": 5035
+    },
+    {
+      "path": "scripts/test-auth-redirect.mjs",
+      "sha256": "a0150e704a47730104d0dc832987884790b8d55b5a53d0a6dcfd898bc3387047",
+      "bytes": 770
+    },
+    {
+      "path": "scripts/test-ecard-exports.cjs",
+      "sha256": "56cf3c5a2ff79681f56e198a17e59895dad20e2a25cba49e032b64bf34b33521",
+      "bytes": 3458
+    },
+    {
+      "path": "scripts/test-onthego-contract.cjs",
+      "sha256": "1826e12a9501b8b6ebdd6b1a56ec5bca87db90dd2590379564d63ec7ea09fe00",
+      "bytes": 6798
+    },
+    {
+      "path": "scripts/test-place-drafts.cjs",
+      "sha256": "1976bd294b98cfc703ac5b2f702db98ddd758bd5b831699881e4ebc2f88c6428",
+      "bytes": 6297
+    },
+    {
+      "path": "scripts/test-place-photo-upload.cjs",
+      "sha256": "ca1f150af097d379237eb9a92ae7f52fe71104f62a88c54c1ba21598cc40688d",
+      "bytes": 2126
+    },
+    {
+      "path": "scripts/test-review-api.cjs",
+      "sha256": "48252bd6ae712ac0e2733c25e0b024f4a54aed8579d3c0e074953ce50da79ce0",
+      "bytes": 1997
+    },
+    {
+      "path": "scripts/test-review-persistence.cjs",
+      "sha256": "d7f1e7016b76a11b5c727a8bf3fe340ed4e9d4523eb2adf9560e1b35e77bac43",
+      "bytes": 2706
+    },
+    {
+      "path": "scripts/test-search-cache.mjs",
+      "sha256": "a1b7dff7644fc8b6b432d8d594ed25f7dbcd16cae74cf79d9813d98afd716a6d",
+      "bytes": 3596
+    },
+    {
+      "path": "scripts/test-tap-intensity.cjs",
+      "sha256": "98373aa5c25cb8b34f09cb642397bcc4ba8758395d6ff2baf126522a8ad3dfe8",
+      "bytes": 5421
+    },
+    {
+      "path": "scripts/test-tavvy-chat-rls.cjs",
+      "sha256": "a73422b3e01cf0ccc074cc57e600d3c40bc32ecb9da464aadc6db3fed558e163",
+      "bytes": 6617
+    },
+    {
+      "path": "scripts/test-tavvy-chat.cjs",
+      "sha256": "2833a10838b0927a861959b86bde31c124d753b40d67c884f5e25eb0c118fd3f",
+      "bytes": 3974
+    },
+    {
+      "path": "scripts/test-universe.cjs",
+      "sha256": "b35c188d2f56a8ac51c280ea9d8feac7e9149ff9efb768cacce8f416496b282d",
+      "bytes": 1441
+    },
+    {
+      "path": "scripts/test-wallet.cjs",
+      "sha256": "fba130309e5f7589f3a07b7e2f6efe3237681d758dbc09d67b151a94e106a02a",
+      "bytes": 4587
+    },
+    {
+      "path": "scripts/tests/account-menu-locale.e2e.cjs",
+      "sha256": "f5f722426130e88f13acb3e1ace3a91fbe592f8411dd4a3bc0f53c8949ccc163",
+      "bytes": 5505
+    },
+    {
+      "path": "scripts/tests/account-menu-locale.test.cjs",
+      "sha256": "6c52ad3676992cdfdbae70e3c49735114e76da550476e465b565e27690cb1413",
+      "bytes": 2646
+    },
+    {
+      "path": "scripts/tests/atlas-audio-locale.test.cjs",
+      "sha256": "6d05f59441b221f38bf7ae37307c10a30508c92641299d9d63ed0ddeeac5ec2b",
+      "bytes": 2273
+    },
+    {
+      "path": "scripts/tests/atlas-audio.e2e.cjs",
+      "sha256": "91d8c075e31b9e5263679dc0c09dd9622022a45d2fc01dca2e5e4a247521ffeb",
+      "bytes": 6542
+    },
+    {
+      "path": "scripts/tests/atomic-place-reviews.test.cjs",
+      "sha256": "ae167db599a8ea64fc144e64fc2bb0d43343df3e8dbf0d3a55f1345871dabbd8",
+      "bytes": 10767
+    },
+    {
+      "path": "scripts/tests/blocked-authors-race.test.cjs",
+      "sha256": "4879fe4567ab2c908299596a947aed764441c70a439792cadbff349423592e46",
+      "bytes": 5889
+    },
+    {
+      "path": "scripts/tests/content-safety-browser.cjs",
+      "sha256": "e36bfd097953a1e2670ffb71d50e824ac56de210ec6f632d272be033ececd672",
+      "bytes": 6159
+    },
+    {
+      "path": "scripts/tests/content-safety.test.cjs",
+      "sha256": "3509c0f1355728e616f5441451d6b34ce460b989ea031ef687b40056d59faf5d",
+      "bytes": 6079
+    },
+    {
+      "path": "scripts/tests/cruise-catalog.test.cjs",
+      "sha256": "08ed1194a5ebc31d4d7f30987e9a99025950488dbff610214116fe98360d9239",
+      "bytes": 5925
+    },
+    {
+      "path": "scripts/tests/cruise-import.test.cjs",
+      "sha256": "075f2631cd6292bf7ab779c867c4d151ff05a3fcb299cceffe3e9e7914b79f86",
+      "bytes": 2257
+    },
+    {
+      "path": "scripts/tests/cruise-reviews.test.cjs",
+      "sha256": "37afb3955b4dc826baaf5689e8b0698b4fc5ec5d5715140864776da0c4812be1",
+      "bytes": 3312
+    },
+    {
+      "path": "scripts/tests/cruise-ui.e2e.cjs",
+      "sha256": "8e404c3cc6ef4d3357a04aea55523c84c6222efd0094a0bc30a27be69e9292d0",
+      "bytes": 18074
+    },
+    {
+      "path": "scripts/tests/ecard-creation-locale.e2e.cjs",
+      "sha256": "ceb2b318268643ac931ff992a5e58120e8abb629ea990e2e6202ff1a0f715007",
+      "bytes": 8048
+    },
+    {
+      "path": "scripts/tests/ecard-creation-locale.test.cjs",
+      "sha256": "62a3257f680036513b46f1982371806749ade5fa1ea22e06fcb788a876840b63",
+      "bytes": 4147
+    },
+    {
+      "path": "scripts/tests/ecard-editor-state.test.cjs",
+      "sha256": "512c708ed87cfb35146b32955d79600e955c442401d8c6e117d408cdc16d3737",
+      "bytes": 3516
+    },
+    {
+      "path": "scripts/tests/ecard-phone-preview.e2e.cjs",
+      "sha256": "7f47cab6b60edd91607fb1a76e0b34a74171f77c0948552376e32094c5acc066",
+      "bytes": 11523
+    },
+    {
+      "path": "scripts/tests/ecard-preview-bridge-browser.cjs",
+      "sha256": "abc88b69cd902df3245c04ec545fcc07c02b2ee3bac524196216180673b9e821",
+      "bytes": 10083
+    },
+    {
+      "path": "scripts/tests/ecard-pro-extras.e2e.cjs",
+      "sha256": "b119dbe7adb21d4b55475fe2d0d371a34b73517db8129b7c5eb6abd48159e00a",
+      "bytes": 12952
+    },
+    {
+      "path": "scripts/tests/ecard-pro-extras.test.cjs",
+      "sha256": "597afc289a5f0dcd298403adc786a8d3dd8e75dcff56da6e5dbb7ffa1b6084fd",
+      "bytes": 3962
+    },
+    {
+      "path": "scripts/tests/ecard-public-availability.test.cjs",
+      "sha256": "ca062c753dae3b33543cd71e57c824552277a8784f7bceb847cec1fcb1ceec12",
+      "bytes": 6920
+    },
+    {
+      "path": "scripts/tests/ecard-public-counts.test.cjs",
+      "sha256": "9ab626b52346fdbcd176d1d1649b2b7f9ab52bfe4fe326220cb27b799588cf0a",
+      "bytes": 4573
+    },
+    {
+      "path": "scripts/tests/ecard-public-renderer.test.cjs",
+      "sha256": "4ae561d6bfa2c54f147f4de692562a3e29cf2bdf1dd0f4d6be6d6607b1a69f45",
+      "bytes": 6236
+    },
+    {
+      "path": "scripts/tests/ecard-safety-browser.cjs",
+      "sha256": "4a9ff827f686bb260565a17f7d27d03eedf558a2c37f2903b7df3f4189b5e8d5",
+      "bytes": 5734
+    },
+    {
+      "path": "scripts/tests/ecard-save-contract.test.cjs",
+      "sha256": "c14a58604e7e4bfa8a05508bda7712b8ddfa59887c8642551e171dcf7adb7f8c",
+      "bytes": 4101
+    },
+    {
+      "path": "scripts/tests/ecard-studio.e2e.cjs",
+      "sha256": "63ec4e6ded65a0f81c0e1bd0a258da53fb2ef8f142e51e1822f00d5c26ff991e",
+      "bytes": 15702
+    },
+    {
+      "path": "scripts/tests/ecard-template-chooser.e2e.cjs",
+      "sha256": "3d7ed5433f12ad0697fea1e6a472858c03a8b7f1111611ddae754ca24f466fc5",
+      "bytes": 8669
+    },
+    {
+      "path": "scripts/tests/ecard-template-finishing.e2e.cjs",
+      "sha256": "ccf1451a52812a5e914d58267300a00731eb7fcbbf87625b8eb6463e9ccf09f1",
+      "bytes": 4101
+    },
+    {
+      "path": "scripts/tests/ecard-template-finishing.test.cjs",
+      "sha256": "7f8268b989f9527f82113254e9b17aab1bff873c048f204360a384e8138dc80b",
+      "bytes": 6356
+    },
+    {
+      "path": "scripts/tests/ecard-template-previews.e2e.cjs",
+      "sha256": "bde9d0e1e98562cf4e51ae4ec82ecc3f9f00a6bac9165bc4a624e08ad92c7817",
+      "bytes": 2735
+    },
+    {
+      "path": "scripts/tests/ecard-template-selection.test.cjs",
+      "sha256": "bd0d61129273cffd445858d4ad511967c090a0a22eb0d9d75df85a0725eb7db9",
+      "bytes": 3101
+    },
+    {
+      "path": "scripts/tests/event-reviews-sql.test.cjs",
+      "sha256": "f5c4149c294a9d548effc612ca4891d4db75af295c20af69f2a8252d29f1a873",
+      "bytes": 4755
+    },
+    {
+      "path": "scripts/tests/events-discovery.test.cjs",
+      "sha256": "6d250341a5cf01f734feec8019399a03f69307ec8d2e240461a52547422c7883",
+      "bytes": 4085
+    },
+    {
+      "path": "scripts/tests/experience-authoring-sql.test.cjs",
+      "sha256": "45a1272fe7a2ddca3dce1fb64b86d17bbacc63c57c53ecd5b40965388fb858af",
+      "bytes": 3206
+    },
+    {
+      "path": "scripts/tests/experience-paths-sql.test.cjs",
+      "sha256": "b21a2a92333fdbe29cb5d35f8b22728d5e0b851b7394bdc6c4a137cfab7d8134",
+      "bytes": 2730
+    },
+    {
+      "path": "scripts/tests/food-menu-sql.test.cjs",
+      "sha256": "946efe05c4aedd985106747fcac51012e402a09f84b669f7eba495bd05e8699d",
+      "bytes": 7553
+    },
+    {
+      "path": "scripts/tests/food-menu.test.cjs",
+      "sha256": "e593e27a42b67cd62fd1fd58eb69e92f5f7b3f519267656dbc714ddd32819b76",
+      "bytes": 2107
+    },
+    {
+      "path": "scripts/tests/menu-appearance-sql.test.cjs",
+      "sha256": "a7707c6a5dc6d3065c4334f6225409c64b949eff1f3e9472774189b4d3b4d645",
+      "bytes": 2235
+    },
+    {
+      "path": "scripts/tests/menu-appearance.e2e.cjs",
+      "sha256": "de2d6bf4c329b4c1f3d918759c6698a83c8ee4a56b675934e1411d77486e3c5b",
+      "bytes": 4202
+    },
+    {
+      "path": "scripts/tests/menu-owner-sql.test.cjs",
+      "sha256": "c675b4f26eda4a8e053e24a2eb87fbccd82a2a5df652afc8576aa94137fc2560",
+      "bytes": 5465
+    },
+    {
+      "path": "scripts/tests/onthego-discovery.test.cjs",
+      "sha256": "6e8da1d7e34cd5c088e45b843232974264e1181425106959c39b44ea86655b38",
+      "bytes": 7609
+    },
+    {
+      "path": "scripts/tests/onthego-edge-contract.test.cjs",
+      "sha256": "b7a5cc74c97636149eb0e26ef7572b76a58c5210c44a4cd8fbb25718ad6d0b58",
+      "bytes": 7661
+    },
+    {
+      "path": "scripts/tests/onthego-lifecycle.test.cjs",
+      "sha256": "ee955f3ac90271419170af55f6793a232bb50ee87489128b3d4e35705edf4582",
+      "bytes": 6309
+    },
+    {
+      "path": "scripts/tests/onthego-map-scope.test.cjs",
+      "sha256": "feca91b2053d7a79804827262866e21b465cca6feabec58bc8c8fb8f0c6ae354",
+      "bytes": 6420
+    },
+    {
+      "path": "scripts/tests/onthego-owner-race.test.cjs",
+      "sha256": "6088b6e294169829709ef6dc90b5224b066953cf8d695ca71f9acf9cca430cef",
+      "bytes": 5635
+    },
+    {
+      "path": "scripts/tests/onthego-review-grid.test.cjs",
+      "sha256": "09eeb0be9f2681692cd8e558d4261d4901221e3b6145c5601e9aeafc2b92920b",
+      "bytes": 2967
+    },
+    {
+      "path": "scripts/tests/onthego-schedule-owner.test.cjs",
+      "sha256": "fe72bab9a80d197895f5663b920b82d61c58f88605a51400ee53558f6ffeab2b",
+      "bytes": 5801
+    },
+    {
+      "path": "scripts/tests/onthego-schedule-race.test.cjs",
+      "sha256": "67c20dedeb287d9bc6d969b78039573db3b95166b328b4be76447d475b1e5133",
+      "bytes": 5059
+    },
+    {
+      "path": "scripts/tests/ordering-sql.test.cjs",
+      "sha256": "0b9c2d80cddf605768954f8e78c2193ad83def481ec03b055cabeec07634d556",
+      "bytes": 11818
+    },
+    {
+      "path": "scripts/tests/owner-media-sql.test.cjs",
+      "sha256": "ab0ffec1a8ed04e80dae47e7d5446af7660e4f0dee66d9a6e2fc773a51fb1f55",
+      "bytes": 10205
+    },
+    {
+      "path": "scripts/tests/place-author-sql.test.cjs",
+      "sha256": "d1671f86ae375451890d8e8332b657cd8aab931cdf328ab844b338f71f94ce83",
+      "bytes": 5882
+    },
+    {
+      "path": "scripts/tests/place-presentation.test.cjs",
+      "sha256": "8e1363112db4f0178b227217d6991dffa3bb980410afd58eeba7ef40f8b767d8",
+      "bytes": 1263
+    },
+    {
+      "path": "scripts/tests/place-share-http.cjs",
+      "sha256": "493e88fed887e12a2423843b16096e441a4facd4d7e369873c5edfe40875050c",
+      "bytes": 6634
+    },
+    {
+      "path": "scripts/tests/place-share-image.test.cjs",
+      "sha256": "0d9803e41c69544b03fcc1e27c530bbea837d0815161c9b8c3e1c2d7dabb6ff2",
+      "bytes": 12595
+    },
+    {
+      "path": "scripts/tests/place-share-render.cjs",
+      "sha256": "bb5db04c021b316fd4468170af66e92d4556ba5b973b3cca608e5a7ecc833a90",
+      "bytes": 3108
+    },
+    {
+      "path": "scripts/tests/place-ui.e2e.cjs",
+      "sha256": "a20b5ed4bc1b6296f72f9a91b80cf388bf6a7e78fbc8c94781ad8acb408f91c0",
+      "bytes": 3405
+    },
+    {
+      "path": "scripts/tests/release-language.e2e.cjs",
+      "sha256": "05edb08037ba6cf0da63532cd8d61a35e56a59bbb388cc77c690d2d0a277d963",
+      "bytes": 10540
+    },
+    {
+      "path": "scripts/tests/release-language.test.cjs",
+      "sha256": "0e71e30714bc55e04b585bab7498d5efeb7434dcb184c1ef3b3ed2da829ef632",
+      "bytes": 3881
+    },
+    {
+      "path": "scripts/tests/restaurant-demo.e2e.cjs",
+      "sha256": "3b4321d2063229297bc39d329f0d605e6aca17ad299fe03704a9a3be2514c4f3",
+      "bytes": 9236
+    },
+    {
+      "path": "scripts/tests/restaurant-inline-onboarding.e2e.cjs",
+      "sha256": "5e8491b69fd6614b211c1e42b06784dbad9e83a40c86dc0ad3079625ba458d86",
+      "bytes": 7719
+    },
+    {
+      "path": "scripts/tests/restaurant-media.e2e.cjs",
+      "sha256": "48cfc4c4b02c2990ea991a56137f1d2bcb550f7db17f3526b8e83d5761babe78",
+      "bytes": 10318
+    },
+    {
+      "path": "scripts/tests/restaurant-owner-journey.e2e.cjs",
+      "sha256": "05967732eb1da6d4fcf06d78dac26060a0853c15878f563a998daca9f0528ba2",
+      "bytes": 10599
+    },
+    {
+      "path": "scripts/tests/restaurant-profile.e2e.cjs",
+      "sha256": "266d4a0a11c16ac86744872369b5036eb43b38070e97a6631efaed5fb77c433c",
+      "bytes": 8677
+    },
+    {
+      "path": "scripts/tests/review-domain.test.cjs",
+      "sha256": "a6130284b6620a7cff9878efbc19d4d3f2818bdd7556efdb86839de9a07f0615",
+      "bytes": 6904
+    },
+    {
+      "path": "scripts/tests/review-history-sql.test.cjs",
+      "sha256": "ca2d4b91013bd9222a618eae48f384722026cedcb5f7f30294f396fd50fdd938",
+      "bytes": 10012
+    },
+    {
+      "path": "scripts/tests/rv-catalog.test.cjs",
+      "sha256": "cdc162cbd7c0c597c5e333882a26d613e955994ab56398332fbd492c52b71bd2",
+      "bytes": 3462
+    },
+    {
+      "path": "scripts/tests/rv-discovery.e2e.cjs",
+      "sha256": "f362e15c7e86d2aff0f689ea1a3fc593a677d0d6916919dfebe940ac6f11a38f",
+      "bytes": 7249
+    },
+    {
+      "path": "scripts/tests/rv-review-summary.test.cjs",
+      "sha256": "907f2c9b82412397e216cd4354ea079ee5642ca98788aee6ac2656891e16f048",
+      "bytes": 4865
+    },
+    {
+      "path": "scripts/tests/search-journey.e2e.cjs",
+      "sha256": "672d741c76c02357652dd6c8b6cdf6ab424b23db62d56a5523c71f3f2c383ab7",
+      "bytes": 13401
+    },
+    {
+      "path": "scripts/tests/search-navigation.e2e.cjs",
+      "sha256": "01cf3e64dc9f358c2c9775c3cb98bd0fc35b0691ef6fb605e84ec821ca3473e4",
+      "bytes": 6705
+    },
+    {
+      "path": "scripts/tests/story-publishing-sql.test.cjs",
+      "sha256": "8f753460043d62261ff3d5156acd47c58b6edc30454a2492df027b049fde501f",
+      "bytes": 13958
+    },
+    {
+      "path": "scripts/tests/template-gallery.e2e.cjs",
+      "sha256": "cb7b0eb9c9c6ddd7a3aafa77cd7748e4dc8212bfe639fccff8207f01455698e7",
+      "bytes": 9493
+    },
+    {
+      "path": "scripts/tests/tool-headers.e2e.cjs",
+      "sha256": "11fc84e61fea8890f5dccbabb4c7abb5a53726249a03cf6f85a64f0fe2eda5d5",
+      "bytes": 6587
+    },
+    {
+      "path": "styles/PlaceDetails.module.css",
+      "sha256": "4b1dd6934edac2f8386588751cd14ef3a461ba043ce4c5a71e2a83f28946ba2c",
+      "bytes": 13971
+    },
+    {
+      "path": "styles/globals.css",
+      "sha256": "cdf5208050780bc15384a1c0843de4c5084c6fcefc06781193bded7ad43e43fc",
+      "bytes": 8310
+    },
+    {
+      "path": "styles/place-details.css",
+      "sha256": "4b1dd6934edac2f8386588751cd14ef3a461ba043ce4c5a71e2a83f28946ba2c",
+      "bytes": 13971
+    },
+    {
+      "path": "styles/tavvyTheme.ts",
+      "sha256": "1d0052e51de1268865200c3b40e73c55f4752ea86a1ca79557734eb05fa58df1",
+      "bytes": 7074
+    },
+    {
+      "path": "supabase/functions/_shared/onthego-http.ts",
+      "sha256": "281eb441cd8ffe2ac5aec2bd3944763474b0b55002b302b07f5c5a572ad03204",
+      "bytes": 1474
+    },
+    {
+      "path": "supabase/functions/_shared/onthego-lifecycle.ts",
+      "sha256": "8798cde8e20313d5b77b7c79ef2fa18edef8b02be771316787e5100e29719bec",
+      "bytes": 2235
+    },
+    {
+      "path": "supabase/functions/admin-disable-session/handler.ts",
+      "sha256": "7f3c674b88dca8fc62f0453fc38d22f2bf6ba1565afa48b42a6af987291012f8",
+      "bytes": 3529
+    },
+    {
+      "path": "supabase/functions/admin-disable-session/index.ts",
+      "sha256": "b7fdbfa32d1c4dc1f7c04da152e0845134539ef9b3b06b8dd53d2e80bb05ca69",
+      "bytes": 455
+    },
+    {
+      "path": "supabase/functions/cancel-scheduled-event/index.ts",
+      "sha256": "196779d023a74b749273d71eeaa34ed589752cd650e6c127a8b9c9dd81c81b2f",
+      "bytes": 3971
+    },
+    {
+      "path": "supabase/functions/create-onthego-place/index.ts",
+      "sha256": "89a92d92165b25f5e1ad3e8af8afee0ebc28b54108a2b6456ac1761fa9deed66",
+      "bytes": 5941
+    },
+    {
+      "path": "supabase/functions/get-place-schedule/index.ts",
+      "sha256": "cbb3f32353626af0683046591e942b12b73ed89e7776c8d6c876cfe25ab05d79",
+      "bytes": 5631
+    },
+    {
+      "path": "supabase/functions/go-live-confirm-address/index.ts",
+      "sha256": "fba65c46dd7a7b0dbc8b27ebb3dfaf2111c2edb7f7fcea9eb5fe5516cf523b6f",
+      "bytes": 126
+    },
+    {
+      "path": "supabase/functions/go-live-end/index.ts",
+      "sha256": "80f38d772dd9b3305c7bdb2686d0d234742d20226482921ccb17af9aceafc30f",
+      "bytes": 122
+    },
+    {
+      "path": "supabase/functions/go-live-start/index.ts",
+      "sha256": "f4db634c56eb40c32b3154075d2e1fd3ee7bd85a3bb1a3289146c9145e2e7eab",
+      "bytes": 124
+    },
+    {
+      "path": "supabase/functions/go-live-update/index.ts",
+      "sha256": "4fca6c502bd7eb706f2a767a4368773e35f98ec537d027fca31f716fa8203cd9",
+      "bytes": 125
+    },
+    {
+      "path": "supabase/functions/live-onthego-map-data/index.ts",
+      "sha256": "a1406bead3a0c80f9b41e60a082ac70f58df5c5820f360ec2583095785cd1605",
+      "bytes": 13541
+    },
+    {
+      "path": "supabase/functions/live-session-details/index.ts",
+      "sha256": "43db4dd5fd5f5c68724b6e1459d85c76fb1a461b4718b3e2da9dc9e181aca374",
+      "bytes": 5187
+    },
+    {
+      "path": "supabase/functions/live-sessions-nearby/index.ts",
+      "sha256": "c2256d91fadc462e2621885f0762e09903e2ae513f1be73b3f349ea3f9021c47",
+      "bytes": 3593
+    },
+    {
+      "path": "supabase/functions/my-active-session/index.ts",
+      "sha256": "a03c128bd120a131ed4504138a514d9ca31715f1e6d3e01adad04eebbfe88a10",
+      "bytes": 6439
+    },
+    {
+      "path": "supabase/functions/my-scheduled-events/index.ts",
+      "sha256": "243e2d2675a2b55d00ddb4da70597de2624418a0322c9726c12650a3a0135e11",
+      "bytes": 4288
+    },
+    {
+      "path": "supabase/functions/schedule-event/index.ts",
+      "sha256": "4b6f9a70737e0598903ce59fb6842ae9e72e67f810cc6404186b2b7707b0f6f1",
+      "bytes": 7353
+    },
+    {
+      "path": "supabase/migrations/202609080005_place_author_policies.sql",
+      "sha256": "2d14fe41ab2b548dd1d05fab33dcca41f9a39950538a10482bd8e3e10e69e6f6",
+      "bytes": 4935
+    },
+    {
+      "path": "supabase/migrations/202609080006_atomic_place_reviews.sql",
+      "sha256": "c0319ecfe9e4ddfc12cfdae6ba8877c793d5b19a6e8070155caa2a6ace9bf97c",
+      "bytes": 10929
+    },
+    {
+      "path": "supabase/migrations/202609080007_review_private_fields.sql",
+      "sha256": "dbe064d3a6f563e8817c412f4ba89f4dc0cb45bd98b990e781cc5d1c1259662c",
+      "bytes": 2007
+    },
+    {
+      "path": "supabase/migrations/20260909120000_onthego_lifecycle.sql",
+      "sha256": "b020f348706ab566d63c5a6357767e6d63549e7d99bab3246ba9fc969859f80b",
+      "bytes": 20992
+    },
+    {
+      "path": "supabase/migrations/20260920120000_review_visits_and_evidence.sql",
+      "sha256": "10f1cf544faf1c70d8ec1af59c863abcead99a28903dcae76a20596131de39a7",
+      "bytes": 18519
+    },
+    {
+      "path": "supabase/migrations/202609210001_restaurant_owner_onboarding.sql",
+      "sha256": "0d191ffd50d0bafd2a5be63f40da74b7053e490dd8da36e1b485be8da8a67fde",
+      "bytes": 18036
+    },
+    {
+      "path": "supabase/migrations/202609210002_authenticated_story_publishing.sql",
+      "sha256": "245b30607b3f2a0b201a09955aa6a25a31d101db9c753cc65ff358d0f1729588",
+      "bytes": 20756
+    },
+    {
+      "path": "supabase/migrations/202609210003_ordering_integrity.sql",
+      "sha256": "0a4bdf575616f92d0d80f199d7b97bd6d85a7b2b74eb8a4b484d2b3b1161dc7c",
+      "bytes": 13945
+    },
+    {
+      "path": "supabase/migrations/202609210004_story_active_place_status.sql",
+      "sha256": "5ecc2ab48b584e1d0d6f427abf578d647ed0f2d4035a854ec27b9ae90e85149f",
+      "bytes": 5982
+    },
+    {
+      "path": "supabase/migrations/202609210005_inline_restaurant_onboarding.sql",
+      "sha256": "e414fa7717055a0cee0d1fcb0cb3c74f95351306edc109372aed969431d8d382",
+      "bytes": 6875
+    },
+    {
+      "path": "supabase/migrations/202609210006_restaurant_owner_profile.sql",
+      "sha256": "956b5ca1cef1327aed145493dd19de742565597a8b4ae4578666da426e1dc65e",
+      "bytes": 3994
+    },
+    {
+      "path": "supabase/migrations/202609210007_restaurant_owner_media.sql",
+      "sha256": "46a08d83290e232e1e18710e5a45f0782e7b03a73fd60bdcc764ac63845d65f1",
+      "bytes": 14751
+    },
+    {
+      "path": "supabase/migrations/202609210008_menu_appearance.sql",
+      "sha256": "332518a2257500053aeef77c3ba5cddd2917956ffbc2d9c043dc5c1df28d7716",
+      "bytes": 593
+    },
+    {
+      "path": "supabase/migrations/202609210009_ecard_existing_profile_fields.sql",
+      "sha256": "1f3b4ba8636bd9b5de6423463fb970d20e87fe4b6529c4057e3f4712934d3108",
+      "bytes": 728
+    },
+    {
+      "path": "supabase/migrations/202609210010_ecard_pro_extras.sql",
+      "sha256": "1b3e727a8d051821690560d97f1c2991ab4754824ce78fcf58caf651272e8037",
+      "bytes": 5755
+    },
+    {
+      "path": "supabase/migrations/202609210011_onthego_place_details.sql",
+      "sha256": "542f2c5bc0afbfd7c9a4b73625aaf1487a3150d9ce4969bd7535e851662b2bce",
+      "bytes": 17874
+    },
+    {
+      "path": "supabase/migrations/202609210012_review_auth_identity.sql",
+      "sha256": "f6728a1e034d3cac76e1728d2c8a6df7d0a7b9bce30589f11af9d042c285e6f1",
+      "bytes": 35650
+    },
+    {
+      "path": "supabase/migrations/202609210013_onthego_admin_disable.sql",
+      "sha256": "b231a55e020515791fb8299f7db265c075109d18f343a084bcfc1f2214934f94",
+      "bytes": 18459
+    },
+    {
+      "path": "supabase/migrations/202609220001_cruise_universe_catalog.sql",
+      "sha256": "eef276d6db55be0b4644015d440566657a38dffa4763f08d4dbf598ba8f962ef",
+      "bytes": 14581
+    },
+    {
+      "path": "supabase/migrations/202609220002_cruise_universe_taps.sql",
+      "sha256": "f13cdc39ed9237fdbf9cada807290f5224740e561a6364b7d243fb3ea9cfe842",
+      "bytes": 12437
+    },
+    {
+      "path": "supabase/migrations/202609220003_ugc_reporting_blocking.sql",
+      "sha256": "7dea2e922f3831a47609bb09480ca03a12d8836739a1845adb5617118034aacf",
+      "bytes": 20129
+    },
+    {
+      "path": "supabase/migrations/202609220004_ugc_surface_coverage.sql",
+      "sha256": "d3d32ee0cd037d1401b3a31c8aa2a573c2b38df1ec2daaf7275922b1d7497add",
+      "bytes": 18288
+    },
+    {
+      "path": "supabase/tests/cruise_universe_gate.sql",
+      "sha256": "f355cbf90a271018e7f253d9412f5d78d5614e9f58f6a297bd732066bfb1a7ba",
+      "bytes": 10983
+    },
+    {
+      "path": "supabase/tests/ecard_existing_features_gates.sql",
+      "sha256": "a41dce077f6c84652174b0527ce78e153f251967a8f48a0041a3d70f5cf029bb",
+      "bytes": 5333
+    },
+    {
+      "path": "supabase/tests/ecard_pro_extras_gates.sql",
+      "sha256": "bec67621ebe48ac5ac24b8fdf216211eec4b8a3600ce750e1047948889a408cc",
+      "bytes": 8191
+    },
+    {
+      "path": "supabase/tests/inline_restaurant_onboarding_gates.sql",
+      "sha256": "55a3a5f24d312bf6eb81b2bf406ec2cf029e50f4a78e17cec0b616bc72f25e43",
+      "bytes": 6127
+    },
+    {
+      "path": "supabase/tests/ordering_live_gates.sql",
+      "sha256": "e19f2809959ff181676b3dc39ceac82e9575f777fd3456f1cfd04dfd0ddba7fe",
+      "bytes": 17167
+    },
+    {
+      "path": "supabase/tests/restaurant_owner_gates.sql",
+      "sha256": "06ac2f1212dbe979b9dfa34cf4f92d61a52de5d2312d7ff90b18225c5e400c95",
+      "bytes": 5052
+    },
+    {
+      "path": "supabase/tests/restaurant_profile_gates.sql",
+      "sha256": "73518884ad6ebeb9ea37d210d061d82a578e23da1712cdc27fa3f3dcbec858ce",
+      "bytes": 3879
+    },
+    {
+      "path": "tavvy-brand-book.html",
+      "sha256": "ee112d753192b49a9d516c0c5cf5239cd06acff97ca59c7952abc2c048bc300d",
+      "bytes": 56473
+    },
+    {
+      "path": "tests/cities.test.cjs",
+      "sha256": "11dba45577efa62a7ef1b3ef6ca2f40bd1532602d6ccc459b199d9a01317f407",
+      "bytes": 3948
+    },
+    {
+      "path": "tests/experiences.test.cjs",
+      "sha256": "8b06af38143ae6c3f210dc56e69acd6bab8204d4d48b0058b2718ed660d051e3",
+      "bytes": 4446
+    },
+    {
+      "path": "tests/fixtures/ecard-public-render-hashes.json",
+      "sha256": "a27b80b2df28ae513ba7e76cffcd4f29ccb4317e748f68ff11865fad1e6891e2",
+      "bytes": 2268
+    },
+    {
+      "path": "tests/fixtures/ecard-template-polish-release-hashes.json",
+      "sha256": "7c74145e79cf41e53e6f89b30524ec6c39ba2bf5b0e646b52fa0ce004305dc67",
+      "bytes": 12205
+    },
+    {
+      "path": "tests/menu-appearance.test.cjs",
+      "sha256": "2046e411faee876c92e657e3051eb75ebd66164c4e826396d3558c99f2dd6abc",
+      "bytes": 1560
+    },
+    {
+      "path": "tests/menu-editor-confirmation.test.cjs",
+      "sha256": "84d9249e5ff36bbed09458a7a89d8cc0c84761b61252219bcffed7c04e40fc37",
+      "bytes": 4191
+    },
+    {
+      "path": "tests/ordering.test.cjs",
+      "sha256": "afa4e1292bdf17de6e1c740095fa9c6f235b2a6ef073e1239df35b50d6bcb2d6",
+      "bytes": 5529
+    },
+    {
+      "path": "tests/place-hours.test.cjs",
+      "sha256": "ec22bad2f4fbfa18e390330fed0fb50f803cc5b3626260a6c381954ad9ac92f1",
+      "bytes": 1980
+    },
+    {
+      "path": "tests/place-share.test.cjs",
+      "sha256": "f49333e4733ec88a9a2a0ee4a6bd0052d0760e61442bc1fda2a4532bd34bec32",
+      "bytes": 5379
+    },
+    {
+      "path": "tests/placeEvidence.test.cjs",
+      "sha256": "c4dfc30fa60796fdbbe6e9cb21cd5ab1618ef13a2e2a98ad211790da44ea5df7",
+      "bytes": 8719
+    },
+    {
+      "path": "tests/placeEvidenceService.test.cjs",
+      "sha256": "54eee0aea4b29ac0b74a045f0843c9bd48d03a9092de89ad6a0080674fa0cdb9",
+      "bytes": 4433
+    },
+    {
+      "path": "tests/restaurant-create-scope.test.cjs",
+      "sha256": "359e5b6b67c0b4c2eeeded6f57fedcfa0d47cc8308b0d06454de717e37986771",
+      "bytes": 1925
+    },
+    {
+      "path": "tests/restaurant-owner.test.cjs",
+      "sha256": "2512a74b48abac6cc94ef7ad8b64e110d8b91148f16223210bcd572b43193b70",
+      "bytes": 7781
+    },
+    {
+      "path": "tests/restaurant-workspace-scope.test.cjs",
+      "sha256": "cbebe84815399965b86f476ec63420c3881cc503eba8acb273f8afc184d64fd9",
+      "bytes": 3643
+    },
+    {
+      "path": "tests/restaurantOwnerMedia.test.cjs",
+      "sha256": "f4a19ce0192fa33d1bead19ffc7648cc3ed194bffaf7a0e5cd20848caff7863a",
+      "bytes": 2194
+    },
+    {
+      "path": "tests/reviewRequestStore.test.cjs",
+      "sha256": "a0675640453ea46b93e8022e5d983c2929c24f350ea68bf7ee1002ece6c47759",
+      "bytes": 1368
+    },
+    {
+      "path": "tests/search-intent.test.cjs",
+      "sha256": "58de6f50242256c375c4ec23eba5fe7c1a63d9a5bcec623604c6028f0dbc8de7",
+      "bytes": 9168
+    },
+    {
+      "path": "tests/signal-catalog.test.cjs",
+      "sha256": "a040f11060335c5cc82c82387a955bcb4c530c898fde1c8a581074779119adbb",
+      "bytes": 3941
+    },
+    {
+      "path": "tests/storyPublishing.test.cjs",
+      "sha256": "e6d5b8b4369d6532b78b9874318b8edac2e3409ae30efeb00379a02556c5c63d",
+      "bytes": 4229
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "3ff073ad3cb95298520ab1359c5c32064f4816cd46390e1ec6c9abed8afef239",
+      "bytes": 636
+    },
+    {
+      "path": "types/index.ts",
+      "sha256": "74ae083b62af7aeaed3c1dacb623afa6daed2d499890992a4ce299a9b33dc436",
+      "bytes": 1762
+    }
+  ]
+}

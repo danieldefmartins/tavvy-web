@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { getThemeColors, tavvyTheme } from '../styles/tavvyTheme';
 import type { Theme } from '../styles/tavvyTheme';
+import design from '../config/design.json';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -20,7 +21,7 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  const [themeMode, setThemeModeState] = useState<ThemeMode>('dark');
+  const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
   const [systemPrefersDark, setSystemPrefersDark] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -70,6 +71,25 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   
   // Select the appropriate theme
   const theme = getThemeColors(isDark);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const palette = isDark ? design.dark : design.light;
+    const variables: Record<string, string> = {
+      '--background': palette.background, '--surface': palette.surface,
+      '--text': palette.text, '--text-secondary': palette.textSecondary,
+      '--text-tertiary': palette.textTertiary, '--border': palette.border,
+      '--link': palette.link,
+    };
+    const previous = Object.fromEntries(Object.keys(variables).map(key => [key, root.style.getPropertyValue(key)]));
+    const previousScheme = root.style.colorScheme;
+    Object.entries(variables).forEach(([key, value]) => root.style.setProperty(key, value));
+    root.style.colorScheme = isDark ? 'dark' : 'light';
+    return () => {
+      Object.entries(previous).forEach(([key, value]) => value ? root.style.setProperty(key, value) : root.style.removeProperty(key));
+      root.style.colorScheme = previousScheme;
+    };
+  }, [isDark]);
 
   // Don't render until we've loaded the saved preference (prevents flash)
   if (!isLoaded) {

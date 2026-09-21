@@ -1,9 +1,12 @@
+import { useReleaseCopy } from '../../../../hooks/useReleaseCopy';
 /**
  * AdvancedSection — form block config, pro credentials, service area.
  * Only shown for pro templates. Collapsed by default.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import ProExtraNotice from '../shared/ProExtraNotice';
+import { visibleFormBlock, setFormBlockEnabled } from '../../../../lib/ecard/formBlock';
 import EditorField from '../shared/EditorField';
 import { useEditor } from '../../../../lib/ecard/EditorContext';
 
@@ -13,14 +16,16 @@ interface AdvancedSectionProps {
 }
 
 export default function AdvancedSection({ isDark, isPro }: AdvancedSectionProps) {
+  const copy = useReleaseCopy();
   const { state, dispatch } = useEditor();
   const card = state.card;
-  const creds = card.pro_credentials || {};
+  const [showProNotice, setShowProNotice] = useState(false);
   const textSecondary = isDark ? '#94A3B8' : '#6B7280';
   const borderColor = isDark ? '#334155' : '#E5E7EB';
 
   const toggleBadge = (field: string) => {
-    dispatch({ type: 'SET_FIELD', field: field as any, value: !(card as any)[field] });
+    if (field === 'form_block' && !visibleFormBlock(card.form_block) && !isPro) { setShowProNotice(true); return; }
+    dispatch({ type: 'SET_FIELD', field: field as any, value: field === 'form_block' ? setFormBlockEnabled(card.form_block, !visibleFormBlock(card.form_block)) : !(card as any)[field] });
   };
 
   const ToggleRow = ({ label, field, checked }: { label: string; field: string; checked: boolean }) => (
@@ -30,9 +35,10 @@ export default function AdvancedSection({ isDark, isPro }: AdvancedSectionProps)
     }}>
       <span style={{ fontSize: 14, color: isDark ? '#E2E8F0' : '#374151' }}>{label}</span>
       <button
+        type="button" role="switch" aria-label={label} aria-checked={checked}
         onClick={() => toggleBadge(field)}
         style={{
-          width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer',
+          width: 44, height: 24, borderRadius: 12, border: "none", cursor: 'pointer',
           background: checked ? '#00C853' : (isDark ? '#334155' : '#D1D5DB'),
           position: 'relative', transition: 'background 0.2s',
         }}
@@ -58,8 +64,8 @@ export default function AdvancedSection({ isDark, isPro }: AdvancedSectionProps)
         }}>
           Professional Badges
         </h4>
-        <ToggleRow label="Licensed" field="show_licensed_badge" checked={!!card.show_licensed_badge} />
-        <ToggleRow label="Insured" field="show_insured_badge" checked={!!card.show_insured_badge} />
+        <ToggleRow label={copy("Licensed")} field="show_licensed_badge" checked={!!card.show_licensed_badge} />
+        <ToggleRow label={copy("Insured")} field="show_insured_badge" checked={!!card.show_insured_badge} />
         <ToggleRow label="Bonded" field="show_bonded_badge" checked={!!card.show_bonded_badge} />
         <ToggleRow label="Tavvy Verified" field="show_tavvy_verified_badge" checked={!!card.show_tavvy_verified_badge} />
 
@@ -96,21 +102,20 @@ export default function AdvancedSection({ isDark, isPro }: AdvancedSectionProps)
       />
 
       {/* Form Block Toggle */}
+      {showProNotice && <ProExtraNotice feature={"Enabling a contact form"} isDark={isDark} onDismiss={() => setShowProNotice(false)} />}
       <div style={{ marginTop: 16 }}>
         <h4 style={{
           fontSize: 14, fontWeight: 600, marginBottom: 8,
           color: isDark ? '#E2E8F0' : '#374151',
         }}>
-          Contact Form
-        </h4>
+          {copy("Contact Form · Pro")}</h4>
         <ToggleRow
-          label="Show contact form on card"
+          label={copy("Show contact form on card")}
           field="form_block"
-          checked={!!card.form_block}
+          checked={!!visibleFormBlock(card.form_block)}
         />
         <p style={{ fontSize: 12, color: textSecondary, marginTop: 4 }}>
-          When enabled, visitors can send you messages through your card.
-        </p>
+          {copy("Contact forms are included with Pro. Existing form settings are preserved when you turn the form off.")}</p>
       </div>
     </div>
   );

@@ -1,0 +1,9 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),ts=require('typescript'),path=require('node:path');
+const native=fs.existsSync(path.join(__dirname,'../screens/RestaurantWorkspaceScreen.tsx')),file=path.join(__dirname,'../components/RestaurantCreateForm.tsx');const ast=ts.createSourceFile(file,fs.readFileSync(file,'utf8'),ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX),arrows={};function visit(n){if(ts.isVariableDeclaration(n)&&ts.isIdentifier(n.name)&&n.initializer&&ts.isArrowFunction(n.initializer))arrows[n.name.text]=n.initializer.getText(ast);ts.forEachChild(n,visit)}visit(ast);
+const exportsScope={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(path.join(__dirname,'../lib/ownerRequestScope.ts'),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{exports:exportsScope});
+for(const handler of ['check','save'])for(const close of [false,true])test(`${native?'native':'web'} onboarding ${handler} ignores late result after ${close?'unmount':'account change'}`,async()=>{
+ let release;const changes=[],scope=exportsScope.createOwnerRequestScope('A');const pending=()=>new Promise(r=>{release=r});
+ const ctx={scope,user:{id:'A'},draft:{},busy:false,selection:'new',supabase:{},validateNewRestaurant:()=>{},findRestaurantDuplicates:pending,createRestaurantAndClaim:pending,finish:async()=>changes.push('finish'),setDuplicates:()=>changes.push('duplicates'),setSelection:()=>changes.push('selection'),setNeedsAccount:()=>{},setError:()=>{},setBusy:()=>{}};
+ vm.runInNewContext(ts.transpileModule('globalThis.run='+arrows[handler],{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText,ctx);
+ const operation=ctx.run({preventDefault(){}});if(close)scope.close();else scope.setIdentity('B');release(handler==='check'?[]:{placeId:'newPlace'});await operation;assert.deepEqual(changes,[]);
+});

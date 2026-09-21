@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+const source=fs.readFileSync('lib/supabaseClient.ts','utf8');
+const url=source.match(/const SUPABASE_URL = '([^']+)'/)[1];
+const key=source.match(/const SUPABASE_ANON_KEY =\s*'([^']+)'/)[1];
+const res=await fetch(`${url}/rest/v1/`,{headers:{apikey:key,Authorization:`Bearer ${key}`},signal:AbortSignal.timeout(20000)});
+if(!res.ok) throw Error(`Schema metadata HTTP ${res.status}`);
+const spec=await res.json();
+const result={tables:Object.fromEntries(Object.entries(spec.definitions||{}).map(([n,d])=>[n,{columns:Object.keys(d.properties||{}),required:d.required||[]}])) ,rpcs:Object.keys(spec.paths||{}).filter(x=>x.startsWith('/rpc/'))};
+fs.writeFileSync('docs/public-api-schema.json',JSON.stringify(result,null,2)+'\n');
+console.log(JSON.stringify({relations:Object.keys(result.tables).length,rpcs:result.rpcs.length,accountDeletion:result.rpcs.includes('/rpc/delete_user_account'),places:result.tables.places},null,2));

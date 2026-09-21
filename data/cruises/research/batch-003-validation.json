@@ -1,0 +1,102 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-09-21",
+  "scope": "Offline data/contract, identity reconciliation and actual display-function checks. No production collision query, rollback execution, import or publication performed.",
+  "worldwideComplete": false,
+  "checks_passed": 15,
+  "summary": {
+    "ships": 84,
+    "operators": 4,
+    "fact_states": {
+      "unverified": 1179,
+      "verified": 374,
+      "conflicting": 43
+    },
+    "facts_by_key": {
+      "entered_service": 44,
+      "length_m": 53,
+      "guests_double_occupancy": 50,
+      "deck_plan_url": 83,
+      "gross_tonnage": 24,
+      "crew": 70,
+      "year_built": 19,
+      "decks_passenger": 28,
+      "dining_outlets": 1,
+      "bars": 1,
+      "pools": 1
+    },
+    "venues": 257,
+    "programs": 11,
+    "cabin_categories": 0,
+    "photos": 0,
+    "unique_source_urls": 96
+  },
+  "checks": [
+    {
+      "name": "Both prior identity batches remain hash-pinned and total 71",
+      "status": "PASS"
+    },
+    {
+      "name": "84 staged ships pass actual catalog contract and recorded provenance",
+      "status": "PASS"
+    },
+    {
+      "name": "Current fleet inventory reconciles every named entry exactly once",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject collision with a prior published ship",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject an announced ship in operating batch",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject silent publication",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject unreviewed photo or invented IMO",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject unsourced scalar substitution",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject a reseller disguised as primary source",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject a venue linked to the ship as a place",
+      "status": "PASS"
+    },
+    {
+      "name": "Typed capacities retain explicit basis and Luna discrepancy is withheld",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual display helper hides all 43 conflicting and all unknown facts",
+      "status": "PASS"
+    },
+    {
+      "name": "Construction, service, GRT and deck conventions are never conflated",
+      "status": "PASS"
+    },
+    {
+      "name": "No totals inferred from partial venue lists; only explicit Utopia counters",
+      "status": "PASS"
+    },
+    {
+      "name": "Programs remain separate from physical venues with sailing variability",
+      "status": "PASS"
+    }
+  ],
+  "files": {
+    "data/cruises/staged/verified-operating-batch-003.json": "d791d164161e4e07cc44de28e2731196c05f362e52722bd9b607c380c77881ad",
+    "data/cruises/research/batch-003-evidence.json": "56b30ea5067be178ba0c62c1cc6b00c649296cd9b14ec35a9c58be8577de6d83",
+    "data/cruises/research/batch-003-fleet-inventory.json": "9f2d9e30cbaed57b71796414b83f79903981a6d3cddb285e9fd493352ee2a392",
+    "data/cruises/research/batch-003-validate.cjs": "6532aeccbe5c564d0860f7ee239fedbab19ab26dad69ed83be92774604188afd"
+  }
+}

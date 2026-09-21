@@ -80,7 +80,7 @@ export default function ProfileSection({ isDark, isPro }: ProfileSectionProps) {
       <EditorField
         label="Title / Role"
         value={card.title_role || card.title || ''}
-        onChange={(v) => handleFieldChange('title_role', v)}
+        onChange={(v) => dispatch({ type: 'SET_FIELDS', fields: { title: v, title_role: v } })}
         placeholder="e.g. Marketing Director"
         isDark={isDark}
         maxLength={100}

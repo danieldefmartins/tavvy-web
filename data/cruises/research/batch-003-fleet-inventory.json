@@ -1,0 +1,655 @@
+{
+  "schemaVersion": 1,
+  "checked_at": "2026-09-21",
+  "bases": [
+    {
+      "path": "data/cruises/staged/verified-operating-batch-001.json",
+      "sha256": "bc87d6f4aabc3217f5af2b6d7b5e12e3d802bc9b33f2cb77020b69b7210cada3",
+      "ship_count": 12
+    },
+    {
+      "path": "data/cruises/staged/verified-operating-batch-002-enriched.json",
+      "sha256": "3fd875b18bd5a0234502dae66256fa9081b3195e09431b962c67bd4e87d73dea",
+      "ship_count": 59
+    }
+  ],
+  "scope": "Reconciliation of the four current official consumer fleet lists. Norwegian Sky is a separately withheld transition case.",
+  "operators": [
+    {
+      "operator_id": "royal-caribbean-international",
+      "official_fleet_url": "https://www.royalcaribbean.com/cruise-ships",
+      "checked_at": "2026-09-21",
+      "coverage": "All named ships on this reviewed fleet list reconciled; this is not an AIS or daily operational status feed.",
+      "listed_count": 31,
+      "staged_count": 29,
+      "ships": [
+        {
+          "slug": "adventure-of-the-seas",
+          "name": "Adventure of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "062d1b83-9751-5b8c-af5f-c9c6127aa0a7"
+        },
+        {
+          "slug": "allure-of-the-seas",
+          "name": "Allure of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "7f97b595-e999-52d3-a23c-1d8f38bacac6"
+        },
+        {
+          "slug": "anthem-of-the-seas",
+          "name": "Anthem of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "413e45f8-6323-5d1e-bde9-a8cb3f77379d"
+        },
+        {
+          "slug": "brilliance-of-the-seas",
+          "name": "Brilliance of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "2e751bc4-be4b-5758-ab7c-155dee5449d5"
+        },
+        {
+          "slug": "enchantment-of-the-seas",
+          "name": "Enchantment of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "ab2d8532-144e-56c1-a72c-e8e3aa237916"
+        },
+        {
+          "slug": "explorer-of-the-seas",
+          "name": "Explorer of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "02b5c15d-395b-518c-8d6c-158323fcae15"
+        },
+        {
+          "slug": "freedom-of-the-seas",
+          "name": "Freedom of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "29ccc06d-9eea-56f6-965b-ae94f33ffc27"
+        },
+        {
+          "slug": "grandeur-of-the-seas",
+          "name": "Grandeur of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "6707a6e1-b10b-528f-8487-b47c74fe72e4"
+        },
+        {
+          "slug": "harmony-of-the-seas",
+          "name": "Harmony of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "caeea4f9-9001-57c6-bb33-1b0c3a4e2bf1"
+        },
+        {
+          "slug": "hero-of-the-seas",
+          "name": "Hero of the Seas",
+          "disposition": "excluded_future",
+          "evidence_url": "https://www.royalcaribbean.com/guides/ships-by-age",
+          "reason": "2027 debut; future order, not an operating cruise ship on the check date."
+        },
+        {
+          "slug": "icon-of-the-seas",
+          "name": "Icon of the Seas",
+          "disposition": "existing_pinned_identity",
+          "ship_id": "df0fda09-7eb9-5a84-b6a0-30e309490456"
+        },
+        {
+          "slug": "independence-of-the-seas",
+          "name": "Independence of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "3af17c7e-e558-52d6-b37c-601650fe56ee"
+        },
+        {
+          "slug": "jewel-of-the-seas",
+          "name": "Jewel of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "e2ebfd8a-5809-5d76-95c2-a3e74f2af9db"
+        },
+        {
+          "slug": "legend-of-the-seas",
+          "name": "Legend of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "c7278c11-0e74-5251-a644-a83885aad519"
+        },
+        {
+          "slug": "liberty-of-the-seas",
+          "name": "Liberty of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "8d582528-096b-5999-b26a-269dd1dbbcc5"
+        },
+        {
+          "slug": "mariner-of-the-seas",
+          "name": "Mariner of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "f9379d6f-00cb-5ba0-9183-55c363d017b3"
+        },
+        {
+          "slug": "navigator-of-the-seas",
+          "name": "Navigator of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "4021b784-e74e-5c44-8013-81d64a5f5878"
+        },
+        {
+          "slug": "oasis-of-the-seas",
+          "name": "Oasis of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "3d7ce38c-ad5a-5b21-9aa0-606352e83ffb"
+        },
+        {
+          "slug": "odyssey-of-the-seas",
+          "name": "Odyssey of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "add307f2-f1a0-52b2-b733-d9497a72103d"
+        },
+        {
+          "slug": "ovation-of-the-seas",
+          "name": "Ovation of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "284f587d-5ee6-5208-9ace-5fd6ffacd086"
+        },
+        {
+          "slug": "quantum-of-the-seas",
+          "name": "Quantum of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "53dd11ea-bbb4-5222-a428-b3107cecfae9"
+        },
+        {
+          "slug": "radiance-of-the-seas",
+          "name": "Radiance of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "9b251f13-b843-5221-96b6-2f1de729f346"
+        },
+        {
+          "slug": "rhapsody-of-the-seas",
+          "name": "Rhapsody of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "eab927dd-6048-5d0f-bf3c-eb1cde911058"
+        },
+        {
+          "slug": "serenade-of-the-seas",
+          "name": "Serenade of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "6cfc642e-26f7-5dc0-a6a8-fea753ab7f9b"
+        },
+        {
+          "slug": "spectrum-of-the-seas",
+          "name": "Spectrum of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "aba5a965-5e1d-5bd7-8438-51e5f76d48c5"
+        },
+        {
+          "slug": "star-of-the-seas",
+          "name": "Star of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "10a08d73-7f38-5bb8-9299-02f59cec067d"
+        },
+        {
+          "slug": "symphony-of-the-seas",
+          "name": "Symphony of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "2e506d24-95f3-5bf0-844e-b7d01a75f523"
+        },
+        {
+          "slug": "utopia-of-the-seas",
+          "name": "Utopia of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "7af0d506-d146-5e8f-9c22-371a351dd829"
+        },
+        {
+          "slug": "vision-of-the-seas",
+          "name": "Vision of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "fb32f2de-e2fc-5fc3-911a-945f2b7984f5"
+        },
+        {
+          "slug": "voyager-of-the-seas",
+          "name": "Voyager of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "f01f2d08-3845-58d0-b655-9b84d1c937f9"
+        },
+        {
+          "slug": "wonder-of-the-seas",
+          "name": "Wonder of the Seas",
+          "disposition": "staged_operating",
+          "ship_id": "655d958e-d185-53b7-a12b-b6fc54091a2c"
+        }
+      ]
+    },
+    {
+      "operator_id": "norwegian-cruise-line",
+      "official_fleet_url": "https://www.ncl.com/cruise-ships",
+      "checked_at": "2026-09-21",
+      "coverage": "All named ships on this reviewed fleet list reconciled; this is not an AIS or daily operational status feed.",
+      "listed_count": 21,
+      "staged_count": 19,
+      "ships": [
+        {
+          "slug": "norwegian-aqua",
+          "name": "Norwegian Aqua",
+          "disposition": "staged_operating",
+          "ship_id": "a4652c7d-0c08-5b7d-93f1-1be820e376d2"
+        },
+        {
+          "slug": "norwegian-aura",
+          "name": "Norwegian Aura",
+          "disposition": "excluded_future",
+          "evidence_url": "https://www.ncl.com/cruise-ships/norwegian-aura",
+          "reason": "2027 debut; not operating on the check date."
+        },
+        {
+          "slug": "norwegian-bliss",
+          "name": "Norwegian Bliss",
+          "disposition": "staged_operating",
+          "ship_id": "a679f313-da66-5226-921c-fe2478d6ab6e"
+        },
+        {
+          "slug": "norwegian-breakaway",
+          "name": "Norwegian Breakaway",
+          "disposition": "staged_operating",
+          "ship_id": "fe0d095c-ea5d-5050-879d-e9aac9524f6c"
+        },
+        {
+          "slug": "norwegian-dawn",
+          "name": "Norwegian Dawn",
+          "disposition": "staged_operating",
+          "ship_id": "03af373d-6238-5b5b-88bb-25f49462ae15"
+        },
+        {
+          "slug": "norwegian-encore",
+          "name": "Norwegian Encore",
+          "disposition": "staged_operating",
+          "ship_id": "9d3003f0-307a-5fd3-acc5-b632dea62af2"
+        },
+        {
+          "slug": "norwegian-epic",
+          "name": "Norwegian Epic",
+          "disposition": "staged_operating",
+          "ship_id": "429488d7-b85d-578c-bb4b-16b8a3e6c6b6"
+        },
+        {
+          "slug": "norwegian-escape",
+          "name": "Norwegian Escape",
+          "disposition": "staged_operating",
+          "ship_id": "04dec232-0d7d-5d9e-bb96-e938f44501c6"
+        },
+        {
+          "slug": "norwegian-gem",
+          "name": "Norwegian Gem",
+          "disposition": "staged_operating",
+          "ship_id": "4bb77074-6b16-5c22-82d0-024b2c46b72f"
+        },
+        {
+          "slug": "norwegian-getaway",
+          "name": "Norwegian Getaway",
+          "disposition": "staged_operating",
+          "ship_id": "dd07a0c5-dca9-583f-b5d0-870785ac13bb"
+        },
+        {
+          "slug": "norwegian-jade",
+          "name": "Norwegian Jade",
+          "disposition": "staged_operating",
+          "ship_id": "938161c3-7435-5fc3-a646-70ba99aee7f8"
+        },
+        {
+          "slug": "norwegian-jewel",
+          "name": "Norwegian Jewel",
+          "disposition": "staged_operating",
+          "ship_id": "43c9c7af-a5ea-5d2c-b845-740bf5cbd477"
+        },
+        {
+          "slug": "norwegian-joy",
+          "name": "Norwegian Joy",
+          "disposition": "staged_operating",
+          "ship_id": "fd70fc4b-5375-5666-9820-bbf1172d0b49"
+        },
+        {
+          "slug": "norwegian-luna",
+          "name": "Norwegian Luna",
+          "disposition": "staged_operating",
+          "ship_id": "38e2d0af-d0c3-5a20-96d1-546690fcc296"
+        },
+        {
+          "slug": "norwegian-pearl",
+          "name": "Norwegian Pearl",
+          "disposition": "staged_operating",
+          "ship_id": "02fc267d-cbce-5a97-b507-146c176765c1"
+        },
+        {
+          "slug": "norwegian-prima",
+          "name": "Norwegian Prima",
+          "disposition": "existing_pinned_identity",
+          "ship_id": "daa9d529-d06e-5d5b-8e29-8d56b5238a33"
+        },
+        {
+          "slug": "norwegian-spirit",
+          "name": "Norwegian Spirit",
+          "disposition": "staged_operating",
+          "ship_id": "6654cea4-13ec-5d55-bbd7-3b6c106510d1"
+        },
+        {
+          "slug": "norwegian-star",
+          "name": "Norwegian Star",
+          "disposition": "staged_operating",
+          "ship_id": "770abf4e-015a-5c3a-8134-ecd16ddb3167"
+        },
+        {
+          "slug": "norwegian-sun",
+          "name": "Norwegian Sun",
+          "disposition": "staged_operating",
+          "ship_id": "9cac4447-9f76-586a-887f-23304fa5c31e"
+        },
+        {
+          "slug": "norwegian-viva",
+          "name": "Norwegian Viva",
+          "disposition": "staged_operating",
+          "ship_id": "0b48cbbd-b8a1-5ed0-b459-32cebe065b4a"
+        },
+        {
+          "slug": "pride-of-america",
+          "name": "Pride of America",
+          "disposition": "staged_operating",
+          "ship_id": "5948eedd-a28f-5531-93bb-3776cd206bff"
+        }
+      ]
+    },
+    {
+      "operator_id": "celebrity-cruises",
+      "official_fleet_url": "https://www.celebritycruises.com/cruise-ships",
+      "checked_at": "2026-09-21",
+      "coverage": "All named ships on this reviewed fleet list reconciled; this is not an AIS or daily operational status feed.",
+      "listed_count": 16,
+      "staged_count": 14,
+      "ships": [
+        {
+          "slug": "celebrity-apex",
+          "name": "Celebrity Apex",
+          "disposition": "staged_operating",
+          "ship_id": "4eb7e515-2377-5f00-b448-31faefe4da78"
+        },
+        {
+          "slug": "celebrity-ascent",
+          "name": "Celebrity Ascent",
+          "disposition": "staged_operating",
+          "ship_id": "c0d17e6c-0a78-5dd4-8091-590f3b6d37cd"
+        },
+        {
+          "slug": "celebrity-beyond",
+          "name": "Celebrity Beyond",
+          "disposition": "staged_operating",
+          "ship_id": "8ffaa7d4-3bf7-50fb-b6c2-485219a15eff"
+        },
+        {
+          "slug": "celebrity-constellation",
+          "name": "Celebrity Constellation",
+          "disposition": "staged_operating",
+          "ship_id": "dbaf78e9-e680-5672-99e4-55e7b981f175"
+        },
+        {
+          "slug": "celebrity-eclipse",
+          "name": "Celebrity Eclipse",
+          "disposition": "staged_operating",
+          "ship_id": "ddd0c1f8-050d-5808-845d-d71f070229bc"
+        },
+        {
+          "slug": "celebrity-edge",
+          "name": "Celebrity Edge",
+          "disposition": "existing_pinned_identity",
+          "ship_id": "63128659-056e-5017-a4d7-34d63a757e87"
+        },
+        {
+          "slug": "celebrity-equinox",
+          "name": "Celebrity Equinox",
+          "disposition": "staged_operating",
+          "ship_id": "3cefd1fd-867e-596e-8da4-5feb30b47840"
+        },
+        {
+          "slug": "celebrity-flora",
+          "name": "Celebrity Flora",
+          "disposition": "staged_operating",
+          "ship_id": "813bd454-45f5-5685-b7c6-ae04858f12af"
+        },
+        {
+          "slug": "celebrity-infinity",
+          "name": "Celebrity Infinity",
+          "disposition": "staged_operating",
+          "ship_id": "611c8d46-2f52-53f3-8fdc-872b9593af6d"
+        },
+        {
+          "slug": "celebrity-millennium",
+          "name": "Celebrity Millennium",
+          "disposition": "staged_operating",
+          "ship_id": "79fd86b8-5dd4-5468-9659-c373847313e7"
+        },
+        {
+          "slug": "celebrity-reflection",
+          "name": "Celebrity Reflection",
+          "disposition": "staged_operating",
+          "ship_id": "0dfef54f-ba5c-5611-a014-fc025d3389bc"
+        },
+        {
+          "slug": "celebrity-silhouette",
+          "name": "Celebrity Silhouette",
+          "disposition": "staged_operating",
+          "ship_id": "5da77226-87f6-5dfb-ae6c-31569f3eb08e"
+        },
+        {
+          "slug": "celebrity-solstice",
+          "name": "Celebrity Solstice",
+          "disposition": "staged_operating",
+          "ship_id": "a9a97faf-8711-5764-8022-05530adcaa5c"
+        },
+        {
+          "slug": "celebrity-summit",
+          "name": "Celebrity Summit",
+          "disposition": "staged_operating",
+          "ship_id": "d574e202-5aa4-5a13-a742-1bb711b446d8"
+        },
+        {
+          "slug": "celebrity-xcel",
+          "name": "Celebrity Xcel",
+          "disposition": "staged_operating",
+          "ship_id": "2c184cce-c5ac-5f58-a0c9-bed5ff0eb7c9"
+        },
+        {
+          "slug": "celebrity-xcite",
+          "name": "Celebrity Xcite",
+          "disposition": "excluded_future",
+          "evidence_url": "https://www.celebritycruises.com/cruise-ships/celebrity-xcite",
+          "reason": "2028 debut, not operating on the check date."
+        }
+      ]
+    },
+    {
+      "operator_id": "msc-cruises",
+      "official_fleet_url": "https://www.msccruisesusa.com/cruise/ships",
+      "checked_at": "2026-09-21",
+      "coverage": "All named ships on this reviewed fleet list reconciled; this is not an AIS or daily operational status feed.",
+      "listed_count": 25,
+      "staged_count": 22,
+      "ships": [
+        {
+          "slug": "msc-armonia",
+          "name": "MSC Armonia",
+          "disposition": "staged_operating",
+          "ship_id": "e46e628d-2d8a-5f91-b994-3ebb703dce65"
+        },
+        {
+          "slug": "msc-bellissima",
+          "name": "MSC Bellissima",
+          "disposition": "staged_operating",
+          "ship_id": "2e0b22eb-dc36-57ea-b117-b9597532e12d"
+        },
+        {
+          "slug": "msc-divina",
+          "name": "MSC Divina",
+          "disposition": "staged_operating",
+          "ship_id": "13bf9444-1c52-57f0-a682-a4274d6baff7"
+        },
+        {
+          "slug": "msc-euribia",
+          "name": "MSC Euribia",
+          "disposition": "staged_operating",
+          "ship_id": "7d9708c2-78f2-55a2-b5ce-fb06f9e24f66"
+        },
+        {
+          "slug": "msc-fantasia",
+          "name": "MSC Fantasia",
+          "disposition": "staged_operating",
+          "ship_id": "eb3c0f43-0df7-5465-9851-18642453609f"
+        },
+        {
+          "slug": "msc-grandiosa",
+          "name": "MSC Grandiosa",
+          "disposition": "staged_operating",
+          "ship_id": "2f890167-851e-5c0e-b7be-c94b8d1efbee"
+        },
+        {
+          "slug": "msc-lirica",
+          "name": "MSC Lirica",
+          "disposition": "staged_operating",
+          "ship_id": "19925f80-173e-5940-869e-9eab8a908508"
+        },
+        {
+          "slug": "msc-magnifica",
+          "name": "MSC Magnifica",
+          "disposition": "staged_operating",
+          "ship_id": "a286288a-13c3-5380-ad72-3179e3c98a6f"
+        },
+        {
+          "slug": "msc-meraviglia",
+          "name": "MSC Meraviglia",
+          "disposition": "staged_operating",
+          "ship_id": "822e2afa-3d7a-57e0-b5c3-0c6dc2fc3235"
+        },
+        {
+          "slug": "msc-musica",
+          "name": "MSC Musica",
+          "disposition": "staged_operating",
+          "ship_id": "1fd9496a-96c6-5595-8773-43505fd814d6"
+        },
+        {
+          "slug": "msc-opera",
+          "name": "MSC Opera",
+          "disposition": "staged_operating",
+          "ship_id": "228193b1-20f1-58bb-9e9e-09dd8b89df74"
+        },
+        {
+          "slug": "msc-orchestra",
+          "name": "MSC Orchestra",
+          "disposition": "staged_operating",
+          "ship_id": "3cfaeb9b-0d1e-5c17-9781-6754fd16e200"
+        },
+        {
+          "slug": "msc-poesia",
+          "name": "MSC Poesia",
+          "disposition": "staged_operating",
+          "ship_id": "8ec171f7-18e5-58ac-adc2-14c1d1117abd"
+        },
+        {
+          "slug": "msc-preziosa",
+          "name": "MSC Preziosa",
+          "disposition": "staged_operating",
+          "ship_id": "e199b0c7-ea3e-5bdd-b037-f8b9139b7246"
+        },
+        {
+          "slug": "msc-seascape",
+          "name": "MSC Seascape",
+          "disposition": "staged_operating",
+          "ship_id": "cbc9aa42-4476-5e9e-8c78-872ce2ba9e14"
+        },
+        {
+          "slug": "msc-seashore",
+          "name": "MSC Seashore",
+          "disposition": "staged_operating",
+          "ship_id": "feb0dd02-2716-5231-a5cc-7366c7423948"
+        },
+        {
+          "slug": "msc-seaside",
+          "name": "MSC Seaside",
+          "disposition": "staged_operating",
+          "ship_id": "396ff13c-7ade-56ea-924a-d545133e4287"
+        },
+        {
+          "slug": "msc-seaview",
+          "name": "MSC Seaview",
+          "disposition": "staged_operating",
+          "ship_id": "54be0e88-cc84-5568-bdd5-4aa6baea5899"
+        },
+        {
+          "slug": "msc-sinfonia",
+          "name": "MSC Sinfonia",
+          "disposition": "staged_operating",
+          "ship_id": "e4671e82-2337-507f-9760-fe1bb42f5df7"
+        },
+        {
+          "slug": "msc-splendida",
+          "name": "MSC Splendida",
+          "disposition": "staged_operating",
+          "ship_id": "2d2ea029-fc21-51fe-bc04-027f405e176d"
+        },
+        {
+          "slug": "msc-virtuosa",
+          "name": "MSC Virtuosa",
+          "disposition": "staged_operating",
+          "ship_id": "37468896-3a92-55a2-9cfd-0b5489656d06"
+        },
+        {
+          "slug": "msc-world-america",
+          "name": "MSC World America",
+          "disposition": "staged_operating",
+          "ship_id": "e85fe7b0-e064-58fb-9551-7ebcaab0869a"
+        },
+        {
+          "slug": "msc-world-asia",
+          "name": "MSC World Asia",
+          "disposition": "excluded_future",
+          "evidence_url": "https://www.mscpressarea.com/press-releases/msc-cruises-opens-sales-for-msc-world-asia-sailing-the-western-mediterranean-from/",
+          "reason": "First public cruise December 11, 2026; future on the check date."
+        },
+        {
+          "slug": "msc-world-atlantic",
+          "name": "MSC World Atlantic",
+          "disposition": "excluded_future",
+          "evidence_url": "https://www.msccruisesusa.com/cruise/ships",
+          "reason": "Marketed for 2027; future on the check date."
+        },
+        {
+          "slug": "msc-world-europa",
+          "name": "MSC World Europa",
+          "disposition": "existing_pinned_identity",
+          "ship_id": "a2061812-add0-50d1-b7d7-0ab63818d059"
+        }
+      ]
+    }
+  ],
+  "withheld": [
+    {
+      "name": "Norwegian Sky / Cordelia Sky",
+      "operator_ids": [
+        "norwegian-cruise-line"
+      ],
+      "disposition": "withheld_operator_transition",
+      "sources": [
+        "https://www.ncl.com/cruise-ships",
+        "https://www.nclhltd.com/brands/norwegian-cruise-line",
+        "https://www.nclhltd.com/investors/sec-filings/all-sec-filings/content/0001104659-26-054833/nclh-20260331x10q.htm",
+        "https://www.cordeliacruises.com/routes"
+      ],
+      "checked_at": "2026-09-21",
+      "reason": "Absent from the reviewed current NCL consumer fleet but present in corporate material; primary filings describe a late-2026 charter and Cordelia markets October 2026 departures. Current operator transition and last NCL public sailing are not established precisely; no operating row or transfer date fabricated."
+    },
+    {
+      "names": [
+        "Celebrity Boundless",
+        "Celebrity Compass",
+        "Celebrity Roamer",
+        "Celebrity Seeker",
+        "Celebrity Wanderer"
+      ],
+      "disposition": "excluded_future_river_fleet",
+      "sources": [
+        "https://www.celebritycruises.com/cruise-ships",
+        "https://www.rclinvestor.com/financial-info/key-statistics/"
+      ],
+      "checked_at": "2026-09-21",
+      "reason": "Named future river products are marketed separately; corporate fleet expansion starts in 2027. None is an operating overnight vessel on the check date."
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+// Synthetic in-memory PostgreSQL; no live writes.
+const {PGlite}=require('@electric-sql/pglite');
+const fs=require('node:fs');
+const assert=require('node:assert/strict');
+(async()=>{
+const db=new PGlite();
+const owner='11111111-1111-4111-8111-111111111111', other='22222222-2222-4222-8222-222222222222';
+await db.exec(`create role anon; create role authenticated; create schema auth;
+create table auth.users(id uuid primary key); create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
+grant usage on schema auth to anon,authenticated;
+create table public.places(id uuid primary key,name text);
+insert into auth.users values ('${owner}'),('${other}'); insert into places values ('${owner}','Synthetic place');`);
+await db.exec(fs.readFileSync('supabase/migrations/202609080003_experience_paths.sql','utf8'));
+await db.exec(`set role authenticated; set request.jwt.claim.sub='${owner}';
+insert into experience_paths(id,title,is_published) values('${owner}','Published',true),('${other}','Draft',false);
+insert into experience_path_stops(path_id,place_id,position) values('${owner}','${owner}',1),('${other}','${owner}',0);`);
+await assert.rejects(db.exec(`insert into experience_path_stops(path_id,place_id,position) values('${owner}','${owner}',1)`),/unique/);
+await assert.rejects(db.exec(`insert into experience_paths(owner_id,title) values('${other}','Forged')`),/row-level security/);
+await db.exec(`set request.jwt.claim.sub='${other}';`);
+assert.equal((await db.query('select * from experience_paths')).rows.length,1);
+assert.equal((await db.query('select * from experience_path_stops')).rows.length,1);
+assert.equal((await db.query(`update experience_paths set title='Attack' where id='${owner}' returning id`)).rows.length,0);
+await assert.rejects(db.exec(`insert into experience_path_stops(path_id,place_id,position) values('${owner}','${owner}',2)`),/row-level security/);
+await db.exec(`reset role; set role anon; set request.jwt.claim.sub='';`);
+assert.equal((await db.query('select * from experience_paths')).rows.length,1);
+assert.equal((await db.query('select * from experience_path_stops')).rows.length,1);
+await assert.rejects(db.exec(`delete from experience_paths`),/permission denied/);
+await db.exec(`reset role; set role authenticated; set request.jwt.claim.sub='${owner}'; delete from experience_paths where id='${owner}';`);
+assert.equal((await db.query(`select * from experience_path_stops where path_id='${owner}'`)).rows.length,0);
+await db.close(); console.log('PASS: schema, publication RLS, owner isolation, spoof prevention, ordering uniqueness and cascade');
+})().catch(e=>{console.error(e);process.exitCode=1;});

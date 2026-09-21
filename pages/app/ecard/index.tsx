@@ -1,3 +1,4 @@
+import { useReleaseCopy } from '../../../hooks/useReleaseCopy';
 /**
  * eCard Hub Screen — /app/ecard
  * Shows existing cards or prompts to create one.
@@ -48,6 +49,7 @@ const PUBLISH_LIMITS = {
 };
 
 export default function ECardHubScreen() {
+  const copy = useReleaseCopy();
   const { t } = useTranslation();
   const router = useRouter();
   const { locale } = router;
@@ -97,9 +99,9 @@ export default function ECardHubScreen() {
       (c) =>
         (c.full_name || '').toLowerCase().includes(q) ||
         (c.title || '').toLowerCase().includes(q) ||
-        (c.is_published ? 'live published' : 'draft').includes(q)
+        (c.is_published ? `live published ${copy('Live').toLowerCase()}` : `draft ${copy('Draft').toLowerCase()}`).includes(q)
     );
-  }, [cards, searchQuery]);
+  }, [cards, searchQuery, copy]);
 
   const handleEditCard = (card: CardData) => {
     router.push(`/app/ecard/${card.id}/edit`, undefined, { locale });
@@ -128,11 +130,11 @@ export default function ECardHubScreen() {
         setCards(prev => prev.filter(c => c.id !== deleteModalCard.id));
         setDeleteModalCard(null);
       } else {
-        alert('Failed to delete card.');
+        alert(copy('Failed to delete card.'));
       }
     } catch (err) {
       console.error('Error deleting card:', err);
-      alert('Failed to delete card.');
+      alert(copy('Failed to delete card.'));
     } finally {
       setDeleting(false);
     }
@@ -147,11 +149,11 @@ export default function ECardHubScreen() {
         setCards(prev => [newCard, ...prev]);
         router.push(`/app/ecard/${newCard.id}/edit`, undefined, { locale });
       } else {
-        alert('Failed to duplicate card.');
+        alert(copy('Failed to duplicate card.'));
       }
     } catch (err) {
       console.error('Error duplicating card:', err);
-      alert('Failed to duplicate card.');
+      alert(copy('Failed to duplicate card.'));
     } finally {
       setDuplicating(null);
     }
@@ -181,7 +183,7 @@ export default function ECardHubScreen() {
   if (loading) {
     return (
       <>
-        <Head><title>My eCards | TavvY</title></Head>
+        <Head><title>{copy('My eCards')} | TavvY</title></Head>
         <AppLayout>
           <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: bg }}>
             <div style={{ width: 36, height: 36, border: `3px solid ${border}`, borderTopColor: ACCENT, borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
@@ -195,7 +197,7 @@ export default function ECardHubScreen() {
   return (
     <>
       <Head>
-        <title>My eCards | TavvY</title>
+        <title>{copy('My eCards')} | TavvY</title>
         <meta name="description" content="Manage your digital business cards" />
       </Head>
 
@@ -207,10 +209,10 @@ export default function ECardHubScreen() {
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '16px 20px', paddingTop: 'max(16px, env(safe-area-inset-top))',
           }}>
-            <button onClick={() => router.back()} style={{ background: 'none', border: 'none', padding: 8, cursor: 'pointer', borderRadius: 8 }}>
+            <button aria-label={copy('Back')} onClick={() => router.back()} style={{ background: 'none', border: 'none', padding: 8, cursor: 'pointer', borderRadius: 8 }}>
               <IoArrowBack size={22} color={textPrimary} />
             </button>
-            <h1 style={{ fontSize: 17, fontWeight: 600, margin: 0, color: textPrimary, letterSpacing: '-0.3px' }}>My eCards</h1>
+            <h1 style={{ fontSize: 17, fontWeight: 600, margin: 0, color: textPrimary, letterSpacing: '-0.3px' }}>{copy("My eCards")}</h1>
             <div style={{ width: 38 }} />
           </header>
 
@@ -232,7 +234,7 @@ export default function ECardHubScreen() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search cards..."
+                  placeholder={copy('Search cards...')}
                   style={{
                     flex: 1,
                     border: 'none',
@@ -244,7 +246,7 @@ export default function ECardHubScreen() {
                 />
                 {searchQuery && (
                   <button
-                    onClick={() => setSearchQuery('')}
+                    aria-label={copy('Clear search')} onClick={() => setSearchQuery('')}
                     style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer', display: 'flex' }}
                   >
                     <IoClose size={16} color={textSecondary} />
@@ -294,7 +296,7 @@ export default function ECardHubScreen() {
                         fontSize: 15, fontWeight: 600, color: textPrimary,
                         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                       }}>
-                        {card.full_name || 'Untitled Card'}
+                        {card.full_name || copy('Untitled Card')}
                       </span>
                       <span style={{
                         fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 6,
@@ -302,7 +304,7 @@ export default function ECardHubScreen() {
                         color: card.is_published ? ACCENT : textSecondary,
                         flexShrink: 0,
                       }}>
-                        {card.is_published ? 'Live' : 'Draft'}
+                        {copy(card.is_published ? 'Live' : 'Draft')}
                       </span>
                     </div>
                     {card.title && (
@@ -330,7 +332,7 @@ export default function ECardHubScreen() {
             <div style={{ textAlign: 'center', padding: '60px 40px' }}>
               <IoSearch size={36} color={textSecondary} />
               <p style={{ fontSize: 15, color: textSecondary, marginTop: 12 }}>
-                No cards match &ldquo;{searchQuery}&rdquo;
+                {copy('No cards match')} &ldquo;{searchQuery}&rdquo;
               </p>
             </div>
           ) : (
@@ -354,16 +356,17 @@ export default function ECardHubScreen() {
                 <IoCardOutline size={36} color={ACCENT} />
               </div>
               <h2 style={{ fontSize: 20, fontWeight: 700, color: textPrimary, margin: '0 0 8px' }}>
-                Create your first digital card
+                {copy("Create your first digital card")}
               </h2>
               <p style={{ fontSize: 14, color: textSecondary, margin: 0, lineHeight: 1.5, maxWidth: 260 }}>
-                Tap here to get started with your digital card
+                {copy("Tap here to get started with your digital card")}
               </p>
             </button>
           )}
 
           {/* ── FAB (Floating Action Button) ── */}
           <button
+            aria-label={copy('Create eCard')}
             onClick={handleFabClick}
             style={{
               position: 'fixed', bottom: 90, right: 24,
@@ -428,7 +431,7 @@ export default function ECardHubScreen() {
                 }}
               >
                 {item.icon}
-                {item.label}
+                {copy(item.label)}
               </button>
             ))}
           </div>
@@ -566,9 +569,9 @@ export default function ECardHubScreen() {
               }}>
                 <IoTrash size={28} color="#EF4444" />
               </div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 8px', textAlign: 'center', color: textPrimary }}>Delete Card?</h3>
+              <h3 style={{ fontSize: 18, fontWeight: 700, margin: '0 0 8px', textAlign: 'center', color: textPrimary }}>{copy("Delete Card?")}</h3>
               <p style={{ fontSize: 14, lineHeight: 1.5, margin: '0 0 24px', textAlign: 'center', color: textSecondary }}>
-                This will permanently remove <strong>&ldquo;{deleteModalCard.full_name || 'Untitled Card'}&rdquo;</strong> and all its data. This cannot be undone.
+                {copy("This will permanently remove")} <strong>&ldquo;{deleteModalCard.full_name || copy('Untitled Card')}&rdquo;</strong> {copy("and all its data. This cannot be undone.")}
               </p>
               <div style={{ display: 'flex', gap: 12 }}>
                 <button
@@ -580,7 +583,7 @@ export default function ECardHubScreen() {
                     background: isDark ? '#250E45' : '#F1F5F9', color: textPrimary,
                   }}
                 >
-                  Cancel
+                  {copy("Cancel")}
                 </button>
                 <button
                   onClick={handleDeleteCard}
@@ -592,7 +595,7 @@ export default function ECardHubScreen() {
                     opacity: deleting ? 0.6 : 1,
                   }}
                 >
-                  {deleting ? 'Deleting...' : 'Delete'}
+                  {copy(deleting ? 'Deleting...' : 'Delete')}
                 </button>
               </div>
             </div>

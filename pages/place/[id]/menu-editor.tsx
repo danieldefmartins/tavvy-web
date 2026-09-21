@@ -1,3 +1,7 @@
+import { useThemeContext } from '../../../contexts/ThemeContext';
+import { useOwnerRequestScope } from '../../../hooks/useOwnerRequestScope';
+import MenuAppearanceSettings from '../../../components/MenuAppearanceSettings';
+import { menuAppearance } from '../../../lib/menuAppearance';
 /**
  * Menu Editor - Restaurant Owner Self-Service
  * Path: pages/place/[id]/menu-editor.tsx
@@ -10,7 +14,7 @@
  * - Auth-gated: requires logged-in user
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -33,6 +37,8 @@ interface MenuItem {
   calories: number | null;
   order_url: string | null;
   sort_order: number;
+  dish_type: string | null;
+  dish_aliases: string[];
   category_id: string;
   meal_period: string | null;
 }
@@ -52,6 +58,7 @@ interface Menu {
   place_id: string;
   name: string;
   style: string | null;
+  photo_gallery_enabled?: boolean;
   cover_image_url: string | null;
   show_cover: boolean;
   happy_hour_enabled: boolean;
@@ -91,6 +98,8 @@ const DIETARY_OPTIONS = [
 
 export default function MenuEditorPage() {
   const router = useRouter();
+  const { theme, isDark } = useThemeContext();
+  const editorTheme = { '--owner-bg': theme.background, '--owner-surface': theme.surface, '--owner-text': theme.text, '--owner-muted': theme.textSecondary, '--owner-border': theme.border, '--owner-link': isDark ? '#D7A7FF' : '#7806A4', '--text': theme.text, '--text-secondary': theme.textSecondary, '--border': theme.border } as React.CSSProperties;
   const { id } = router.query;
 
   // Auth
@@ -102,6 +111,13 @@ export default function MenuEditorPage() {
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [placeName, setPlaceName] = useState('');
+  const [canManage, setCanManage] = useState(false);
+  const [accessError, setAccessError] = useState('');
+  const ownerKey = `${user?.id || ''}:${typeof id === 'string' ? id : ''}`;
+  const scope = useOwnerRequestScope(ownerKey);
+  const loadSequence = useRef(0);
+  const [loadedFor, setLoadedFor] = useState('');
+  const canEdit = canManage && loadedFor === ownerKey;
   const [loading, setLoading] = useState(true);
 
   // UI State
@@ -112,102 +128,72 @@ export default function MenuEditorPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'item' | 'category'; id: string } | null>(null);
 
+  useEffect(() => { if (router.query.tab === 'settings') setActiveTab('settings'); }, [router.query.tab]);
+
   // ─── Auth Check ───────────────────────────────────────────────────────────
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      setUser(currentUser);
-      setAuthLoading(false);
-    };
-    checkAuth();
-
+    let active = true, authVersion = 0;
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      authVersion++; if (active) { setUser(session?.user ?? null); setAuthLoading(false); }
     });
-
-    return () => subscription.unsubscribe();
+    const version = authVersion;
+    void supabase.auth.getUser().then(({ data }) => {
+      if (active && version === authVersion) { setUser(data.user); setAuthLoading(false); }
+    }).catch(() => { if (active && version === authVersion) { setUser(null); setAuthLoading(false); } });
+    return () => { active = false; subscription.unsubscribe(); };
   }, []);
 
   // ─── Load Data ────────────────────────────────────────────────────────────
 
   const loadData = useCallback(async () => {
-    if (!id) return;
-    setLoading(true);
+    if (typeof id !== 'string' || !user) return;
+    const valid = scope.capture(), request = ++loadSequence.current;
+    const current = () => valid() && request === loadSequence.current;
+    setLoading(true); setCanManage(false); setAccessError('');
     try {
-      // Place name
-      const { data: placeData } = await supabase
-        .from('places')
-        .select('name')
-        .eq('id', id)
-        .maybeSingle();
-      if (placeData) setPlaceName(placeData.name || '');
-
-      // Menu
-      let { data: menuData } = await supabase
-        .from('menus')
-        .select('*')
-        .eq('place_id', id)
-        .maybeSingle();
-
-      // If no menu exists, create one
-      if (!menuData) {
-        const { data: newMenu } = await supabase
-          .from('menus')
-          .insert({
-            place_id: id,
-            name: `${placeData?.name || 'Restaurant'} Menu`,
-            show_cover: false,
-            happy_hour_enabled: false,
-            promo_banner_enabled: false,
-            seasonal_special_enabled: false,
-          })
-          .select()
-          .single();
-        menuData = newMenu;
-      }
-
+      // UI gate only; the database independently checks current verified ownership.
+      const { data: claim, error: claimError } = await supabase.from('pro_business_claims')
+        .select('id').eq('user_id', user.id).eq('place_id', id).eq('claim_kind', 'restaurant').eq('status', 'verified').not('ownership_verified_at', 'is', null).limit(1);
+      if (!current()) return;
+      if (claimError || !claim?.length) throw new Error(claimError ? 'Unable to verify menu management access. Please try again later.' : 'A verified business claim is required to manage this restaurant menu.');
+      const { data: placeData, error: placeError } = await supabase.from('places').select('name').eq('id', id).maybeSingle();
+      if (!current()) return;
+      if (placeError || !placeData) throw new Error('Restaurant details could not be loaded. Please try again.');
+      const { data: menuData, error: menuError } = await supabase.from('menus').select('*').eq('place_id', id).maybeSingle();
+      if (!current()) return;
+      if (menuError) throw new Error('The menu could not be loaded. Please try again.');
+      let nextCategories: MenuCategory[] = [], nextItems: MenuItem[] = [];
       if (menuData) {
-        setMenu(menuData);
-
-        // Categories
-        const { data: catData } = await supabase
-          .from('menu_categories')
-          .select('*')
-          .eq('menu_id', menuData.id)
-          .order('sort_order', { ascending: true });
-        setCategories(catData || []);
-
-        // Items
-        if (catData && catData.length > 0) {
-          const catIds = catData.map((c: any) => c.id);
-          const { data: itemData } = await supabase
-            .from('menu_items')
-            .select('*')
-            .in('category_id', catIds)
-            .order('sort_order', { ascending: true });
-          setItems(itemData || []);
-        } else {
-          setItems([]);
+        const { data, error } = await supabase.from('menu_categories').select('*').eq('menu_id', menuData.id).order('sort_order', { ascending: true });
+        if (!current()) return;
+        if (error) throw new Error('Menu categories could not be loaded. Please try again.');
+        nextCategories = data || [];
+        if (nextCategories.length) {
+          const { data, error } = await supabase.from('menu_items').select('*').in('category_id', nextCategories.map(c => c.id)).order('sort_order', { ascending: true });
+          if (!current()) return;
+          if (error) throw new Error('Menu items could not be loaded. Please try again.');
+          nextItems = data || [];
         }
       }
-    } catch (err) {
-      console.error('[MenuEditor] Load error:', err);
-      showToast('Error loading menu data');
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
+      setPlaceName(placeData.name || ''); setMenu(menuData); setCategories(nextCategories); setItems(nextItems);
+      setLoadedFor(ownerKey); setCanManage(true);
+    } catch (error) {
+      if (current()) { setAccessError(error instanceof Error ? error.message : 'Menu data could not be loaded. Please try again.'); setCanManage(false); }
+    } finally { if (current()) setLoading(false); }
+  }, [id, user?.id, ownerKey, scope]);
 
   useEffect(() => {
-    if (id && user) loadData();
-  }, [id, user, loadData]);
+    setSaving(false); setToast(null); setEditingItem(null); setEditingCategory(null); setDeleteConfirm(null);
+    if (id && user) void loadData(); else { setCanManage(false); setLoading(false); }
+  }, [ownerKey, loadData]);
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
 
   const showToast = (message: string) => {
     setToast(message);
-    setTimeout(() => setToast(null), 3000);
+    const valid = scope.capture();
+    setTimeout(() => { if (valid()) setToast(null); }, 3000);
   };
 
   const uploadImage = async (file: File): Promise<string | null> => {
@@ -229,9 +215,27 @@ export default function MenuEditorPage() {
     }
   };
 
+  const createMenu = async () => {
+    if (!user || !id || !canEdit || saving) return;
+    const valid = scope.capture();
+    setSaving(true);
+    try {
+      const { data, error } = await supabase.from('menus').insert({
+        place_id: id, name: `${placeName || 'Restaurant'} Menu`, show_cover: false,
+        happy_hour_enabled: false, promo_banner_enabled: false, seasonal_special_enabled: false,
+      }).select('id').single();
+      if (!valid()) return;
+      if (error || !data) throw error || new Error('Menu creation was not confirmed');
+      await loadData();
+    } catch { if (valid()) showToast('Unable to create menu. Confirm you have permission to manage this restaurant.'); }
+    finally { if (valid()) setSaving(false); }
+  };
+
   // ─── Item CRUD ────────────────────────────────────────────────────────────
 
   const saveItem = async () => {
+    if (!canEdit || saving) return;
+    const valid = scope.capture();
     if (!editingItem || !editingItem.name || !editingItem.category_id) {
       showToast('Name and category are required');
       return;
@@ -241,7 +245,9 @@ export default function MenuEditorPage() {
       const payload = {
         name: editingItem.name,
         description: editingItem.description || null,
-        price: editingItem.price || null,
+        price: editingItem.price ?? null,
+        dish_type: editingItem.dish_type?.trim() || null,
+        dish_aliases: (editingItem.dish_aliases || []).map(alias => alias.trim()).filter(Boolean),
         image_url: editingItem.image_url || null,
         is_popular: editingItem.is_popular || false,
         is_new: editingItem.is_new || false,
@@ -256,32 +262,43 @@ export default function MenuEditorPage() {
 
       if (editingItem.id) {
         // Update
-        await supabase.from('menu_items').update(payload).eq('id', editingItem.id);
+        const { data, error } = await supabase.from('menu_items').update(payload).eq('id', editingItem.id).select('id').single();
+        if (!valid()) return;
+        if (error || !data) throw error || new Error('Item update was not confirmed');
         showToast('Item updated');
       } else {
         // Insert
-        await supabase.from('menu_items').insert(payload);
+        const { data, error } = await supabase.from('menu_items').insert(payload).select('id').single();
+        if (!valid()) return;
+        if (error || !data) throw error || new Error('Item creation was not confirmed');
         showToast('Item added');
       }
       setEditingItem(null);
       await loadData();
     } catch (err) {
-      showToast('Error saving item');
+      if (valid()) showToast('Error saving item');
     } finally {
-      setSaving(false);
+      if (valid()) setSaving(false);
     }
   };
 
   const deleteItem = async (itemId: string) => {
-    await supabase.from('menu_items').delete().eq('id', itemId);
-    showToast('Item deleted');
-    setDeleteConfirm(null);
-    await loadData();
+    if (!canEdit || saving) return;
+    const valid = scope.capture(); setSaving(true);
+    try {
+      const { data, error } = await supabase.from('menu_items').delete().eq('id', itemId).select('id').single();
+      if (!valid()) return;
+      if (error || !data) throw error || new Error('Item deletion was not confirmed');
+      showToast('Item deleted'); setDeleteConfirm(null); await loadData();
+    } catch { if (valid()) showToast('Unable to delete this item. Please try again.'); }
+    finally { if (valid()) setSaving(false); }
   };
 
   // ─── Category CRUD ────────────────────────────────────────────────────────
 
   const saveCategory = async () => {
+    if (!canEdit || saving) return;
+    const valid = scope.capture();
     if (!editingCategory || !editingCategory.name || !menu) {
       showToast('Category name is required');
       return;
@@ -298,22 +315,28 @@ export default function MenuEditorPage() {
       };
 
       if (editingCategory.id) {
-        await supabase.from('menu_categories').update(payload).eq('id', editingCategory.id);
+        const { data, error } = await supabase.from('menu_categories').update(payload).eq('id', editingCategory.id).select('id').single();
+        if (!valid()) return;
+        if (error || !data) throw error || new Error('Category update was not confirmed');
         showToast('Category updated');
       } else {
-        await supabase.from('menu_categories').insert(payload);
+        const { data, error } = await supabase.from('menu_categories').insert(payload).select('id').single();
+        if (!valid()) return;
+        if (error || !data) throw error || new Error('Category creation was not confirmed');
         showToast('Category added');
       }
       setEditingCategory(null);
       await loadData();
     } catch {
-      showToast('Error saving category');
+      if (valid()) showToast('Error saving category');
     } finally {
-      setSaving(false);
+      if (valid()) setSaving(false);
     }
   };
 
   const deleteCategory = async (catId: string) => {
+    if (!canEdit || saving) return;
+    const valid = scope.capture();
     // Check for items in this category
     const catItems = items.filter(i => i.category_id === catId);
     if (catItems.length > 0) {
@@ -321,39 +344,46 @@ export default function MenuEditorPage() {
       setDeleteConfirm(null);
       return;
     }
-    await supabase.from('menu_categories').delete().eq('id', catId);
-    showToast('Category deleted');
-    setDeleteConfirm(null);
-    await loadData();
+    setSaving(true);
+    try {
+      const { data, error } = await supabase.from('menu_categories').delete().eq('id', catId).select('id').single();
+      if (!valid()) return;
+      if (error || !data) throw error || new Error('Category deletion was not confirmed');
+      showToast('Category deleted'); setDeleteConfirm(null); await loadData();
+    } catch { if (valid()) showToast('Unable to delete this category. Please try again.'); }
+    finally { if (valid()) setSaving(false); }
   };
 
   // ─── Settings Save ────────────────────────────────────────────────────────
 
   const saveSettings = async () => {
-    if (!menu) return;
+    if (!menu || !canEdit || saving) return;
+    const valid = scope.capture();
     setSaving(true);
     try {
-      await supabase.from('menus').update({
-        name: menu.name,
-        cover_image_url: menu.cover_image_url,
-        style: menu.style,
+      const { data, error } = await supabase.from('menus').update({
+        name: menu.name, cover_image_url: menu.cover_image_url,
+        style: menuAppearance(menu).style, photo_gallery_enabled: menuAppearance(menu).galleryEnabled,
         show_cover: menu.show_cover,
-      }).eq('id', menu.id);
+      }).eq('id', menu.id).select('id').single();
+      if (!valid()) return;
+      if (error || !data) throw error || new Error('Settings were not saved');
       showToast('Settings saved');
     } catch {
-      showToast('Error saving settings');
+      if (valid()) showToast('Error saving settings');
     } finally {
-      setSaving(false);
+      if (valid()) setSaving(false);
     }
   };
 
   // ─── Promotions Save ──────────────────────────────────────────────────────
 
   const savePromotions = async () => {
-    if (!menu) return;
+    if (!menu || !canEdit || saving) return;
+    const valid = scope.capture();
     setSaving(true);
     try {
-      await supabase.from('menus').update({
+      const { data, error } = await supabase.from('menus').update({
         happy_hour_enabled: menu.happy_hour_enabled,
         happy_hour_text: menu.happy_hour_text,
         happy_hour_times: menu.happy_hour_times,
@@ -365,12 +395,14 @@ export default function MenuEditorPage() {
         seasonal_special_enabled: menu.seasonal_special_enabled,
         welcome_message: menu.welcome_message,
         tagline: menu.tagline,
-      }).eq('id', menu.id);
+      }).eq('id', menu.id).select('id').single();
+      if (!valid()) return;
+      if (error || !data) throw error || new Error('Promotions were not saved');
       showToast('Promotions saved');
     } catch {
-      showToast('Error saving promotions');
+      if (valid()) showToast('Error saving promotions');
     } finally {
-      setSaving(false);
+      if (valid()) setSaving(false);
     }
   };
 
@@ -378,7 +410,7 @@ export default function MenuEditorPage() {
 
   if (authLoading) {
     return (
-      <div className="me-loading">
+      <div className="me-loading" style={editorTheme}>
         <div className="me-spinner" />
         <p>Checking authentication...</p>
         <style jsx>{editorStyles}</style>
@@ -388,11 +420,11 @@ export default function MenuEditorPage() {
 
   if (!user) {
     return (
-      <div className="me-auth-gate">
+      <div className="me-auth-gate" style={editorTheme}>
         <div className="me-auth-card">
           <h2>Sign In Required</h2>
           <p>You need to be signed in to manage your restaurant menu.</p>
-          <button className="me-btn-primary" onClick={() => router.push('/app/login')}>
+          <button className="me-btn-primary" onClick={() => router.push(`/app/login?returnUrl=${encodeURIComponent(router.asPath)}`)}>
             Sign In
           </button>
         </div>
@@ -403,12 +435,29 @@ export default function MenuEditorPage() {
 
   if (loading) {
     return (
-      <div className="me-loading">
+      <div className="me-loading" style={editorTheme}>
         <div className="me-spinner" />
         <p>Loading menu editor...</p>
         <style jsx>{editorStyles}</style>
       </div>
     );
+  }
+
+  if (!canEdit) {
+    return <div className="me-auth-gate" style={editorTheme}><div className="me-auth-card">
+      <h2>Restaurant access required</h2><p role="alert">{accessError || 'Unable to verify menu management access.'}</p>
+      <button className="me-btn-primary" onClick={loadData}>Check access again</button>
+      <p><Link href={`/place/${id}`}>Back to restaurant</Link></p>
+    </div><style jsx>{editorStyles}</style></div>;
+  }
+
+  if (!menu) {
+    return <div className="me-auth-gate" style={editorTheme}><div className="me-auth-card">
+      <h2>Create a restaurant menu</h2><p>{placeName || 'This restaurant'} has no menu available to edit.</p>
+      <button className="me-btn-primary" disabled={saving} onClick={createMenu}>{saving ? 'Creating…' : 'Create Menu'}</button>
+      {toast && <p role="alert">{toast}</p>}
+      <p><Link href={`/place/${id}`}>Back to restaurant</Link></p>
+    </div><style jsx>{editorStyles}</style></div>;
   }
 
   // ─── Render ───────────────────────────────────────────────────────────────
@@ -425,7 +474,7 @@ export default function MenuEditorPage() {
       </Head>
       <style jsx>{editorStyles}</style>
 
-      <div className="me-container">
+      <div className="me-container" style={editorTheme}>
         {/* Header */}
         <header className="me-header">
           <div className="me-header-left">
@@ -583,24 +632,14 @@ export default function MenuEditorPage() {
                   </div>
                 )}
 
-                <label className="me-field">
-                  <span>Menu Style</span>
-                  <select
-                    value={menu.style || 'magazine'}
-                    onChange={e => setMenu({ ...menu, style: e.target.value })}
-                  >
-                    <option value="magazine">Magazine</option>
-                    <option value="gallery">Gallery</option>
-                  </select>
-                </label>
-
+                <MenuAppearanceSettings value={menu} onChange={appearance => setMenu({ ...menu, ...appearance })} />
                 <label className="me-field-toggle">
                   <input
                     type="checkbox"
                     checked={menu.show_cover}
                     onChange={e => setMenu({ ...menu, show_cover: e.target.checked })}
                   />
-                  <span>Show Cover Page</span>
+                  <span>Show cover page in Visual design</span>
                 </label>
 
                 <button className="me-btn-primary" onClick={saveSettings} disabled={saving}>
@@ -774,6 +813,21 @@ export default function MenuEditorPage() {
                 </label>
 
                 <label className="me-field">
+                  <span>Plain-language dish name</span>
+                  <input value={editingItem.dish_type || ''} maxLength={120}
+                    onChange={e => setEditingItem({ ...editingItem, dish_type: e.target.value })}
+                    placeholder="For example: chicken parmesan" />
+                  <small>Keep the creative name above. Add what this dish actually is so diners can find it.</small>
+                </label>
+                <label className="me-field">
+                  <span>Alternative dish names (comma separated)</span>
+                  <input value={(editingItem.dish_aliases || []).join(',')}
+                    onChange={e => setEditingItem({ ...editingItem, dish_aliases: e.target.value.split(',') })}
+                    placeholder="For example: chicken parm, chicken parmigiana" />
+                  <small>Only add names you confirm describe this dish. Do not guess ingredients or allergen claims.</small>
+                </label>
+
+                <label className="me-field">
                   <span>Description</span>
                   <textarea
                     value={editingItem.description || ''}
@@ -852,8 +906,9 @@ export default function MenuEditorPage() {
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-                      showToast('Uploading...');
+                      const valid = scope.capture(); showToast('Uploading...');
                       const url = await uploadImage(file);
+                      if (!valid()) return;
                       if (url) {
                         setEditingItem(prev => ({ ...prev, image_url: url }));
                         showToast('Image uploaded');
@@ -1054,7 +1109,7 @@ export default function MenuEditorPage() {
         )}
 
         {/* Toast */}
-        {toast && <div className="me-toast">{toast}</div>}
+        {toast && <div className="me-toast" role={/error|unable/i.test(toast) ? "alert" : "status"}>{toast}</div>}
       </div>
     </>
   );
@@ -1069,15 +1124,15 @@ const editorStyles = `
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: #f8f9fa;
+    background: var(--owner-bg,#f8f9fa);
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-    color: #666;
+    color: var(--owner-muted,#666);
   }
   .me-spinner {
     width: 32px;
     height: 32px;
-    border: 3px solid #eee;
-    border-top-color: #8A05BE;
+    border: 3px solid var(--owner-border,#eee);
+    border-top-color: var(--owner-link,#7806A4);
     border-radius: 50%;
     animation: me-spin 0.7s linear infinite;
     margin-bottom: 12px;
@@ -1089,12 +1144,12 @@ const editorStyles = `
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f8f9fa;
+    background: var(--owner-bg,#f8f9fa);
     padding: 24px;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
   }
   .me-auth-card {
-    background: #fff;
+    background: var(--owner-surface,#fff);
     padding: 40px;
     border-radius: 16px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.08);
@@ -1104,17 +1159,17 @@ const editorStyles = `
   .me-auth-card h2 {
     margin: 0 0 12px;
     font-size: 22px;
-    color: #1a1a1a;
+    color: var(--owner-text,#1a1a1a);
   }
   .me-auth-card p {
     margin: 0 0 24px;
-    color: #666;
+    color: var(--owner-muted,#666);
     font-size: 15px;
   }
 
   .me-container {
     min-height: 100vh;
-    background: #f8f9fa;
+    background: var(--owner-bg,#f8f9fa);
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
     max-width: 1000px;
     margin: 0 auto;
@@ -1126,8 +1181,8 @@ const editorStyles = `
     align-items: center;
     justify-content: space-between;
     padding: 20px 24px;
-    background: #fff;
-    border-bottom: 1px solid #eee;
+    background: var(--owner-surface,#fff);
+    border-bottom: 1px solid var(--owner-border,#eee);
     position: sticky;
     top: 0;
     z-index: 50;
@@ -1142,19 +1197,19 @@ const editorStyles = `
     border: none;
     font-size: 22px;
     cursor: pointer;
-    color: #8A05BE;
+    color: var(--owner-link,#7806A4);
     padding: 4px 8px;
   }
   .me-title {
     margin: 0;
     font-size: 20px;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--owner-text,#1a1a1a);
   }
   .me-subtitle {
     margin: 2px 0 0;
     font-size: 13px;
-    color: #888;
+    color: var(--owner-muted,#888);
   }
   .me-preview-link {
     padding: 8px 16px;
@@ -1172,8 +1227,8 @@ const editorStyles = `
   .me-tabs {
     display: flex;
     gap: 0;
-    background: #fff;
-    border-bottom: 1px solid #eee;
+    background: var(--owner-surface,#fff);
+    border-bottom: 1px solid var(--owner-border,#eee);
     padding: 0 24px;
     overflow-x: auto;
   }
@@ -1183,18 +1238,18 @@ const editorStyles = `
     background: none;
     font-size: 14px;
     font-weight: 500;
-    color: #666;
+    color: var(--owner-muted,#666);
     cursor: pointer;
     border-bottom: 2px solid transparent;
     transition: all 0.2s;
     white-space: nowrap;
   }
   .me-tab.active {
-    color: #8A05BE;
-    border-bottom-color: #8A05BE;
+    color: var(--owner-link,#7806A4);
+    border-bottom-color: var(--owner-link,#7806A4);
     font-weight: 600;
   }
-  .me-tab:hover { color: #8A05BE; }
+  .me-tab:hover { color: var(--owner-link,#7806A4); }
 
   /* Content */
   .me-content {
@@ -1218,15 +1273,15 @@ const editorStyles = `
 
   .me-btn-secondary {
     padding: 10px 20px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--owner-border,#ddd);
     border-radius: 8px;
-    background: #fff;
-    color: #333;
+    background: var(--owner-surface,#fff);
+    color: var(--owner-text,#333);
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
   }
-  .me-btn-secondary:hover { background: #f5f5f5; }
+  .me-btn-secondary:hover { background: var(--owner-bg,#f5f5f5); }
 
   .me-btn-danger {
     padding: 10px 20px;
@@ -1245,7 +1300,7 @@ const editorStyles = `
     border: 1px dashed #8A05BE;
     border-radius: 6px;
     background: rgba(138, 5, 190, 0.04);
-    color: #8A05BE;
+    color: var(--owner-link,#7806A4);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -1254,20 +1309,20 @@ const editorStyles = `
 
   .me-btn-edit {
     padding: 5px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--owner-border,#ddd);
     border-radius: 6px;
-    background: #fff;
-    color: #333;
+    background: var(--owner-surface,#fff);
+    color: var(--owner-text,#333);
     font-size: 12px;
     cursor: pointer;
   }
-  .me-btn-edit:hover { border-color: #8A05BE; color: #8A05BE; }
+  .me-btn-edit:hover { border-color: var(--owner-link,#7806A4); color: var(--owner-link,#7806A4); }
 
   .me-btn-delete {
     padding: 5px 12px;
     border: 1px solid #fecaca;
     border-radius: 6px;
-    background: #fff;
+    background: var(--owner-surface,#fff);
     color: #dc2626;
     font-size: 12px;
     cursor: pointer;
@@ -1276,7 +1331,7 @@ const editorStyles = `
 
   /* Items Tab */
   .me-category-group {
-    background: #fff;
+    background: var(--owner-surface,#fff);
     border-radius: 12px;
     padding: 20px;
     margin-bottom: 16px;
@@ -1288,16 +1343,16 @@ const editorStyles = `
     justify-content: space-between;
     margin-bottom: 16px;
     padding-bottom: 12px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--owner-border,#eee);
   }
   .me-category-group-header h3 {
     margin: 0;
     font-size: 16px;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--owner-text,#1a1a1a);
   }
   .me-empty-cat {
-    color: #999;
+    color: var(--owner-muted,#999);
     font-size: 13px;
     font-style: italic;
     padding: 12px 0;
@@ -1308,7 +1363,7 @@ const editorStyles = `
     align-items: center;
     gap: 14px;
     padding: 12px 0;
-    border-bottom: 1px solid #f5f5f5;
+    border-bottom: 1px solid var(--owner-border,#f5f5f5);
   }
   .me-item-row:last-child { border-bottom: none; }
   .me-item-row.sold-out { opacity: 0.5; }
@@ -1319,7 +1374,7 @@ const editorStyles = `
     border-radius: 8px;
     overflow: hidden;
     flex-shrink: 0;
-    background: #f3f3f3;
+    background: var(--owner-bg,#f3f3f3);
   }
   .me-item-thumb img {
     width: 100%;
@@ -1333,7 +1388,7 @@ const editorStyles = `
     align-items: center;
     justify-content: center;
     font-size: 9px;
-    color: #bbb;
+    color: var(--owner-muted,#bbb);
   }
 
   .me-item-info {
@@ -1344,12 +1399,12 @@ const editorStyles = `
     display: block;
     font-size: 14px;
     font-weight: 600;
-    color: #1a1a1a;
+    color: var(--owner-text,#1a1a1a);
   }
   .me-item-price {
     display: block;
     font-size: 13px;
-    color: #666;
+    color: var(--owner-muted,#666);
     margin-top: 2px;
   }
   .me-item-tags {
@@ -1386,14 +1441,14 @@ const editorStyles = `
     margin: 0;
     font-size: 18px;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--owner-text,#1a1a1a);
   }
 
   .me-cat-row {
     display: flex;
     align-items: center;
     gap: 14px;
-    background: #fff;
+    background: var(--owner-surface,#fff);
     padding: 16px 20px;
     border-radius: 10px;
     margin-bottom: 8px;
@@ -1404,7 +1459,7 @@ const editorStyles = `
     height: 28px;
     border-radius: 6px;
     background: #f3e5f5;
-    color: #8A05BE;
+    color: var(--owner-link,#7806A4);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1416,13 +1471,13 @@ const editorStyles = `
   .me-cat-name {
     font-size: 15px;
     font-weight: 600;
-    color: #1a1a1a;
+    color: var(--owner-text,#1a1a1a);
   }
   .me-cat-period {
     margin-left: 10px;
     font-size: 12px;
-    color: #888;
-    background: #f5f5f5;
+    color: var(--owner-muted,#888);
+    background: var(--owner-bg,#f5f5f5);
     padding: 2px 8px;
     border-radius: 4px;
   }
@@ -1446,25 +1501,25 @@ const editorStyles = `
   .me-field > span {
     font-size: 13px;
     font-weight: 600;
-    color: #333;
+    color: var(--owner-text,#333);
   }
   .me-field input[type="text"],
   .me-field input[type="number"],
   .me-field select,
   .me-field textarea {
     padding: 10px 14px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--owner-border,#ddd);
     border-radius: 8px;
     font-size: 14px;
     font-family: inherit;
     transition: border-color 0.2s;
-    background: #fff;
+    background: var(--owner-surface,#fff);
   }
   .me-field input:focus,
   .me-field select:focus,
   .me-field textarea:focus {
     outline: none;
-    border-color: #8A05BE;
+    border-color: var(--owner-link,#7806A4);
     box-shadow: 0 0 0 3px rgba(138, 5, 190, 0.1);
   }
   .me-field textarea { resize: vertical; }
@@ -1481,12 +1536,12 @@ const editorStyles = `
     gap: 10px;
     cursor: pointer;
     font-size: 14px;
-    color: #333;
+    color: var(--owner-text,#333);
   }
   .me-field-toggle input[type="checkbox"] {
     width: 18px;
     height: 18px;
-    accent-color: #8A05BE;
+    accent-color: var(--owner-link,#7806A4);
     cursor: pointer;
   }
   .me-field-toggle span {
@@ -1509,18 +1564,18 @@ const editorStyles = `
     align-items: center;
     gap: 6px;
     font-size: 13px;
-    color: #444;
+    color: var(--owner-text,#444);
     cursor: pointer;
   }
   .me-checkbox-label input[type="checkbox"] {
-    accent-color: #8A05BE;
+    accent-color: var(--owner-link,#7806A4);
   }
 
   .me-img-preview {
     border-radius: 8px;
     overflow: hidden;
     max-width: 300px;
-    border: 1px solid #eee;
+    border: 1px solid var(--owner-border,#eee);
   }
   .me-img-preview img {
     width: 100%;
@@ -1533,7 +1588,7 @@ const editorStyles = `
 
   .me-promo-section {
     padding: 16px;
-    background: #fafafa;
+    background: var(--owner-bg,#fafafa);
     border-radius: 10px;
     display: flex;
     flex-direction: column;
@@ -1544,12 +1599,12 @@ const editorStyles = `
   .me-empty-state {
     text-align: center;
     padding: 40px 20px;
-    background: #fff;
+    background: var(--owner-surface,#fff);
     border-radius: 12px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.04);
   }
   .me-empty-state p {
-    color: #666;
+    color: var(--owner-muted,#666);
     font-size: 15px;
     margin: 0 0 16px;
   }
@@ -1566,7 +1621,7 @@ const editorStyles = `
     padding: 20px;
   }
   .me-modal {
-    background: #fff;
+    background: var(--owner-surface,#fff);
     border-radius: 16px;
     width: 100%;
     max-width: 560px;
@@ -1582,24 +1637,24 @@ const editorStyles = `
     align-items: center;
     justify-content: space-between;
     padding: 20px 24px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--owner-border,#eee);
   }
   .me-modal-header h2 {
     margin: 0;
     font-size: 18px;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--owner-text,#1a1a1a);
   }
   .me-modal-close {
     background: none;
     border: none;
     font-size: 28px;
-    color: #999;
+    color: var(--owner-muted,#999);
     cursor: pointer;
     padding: 0 4px;
     line-height: 1;
   }
-  .me-modal-close:hover { color: #333; }
+  .me-modal-close:hover { color: var(--owner-text,#333); }
 
   .me-modal-body {
     padding: 24px;
@@ -1611,7 +1666,7 @@ const editorStyles = `
 
   .me-modal-footer {
     padding: 16px 24px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--owner-border,#eee);
     display: flex;
     justify-content: flex-end;
     gap: 10px;

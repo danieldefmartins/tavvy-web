@@ -1,0 +1,16 @@
+{
+  "lib/demoRestaurant.ts": "30d91bee4deb1d9cc388d0dd9b1a7005f2070b6b32554c1d50edca79ac6345ec",
+  "components/PreviewPlace.tsx": "a28687fac0f01e15da5cc2a77873b27cb2eafb2754bc45ebc6720a5fee3ea999",
+  "pages/place/[id]/menu.tsx": "5e5484ca406fb991455fdd2d6af85dea41ce2ea4d47bb55f972b09853e7d1246",
+  "pages/place/[id]/menu-gallery.tsx": "05efc0aa7d4e4593225c815af2fcc4600c80fd76fa998614cf2418233cd12bcb",
+  "pages/place/[id]/order.tsx": "499801a26036029a36d16ea4599dfda205df8645bf86ee2efaccc20d360da689",
+  "components/demo/DemoContact.tsx": "50114d5c0362c81057f5dd24e58a12ff052108aa130866421a471eb3a9119f38",
+  "components/demo/DemoBanner.tsx": "fe8a8ab2a0521952abb74e2c95471b1621a54882b198f91ff93b5958595be813",
+  "components/demo/DemoReview.tsx": "111cee69a11451a98e883031f2279fa21470e1e2a0b398063cc6d14eceb2e1a5",
+  "components/demo/DemoQR.tsx": "f3247aca54a234ac0e31c00219f6ffe5cd83a9f80455f959beebdb7f139e597a",
+  "components/demo/DemoDialog.tsx": "376c75e3183971c21a2628bcacb53328c3c5af0861a0e44e9570a4ecdbbf5719",
+  "pages/app/demo/restaurant-showcase.tsx": "3984c8c7d1ee8dd5710695e7805b4559e9187fccb33a377b2e28c0df6591e1ef",
+  "pages/app/demo/restaurant.tsx": "1962245afeda74374ce97a165156cce4742a4b9ba6273c933c12ee376483230a",
+  "pages/app/demo/restaurant-website.tsx": "5e7b2e84f6366eaa4d001ea59fe009000c1a85ce61d095f3437dc8c0be8cd80e",
+  "pages/app/demo/restaurant-card.tsx": "14b7d1d3ef90e944e2317eb1a7798b42174a88139979ad87417938b81187cc56"
+}

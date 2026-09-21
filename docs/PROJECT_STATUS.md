@@ -1,26 +1,30 @@
 # Tavvy current engineering status
 
-As of September 21, 2026, 03:37 America/New_York (07:37 UTC).
+As of September 21, 2026, 04:15 America/New_York (08:15 UTC).
 Read [PROJECT_MEMORY.md](PROJECT_MEMORY.md) for product decisions and architecture.
 This checkpoint distinguishes live features, local verification and remaining work.
 The full requested release is not complete.
 
 ## Source and release warning
 
-The active web/mobile workspaces contain released changes and unrelated unfinished
-work beyond committed `main`. Production releases use reviewed, isolated snapshots.
-Git HEAD alone does not reproduce the current app. Obtain the current release
-snapshot and private evidence from the maintainer before preparing another release.
+The active main workspaces contain unrelated unfinished work. Reviewed application
+source is now separated on `release/verified-web-20260921` and
+`release/native-preview-20260921`, with relative-file SHA-256 manifests under
+`docs/release-manifests/`. The web branch contains the reviewed search/account and
+owner/menu batches; the mobile branch is a preview candidate, not an uploaded build.
+Historical marketing captures are preserved separately and are not final Store assets.
 Do not deploy a mixed working directory or replay a migration based on its filename.
+Use the live/prepared status below and the maintainer's exact private release receipts.
 
 ## Live releases
 
-The current verified web build is `-Gu0Rf0Yc1fVdvEMncgYo`. It includes the earlier
+The current verified web build is `9vk2EoKB74_bQtxf_R9m0`. It includes the earlier
 appearance, place-sharing, eCard gallery, tools, cruise, community-safety, On The Go,
 Atlas audio and English/Portuguese/Spanish creation-copy batches. The current admin
-release includes verified review-author resolution. Both deployments succeeded;
-Two read-only live batches passed 172 and 80 checks, including all 218 cruise detail pages,
-sharing metadata, public tool routes and anonymous admin access denial.
+release includes verified review-author resolution. Both deployments succeeded. Search/account copy is now live and passed 23 deployed
+browser checks using controlled provider fixtures. Read-only live batches cover all
+342 cruise detail pages and sharing metadata, public tools and anonymous admin denial.
+The latest catalog batch passed 141 HTTP checks with no customer writes.
 
 | Area | Delivered and verified | Remaining limits |
 | --- | --- | --- |
@@ -38,16 +42,18 @@ sharing metadata, public tool routes and anonymous admin access denial.
 
 ### Cruise catalog
 
-218 verified ships are published across 21 operators: 169 ocean, 38 river and 11
-expedition ships. This includes 1,188 sourced venues, 60 cabin categories and 71
+342 verified ships are published across 21 operators: 181 ocean, 149 river and 12
+expedition ships. This includes 1,713 sourced venues, 60 cabin categories and 71
 programs. Unknown facts remain unknown; conflicting values are withheld from display.
 No unverified ship photos, customer reviews or canonical venue links were invented.
-All 218 public pages and ship metadata passed live HTTP checks.
+All 342 public pages and ship metadata passed live HTTP checks.
 
-The latest 63 Carnival, Princess, Costa and Disney ships passed collision checks,
-the actual database rollback rehearsal, committed publication, exact anonymous
-projection checks and all 63 live detail pages. Further Viking and AmaWaterways
-research is underway. Worldwide fleet coverage is incomplete.
+The latest 124 Viking and AmaWaterways ships passed collision checks, the actual
+database rollback rehearsal, committed publication, exact anonymous projection checks
+and all 124 public pages. The preceding Carnival, Princess, Costa and Disney batch is
+also verified. Further overnight fleet research is underway; worldwide coverage remains
+incomplete. Staged JSON retains its research draft state; see the catalog manifest for
+the published batch set, and never replay those imports.
 Future launches and ownership/name transitions require dated status evidence and
 identity reconciliation, rather than treating every marketing page as an operating ship.
 
@@ -61,11 +67,15 @@ identity reconciliation, rather than treating every marketing page as an operati
 - Earlier compilation-only local builds omitted public connection settings and are
   invalid release evidence. Use the configured build receipts. Public client settings
   are checked in the actual bundle; private server credentials must remain absent.
-- The newer 672-file snapshot compiled successfully with validated public settings.
-  It includes Atlas, review identity readers, focus-aware status-bar restoration and
-  translated Profile/eCard labels. Actual iPhone/iPad QA is underway; it is not uploaded.
-- A separate Profile correction is prepared: Saved opens the existing Saved screen;
-  statistics without destinations remain readable text; version comes from app metadata.
+- The configured 681-file snapshot passed actual iPhone/iPad navigation and preview
+  checks. Saved opens its real destination, statistics without routes remain readable
+  text, and version comes from app metadata. It includes Atlas, review identity readers,
+  status-bar restoration, account copy and search fixes; it is not uploaded.
+- Full-display captures establish correct dark preview and landscape rendering.
+  Certain XCTest app-only images omitted composited WebView pixels or rotated content;
+  those marked capture artifacts must not be used for marketing or regression claims.
+- The 685-file source candidate adds owner request guards and passes app typecheck plus
+  nine focused tests. It has not yet been built or tested as a native binary.
 - Earlier Account, RV & Camping, Universes, Realtors, Saved and sign-in navigation
   checks passed fresh-install and update paths on iPad Air 11-inch M4 / iOS 26.5.
   This is not Apple's original M3 / iPadOS 26.2 review environment.
@@ -88,7 +98,7 @@ browser template capture and App Store submission are separate deliverables.
 
 ## Search
 
-The preserved import continuation has passed 16 million of 34,883,915 records with
+The preserved import continuation has passed 18 million of 34,883,915 records with
 no unresolved write outcomes at this checkpoint. The original serving search remains
 active. The immutable full-backup content-hash ledger is complete. Do not restart the
 writer, reset the target or replay acknowledged batches. Any interruption requires
@@ -99,15 +109,22 @@ permissions and search checks, restart persistence, producer reconciliation and 
 verified traffic switch. The approved costs and overlap review checkpoint remain in
 the private runbook. No infrastructure identifiers or credentials belong here.
 
-The product audit reproduced demo interception of a real restaurant name, stale Where
-state affecting explicit near-me intent, browser Back skipping prior map searches and
-touch swipes scrolling inside a half-open results sheet. Narrow fixes are under test
-on web/mobile; they are not part of the current live build yet.
+The product search corrections are live on web and included in the 681 native
+candidate. Explicit Boston destinations override device position; near-me clears stale
+location filters; real named-place results take precedence over a clearly labeled demo
+link. Browser Back/Forward restores searches and list state, and touch swipes expand or
+collapse the results sheet while retaining full-height list scrolling. The 23 integrated
+and 23 deployed browser checks passed. Safari/device-specific gesture testing remains
+distinct from Chromium touch emulation.
 
 ## Other work still required
 
-- Verify the restaurant owner portal, inline missing-place onboarding, contacts/social
-  links, the full Tavvy Menu, delivery links and all demonstration actions end to end.
+- Owner/menu verification passed full menu/gallery, inline onboarding, profile/contact
+  and local-demo workflows. The reviewed web batch fixes false save/delete success,
+  missing meal-period persistence, stale account responses, login return and theme-aware
+  editor chrome; 46 focused tests, production build and 13 integrated browser checks
+  passed. Deployment is in progress at this checkpoint. Real customer records were not
+  used for write testing; operational ownership verification remains separate.
 - Keep reviews prominent without duplicate complete sections; validate ordinary-issue
   aging against independent later evidence. Do not turn silence into proof of a fix.
 - Finalize the separate restaurant membership offer before paid activation. Existing

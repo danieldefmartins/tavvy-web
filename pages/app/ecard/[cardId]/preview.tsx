@@ -24,7 +24,9 @@ import {
   THEMES,
   FREE_LINK_LIMIT,
 } from '../../../../lib/ecard';
-import { useRoles } from '../../../../hooks/useRoles';
+import { useECardPlan } from '../../../../hooks/useECardPlan';
+import { getTemplateById } from '../../../../config/eCardTemplates';
+import { hasProExtras } from '../../../../lib/ecard/premiumContent';
 import ECardIframePreview, { ECardIframePreviewHandle } from '../../../../components/ecard/ECardIframePreview';
 import StyledQRCode, { QR_STYLE_PRESETS, QRStyleConfig } from '../../../../components/ecard/StyledQRCode';
 import {
@@ -56,7 +58,8 @@ export default function ECardPreviewPage() {
   const { cardId: routeCardId } = router.query;
   const { isDark } = useThemeContext();
   const { user } = useAuth();
-  const { isPro } = useRoles();
+  const plan = useECardPlan();
+  const { isPro } = plan;
 
   const [loading, setLoading] = useState(true);
   const [cardData, setCardData] = useState<CardData | null>(null);
@@ -76,6 +79,8 @@ export default function ECardPreviewPage() {
   const [toolbarTab, setToolbarTab] = useState<'visibility' | 'colors'>('visibility');
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [saveError, setSaveError] = useState('');
+  const savingRef = useRef(false), publishingRef = useRef(false), revisionRef = useRef(0);
 
   // Editable fields (local state for live editing)
   const [showContactInfo, setShowContactInfo] = useState(true);
@@ -92,7 +97,7 @@ export default function ECardPreviewPage() {
       return;
     }
 
-    Promise.all([getCardById(cardId), getCardLinks(cardId)])
+    Promise.all([getCardById(cardId), getCardLinks(cardId, { includeInactive: true, throwOnError: true })])
       .then(([card, links]) => {
         if (card) {
           setCardData(card);
@@ -103,52 +108,47 @@ export default function ECardPreviewPage() {
           setGradientColor2((card as any).gradient_color_2 || '#00BFFF');
         }
       })
-      .catch(console.error)
+      .catch(() => setSaveError('Your card or links could not be loaded. Refresh to try again.'))
       .finally(() => setLoading(false));
   }, [router.isReady, cardId]);
 
   // Save changes to database and refresh preview
-  const saveChanges = useCallback(async () => {
-    if (!cardId || !hasChanges) return;
-    setSaving(true);
+  const saveChanges = useCallback(async (): Promise<boolean> => {
+    if (!cardId || !cardData || cardData.user_id !== user?.id || plan.loading || plan.error || savingRef.current) return false;
+    if (!hasChanges) return true;
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    const revision = revisionRef.current;
+    savingRef.current = true; setSaving(true); setSaveError('');
     try {
-      await updateCard(cardId, {
-        show_contact_info: showContactInfo,
-        show_social_icons: showSocialIcons,
-        gradient_color_1: gradientColor1,
-        gradient_color_2: gradientColor2,
-      } as any);
-      setCardData(prev => prev ? {
-        ...prev,
-        show_contact_info: showContactInfo,
-        show_social_icons: showSocialIcons,
-        gradient_color_1: gradientColor1,
-        gradient_color_2: gradientColor2,
-      } as any : prev);
+      const updates = { show_contact_info: showContactInfo, show_social_icons: showSocialIcons, gradient_color_1: gradientColor1, gradient_color_2: gradientColor2 };
+      if (!await updateCard(cardId, updates as any)) throw new Error('Your changes could not be saved. Retry before publishing.');
+      setCardData(prev => prev ? { ...prev, ...updates } : prev);
+      if (revisionRef.current !== revision) return false;
       setHasChanges(false);
-      setTimeout(() => iframePreviewRef.current?.reload(), 500);
-    } catch (error) {
-      console.error('Error saving changes:', error);
-    } finally {
-      setSaving(false);
-    }
-  }, [cardId, hasChanges, showContactInfo, showSocialIcons, gradientColor1, gradientColor2]);
+      return true;
+    } catch (failure) { setSaveError((failure as Error).message); return false; }
+    finally { savingRef.current = false; setSaving(false); }
+  }, [cardId, cardData, user?.id, hasChanges, showContactInfo, showSocialIcons, gradientColor1, gradientColor2, plan.loading, plan.error]);
 
   // Auto-save after 1.5s delay
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
-    if (!hasChanges) return;
+    if (!hasChanges || saving || publishing || saveError || plan.loading || plan.error) return;
     if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(() => saveChanges(), 1500);
     return () => { if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current); };
-  }, [hasChanges, saveChanges]);
+  }, [hasChanges, saveChanges, saving, publishing, saveError, plan.loading, plan.error]);
 
   const handleToggle = (setter: React.Dispatch<React.SetStateAction<boolean>>, value: boolean) => {
+    if (publishingRef.current) return;
+    revisionRef.current += 1; setSaveError('');
     setter(value);
     setHasChanges(true);
   };
 
   const handleColorChange = (setter: React.Dispatch<React.SetStateAction<string>>, value: string) => {
+    if (publishingRef.current) return;
+    revisionRef.current += 1; setSaveError('');
     setter(value);
     setHasChanges(true);
   };
@@ -179,13 +179,15 @@ export default function ECardPreviewPage() {
   };
 
   const refreshPreview = async () => {
-    if (!cardId) return;
+    if (!cardId || savingRef.current || publishingRef.current) return;
+    if (hasChanges && !await saveChanges()) return;
     try {
-      const [card, links] = await Promise.all([getCardById(cardId), getCardLinks(cardId)]);
+      setSaveError('');
+      const [card, links] = await Promise.all([getCardById(cardId), getCardLinks(cardId, { includeInactive: true, throwOnError: true })]);
       if (card) { setCardData(card); setCardLinks(links || []); }
       iframePreviewRef.current?.reload();
     } catch (error) {
-      console.error('Error refreshing preview:', error);
+      setSaveError('Your card or links could not be refreshed. Please try again.');
     }
   };
 
@@ -196,29 +198,18 @@ export default function ECardPreviewPage() {
     const theme = THEMES.find(t => t.id === cardData.theme);
     if (theme?.isPremium) return true;
     // Check premium template
-    const premiumTemplates = ['pro-', 'business-card', 'cover-card'];
-    if (cardData.template_id && premiumTemplates.some(p => cardData.template_id!.startsWith(p))) return true;
+    if (getTemplateById(cardData.template_id || 'basic')?.isPremium) return true;
     // Check link limit
-    if (cardLinks.length > FREE_LINK_LIMIT) return true;
-    // Check premium blocks
-    const premiumBlockTypes = ['gallery', 'video', 'youtube', 'testimonials', 'form', 'credentials'];
-    if ((cardData as any).blocks) {
-      const hasPremiumBlock = (cardData as any).blocks.some((block: any) =>
-        premiumBlockTypes.includes(block.type)
-      );
-      if (hasPremiumBlock) return true;
-    }
-    // Check premium features individually
-    if (cardData.gallery_images && cardData.gallery_images.length > 0) return true;
-    if (cardData.youtube_video_url) return true;
-    if (cardData.pro_credentials) return true;
-    if (cardData.form_block) return true;
+    if (cardLinks.filter(link => link.is_active !== false && link.is_active !== null).length > FREE_LINK_LIMIT) return true;
+    // Keep the existing legacy testimonial gate; the four approved extras use shared content-aware checks.
+    if (Array.isArray((cardData as any).blocks) && (cardData as any).blocks.some((block: any) => block.type === 'testimonials')) return true;
+    if (hasProExtras(cardData)) return true;
     return false;
   };
 
   /** Handle publish with premium gating */
   const handlePublish = async () => {
-    if (!cardId || !cardData) return;
+    if (!cardId || !cardData || cardData.user_id !== user?.id || publishingRef.current || savingRef.current || plan.loading || plan.error) return;
 
     // Check if card has premium features and user is not Pro
     if (!isPro && hasPremiumFeatures()) {
@@ -226,37 +217,38 @@ export default function ECardPreviewPage() {
       return;
     }
 
-    setPublishing(true);
+    publishingRef.current = true; setPublishing(true);
     try {
+      if (hasChanges && !await saveChanges()) return;
       const success = await publishCard(cardId, cardData.slug);
       if (success) {
         setCardData(prev => prev ? { ...prev, is_published: true } : prev);
         setTimeout(() => iframePreviewRef.current?.reload(), 500);
       } else {
-        alert('Failed to publish card. Please try again.');
+        setSaveError('Your card could not be published. Your saved content is still here.');
       }
     } catch (error) {
       console.error('Error publishing card:', error);
-      alert('Failed to publish card.');
+      setSaveError('Your card could not be published. Please retry.');
     } finally {
-      setPublishing(false);
+      publishingRef.current = false; setPublishing(false);
     }
   };
 
   /** Handle unpublish */
   const handleUnpublish = async () => {
-    if (!cardId) return;
+    if (!cardId || publishingRef.current || savingRef.current) return;
     if (!confirm('This will make your card invisible to others. Continue?')) return;
-    setPublishing(true);
+    publishingRef.current = true; setPublishing(true);
     try {
       const success = await unpublishCard(cardId);
       if (success) {
         setCardData(prev => prev ? { ...prev, is_published: false } : prev);
-      }
+      } else { setSaveError('Your card could not be unpublished. Please retry.'); }
     } catch (error) {
-      console.error('Error unpublishing card:', error);
+      setSaveError('Your card could not be unpublished. Please retry.');
     } finally {
-      setPublishing(false);
+      publishingRef.current = false; setPublishing(false);
     }
   };
 
@@ -300,6 +292,7 @@ export default function ECardPreviewPage() {
             </div>
           </header>
 
+          {(saveError || plan.error) && <div className="preview-save-error" role="alert" style={{margin:'12px auto',maxWidth:500,padding:16,border:'1px solid #B54747',borderRadius:12,color:isDark?'#fff':'#202124'}}><p>{plan.error || saveError}</p><button onClick={plan.error ? plan.retry : () => { if(hasChanges)void saveChanges();else void refreshPreview(); }} disabled={saving||publishing} style={{minHeight:44,padding:'8px 16px',borderRadius:8,border:'1px solid #89769A',background:'transparent',color:'inherit'}}>{plan.error?'Retry plan check':hasChanges?'Retry saving':'Refresh'}</button></div>}
           {/* Card Preview */}
           {loading ? (
             <div className="card-preview-container">
@@ -341,9 +334,9 @@ export default function ECardPreviewPage() {
               <button
                 className="publish-inline-btn"
                 onClick={handlePublish}
-                disabled={publishing}
+                disabled={publishing || saving || plan.loading || !!plan.error}
               >
-                {publishing ? 'Publishing...' : 'Publish Now'}
+                {publishing ? 'Publishing...' : 'Publish'}
               </button>
             </div>
           )}
@@ -390,6 +383,7 @@ export default function ECardPreviewPage() {
                   <div className="toggle-row">
                     <span className="toggle-label">Contact Info</span>
                     <button
+                      disabled={publishing} aria-label="Show contact info"
                       className={`toggle-switch ${showContactInfo ? 'on' : 'off'}`}
                       onClick={() => handleToggle(setShowContactInfo, !showContactInfo)}
                     >
@@ -399,6 +393,7 @@ export default function ECardPreviewPage() {
                   <div className="toggle-row">
                     <span className="toggle-label">Social Icons</span>
                     <button
+                      disabled={publishing} aria-label="Show social icons"
                       className={`toggle-switch ${showSocialIcons ? 'on' : 'off'}`}
                       onClick={() => handleToggle(setShowSocialIcons, !showSocialIcons)}
                     >
@@ -415,7 +410,7 @@ export default function ECardPreviewPage() {
                     <div className="color-picker-wrapper">
                       <div className="color-swatch" style={{ background: gradientColor1 }} />
                       <input
-                        type="color"
+                        type="color" disabled={publishing}
                         value={gradientColor1}
                         onChange={(e) => handleColorChange(setGradientColor1, e.target.value)}
                         className="color-input"
@@ -428,7 +423,7 @@ export default function ECardPreviewPage() {
                     <div className="color-picker-wrapper">
                       <div className="color-swatch" style={{ background: gradientColor2 }} />
                       <input
-                        type="color"
+                        type="color" disabled={publishing}
                         value={gradientColor2}
                         onChange={(e) => handleColorChange(setGradientColor2, e.target.value)}
                         className="color-input"
@@ -441,7 +436,7 @@ export default function ECardPreviewPage() {
               )}
 
               {hasChanges && (
-                <button className="save-btn" onClick={saveChanges} disabled={saving}>
+                <button className="save-btn" onClick={saveChanges} disabled={saving || publishing || plan.loading || !!plan.error}>
                   <IoSave size={16} />
                   <span>{saving ? 'Saving...' : 'Save Changes'}</span>
                 </button>
@@ -456,7 +451,7 @@ export default function ECardPreviewPage() {
                 <button
                   className="publish-btn"
                   onClick={handlePublish}
-                  disabled={publishing}
+                  disabled={publishing || saving || plan.loading || !!plan.error}
                 >
                   {publishing ? 'Publishing...' : 'Publish Card'}
                 </button>
@@ -464,7 +459,7 @@ export default function ECardPreviewPage() {
                 <button
                   className="unpublish-btn"
                   onClick={handleUnpublish}
-                  disabled={publishing}
+                  disabled={publishing || saving || plan.loading || !!plan.error}
                 >
                   {publishing ? 'Unpublishing...' : 'Unpublish'}
                 </button>

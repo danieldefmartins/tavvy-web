@@ -13,6 +13,8 @@ import AppLayout from '../../components/AppLayout';
 import { spacing, borderRadius } from '../../constants/Colors';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
+import { safeAuthRedirect } from '../../lib/authRedirect';
+import { supabase } from '../../lib/supabaseClient';
 
 export default function SignUpScreen() {
   const { theme } = useThemeContext();
@@ -20,6 +22,8 @@ export default function SignUpScreen() {
   const { t } = useTranslation('common');
   const router = useRouter();
   const { locale } = router;
+  const returnUrl = safeAuthRedirect(router.query.returnUrl);
+  const restaurantSignup = returnUrl.startsWith('/app/business');
   
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
@@ -57,7 +61,9 @@ export default function SignUpScreen() {
     setError(null);
     
     try {
-      await signUp(email, password, displayName, zipCode.trim());
+      await signUp(email, password, displayName, zipCode.trim(), returnUrl);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) { await router.replace(returnUrl); return; }
       setSuccess(true);
     } catch (err: any) {
       setError(err.message || 'Failed to create account');
@@ -161,10 +167,10 @@ export default function SignUpScreen() {
           {/* Sign Up Form */}
           <div className="form-container">
             <h1 className="title" style={{ color: theme.text }}>
-              Create Account
+              {restaurantSignup ? 'Create your restaurant account' : 'Create Account'}
             </h1>
             <p className="subtitle" style={{ color: theme.textSecondary }}>
-              Join TavvY to discover and share places
+              {restaurantSignup ? 'Create your account to continue your restaurant ownership request. Verification is required before editing.' : 'Join TavvY to discover and share places'}
             </p>
 
             {error && (
@@ -286,7 +292,7 @@ export default function SignUpScreen() {
               <span style={{ color: theme.textSecondary }}>
                 Already have an account?{' '}
               </span>
-              <Link href="/app/login" locale={locale} style={{ color: theme.primary }}>
+              <Link href={`/app/login?returnUrl=${encodeURIComponent(returnUrl)}`} locale={locale} style={{ color: theme.primary }}>
                 Log In
               </Link>
             </div>

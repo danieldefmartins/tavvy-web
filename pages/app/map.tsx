@@ -1,3 +1,7 @@
+import Link from 'next/link';
+import { DEMO_RESTAURANT_HREF, shouldOfferDemoRestaurant } from '../../lib/demoPlace';
+import { canGoBackInApp } from '../../hooks/useAppNavigationHistory';
+import { parseSearchQuery } from '../../lib/smartQueryParser';
 /**
  * Map View Screen
  * Full-screen interactive map with place search and bottom sheet
@@ -216,6 +220,16 @@ export default function MapScreen() {
   
   // Search states
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchMessage, setSearchMessage] = useState('');
+  const [showDemoFallback, setShowDemoFallback] = useState(false);
+  const [resolvedLocation, setResolvedLocation] = useState('This map area');
+  const actualCoordinatesRef = useRef<[number, number] | null>(null);
+  const restoredMapRef = useRef(false);
+  const [loadedRoute, setLoadedRoute] = useState('');
+  const listRef = useRef<HTMLDivElement>(null);
+  const mapViewportRef = useRef<HTMLDivElement>(null);
+  const searchRowRef = useRef<HTMLDivElement>(null);
+  const restoreListScrollRef = useRef(0);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchSuggestionsList, setSearchSuggestionsList] = useState<SearchResult[]>([]);
@@ -224,19 +238,35 @@ export default function MapScreen() {
   const [showSearchOverlay, setShowSearchOverlay] = useState(false);
   const [showSearchThisArea, setShowSearchThisArea] = useState(false);
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
+  const searchIntentRef = useRef(false);
+  const placesRequestRef = useRef(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const mapBoundsRef = useRef<{ minLat: number; maxLat: number; minLng: number; maxLng: number; center: [number, number] } | null>(null);
   const initialLoadDone = useRef(false);
 
-  // Apply ?q= from the URL (e.g. arriving from the home search bar via Enter)
+  // URL owns each submitted search. Back/Forward can restore a prior map entry.
   useEffect(() => {
     if (!router.isReady) return;
-    const q = router.query.q;
-    if (typeof q === 'string' && q.trim()) {
-      setSearchQuery(q.trim());
-    }
+    ++placesRequestRef.current;
+    setLoadedRoute('');
+    setShowSuggestions(false); setShowSearchOverlay(false); setSearchMessage(''); setShowDemoFallback(false);
+    try {
+      const stored = JSON.parse(sessionStorage.getItem(`tavvy:map:${router.asPath}`) || 'null');
+      if (stored && Array.isArray(stored.places) && !stored.places.some((place: any) => place.evidenceStatus === 'loading') && Date.now() - stored.at < 120000) {
+        restoredMapRef.current = true; searchIntentRef.current = Boolean(router.query.q);
+        setSearchQuery(stored.query); setShowDemoFallback(stored.demoFallback === true); setSelectedPlaceId(null); setPlaces(stored.places); setMapCenter(stored.center); setMapZoom(stored.zoom);
+        setSheetHeightPx(Math.max(SNAP_COLLAPSED, Math.min(stored.height, getSnapPoints()[2]))); setSelectedCategory(stored.category); setResolvedLocation(stored.label);
+        restoreListScrollRef.current = stored.scrollTop || 0; setLoadedRoute(router.asPath); setLoading(false); return;
+      }
+    } catch {}
+    restoredMapRef.current = false; restoreListScrollRef.current = 0;
+    const q = typeof router.query.q === 'string' ? router.query.q.trim() : '';
+    setSearchQuery(q); setSelectedPlaceId(null);
+    if (q) { searchIntentRef.current = true; setSelectedCategory('all'); void runSearch(q); }
+    else { searchIntentRef.current = false; const category = typeof router.query.category === 'string' ? router.query.category : 'all'; setSelectedCategory(category); void fetchPlaces(category); }
+    // runSearch/fetchPlaces read the current URL; result generations discard earlier responses.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.isReady]);
+  }, [router.isReady, router.asPath]);
 
   // Filter states
   const [showFilters, setShowFilters] = useState(false);
@@ -261,6 +291,20 @@ export default function MapScreen() {
   const dragStartHeight = useRef<number>(0);
   const isDragging = useRef(false);
 
+  useEffect(() => {
+    if (!router.isReady || loading || loadedRoute !== router.asPath) return;
+    const save = () => { try { sessionStorage.setItem(`tavvy:map:${router.asPath}`, JSON.stringify({ at: Date.now(), query: typeof router.query.q === 'string' ? router.query.q : '', places, center: mapCenter, zoom: mapZoom, height: sheetHeightPx, category: selectedCategory, label: resolvedLocation, scrollTop: listRef.current?.scrollTop || 0, demoFallback: showDemoFallback })); } catch {} };
+    save(); window.addEventListener('pagehide', save); router.events.on('routeChangeStart', save);
+    const list = listRef.current; let timer: ReturnType<typeof setTimeout> | undefined;
+    const scroll = () => { if (!timer) timer = setTimeout(() => { timer = undefined; save(); }, 120); };
+    list?.addEventListener('scroll', scroll, { passive: true });
+    return () => { if (timer) clearTimeout(timer); window.removeEventListener('pagehide', save); router.events.off('routeChangeStart', save); list?.removeEventListener('scroll', scroll); };
+  }, [router.asPath, router.isReady, loading, places, mapCenter, mapZoom, sheetHeightPx, selectedCategory, resolvedLocation, loadedRoute, showDemoFallback]);
+
+  useEffect(() => {
+    if (!loading && listRef.current && restoreListScrollRef.current) { listRef.current.scrollTop = restoreListScrollRef.current; restoreListScrollRef.current = 0; }
+  }, [loading, places]);
+
   // --- Smooth, velocity-aware bottom-sheet dragging ---
   // During a drag we write the height straight to the DOM (rAF-coalesced) so we
   // never trigger a React re-render per frame. On release we pick a snap point
@@ -270,13 +314,20 @@ export default function MapScreen() {
   const lastT = useRef(0);
   const velocity = useRef(0);          // px/ms, positive = dragging upward (growing)
   const didDrag = useRef(false);
+  const suppressClickUntilRef = useRef(0);
+  const mouseCleanupRef = useRef<(() => void) | null>(null);
   const rafId = useRef<number | null>(null);
   const pendingHeight = useRef<number | null>(null);
   const SHEET_EASE = 'height 0.42s cubic-bezier(0.32, 0.72, 0, 1)';
 
   const getSnapPoints = () => {
     const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
-    return [SNAP_COLLAPSED, vh * 0.5, vh * 0.88];
+    const viewport = mapViewportRef.current?.getBoundingClientRect();
+    const searchRow = searchRowRef.current?.getBoundingClientRect();
+    // Keep search and Back reachable above the expanded sheet, including landscape.
+    const available = viewport && searchRow ? viewport.bottom - searchRow.bottom - 8 : vh * .88;
+    const maximum = Math.max(SNAP_COLLAPSED, Math.min(vh * .88, available));
+    return [SNAP_COLLAPSED, Math.min(vh * .5, maximum), maximum];
   };
 
   const flushHeight = () => {
@@ -304,7 +355,7 @@ export default function MapScreen() {
       : sheetHeightPx;
     lastY.current = clientY;
     lastT.current = performance.now();
-    velocity.current = 0;
+    velocity.current = 0; pendingHeight.current = null;
   };
 
   const moveDrag = (clientY: number) => {
@@ -319,11 +370,11 @@ export default function MapScreen() {
     lastT.current = now;
 
     const deltaY = dragStartY.current - clientY;
-    if (Math.abs(deltaY) > 12) didDrag.current = true;
+    if (Math.abs(deltaY) > 5) didDrag.current = true;
 
     const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
     const min = SNAP_COLLAPSED;
-    const max = vh * 0.88;
+    const max = getSnapPoints()[2];
     let newHeight = dragStartHeight.current + deltaY;
     // Rubber-band resistance past the limits so it feels elastic, not stuck.
     if (newHeight < min) newHeight = min - (min - newHeight) * 0.35;
@@ -338,10 +389,10 @@ export default function MapScreen() {
     if (!isDragging.current) return;
     isDragging.current = false;
     if (rafId.current != null) { cancelAnimationFrame(rafId.current); rafId.current = null; }
-    const currentHeight = sheetRef.current
-      ? sheetRef.current.getBoundingClientRect().height
-      : sheetHeightPx;
-    const target = chooseSnap(currentHeight, velocity.current);
+    const currentHeight = pendingHeight.current ?? sheetRef.current?.getBoundingClientRect().height ?? sheetHeightPx;
+    const target = chooseSnap(currentHeight, performance.now() - lastT.current > 100 ? 0 : velocity.current);
+    pendingHeight.current = null;
+    if (didDrag.current) suppressClickUntilRef.current = performance.now() + 350;
     if (sheetRef.current) {
       sheetRef.current.style.transition = SHEET_EASE;
       sheetRef.current.style.height = `${target}px`;
@@ -350,11 +401,15 @@ export default function MapScreen() {
   };
 
   // Handle event bindings (whole header is grabbable, not just the pill)
-  const handleTouchStart = (e: React.TouchEvent) => beginDrag(e.touches[0].clientY);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if ((e.target as HTMLElement).closest('button, a, input')) return;
+    beginDrag(e.touches[0].clientY);
+  };
   const handleTouchMove = (e: React.TouchEvent) => moveDrag(e.touches[0].clientY);
   const handleTouchEnd = () => endDrag();
   const handleMouseDown = (e: React.MouseEvent) => {
-    e.preventDefault();
+    if ((e.target as HTMLElement).closest('button, a, input')) return;
+    e.preventDefault(); mouseCleanupRef.current?.();
     beginDrag(e.clientY);
     const onMove = (ev: MouseEvent) => moveDrag(ev.clientY);
     const onUp = () => {
@@ -362,10 +417,44 @@ export default function MapScreen() {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
     };
+    mouseCleanupRef.current = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
   };
   
+  // Let a list gesture expand the sheet first; at full height native scrolling takes over.
+  // A downward gesture at the top collapses it. Horizontal filters/buttons remain ordinary controls.
+  useEffect(() => {
+    const list = listRef.current; if (!list) return;
+    let startY = 0, startX = 0, tracking = false, draggingList = false;
+    const start = (event: TouchEvent) => { if (event.touches.length !== 1) return; startY = event.touches[0].clientY; startX = event.touches[0].clientX; tracking = true; draggingList = false; };
+    const move = (event: TouchEvent) => {
+      if (!tracking || event.touches.length !== 1) return;
+      const touch = event.touches[0], delta = startY - touch.clientY;
+      if (!draggingList) {
+        if (Math.abs(delta) < 8 || Math.abs(delta) < Math.abs(startX - touch.clientX)) return;
+        const height = sheetRef.current?.getBoundingClientRect().height || 0;
+        const atTop = list.scrollTop <= 1;
+        if (!atTop || (delta > 0 && height >= getSnapPoints()[2] - 8)) return;
+        draggingList = true; beginDrag(startY);
+      }
+      if (event.cancelable) event.preventDefault();
+      moveDrag(touch.clientY);
+    };
+    const end = () => { tracking = false; if (draggingList) endDrag(); draggingList = false; };
+    list.addEventListener('touchstart', start, { passive: true });
+    list.addEventListener('touchmove', move, { passive: false });
+    list.addEventListener('touchend', end); list.addEventListener('touchcancel', end);
+    return () => { list.removeEventListener('touchstart', start); list.removeEventListener('touchmove', move); list.removeEventListener('touchend', end); list.removeEventListener('touchcancel', end); if (rafId.current != null) cancelAnimationFrame(rafId.current); };
+    // DOM refs and drag handlers read current measurements; no per-frame React updates.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const resize = () => { if (!isDragging.current) setSheetHeightPx(height => Math.max(SNAP_COLLAPSED, Math.min(height, getSnapPoints()[2]))); };
+    window.addEventListener('resize', resize); return () => { window.removeEventListener('resize', resize); mouseCleanupRef.current?.(); };
+  }, []);
+
   // Popup states for map controls
   const [showWeatherPopup, setShowWeatherPopup] = useState(false);
   const [showLayersPopup, setShowLayersPopup] = useState(false);
@@ -379,11 +468,12 @@ export default function MapScreen() {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const loc: [number, number] = [position.coords.latitude, position.coords.longitude];
+          actualCoordinatesRef.current = loc;
           setUserLocation(loc);
-          setMapCenter(loc);
+          if (!searchIntentRef.current) setMapCenter(loc);
         },
         (error) => {
-          console.log('Location error:', error);
+          setSearchMessage('Location access was unavailable. Search a city or move the map.');
         }
       );
     }
@@ -392,40 +482,45 @@ export default function MapScreen() {
 
   // Fetch places when location or category changes
   useEffect(() => {
-    fetchPlaces();
-  }, [userLocation, selectedCategory]);
+    if (router.isReady && !searchIntentRef.current && !restoredMapRef.current) fetchPlaces(typeof router.query.category === 'string' ? router.query.category : 'all');
+    // Category/URL changes are handled by the route effect above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userLocation]);
 
   // Handle search input with debounce for autocomplete
   useEffect(() => {
+    const controller = new AbortController();
     if (searchDebounceRef.current) {
       clearTimeout(searchDebounceRef.current);
     }
 
-    if (searchQuery.trim().length >= 2) {
+    if (showSearchOverlay && searchQuery.trim().length >= 2) {
       setIsSearching(true);
       searchDebounceRef.current = setTimeout(async () => {
         try {
           // Use API route for search suggestions
           const params = new URLSearchParams({
             q: searchQuery,
-            userLat: userLocation[0].toString(),
-            userLng: userLocation[1].toString(),
-            limit: '8',
+            ...(actualCoordinatesRef.current ? { userLat: actualCoordinatesRef.current[0].toString(), userLng: actualCoordinatesRef.current[1].toString() } : {}),
+            limit: '8', evidence: 'defer',
           });
           
-          const response = await fetch(`/api/search?${params}`);
+          if (!parseSearchQuery(searchQuery).useCurrentLocation) for (const [key, apiKey] of [['where','where'],['location','location'],['lat','userLat'],['lng','userLng'],['minLat','minLat'],['maxLat','maxLat'],['minLng','minLng'],['maxLng','maxLng']]) {
+            if (typeof router.query[key] === 'string') params.set(apiKey, router.query[key] as string);
+          }
+          const response = await fetch(`/api/search?${params}`, { signal: controller.signal });
           const data = await response.json();
           
-          if (data.suggestions) {
+          if (!controller.signal.aborted && data.suggestions) {
             setSearchSuggestionsList(data.suggestions);
             setShowSuggestions(true);
           }
         } catch (error) {
-          console.error('Error fetching suggestions:', error);
+          if (!controller.signal.aborted) console.error('Error fetching suggestions:', error);
         } finally {
-          setIsSearching(false);
+          if (!controller.signal.aborted) setIsSearching(false);
         }
-      }, 300);
+      }, 180);
     } else {
       setSearchSuggestionsList([]);
       setShowSuggestions(false);
@@ -433,13 +528,15 @@ export default function MapScreen() {
     }
 
     return () => {
+      controller.abort();
       if (searchDebounceRef.current) {
         clearTimeout(searchDebounceRef.current);
       }
     };
-  }, [searchQuery, userLocation]);
+  }, [searchQuery, userLocation, showSearchOverlay, router.asPath]);
 
-  const fetchPlaces = async () => {
+  const fetchPlaces = async (category = selectedCategory) => {
+    const requestId = ++placesRequestRef.current;
     setLoading(true);
     try {
       // userLocation is [lat, lng] format
@@ -466,8 +563,8 @@ export default function MapScreen() {
         'shopping': 'shop store'
       };
       
-      const categoryFilter = selectedCategory !== 'all' ? 
-        categoryMap[selectedCategory] : undefined;
+      const categoryFilter = category !== 'all' ? 
+        categoryMap[category] : undefined;
       
       // Use API route instead of direct Supabase call
       const params = new URLSearchParams({
@@ -485,7 +582,7 @@ export default function MapScreen() {
       
       if (data.error) {
         console.error('[Map] API error:', data.error);
-        setPlaces([]);
+        if (requestId === placesRequestRef.current && !searchIntentRef.current) setPlaces([]);
       } else {
         const fetchedPlaces = data.places || [];
         
@@ -501,22 +598,19 @@ export default function MapScreen() {
         });
         
         console.log(`[Map] Fetched ${fetchedPlaces.length} places, ${uniquePlaces.length} unique via API`, data.metrics);
-        setPlaces(uniquePlaces);
+        if (requestId === placesRequestRef.current && !searchIntentRef.current) { setPlaces(uniquePlaces); setLoadedRoute(router.asPath); }
       }
     } catch (error) {
       console.error('Error fetching places:', error);
-      setPlaces([]);
+      if (requestId === placesRequestRef.current && !searchIntentRef.current) setPlaces([]);
     } finally {
-      setLoading(false);
+      if (requestId === placesRequestRef.current && !searchIntentRef.current) setLoading(false);
     }
   };
 
   // Handle category selection
   const handleCategorySelect = (categoryId: string) => {
-    setSelectedCategory(categoryId);
-    // Expand sheet to half when selecting a category
-    const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
-    setSheetHeightPx(vh * 0.5);
+    void router.push({ pathname: '/app/map', query: categoryId === 'all' ? {} : { category: categoryId } }, undefined, { shallow: true });
   };
 
   // Handle map move end - show "Search this area" button
@@ -533,113 +627,62 @@ export default function MapScreen() {
   // Search this area - fetch places for current map bounds
   const searchThisArea = async () => {
     setShowSearchThisArea(false);
-    if (!mapBoundsRef.current) return;
-    
-    const { minLat, maxLat, minLng, maxLng, center } = mapBoundsRef.current;
-    setLoading(true);
-    try {
-      const categoryMap: Record<string, string> = {
-        'restaurants': 'restaurant',
-        'cafes': 'coffee cafe',
-        'bars': 'bar pub',
-        'gas': 'gas station fuel',
-        'shopping': 'shop store'
-      };
-      const categoryFilter = selectedCategory !== 'all' ? categoryMap[selectedCategory] : undefined;
-      
-      const params = new URLSearchParams({
-        minLat: minLat.toString(),
-        maxLat: maxLat.toString(),
-        minLng: minLng.toString(),
-        maxLng: maxLng.toString(),
-        userLat: center[0].toString(),
-        userLng: center[1].toString(),
-        ...(categoryFilter && { category: categoryFilter }),
-      });
-      
-      const response = await fetch(`/api/places?${params}`);
-      const data = await response.json();
-      
-      if (data.error) {
-        console.error('[Map] API error:', data.error);
-        setPlaces([]);
-      } else {
-        const fetchedPlaces = data.places || [];
-        const seenIds = new Set<string>();
-        const uniquePlaces = fetchedPlaces.filter((place: PlaceCardType) => {
-          if (seenIds.has(place.id)) return false;
-          seenIds.add(place.id);
-          return true;
-        });
-        console.log(`[Map] Search this area: ${uniquePlaces.length} places`);
-        setPlaces(uniquePlaces);
-      }
-    } catch (error) {
-      console.error('Error searching area:', error);
-      setPlaces([]);
-    } finally {
-      setLoading(false);
-    }
+    const bounds = mapBoundsRef.current;
+    if (!bounds) return;
+    const query = parseSearchQuery(searchQuery).placeName || (selectedCategory === 'all' ? '*' : selectedCategory);
+    navigateMapSearch(query, { location: 'map', minLat: String(bounds.minLat), maxLat: String(bounds.maxLat), minLng: String(bounds.minLng), maxLng: String(bounds.maxLng), userLat: String(bounds.center[0]), userLng: String(bounds.center[1]) });
   };
 
-  // Handle suggestion selection — show on map (matching iOS behavior)
+  // Give an autocomplete selection its own history entry while keeping it on the map.
   const handleSuggestionSelect = (suggestion: SearchResult) => {
-    setSearchQuery(suggestion.name);
-    setShowSuggestions(false);
-    setShowSearchOverlay(false);
-    
-    if (suggestion.latitude && suggestion.longitude) {
-      // Center map on the selected place
-      setMapCenter([suggestion.latitude, suggestion.longitude]);
-      setMapZoom(16); // Zoom in closer for a single place
-      
-      // Convert suggestion to PlaceCardType and show as the only card
-      const placeCard: PlaceCardType = {
-        id: (suggestion as any).id || `search-${Date.now()}`,
-        name: suggestion.name,
-        latitude: suggestion.latitude,
-        longitude: suggestion.longitude,
-        category: (suggestion as any).category || 'Place',
-        city: (suggestion as any).city || '',
-        address: (suggestion as any).address || '',
-        signals: [],
-        topSignals: (suggestion as any).topSignals || [],
-      };
-      
-      setPlaces([placeCard]);
-      setSelectedPlaceId(placeCard.id);
-      
-      // Expand bottom sheet to show the result
-      const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
-      setSheetHeightPx(vh * 0.5);
-      
-      console.log('[MapScreen] Showing place on map:', placeCard.name, placeCard.id);
-    }
+    navigateMapSearch(suggestion.name, suggestion.id ? { selected: suggestion.id } : undefined);
   };
 
   // Handle search submit (Enter key) — search and show results on map
-  const handleSearch = async () => {
-    if (searchQuery.trim()) {
+  const runSearch = async (query: string) => {
+    if (query.trim()) {
+      searchIntentRef.current = true;
+      const requestId = ++placesRequestRef.current;
       setShowSuggestions(false);
       setShowSearchOverlay(false);
-      setLoading(true);
+      setLoading(true); setLoadedRoute(''); setSearchMessage(''); setShowDemoFallback(false);
+      setSheetHeightPx(getSnapPoints()[1]);
       
       try {
         // Search via API (same endpoint as autocomplete, but with higher limit)
         const params = new URLSearchParams({
-          q: searchQuery.trim(),
-          userLat: userLocation[0].toString(),
-          userLng: userLocation[1].toString(),
-          limit: '30',
+          q: query.trim(),
+          ...(actualCoordinatesRef.current ? { userLat: String(actualCoordinatesRef.current[0]), userLng: String(actualCoordinatesRef.current[1]) } : {}),
+          limit: '30', evidence: 'defer',
         });
         
+        for (const [key, apiKey] of [['where','where'],['need','need'],['location','location'],['lat','userLat'],['lng','userLng'],['minLat','minLat'],['maxLat','maxLat'],['minLng','minLng'],['maxLng','maxLng']]) {
+          if (typeof router.query[key] === 'string') params.set(apiKey, router.query[key] as string);
+        }
+        if (parseSearchQuery(query).useCurrentLocation) {
+          // A map center is not a device fix, even when an earlier route supplied lat/lng.
+          const point = actualCoordinatesRef.current || await new Promise<[number, number]>((resolve, reject) => {
+            if (!navigator.geolocation) { reject(new Error('Location is unavailable. Enter a city instead.')); return; }
+            navigator.geolocation.getCurrentPosition(position => resolve([position.coords.latitude, position.coords.longitude]), () => reject(new Error('Location access was not available. Enter a city instead.')), { timeout: 10000 });
+          });
+          if (requestId !== placesRequestRef.current) return;
+          actualCoordinatesRef.current = point;
+          for (const key of ['where','minLat','maxLat','minLng','maxLng']) params.delete(key);
+          params.set('location', 'current'); params.set('userLat', String(point[0])); params.set('userLng', String(point[1]));
+        }
         const response = await fetch(`/api/search?${params}`);
         const data = await response.json();
         
-        if (data.suggestions && data.suggestions.length > 0) {
+        if (!response.ok || !Array.isArray(data.suggestions)) throw new Error(data.error || 'Search unavailable');
+        if (requestId !== placesRequestRef.current) return;
+        setResolvedLocation(data.location?.label || 'Any location'); setLoadedRoute(router.asPath);
+        setShowDemoFallback(shouldOfferDemoRestaurant(query, data.suggestions, data.partial));
+        setSearchQuery(query);
+        if (data.suggestions.length > 0) {
           // Convert search suggestions to PlaceCardType for the map
           const searchPlaces: PlaceCardType[] = data.suggestions
-            .filter((s: any) => s.latitude && s.longitude)
+            .filter((s: any) => typeof router.query.selected !== 'string' || s.id === router.query.selected)
+            .filter((s: any) => Number.isFinite(s.latitude) && Number.isFinite(s.longitude))
             .map((s: any) => ({
               id: s.id || `search-${Date.now()}-${Math.random()}`,
               name: s.name,
@@ -649,36 +692,66 @@ export default function MapScreen() {
               city: s.city || '',
               address: s.address || '',
               distance: s.distance,
-              signals: [],
+              signals: s.signals || [],
               topSignals: s.topSignals || [],
+              evidenceStatus: s.evidenceStatus,
             }));
           
-          setPlaces(searchPlaces);
+          if (requestId === placesRequestRef.current) setPlaces(searchPlaces);
           
           // Center map on first result
-          if (searchPlaces[0]) {
+          if (searchPlaces[0] && requestId === placesRequestRef.current) {
             setMapCenter([searchPlaces[0].latitude, searchPlaces[0].longitude]);
             setMapZoom(14);
             setSelectedPlaceId(searchPlaces[0].id);
           }
           
-          console.log(`[MapScreen] Search "${searchQuery}" returned ${searchPlaces.length} places on map`);
+          console.log(`[MapScreen] Search "${query}" returned ${searchPlaces.length} places on map`);
+          setLoading(false);
+          if (data.evidencePending) {
+            params.set('evidence', 'full');
+            try {
+              const enrichedResponse = await fetch(`/api/search?${params}`);
+              const enriched = await enrichedResponse.json();
+              if (!enrichedResponse.ok || !Array.isArray(enriched.suggestions)) throw new Error('Guest reports unavailable');
+              if (requestId === placesRequestRef.current) {
+                const byId = new Map(enriched.suggestions.map((place: any) => [place.id, place]));
+                const updated = searchPlaces.map(place => ({ ...place, ...(byId.get(place.id) as any || { evidenceStatus: 'unavailable' }) }));
+                if (params.get('need')) updated.sort((a: any,b: any) => (b.matchScore ?? -1) - (a.matchScore ?? -1));
+                setPlaces(updated);
+              }
+            } catch { if (requestId === placesRequestRef.current) setPlaces(previous => previous.map(place => ({ ...place, evidenceStatus: 'unavailable' }))); }
+          }
         } else {
-          console.log(`[MapScreen] Search "${searchQuery}" returned no results`);
-          setPlaces([]);
+          console.log(`[MapScreen] Search "${query}" returned no results`);
+          if (requestId === placesRequestRef.current) setPlaces([]);
         }
       } catch (error) {
         console.error('[MapScreen] Search error:', error);
-        setPlaces([]);
+        if (requestId === placesRequestRef.current) { setPlaces([]); setSearchMessage(error instanceof Error ? error.message : 'Search unavailable'); }
       } finally {
-        setLoading(false);
+        if (requestId === placesRequestRef.current) setLoading(false);
       }
       
-      // Expand bottom sheet to show results
-      const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
-      setSheetHeightPx(vh * 0.5);
+      // Evidence may finish later; preserve the user's current sheet position.
     }
   };
+  const navigateMapSearch = (query: string, override?: Record<string, string>) => {
+    if (!query.trim()) return;
+    const next: Record<string, string> = { q: query.trim() };
+    const parsed = parseSearchQuery(query);
+    if (!parsed.city && !parsed.useCurrentLocation) {
+      for (const key of ['where','need','location','lat','lng','minLat','maxLat','minLng','maxLng']) if (typeof router.query[key] === 'string') next[key] = router.query[key] as string;
+    }
+    if (!parsed.city && !next.lat && actualCoordinatesRef.current) { next.lat = String(actualCoordinatesRef.current[0]); next.lng = String(actualCoordinatesRef.current[1]); }
+    if (parsed.useCurrentLocation) next.location = 'current';
+    if (override) { if (override.location === 'map') { delete next.where; for (const key of ['minLat','maxLat','minLng','maxLng']) delete next[key]; } for (const [key,value] of Object.entries(override)) next[key === 'userLat' ? 'lat' : key === 'userLng' ? 'lng' : key] = value; }
+    setShowSearchOverlay(false); setShowSuggestions(false);
+    const unchanged = Object.keys(router.query).length === Object.keys(next).length && Object.entries(next).every(([key,value]) => router.query[key] === value);
+    if (unchanged) void runSearch(query);
+    else void router.push({ pathname: '/app/map', query: next }, undefined, { shallow: true });
+  };
+  const handleSearch = () => { navigateMapSearch(searchQuery); };
 
   // Center on user location - request fresh geolocation
   const centerOnUser = () => {
@@ -686,6 +759,7 @@ export default function MapScreen() {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const loc: [number, number] = [position.coords.latitude, position.coords.longitude];
+          actualCoordinatesRef.current = loc;
           setUserLocation(loc);
           setMapCenter(loc);
         },
@@ -708,7 +782,7 @@ export default function MapScreen() {
 
   // Handle back navigation
   const handleBack = () => {
-    router.push('/app', undefined, { locale });
+    if (canGoBackInApp()) router.back(); else void router.replace('/app', undefined, { locale });
   };
 
   // Dynamic sheet height based on drag state
@@ -823,11 +897,11 @@ export default function MapScreen() {
         />
       </Head>
 
-      <div className="map-screen">
+      <div className="map-screen" ref={mapViewportRef}>
         {/* Top Controls */}
         <div className="top-controls">
           {/* Back Button & Search Bar */}
-          <div className="search-row">
+          <div className="search-row" ref={searchRowRef}>
             <button className="back-btn" onClick={handleBack}>
               <FiArrowLeft size={24} />
             </button>
@@ -853,11 +927,8 @@ export default function MapScreen() {
               {searchQuery && (
                 <button className="clear-btn" onClick={(e) => {
                   e.stopPropagation();
-                  setSearchQuery('');
-                  setSearchSuggestionsList([]);
-                  setShowSuggestions(false);
-                  // Re-fetch nearby places when clearing search
-                  fetchPlaces();
+                  setSearchSuggestionsList([]); setShowSuggestions(false);
+                  void router.push('/app/map', undefined, { shallow: true });
                 }}>
                   <FiX size={18} />
                 </button>
@@ -924,9 +995,8 @@ export default function MapScreen() {
                 {isSearching && <div className="search-spinner" />}
                 {searchQuery && !isSearching && (
                   <button className="clear-btn" onClick={() => {
-                    setSearchQuery('');
-                    setSearchSuggestionsList([]);
-                    setShowSuggestions(false);
+                    setSearchSuggestionsList([]); setShowSuggestions(false); setShowSearchOverlay(false);
+                    void router.push('/app/map', undefined, { shallow: true });
                   }}>
                     <FiX size={18} />
                   </button>
@@ -1201,17 +1271,30 @@ export default function MapScreen() {
           className="bottom-sheet"
           ref={sheetRef}
           style={getSheetStyle()}
+          onClickCapture={event => { if (performance.now() < suppressClickUntilRef.current) { event.preventDefault(); event.stopPropagation(); } }}
         >
-          {/* Draggable Handle — drag anywhere on this header; tap to toggle */}
+          <div className="search-scope"><span>{resolvedLocation}</span><button onClick={() => router.push({ pathname: '/app/search', query: router.query })}>Edit location & filters</button></div>
+        {searchMessage && <p role="status" className="search-scope">{searchMessage}</p>}
+        {/* Draggable Handle — drag anywhere on this header; tap to toggle */}
           <div
             className="sheet-handle"
+            role="button" tabIndex={0} aria-label="Resize search results" aria-expanded={sheetHeightPx > SNAP_COLLAPSED + 20}
+            onKeyDown={event => {
+              if (['ArrowUp','ArrowDown','Home','End','Enter',' '].includes(event.key)) {
+                event.preventDefault(); const snaps = getSnapPoints();
+                const target = event.key === 'Home' ? snaps[0] : event.key === 'End' ? snaps[2] : event.key === 'ArrowUp' ? snaps.find(h => h > sheetHeightPx + 8) ?? snaps[2] : event.key === 'ArrowDown' ? [...snaps].reverse().find(h => h < sheetHeightPx - 8) ?? snaps[0] : sheetHeightPx <= SNAP_COLLAPSED + 20 ? snaps[1] : snaps[0];
+                setSheetHeightPx(target);
+              }
+            }}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchEnd}
             onMouseDown={handleMouseDown}
             onClick={() => {
               // Ignore the click that follows a real drag — only treat true taps as toggles
-              if (didDrag.current) { didDrag.current = false; return; }
+              if (performance.now() < suppressClickUntilRef.current) return;
+              didDrag.current = false;
               const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
               if (sheetHeightPx <= SNAP_COLLAPSED + 20) {
                 setSheetHeightPx(vh * 0.5);
@@ -1224,11 +1307,11 @@ export default function MapScreen() {
             <span className="handle-hint">{sheetHeightPx <= SNAP_COLLAPSED + 20 ? 'Swipe up for places' : ''}</span>
           </div>
 
-          {/* Sheet Header */}
-          <div className="sheet-header">
+          {/* The full header is a grab area, including the title. */}
+          <div className="sheet-header" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchEnd} onMouseDown={handleMouseDown}>
             <h2 className="sheet-title">{categoryName}</h2>
             {selectedCategory !== 'all' && (
-              <button className="close-btn" onClick={() => setSelectedCategory('all')}>
+              <button className="close-btn" onClick={() => handleCategorySelect('all')}>
                 <IoClose size={24} />
               </button>
             )}
@@ -1311,7 +1394,7 @@ export default function MapScreen() {
           )}
 
           {/* Place Cards */}
-          <div className="places-list">
+          <div className="places-list" ref={listRef}>
             {loading ? (
               <div className="loading">
                 <div className="spinner" />
@@ -1319,8 +1402,7 @@ export default function MapScreen() {
               </div>
             ) : places.length === 0 ? (
               <div className="empty-state">
-                <p>No places found in this area</p>
-                <p className="empty-hint">Try zooming out or searching for a specific place</p>
+                {showDemoFallback ? <Link className="demo-fallback" href={DEMO_RESTAURANT_HREF}><strong>Trattoria Tavvy</strong><span>Illustrative demo</span><span>View demo →</span></Link> : <><p>{searchMessage || `No places found · ${resolvedLocation}`}</p><p className="empty-hint">Try zooming out or searching for a specific place</p></>}
               </div>
             ) : (
               places.map((place) => (
@@ -1937,6 +2019,9 @@ export default function MapScreen() {
         }
 
         /* Bottom Sheet */
+        .demo-fallback { display: flex; flex-direction: column; gap: 8px; padding: 18px; color: ${theme.text}; background: ${theme.surface}; border: 1px solid ${theme.border}; border-radius: 14px; text-decoration: none; }
+        .search-scope { display: flex; gap: 10px; padding: 8px 16px; align-items: center; color: ${theme.text}; font-size: 13px; }
+        .search-scope button { padding: 8px 10px; background: ${theme.surface}; color: inherit; border: 1px solid ${theme.border}; border-radius: 9px; }
         .bottom-sheet {
           position: absolute;
           bottom: 0;
@@ -1965,6 +2050,8 @@ export default function MapScreen() {
           flex-shrink: 0;
         }
 
+        .sheet-handle:focus-visible { outline: 3px solid ${ACCENT_CYAN}; outline-offset: -3px; }
+        @media (prefers-reduced-motion: reduce) { .bottom-sheet { transition-duration: 0.01ms !important; } }
         .sheet-handle:active {
           cursor: grabbing;
         }
@@ -1995,7 +2082,12 @@ export default function MapScreen() {
           align-items: center;
           padding: 0 20px 12px;
           flex-shrink: 0;
+          min-height: 56px;
+          cursor: grab;
+          user-select: none;
+          touch-action: none;
         }
+        .sheet-header:active { cursor: grabbing; }
 
         .sheet-title {
           font-size: 24px;
@@ -2128,7 +2220,10 @@ export default function MapScreen() {
         /* Places List */
         .places-list {
           flex: 1;
+          min-height: 0;
           overflow-y: auto;
+          overscroll-behavior-y: contain;
+          -webkit-overflow-scrolling: touch;
           padding: 0 20px 20px;
         }
 

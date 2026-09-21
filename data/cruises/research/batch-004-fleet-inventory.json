@@ -1,0 +1,479 @@
+{
+  "schemaVersion": 1,
+  "checked_at": "2026-09-21",
+  "bases": [
+    {
+      "path": "data/cruises/staged/verified-operating-batch-001.json",
+      "sha256": "bc87d6f4aabc3217f5af2b6d7b5e12e3d802bc9b33f2cb77020b69b7210cada3",
+      "ship_count": 12
+    },
+    {
+      "path": "data/cruises/staged/verified-operating-batch-002-enriched.json",
+      "sha256": "3fd875b18bd5a0234502dae66256fa9081b3195e09431b962c67bd4e87d73dea",
+      "ship_count": 59
+    },
+    {
+      "path": "data/cruises/staged/verified-operating-batch-003.json",
+      "sha256": "d791d164161e4e07cc44de28e2731196c05f362e52722bd9b607c380c77881ad",
+      "ship_count": 84
+    }
+  ],
+  "scope": "Reconciliation of the four current official consumer fleet lists. Costa Fortuna has a dated future operator-transition note.",
+  "operators": [
+    {
+      "operator_id": "carnival-cruise-line",
+      "official_fleet_url": "https://www.carnival.com/cruise-ships",
+      "checked_at": "2026-09-21",
+      "coverage": "All named ships on this reviewed fleet list reconciled; this is not an AIS or daily operational status feed.",
+      "listed_count": 31,
+      "staged_count": 29,
+      "ships": [
+        {
+          "slug": "carnival-tropicale",
+          "name": "Carnival Tropicale",
+          "disposition": "excluded_future",
+          "evidence_url": "https://www.carnival.com/cruise-ships/carnival-tropicale",
+          "reason": "2028 debut; not operating on the check date."
+        },
+        {
+          "slug": "carnival-festivale",
+          "name": "Carnival Festivale",
+          "disposition": "excluded_future",
+          "evidence_url": "https://www.carnival.com/cruise-ships/carnival-festivale",
+          "reason": "2027 debut; not operating on the check date."
+        },
+        {
+          "slug": "carnival-jubilee",
+          "name": "Carnival Jubilee",
+          "disposition": "staged_operating",
+          "ship_id": "5a9970e9-fbbc-52f6-b4d0-be492e72efa6"
+        },
+        {
+          "slug": "carnival-firenze",
+          "name": "Carnival Firenze",
+          "disposition": "staged_operating",
+          "ship_id": "4f377e2f-07a4-5992-9061-f010affb0206"
+        },
+        {
+          "slug": "carnival-venezia",
+          "name": "Carnival Venezia",
+          "disposition": "staged_operating",
+          "ship_id": "e29c0cd0-f3d6-5c4d-9389-d77e9d76416c"
+        },
+        {
+          "slug": "carnival-celebration",
+          "name": "Carnival Celebration",
+          "disposition": "staged_operating",
+          "ship_id": "2b39fc3d-e069-50ec-9159-30d5aeb11814"
+        },
+        {
+          "slug": "carnival-luminosa",
+          "name": "Carnival Luminosa",
+          "disposition": "staged_operating",
+          "ship_id": "898e72e1-d558-515e-b2b4-608e81e11cc6"
+        },
+        {
+          "slug": "mardi-gras",
+          "name": "Mardi Gras",
+          "disposition": "staged_operating",
+          "ship_id": "7024f7ce-f47a-5fa2-81fe-1acf59eb2bb5"
+        },
+        {
+          "slug": "carnival-conquest",
+          "name": "Carnival Conquest",
+          "disposition": "staged_operating",
+          "ship_id": "096b1239-7295-5088-be74-bfbe10b5a8fb"
+        },
+        {
+          "slug": "carnival-dream",
+          "name": "Carnival Dream",
+          "disposition": "staged_operating",
+          "ship_id": "4126779a-327f-5605-b54f-f00505c13124"
+        },
+        {
+          "slug": "carnival-panorama",
+          "name": "Carnival Panorama",
+          "disposition": "staged_operating",
+          "ship_id": "e2b3109d-a3aa-5baf-b812-c95b0fafda5b"
+        },
+        {
+          "slug": "carnival-legend",
+          "name": "Carnival Legend",
+          "disposition": "staged_operating",
+          "ship_id": "7f830baf-f8e3-5df7-89f2-6653caf1265a"
+        },
+        {
+          "slug": "carnival-glory",
+          "name": "Carnival Glory",
+          "disposition": "staged_operating",
+          "ship_id": "b354f3b6-04f7-5e71-9772-278fd4dacc1f"
+        },
+        {
+          "slug": "carnival-radiance",
+          "name": "Carnival Radiance",
+          "disposition": "staged_operating",
+          "ship_id": "b3fd816e-1474-57e1-b940-70bebde69434"
+        },
+        {
+          "slug": "carnival-spirit",
+          "name": "Carnival Spirit",
+          "disposition": "staged_operating",
+          "ship_id": "e0908d66-fe5b-514f-b483-f3ce782008ef"
+        },
+        {
+          "slug": "carnival-horizon",
+          "name": "Carnival Horizon",
+          "disposition": "staged_operating",
+          "ship_id": "116e0d5e-48ea-5fc3-aea4-55e919e852b8"
+        },
+        {
+          "slug": "carnival-sunrise",
+          "name": "Carnival Sunrise",
+          "disposition": "staged_operating",
+          "ship_id": "1e921f71-b485-510c-a746-e1d66b963601"
+        },
+        {
+          "slug": "carnival-miracle",
+          "name": "Carnival Miracle",
+          "disposition": "staged_operating",
+          "ship_id": "c31e538b-9b81-5434-8e0e-e3c78f549d1f"
+        },
+        {
+          "slug": "carnival-vista",
+          "name": "Carnival Vista",
+          "disposition": "staged_operating",
+          "ship_id": "45696ea1-b88a-5d85-ba9c-3c3d27f104f5"
+        },
+        {
+          "slug": "carnival-magic",
+          "name": "Carnival Magic",
+          "disposition": "staged_operating",
+          "ship_id": "633b2de7-3b92-5906-8713-5625f6296d9e"
+        },
+        {
+          "slug": "carnival-breeze",
+          "name": "Carnival Breeze",
+          "disposition": "staged_operating",
+          "ship_id": "c8b8e303-8616-5b56-9ac5-865efb495b01"
+        },
+        {
+          "slug": "carnival-freedom",
+          "name": "Carnival Freedom",
+          "disposition": "staged_operating",
+          "ship_id": "f15d74fc-f3bb-56ce-9eba-ac81fb7ef0db"
+        },
+        {
+          "slug": "carnival-paradise",
+          "name": "Carnival Paradise",
+          "disposition": "staged_operating",
+          "ship_id": "4edff338-21e8-530b-885f-169c4780823c"
+        },
+        {
+          "slug": "carnival-elation",
+          "name": "Carnival Elation",
+          "disposition": "staged_operating",
+          "ship_id": "30b9eb34-505c-53cf-99c9-aba63873bbf7"
+        },
+        {
+          "slug": "carnival-sunshine",
+          "name": "Carnival Sunshine",
+          "disposition": "staged_operating",
+          "ship_id": "47c4b153-c52c-52ca-95b4-73545072ef01"
+        },
+        {
+          "slug": "carnival-valor",
+          "name": "Carnival Valor",
+          "disposition": "staged_operating",
+          "ship_id": "be6f4045-e6bf-518b-8e17-c341ee9a1fe9"
+        },
+        {
+          "slug": "carnival-liberty",
+          "name": "Carnival Liberty",
+          "disposition": "staged_operating",
+          "ship_id": "7b3dc5b9-7b6b-50ac-aedd-db53a39cb723"
+        },
+        {
+          "slug": "carnival-pride",
+          "name": "Carnival Pride",
+          "disposition": "staged_operating",
+          "ship_id": "62a7343d-e8ed-5856-9da9-3dea5039edd9"
+        },
+        {
+          "slug": "carnival-splendor",
+          "name": "Carnival Splendor",
+          "disposition": "staged_operating",
+          "ship_id": "0deb974d-e741-5ea9-9aaa-0d27ad58ca9c"
+        },
+        {
+          "slug": "carnival-adventure",
+          "name": "Carnival Adventure",
+          "disposition": "staged_operating",
+          "ship_id": "ce795238-3b8b-5829-8beb-0132e7ded763"
+        },
+        {
+          "slug": "carnival-encounter",
+          "name": "Carnival Encounter",
+          "disposition": "staged_operating",
+          "ship_id": "703c66f8-e3cd-54d9-b4fd-463f9baa6beb"
+        }
+      ]
+    },
+    {
+      "operator_id": "princess-cruises",
+      "official_fleet_url": "https://www.princess.com/ships-and-experience/ships",
+      "checked_at": "2026-09-21",
+      "coverage": "All named ships on this reviewed fleet list reconciled; this is not an AIS or daily operational status feed.",
+      "listed_count": 17,
+      "staged_count": 17,
+      "ships": [
+        {
+          "slug": "caribbean-princess",
+          "name": "Caribbean Princess",
+          "disposition": "staged_operating",
+          "ship_id": "9b2b06b8-74d3-5664-90c4-ee4314525969"
+        },
+        {
+          "slug": "coral-princess",
+          "name": "Coral Princess",
+          "disposition": "staged_operating",
+          "ship_id": "712f31ab-678f-50f1-80ea-984b06f098ae"
+        },
+        {
+          "slug": "crown-princess",
+          "name": "Crown Princess",
+          "disposition": "staged_operating",
+          "ship_id": "c1aff1cd-2827-5d82-b7d9-b1560d65a0bc"
+        },
+        {
+          "slug": "diamond-princess",
+          "name": "Diamond Princess",
+          "disposition": "staged_operating",
+          "ship_id": "31ad26bb-2f8b-5cc4-863e-a1f279ef472d"
+        },
+        {
+          "slug": "discovery-princess",
+          "name": "Discovery Princess",
+          "disposition": "staged_operating",
+          "ship_id": "598580fd-5ba0-5f7c-9a04-39ceac1cbef7"
+        },
+        {
+          "slug": "emerald-princess",
+          "name": "Emerald Princess",
+          "disposition": "staged_operating",
+          "ship_id": "552dd870-fe2f-5368-9638-9689d3788335"
+        },
+        {
+          "slug": "enchanted-princess",
+          "name": "Enchanted Princess",
+          "disposition": "staged_operating",
+          "ship_id": "78aae401-e753-5de7-914f-b5d35913e5dc"
+        },
+        {
+          "slug": "grand-princess",
+          "name": "Grand Princess",
+          "disposition": "staged_operating",
+          "ship_id": "96d66284-7d00-517f-941a-e0944acd9f71"
+        },
+        {
+          "slug": "island-princess",
+          "name": "Island Princess",
+          "disposition": "staged_operating",
+          "ship_id": "5e8439bc-1741-5bba-94e4-2f9c1f9b09f8"
+        },
+        {
+          "slug": "majestic-princess",
+          "name": "Majestic Princess",
+          "disposition": "staged_operating",
+          "ship_id": "c9a6f8c2-1e96-57c7-9241-231a228c5228"
+        },
+        {
+          "slug": "regal-princess",
+          "name": "Regal Princess",
+          "disposition": "staged_operating",
+          "ship_id": "261065f5-fc08-5ef7-a5d2-9645336f7805"
+        },
+        {
+          "slug": "royal-princess",
+          "name": "Royal Princess",
+          "disposition": "staged_operating",
+          "ship_id": "f0f96026-611e-5130-b876-eb8da8a665a4"
+        },
+        {
+          "slug": "ruby-princess",
+          "name": "Ruby Princess",
+          "disposition": "staged_operating",
+          "ship_id": "2dda29c9-b376-5d8f-ab4e-889ab4431d43"
+        },
+        {
+          "slug": "sapphire-princess",
+          "name": "Sapphire Princess",
+          "disposition": "staged_operating",
+          "ship_id": "294706d8-3b1b-5acc-b301-9c1d9944437f"
+        },
+        {
+          "slug": "sky-princess",
+          "name": "Sky Princess",
+          "disposition": "staged_operating",
+          "ship_id": "f447f1aa-2980-5599-afce-0c57d97e14a4"
+        },
+        {
+          "slug": "star-princess",
+          "name": "Star Princess",
+          "disposition": "staged_operating",
+          "ship_id": "4af726fe-85c2-530e-965d-aa8cde07141e"
+        },
+        {
+          "slug": "sun-princess",
+          "name": "Sun Princess",
+          "disposition": "staged_operating",
+          "ship_id": "35ee169f-9887-532a-928b-551d3246e4fa"
+        }
+      ]
+    },
+    {
+      "operator_id": "costa-cruises",
+      "official_fleet_url": "https://www.costacruises.com/fleet.html",
+      "checked_at": "2026-09-21",
+      "coverage": "All named ships on this reviewed fleet list reconciled; this is not an AIS or daily operational status feed.",
+      "listed_count": 9,
+      "staged_count": 9,
+      "ships": [
+        {
+          "slug": "costa-toscana",
+          "name": "Costa Toscana",
+          "disposition": "staged_operating",
+          "ship_id": "72fb3c59-ddcf-5324-ad2b-9bdecaabe871"
+        },
+        {
+          "slug": "costa-smeralda",
+          "name": "Costa Smeralda",
+          "disposition": "staged_operating",
+          "ship_id": "ff3f5ff3-df8e-5033-965c-aecec8b0d102"
+        },
+        {
+          "slug": "costa-deliziosa",
+          "name": "Costa Deliziosa",
+          "disposition": "staged_operating",
+          "ship_id": "32419478-8151-558f-a408-4e60159df269"
+        },
+        {
+          "slug": "costa-diadema",
+          "name": "Costa Diadema",
+          "disposition": "staged_operating",
+          "ship_id": "22d0ce99-bebd-5f6f-87a8-6aee552fd4b9"
+        },
+        {
+          "slug": "costa-fascinosa",
+          "name": "Costa Fascinosa",
+          "disposition": "staged_operating",
+          "ship_id": "5c191898-60ab-5632-bde1-a55eae5dbf67"
+        },
+        {
+          "slug": "costa-favolosa",
+          "name": "Costa Favolosa",
+          "disposition": "staged_operating",
+          "ship_id": "3ec6ebc1-c615-5bf1-808d-2858dbcba285"
+        },
+        {
+          "slug": "costa-pacifica",
+          "name": "Costa Pacifica",
+          "disposition": "staged_operating",
+          "ship_id": "60aeb842-95b3-5627-a752-65a29e9d05db"
+        },
+        {
+          "slug": "costa-fortuna",
+          "name": "Costa Fortuna",
+          "disposition": "staged_operating",
+          "ship_id": "f125aeec-da70-5339-b413-109fdff2a6b6"
+        },
+        {
+          "slug": "costa-serena",
+          "name": "Costa Serena",
+          "disposition": "staged_operating",
+          "ship_id": "13b46814-2104-57ae-b576-bd4540ca0d9f"
+        }
+      ]
+    },
+    {
+      "operator_id": "disney-cruise-line",
+      "official_fleet_url": "https://disneycruise.disney.go.com/en-au/ships/",
+      "checked_at": "2026-09-21",
+      "coverage": "All named ships on this reviewed fleet list reconciled; this is not an AIS or daily operational status feed.",
+      "listed_count": 9,
+      "staged_count": 8,
+      "ships": [
+        {
+          "slug": "disney-adventure",
+          "name": "Disney Adventure",
+          "disposition": "staged_operating",
+          "ship_id": "e1a22f75-b8d5-5575-abd5-dfd080acdc81"
+        },
+        {
+          "slug": "disney-believe",
+          "name": "Disney Believe",
+          "disposition": "excluded_future",
+          "evidence_url": "https://disneycruise.disney.go.com/en-sg/ships/believe/",
+          "reason": "2027 debut; not operating on the check date."
+        },
+        {
+          "slug": "disney-destiny",
+          "name": "Disney Destiny",
+          "disposition": "staged_operating",
+          "ship_id": "5fd5cf52-ee43-5dde-a82b-c7ac9329de32"
+        },
+        {
+          "slug": "disney-dream",
+          "name": "Disney Dream",
+          "disposition": "staged_operating",
+          "ship_id": "d2fe30ed-c0dd-5faf-ba93-a6d8cc3f4457"
+        },
+        {
+          "slug": "disney-fantasy",
+          "name": "Disney Fantasy",
+          "disposition": "staged_operating",
+          "ship_id": "89b21696-d5f3-5c72-bcf5-789d7782884d"
+        },
+        {
+          "slug": "disney-magic",
+          "name": "Disney Magic",
+          "disposition": "staged_operating",
+          "ship_id": "a45d1b22-9bcf-5a8f-a4c9-898225631fa0"
+        },
+        {
+          "slug": "disney-treasure",
+          "name": "Disney Treasure",
+          "disposition": "staged_operating",
+          "ship_id": "c04ca059-bf56-5e6e-86dd-34661113b8f0"
+        },
+        {
+          "slug": "disney-wish",
+          "name": "Disney Wish",
+          "disposition": "staged_operating",
+          "ship_id": "2aa9e45d-8331-51ef-a800-1ba7547fa6d0"
+        },
+        {
+          "slug": "disney-wonder",
+          "name": "Disney Wonder",
+          "disposition": "staged_operating",
+          "ship_id": "38b91063-e03d-5dd8-8846-b368675adad0"
+        }
+      ]
+    }
+  ],
+  "withheld": [
+    {
+      "name": "Margaritaville at Sea Beachcomber",
+      "current_slug": "costa-fortuna",
+      "current_ship_id": "f125aeec-da70-5339-b413-109fdff2a6b6",
+      "disposition": "withheld_duplicate_future_operator_identity",
+      "sources": [
+        "https://www.margaritavilleatsea.com/margaritaville-at-sea-acquires-third-vessel-in-three-years-to-further-expand-fleet",
+        "https://www.margaritavilleatsea.com/margaritaville-at-sea-reveals-all-new-original-production-shows-for-flagship-beachcomber",
+        "https://www.costacruises.com/fleet.html",
+        "https://www.costacruises.com/fleet/fortuna.html"
+      ],
+      "checked_at": "2026-09-21",
+      "reason": "Future January 2027 product is the same physical Costa Fortuna. Keep one immutable ship identity; no new operating ship, handover date or already-completed rename is asserted."
+    }
+  ]
+}

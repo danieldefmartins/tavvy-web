@@ -1,0 +1,116 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-09-21",
+  "scope": "Offline identity, actual catalog/display contract and evidence checks only. No database collision query, import, rollback execution or publication performed.",
+  "worldwideComplete": false,
+  "checks_passed": 19,
+  "summary": {
+    "ships": 124,
+    "operators": 2,
+    "by_operator": {
+      "amawaterways": 27,
+      "viking": 97
+    },
+    "by_kind": {
+      "river": 111,
+      "ocean": 12,
+      "expedition": 1
+    },
+    "facts": {
+      "unverified": 1896,
+      "verified": 454,
+      "conflicting": 6
+    },
+    "venues": 525,
+    "programs": 0,
+    "cabin_categories": 0,
+    "unique_primary_urls": 144,
+    "registry_leads_total": 58,
+    "worldwide_complete": false,
+    "existing_records_modified": false
+  },
+  "checks": [
+    {
+      "name": "All four prior identity batches remain hash-pinned and total 218",
+      "status": "PASS"
+    },
+    {
+      "name": "124 operating drafts satisfy real catalog contract and per-field evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "Official fleet URL union and all observed Ama ship pages are reconciled",
+      "status": "PASS"
+    },
+    {
+      "name": "Kara, Octantis, AmaMagna, AmaDouro and AmaLea retain earlier IDs only",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject collision with previously published identity",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject future AmaMaya despite stale current-tense ship marketing",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject silent publication of staged research",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject invented registry identifier or photo",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject unsourced scalar replacement",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject reseller masquerading as official source",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject a ship UUID used as a venue place ID",
+      "status": "PASS"
+    },
+    {
+      "name": "Explicit maximum basis is retained, untyped guest labels are not relabeled",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual renderer hides all six unresolved factual discrepancies",
+      "status": "PASS"
+    },
+    {
+      "name": "Combined build/refurbishment and maiden seasons do not become construction years",
+      "status": "PASS"
+    },
+    {
+      "name": "GRT diagrams and numbered deck labels never imply GT or total decks",
+      "status": "PASS"
+    },
+    {
+      "name": "Partial venues do not become inferred counts or scheduled shows",
+      "status": "PASS"
+    },
+    {
+      "name": "Suspended fleets and dated transition uncertainty stay outside operating batch",
+      "status": "PASS"
+    },
+    {
+      "name": "Previously published Octantis discrepancy is reported without replacing its row",
+      "status": "PASS"
+    },
+    {
+      "name": "MS Antares annual spelling cannot silently create a second prior identity",
+      "status": "PASS"
+    }
+  ],
+  "files": {
+    "data/cruises/staged/verified-operating-batch-005.json": "673588e71c745325ac45ea6708a167eba79373721c49ad213ebf1a294f8e2457",
+    "data/cruises/research/batch-005-evidence.json": "5328121e0aa2caf681aa2a3ab35ddda47bbfc0a52cc64709dba93d1fe6c98902",
+    "data/cruises/research/batch-005-fleet-inventory.json": "1147c8e3b430ef0aa166dc28e50a641e80ee5bc56d9b37c7129f3a159a12d107",
+    "data/cruises/research/batch-005-validate.cjs": "be41c90e2ccc2a50b1dda89d5c83e4a02b6c0884d8db0df0da01d7019cb7ef61"
+  }
+}

@@ -1,3 +1,4 @@
+import { todayVisitDate, visitDateToIso } from '../../lib/reviewPersistence';
 /**
  * AddReview Page - Single-Page Signal Tap Review
  * MATCHES the mockup design:
@@ -67,7 +68,12 @@ export default function AddReviewPage() {
   // State
   const [tapCounts, setTapCounts] = useState<{ [key: string]: number }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [editingPrevious, setEditingPrevious] = useState(false);
+  const [previousNotes, setPreviousNotes] = useState<{ publicNote?: string; privateNote?: string }>({});
+  const [previousTaps, setPreviousTaps] = useState<Record<string, number>>({});
+  const [visitDate, setVisitDate] = useState(todayVisitDate);
   const [existingReviewId, setExistingReviewId] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -89,6 +95,8 @@ export default function AddReviewPage() {
   const loadData = async (pid: string) => {
     try {
       setIsLoading(true);
+      setLoadError(null);
+      setExistingReviewId(null); setEditingPrevious(false); setPreviousTaps({}); setPreviousNotes({}); setTapCounts({}); setVisitDate(todayVisitDate());
       
       const placeSignals = await fetchSignalsForPlace(pid);
       setSignals(placeSignals);
@@ -97,14 +105,16 @@ export default function AddReviewPage() {
       
       if (review) {
         setExistingReviewId(review.id);
+        setPreviousNotes({ publicNote: review.public_note || undefined, privateNote: review.private_note_owner || undefined });
         const counts: { [key: string]: number } = {};
         existingSignals.forEach(signal => {
           counts[signal.signalId] = signal.intensity;
         });
-        setTapCounts(counts);
+        setPreviousTaps(counts);
       }
     } catch (error) {
       console.error('Error loading data:', error);
+      setLoadError(error instanceof Error ? error.message : 'Unable to load your review.');
     } finally {
       setIsLoading(false);
     }
@@ -139,6 +149,7 @@ export default function AddReviewPage() {
   };
 
   const handleSubmit = async () => {
+    if (isSubmitting || loadError) return;
     if (!placeId || typeof placeId !== 'string') return;
 
     const selectedCount = Object.keys(tapCounts).filter(k => tapCounts[k] > 0).length;
@@ -152,6 +163,7 @@ export default function AddReviewPage() {
       return;
     }
 
+    if (!editingPrevious) { try { visitDateToIso(visitDate); } catch (error) { setSubmitError(error instanceof Error ? error.message : 'Choose a visit date.'); return; } }
     setIsSubmitting(true);
     setSubmitError(null);
 
@@ -162,13 +174,13 @@ export default function AddReviewPage() {
 
     let result;
     
-    if (existingReviewId) {
-      result = await updateReview(existingReviewId, placeId, reviewSignals);
+    if (editingPrevious && existingReviewId) {
+      result = await updateReview(existingReviewId, placeId, reviewSignals, previousNotes.publicNote, previousNotes.privateNote);
     } else {
       result = await submitReview(
         placeId,
         (placeName as string) || 'Unknown Place',
-        reviewSignals
+        reviewSignals, undefined, undefined, { visitedAt: visitDateToIso(visitDate) }
       );
     }
 
@@ -238,7 +250,7 @@ export default function AddReviewPage() {
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 64, marginBottom: 16 }}>✅</div>
             <h2 style={{ color: isDark ? '#fff' : '#000', fontSize: 24, fontWeight: 700 }}>
-              {existingReviewId ? 'Review Updated!' : 'Review Submitted!'}
+              {editingPrevious ? 'Review Updated!' : 'Review Submitted!'}
             </h2>
             <p style={{ color: isDark ? '#8E8E93' : '#666', marginTop: 8 }}>
               Thanks for helping the community!
@@ -289,6 +301,12 @@ export default function AddReviewPage() {
               <span>{placeName}</span>
             </div>
           )}
+
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
+            <label><input type="radio" name="visit-kind" checked={!editingPrevious} onChange={() => { setEditingPrevious(false); setTapCounts({}); }} /> A new visit</label>
+            {existingReviewId && <label><input type="radio" name="visit-kind" checked={editingPrevious} onChange={() => { setEditingPrevious(true); setTapCounts(previousTaps); }} /> Edit my previous review</label>}
+            {!editingPrevious ? <label>Visit date <input type="date" max={todayVisitDate()} value={visitDate} onChange={event => setVisitDate(event.target.value)} /></label> : <small>Your original visit date is kept. This edit is recorded in history.</small>}
+          </div>
 
           {/* All 3 categories on one page */}
           {CATEGORIES.map((category) => {
@@ -384,6 +402,7 @@ export default function AddReviewPage() {
           })}
 
           {/* Error message */}
+          {loadError && <p role="alert">{loadError} <button onClick={() => loadData(String(placeId))}>Retry</button></p>}
           {submitError && (
             <div className="error-message">
               {submitError}
@@ -395,7 +414,7 @@ export default function AddReviewPage() {
             <button
               className="continue-btn"
               onClick={handleSubmit}
-              disabled={isSubmitting || totalSelected === 0}
+              disabled={isSubmitting || !!loadError || totalSelected === 0}
             >
               {isSubmitting ? 'Submitting...' : (
                 totalSelected > 0 

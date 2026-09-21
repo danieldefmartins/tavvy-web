@@ -1,0 +1,50 @@
+const {PGlite}=require('@electric-sql/pglite');
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+(async()=>{
+ const db=new PGlite();const base=path.join(__dirname,'../..');
+ const schema=JSON.parse(fs.readFileSync(path.join(base,'docs/schema-audit/public-schema.json')));
+ const placeSchema=JSON.parse(fs.readFileSync(path.join(base,'docs/schema-audit/place-schema.json')));
+ await db.exec(`CREATE ROLE authenticated;CREATE ROLE anon;CREATE SCHEMA auth;
+ CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
+ CREATE FUNCTION auth.role() RETURNS text LANGUAGE sql STABLE AS $$ SELECT current_user::text $$;
+ GRANT USAGE ON SCHEMA public,auth TO authenticated,anon;
+ -- Spatial functions are inert stubs; the exact deployed invoker trigger is used.
+ CREATE DOMAIN geography AS text;
+ CREATE FUNCTION st_makepoint(numeric,numeric) RETURNS text LANGUAGE sql AS $$ SELECT $1::text || ',' || $2::text $$;
+ CREATE FUNCTION st_setsrid(text,integer) RETURNS text LANGUAGE sql AS $$ SELECT $1 $$;`);
+ const tables=['places','tavvy_places','atlas_universe_places','pro_business_claims'];
+ for(const table of tables){
+ const cols=schema.columns.filter(c=>c.table===table).map(c=>`"${c.column}" ${c.type==='_text'?'text[]':c.type}${c.column==='id'?' PRIMARY KEY DEFAULT gen_random_uuid()':c.column==='is_deleted'?' DEFAULT false':''}`);
+ await db.exec(`CREATE TABLE ${table}(${cols.join(',')});ALTER TABLE ${table} ENABLE ROW LEVEL SECURITY;GRANT SELECT,INSERT,UPDATE,DELETE ON ${table} TO authenticated,anon;`);
+ }
+ await db.exec(`CREATE UNIQUE INDEX canonical_source ON places(source_type,source_id) WHERE source_type IS NOT NULL AND source_id IS NOT NULL;CREATE UNIQUE INDEX membership_unique ON atlas_universe_places(universe_id,place_id);`);
+ for(const p of schema.policies.filter(p=>tables.includes(p.table)))await db.exec(`CREATE POLICY "${p.name}" ON ${p.table} FOR ${p.command} TO ${p.roles.join(',')}${p.using?` USING (${p.using})`:''}${p.check?` WITH CHECK (${p.check})`:''}`);
+ await db.exec(placeSchema.functions.find(f=>f.name==='sync_tavvy_places_to_places').definition);
+ await db.exec(placeSchema.triggers.find(t=>t.definition.includes('tavvy_places_sync_trigger')).definition);
+ const migration=fs.readFileSync(path.join(base,'supabase/migrations/202609080005_place_author_policies.sql'),'utf8');await db.exec(migration);await db.exec(migration);
+ const a='00000000-0000-0000-0000-000000000001',b='00000000-0000-0000-0000-000000000002',u='00000000-0000-0000-0000-000000000003',v='00000000-0000-0000-0000-000000000004',ext='00000000-0000-0000-0000-000000000005';
+ await db.exec(`INSERT INTO places(id,source_type,source_id,name) VALUES('${ext}','osm','external','External'); SET ROLE authenticated;SELECT set_config('request.jwt.claim.sub','${a}',false);`);
+ await assert.rejects(db.exec(`INSERT INTO tavvy_places(id,created_by,name) VALUES('${b}','${b}','spoof')`),/row-level security/);
+ await db.exec(`INSERT INTO tavvy_places(id,created_by,name,universe_id,latitude,longitude) VALUES('${a}','${a}','Own','${u}',0,0)`);
+ const own=(await db.query(`SELECT id FROM places WHERE source_id='${a}'`)).rows[0].id;
+ await db.exec(`INSERT INTO atlas_universe_places(universe_id,place_id) VALUES('${u}','${own}')`);
+ assert.equal((await db.query(`UPDATE tavvy_places SET name='Synced update' WHERE id='${a}' RETURNING id`)).rows.length,1);
+ assert.equal((await db.query(`SELECT name FROM places WHERE id='${own}'`)).rows[0].name,'Synced update');
+ await assert.rejects(db.exec(`UPDATE tavvy_places SET created_by='${b}' WHERE id='${a}'`),/row-level security/);
+ await assert.rejects(db.exec(`UPDATE places SET source_id='forged' WHERE id='${own}'`),/provenance/);
+ await assert.rejects(db.exec(`INSERT INTO places(source_type,source_id,name) VALUES('osm','forged','bad')`),/row-level security/);
+ await assert.rejects(db.exec(`INSERT INTO atlas_universe_places(universe_id,place_id) VALUES('${v}','${own}')`),/row-level security/);
+ await db.exec(`SELECT set_config('request.jwt.claim.sub','${b}',false);INSERT INTO tavvy_places(id,created_by,name,universe_id) VALUES('${b}','${b}','Other','${u}')`);
+ assert.equal((await db.query(`UPDATE places SET name='attack' WHERE id='${own}' RETURNING id`)).rows.length,0);
+ assert.equal((await db.query(`DELETE FROM atlas_universe_places WHERE place_id='${own}' RETURNING id`)).rows.length,0);
+ assert.equal((await db.query(`UPDATE atlas_universe_places SET universe_id='${v}' WHERE place_id='${own}' RETURNING id`)).rows.length,0);
+ await assert.rejects(db.exec(`INSERT INTO atlas_universe_places(universe_id,place_id) VALUES('${u}','${own}') ON CONFLICT DO NOTHING`),/row-level security/);
+ assert.equal((await db.query(`UPDATE places SET name='unclaimed attack' WHERE id='${ext}' RETURNING id`)).rows.length,0);
+ await db.exec(`RESET ROLE;INSERT INTO pro_business_claims(user_id,place_id,status) VALUES('${b}','${ext}','verified');SET ROLE authenticated;`);
+ assert.equal((await db.query(`UPDATE places SET name='Verified owner edit' WHERE id='${ext}' RETURNING id`)).rows.length,1);
+ await assert.rejects(db.exec(`UPDATE places SET source_type='user',source_id='${b}' WHERE id='${ext}'`),/provenance/);
+ await db.exec(`SET ROLE anon;SELECT set_config('request.jwt.claim.sub','',false)`);
+ assert.equal((await db.query(`SELECT * FROM places`)).rows.length,3);
+ await assert.rejects(db.exec(`INSERT INTO tavvy_places(name) VALUES('anon')`),/row-level security/);
+ await db.close();console.log('PASS: real policy overlay + deployed invoker sync; spoofed author blocked; own create/sync/membership succeeds; cross-owner membership mutation denied; verified claimant update succeeds; provenance transfer denied; public reads retained; idempotent migration.');
+})().catch(e=>{console.error(e);process.exitCode=1});

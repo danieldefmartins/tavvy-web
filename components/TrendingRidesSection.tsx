@@ -13,7 +13,7 @@ const TrendingRidesSection = () => {
     // Add more ride objects here
   ];
 
-  const styles = {
+  const styles: Record<string, React.CSSProperties> = {
     container: {
       backgroundColor: '#17013A',
       borderRadius: '12px',

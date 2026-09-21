@@ -3,6 +3,7 @@
  * Browse local experiences and activities
  */
 
+import { useAuth } from '../../contexts/AuthContext';
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -11,40 +12,22 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../constants/Colors';
-import { FiSearch, FiMapPin, FiCalendar, FiClock, FiUsers } from 'react-icons/fi';
-import { useTranslation } from 'next-i18next';
+import { FiSearch, FiClock } from 'react-icons/fi';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
-interface Experience {
-  id: string;
-  title: string;
-  slug?: string;
-  description?: string;
-  cover_image_url?: string;
-  category?: string;
-  location?: string;
-  price?: number;
-  duration_hours?: number;
-  max_participants?: number;
-  rating?: number;
-  review_count?: number;
-}
-
-const EXPERIENCE_CATEGORIES = [
-  { id: 'all', name: 'All', icon: '✨' },
-  { id: 'food-tours', name: 'Food Tours', icon: '🍽️' },
-  { id: 'outdoor', name: 'Outdoor', icon: '🏕️' },
-  { id: 'cultural', name: 'Cultural', icon: '🎭' },
-  { id: 'wellness', name: 'Wellness', icon: '🧘' },
-  { id: 'nightlife', name: 'Nightlife', icon: '🌙' },
-  { id: 'workshops', name: 'Workshops', icon: '🎨' },
-];
+import { ExperiencePath, loadExperiencePaths, matchesPath, loadOwnedExperiencePaths } from '../../lib/experiencePaths';
 
 export default function ExperiencesScreen() {
   const router = useRouter();
+  const { user } = useAuth();
+  const [owned, setOwned] = useState<ExperiencePath[]>([]);
+  const [ownedError, setOwnedError] = useState(false);
+  const [ownedLoading, setOwnedLoading] = useState(false);
+  const [ownedRetry, setOwnedRetry] = useState(0);
   const { locale } = router;
   const { theme } = useThemeContext();
-  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [experiences, setExperiences] = useState<ExperiencePath[]>([]);
+  const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -53,31 +36,23 @@ export default function ExperiencesScreen() {
     fetchExperiences();
   }, []);
 
-  const fetchExperiences = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('experiences')
-        .select('*')
-        .order('rating', { ascending: false })
-        .limit(50);
+  useEffect(() => {
+    let active = true;
+    setOwned([]); setOwnedError(false); setOwnedLoading(Boolean(user));
+    if (user) loadOwnedExperiencePaths(supabase, user.id).then(rows => { if (active) setOwned(rows); }).catch(() => { if (active) setOwnedError(true); }).finally(() => { if (active) setOwnedLoading(false); });
+    return () => { active = false; };
+  }, [user?.id, ownedRetry]);
 
-      if (!error) {
-        setExperiences(data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching experiences:', error);
-    } finally {
-      setLoading(false);
-    }
+  const fetchExperiences = async () => {
+    setLoading(true);
+    setError(false);
+    try { setExperiences(await loadExperiencePaths(supabase)); }
+    catch { setError(true); }
+    finally { setLoading(false); }
   };
 
-  const filteredExperiences = experiences.filter(exp => {
-    const matchesCategory = selectedCategory === 'all' || exp.category === selectedCategory;
-    const matchesSearch = !searchQuery || 
-      exp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      exp.location?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+  const categories = ['all', ...Array.from(new Set(experiences.map(p => p.category).filter((c): c is string => Boolean(c))))];
+  const filteredExperiences = experiences.filter(exp => matchesPath(exp, searchQuery, selectedCategory));
 
   return (
     <>
@@ -97,6 +72,7 @@ export default function ExperiencesScreen() {
             <div className="search-container">
               <FiSearch size={18} color="rgba(255,255,255,0.7)" />
               <input
+                aria-label="Search experiences"
                 type="text"
                 placeholder="Search experiences..."
                 value={searchQuery}
@@ -105,19 +81,24 @@ export default function ExperiencesScreen() {
             </div>
           </header>
 
+          <section style={{ padding: 24, color: theme.text }}>
+            <Link href="/app/experience/new" style={{ display: 'inline-block', padding: '12px 18px', borderRadius: 12, background: theme.primary, color: 'white', textDecoration: 'none' }}>Create a path</Link>
+            {user && <><h2>My paths</h2>{ownedLoading ? <p role="status">Loading your paths…</p> : ownedError ? <p role="alert">Your paths could not be loaded. <button onClick={() => setOwnedRetry(x => x + 1)}>Retry</button></p> : owned.length ? owned.map(path => <p key={path.id}><Link href={`/app/experience/${path.id}`}>{path.title}</Link> · {path.is_published ? 'Published' : 'Private draft'}</p>) : <p>Your saved paths will appear here.</p>}</>}
+          </section>
           {/* Category Pills */}
           <div className="categories-scroll">
-            {EXPERIENCE_CATEGORIES.map((cat) => (
+            {categories.map((category) => (
               <button
-                key={cat.id}
-                className={`category-pill ${selectedCategory === cat.id ? 'active' : ''}`}
-                onClick={() => setSelectedCategory(cat.id)}
+                key={category}
+                aria-pressed={selectedCategory === category}
+                className={`category-pill ${selectedCategory === category ? 'active' : ''}`}
+                onClick={() => setSelectedCategory(category || 'all')}
                 style={{
-                  backgroundColor: selectedCategory === cat.id ? theme.primary : theme.surface,
-                  color: selectedCategory === cat.id ? 'white' : theme.text,
+                  backgroundColor: selectedCategory === category ? theme.primary : theme.surface,
+                  color: selectedCategory === category ? 'white' : theme.text,
                 }}
               >
-                {cat.icon} {cat.name}
+                {category === 'all' ? 'All paths' : category}
               </button>
             ))}
           </div>
@@ -125,15 +106,17 @@ export default function ExperiencesScreen() {
           {/* Experiences Grid */}
           <section className="experiences-section">
             {loading ? (
-              <div className="loading-container">
+              <div className="loading-container" role="status" aria-label="Loading experiences">
                 <div className="loading-spinner" />
               </div>
+            ) : error ? (
+              <div role="alert" className="empty-state"><p>Experiences could not be loaded.</p><button onClick={fetchExperiences}>Retry</button></div>
             ) : filteredExperiences.length === 0 ? (
               <div className="empty-state">
                 <span>✨</span>
                 <h3 style={{ color: theme.text }}>No experiences found</h3>
                 <p style={{ color: theme.textSecondary }}>
-                  {searchQuery ? 'Try a different search' : 'Check back soon for new experiences'}
+                  {searchQuery || selectedCategory !== 'all' ? 'Try a different search or category' : 'No published experience paths yet. Check back soon.'}
                 </p>
               </div>
             ) : (
@@ -141,7 +124,7 @@ export default function ExperiencesScreen() {
                 {filteredExperiences.map((exp) => (
                   <Link
                     key={exp.id}
-                    href={`/app/experience/${exp.slug || exp.id}`}
+                    href={`/app/experience/${exp.id}`}
                     locale={locale}
                     className="experience-card"
                     style={{ backgroundColor: theme.cardBackground }}
@@ -162,36 +145,9 @@ export default function ExperiencesScreen() {
                     </div>
                     <div className="card-content">
                       <h3 style={{ color: theme.text }}>{exp.title}</h3>
-                      {exp.location && (
-                        <p className="location" style={{ color: theme.textSecondary }}>
-                          <FiMapPin size={12} /> {exp.location}
-                        </p>
-                      )}
-                      <div className="meta-row">
-                        {exp.duration_hours && (
-                          <span style={{ color: theme.textTertiary }}>
-                            <FiClock size={12} /> {exp.duration_hours}h
-                          </span>
-                        )}
-                        {exp.max_participants && (
-                          <span style={{ color: theme.textTertiary }}>
-                            <FiUsers size={12} /> Up to {exp.max_participants}
-                          </span>
-                        )}
-                      </div>
-                      {exp.price !== undefined && (
-                        <p className="price" style={{ color: theme.text }}>
-                          From <strong>${exp.price}</strong> per person
-                        </p>
-                      )}
-                      {exp.rating && (
-                        <div className="rating">
-                          <span>⭐ {exp.rating.toFixed(1)}</span>
-                          {exp.review_count && (
-                            <span style={{ color: theme.textTertiary }}>({exp.review_count})</span>
-                          )}
-                        </div>
-                      )}
+                      {exp.description && <p style={{ color: theme.textSecondary }}>{exp.description}</p>}
+                      {exp.duration_minutes != null && <p><FiClock /> {exp.duration_minutes} minutes</p>}
+
                     </div>
                   </Link>
                 ))}

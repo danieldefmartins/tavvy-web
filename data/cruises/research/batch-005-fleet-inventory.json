@@ -1,0 +1,1765 @@
+{
+  "schemaVersion": 1,
+  "checked_at": "2026-09-21",
+  "bases": [
+    {
+      "path": "data/cruises/staged/verified-operating-batch-001.json",
+      "sha256": "bc87d6f4aabc3217f5af2b6d7b5e12e3d802bc9b33f2cb77020b69b7210cada3",
+      "ship_count": 12
+    },
+    {
+      "path": "data/cruises/staged/verified-operating-batch-002-enriched.json",
+      "sha256": "3fd875b18bd5a0234502dae66256fa9081b3195e09431b962c67bd4e87d73dea",
+      "ship_count": 59
+    },
+    {
+      "path": "data/cruises/staged/verified-operating-batch-003.json",
+      "sha256": "d791d164161e4e07cc44de28e2731196c05f362e52722bd9b607c380c77881ad",
+      "ship_count": 84
+    },
+    {
+      "path": "data/cruises/staged/verified-operating-batch-004.json",
+      "sha256": "e95de3c3be495a46c09622144b513cd27f94a2fc050b8f088f58e243ce710212",
+      "ship_count": 63
+    }
+  ],
+  "scope": "Reconciliation of current official fleet URL variants, the latest annual fleet table and individual ship products. Future, suspended and unresolved identities remain separate.",
+  "operators": [
+    {
+      "operator_id": "viking",
+      "official_fleet_url": "https://www.vikingrivercruises.com/ships/index.html",
+      "additional_fleet_urls": [
+        "https://www.vikingrivercruises.com/ships/longships/index.html",
+        "https://www.vikingrivercruises.com/ships/douro/index.html",
+        "https://www.vikingrivercruises.com/ships/elbe/index.html",
+        "https://www.vikingrivercruises.com/ships/seine/index.html",
+        "https://www.vikingrivercruises.com/ships/egypt/index.html",
+        "https://www.vikingrivercruises.com/ships/asia/index.html",
+        "https://www.vikingrivercruises.com/ships/index.html",
+        "https://www.vikingcruises.com/oceans/ships/index.html",
+        "https://www.vikingcruises.com/expeditions/ships/index.html",
+        "https://www.vikingrivercruises.com/ships/longships/",
+        "https://www.vikingcruises.com/oceans/ships",
+        "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf"
+      ],
+      "checked_at": "2026-09-21",
+      "coverage": "Union of both official consumer URL variants and annual-report reconciliation; every observed identity is classified. Some current-service/operator-role questions remain withheld. Not a claim of complete operating-fleet coverage.",
+      "listed_count": 128,
+      "staged_count": 97,
+      "ships": [
+        {
+          "slug": "viking-aegir",
+          "name": "Viking Aegir",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "0416c9d5-a647-5a04-a529-9def7ab8b392"
+        },
+        {
+          "slug": "viking-alruna",
+          "name": "Viking Alruna",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "4582ae9d-3115-5197-977e-e99b8476254c"
+        },
+        {
+          "slug": "viking-alsvin",
+          "name": "Viking Alsvin",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "fef0b81d-a7c8-5d37-8826-ab3347d7c415"
+        },
+        {
+          "slug": "viking-annar",
+          "name": "Viking Annar",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "999a9dc0-18da-5182-986c-2a92e83c7401"
+        },
+        {
+          "slug": "viking-atla",
+          "name": "Viking Atla",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "b7a91a07-3178-58e0-97b9-f431f3a83f3c"
+        },
+        {
+          "slug": "viking-baldur",
+          "name": "Viking Baldur",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "70aecd7c-6b88-54b7-9714-dcadad569d94"
+        },
+        {
+          "slug": "viking-bestla",
+          "name": "Viking Bestla",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "5307c058-d50f-53bd-80e5-97051adcefb8"
+        },
+        {
+          "slug": "viking-bragi",
+          "name": "Viking Bragi",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "b4c6d21b-1cd7-5ce0-98cc-ab826d8c32bd"
+        },
+        {
+          "slug": "viking-buri",
+          "name": "Viking Buri",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "f6c02e0a-691c-5ad5-b0e5-9bc4256ad971"
+        },
+        {
+          "slug": "viking-dagur",
+          "name": "Viking Dagur",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "f72997c6-b413-52a3-b3c8-e3802d9fe122"
+        },
+        {
+          "slug": "viking-delling",
+          "name": "Viking Delling",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "d59f7878-f8de-54fc-9c16-5137350f8270"
+        },
+        {
+          "slug": "viking-egdir",
+          "name": "Viking Egdir",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "2f62a32d-8add-5464-81e6-9b78cb644a1f"
+        },
+        {
+          "slug": "viking-egil",
+          "name": "Viking Egil",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "d8118bcd-ad9d-59d3-8343-204207f5d7b3"
+        },
+        {
+          "slug": "viking-einar",
+          "name": "Viking Einar",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "1dcef4ab-f32f-5eea-8766-e485865e365c"
+        },
+        {
+          "slug": "viking-eir",
+          "name": "Viking Eir",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "c656c1a0-e5a8-51a5-8ec0-c373fe011d63"
+        },
+        {
+          "slug": "viking-eistla",
+          "name": "Viking Eistla",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "05b2a7ec-688b-5133-9a34-7de30a575cca"
+        },
+        {
+          "slug": "viking-eldir",
+          "name": "Viking Eldir",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "53770a62-2c12-599b-acd5-85b173827633"
+        },
+        {
+          "slug": "viking-embla",
+          "name": "Viking Embla",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "1bffdb7d-b27f-58bb-a8f0-97da36934c8d"
+        },
+        {
+          "slug": "viking-forseti",
+          "name": "Viking Forseti",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "e02149d8-bf9f-53b3-af38-723642871295"
+        },
+        {
+          "slug": "viking-freya",
+          "name": "Viking Freya",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "7aad763b-8bbd-502e-89c1-e710c8e940d4"
+        },
+        {
+          "slug": "viking-fulla",
+          "name": "Viking Fulla",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "excluded_future",
+          "reason": "Official ship page identifies a future 2027 build; not a current operating ship.",
+          "source_url": "https://www.vikingrivercruises.com/ships/longships/viking-fulla.html"
+        },
+        {
+          "slug": "viking-gefjon",
+          "name": "Viking Gefjon",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "a8195fb4-13e9-5409-89d5-7cfc06d72f2e"
+        },
+        {
+          "slug": "viking-gersemi",
+          "name": "Viking Gersemi",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "21da908e-25ba-5ca5-8d48-7cfbbd18deb2"
+        },
+        {
+          "slug": "viking-gullveig",
+          "name": "Viking Gullveig",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "24a5bd1b-743b-50f9-86cc-5a7ce1d5e2ba"
+        },
+        {
+          "slug": "viking-gymir",
+          "name": "Viking Gymir",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "7b7e7397-45e6-50b0-ab9e-49234efe53bb"
+        },
+        {
+          "slug": "viking-haki",
+          "name": "Viking Haki",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "withheld_status",
+          "reason": "2026 build label and October naming announcement; reviewed sources do not establish passenger service by the checked date.",
+          "source_url": "https://www.viking.com/press/press-releases/2026-08-24-viking-honors-top-travel-advisor-partners-as-godparents-of-seven-new-river-ships.html"
+        },
+        {
+          "slug": "viking-halogi",
+          "name": "Viking Halogi",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "withheld_status",
+          "reason": "2026 build label and October naming announcement; reviewed sources do not establish passenger service by the checked date.",
+          "source_url": "https://www.viking.com/press/press-releases/2026-08-24-viking-honors-top-travel-advisor-partners-as-godparents-of-seven-new-river-ships.html"
+        },
+        {
+          "slug": "viking-heimdal",
+          "name": "Viking Heimdal",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "f303eded-4709-5335-96e8-79c7eba407c0"
+        },
+        {
+          "slug": "viking-herja",
+          "name": "Viking Herja",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "ede82df8-1956-50ab-befe-295e183f8dd9"
+        },
+        {
+          "slug": "viking-hermod",
+          "name": "Viking Hermod",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "2a702e8b-1963-51dd-bf27-647a80fd75e4"
+        },
+        {
+          "slug": "viking-hervor",
+          "name": "Viking Hervor",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "734c4dd7-2188-5683-9029-73a2553a1771"
+        },
+        {
+          "slug": "viking-hild",
+          "name": "Viking Hild",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "9f0b15f7-10d9-5b7c-b45a-fa13407bad68"
+        },
+        {
+          "slug": "viking-hlin",
+          "name": "Viking Hlin",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "714ff038-011e-530e-a448-321a94fda7e3"
+        },
+        {
+          "slug": "viking-hnoss",
+          "name": "Viking Hnoss",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "excluded_future",
+          "reason": "Official ship page identifies a future 2027 build; not a current operating ship.",
+          "source_url": "https://www.vikingrivercruises.com/ships/longships/viking-hnoss.html"
+        },
+        {
+          "slug": "viking-honir",
+          "name": "Viking Honir",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "268dac89-eeca-5eca-b99f-0137d105dade"
+        },
+        {
+          "slug": "viking-idi",
+          "name": "Viking Idi",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "26082390-36f4-5e42-bdf2-bf0148ac4bcc"
+        },
+        {
+          "slug": "viking-idun",
+          "name": "Viking Idun",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "23aa023a-21d9-51de-b45e-f0f13cbb639b"
+        },
+        {
+          "slug": "viking-ingvi",
+          "name": "Viking Ingvi",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "385d5c43-f95a-5a35-b449-cabfb5518f35"
+        },
+        {
+          "slug": "viking-jarl",
+          "name": "Viking Jarl",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "338cfce3-e339-5ab4-a85d-4f60d02a6424"
+        },
+        {
+          "slug": "viking-kadlin",
+          "name": "Viking Kadlin",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "8443fce4-0b49-5594-8ea2-c5f56788c687"
+        },
+        {
+          "slug": "viking-kara",
+          "name": "Viking Kara",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "existing_pinned_identity",
+          "ship_id": "e9729055-da0d-54dc-a42d-321641a9ddcf"
+        },
+        {
+          "slug": "viking-kvasir",
+          "name": "Viking Kvasir",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "27a09b86-01a2-5fbf-99e3-ea2fd7f5cad7"
+        },
+        {
+          "slug": "viking-laga",
+          "name": "Viking Laga",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "excluded_future",
+          "reason": "Official ship page identifies a future 2027 build; not a current operating ship.",
+          "source_url": "https://www.vikingrivercruises.com/ships/longships/viking-laga.html"
+        },
+        {
+          "slug": "viking-lif",
+          "name": "Viking Lif",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "c04cc48d-6bae-525d-b0ae-1df12feb4de3"
+        },
+        {
+          "slug": "viking-lofn",
+          "name": "Viking Lofn",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "8d28aab4-f5f8-5fee-a499-e28e4b0e68fc"
+        },
+        {
+          "slug": "viking-magni",
+          "name": "Viking Magni",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "fb695019-9b70-57ed-8e2c-dd810d323b7b"
+        },
+        {
+          "slug": "viking-mani",
+          "name": "Viking Mani",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "783cb013-4553-5dd7-9cec-57413132ee58"
+        },
+        {
+          "slug": "viking-mimir",
+          "name": "Viking Mimir",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "8ab84746-e41e-506a-992b-281680e95c8f"
+        },
+        {
+          "slug": "viking-modi",
+          "name": "Viking Modi",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "54fe691e-fbab-5ac6-ad89-7518956294e2"
+        },
+        {
+          "slug": "viking-odin",
+          "name": "Viking Odin",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "32a87428-743b-5864-9620-87f0225b0571"
+        },
+        {
+          "slug": "viking-ran",
+          "name": "Viking Ran",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "excluded_future",
+          "reason": "Official ship page identifies a future 2027 build; not a current operating ship.",
+          "source_url": "https://www.vikingrivercruises.com/ships/longships/viking-ran.html"
+        },
+        {
+          "slug": "viking-rinda",
+          "name": "Viking Rinda",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "2eca6e91-0223-54f6-8eaa-a4aca33b14c2"
+        },
+        {
+          "slug": "viking-rolf",
+          "name": "Viking Rolf",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "4346a9b9-6444-5309-be1e-b153edfdc18c"
+        },
+        {
+          "slug": "viking-rota",
+          "name": "Viking Rota",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "withheld_status",
+          "reason": "2026 build label and October naming announcement; reviewed sources do not establish passenger service by the checked date.",
+          "source_url": "https://www.viking.com/press/press-releases/2026-08-24-viking-honors-top-travel-advisor-partners-as-godparents-of-seven-new-river-ships.html"
+        },
+        {
+          "slug": "viking-sigrun",
+          "name": "Viking Sigrun",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "4a67aec0-4890-543d-a078-6367e634f210"
+        },
+        {
+          "slug": "viking-sigyn",
+          "name": "Viking Sigyn",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "0262fdf9-3bcf-5ffc-8a74-6456d48747a4"
+        },
+        {
+          "slug": "viking-sjofn",
+          "name": "Viking Sjofn",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "withheld_status",
+          "reason": "2026 build label and October naming announcement; reviewed sources do not establish passenger service by the checked date.",
+          "source_url": "https://www.viking.com/press/press-releases/2026-08-24-viking-honors-top-travel-advisor-partners-as-godparents-of-seven-new-river-ships.html"
+        },
+        {
+          "slug": "viking-skadi",
+          "name": "Viking Skadi",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "8a362e84-3508-5afa-ba5e-3caf7cd14345"
+        },
+        {
+          "slug": "viking-skirnir",
+          "name": "Viking Skirnir",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "8f4d5afb-ff50-5d57-a668-25c51e6a257f"
+        },
+        {
+          "slug": "viking-tialfi",
+          "name": "Viking Tialfi",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "88659c78-78d0-5b00-ab43-a78c63cb7990"
+        },
+        {
+          "slug": "viking-tir",
+          "name": "Viking Tir",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "f74c6bed-c0c1-5330-8f8a-03410a7dd4cd"
+        },
+        {
+          "slug": "viking-tor",
+          "name": "Viking Tor",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "6d79e648-6ea3-59f3-98f1-1a917d10049c"
+        },
+        {
+          "slug": "viking-ullur",
+          "name": "Viking Ullur",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "aada5ff5-99c1-5ced-8a25-97eb6ba3952e"
+        },
+        {
+          "slug": "viking-vali",
+          "name": "Viking Vali",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "99e0c3f6-782a-547f-8bfc-3dbd17ee234d"
+        },
+        {
+          "slug": "viking-var",
+          "name": "Viking Var",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "9f94a573-89d7-516e-826f-cc7bb1555ea6"
+        },
+        {
+          "slug": "viking-ve",
+          "name": "Viking Ve",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "ab79ec21-baa5-5854-83ed-b790ba2677de"
+        },
+        {
+          "slug": "viking-vidar",
+          "name": "Viking Vidar",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "05cc5602-8984-58af-a809-dd07400b15b6"
+        },
+        {
+          "slug": "viking-vilhjalm",
+          "name": "Viking Vilhjalm",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "05bd7142-fba8-5254-8d78-0a6a34c70e65"
+        },
+        {
+          "slug": "viking-vili",
+          "name": "Viking Vili",
+          "group": "longships",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "dc8c261b-cda4-5786-ac6b-8cd22a8d49d0"
+        },
+        {
+          "slug": "viking-gyda",
+          "name": "Viking Gyda",
+          "group": "douro",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/douro/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "84686e05-00fd-59bd-bfec-1408f263cf58"
+        },
+        {
+          "slug": "viking-helgrim",
+          "name": "Viking Helgrim",
+          "group": "douro",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/douro/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "3445eafb-ca25-5226-a4da-e79cbbba4503"
+        },
+        {
+          "slug": "viking-hemming",
+          "name": "Viking Hemming",
+          "group": "douro",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/douro/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "010640c4-a621-51fc-9741-293bcdb9a405"
+        },
+        {
+          "slug": "viking-osfrid",
+          "name": "Viking Osfrid",
+          "group": "douro",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/douro/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "482d9e12-736e-56e0-a0fa-f2c51deb1fa7"
+        },
+        {
+          "slug": "viking-sol",
+          "name": "Viking Sol",
+          "group": "douro",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/douro/index.html",
+          "disposition": "excluded_future",
+          "reason": "Official ship page identifies a future 2027 build; not a current operating ship.",
+          "source_url": "https://www.vikingrivercruises.com/ships/douro/viking-sol.html"
+        },
+        {
+          "slug": "viking-torgil",
+          "name": "Viking Torgil",
+          "group": "douro",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/douro/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "7eea9830-28a8-5f5c-9401-4085913f088b"
+        },
+        {
+          "slug": "viking-astrild",
+          "name": "Viking Astrild",
+          "group": "elbe",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/elbe/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "3e4a330b-deac-51e9-af77-f7f6d9458c4a"
+        },
+        {
+          "slug": "viking-beyla",
+          "name": "Viking Beyla",
+          "group": "elbe",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/elbe/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "6e1be3ce-cdcb-5cf2-b12e-c85411551fa4"
+        },
+        {
+          "slug": "viking-fjolvar",
+          "name": "Viking Fjolvar",
+          "group": "seine",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/seine/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "3d054f6c-849b-592f-b7e2-1a05fa6d2e51"
+        },
+        {
+          "slug": "viking-fjorgyn",
+          "name": "Viking Fjorgyn",
+          "group": "seine",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/seine/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "beb845bf-73fe-5e42-ac64-21346aa885c9"
+        },
+        {
+          "slug": "viking-kari",
+          "name": "Viking Kari",
+          "group": "seine",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/seine/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "879a9030-bfc4-5fa2-b05e-2262c366aecb"
+        },
+        {
+          "slug": "viking-nerthus",
+          "name": "Viking Nerthus",
+          "group": "seine",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/seine/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "bfdb7cc3-3e9c-5b5f-bc8b-008b83c8fabd"
+        },
+        {
+          "slug": "viking-radgrid",
+          "name": "Viking Radgrid",
+          "group": "seine",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/seine/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "e876bcbb-154e-5d25-a03c-4c61ed8cb30d"
+        },
+        {
+          "slug": "viking-skaga",
+          "name": "Viking Skaga",
+          "group": "seine",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/seine/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "1eb2691c-f11d-51f9-8ff4-37092f930b5b"
+        },
+        {
+          "slug": "viking-amun",
+          "name": "Viking Amun",
+          "group": "egypt",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/egypt/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "538cba24-062a-53f3-85a3-6028412d8239"
+        },
+        {
+          "slug": "viking-anubis",
+          "name": "Viking Anubis",
+          "group": "egypt",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/egypt/index.html",
+          "disposition": "excluded_future",
+          "reason": "Official ship page identifies a future 2027 build; not a current operating ship.",
+          "source_url": "https://www.vikingrivercruises.com/ships/egypt/viking-anubis.html"
+        },
+        {
+          "slug": "viking-aton",
+          "name": "Viking Aton",
+          "group": "egypt",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/egypt/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "8d8aa592-1121-51eb-8929-c5e89a2c8b76"
+        },
+        {
+          "slug": "viking-geb",
+          "name": "Viking Geb",
+          "group": "egypt",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/egypt/index.html",
+          "disposition": "excluded_future",
+          "reason": "Official ship page identifies a future 2027 build; not a current operating ship.",
+          "source_url": "https://www.vikingrivercruises.com/ships/egypt/viking-geb.html"
+        },
+        {
+          "slug": "viking-hathor",
+          "name": "Viking Hathor",
+          "group": "egypt",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/egypt/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "5801993d-af71-564f-8494-35a740081b33"
+        },
+        {
+          "slug": "viking-osiris",
+          "name": "Viking Osiris",
+          "group": "egypt",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/egypt/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "8c47112e-1911-5189-9ea7-78b2d0f24e45"
+        },
+        {
+          "slug": "viking-ptah",
+          "name": "Viking Ptah",
+          "group": "egypt",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/egypt/index.html",
+          "disposition": "withheld_status",
+          "reason": "Delivered August 2026; announced September debut has no exact service-start date in reviewed sources. Delivery alone is not passenger operation.",
+          "source_url": "https://www.viking.com/press/press-releases/2026-04-01-viking-announces-float-out-of-newest-nile-river-ships.html"
+        },
+        {
+          "slug": "viking-ra",
+          "name": "Viking Ra",
+          "group": "egypt",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/egypt/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "757b31e8-252c-54eb-9e71-d69b76aea805"
+        },
+        {
+          "slug": "viking-sekhmet",
+          "name": "Viking Sekhmet",
+          "group": "egypt",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/egypt/index.html",
+          "disposition": "excluded_future",
+          "reason": "Official debut is November 2026.",
+          "source_url": "https://www.viking.com/press/press-releases/2026-04-01-viking-announces-float-out-of-newest-nile-river-ships.html"
+        },
+        {
+          "slug": "viking-sobek",
+          "name": "Viking Sobek",
+          "group": "egypt",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/egypt/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "814dc3b8-0b3f-56eb-9a38-1805175b1221"
+        },
+        {
+          "slug": "viking-thoth",
+          "name": "Viking Thoth",
+          "group": "egypt",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/egypt/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "c837e1a4-ef05-5692-8de7-87051d9059f2"
+        },
+        {
+          "slug": "ms-antares",
+          "name": "MS Antares",
+          "group": "egypt",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/egypt/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "085b2b01-2a15-50e4-ae3c-b80763b1191a"
+        },
+        {
+          "slug": "viking-brahmaputra",
+          "name": "Viking Brahmaputra",
+          "group": "asia",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/asia/index.html",
+          "disposition": "excluded_future",
+          "reason": "Official ship page identifies a future 2027 build; not a current operating ship.",
+          "source_url": "https://www.vikingrivercruises.com/ships/asia/viking-brahmaputra.html"
+        },
+        {
+          "slug": "viking-ganges",
+          "name": "Viking Ganges",
+          "group": "asia",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/asia/index.html",
+          "disposition": "excluded_future",
+          "reason": "Official ship page identifies a future 2028 build; not a current operating ship.",
+          "source_url": "https://www.vikingrivercruises.com/ships/asia/viking-ganges.html"
+        },
+        {
+          "slug": "viking-saigon",
+          "name": "Viking Saigon",
+          "group": "asia",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/asia/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "92200aaa-f06f-59b8-9ec0-6747e460e530"
+        },
+        {
+          "slug": "viking-tonle",
+          "name": "Viking Tonle",
+          "group": "asia",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/asia/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "f829431e-00a7-5cab-948f-9ea2a134e491"
+        },
+        {
+          "slug": "viking-mississippi",
+          "name": "Viking Mississippi",
+          "group": "mississippi",
+          "official_fleet_url": "https://www.vikingrivercruises.com/ships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "8189d65b-872e-5947-bc51-d3c57f7b586a"
+        },
+        {
+          "slug": "viking-astrea",
+          "name": "Viking Astrea",
+          "group": "ocean",
+          "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+          "disposition": "excluded_future",
+          "reason": "Official ship page identifies a future 2027 build; not a current operating ship.",
+          "source_url": "https://www.vikingcruises.com/oceans/ships/viking-astrea.html"
+        },
+        {
+          "slug": "viking-jupiter",
+          "name": "Viking Jupiter",
+          "group": "ocean",
+          "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "2ea87b37-70e3-59ab-9ebd-326a2ada749f"
+        },
+        {
+          "slug": "viking-leda",
+          "name": "Viking Leda",
+          "group": "ocean",
+          "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+          "disposition": "excluded_future",
+          "reason": "Official ship page identifies a future 2029 build; not a current operating ship.",
+          "source_url": "https://www.vikingcruises.com/oceans/ships/viking-leda.html"
+        },
+        {
+          "slug": "viking-libra",
+          "name": "Viking Libra",
+          "group": "ocean",
+          "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+          "disposition": "excluded_future",
+          "reason": "Official May delivery announcement for Mira places Libra delivery in November 2026. A 2026 build label is not current service.",
+          "source_url": "https://www.vikingcruises.com/press/press-releases/2026-05-26-viking-takes-delivery-of-newest-ocean-ship.html"
+        },
+        {
+          "slug": "viking-lyra",
+          "name": "Viking Lyra",
+          "group": "ocean",
+          "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+          "disposition": "excluded_future",
+          "reason": "Official ship page identifies a future 2028 build; not a current operating ship.",
+          "source_url": "https://www.vikingcruises.com/oceans/ships/viking-lyra.html"
+        },
+        {
+          "slug": "viking-mars",
+          "name": "Viking Mars",
+          "group": "ocean",
+          "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "4c01837a-72a0-5f5e-823a-2f0cf49bf57d"
+        },
+        {
+          "slug": "viking-mira",
+          "name": "Viking Mira",
+          "group": "ocean",
+          "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "b5489f95-6e84-5bbf-851f-bb84f3c7fecb"
+        },
+        {
+          "slug": "viking-neptune",
+          "name": "Viking Neptune",
+          "group": "ocean",
+          "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "1dc278a8-7595-5380-97ef-0e9a8b78f4e2"
+        },
+        {
+          "slug": "viking-orion",
+          "name": "Viking Orion",
+          "group": "ocean",
+          "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "ec6c0181-6558-55b1-a818-7cff6a33850d"
+        },
+        {
+          "slug": "viking-saturn",
+          "name": "Viking Saturn",
+          "group": "ocean",
+          "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "013cf393-3b26-5f3a-a407-ca3c109181ba"
+        },
+        {
+          "slug": "viking-sea",
+          "name": "Viking Sea",
+          "group": "ocean",
+          "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "9522507c-4cd6-5cc9-93a9-e30749a1506a"
+        },
+        {
+          "slug": "viking-sky",
+          "name": "Viking Sky",
+          "group": "ocean",
+          "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "7f48d2d8-db58-559c-ba85-27b383fc8ca1"
+        },
+        {
+          "slug": "viking-star",
+          "name": "Viking Star",
+          "group": "ocean",
+          "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "a1b4f1e8-04f6-5c7d-81f5-f5cba32c7958"
+        },
+        {
+          "slug": "viking-vega",
+          "name": "Viking Vega",
+          "group": "ocean",
+          "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+          "disposition": "excluded_future",
+          "reason": "Official ship page identifies a future 2028 build; not a current operating ship.",
+          "source_url": "https://www.vikingcruises.com/oceans/ships/viking-vega.html"
+        },
+        {
+          "slug": "viking-vela",
+          "name": "Viking Vela",
+          "group": "ocean",
+          "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "30bbff04-6881-5a2b-8116-3c0d30f11971"
+        },
+        {
+          "slug": "viking-venus",
+          "name": "Viking Venus",
+          "group": "ocean",
+          "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "c4281783-a44f-5a3c-b939-bfcbba32c274"
+        },
+        {
+          "slug": "viking-vesta",
+          "name": "Viking Vesta",
+          "group": "ocean",
+          "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "fefd8c44-886e-5dc7-bad5-f4a8c0d14bde"
+        },
+        {
+          "slug": "viking-yi-dun",
+          "name": "Viking Yi Dun",
+          "group": "ocean",
+          "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+          "disposition": "withheld_operator_role",
+          "reason": "Viking Yidun / Yi Dun is owned and operated by CMV; Viking sells accommodation under an exclusive agreement. Consumer detail redirects to fleet. Keep Viking Sun alias together and review operator-role display before publishing.",
+          "source_url": "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf"
+        },
+        {
+          "slug": "viking-octantis",
+          "name": "Viking Octantis",
+          "group": "expedition",
+          "official_fleet_url": "https://www.vikingcruises.com/expeditions/ships/index.html",
+          "disposition": "existing_pinned_identity",
+          "ship_id": "b0761e7a-1cf8-57fe-ae99-5fb033ebf9ad"
+        },
+        {
+          "slug": "viking-polaris",
+          "name": "Viking Polaris",
+          "group": "expedition",
+          "official_fleet_url": "https://www.vikingcruises.com/expeditions/ships/index.html",
+          "disposition": "staged_operating",
+          "ship_id": "92c2e9dd-503e-5cb1-9414-773bb897fc30"
+        },
+        {
+          "slug": "viking-njord",
+          "name": "Viking Njord",
+          "group": "annual-table-only",
+          "disposition": "withheld_status",
+          "reason": "Listed in 2025 annual fleet table but absent from the reviewed current consumer fleet index; present public overnight operation not sufficiently established.",
+          "source_url": "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf"
+        },
+        {
+          "slug": "viking-prestige",
+          "name": "Viking Prestige",
+          "group": "annual-table-only",
+          "disposition": "withheld_status",
+          "reason": "Listed in 2025 annual fleet table but absent from the reviewed current consumer fleet index; present public overnight operation not sufficiently established.",
+          "source_url": "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf"
+        },
+        {
+          "slug": "viking-akun",
+          "name": "Viking Akun",
+          "group": "annual-table-only",
+          "disposition": "excluded_suspended",
+          "reason": "Annual report says no Russia/Ukraine itineraries are for sale; not an operating public cruise product.",
+          "source_url": "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf"
+        },
+        {
+          "slug": "viking-rurik",
+          "name": "Viking Rurik",
+          "group": "annual-table-only",
+          "disposition": "excluded_suspended",
+          "reason": "Annual report says no Russia/Ukraine itineraries are for sale; not an operating public cruise product.",
+          "source_url": "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf"
+        },
+        {
+          "slug": "viking-ingvar",
+          "name": "Viking Ingvar",
+          "group": "annual-table-only",
+          "disposition": "excluded_suspended",
+          "reason": "Annual report says no Russia/Ukraine itineraries are for sale; not an operating public cruise product.",
+          "source_url": "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf"
+        },
+        {
+          "slug": "viking-truvor",
+          "name": "Viking Truvor",
+          "group": "annual-table-only",
+          "disposition": "excluded_suspended",
+          "reason": "Annual report says no Russia/Ukraine itineraries are for sale; not an operating public cruise product.",
+          "source_url": "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf"
+        },
+        {
+          "slug": "viking-helgi",
+          "name": "Viking Helgi",
+          "group": "annual-table-only",
+          "disposition": "excluded_suspended",
+          "reason": "Annual report says no Russia/Ukraine itineraries are for sale; not an operating public cruise product.",
+          "source_url": "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf"
+        },
+        {
+          "slug": "viking-sineus",
+          "name": "Viking Sineus",
+          "group": "annual-table-only",
+          "disposition": "excluded_suspended",
+          "reason": "Annual report says no Russia/Ukraine itineraries are for sale; not an operating public cruise product.",
+          "source_url": "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf"
+        }
+      ]
+    },
+    {
+      "operator_id": "amawaterways",
+      "official_fleet_url": "https://www.amawaterways.com/ships",
+      "additional_fleet_urls": [
+        "https://www.amawaterways.com/sitemap_us.xml",
+        "https://www.amawaterways.com/news/press-releases/2026/ships-2032"
+      ],
+      "checked_at": "2026-09-21",
+      "coverage": "All 37 distinct ship pages discovered in the official US sitemap reconciled with current ship products and dated launch announcements. Fleet landing is paginated; headline fleet totals are not treated as a complete vessel inventory.",
+      "listed_count": 37,
+      "staged_count": 27,
+      "ships": [
+        {
+          "slug": "amabella",
+          "name": "AmaBella",
+          "official_ship_url": "https://www.amawaterways.com/ships/amabella",
+          "disposition": "staged_operating",
+          "ship_id": "add55af4-d597-5723-bf6f-8e287804e302"
+        },
+        {
+          "slug": "amacello",
+          "name": "AmaCello",
+          "official_ship_url": "https://www.amawaterways.com/ships/amacello",
+          "disposition": "staged_operating",
+          "ship_id": "7c9085e3-eaa6-5afc-b463-34d689e9e97c"
+        },
+        {
+          "slug": "amacerto",
+          "name": "AmaCerto",
+          "official_ship_url": "https://www.amawaterways.com/ships/amacerto",
+          "disposition": "staged_operating",
+          "ship_id": "48fed6cf-101a-519b-921b-6637bf486b2e"
+        },
+        {
+          "slug": "amacleo",
+          "name": "AmaCleo",
+          "official_ship_url": "https://www.amawaterways.com/ships/amacleo",
+          "disposition": "excluded_future",
+          "reason": "April 2026 official expansion announcement schedules AmaCleo for 2028.",
+          "source_url": "https://www.amawaterways.com/news/press-releases/2026/ships-2032"
+        },
+        {
+          "slug": "amadahlia",
+          "name": "AmaDahlia",
+          "official_ship_url": "https://www.amawaterways.com/ships/amadahlia",
+          "disposition": "staged_operating",
+          "ship_id": "1fd979ea-69a3-5e85-bd74-9e8ed43fd8e9"
+        },
+        {
+          "slug": "amadante",
+          "name": "AmaDante",
+          "official_ship_url": "https://www.amawaterways.com/ships/amadante",
+          "disposition": "staged_operating",
+          "ship_id": "fbe534e2-7873-55be-966a-780c8d575847"
+        },
+        {
+          "slug": "amadara",
+          "name": "AmaDara",
+          "official_ship_url": "https://www.amawaterways.com/ships/amadara",
+          "disposition": "staged_operating",
+          "ship_id": "5a2db358-440b-5f8a-ac7f-b4c6f10a1b04"
+        },
+        {
+          "slug": "amadolce",
+          "name": "AmaDolce",
+          "official_ship_url": "https://www.amawaterways.com/ships/amadolce",
+          "disposition": "staged_operating",
+          "ship_id": "fc686d8a-d7be-5459-be63-272ddc9fe3ba"
+        },
+        {
+          "slug": "amadouro",
+          "name": "AmaDouro",
+          "official_ship_url": "https://www.amawaterways.com/ships/amadouro",
+          "disposition": "existing_pinned_identity",
+          "ship_id": "a9faa575-d703-515b-8a22-e4146402ec17"
+        },
+        {
+          "slug": "amafiora",
+          "name": "AmaFiora",
+          "official_ship_url": "https://www.amawaterways.com/ships/amafiora",
+          "disposition": "excluded_future",
+          "reason": "Individual page and April 2026 announcement schedule 2027.",
+          "source_url": "https://www.amawaterways.com/ships/amafiora"
+        },
+        {
+          "slug": "amagaia",
+          "name": "AmaGaia",
+          "official_ship_url": "https://www.amawaterways.com/ships/amagaia",
+          "disposition": "excluded_future",
+          "reason": "April 2026 announcement schedules 2028; current-tense ship marketing is not current operation.",
+          "source_url": "https://www.amawaterways.com/news/press-releases/2026/ships-2032"
+        },
+        {
+          "slug": "amakristina",
+          "name": "AmaKristina",
+          "official_ship_url": "https://www.amawaterways.com/ships/amakristina",
+          "disposition": "staged_operating",
+          "ship_id": "5b3e7536-1a16-5d52-bb8a-b40079509966"
+        },
+        {
+          "slug": "amalea",
+          "name": "AmaLea",
+          "official_ship_url": "https://www.amawaterways.com/ships/amalea",
+          "disposition": "existing_pinned_identity",
+          "ship_id": "36c6f3d9-9fb8-5e47-8db4-7b2d12cf87a4"
+        },
+        {
+          "slug": "amalilia",
+          "name": "AmaLilia",
+          "official_ship_url": "https://www.amawaterways.com/ships/amalilia",
+          "disposition": "staged_operating",
+          "ship_id": "262c1d09-dfae-5265-8fd7-5fd7f12b332e"
+        },
+        {
+          "slug": "amalucia",
+          "name": "AmaLucia",
+          "official_ship_url": "https://www.amawaterways.com/ships/amalucia",
+          "disposition": "staged_operating",
+          "ship_id": "a49c38cc-1a86-5cf3-820c-e5a48f2a79f3"
+        },
+        {
+          "slug": "amalyra",
+          "name": "AmaLyra",
+          "official_ship_url": "https://www.amawaterways.com/ships/amalyra",
+          "disposition": "staged_operating",
+          "ship_id": "6bb814f6-f77f-544f-907b-4861e4e7b5ae"
+        },
+        {
+          "slug": "amamagdalena",
+          "name": "AmaMagdalena",
+          "official_ship_url": "https://www.amawaterways.com/ships/amamagdalena",
+          "disposition": "staged_operating",
+          "ship_id": "f9609a9b-76f4-5526-bafc-210fb922a1b6"
+        },
+        {
+          "slug": "amamagna",
+          "name": "AmaMagna",
+          "official_ship_url": "https://www.amawaterways.com/ships/amamagna",
+          "disposition": "existing_pinned_identity",
+          "ship_id": "a0af8cc7-015f-5e03-a5d3-b4de0e36ef57"
+        },
+        {
+          "slug": "amamaria",
+          "name": "AmaMaria",
+          "official_ship_url": "https://www.amawaterways.com/ships/amamaria",
+          "disposition": "excluded_future",
+          "reason": "Same page says both debut 2028 and launching 2027. Both are future; exact debut remains conflicting.",
+          "source_url": "https://www.amawaterways.com/ships/amamaria"
+        },
+        {
+          "slug": "amamaya",
+          "name": "AmaMaya",
+          "official_ship_url": "https://www.amawaterways.com/ships/amamaya",
+          "disposition": "withheld_conflicting_status",
+          "reason": "Ship FAQ says 2026; newer dated April 2026 expansion announcement says 2027. No current passenger service established.",
+          "source_url": "https://www.amawaterways.com/news/press-releases/2026/ships-2032"
+        },
+        {
+          "slug": "amamelodia",
+          "name": "AmaMelodia",
+          "official_ship_url": "https://www.amawaterways.com/ships/amamelodia",
+          "disposition": "staged_operating",
+          "ship_id": "4a8c9213-cccd-5190-be3d-195a6586ffaf"
+        },
+        {
+          "slug": "amamora",
+          "name": "AmaMora",
+          "official_ship_url": "https://www.amawaterways.com/ships/amamora",
+          "disposition": "staged_operating",
+          "ship_id": "0c2c7c2b-353d-538d-9d0a-2c19961eb79a"
+        },
+        {
+          "slug": "amanubia",
+          "name": "AmaNubia",
+          "official_ship_url": "https://www.amawaterways.com/ships/amanubia",
+          "disposition": "excluded_future",
+          "reason": "Current individual page says November 2026; April release said September. Revised future launch is not current service.",
+          "source_url": "https://www.amawaterways.com/ships/amanubia"
+        },
+        {
+          "slug": "amaprima",
+          "name": "AmaPrima",
+          "official_ship_url": "https://www.amawaterways.com/ships/amaprima",
+          "disposition": "staged_operating",
+          "ship_id": "e53750b4-39b2-596a-8e0d-0b375252e9db"
+        },
+        {
+          "slug": "amareina",
+          "name": "AmaReina",
+          "official_ship_url": "https://www.amawaterways.com/ships/amareina",
+          "disposition": "staged_operating",
+          "ship_id": "7d150541-0e76-52f1-8626-f7ee862b9953"
+        },
+        {
+          "slug": "amarudi",
+          "name": "AmaRudi",
+          "official_ship_url": "https://www.amawaterways.com/ships/amarudi",
+          "disposition": "excluded_future",
+          "reason": "Individual page announces inaugural sailing April 11, 2027.",
+          "source_url": "https://www.amawaterways.com/ships/amarudi"
+        },
+        {
+          "slug": "amaserena",
+          "name": "AmaSerena",
+          "official_ship_url": "https://www.amawaterways.com/ships/amaserena",
+          "disposition": "staged_operating",
+          "ship_id": "3415a765-bcc8-5246-9251-9138b2919075"
+        },
+        {
+          "slug": "amasiena",
+          "name": "AmaSiena",
+          "official_ship_url": "https://www.amawaterways.com/ships/amasiena",
+          "disposition": "staged_operating",
+          "ship_id": "8b410b9c-37f1-59ef-bbbe-2866336b6bce"
+        },
+        {
+          "slug": "amasintra",
+          "name": "AmaSintra",
+          "official_ship_url": "https://www.amawaterways.com/ships/amasintra",
+          "disposition": "staged_operating",
+          "ship_id": "6a0df1b7-87d2-56ee-8bc6-4bf7e5302a01"
+        },
+        {
+          "slug": "amasofia",
+          "name": "AmaSofia",
+          "official_ship_url": "https://www.amawaterways.com/ships/amasofia",
+          "disposition": "staged_operating",
+          "ship_id": "2abb89ff-d905-579c-841e-73c05b4465d7"
+        },
+        {
+          "slug": "amasonata",
+          "name": "AmaSonata",
+          "official_ship_url": "https://www.amawaterways.com/ships/amasonata",
+          "disposition": "staged_operating",
+          "ship_id": "ff4363e2-18c3-5896-8c88-46008a7818ea"
+        },
+        {
+          "slug": "amastella",
+          "name": "AmaStella",
+          "official_ship_url": "https://www.amawaterways.com/ships/amastella",
+          "disposition": "staged_operating",
+          "ship_id": "1fd01b98-972a-528f-bc6d-0a24bbb75905"
+        },
+        {
+          "slug": "amavenita",
+          "name": "AmaVenita",
+          "official_ship_url": "https://www.amawaterways.com/ships/amavenita",
+          "disposition": "staged_operating",
+          "ship_id": "170c105a-da3c-550f-821f-fe5f8edfe7d2"
+        },
+        {
+          "slug": "amaverde",
+          "name": "AmaVerde",
+          "official_ship_url": "https://www.amawaterways.com/ships/amaverde",
+          "disposition": "staged_operating",
+          "ship_id": "d0e9120e-e6c5-5eab-b0dc-aeb7be90fdf0"
+        },
+        {
+          "slug": "amavida",
+          "name": "AmaVida",
+          "official_ship_url": "https://www.amawaterways.com/ships/amavida",
+          "disposition": "staged_operating",
+          "ship_id": "1a5ed319-a19b-59d9-b3b6-a6e417354ffa"
+        },
+        {
+          "slug": "amaviola",
+          "name": "AmaViola",
+          "official_ship_url": "https://www.amawaterways.com/ships/amaviola",
+          "disposition": "staged_operating",
+          "ship_id": "15878714-2527-5c7b-a996-40a63748c4bd"
+        },
+        {
+          "slug": "zambezi-queen",
+          "name": "Zambezi Queen",
+          "official_ship_url": "https://www.amawaterways.com/ships/zambezi-queen",
+          "disposition": "staged_operating",
+          "ship_id": "14ccf99d-10fe-5b4f-8a22-ff3b8189ca04"
+        }
+      ]
+    }
+  ],
+  "withheld": [
+    {
+      "operator_id": "viking",
+      "slug": "viking-fulla",
+      "name": "Viking Fulla",
+      "group": "longships",
+      "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+      "disposition": "excluded_future",
+      "reason": "Official ship page identifies a future 2027 build; not a current operating ship.",
+      "source_url": "https://www.vikingrivercruises.com/ships/longships/viking-fulla.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-haki",
+      "name": "Viking Haki",
+      "group": "longships",
+      "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+      "disposition": "withheld_status",
+      "reason": "2026 build label and October naming announcement; reviewed sources do not establish passenger service by the checked date.",
+      "source_url": "https://www.viking.com/press/press-releases/2026-08-24-viking-honors-top-travel-advisor-partners-as-godparents-of-seven-new-river-ships.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-halogi",
+      "name": "Viking Halogi",
+      "group": "longships",
+      "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+      "disposition": "withheld_status",
+      "reason": "2026 build label and October naming announcement; reviewed sources do not establish passenger service by the checked date.",
+      "source_url": "https://www.viking.com/press/press-releases/2026-08-24-viking-honors-top-travel-advisor-partners-as-godparents-of-seven-new-river-ships.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-hnoss",
+      "name": "Viking Hnoss",
+      "group": "longships",
+      "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+      "disposition": "excluded_future",
+      "reason": "Official ship page identifies a future 2027 build; not a current operating ship.",
+      "source_url": "https://www.vikingrivercruises.com/ships/longships/viking-hnoss.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-laga",
+      "name": "Viking Laga",
+      "group": "longships",
+      "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+      "disposition": "excluded_future",
+      "reason": "Official ship page identifies a future 2027 build; not a current operating ship.",
+      "source_url": "https://www.vikingrivercruises.com/ships/longships/viking-laga.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-ran",
+      "name": "Viking Ran",
+      "group": "longships",
+      "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+      "disposition": "excluded_future",
+      "reason": "Official ship page identifies a future 2027 build; not a current operating ship.",
+      "source_url": "https://www.vikingrivercruises.com/ships/longships/viking-ran.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-rota",
+      "name": "Viking Rota",
+      "group": "longships",
+      "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+      "disposition": "withheld_status",
+      "reason": "2026 build label and October naming announcement; reviewed sources do not establish passenger service by the checked date.",
+      "source_url": "https://www.viking.com/press/press-releases/2026-08-24-viking-honors-top-travel-advisor-partners-as-godparents-of-seven-new-river-ships.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-sjofn",
+      "name": "Viking Sjofn",
+      "group": "longships",
+      "official_fleet_url": "https://www.vikingrivercruises.com/ships/longships/index.html",
+      "disposition": "withheld_status",
+      "reason": "2026 build label and October naming announcement; reviewed sources do not establish passenger service by the checked date.",
+      "source_url": "https://www.viking.com/press/press-releases/2026-08-24-viking-honors-top-travel-advisor-partners-as-godparents-of-seven-new-river-ships.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-sol",
+      "name": "Viking Sol",
+      "group": "douro",
+      "official_fleet_url": "https://www.vikingrivercruises.com/ships/douro/index.html",
+      "disposition": "excluded_future",
+      "reason": "Official ship page identifies a future 2027 build; not a current operating ship.",
+      "source_url": "https://www.vikingrivercruises.com/ships/douro/viking-sol.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-anubis",
+      "name": "Viking Anubis",
+      "group": "egypt",
+      "official_fleet_url": "https://www.vikingrivercruises.com/ships/egypt/index.html",
+      "disposition": "excluded_future",
+      "reason": "Official ship page identifies a future 2027 build; not a current operating ship.",
+      "source_url": "https://www.vikingrivercruises.com/ships/egypt/viking-anubis.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-geb",
+      "name": "Viking Geb",
+      "group": "egypt",
+      "official_fleet_url": "https://www.vikingrivercruises.com/ships/egypt/index.html",
+      "disposition": "excluded_future",
+      "reason": "Official ship page identifies a future 2027 build; not a current operating ship.",
+      "source_url": "https://www.vikingrivercruises.com/ships/egypt/viking-geb.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-ptah",
+      "name": "Viking Ptah",
+      "group": "egypt",
+      "official_fleet_url": "https://www.vikingrivercruises.com/ships/egypt/index.html",
+      "disposition": "withheld_status",
+      "reason": "Delivered August 2026; announced September debut has no exact service-start date in reviewed sources. Delivery alone is not passenger operation.",
+      "source_url": "https://www.viking.com/press/press-releases/2026-04-01-viking-announces-float-out-of-newest-nile-river-ships.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-sekhmet",
+      "name": "Viking Sekhmet",
+      "group": "egypt",
+      "official_fleet_url": "https://www.vikingrivercruises.com/ships/egypt/index.html",
+      "disposition": "excluded_future",
+      "reason": "Official debut is November 2026.",
+      "source_url": "https://www.viking.com/press/press-releases/2026-04-01-viking-announces-float-out-of-newest-nile-river-ships.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-brahmaputra",
+      "name": "Viking Brahmaputra",
+      "group": "asia",
+      "official_fleet_url": "https://www.vikingrivercruises.com/ships/asia/index.html",
+      "disposition": "excluded_future",
+      "reason": "Official ship page identifies a future 2027 build; not a current operating ship.",
+      "source_url": "https://www.vikingrivercruises.com/ships/asia/viking-brahmaputra.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-ganges",
+      "name": "Viking Ganges",
+      "group": "asia",
+      "official_fleet_url": "https://www.vikingrivercruises.com/ships/asia/index.html",
+      "disposition": "excluded_future",
+      "reason": "Official ship page identifies a future 2028 build; not a current operating ship.",
+      "source_url": "https://www.vikingrivercruises.com/ships/asia/viking-ganges.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-astrea",
+      "name": "Viking Astrea",
+      "group": "ocean",
+      "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+      "disposition": "excluded_future",
+      "reason": "Official ship page identifies a future 2027 build; not a current operating ship.",
+      "source_url": "https://www.vikingcruises.com/oceans/ships/viking-astrea.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-leda",
+      "name": "Viking Leda",
+      "group": "ocean",
+      "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+      "disposition": "excluded_future",
+      "reason": "Official ship page identifies a future 2029 build; not a current operating ship.",
+      "source_url": "https://www.vikingcruises.com/oceans/ships/viking-leda.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-libra",
+      "name": "Viking Libra",
+      "group": "ocean",
+      "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+      "disposition": "excluded_future",
+      "reason": "Official May delivery announcement for Mira places Libra delivery in November 2026. A 2026 build label is not current service.",
+      "source_url": "https://www.vikingcruises.com/press/press-releases/2026-05-26-viking-takes-delivery-of-newest-ocean-ship.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-lyra",
+      "name": "Viking Lyra",
+      "group": "ocean",
+      "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+      "disposition": "excluded_future",
+      "reason": "Official ship page identifies a future 2028 build; not a current operating ship.",
+      "source_url": "https://www.vikingcruises.com/oceans/ships/viking-lyra.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-vega",
+      "name": "Viking Vega",
+      "group": "ocean",
+      "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+      "disposition": "excluded_future",
+      "reason": "Official ship page identifies a future 2028 build; not a current operating ship.",
+      "source_url": "https://www.vikingcruises.com/oceans/ships/viking-vega.html"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-yi-dun",
+      "name": "Viking Yi Dun",
+      "group": "ocean",
+      "official_fleet_url": "https://www.vikingcruises.com/oceans/ships/index.html",
+      "disposition": "withheld_operator_role",
+      "reason": "Viking Yidun / Yi Dun is owned and operated by CMV; Viking sells accommodation under an exclusive agreement. Consumer detail redirects to fleet. Keep Viking Sun alias together and review operator-role display before publishing.",
+      "source_url": "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-njord",
+      "name": "Viking Njord",
+      "group": "annual-table-only",
+      "disposition": "withheld_status",
+      "reason": "Listed in 2025 annual fleet table but absent from the reviewed current consumer fleet index; present public overnight operation not sufficiently established.",
+      "source_url": "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-prestige",
+      "name": "Viking Prestige",
+      "group": "annual-table-only",
+      "disposition": "withheld_status",
+      "reason": "Listed in 2025 annual fleet table but absent from the reviewed current consumer fleet index; present public overnight operation not sufficiently established.",
+      "source_url": "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-akun",
+      "name": "Viking Akun",
+      "group": "annual-table-only",
+      "disposition": "excluded_suspended",
+      "reason": "Annual report says no Russia/Ukraine itineraries are for sale; not an operating public cruise product.",
+      "source_url": "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-rurik",
+      "name": "Viking Rurik",
+      "group": "annual-table-only",
+      "disposition": "excluded_suspended",
+      "reason": "Annual report says no Russia/Ukraine itineraries are for sale; not an operating public cruise product.",
+      "source_url": "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-ingvar",
+      "name": "Viking Ingvar",
+      "group": "annual-table-only",
+      "disposition": "excluded_suspended",
+      "reason": "Annual report says no Russia/Ukraine itineraries are for sale; not an operating public cruise product.",
+      "source_url": "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-truvor",
+      "name": "Viking Truvor",
+      "group": "annual-table-only",
+      "disposition": "excluded_suspended",
+      "reason": "Annual report says no Russia/Ukraine itineraries are for sale; not an operating public cruise product.",
+      "source_url": "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-helgi",
+      "name": "Viking Helgi",
+      "group": "annual-table-only",
+      "disposition": "excluded_suspended",
+      "reason": "Annual report says no Russia/Ukraine itineraries are for sale; not an operating public cruise product.",
+      "source_url": "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf"
+    },
+    {
+      "operator_id": "viking",
+      "slug": "viking-sineus",
+      "name": "Viking Sineus",
+      "group": "annual-table-only",
+      "disposition": "excluded_suspended",
+      "reason": "Annual report says no Russia/Ukraine itineraries are for sale; not an operating public cruise product.",
+      "source_url": "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf"
+    },
+    {
+      "operator_id": "amawaterways",
+      "slug": "amacleo",
+      "name": "AmaCleo",
+      "official_ship_url": "https://www.amawaterways.com/ships/amacleo",
+      "disposition": "excluded_future",
+      "reason": "April 2026 official expansion announcement schedules AmaCleo for 2028.",
+      "source_url": "https://www.amawaterways.com/news/press-releases/2026/ships-2032"
+    },
+    {
+      "operator_id": "amawaterways",
+      "slug": "amafiora",
+      "name": "AmaFiora",
+      "official_ship_url": "https://www.amawaterways.com/ships/amafiora",
+      "disposition": "excluded_future",
+      "reason": "Individual page and April 2026 announcement schedule 2027.",
+      "source_url": "https://www.amawaterways.com/ships/amafiora"
+    },
+    {
+      "operator_id": "amawaterways",
+      "slug": "amagaia",
+      "name": "AmaGaia",
+      "official_ship_url": "https://www.amawaterways.com/ships/amagaia",
+      "disposition": "excluded_future",
+      "reason": "April 2026 announcement schedules 2028; current-tense ship marketing is not current operation.",
+      "source_url": "https://www.amawaterways.com/news/press-releases/2026/ships-2032"
+    },
+    {
+      "operator_id": "amawaterways",
+      "slug": "amamaria",
+      "name": "AmaMaria",
+      "official_ship_url": "https://www.amawaterways.com/ships/amamaria",
+      "disposition": "excluded_future",
+      "reason": "Same page says both debut 2028 and launching 2027. Both are future; exact debut remains conflicting.",
+      "source_url": "https://www.amawaterways.com/ships/amamaria"
+    },
+    {
+      "operator_id": "amawaterways",
+      "slug": "amamaya",
+      "name": "AmaMaya",
+      "official_ship_url": "https://www.amawaterways.com/ships/amamaya",
+      "disposition": "withheld_conflicting_status",
+      "reason": "Ship FAQ says 2026; newer dated April 2026 expansion announcement says 2027. No current passenger service established.",
+      "source_url": "https://www.amawaterways.com/news/press-releases/2026/ships-2032"
+    },
+    {
+      "operator_id": "amawaterways",
+      "slug": "amanubia",
+      "name": "AmaNubia",
+      "official_ship_url": "https://www.amawaterways.com/ships/amanubia",
+      "disposition": "excluded_future",
+      "reason": "Current individual page says November 2026; April release said September. Revised future launch is not current service.",
+      "source_url": "https://www.amawaterways.com/ships/amanubia"
+    },
+    {
+      "operator_id": "amawaterways",
+      "slug": "amarudi",
+      "name": "AmaRudi",
+      "official_ship_url": "https://www.amawaterways.com/ships/amarudi",
+      "disposition": "excluded_future",
+      "reason": "Individual page announces inaugural sailing April 11, 2027.",
+      "source_url": "https://www.amawaterways.com/ships/amarudi"
+    },
+    {
+      "operator_id": "amawaterways",
+      "name": "AmaClara",
+      "slug": "amaclara",
+      "disposition": "excluded_future",
+      "source_url": "https://www.amawaterways.com/news/press-releases/2026/ships-2032",
+      "reason": "April 2026 growth announcement names a 2028 debut; no individual ship page observed in the sitemap."
+    }
+  ],
+  "duplicate_pages": [
+    {
+      "url": "https://www.amawaterways.com/ships/amavida/2028",
+      "canonical_slug": "amavida",
+      "reason": "Future-year product variant for the same named vessel; no new physical identity inferred."
+    }
+  ],
+  "identity_aliases_not_imported": [
+    {
+      "canonical_observed_name": "Viking Yi Dun",
+      "aliases": [
+        "Viking Yidun",
+        "Viking Sun"
+      ],
+      "reason": "Official report and operator press establish the aliases; operator-role question withheld as one identity.",
+      "source_urls": [
+        "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf",
+        "https://www.viking.com/press/press-releases/2024-09-19-viking-celebrates-historic-return-to-china.html"
+      ]
+    },
+    {
+      "canonical_observed_name": "MS Antares",
+      "aliases": [
+        "Viking Antares"
+      ],
+      "reason": "Annual fleet table spelling versus consumer ship-page name; not a second vessel.",
+      "source_urls": [
+        "https://ir.viking.com/sec-filings/all-sec-filings/content/0001745201-26-000007/0001745201-26-000007.pdf",
+        "https://www.vikingrivercruises.com/ships/egypt/ms-antares.html"
+      ]
+    }
+  ]
+}

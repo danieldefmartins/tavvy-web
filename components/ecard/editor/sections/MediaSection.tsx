@@ -1,3 +1,4 @@
+import { useReleaseCopy } from '../../../../hooks/useReleaseCopy';
 /**
  * MediaSection -- Gallery images and video management.
  */
@@ -18,6 +19,7 @@ import { useEditor } from '../../../../lib/ecard/EditorContext';
 import { uploadEcardFile } from '../../../../lib/ecard';
 import { supabase } from '../../../../lib/supabaseClient';
 import EditorSection from '../shared/EditorSection';
+import ProExtraNotice from '../shared/ProExtraNotice';
 
 interface MediaSectionProps {
   isDark: boolean;
@@ -33,6 +35,7 @@ const VIDEO_TYPES: { id: VideoType; name: string; icon: React.ReactNode; placeho
 ];
 
 export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
+  const copy = useReleaseCopy();
   const { state, dispatch } = useEditor();
   const card = state.card;
   const galleryImages = card.gallery_images || [];
@@ -41,9 +44,11 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
-  const [videoType, setVideoType] = useState<VideoType>('youtube');
+  const [videoType, setVideoType] = useState<VideoType>("youtube");
   const [videoUrl, setVideoUrl] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [proFeature, setProFeature] = useState<string | null>(null);
+  const allowAddition = (feature: string) => { if (isPro) return true; setProFeature(feature); return false; };
 
   const textPrimary = isDark ? '#FFFFFF' : '#111111';
   const textSecondary = isDark ? '#94A3B8' : '#6B7280';
@@ -58,6 +63,7 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
   const handleGalleryAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
+    if (!allowAddition("Adding gallery photos")) { e.target.value = ''; return; }
 
     Array.from(files).forEach((file) => {
       const id = `gallery_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
@@ -78,6 +84,7 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
     const file = e.target.files?.[0];
     if (!file) return;
     e.target.value = '';
+    if (!allowAddition("Adding embedded videos")) return;
 
     setUploading(true);
     try {
@@ -88,7 +95,7 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
         return;
       }
 
-      const url = await uploadEcardFile(userId, file, 'videos');
+      const url = await uploadEcardFile(userId, file, "videos");
       if (url) {
         setVideoUrl(url);
       } else {
@@ -104,10 +111,11 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
 
   // -- Videos --
   const handleAddVideo = () => {
+    if (!allowAddition("Adding embedded videos")) { setVideoModalOpen(false); return; }
     if (!videoUrl.trim()) return;
     dispatch({ type: 'ADD_VIDEO', video: { type: videoType, url: videoUrl.trim() } });
     setVideoUrl('');
-    setVideoType('youtube');
+    setVideoType("youtube");
     setVideoModalOpen(false);
   };
 
@@ -117,12 +125,14 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
 
   return (
     <EditorSection
-      id="media"
-      title="Media"
+      id={"media"}
+      title={copy("Media")}
       icon={<IoImages size={20} />}
       defaultOpen={false}
       isDark={isDark}
     >
+      <p style={{fontSize:13,color:textSecondary,lineHeight:1.5,margin:'0 0 16px'}}>{copy('Gallery photos, embedded videos, contact forms and professional credentials are Pro extras.')} {copy('Your existing content stays on your card.')}</p>
+      {proFeature && <ProExtraNotice feature={proFeature} isDark={isDark} onDismiss={() => setProFeature(null)} />}
       {/* ===== Gallery Section ===== */}
       <div style={{ marginBottom: 28 }}>
         <div
@@ -133,9 +143,9 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
             marginBottom: 12,
           }}
         >
-          <span style={{ fontSize: 14, fontWeight: 600, color: textPrimary }}>Gallery</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: textPrimary }}>{copy("Gallery · Pro")}</span>
           <span style={{ fontSize: 12, color: textSecondary }}>
-            {galleryImages.length} image{galleryImages.length !== 1 ? 's' : ''}
+            {galleryImages.length} {copy('Photos')}
           </span>
         </div>
 
@@ -145,7 +155,7 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
           type="file"
           accept="image/*"
           multiple
-          style={{ display: 'none' }}
+          style={{ display: "none" }}
           onChange={handleGalleryAdd}
         />
 
@@ -171,7 +181,7 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
                 }}
               >
                 <img
-                  src={img.url}
+                  src={img.url || (img as any).uri}
                   alt=""
                   style={{
                     position: 'absolute',
@@ -183,6 +193,7 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
                 />
                 <button
                   onClick={() => handleGalleryRemove(img.id)}
+                  aria-label="Remove gallery photo"
                   style={{
                     position: 'absolute',
                     top: 4,
@@ -191,7 +202,7 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
                     height: 24,
                     borderRadius: 12,
                     background: 'rgba(0,0,0,0.6)',
-                    border: 'none',
+                    border: "none",
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
@@ -208,7 +219,7 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
 
         {/* Add gallery image button */}
         <button
-          onClick={() => galleryInputRef.current?.click()}
+          onClick={() => { if (allowAddition("Adding gallery photos")) galleryInputRef.current?.click(); }}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -216,7 +227,7 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
             padding: '10px 16px',
             border: `1px dashed ${borderColor}`,
             borderRadius: 10,
-            background: 'none',
+            background: "none",
             cursor: 'pointer',
             fontSize: 13,
             fontWeight: 500,
@@ -226,8 +237,7 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
           }}
         >
           <IoAdd size={18} />
-          Add Images
-        </button>
+          {copy("Add Images")}</button>
       </div>
 
       {/* ===== Videos Section ===== */}
@@ -240,9 +250,9 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
             marginBottom: 12,
           }}
         >
-          <span style={{ fontSize: 14, fontWeight: 600, color: textPrimary }}>Videos</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: textPrimary }}>{copy("Videos · Pro")}</span>
           <span style={{ fontSize: 12, color: textSecondary }}>
-            {videos.length} video{videos.length !== 1 ? 's' : ''}
+            {videos.length} {copy('Videos')}
           </span>
         </div>
 
@@ -305,9 +315,10 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
                   </div>
                   <button
                     onClick={() => handleRemoveVideo(index)}
+                    aria-label="Remove video"
                     style={{
-                      background: 'none',
-                      border: 'none',
+                      background: "none",
+                      border: "none",
                       padding: 6,
                       cursor: 'pointer',
                       flexShrink: 0,
@@ -323,7 +334,7 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
 
         {/* Add video button */}
         <button
-          onClick={() => setVideoModalOpen(true)}
+          onClick={() => { if (allowAddition("Adding embedded videos")) setVideoModalOpen(true); }}
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -331,7 +342,7 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
             padding: '10px 16px',
             border: `1px dashed ${borderColor}`,
             borderRadius: 10,
-            background: 'none',
+            background: "none",
             cursor: 'pointer',
             fontSize: 13,
             fontWeight: 500,
@@ -341,8 +352,7 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
           }}
         >
           <IoVideocam size={18} />
-          Add Video
-        </button>
+          {copy("Add Video")}</button>
       </div>
 
       {/* ===== Add Video Modal ===== */}
@@ -379,12 +389,12 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
                 marginBottom: 20,
               }}
             >
-              <span style={{ fontSize: 16, fontWeight: 600, color: textPrimary }}>Add Video</span>
+              <span style={{ fontSize: 16, fontWeight: 600, color: textPrimary }}>{copy("Add Video")}</span>
               <button
                 onClick={() => setVideoModalOpen(false)}
                 style={{
-                  background: 'none',
-                  border: 'none',
+                  background: "none",
+                  border: "none",
                   cursor: 'pointer',
                   padding: 4,
                 }}
@@ -422,7 +432,7 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
                       border: `2px solid ${videoType === type.id ? '#00C853' : borderColor}`,
                       background: videoType === type.id
                         ? (isDark ? 'rgba(0,200,83,0.1)' : 'rgba(0,200,83,0.05)')
-                        : 'none',
+                        : "none",
                       cursor: 'pointer',
                       fontSize: 11,
                       fontWeight: 500,
@@ -443,7 +453,7 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
                 ref={videoInputRef}
                 type="file"
                 accept="video/*"
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
                 onChange={handleVideoFileSelect}
               />
 
@@ -461,7 +471,7 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
                     Upload Video
                   </label>
                   <button
-                    onClick={() => videoInputRef.current?.click()}
+                    onClick={() => { if (allowAddition("Adding embedded videos")) videoInputRef.current?.click(); }}
                     disabled={uploading}
                     style={{
                       display: 'flex',
@@ -474,7 +484,7 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
                       borderRadius: 10,
                       background: uploading
                         ? (isDark ? 'rgba(0,200,83,0.08)' : 'rgba(0,200,83,0.04)')
-                        : 'none',
+                        : "none",
                       cursor: uploading ? 'wait' : 'pointer',
                       fontSize: 14,
                       fontWeight: 500,
@@ -525,7 +535,7 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
                   fontSize: 14,
                   backgroundColor: inputBg,
                   color: inputColor,
-                  outline: 'none',
+                  outline: "none",
                   boxSizing: 'border-box',
                 }}
               />
@@ -539,22 +549,21 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
                   padding: '10px 20px',
                   borderRadius: 10,
                   border: `1px solid ${borderColor}`,
-                  background: 'none',
+                  background: "none",
                   fontSize: 14,
                   fontWeight: 500,
                   color: textSecondary,
                   cursor: 'pointer',
                 }}
               >
-                Cancel
-              </button>
+                {copy("Cancel")}</button>
               <button
                 onClick={handleAddVideo}
                 disabled={!videoUrl.trim()}
                 style={{
                   padding: '10px 20px',
                   borderRadius: 10,
-                  border: 'none',
+                  border: "none",
                   background: videoUrl.trim() ? '#00C853' : (isDark ? '#334155' : '#E5E7EB'),
                   fontSize: 14,
                   fontWeight: 500,
@@ -562,8 +571,7 @@ export default function MediaSection({ isDark, isPro }: MediaSectionProps) {
                   cursor: videoUrl.trim() ? 'pointer' : 'not-allowed',
                 }}
               >
-                Add Video
-              </button>
+                {copy("Add Video")}</button>
             </div>
           </div>
         </div>

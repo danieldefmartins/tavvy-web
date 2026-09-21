@@ -1,3 +1,6 @@
+import { menuAppearance, readDemoMenuAppearance } from '../../../lib/menuAppearance';
+import { isDemoRestaurant, demoMenu, demoCategories, demoItems, readDemoCategories, recordDemoEvent, DEMO_HOME, DEMO_ORDER, DEMO_ORDER_KEY, DEMO_GUIDE } from '../../../lib/demoRestaurant';
+import DemoBanner from '../../../components/demo/DemoBanner';
 /**
  * Menu Gallery Page - Full-Screen Image-First Experience
  * Path: pages/place/[id]/menu-gallery.tsx
@@ -12,6 +15,7 @@
  * - Dark, minimal, premium feel
  */
 
+import { dietaryMatch } from '../../../lib/placePresentation';
 import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -54,6 +58,7 @@ interface Menu {
   place_id: string;
   name: string;
   style: string | null;
+  photo_gallery_enabled?: boolean;
   cover_image_url: string | null;
   show_cover: boolean;
   happy_hour_enabled: boolean;
@@ -106,6 +111,8 @@ export default function MenuGalleryPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = router.query;
+  const isDemo = isDemoRestaurant(id);
+  const placeHref = isDemo ? DEMO_HOME : `/app/place/${id}`;
 
   const [menu, setMenu] = useState<Menu | null>(null);
   const [categories, setCategories] = useState<MenuCategory[]>([]);
@@ -114,6 +121,8 @@ export default function MenuGalleryPage() {
   const [placeSlug, setPlaceSlug] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [noMenu, setNoMenu] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const loadVersion = useRef(0);
   const [chefDish, setChefDish] = useState<FeaturedDish | null>(null);
   const [dayDish, setDayDish] = useState<FeaturedDish | null>(null);
 
@@ -121,6 +130,7 @@ export default function MenuGalleryPage() {
   const [activePeriod, setActivePeriod] = useState<MealPeriod>('all');
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [showCategoryPanel, setShowCategoryPanel] = useState(false);
+  const [showOtherDishes,setShowOtherDishes]=useState(false);
   const [activeFilters, setActiveFilters] = useState<AllergenFilter[]>([]);
 
   // Scroll position
@@ -135,30 +145,47 @@ export default function MenuGalleryPage() {
 
   // Track menu view
   useEffect(() => {
-    if (id && !loading && !noMenu) {
-      trackMenuView(id as string);
+    if (id && !loading && !noMenu && !loadError && menu) {
+      if (isDemo) recordDemoEvent('menuViews'); else trackMenuView(id as string);
     }
-  }, [id, loading, noMenu]);
+  }, [id, loading, noMenu, loadError, menu]);
 
   const loadMenu = async (placeId: string) => {
-    setLoading(true);
+    const version = ++loadVersion.current;
+    setLoading(true); setLoadError(null); setNoMenu(false);
+    setMenu(null); setCategories([]); setAllItems([]); setChefDish(null); setDayDish(null); setPlaceName(''); setPlaceSlug('');
+    setActiveCategory('all'); setActivePeriod('all'); setActiveIndex(0);
+    if (isDemoRestaurant(placeId)) {
+      const demoCategories = readDemoCategories();
+      const demoItems = demoCategories.flatMap(c => c.items.map(i => ({ ...i, category_id: c.id, category_name: c.name, meal_period: c.meal_period })));
+      setPlaceName('Trattoria Tavvy'); setPlaceSlug('demo-trattoria');
+      setMenu({ ...demoMenu, ...readDemoMenuAppearance() }); setCategories(demoCategories); setAllItems(demoItems);
+      setChefDish(demoItems.find(i => i.id === demoMenu.chef_recommendation_id) || null);
+      setDayDish(demoItems.find(i => i.id === demoMenu.dish_of_day_id) || null);
+      setLoading(false); return;
+    }
     try {
-      const { data: placeData } = await supabase
+      const { data: placeData, error: placeError } = await supabase
         .from('places')
         .select('name, slug')
         .eq('id', placeId)
         .maybeSingle();
+      if (version !== loadVersion.current) return;
+      if (placeError) throw placeError;
 
       if (placeData) {
         setPlaceName(placeData.name || '');
         setPlaceSlug(placeData.slug || '');
       }
 
-      const { data: menuData } = await supabase
+      const { data: menuData, error: menuError } = await supabase
         .from('menus')
         .select('*')
         .eq('place_id', placeId)
+        .eq('is_active', true)
         .maybeSingle();
+      if (version !== loadVersion.current) return;
+      if (menuError) throw menuError;
 
       if (!menuData) {
         setNoMenu(true);
@@ -172,10 +199,13 @@ export default function MenuGalleryPage() {
       if (menuData.show_cover) {
         const featuredIds = [menuData.chef_recommendation_id, menuData.dish_of_day_id].filter(Boolean);
         if (featuredIds.length > 0) {
-          const { data: featuredData } = await supabase
+          const { data: featuredData, error: featuredError } = await supabase
             .from('menu_items')
             .select('id, name, price, price_label, image_url')
-            .in('id', featuredIds);
+            .in('id', featuredIds)
+            .eq('is_available', true);
+      if (version !== loadVersion.current) return;
+      if (featuredError) throw featuredError;
           if (featuredData) {
             featuredData.forEach((dish: any) => {
               if (dish.id === menuData.chef_recommendation_id) setChefDish(dish);
@@ -185,21 +215,26 @@ export default function MenuGalleryPage() {
         }
       }
 
-      const { data: categoriesData } = await supabase
+      const { data: categoriesData, error: categoriesError } = await supabase
         .from('menu_categories')
         .select('*')
         .eq('menu_id', menuData.id)
         .order('sort_order', { ascending: true });
+      if (version !== loadVersion.current) return;
+      if (categoriesError) throw categoriesError;
 
       if (categoriesData && categoriesData.length > 0) {
         setCategories(categoriesData);
 
         const categoryIds = categoriesData.map((c: any) => c.id);
-        const { data: itemsData } = await supabase
+        const { data: itemsData, error: itemsError } = await supabase
           .from('menu_items')
           .select('*')
           .in('category_id', categoryIds)
+          .eq('is_available', true)
           .order('sort_order', { ascending: true });
+      if (version !== loadVersion.current) return;
+      if (itemsError) throw itemsError;
 
         if (itemsData) {
           // Attach category name and meal_period to each item
@@ -217,29 +252,23 @@ export default function MenuGalleryPage() {
       }
     } catch (error) {
       console.error('[MenuGallery] Error loading menu:', error);
-      setNoMenu(true);
+      if (version === loadVersion.current) setLoadError('We could not load this menu. Please try again.');
     } finally {
-      setLoading(false);
+      if (version === loadVersion.current) setLoading(false);
     }
   };
 
-  const itemMatchesFilters = (item: MenuItem): boolean => {
-    if (activeFilters.length === 0) return true;
-    const tags = (item.dietary_tags || []).map(t => t.toLowerCase().replace('-', '_'));
-    return activeFilters.every(filter => {
-      if (filter === 'gluten_free') return tags.includes('gluten_free') || tags.includes('gf') || tags.includes('gluten-free');
-      return tags.includes(filter);
-    });
-  };
+  const itemMatchesFilters = (item:MenuItem) => dietaryMatch(item.dietary_tags,activeFilters)==='match';
 
   const toggleFilter = (filter: AllergenFilter) => {
+    setShowOtherDishes(false);
     setActiveFilters(prev =>
       prev.includes(filter) ? prev.filter(f => f !== filter) : [...prev, filter]
     );
   };
 
   // Filtered items
-  const filteredItems = allItems.filter(item => {
+  const periodItems = allItems.filter(item => {
     // Meal period filter
     if (activePeriod !== 'all') {
       if (item.meal_period !== activePeriod && item.meal_period !== 'all_day' && item.meal_period !== null) {
@@ -253,6 +282,9 @@ export default function MenuGalleryPage() {
     return true;
   });
 
+  const matchingCount=periodItems.filter(itemMatchesFilters).length;
+  const filteredItems=periodItems.filter(item=>showOtherDishes||itemMatchesFilters(item));
+  useEffect(()=>{setActiveIndex(0);scrollRef.current?.scrollTo({left:0});},[activeCategory,activePeriod,activeFilters,showOtherDishes]);
   // Available periods — fixed order: Breakfast, Lunch, Dinner, All Day
   const availablePeriods: MealPeriod[] = ['all'];
   const periodsInData = new Set(categories.map(c => c.meal_period).filter(Boolean));
@@ -280,7 +312,7 @@ export default function MenuGalleryPage() {
     // Track item view when card snaps into view
     const itemIndex = index - coverOffset;
     if (itemIndex >= 0 && itemIndex < filteredItems.length) {
-      trackItemView(filteredItems[itemIndex].id);
+      if (!isDemo) trackItemView(filteredItems[itemIndex].id);
     }
   };
 
@@ -317,8 +349,8 @@ export default function MenuGalleryPage() {
 
   // Share a dish
   const handleShareDish = async (item: MenuItem) => {
-    trackMenuShare(id as string);
-    trackItemShare(item.id);
+    if (!isDemo) trackMenuShare(id as string);
+    if (!isDemo) trackItemShare(item.id);
     const shareUrl = `https://tavvy.com/place/${id}/menu-gallery?dish=${item.id}`;
     const priceStr = formatPrice(item.price, item.price_label);
     const shareText = `${item.name} at ${placeName}${priceStr ? ` — ${priceStr}` : ''}`;
@@ -344,7 +376,11 @@ export default function MenuGalleryPage() {
   };
 
   // Loading
-  if (loading) {
+  useEffect(() => {
+    if (menu && !menuAppearance(menu).galleryEnabled) void router.replace(`/place/${id}/menu${typeof router.query.dish === 'string' ? `?dish=${encodeURIComponent(router.query.dish)}` : ''}`);
+  }, [menu, id]);
+
+  if (loading || (menu && !menuAppearance(menu).galleryEnabled)) {
     return (
       <>
         <style jsx global>{galleryStyles}</style>
@@ -355,20 +391,22 @@ export default function MenuGalleryPage() {
     );
   }
 
+  if (loadError) {
+    return <><style jsx global>{galleryStyles}</style><div className="gallery-shell">{isDemo && <DemoBanner compact />}<div className="gallery-empty" role="alert"><p>{loadError}</p><button className="gallery-back-link" onClick={() => loadMenu(id as string)}>Try again</button><Link href={placeHref}>Back to restaurant</Link></div></div></>;
+  }
+
   // No menu
   if (noMenu) {
     return (
       <>
         <style jsx global>{galleryStyles}</style>
-        <Head>
+        <Head>{isDemo && <meta name="robots" content="noindex,nofollow" />}
           <title>{placeName ? `${placeName} Menu` : 'Menu'} | Tavvy</title>
         </Head>
-        <div className="gallery-shell">
+        <div className="gallery-shell">{isDemo && <DemoBanner compact />}
           <div className="gallery-empty">
             <p>No menu available yet.</p>
-            <button onClick={() => router.back()} className="gallery-back-link">
-              Go Back
-            </button>
+            <Link href={placeHref} className="gallery-back-link">Back to restaurant</Link>
           </div>
         </div>
       </>
@@ -377,7 +415,7 @@ export default function MenuGalleryPage() {
 
   return (
     <>
-      <Head>
+      <Head>{isDemo && <meta name="robots" content="noindex,nofollow" />}
         <title>{placeName ? `${placeName} Menu` : 'Menu Gallery'} | Tavvy</title>
         <meta name="description" content={`Browse the menu at ${placeName} in a beautiful gallery view.`} />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -386,18 +424,11 @@ export default function MenuGalleryPage() {
 
       <style jsx global>{galleryStyles}</style>
 
-      <div className="gallery-shell">
+      <div className="gallery-shell">{isDemo && <DemoBanner compact />}
         {/* ROW 1: Navigation */}
         <div className="gallery-nav">
-          <button className="gallery-nav-back" onClick={() => router.back()}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="15 18 9 12 15 6"/>
-            </svg>
-          </button>
-          <Link href={`/place/${id}`} className="gallery-nav-title">{placeName}</Link>
-          <Link href={`/place/${id}/menu`} className="gallery-nav-classic">
-            Classic
-          </Link>
+          <Link href={placeHref} className="gallery-nav-title">← {placeName||'Back to restaurant'}</Link>
+          <Link href={`/place/${id}/menu`} className="gallery-nav-classic">List</Link><span className="gallery-nav-classic" aria-current="page">Photos</span>
         </div>
 
         {/* ROW 2: Meal periods + filter icon */}
@@ -417,6 +448,8 @@ export default function MenuGalleryPage() {
           )}
           {/* Filter icon — toggles category panel */}
           <button
+            aria-label="Filter menu"
+            aria-expanded={showCategoryPanel}
             onClick={() => setShowCategoryPanel(!showCategoryPanel)}
             style={{
               width: 34, height: 34, borderRadius: 8,
@@ -468,7 +501,7 @@ export default function MenuGalleryPage() {
                 <button
                   key={f.key}
                   className={`gallery-allergen-pill ${activeFilters.includes(f.key) ? 'active' : ''}`}
-                  onClick={() => toggleFilter(f.key)}
+                  aria-pressed={activeFilters.includes(f.key)} onClick={() => toggleFilter(f.key)}
                 >
                   {activeFilters.includes(f.key) ? '✓ ' : `${f.icon} `}{f.label}
                 </button>
@@ -477,6 +510,7 @@ export default function MenuGalleryPage() {
           </div>
         )}
 
+        {activeFilters.length>0&&<div className="gallery-dietary-result" role="status"><strong>{matchingCount} dishes match</strong><button onClick={()=>{setActiveFilters([]);setShowOtherDishes(false)}}>Clear</button><button aria-pressed={showOtherDishes} onClick={()=>setShowOtherDishes(!showOtherDishes)}>{showOtherDishes?'Matches only':'Other dishes'}</button><p>Missing dietary tags mean unknown. Ask the restaurant about allergies.</p></div>}
         {/* Gallery Cards - Horizontal Scroll */}
         {filteredItems.length > 0 ? (
           <>
@@ -487,7 +521,7 @@ export default function MenuGalleryPage() {
             >
               {/* Cover Card — Full-screen image background */}
               {menu?.show_cover && (
-                <div className="gallery-card gallery-cover-card">
+                <div className="gallery-card gallery-cover-card" tabIndex={0} aria-label="Menu cover">
                   <div className="gallery-card-image">
                     {menu.cover_image_url ? (
                       <img src={menu.cover_image_url} alt={placeName} className="gallery-cover-hero-img" />
@@ -544,8 +578,8 @@ export default function MenuGalleryPage() {
                 const matchesFilter = itemMatchesFilters(item);
 
                 return (
-                  <div key={item.id} className={`gallery-card ${!matchesFilter ? 'gallery-card-filtered' : ''}`}>
-                    {/* Full 9:16 image */}
+                  <div key={item.id} className={`gallery-card ${!matchesFilter ? 'gallery-card-filtered' : ''}`} tabIndex={0} aria-label={item.name}>
+                    {/* Dish image, with the restaurant cover as fallback */}
                     <div className="gallery-card-image">
                       {imageUrl ? (
                         <img src={imageUrl} alt={item.name} />
@@ -560,7 +594,7 @@ export default function MenuGalleryPage() {
                       {/* Allergen warning overlay */}
                       {!matchesFilter && (
                         <div className="gallery-card-allergen-overlay">
-                          <span>⚠️ Does not match your dietary filters</span>
+                          <span>{dietaryMatch(item.dietary_tags,activeFilters)==='unknown'?'Dietary information not confirmed for these filters':'Other dish — does not match selected filters'}</span>
                         </div>
                       )}
 
@@ -577,6 +611,7 @@ export default function MenuGalleryPage() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="gallery-card-order"
+                            aria-label={`Order ${item.name}`}
                             onClick={(e) => e.stopPropagation()}
                           >
                             🛒
@@ -585,7 +620,7 @@ export default function MenuGalleryPage() {
                         <button
                           className="gallery-card-share"
                           onClick={(e) => { e.stopPropagation(); handleShareDish(item); }}
-                          aria-label="Share dish"
+                          aria-label={`Share ${item.name}`}
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
@@ -601,7 +636,7 @@ export default function MenuGalleryPage() {
                         {item.is_new && <span className="gallery-badge new">{'\u2728'} New</span>}
                       </div>
 
-                      {/* Fixed text block — ALWAYS same position regardless of content */}
+                      {/* Full text flows below the image and actions. */}
                       <div className="gallery-card-text-block">
                         <h2 className="gallery-card-name">{item.name}</h2>
                         <p className="gallery-card-desc">
@@ -610,8 +645,7 @@ export default function MenuGalleryPage() {
                         <div className="gallery-card-dietary">
                           {item.dietary_tags && item.dietary_tags.length > 0 ? (
                             item.dietary_tags.map(tag => {
-                              const info = DIETARY_LABELS[tag.toLowerCase()];
-                              if (!info) return null;
+                              const info = DIETARY_LABELS[tag.toLowerCase()] || { icon: '', label: tag.replace(/[_-]/g, ' ') };
                               return (
                                 <span key={tag} className="gallery-dietary-pill">
                                   {info.icon} {info.label}
@@ -619,7 +653,7 @@ export default function MenuGalleryPage() {
                               );
                             })
                           ) : (
-                            <span className="gallery-dietary-pill" style={{ opacity: 0 }}>placeholder</span>
+                            null
                           )}
                         </div>
                       </div>
@@ -650,13 +684,15 @@ export default function MenuGalleryPage() {
           </>
         ) : (
           <div className="gallery-empty-items">
-            <p>No dishes in this category.</p>
+            <p>{activeFilters.length?'No dishes with confirmed matching tags. Clear filters or show other dishes.':'No dishes in this category.'}</p>
           </div>
         )}
 
         {/* Powered by footer with logo */}
         <div className="gallery-footer">
-          <img src="/tavvy-logo-white.png" alt="Tavvy" className="gallery-footer-logo" />
+          <button className="gallery-back-link" disabled={activeIndex === 0} onClick={() => scrollRef.current?.scrollBy({ left: -scrollRef.current.clientWidth, behavior: 'smooth' })}>Previous</button>
+          <span aria-live="polite">{filteredItems.length?`${activeIndex + 1} / ${filteredItems.length + coverOffset}`:'0 dishes'}</span>
+          <button className="gallery-back-link" disabled={activeIndex >= filteredItems.length + coverOffset - 1} onClick={() => scrollRef.current?.scrollBy({ left: scrollRef.current.clientWidth, behavior: 'smooth' })}>Next</button>
         </div>
       </div>
     </>
@@ -730,6 +766,7 @@ const galleryStyles = `
   .gallery-nav {
     display: flex;
     align-items: center;
+    flex-wrap: wrap; justify-content: center; gap: 8px;
     padding: 12px 16px;
     padding-top: max(12px, env(safe-area-inset-top));
     z-index: 20;
@@ -746,17 +783,7 @@ const galleryStyles = `
     align-items: center;
   }
   .gallery-nav-title {
-    flex: 1;
-    text-align: center;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: -0.2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding: 0 8px;
-    color: #fff;
-    text-decoration: none;
+    flex: 1 0 100%; min-width: 0; text-align: center; font-size: 1rem; font-weight: 600; padding: 0 8px; color: #fff; text-decoration: none; overflow-wrap: anywhere;
   }
   .gallery-nav-title:hover {
     opacity: 0.8;
@@ -781,7 +808,7 @@ const galleryStyles = `
   .gallery-periods {
     display: flex;
     gap: 6px;
-    margin-bottom: 8px;
+    margin-bottom: 8px; min-width: 0; overflow-x: auto;
   }
   .gallery-period-btn {
     padding: 6px 14px;
@@ -841,42 +868,22 @@ const galleryStyles = `
   }
   .gallery-scroll::-webkit-scrollbar { display: none; }
 
-  /* Each Card — FULL SCREEN between header and footer, image fills everything */
+  /* Horizontal pages; each card scrolls vertically for its complete content. */
   .gallery-card {
-    min-width: 100%;
-    width: 100%;
-    height: 100%;
-    flex-shrink: 0;
-    scroll-snap-align: start;
-    position: relative;
-    overflow: hidden;
+    flex: 0 0 100%; width: 100%; min-width: 0; height: 100%;
+    scroll-snap-align: start; position: relative; overflow-y: auto; overflow-x: hidden;
+    overscroll-behavior-y: contain; background: #101014;
   }
 
-  /* Image fills the ENTIRE card — no padding, no gaps, edge to edge */
+  /* Image first, followed by normal-flow details inside each scrollable card. */
   .gallery-card-image {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    position: relative; min-height: 100%;
   }
   .gallery-card-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    /* Stretches/crops any image to fill the full screen */
+    display: block; width: 100%; height: clamp(180px, 42dvh, 440px); object-fit: cover;
   }
   .gallery-card-placeholder {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    color: #333;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    height: clamp(180px, 42dvh, 440px); display: grid; place-items: center; padding: 24px; background: #202026; color: #bbb; overflow-wrap: anywhere;
   }
   /* Gradient only at the very bottom for text readability */
   .gallery-card-gradient {
@@ -893,15 +900,9 @@ const galleryStyles = `
     pointer-events: none;
   }
 
-  /* Price badge + share top right group */
+  /* Price and actions wrap below the image. */
   .gallery-card-top-right {
-    position: absolute;
-    top: 12px;
-    right: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    z-index: 2;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 16px 20px 0;
   }
   .gallery-card-price {
     background: rgba(0,0,0,0.6);
@@ -932,14 +933,9 @@ const galleryStyles = `
     background: rgba(138, 5, 190, 0.7);
   }
 
-  /* Badges top left */
+  /* Badges flow above the dish details. */
   .gallery-card-badges-top {
-    position: absolute;
-    top: 12px;
-    left: 16px;
-    display: flex;
-    gap: 6px;
-    z-index: 2;
+    display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 20px 0;
   }
   .gallery-badge {
     background: rgba(0,0,0,0.6);
@@ -958,52 +954,18 @@ const galleryStyles = `
     background: rgba(138, 5, 190, 0.7);
   }
 
-  /*
-   * FIXED TEXT BLOCK — locked position for ALL cards.
-   * Uses fixed height so text never shifts between dishes.
-   */
+  /* Full dish text stays readable without truncation. */
   .gallery-card-text-block {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    right: 70px;
-    height: 110px;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    gap: 8px;
+    position: relative; display: flex; flex-direction: column; gap: 12px; padding: 20px; overflow-wrap: anywhere;
   }
   .gallery-card-name {
-    margin: 0;
-    font-size: 22px;
-    font-weight: 800;
-    color: #fff;
-    line-height: 1.25;
-    letter-spacing: -0.5px;
-    text-shadow: 0 2px 12px rgba(0,0,0,0.8);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin: 0; font-size: 1.5rem; font-weight: 800; color: #fff; line-height: 1.3; overflow-wrap: anywhere;
   }
   .gallery-card-desc {
-    font-size: 13px;
-    color: rgba(255,255,255,0.65);
-    margin: 0;
-    line-height: 1.4;
-    height: 36px;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
+    margin: 0; font-size: 1rem; color: #d5d5dd; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere;
   }
   .gallery-card-dietary {
-    display: flex;
-    gap: 5px;
-    flex-wrap: nowrap;
-    height: 22px;
-    align-items: center;
-    overflow: hidden;
+    display: flex; gap: 6px; flex-wrap: wrap; align-items: flex-start;
   }
   .gallery-dietary-pill {
     padding: 2px 7px;
@@ -1017,14 +979,9 @@ const galleryStyles = `
     white-space: nowrap;
   }
 
-  /* Dots — bottom right, subtle */
+  /* Pagination indicators stay outside the scrollable cards. */
   .gallery-dots {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    display: flex;
-    gap: 4px;
-    z-index: 10;
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; padding: 8px; flex-shrink: 0;
   }
   .gallery-dot {
     width: 5px;
@@ -1038,19 +995,9 @@ const galleryStyles = `
     transform: scale(1.3);
   }
 
-  /* Counter — bottom right */
+  /* Counter for larger menus. */
   .gallery-counter {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.7);
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(4px);
-    padding: 4px 12px;
-    border-radius: 12px;
-    z-index: 10;
+    text-align: center; padding: 8px; font-size: .875rem; flex-shrink: 0;
   }
 
   /* Empty items */
@@ -1090,15 +1037,7 @@ const galleryStyles = `
     background: radial-gradient(ellipse at center top, #1a0a2e 0%, #000 70%);
   }
   .gallery-cover-content {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 24px;
-    text-align: center;
-    z-index: 2;
+    position: relative; display: flex; flex-direction: column; align-items: center; padding: 28px 20px; text-align: center; z-index: 2; min-height: 100%; overflow-wrap: anywhere;
   }
   .gallery-cover-name {
     margin: 0;
@@ -1131,12 +1070,7 @@ const galleryStyles = `
     max-width: 320px;
   }
   .gallery-cover-pill {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
-    white-space: nowrap;
-    backdrop-filter: blur(4px);
+    padding: 8px 12px; border-radius: 20px; font-size: .875rem; line-height: 1.5; max-width: 100%; white-space: normal; overflow-wrap: anywhere; background: #17171c;
   }
   .pill-happy {
     background: rgba(251, 191, 36, 0.15);
@@ -1164,13 +1098,7 @@ const galleryStyles = `
     color: #86efac;
   }
   .gallery-cover-swipe {
-    position: absolute;
-    bottom: 30px;
-    margin: 0;
-    font-size: 13px;
-    color: rgba(255,255,255,0.35);
-    font-weight: 400;
-    animation: gallery-swipe-pulse 2s ease-in-out infinite;
+    margin: 24px 0 0; font-size: 1rem; color: #ddd;
   }
   @keyframes gallery-swipe-pulse {
     0%, 100% { opacity: 0.35; transform: translateX(0); }
@@ -1294,12 +1222,42 @@ const galleryStyles = `
     50% { transform: scale(1.1); box-shadow: 0 0 12px 4px rgba(255,80,0,0.3); }
   }
 
+  .gallery-card:not(.gallery-cover-card) .gallery-card-gradient { display: none; }
+  .gallery-cover-thumbs .gallery-cover-thumb img { height: 100%; width: 100%; }
+  .gallery-cover-card .gallery-cover-hero-img { position: absolute; height: 100%; opacity: .3; }
+  .gallery-cover-card .gallery-card-gradient { background: rgba(0,0,0,.45); }
+  .gallery-card-price, .gallery-dietary-pill, .gallery-badge { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+  .gallery-card-share, .gallery-card-order { flex-shrink: 0; width: 44px; height: 44px; }
+  .gallery-card-allergen-overlay { position: static; transform: none; margin: 12px 20px 0; }
+  .gallery-card-filtered { opacity: 1; }
+  .gallery-footer { flex-wrap: wrap; gap: 10px; }
+  .gallery-footer a { color: #ddd; font-size: .875rem; }
+  .gallery-footer button { padding: 6px 10px; }
+  .gallery-footer button:disabled { opacity: .4; cursor: default; }
+  .gallery-cover-name { font-size: 2rem; }
+  .gallery-cover-pills { width: 100%; }
+  .gallery-scroll { overflow-y: hidden; }
+  .gallery-nav-classic { color: #d8b4fe; }
+  .gallery-card:focus-visible, .gallery-shell a:focus-visible, .gallery-shell button:focus-visible { outline: 2px solid #d8b4fe; outline-offset: -2px; }
+  @media (max-height: 500px) { .gallery-shell { overflow-y: auto; } .gallery-scroll { flex: 0 0 65dvh; } }
+
   /* Smooth momentum scrolling feel */
   @media (hover: hover) {
     .gallery-scroll {
       scroll-behavior: smooth;
     }
   }
+
+  html,body,.gallery-shell,.gallery-loading{background:var(--background);color:var(--text)}
+  .gallery-nav,.gallery-periods,.gallery-footer,.gallery-card-info,.gallery-empty{background:var(--background);color:var(--text)}
+  .gallery-nav-title,.gallery-nav-back,.gallery-card-name,.gallery-card-title,.gallery-empty h2{color:var(--text)}
+  .gallery-nav-classic,.gallery-footer a,.gallery-back-link{color:var(--link)}
+  .gallery-card-desc,.gallery-empty p,.gallery-card-category,.gallery-empty-sub{color:var(--text-secondary)}
+  .gallery-cat-pill,.gallery-allergen-pill,.gallery-period-btn{background:var(--surface);color:var(--text-secondary);border-color:var(--border)}
+  .gallery-cat-pill.active,.gallery-period-btn.active{background:#74209A;color:#fff}.gallery-allergen-pill.active{background:#086B54;color:#fff}
+  .gallery-dietary-result{padding:8px 12px;color:var(--text);background:var(--surface);font-size:13px;flex-shrink:0}.gallery-dietary-result button{min-height:40px;margin-left:10px;color:var(--link);background:transparent;border:0;text-decoration:underline}.gallery-dietary-result p{margin:0;color:var(--text-secondary)}
+  .gallery-cover-title,.gallery-cover-subtitle,.gallery-cover-hint{color:#fff}.gallery-card-filtered{opacity:1}
+  .gallery-card:not(.gallery-cover-card){background:var(--surface)}.gallery-dietary-pill{font-size:13px;color:var(--text-secondary);background:var(--background);border-color:var(--border)}.gallery-card-placeholder{color:var(--text-secondary);background:var(--surface)}.gallery-footer button{min-height:44px}.gallery-dot{background:var(--border)}.gallery-dot.active{background:var(--link)}
 `;
 
 export const getServerSideProps = async ({ locale }: { locale: string }) => ({

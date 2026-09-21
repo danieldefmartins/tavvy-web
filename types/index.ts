@@ -5,6 +5,7 @@ export interface Signal {
 }
 
 export interface Place {
+  logo_url?: string;
   id: string;
   name: string;
   address_line1: string;

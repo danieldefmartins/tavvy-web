@@ -29,8 +29,7 @@ const mapLayers: MapLayer[] = [
 export default function MapLayerSettingsPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { themeMode } = useThemeContext();
-  const isDark = themeMode === 'dark';
+  const { isDark } = useThemeContext();
   
   const [selectedLayer, setSelectedLayer] = useState('standard');
 

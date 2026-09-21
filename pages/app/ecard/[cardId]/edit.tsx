@@ -6,6 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { useThemeContext } from '../../../../contexts/ThemeContext';
 import { useAuth } from '../../../../contexts/AuthContext';
 import AppLayout from '../../../../components/AppLayout';
 import { EditorProvider, useEditor } from '../../../../lib/ecard/EditorContext';
@@ -21,6 +22,8 @@ function EditorShell() {
   const { cardId } = router.query;
   const { user, loading: authLoading } = useAuth();
   const { state, loadCard } = useEditor();
+  const { isDark } = useThemeContext();
+  const canvas = isDark ? '#111018' : '#F7F7FA';
   const [initialLoading, setInitialLoading] = useState(true);
 
   useEffect(() => {
@@ -43,7 +46,7 @@ function EditorShell() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: CANVAS_BG,
+        backgroundColor: canvas,
       }}>
         <div style={{
           width: 36,
@@ -58,7 +61,8 @@ function EditorShell() {
     );
   }
 
-  if (state.loadError) {
+  const ownershipError = state.card.id && state.card.user_id !== user?.id ? 'This card belongs to another account. Open one of your own cards to edit it.' : null;
+  if (state.loadError || ownershipError) {
     return (
       <div style={{
         minHeight: '100vh',
@@ -69,11 +73,12 @@ function EditorShell() {
         gap: 16,
         padding: 40,
         textAlign: 'center',
-        backgroundColor: CANVAS_BG,
+        backgroundColor: canvas,
       }}>
         <p style={{ fontSize: 16, color: '#EF4444', fontWeight: 500 }}>
-          {state.loadError}
+          {state.loadError || ownershipError}
         </p>
+        {!ownershipError && <button onClick={() => { setInitialLoading(true); void loadCard(String(cardId)).finally(() => setInitialLoading(false)); }} style={{ minHeight:44,padding:'10px 20px',borderRadius:8,border:'1px solid #89769A',background:'transparent',color:isDark?'#fff':'#202124' }}>Retry loading</button>}
         <button
           onClick={() => router.push('/app/ecard')}
           style={{
@@ -100,7 +105,7 @@ export default function ECardEditPage() {
   return (
     <>
       <Head>
-        <title>Edit eCard | TavvY</title>
+        <title>Edit eCard | Tavvy</title>
       </Head>
       <AppLayout hideTabBar>
         <EditorProvider>

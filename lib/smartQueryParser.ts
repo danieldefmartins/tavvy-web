@@ -45,8 +45,26 @@ export interface ParsedQuery {
   city?: string;
   region?: string;  // State for US, province for others
   country?: string;
+  useCurrentLocation?: boolean;
   isParsed: boolean;  // True if we successfully extracted entities
   originalQuery: string;
+}
+
+function parseUsLocation(value: string): { city: string; region?: string; country?: string } {
+  const location = value.trim();
+  const code = location.match(/^(.+?)(?:,\s*|\s+)([a-zA-Z]{2})$/);
+  if (code && US_STATES.has(code[2].toUpperCase())) {
+    return { city: code[1].trim(), region: code[2].toUpperCase(), country: 'US' };
+  }
+  const lower = location.toLowerCase();
+  for (const [stateName, region] of Object.entries(US_STATE_NAMES).sort((a, b) => b[0].length - a[0].length)) {
+    for (const separator of [', ', ' ']) {
+      if (lower.endsWith(separator + stateName)) {
+        return { city: location.slice(0, -(separator.length + stateName.length)).trim(), region, country: 'US' };
+      }
+    }
+  }
+  return { city: location };
 }
 
 /**
@@ -63,36 +81,27 @@ export function parseSearchQuery(query: string): ParsedQuery {
     };
   }
 
+  // Relative location is an explicit intent, never a city named "me".
+  const nearby = trimmed.match(/^(.*?)\s*(?:near\s+me|nearby|around\s+me|near\s+my\s+(?:current\s+)?location)$/i);
+  if (nearby) return { placeName: nearby[1].trim() || '*', useCurrentLocation: true, isParsed: true, originalQuery: query };
+
   // Pattern 1: "Place near City State" or "Place near City, State"
   // Example: "Starbucks near Newark NJ" or "coffee shops in Manhattan, NY"
   // Supports both "near Newark NJ" and "near Newark, NJ"
-  const nearPattern = /^(.+?)\s+(?:near|in|at)\s+(.+?)(?:(?:,\s*|\s+)([a-zA-Z]{2}))?$/i;
+  const nearPattern = /^(.+?)\s+(?:near|in|at)\s+(.+)$/i;
   const nearMatch = trimmed.match(nearPattern);
   
   if (nearMatch) {
-    const [_, placeName, cityPart, statePart] = nearMatch;
+    const [_, placeName, locationPart] = nearMatch;
+    const location = parseUsLocation(locationPart);
     const result: ParsedQuery = {
       placeName: placeName.trim(),
-      city: cityPart.trim(),
+      city: location.city,
+      region: location.region,
+      country: location.country,
       isParsed: true,
       originalQuery: query
     };
-    
-    if (statePart) {
-      const stateUpper = statePart.trim().toUpperCase();
-      if (US_STATES.has(stateUpper)) {
-        result.region = stateUpper;
-        result.country = 'US';
-      } else {
-        // Try to match full state name
-        const stateLower = statePart.trim().toLowerCase();
-        if (US_STATE_NAMES[stateLower]) {
-          result.region = US_STATE_NAMES[stateLower];
-          result.country = 'US';
-        }
-      }
-    }
-    
     return result;
   }
 
@@ -117,24 +126,8 @@ export function parseSearchQuery(query: string): ParsedQuery {
     }
   }
 
-  // Pattern 3: "Place City" (just city, no state)
-  // Example: "Starbucks Manhattan" or "pizza Newark"
-  // This is tricky - we'll only match if the last word looks like a city (capitalized)
-  const cityPattern = /^(.+?)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)$/;
-  const cityMatch = trimmed.match(cityPattern);
-  
-  if (cityMatch) {
-    const [_, placeName, city] = cityMatch;
-    // Only parse if city looks like a proper noun (2+ chars, capitalized)
-    if (city.length >= 2) {
-      return {
-        placeName: placeName.trim(),
-        city: city.trim(),
-        isParsed: true,
-        originalQuery: query
-      };
-    }
-  }
+  // Capitalization alone cannot distinguish a business name from a city.
+  // Preserve names such as Whole Foods and Riva Cucina unless location syntax is explicit.
 
   // Pattern 4: "Place, City, State" (comma-separated)
   // Example: "Starbucks, Newark, NJ"
@@ -143,21 +136,15 @@ export function parseSearchQuery(query: string): ParsedQuery {
   
   if (commaMatch) {
     const [_, placeName, cityPart, statePart] = commaMatch;
+    const location = parseUsLocation(statePart ? `${cityPart}, ${statePart}` : cityPart);
     const result: ParsedQuery = {
       placeName: placeName.trim(),
-      city: cityPart.trim(),
+      city: location.city,
+      region: location.region,
+      country: location.country,
       isParsed: true,
       originalQuery: query
     };
-    
-    if (statePart) {
-      const stateUpper = statePart.trim().toUpperCase();
-      if (US_STATES.has(stateUpper)) {
-        result.region = stateUpper;
-        result.country = 'US';
-      }
-    }
-    
     return result;
   }
 
@@ -174,6 +161,7 @@ export function parseSearchQuery(query: string): ParsedQuery {
  */
 export function getParseDescription(parsed: ParsedQuery): string | null {
   if (!parsed.isParsed) return null;
+  if (parsed.useCurrentLocation) return `Searching for ${parsed.placeName} near your location`;
   
   const parts: string[] = [];
   

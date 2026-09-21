@@ -1,0 +1,16 @@
+[
+  "lib/demoRestaurant.ts",
+  "components/PreviewPlace.tsx",
+  "pages/place/[id]/menu.tsx",
+  "pages/place/[id]/menu-gallery.tsx",
+  "pages/place/[id]/order.tsx",
+  "components/demo/DemoContact.tsx",
+  "components/demo/DemoBanner.tsx",
+  "components/demo/DemoReview.tsx",
+  "components/demo/DemoQR.tsx",
+  "components/demo/DemoDialog.tsx",
+  "pages/app/demo/restaurant-showcase.tsx",
+  "pages/app/demo/restaurant.tsx",
+  "pages/app/demo/restaurant-website.tsx",
+  "pages/app/demo/restaurant-card.tsx"
+]

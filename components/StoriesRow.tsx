@@ -4,6 +4,7 @@
 // Horizontal scrollable row of place story avatars
 // Similar to Instagram/Facebook stories at the top
 
+import ContentSafetyActions,{CONTENT_SAFETY_CHANGED} from './ContentSafetyActions';
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
@@ -30,6 +31,7 @@ interface Story {
   thumbnailUrl: string | null;
   createdAt: string;
   expiresAt: string;
+  storyKind?: string;
 }
 
 interface StoriesRowProps {
@@ -100,11 +102,12 @@ export default function StoriesRow({
           created_at,
           expires_at,
           user_id,
-          is_permanent
+          is_permanent,
+          story_kind
         `)
         .in('place_id', targetPlaceIds)
         .eq('status', 'active')
-        .or(`expires_at.gt.${now},is_permanent.eq.true`)
+        .or(`expires_at.gt.${now},and(is_permanent.eq.true,story_kind.eq.owner_highlight)`)
         .order('created_at', { ascending: false });
 
       if (storiesError || !stories || stories.length === 0) {
@@ -183,7 +186,7 @@ export default function StoriesRow({
       .select('*')
       .eq('place_id', placeId)
       .eq('status', 'active')
-      .or(`expires_at.gt.${now},is_permanent.eq.true`)
+      .or(`expires_at.gt.${now},and(is_permanent.eq.true,story_kind.eq.owner_highlight)`)
       .order('created_at', { ascending: true });
 
     if (stories && stories.length > 0) {
@@ -200,6 +203,7 @@ export default function StoriesRow({
         thumbnailUrl: s.thumbnail_url,
         createdAt: s.created_at,
         expiresAt: s.expires_at,
+        storyKind:s.story_kind,
       }));
       
       if (onStoryPress) {
@@ -221,6 +225,8 @@ export default function StoriesRow({
     
     setViewedStoryIds(prev => { const next = new Set(Array.from(prev)); next.add(storyId); return next; });
   };
+
+  useEffect(()=>{const changed=()=>{setShowStoryViewer(false);setSelectedStories([]);void fetchStoriesForUniverse()};window.addEventListener(CONTENT_SAFETY_CHANGED,changed);return()=>window.removeEventListener(CONTENT_SAFETY_CHANGED,changed)},[fetchStoriesForUniverse]);
 
   const closeStoryViewer = () => {
     setShowStoryViewer(false);
@@ -517,7 +523,7 @@ export default function StoriesRow({
                 {selectedStories[currentStoryIndex]?.placeName}
               </div>
               <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px' }}>
-                {new Date(selectedStories[currentStoryIndex]?.createdAt).toLocaleString()}
+                {selectedStories[currentStoryIndex]?.storyKind==='owner_highlight'?'From the restaurant':'Guest story'} · {new Date(selectedStories[currentStoryIndex]?.createdAt).toLocaleString()}
               </div>
             </div>
             <button
@@ -534,6 +540,8 @@ export default function StoriesRow({
               ×
             </button>
           </div>
+
+          <div style={{padding:'0 16px',maxHeight:'50vh',overflowY:'auto'}}><ContentSafetyActions kind="story" contentId={selectedStories[currentStoryIndex].id} onChanged={closeStoryViewer}/></div>
 
           {/* Story Content */}
           <div style={{

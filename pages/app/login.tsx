@@ -4,6 +4,8 @@
  */
 
 import React, { useState } from 'react';
+import { startOAuth } from '../../lib/startOAuth';
+import { safeAuthRedirect } from '../../lib/authRedirect';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -47,7 +49,7 @@ export default function LoginScreen() {
       await new Promise(resolve => setTimeout(resolve, 500));
       // Redirect to returnUrl or redirect param if provided, otherwise go to /app
       // Use replace to prevent back-button returning to login page
-      const returnUrl = (router.query.returnUrl || router.query.redirect) as string;
+      const returnUrl = safeAuthRedirect(router.query.returnUrl || router.query.redirect);
       router.replace(returnUrl || '/app', undefined, { locale });
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');
@@ -56,9 +58,15 @@ export default function LoginScreen() {
     }
   };
 
-  const handleSocialLogin = (provider: 'apple' | 'google') => {
-    // TODO: Implement social login
-    console.log(`Login with ${provider}`);
+  const handleSocialLogin = async (provider: 'apple' | 'google') => {
+    setLoading(true);
+    setError(null);
+    try {
+      await startOAuth(provider, router.query.returnUrl || router.query.redirect);
+    } catch (err: any) {
+      setError(err.message || 'Unable to start sign in. Please try again.');
+      setLoading(false);
+    }
   };
 
   return (
@@ -193,6 +201,7 @@ export default function LoginScreen() {
               <button
                 type="button"
                 className="social-button"
+                disabled={loading}
                 onClick={() => handleSocialLogin('apple')}
                 style={{ 
                   backgroundColor: theme.surface,
@@ -207,6 +216,7 @@ export default function LoginScreen() {
               <button
                 type="button"
                 className="social-button"
+                disabled={loading}
                 onClick={() => handleSocialLogin('google')}
                 style={{ 
                   backgroundColor: theme.surface,

@@ -13,6 +13,7 @@ import { useRouter } from 'next/router';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
+import { getStoryPublishAccess, hasStoryOwnerAccess, publishUploadedStory, StoryKind, StoryPublishError, storyMediaDetails } from '../../lib/storyPublishing';
 import {
   IoArrowBack, IoClose, IoCamera, IoImage, IoCheckmark,
   IoLocation, IoSearch
@@ -49,6 +50,22 @@ export default function AddStoryPage() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [storyKind, setStoryKind] = useState<StoryKind>('customer');
+  const [canPublishHighlight, setCanPublishHighlight] = useState(false);
+  const pendingUpload = useRef<{ file: File; placeId: string; path: string } | null>(null);
+
+  useEffect(() => {
+    let current = true;
+    setCanPublishHighlight(false);
+    setStoryKind('customer');
+    if (selectedPlace?.id && user) hasStoryOwnerAccess(supabase, selectedPlace.id).then(allowed => {
+      if (current) {
+        setCanPublishHighlight(allowed);
+        if (allowed && router.query.storyKind === 'owner_highlight') setStoryKind('owner_highlight');
+      }
+    });
+    return () => { current = false; };
+  }, [selectedPlace?.id, user?.id, router.query.storyKind]);
 
   const colors = {
     background: isDark ? '#0D0D1A' : '#FFFFFF',
@@ -293,66 +310,50 @@ export default function AddStoryPage() {
       setError('Please select a place and upload a photo or video');
       return;
     }
-
+    setUploading(true);
+    setError(null);
     try {
-      setUploading(true);
-      setError(null);
-
-      // Upload file to Supabase Storage (bucket: place-stories, matching iOS)
-      const fileExt = selectedFile.name.split('.').pop() || (mediaType === 'video' ? 'mp4' : 'jpg');
-      const fileName = `${user.id}/${selectedPlace.id}/${Date.now()}.${fileExt}`;
-      // Determine content type — iOS Safari may give empty type for .mov
-      let contentType = selectedFile.type;
-      if (!contentType) {
-        if (/\.mov$/i.test(selectedFile.name)) contentType = 'video/quicktime';
-        else if (/\.mp4$/i.test(selectedFile.name)) contentType = 'video/mp4';
-        else if (/\.(jpg|jpeg)$/i.test(selectedFile.name)) contentType = 'image/jpeg';
-        else if (/\.png$/i.test(selectedFile.name)) contentType = 'image/png';
-        else if (/\.heic$/i.test(selectedFile.name)) contentType = 'image/heic';
-        else contentType = 'application/octet-stream';
+      const media = storyMediaDetails(selectedFile.name, selectedFile.type);
+      if (!media) throw new Error('Choose a JPEG, PNG, WebP, HEIC, MP4, MOV or WebM file.');
+      let location: { latitude: number; longitude: number } | null = null;
+      if (storyKind === 'customer') {
+        location = await new Promise((resolve, reject) => {
+          if (!navigator.geolocation) return reject(new Error('Allow location access to share a customer story from this place.'));
+          navigator.geolocation.getCurrentPosition(
+            position => resolve({ latitude: position.coords.latitude, longitude: position.coords.longitude }),
+            () => reject(new Error('Allow location access to share a customer story from this place.')),
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 },
+          );
+        });
       }
-      
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('place-stories')
-        .upload(fileName, selectedFile, {
-          contentType,
-          upsert: false,
+      const pending = pendingUpload.current;
+      // Retry an uncertain publication with its original uploaded path.
+      let path = pending?.file === selectedFile && pending.placeId === selectedPlace.id ? pending.path : '';
+      if (!path) {
+        const access = await getStoryPublishAccess(supabase, selectedPlace.id, storyKind, location);
+        if (selectedFile.size > access.max_media_bytes) throw new Error('Choose a photo or video smaller than 50 MB.');
+        path = `${user.id}/${selectedPlace.id}/${crypto.randomUUID()}.${media.extension}`;
+        const { error: uploadError } = await supabase.storage.from('place-stories').upload(path, selectedFile, {
+          contentType: media.mime, upsert: false,
         });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('place-stories')
-        .getPublicUrl(fileName);
-
-      // Calculate expiration (72 hours from now)
-      const expiresAt = new Date();
-      expiresAt.setHours(expiresAt.getHours() + 72);
-
-      // Create story record (matching iOS schema exactly)
-      const { error: insertError } = await supabase
-        .from('place_stories')
-        .insert({
-          place_id: selectedPlace.id,
-          user_id: user.id,
-          media_url: publicUrl,
-          media_type: mediaType,
-          caption: caption || null,
-          expires_at: expiresAt.toISOString(),
-          status: 'active',
-          is_permanent: false,
-          universe_id: universeId || null,
-        });
-
-      if (insertError) throw insertError;
-
-      // Success - go back to previous page (universe page)
-      alert('Story uploaded successfully! It will be visible for 72 hours.');
+        if (uploadError) {
+          // No publish request was made, so an uploaded object here is an orphan.
+          try { await supabase.storage.from('place-stories').remove([path]); } catch {}
+          throw new Error('The media upload did not finish. Check your connection and try again.');
+        }
+        pendingUpload.current = { file: selectedFile, placeId: selectedPlace.id, path };
+      }
+      await publishUploadedStory(supabase, {
+        placeId: selectedPlace.id, mediaPath: path, mediaType: media.type, kind: storyKind,
+        caption, location, universeId: typeof universeId === 'string' ? universeId : null,
+      });
+      pendingUpload.current = null;
+      alert(storyKind === 'owner_highlight'
+        ? 'Restaurant highlight published. It stays available until you remove it.'
+        : 'Story published. It will be visible for 72 hours.');
       router.back();
-      
     } catch (err: any) {
-      console.error('Error uploading story:', err);
+      if (err instanceof StoryPublishError && !err.keepUpload) pendingUpload.current = null;
       setError(err.message || 'Failed to upload story');
     } finally {
       setUploading(false);
@@ -830,7 +831,25 @@ export default function AddStoryPage() {
             )}
           </div>
 
-          {/* Caption */}
+          <section style={{ marginBottom: 20 }} aria-label="Story type">
+              <p style={{ color: colors.text, fontWeight: 600, marginBottom: 8 }}>Share as</p>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button type="button" disabled={uploading} aria-pressed={storyKind === 'customer'}
+                  onClick={() => setStoryKind('customer')}
+                  style={{ padding: '10px 14px', borderRadius: 12, border: `1px solid ${colors.border}`, background: storyKind === 'customer' ? colors.primary : colors.card, color: colors.text }}>
+                  Customer story
+                </button>
+                {canPublishHighlight && <button type="button" disabled={uploading} aria-pressed={storyKind === 'owner_highlight'}
+                  onClick={() => setStoryKind('owner_highlight')}
+                  style={{ padding: '10px 14px', borderRadius: 12, border: `1px solid ${colors.border}`, background: storyKind === 'owner_highlight' ? colors.primary : colors.card, color: colors.text }}>
+                  Restaurant highlight
+                </button>}
+              </div>
+              <p style={{ color: colors.textSecondary, fontSize: 13, lineHeight: 1.5 }}>
+                {storyKind === 'customer' ? 'Share what you see here. Location access is required; customer stories last 72 hours.' : 'Show your food, team or space. Restaurant highlights stay available until you remove them.'}
+              </p>
+            </section>
+            {/* Caption */}
           <div style={{ marginBottom: '24px' }}>
             <label style={{
               display: 'block',
@@ -880,7 +899,7 @@ export default function AddStoryPage() {
               color: colors.textSecondary,
               lineHeight: '1.5',
             }}>
-              📸 Your story will be visible for 72 hours. If it's the only story for this place, it will stay visible until someone adds a new one.
+                  {storyKind === 'owner_highlight' ? 'Restaurant highlights stay available until you remove them.' : 'Customer stories are visible for 72 hours.'}
             </p>
           </div>
         </div>

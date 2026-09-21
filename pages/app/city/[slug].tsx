@@ -10,22 +10,14 @@ import Link from 'next/link';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import AppLayout from '../../../components/AppLayout';
 import { supabase } from '../../../lib/supabaseClient';
+import { CityRecord, loadCity, loadCityPlaces, cityPhotos } from '../../../lib/cities';
 import { spacing, borderRadius } from '../../../constants/Colors';
 import PlaceCard from '../../../components/PlaceCard';
 import { FiArrowLeft, FiSearch, FiMapPin, FiGrid, FiList } from 'react-icons/fi';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
-interface City {
-  id: string;
-  name: string;
-  slug: string;
-  state?: string;
-  country?: string;
-  cover_image_url?: string;
-  description?: string;
-  population?: number;
-}
+type City = CityRecord;
 
 interface Place {
   id: string;
@@ -48,6 +40,9 @@ export default function CityDetailScreen() {
 
   const [city, setCity] = useState<City | null>(null);
   const [places, setPlaces] = useState<Place[]>([]);
+  const [loadError, setLoadError] = useState('');
+  const [placesError, setPlacesError] = useState('');
+  const [attempt, setAttempt] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -64,71 +59,27 @@ export default function CityDetailScreen() {
   ];
 
   useEffect(() => {
-    if (slug) {
-      fetchCityData();
-    }
-  }, [slug]);
-
-  const isUuid = (v: string) =>
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
-
-  const fetchPlacesForCity = async (cityName: string) => {
-    const { data: placesData, error: placesError } = await supabase
-      .from('places')
-      .select('id, name, slug, tavvy_category, street, city, cover_image_url, photos, status')
-      .ilike('city', cityName)
-      .eq('status', 'active')
-      .limit(50);
-
-    if (!placesError && placesData) {
-      setPlaces(
-        placesData.map((p: any) => ({
-          id: p.id,
-          name: p.name,
-          slug: p.slug,
-          category: p.tavvy_category,
-          address: p.street,
-          city: p.city,
-          photo_url: p.cover_image_url || (Array.isArray(p.photos) ? p.photos[0] : undefined),
-        }))
-      );
-    }
-  };
-
-  const fetchCityData = async () => {
-    setLoading(true);
-    try {
-      const rawSlug = slug as string;
-
-      // Fetch city info (never .or(id.eq.slug) — crashes on uuid columns)
-      let cityQuery = supabase
-        .from('tavvy_cities')
-        .select('id, name, slug, state, country, cover_image_url, description, population')
-        .limit(1);
-      cityQuery = isUuid(rawSlug) ? cityQuery.eq('id', rawSlug) : cityQuery.eq('slug', rawSlug);
-      const { data: cityData, error: cityError } = await cityQuery.maybeSingle();
-
-      // Derive a display name from the slug as fallback
-      const derivedName = rawSlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-
-      if (!cityError && cityData) {
-        setCity(cityData);
-        await fetchPlacesForCity(cityData.name || derivedName);
-      } else {
-        // True fallback: placeholder city from slug; still try to load places by derived name
-        setCity({
-          id: rawSlug,
-          name: derivedName,
-          slug: rawSlug,
-        });
-        await fetchPlacesForCity(derivedName);
-      }
-    } catch (error) {
-      console.error('Error fetching city:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    if (!router.isReady) return;
+    let current = true;
+    setLoading(true); setCity(null); setPlaces([]); setLoadError(''); setPlacesError('');
+    (async () => {
+      try {
+        const record = typeof slug === 'string' ? await loadCity(supabase, slug) : null;
+        if (!current) return;
+        setCity(record);
+        if (record) {
+          try {
+            const rows = await loadCityPlaces(supabase, record);
+            if (current) setPlaces(rows.map(p => ({ id: p.id, name: p.name, slug: p.slug,
+              category: p.tavvy_category, address: p.street, city: p.city,
+              photo_url: p.cover_image_url || (Array.isArray(p.photos) ? p.photos[0] : undefined) })));
+          } catch { if (current) setPlacesError('Places could not be loaded. Please retry.'); }
+        }
+      } catch { if (current) setLoadError('City could not be loaded. Please retry.'); }
+      finally { if (current) setLoading(false); }
+    })();
+    return () => { current = false; };
+  }, [slug, router.isReady, attempt]);
 
   // Normalize so 'Restaurants'/'restaurant' both match the singular pill ids
   const normalizeCategory = (c?: string) =>
@@ -149,7 +100,8 @@ export default function CityDetailScreen() {
       <AppLayout hideTabBar>
         <div className="error-screen" style={{ backgroundColor: theme.background }}>
           <span>🏙️</span>
-          <h1 style={{ color: theme.text }}>City not found</h1>
+          <h1 style={{ color: theme.text }}>{loadError || 'City not found'}</h1>
+          {loadError && <button onClick={() => setAttempt(value => value + 1)}>Retry</button>}
           <button onClick={() => router.push('/app/cities', undefined, { locale })} style={{ color: theme.primary }}>
             Browse Cities
           </button>
@@ -183,7 +135,7 @@ export default function CityDetailScreen() {
           {/* Header */}
           <header className="city-header">
             <img 
-              src={city?.cover_image_url || `https://source.unsplash.com/800x400/?${city?.name},city`}
+              src={city?.cover_image_url || undefined}
               alt={city?.name}
               className="cover-image"
             />
@@ -254,13 +206,20 @@ export default function CityDetailScreen() {
             </div>
           )}
 
+          {city && <div className="description-section" style={{ color: theme.textSecondary }}>
+            <p>{city.population != null ? `${city.population.toLocaleString()} residents · ` : ''}{placesError ? 'Place count unavailable' : `${places.length} listed places`}</p>
+            {[['Culture', city.culture], ['History', city.history], ['Best time to visit', city.best_time_to_visit], ['Weather', city.weather_summary], ['Time zone', city.timezone]].map(([label, value]) => value ? <section key={label}><h3>{label}</h3><p>{value}</p></section> : null)}
+            <h3>Photos</h3>
+            {cityPhotos(city).length ? cityPhotos(city).map(url => <img key={url} src={url} alt={city.name} style={{ width: '100%', maxWidth: 480, borderRadius: 12, marginBottom: 12 }} />) : <p>No city photos have been published yet.</p>}
+            <h3>City reviews</h3><p>City reviews are not available yet. Open a place in this city to see its community signals or share your experience.</p>
+          </div>}
           {/* Places */}
           <section className="places-section">
             <h2 style={{ color: theme.text }}>
               {searchQuery ? 'Search Results' : `Places in ${city?.name}`}
             </h2>
 
-            {loading ? (
+            {placesError ? (<div role="alert"><p>{placesError}</p><button onClick={() => setAttempt(value => value + 1)}>Retry</button></div>) : loading ? (
               <div className="loading-container">
                 <div className="loading-spinner" />
               </div>

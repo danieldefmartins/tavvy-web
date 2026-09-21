@@ -1,3 +1,4 @@
+import { useReleaseCopy } from '../../../../hooks/useReleaseCopy';
 /**
  * EditorSection — collapsible section wrapper for the card editor.
  * Each section has a title, optional icon, and collapse/expand toggle.
@@ -23,6 +24,7 @@ export default function EditorSection({
   children,
   isDark = false,
 }: EditorSectionProps) {
+  const copy = useReleaseCopy();
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -32,6 +34,7 @@ export default function EditorSection({
   return (
     <section id={`section-${id}`} style={{ borderBottom: `1px solid ${border}` }}>
       <button
+        type="button" aria-expanded={isOpen} aria-controls={`section-${id}-content`}
         onClick={() => setIsOpen(!isOpen)}
         style={{
           display: 'flex',
@@ -39,14 +42,14 @@ export default function EditorSection({
           gap: 10,
           width: '100%',
           padding: '18px 20px',
-          background: 'none',
-          border: 'none',
+          background: "none",
+          border: "none",
           cursor: 'pointer',
           textAlign: 'left',
         }}
       >
         {icon && <span style={{ display: 'flex', color: '#00C853', flexShrink: 0 }}>{icon}</span>}
-        <span style={{ flex: 1, fontSize: 16, fontWeight: 600, color: textPrimary }}>{title}</span>
+        <span style={{ flex: 1, fontSize: 16, fontWeight: 600, color: textPrimary }}>{copy(title)}</span>
         <IoChevronDown
           size={18}
           color={isDark ? '#64748B' : '#9CA3AF'}
@@ -57,10 +60,10 @@ export default function EditorSection({
         />
       </button>
       <div
-        ref={contentRef}
+        id={`section-${id}-content`} ref={contentRef}
         style={{
           overflow: 'hidden',
-          maxHeight: isOpen ? 'none' : 0,
+          maxHeight: isOpen ? "none" : 0,
           opacity: isOpen ? 1 : 0,
           transition: 'opacity 0.2s',
           padding: isOpen ? '0 20px 20px' : '0 20px 0',

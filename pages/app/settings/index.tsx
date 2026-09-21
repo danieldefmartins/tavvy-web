@@ -1,3 +1,4 @@
+import { useReleaseCopy } from '../../../hooks/useReleaseCopy';
 /**
  * Settings Screen - Redesigned
  * Clean, organized settings with better visual hierarchy
@@ -13,24 +14,25 @@ import Link from 'next/link';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import AppLayout from '../../../components/AppLayout';
+import BlockedAuthors from '../../../components/BlockedAuthors';
+import AppearanceSelector from '../../../components/AppearanceSelector';
 import { 
-  FiArrowLeft, FiGlobe, FiMoon, FiBell, FiMail, FiMapPin, 
+  FiArrowLeft, FiGlobe, FiBell, FiMail, FiMapPin, 
   FiTrendingUp, FiMap, FiHelpCircle, FiFileText, FiShield,
   FiChevronRight
 } from 'react-icons/fi';
 import { IoLanguage, IoRadio } from 'react-icons/io5';
 
 export default function SettingsScreen() {
+  const copy = useReleaseCopy();
   const router = useRouter();
   const { locale } = router;
   const { t } = useTranslation('common');
-  const { themeMode, setThemeMode } = useThemeContext();
+  const { theme, isDark } = useThemeContext();
   const { user } = useAuth();
 
-  const isDark = themeMode === 'dark';
 
   // Settings state
-  const [darkMode, setDarkMode] = useState(isDark);
   const [autoTranslate, setAutoTranslate] = useState(false);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -38,31 +40,25 @@ export default function SettingsScreen() {
   const [locationSharing, setLocationSharing] = useState(true);
   const [shareUsageData, setShareUsageData] = useState(false);
 
-  const handleDarkModeToggle = () => {
-    const newValue = !darkMode;
-    setDarkMode(newValue);
-    setThemeMode(newValue ? 'dark' : 'light');
-  };
-
   return (
     <>
       <Head>
         <title>Settings | TavvY</title>
-        <meta name="description" content="TavvY app settings" />
+        <meta name={"description"} content="TavvY app settings" />
       </Head>
 
       <AppLayout>
         <div className="settings-screen">
           {/* Header */}
           <header className="header">
-            <button className="back-btn" onClick={() => router.back()}>
+            <button aria-label="Go back" className="back-btn" onClick={() => router.back()}>
               <FiArrowLeft size={24} />
             </button>
             <h1>{t("settings.title")}</h1>
             <div style={{ width: 24 }} />
           </header>
 
-          <div className="content">
+          <div className={"content"}>
             {/* Language Section */}
             <section className="section">
               <h2 className="section-label">{t("settings.languageSection")}</h2>
@@ -74,7 +70,7 @@ export default function SettingsScreen() {
                   <span className="row-title">{t("settings.language")}</span>
                 </div>
                 <div className="row-right">
-                  <span className="row-value">🇺🇸 English</span>
+                  <span className="row-value">{new Intl.DisplayNames([locale || 'en'], { type: 'language' }).of(locale || 'en')}</span>
                   <FiChevronRight size={20} className="chevron" />
                 </div>
               </Link>
@@ -82,24 +78,10 @@ export default function SettingsScreen() {
 
             {/* Theme Section */}
             <section className="section">
-              <h2 className="section-label">{t("settings.themeSection")}</h2>
-              <div className="setting-row">
-                <div className="row-left">
-                  <div className="icon-container purple">
-                    <FiMoon size={20} />
-                  </div>
-                  <span className="row-title">{t("settings.darkMode")}</span>
-                </div>
-                <label className="toggle">
-                  <input
-                    type="checkbox"
-                    checked={darkMode}
-                    onChange={handleDarkModeToggle}
-                  />
-                  <span className="toggle-slider"></span>
-                </label>
-              </div>
+              <AppearanceSelector />
             </section>
+
+            <BlockedAuthors />
 
             {/* Reviews Section */}
             <section className="section">
@@ -114,7 +96,7 @@ export default function SettingsScreen() {
                 <label className="toggle">
                   <input
                     type="checkbox"
-                    checked={autoTranslate}
+                    aria-label={copy("Auto-translate reviews")} checked={autoTranslate}
                     onChange={(e) => setAutoTranslate(e.target.checked)}
                   />
                   <span className="toggle-slider"></span>
@@ -136,7 +118,7 @@ export default function SettingsScreen() {
                   <label className="toggle">
                     <input
                       type="checkbox"
-                      checked={pushNotifications}
+                      aria-label={"Push notifications"} checked={pushNotifications}
                       onChange={(e) => setPushNotifications(e.target.checked)}
                     />
                     <span className="toggle-slider"></span>
@@ -155,7 +137,7 @@ export default function SettingsScreen() {
                   <label className="toggle">
                     <input
                       type="checkbox"
-                      checked={emailNotifications}
+                      aria-label={"Email notifications"} checked={emailNotifications}
                       onChange={(e) => setEmailNotifications(e.target.checked)}
                     />
                     <span className="toggle-slider"></span>
@@ -174,7 +156,7 @@ export default function SettingsScreen() {
                   <label className="toggle">
                     <input
                       type="checkbox"
-                      checked={liveBusinessAlerts}
+                      aria-label={"Live business alerts"} checked={liveBusinessAlerts}
                       onChange={(e) => setLiveBusinessAlerts(e.target.checked)}
                     />
                     <span className="toggle-slider"></span>
@@ -197,7 +179,7 @@ export default function SettingsScreen() {
                   <label className="toggle">
                     <input
                       type="checkbox"
-                      checked={locationSharing}
+                      aria-label={"Location sharing"} checked={locationSharing}
                       onChange={(e) => setLocationSharing(e.target.checked)}
                     />
                     <span className="toggle-slider"></span>
@@ -216,7 +198,7 @@ export default function SettingsScreen() {
                   <label className="toggle">
                     <input
                       type="checkbox"
-                      checked={shareUsageData}
+                      aria-label={"Share usage data"} checked={shareUsageData}
                       onChange={(e) => setShareUsageData(e.target.checked)}
                     />
                     <span className="toggle-slider"></span>
@@ -237,7 +219,7 @@ export default function SettingsScreen() {
                     <span className="row-title">{t("settings.distanceUnit")}</span>
                   </div>
                   <div className="row-right">
-                    <span className="row-value">Miles</span>
+                    <span className="row-value">{copy("Miles")}</span>
                     <FiChevronRight size={20} className="chevron" />
                   </div>
                 </Link>
@@ -252,7 +234,7 @@ export default function SettingsScreen() {
                     <span className="row-title">{t("settings.defaultMapLayer")}</span>
                   </div>
                   <div className="row-right">
-                    <span className="row-value">Standard</span>
+                    <span className="row-value">{copy("Standard")}</span>
                     <FiChevronRight size={20} className="chevron" />
                   </div>
                 </Link>
@@ -299,9 +281,16 @@ export default function SettingsScreen() {
               </div>
             </section>
 
+            {user && <section className="section">
+              <h2 className="section-label">{copy("Account")}</h2>
+              <Link href="/app/settings/delete-account" locale={locale} className="setting-row clickable">
+                <span className="row-title">{"Delete account"}</span><FiChevronRight size={20} />
+              </Link>
+            </section>}
+
             {/* App Info */}
             <div className="app-info">
-              <p className="version">Version 2.0.1</p>
+              <p className={"version"}>Version 2.0.1</p>
               <p className="tagline">Discover places through real experiences</p>
             </div>
           </div>
@@ -310,7 +299,7 @@ export default function SettingsScreen() {
         <style jsx>{`
           .settings-screen {
             min-height: 100vh;
-            background-color: ${isDark ? '#000000' : '#FFFFFF'};
+            background-color: ${theme.background};
             padding-bottom: 100px;
           }
 
@@ -329,7 +318,7 @@ export default function SettingsScreen() {
             border: none;
             padding: 8px;
             cursor: pointer;
-            color: ${isDark ? '#FFFFFF' : '#000000'};
+            color: ${theme.text};
             display: flex;
             align-items: center;
             justify-content: center;
@@ -338,7 +327,7 @@ export default function SettingsScreen() {
           .header h1 {
             font-size: 18px;
             font-weight: 600;
-            color: ${isDark ? '#FFFFFF' : '#000000'};
+            color: ${theme.text};
             margin: 0;
           }
 
@@ -355,39 +344,39 @@ export default function SettingsScreen() {
           .section-label {
             font-size: 13px;
             font-weight: 600;
-            color: ${isDark ? '#666666' : '#999999'};
+            color: ${theme.textSecondary};
             letter-spacing: 0.5px;
             margin: 0 0 12px 0;
           }
 
           /* Settings Group (for multiple rows) */
           .settings-group {
-            background-color: ${isDark ? '#1A1A1A' : '#F8F8F8'};
+            background-color: ${theme.surface};
             border-radius: 16px;
             overflow: hidden;
           }
 
           /* Setting Row */
-          .setting-row {
+          .settings-screen :global(.setting-row) {
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 16px;
-            background-color: ${isDark ? '#1A1A1A' : '#F8F8F8'};
+            background-color: ${theme.surface};
             text-decoration: none;
             transition: background-color 0.2s;
           }
 
-          .setting-row.clickable {
+          .settings-screen :global(.setting-row.clickable) {
             cursor: pointer;
           }
 
-          .setting-row.clickable:hover {
+          .settings-screen :global(.setting-row.clickable:hover) {
             background-color: ${isDark ? '#222222' : '#F0F0F0'};
           }
 
           /* Single row (not in group) */
-          .section > .setting-row {
+          .section > :global(.setting-row) {
             border-radius: 16px;
           }
 
@@ -426,7 +415,7 @@ export default function SettingsScreen() {
           .row-title {
             font-size: 16px;
             font-weight: 500;
-            color: ${isDark ? '#FFFFFF' : '#000000'};
+            color: ${theme.text};
           }
 
           .row-right {
@@ -437,11 +426,11 @@ export default function SettingsScreen() {
 
           .row-value {
             font-size: 15px;
-            color: ${isDark ? '#999999' : '#666666'};
+            color: ${theme.textSecondary};
           }
 
           .chevron {
-            color: ${isDark ? '#666666' : '#CCCCCC'};
+            color: ${theme.textSecondary};
           }
 
           /* Divider */
@@ -477,6 +466,8 @@ export default function SettingsScreen() {
             border-radius: 31px;
           }
 
+          .toggle input:focus-visible + .toggle-slider { outline: 3px solid ${theme.text}; outline-offset: 3px; }
+
           .toggle-slider:before {
             position: absolute;
             content: "";
@@ -506,13 +497,13 @@ export default function SettingsScreen() {
 
           .version {
             font-size: 13px;
-            color: ${isDark ? '#666666' : '#999999'};
+            color: ${theme.textSecondary};
             margin: 0 0 4px 0;
           }
 
           .tagline {
             font-size: 13px;
-            color: ${isDark ? '#666666' : '#999999'};
+            color: ${theme.textSecondary};
             margin: 0;
           }
 

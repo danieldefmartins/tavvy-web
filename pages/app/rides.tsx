@@ -26,7 +26,7 @@ import {
   IoRocket, IoThumbsUp, IoSparkles, IoAlertCircle,
   IoFlame, IoTime, IoLocation, IoTrainOutline
 } from 'react-icons/io5';
-import { UnifiedHeader } from '../../components/UnifiedHeader';
+import ToolHeader from '../../components/ToolHeader';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 
@@ -403,37 +403,9 @@ export default function RidesScreen() {
 
       <AppLayout>
         <div className="rides-screen" style={{ backgroundColor, minHeight: '100vh' }}>
-          {/* Header */}
-          <div className="rides-header" style={{ 
-            backgroundColor: surfaceColor,
-            padding: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderBottom: `1px solid ${isDark ? '#374151' : '#E5E7EB'}`
-          }}>
-            <button 
-              onClick={handleBack}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px' }}
-            >
-              <FiArrowLeft size={24} color={textColor} />
-            </button>
-            <div style={{ textAlign: 'center', flex: 1 }}>
-              <h1 style={{ color: textColor, fontSize: '20px', fontWeight: '600', margin: 0 }}>Rides</h1>
-              <p style={{ color: COLORS.accent, fontSize: '14px', margin: 0 }}>Theme park thrills await.</p>
-            </div>
-            <button 
-              onClick={onRefresh}
-              disabled={refreshing}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '8px' }}
-            >
-              <FiRefreshCw 
-                size={20} 
-                color={secondaryTextColor} 
-                style={{ animation: refreshing ? 'spin 1s linear infinite' : 'none' }}
-              />
-            </button>
-          </div>
+          <ToolHeader title="Rides" subtitle="Theme park thrills await.">
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}><button type="button" onClick={onRefresh} disabled={refreshing} style={{ minHeight: 44, background: 'transparent', color: textColor, border: 0, display: 'flex', gap: 8, alignItems: 'center' }}><FiRefreshCw aria-hidden size={20} />{refreshing ? 'Refreshing…' : 'Refresh rides'}</button></div>
+          </ToolHeader>
 
           {/* Search Bar */}
           <div style={{ padding: '12px 16px', backgroundColor: surfaceColor }}>

@@ -1,0 +1,109 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-09-21",
+  "scope": "Offline data/contract, identity reconciliation and actual display-function checks. No production collision query, rollback execution, import or publication performed.",
+  "worldwideComplete": false,
+  "checks_passed": 17,
+  "summary": {
+    "ships": 63,
+    "operators": 4,
+    "fact_states": {
+      "unverified": 938,
+      "verified": 245,
+      "conflicting": 14
+    },
+    "facts_by_key": {
+      "length_m": 47,
+      "gross_tonnage": 27,
+      "crew": 59,
+      "entered_service": 46,
+      "guests_double_occupancy": 25,
+      "guests_maximum": 6,
+      "dining_outlets": 8,
+      "pools": 9,
+      "restaurants": 1,
+      "guests_lower_berths": 17
+    },
+    "venues": 565,
+    "programs": 24,
+    "cabin_categories": 0,
+    "photos": 0,
+    "unique_source_urls": 100
+  },
+  "checks": [
+    {
+      "name": "All three prior identity batches remain hash-pinned and total 155",
+      "status": "PASS"
+    },
+    {
+      "name": "63 staged ships pass actual catalog contract and recorded provenance",
+      "status": "PASS"
+    },
+    {
+      "name": "Current fleet inventory reconciles every named entry exactly once",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject collision with a prior staged or published ship",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject an announced ship in operating batch",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject silent publication",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject unreviewed photo or invented IMO",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject unsourced scalar substitution",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject a reseller disguised as primary source",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject a venue linked to the ship as a place",
+      "status": "PASS"
+    },
+    {
+      "name": "Typed passenger capacity retains lower-berth, double-occupancy and maximum bases",
+      "status": "PASS"
+    },
+    {
+      "name": "Actual renderer hides all conflicting and unknown facts",
+      "status": "PASS"
+    },
+    {
+      "name": "No inferred build year, deck conventions, GT/GRT or relaunch year",
+      "status": "PASS"
+    },
+    {
+      "name": "Explicit Costa totals retain pool and dining scope; partial venues never become totals",
+      "status": "PASS"
+    },
+    {
+      "name": "Programs remain distinct from physical venues and are not guaranteed schedules",
+      "status": "PASS"
+    },
+    {
+      "name": "Costa Fortuna keeps one identity and exact dated transition evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "Wrong-ship redirects rejected and every staged ship has real feature evidence",
+      "status": "PASS"
+    }
+  ],
+  "files": {
+    "data/cruises/staged/verified-operating-batch-004.json": "e95de3c3be495a46c09622144b513cd27f94a2fc050b8f088f58e243ce710212",
+    "data/cruises/research/batch-004-evidence.json": "2fddd24168249e2cd664cb45e92a1651f2ed9a8248a5a23b52387dd2c930b67a",
+    "data/cruises/research/batch-004-fleet-inventory.json": "18149f410b3c8b741d0d212298ae1c66e627e9160fe5145ea298e229ed62b29a",
+    "data/cruises/research/batch-004-validate.cjs": "96e61760fe8bc960dea774dc546acc274808f778e9430141709b3518cce05b48"
+  }
+}

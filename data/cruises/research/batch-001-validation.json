@@ -1,0 +1,135 @@
+{
+  "batch": "verified-operating-batch-001",
+  "checked_at": "2026-09-21",
+  "result": "PASS",
+  "checks": [
+    {
+      "name": "Existing catalog validator accepts the staged dataset",
+      "result": "PASS"
+    },
+    {
+      "name": "Exactly 12 ships with four in each supported segment",
+      "result": "PASS"
+    },
+    {
+      "name": "All ships remain draft; public selector exposes none",
+      "result": "PASS"
+    },
+    {
+      "name": "Only operating public overnight ships; no announced or charter-only scope",
+      "result": "PASS"
+    },
+    {
+      "name": "Identity/scope/status publication prerequisites pass even for drafts",
+      "result": "PASS"
+    },
+    {
+      "name": "All operators reuse exact existing registry IDs and names",
+      "result": "PASS"
+    },
+    {
+      "name": "Ship, Universe, venue, cabin and program IDs are distinct valid UUIDv5",
+      "result": "PASS"
+    },
+    {
+      "name": "Official identifiers and all photos remain explicit unknowns",
+      "result": "PASS"
+    },
+    {
+      "name": "Sources are unique per ship, HTTPS official operator hosts and UTC dated",
+      "result": "PASS"
+    },
+    {
+      "name": "Every known fact has valid type, dated provenance and field locator",
+      "result": "PASS"
+    },
+    {
+      "name": "All 19 contract facts appear once; unsupported facts are null, never zero",
+      "result": "PASS"
+    },
+    {
+      "name": "Exactly two identified conflicts never appear in display facts",
+      "result": "PASS"
+    },
+    {
+      "name": "Every venue is source-backed, belongs to its ship and has no fabricated place ID",
+      "result": "PASS"
+    },
+    {
+      "name": "Cabin source references and field evidence are complete",
+      "result": "PASS"
+    },
+    {
+      "name": "Programs retain dated sources, variability notes and same-ship venue targets",
+      "result": "PASS"
+    },
+    {
+      "name": "Ambiguous passenger counts do not leak into typed capacity fields",
+      "result": "PASS"
+    },
+    {
+      "name": "Build year is not copied from AmaMagna or MSC service year",
+      "result": "PASS"
+    },
+    {
+      "name": "No restaurant, deck or shop count is derived from venue/cabin array length",
+      "result": "PASS"
+    },
+    {
+      "name": "Mixed staff/crew and GRT measurements remain untyped rather than relabeled",
+      "result": "PASS"
+    },
+    {
+      "name": "Feet conversions are rounded to 0.1m and record original unit/basis",
+      "result": "PASS"
+    },
+    {
+      "name": "Coverage is explicit, incomplete and not conflated with operator leads",
+      "result": "PASS"
+    },
+    {
+      "name": "No copied marketing descriptions or invented rename history",
+      "result": "PASS"
+    }
+  ],
+  "check_count": 22,
+  "contract_result": {
+    "errors": [],
+    "warnings": [
+      "ships[0]: 12 facts will remain hidden (unknown, conflicting, unverified or invalid)",
+      "ships[1]: 17 facts will remain hidden (unknown, conflicting, unverified or invalid)",
+      "ships[2]: 14 facts will remain hidden (unknown, conflicting, unverified or invalid)",
+      "ships[3]: 14 facts will remain hidden (unknown, conflicting, unverified or invalid)",
+      "ships[4]: 14 facts will remain hidden (unknown, conflicting, unverified or invalid)",
+      "ships[5]: 15 facts will remain hidden (unknown, conflicting, unverified or invalid)",
+      "ships[6]: 15 facts will remain hidden (unknown, conflicting, unverified or invalid)",
+      "ships[7]: 15 facts will remain hidden (unknown, conflicting, unverified or invalid)",
+      "ships[8]: 14 facts will remain hidden (unknown, conflicting, unverified or invalid)",
+      "ships[9]: 15 facts will remain hidden (unknown, conflicting, unverified or invalid)",
+      "ships[10]: 17 facts will remain hidden (unknown, conflicting, unverified or invalid)",
+      "ships[11]: 15 facts will remain hidden (unknown, conflicting, unverified or invalid)"
+    ],
+    "ships": 12,
+    "operating": 12,
+    "announced": 0,
+    "worldwideComplete": false
+  },
+  "counts": {
+    "operator_leads": 58,
+    "represented_operators": 9,
+    "ships": 12,
+    "published_ships": 0,
+    "venues": 48,
+    "cabin_categories": 36,
+    "programs": 2,
+    "verified_facts": 51,
+    "conflicting_facts": 2,
+    "unknown_facts": 175
+  },
+  "dataset_sha256": "bc87d6f4aabc3217f5af2b6d7b5e12e3d802bc9b33f2cb77020b69b7210cada3",
+  "limitations": [
+    "Local contract/provenance validation, not a production import or external registry identity check.",
+    "Sources were manually reviewed; assertions do not independently establish factual truth.",
+    "No full operator/worldwide coverage, no photo reuse permissions, no confirmed cabin inventory."
+  ]
+}

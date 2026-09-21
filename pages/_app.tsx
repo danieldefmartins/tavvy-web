@@ -1,6 +1,10 @@
+import 'leaflet/dist/leaflet.css';
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
+import PlaceShareHead from '../components/PlaceShareHead';
+import { DEMO_PLACE_SHARE } from '../lib/placeShareMetadata';
 import { useRouter } from 'next/router';
+import { useAppNavigationHistory } from '../hooks/useAppNavigationHistory';
 import { useEffect, useRef } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { appWithTranslation } from 'next-i18next';
@@ -75,52 +79,43 @@ function detectBrowserLanguage(): string {
 function LocaleManager() {
   const router = useRouter();
   const { locale, pathname, asPath, query } = router;
+  const initialLocaleRef = useRef<string | null>(null);
   const hasProcessedRef = useRef(false);
-  // Track whether initial detection is complete before saving locale
-  const detectionCompleteRef = useRef(false);
-
-  // On initial load: restore saved locale OR auto-detect browser language
-  // This MUST run before the save effect to prevent race conditions.
   useEffect(() => {
-    if (typeof window === 'undefined' || hasProcessedRef.current) return;
+    if (!router.isReady || hasProcessedRef.current) return;
     hasProcessedRef.current = true;
-
-    const savedLocale = localStorage.getItem('tavvy-locale');
-
-    if (savedLocale && SUPPORTED_LOCALES.includes(savedLocale)) {
-      // User has a saved preference (manual or previous auto-detect)
-      detectionCompleteRef.current = true;
-      if (savedLocale !== locale) {
-        router.replace({ pathname, query }, asPath, { locale: savedLocale });
-      }
-      return;
+    let saved: string | null = null;
+    try { saved = localStorage.getItem('tavvy-locale'); } catch { /* Storage may be unavailable in private contexts. */ }
+    const preferred = saved && SUPPORTED_LOCALES.includes(saved) ? saved : detectBrowserLanguage();
+    initialLocaleRef.current = preferred;
+    if (preferred !== locale) {
+      void router.replace({ pathname, query }, asPath, { locale: preferred }).catch(() => {
+        // Keep the current route usable if loading the selected language fails.
+        initialLocaleRef.current = null;
+      });
+    } else {
+      initialLocaleRef.current = null;
+      try { localStorage.setItem('tavvy-locale', preferred); } catch { /* Preference still works for this session. */ }
     }
+  }, [router.isReady]); // Initial preference is restored once, not on each navigation.
 
-    // No saved preference — first visit
-    // Auto-detect browser/device language
-    const detectedLang = detectBrowserLanguage();
-    localStorage.setItem('tavvy-locale', detectedLang);
-    detectionCompleteRef.current = true;
-    console.log(`[i18n] First visit: auto-detected browser language "${detectedLang}"`);
-
-    if (detectedLang !== locale) {
-      router.replace({ pathname, query }, asPath, { locale: detectedLang });
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Save locale to localStorage whenever it changes (from navigation or manual selection)
-  // Only starts saving AFTER initial detection is complete to avoid overwriting
-  // a saved preference with the server's default locale.
   useEffect(() => {
-    if (locale && typeof window !== 'undefined' && detectionCompleteRef.current) {
-      localStorage.setItem('tavvy-locale', locale);
-    }
+    if (!locale) return;
+    document.documentElement.lang = locale;
+    document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
+    // Do not overwrite the chosen language with the old route while replacement is pending.
+    if (initialLocaleRef.current && locale !== initialLocaleRef.current) return;
+    if (!hasProcessedRef.current) return;
+    initialLocaleRef.current = null;
+    try { localStorage.setItem('tavvy-locale', locale); } catch { /* Non-persistent environments remain usable. */ }
   }, [locale]);
-
   return null;
 }
 
 function App({ Component, pageProps }: AppProps) {
+  useAppNavigationHistory();
+  const pageRoute = useRouter().pathname;
+  const placePreview = pageProps.placeShare || (pageRoute === '/app/demo/restaurant' ? DEMO_PLACE_SHARE : null);
   // PWA freshness: when a NEW service worker takes over (i.e. a new deploy),
   // reload once so users get the fresh version instead of the old cached page.
   // Guarded on an existing controller so first-install does NOT trigger a reload.
@@ -159,9 +154,9 @@ function App({ Component, pageProps }: AppProps) {
         <meta property="og:title" content="Tavvy — Real Experiences, Not Fake Stars" key="og:title" />
         <meta property="og:description" content="Stop guessing with meaningless star ratings. Tavvy shows you real signals from real people — what's actually great, the vibe, and what to watch out for." key="og:description" />
         <meta property="og:image" content="https://tavvy.com/og-image.png" key="og:image" />
-        <meta property="og:image:width" content="1200" key="og:image:width" />
-        <meta property="og:image:height" content="630" key="og:image:height" />
-        <meta property="og:site_name" content="Tavvy" />
+        {!placePreview && <meta property="og:image:width" content="1200" key="og:image:width" />}
+        {!placePreview && <meta property="og:image:height" content="630" key="og:image:height" />}
+        <meta property="og:site_name" content="Tavvy" key="og:site_name" />
 
         {/* Default Twitter — overridden by page-level <Head> for eCards, places, etc. */}
         <meta name="twitter:card" content="summary_large_image" key="twitter:card" />
@@ -170,6 +165,8 @@ function App({ Component, pageProps }: AppProps) {
         <meta name="twitter:description" content="Discover restaurants, cafes, bars, and more near you. Real reviews from real people. Your local guide to the best spots." key="twitter:description" />
         <meta name="twitter:image" content="https://files.manuscdn.com/user_upload_by_module/session_file/310519663313028198/XIYZzUZRGypYoHEu.png" key="twitter:image" />
       </Head>
+      {/* Preview tags must render before providers that wait for client hydration. */}
+      {placePreview && <PlaceShareHead metadata={placePreview} />}
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ProAuthProvider>

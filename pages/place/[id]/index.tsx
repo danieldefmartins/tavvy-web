@@ -7,7 +7,7 @@ import { Place } from '../../../types';
 import { fetchPlaceSignals, SignalAggregate } from '../../../lib/signalService';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { ChevronLeft, Heart, Phone, BookOpen, Globe, MapPin, Scissors, Brush, Spa } from 'lucide-react';
+import { ChevronLeft, Heart, Phone, BookOpen, Globe, MapPin, Scissors, Brush, Flower2 as Spa } from 'lucide-react';
 import SignalMatrix from '../../../components/SignalMatrix';
 
 const categoryEmoji: Record<string, string> = {
@@ -146,8 +146,7 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
             .limit(12)
             .then(({ data: photoData }) => {
               if (photoData) setPhotos(photoData.filter((p: any) => p.url));
-            })
-            .catch(() => {});
+            }, () => {});
           // Load stories
           supabase
             .from('place_stories')
@@ -158,8 +157,7 @@ export default function PlaceDetailsScreen({ placeId }: { placeId?: string }) {
             .limit(10)
             .then(({ data: storyData }) => {
               if (storyData) setStories(storyData);
-            })
-            .catch(() => {});
+            }, () => {});
         }
       }).catch(() => setLoading(false));
     }

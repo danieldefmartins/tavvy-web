@@ -1,0 +1,2365 @@
+{
+  "research_schema_version": 1,
+  "batch_id": "002",
+  "checked_at": "2026-09-21",
+  "status": "fleet_name_research_only",
+  "publishable": false,
+  "worldwide_complete": false,
+  "scope": "Overnight public ocean, river and expedition cruise candidates. Excludes charter-only and day-trip-only vessels; charter availability alone does not exclude a ship sold on public overnight cruises.",
+  "registry_snapshot": {
+    "path": "data/cruises/research/operator-registry.json",
+    "sha256": "0b5fb3da1c17ed4765e798b958e916e6629bb4d321410757818785eeca8e2fdd",
+    "operator_lead_count": 58
+  },
+  "protected_batch001_inputs": {
+    "data/cruises/staged/verified-operating-batch-001.json": "bc87d6f4aabc3217f5af2b6d7b5e12e3d802bc9b33f2cb77020b69b7210cada3",
+    "data/cruises/research/batch-001-evidence.json": "13bad21528fb79659e7ff9d7b47a7d987a3161f007c459754fb7bb081d4d60ef",
+    "data/cruises/research/batch-001-verification.md": "ab7dc9deb84b0e5b2b14041f95e0b2b183dd7f48d29d142667c2591291cca979",
+    "data/cruises/research/batch-001-validation.json": "ff2fe33887d83b803eb298ae631529b90ca4e9d1226370fc917f8684aa8dd794"
+  },
+  "counts": {
+    "operators": 10,
+    "ship_name_leads": 69,
+    "exact_normalized_name_duplicates": 0,
+    "exact_batch001_name_overlaps": 0,
+    "complete_retrieved_fleet_pages": 7,
+    "complete_retrieved_full_fleet_statements": 1,
+    "partial_access_operators": 2,
+    "verified_operating_ships": 0,
+    "verified_physical_vessel_count": null,
+    "canonical_ship_ids_assigned": 0,
+    "candidate_kinds": {
+      "ocean": 23,
+      "river": 36,
+      "expedition": 10
+    }
+  },
+  "deduplication": {
+    "method": "Case-folded Unicode names; normalize punctuation/whitespace for exact-name comparison. Do not strip brand prefixes or roman numerals. Check exact names against batch001. No fuzzy physical-identity merges.",
+    "physical_identity_resolved": false,
+    "requires_before_catalog": "Verify IMO/ENI or another authoritative permanent identity, former names/operator history, actual operator relationship, current service status and public overnight eligibility. Resolve cross-marketing before assigning UUIDs."
+  },
+  "exclusions": [
+    {
+      "kind": "tenders_and_excursion_craft",
+      "reason": "Zodiacs, Xplorer tenders and similar shore boats are not overnight cruise ship leads."
+    },
+    {
+      "kind": "historical_narrative",
+      "reason": "Names appearing only in historical operator narratives or old brochures are not added to a current fleet list."
+    },
+    {
+      "kind": "private_charter_only_or_daytrip",
+      "reason": "Not in task scope; no known charter-only/day-trip-only vessel retained."
+    },
+    {
+      "kind": "non_production_or_unrelated_domains",
+      "reason": "Coral development/UAT hosts and similarly named unrelated businesses were not used as current official fleet evidence."
+    }
+  ],
+  "sources": [
+    {
+      "id": "b002-cunard-fleet",
+      "operator_registry_id": "cunard",
+      "url": "https://www.cunard.com/en-us/cruise-ships",
+      "publisher": "Cunard",
+      "checked_at": "2026-09-21",
+      "published_at": null,
+      "source_type": "operator",
+      "access": "full_page_retrieved",
+      "locator": "Fleet links and fleet-in-numbers section",
+      "evidence_summary": "The current fleet page lists four named Queens, advertises four ships, and describes their onboard staterooms and suites."
+    },
+    {
+      "id": "b002-azamara-about",
+      "operator_registry_id": "azamara",
+      "url": "https://www.azamara.com/about-azamara",
+      "publisher": "Azamara",
+      "checked_at": "2026-09-21",
+      "published_at": null,
+      "source_type": "operator",
+      "access": "indexed_excerpt_only",
+      "locator": "Our Ships section",
+      "evidence_summary": "Official indexed text enumerates four R-class ships. Direct retrieval returned HTTP403; the full page was not inspected."
+    },
+    {
+      "id": "b002-azamara-home",
+      "operator_registry_id": "azamara",
+      "url": "https://www.azamara.com/gb/home",
+      "publisher": "Azamara",
+      "checked_at": "2026-09-21",
+      "published_at": null,
+      "source_type": "operator",
+      "access": "indexed_excerpt_only",
+      "locator": "Your Home at Sea section",
+      "evidence_summary": "Official indexed text repeats the four names and describes staterooms and voyages. Direct retrieval returned HTTP403."
+    },
+    {
+      "id": "b002-virgin-fleet-release",
+      "operator_registry_id": "virgin-voyages",
+      "url": "https://www.virginvoyages.com/press/latest-releases/virgin-voyages-sisters-at-sea-fleet-meetup",
+      "publisher": "Virgin Voyages",
+      "checked_at": "2026-09-21",
+      "published_at": "2026-03-20",
+      "source_type": "operator",
+      "access": "full_page_retrieved",
+      "locator": "Fleet paragraph and Four Ways to Be There",
+      "evidence_summary": "Names all four ships as the full fleet and offers public five-, seven- and ten-night sailings. The February 2027 event is a future itinerary, not proof of completed operation."
+    },
+    {
+      "id": "b002-virgin-current-campaign",
+      "operator_registry_id": "virgin-voyages",
+      "url": "https://www.virginvoyages.com/cruises/specialized-themed/eat-drink-food-festival",
+      "publisher": "Virgin Voyages",
+      "checked_at": "2026-09-21",
+      "published_at": null,
+      "source_type": "operator",
+      "access": "full_page_retrieved",
+      "locator": "Four Ships. One Festival.",
+      "evidence_summary": "All four names have voyage links for the advertised August 27–September 28, 2026 campaign. Sailing completion and operational disruptions were not checked."
+    },
+    {
+      "id": "b002-hal-fleet",
+      "operator_registry_id": "holland-america-line",
+      "url": "https://www.hollandamerica.com/en/us/cruise-ships",
+      "publisher": "Holland America Line",
+      "checked_at": "2026-09-21",
+      "published_at": null,
+      "source_type": "operator",
+      "access": "full_page_retrieved",
+      "locator": "Meet Our Fleet — eleven ship detail links",
+      "evidence_summary": "The retrieved fleet section has eleven distinct ship entries, grouped by class; the page describes cabins and links to public cruises. Eleven is a transcription count, not an explicit fleet-total claim."
+    },
+    {
+      "id": "b002-arosa-fleet",
+      "operator_registry_id": "a-rosa",
+      "url": "https://newsroom.arosa-cruises.com/press-kits/press-kit-company-product.html",
+      "publisher": "A-ROSA",
+      "checked_at": "2026-09-21",
+      "published_at": null,
+      "source_type": "operator",
+      "access": "full_page_retrieved",
+      "locator": "The A-ROSA Premium Fleet — five river tables",
+      "evidence_summary": "The current press kit explicitly counts fifteen ships and lists fifteen names across five rivers. Public fares and cabins support overnight-cruise scope. Historical narrative was not added as extra fleet entries."
+    },
+    {
+      "id": "b002-riverside-fleet",
+      "operator_registry_id": "riverside-luxury-cruises",
+      "url": "https://riverside-cruises.com/en/ships",
+      "publisher": "Riverside Luxury Cruises",
+      "checked_at": "2026-09-21",
+      "published_at": null,
+      "source_type": "operator",
+      "access": "full_page_retrieved",
+      "locator": "Three ship headings below the fleet introduction",
+      "evidence_summary": "The current public fleet page names three all-suite river ships and links to trip booking."
+    },
+    {
+      "id": "b002-avalon-fleet",
+      "operator_registry_id": "avalon-waterways",
+      "url": "https://www.avalonwaterways.com/River-Cruise-Ships/",
+      "publisher": "Avalon Waterways",
+      "checked_at": "2026-09-21",
+      "published_at": null,
+      "source_type": "operator",
+      "access": "full_page_retrieved",
+      "locator": "Europe; Ships of Asia; South America & Africa Ships",
+      "evidence_summary": "Nineteen named entries: fifteen Europe, one Asia, and three South America/Africa. Cabin or suite descriptions and per-ship cruise links support overnight scope. Marketing inclusion does not establish ownership or legal operation."
+    },
+    {
+      "id": "b002-aurora-fleet",
+      "operator_registry_id": "aurora-expeditions",
+      "url": "https://www.aurora-expeditions.com/ship",
+      "publisher": "Aurora Expeditions",
+      "checked_at": "2026-09-21",
+      "published_at": null,
+      "source_type": "operator",
+      "access": "full_page_retrieved",
+      "locator": "Fleet introduction and Discover our innovative expedition ships",
+      "evidence_summary": "The fleet page explicitly enumerates three expedition ships, describes cabins, and advertises multi-day public expeditions."
+    },
+    {
+      "id": "b002-aurora-domain",
+      "operator_registry_id": "aurora-expeditions",
+      "url": "https://www.auroraexpeditions.com.au/",
+      "publisher": "Aurora Expeditions",
+      "checked_at": "2026-09-21",
+      "published_at": null,
+      "source_type": "operator",
+      "access": "redirect_verified",
+      "locator": "Redirect destination https://www.aurora-expeditions.com/au",
+      "evidence_summary": "The registry website redirects to the new official Aurora domain. The operator registry was not edited."
+    },
+    {
+      "id": "b002-swan-fleet",
+      "operator_registry_id": "swan-hellenic",
+      "url": "https://www.swanhellenic.com/ship",
+      "publisher": "Swan Hellenic",
+      "checked_at": "2026-09-21",
+      "published_at": null,
+      "source_type": "operator",
+      "access": "full_page_retrieved",
+      "locator": "Our Ships — three Explore links",
+      "evidence_summary": "The official fleet page lists three expedition ships. This verifies the advertised list, not the service status of any particular vessel."
+    },
+    {
+      "id": "b002-swan-overnight",
+      "operator_registry_id": "swan-hellenic",
+      "url": "https://www.swanhellenic.com/experience/onboard-experience",
+      "publisher": "Swan Hellenic",
+      "checked_at": "2026-09-21",
+      "published_at": null,
+      "source_type": "operator",
+      "access": "full_page_retrieved",
+      "locator": "A Home From Home at Sea and Explore Our Ships",
+      "evidence_summary": "The same three ships appear alongside stateroom, suite and bed descriptions and public cruise links; this supports overnight scope."
+    },
+    {
+      "id": "b002-coral-schedule",
+      "operator_registry_id": "coral-expeditions",
+      "url": "https://media.coralexpeditions.com/media/All-Vessel-Sailing-Schedule-Coral-Expeditions.pdf",
+      "publisher": "Coral Expeditions",
+      "checked_at": "2026-09-21",
+      "published_at": "2025-09-01",
+      "source_type": "operator",
+      "access": "indexed_excerpt_only",
+      "locator": "September 2026 through April 2027 rows; Last Updated header",
+      "evidence_summary": "Indexed operator PDF text lists three named ships on overnight itineraries. It states a September 1, 2025 update; direct PDF retrieval timed out. It is historical planning evidence, not a complete current fleet check."
+    }
+  ],
+  "operators": [
+    {
+      "operator_registry_id": "cunard",
+      "operator_name": "Cunard",
+      "registry_official_website": "https://www.cunard.com",
+      "checked_at": "2026-09-21",
+      "coverage": "complete_retrieved_fleet_page",
+      "transcribed_lead_count": 4,
+      "advertised_fleet_count": 4,
+      "source_ids": [
+        "b002-cunard-fleet"
+      ],
+      "overnight_public_scope_basis": "Staterooms and suites, public cruise links.",
+      "limitations": "Complete enumeration of the retrieved page only; legal identity and ship-by-ship current operation remain unchecked.",
+      "access_attempts": []
+    },
+    {
+      "operator_registry_id": "azamara",
+      "operator_name": "Azamara",
+      "registry_official_website": "https://www.azamara.com",
+      "checked_at": "2026-09-21",
+      "coverage": "partial_access",
+      "transcribed_lead_count": 4,
+      "advertised_fleet_count": 4,
+      "source_ids": [
+        "b002-azamara-about",
+        "b002-azamara-home"
+      ],
+      "overnight_public_scope_basis": "Official indexed fleet and home-page text describes staterooms and overnight voyages.",
+      "limitations": "Four names match the explicit indexed count, but HTTP403 prevented direct inspection. Do not mark current fleet coverage complete.",
+      "access_attempts": [
+        {
+          "url": "https://www.azamara.com/about-azamara",
+          "result": "http_403"
+        },
+        {
+          "url": "https://www.azamara.com/gb/home",
+          "result": "http_403"
+        },
+        {
+          "url": "https://www.azamara.com/our-ships",
+          "result": "tool_inaccessible"
+        }
+      ]
+    },
+    {
+      "operator_registry_id": "virgin-voyages",
+      "operator_name": "Virgin Voyages",
+      "registry_official_website": "https://www.virginvoyages.com",
+      "checked_at": "2026-09-21",
+      "coverage": "complete_retrieved_full_fleet_statement",
+      "transcribed_lead_count": 4,
+      "advertised_fleet_count": 4,
+      "source_ids": [
+        "b002-virgin-fleet-release",
+        "b002-virgin-current-campaign"
+      ],
+      "overnight_public_scope_basis": "Official full-fleet release offers public 5–10 night voyages; current 2026 campaign has all four ships.",
+      "limitations": "Dedicated /our-ships page was inaccessible. Full enumeration is supported by two retrieved official pages, not a dedicated fleet-page access claim. Future meetup is not current-operation proof.",
+      "access_attempts": [
+        {
+          "url": "https://www.virginvoyages.com/our-ships",
+          "result": "tool_inaccessible"
+        }
+      ]
+    },
+    {
+      "operator_registry_id": "holland-america-line",
+      "operator_name": "Holland America Line",
+      "registry_official_website": "https://www.hollandamerica.com",
+      "checked_at": "2026-09-21",
+      "coverage": "complete_retrieved_fleet_page",
+      "transcribed_lead_count": 11,
+      "advertised_fleet_count": null,
+      "source_ids": [
+        "b002-hal-fleet"
+      ],
+      "overnight_public_scope_basis": "Fleet page describes staterooms and public cruise search.",
+      "limitations": "All eleven entries on the retrieved current fleet page are transcribed; no historical ships were added. The current Rotterdam name still needs permanent-identity resolution.",
+      "access_attempts": []
+    },
+    {
+      "operator_registry_id": "a-rosa",
+      "operator_name": "A-ROSA",
+      "registry_official_website": "https://www.arosa-cruises.com",
+      "checked_at": "2026-09-21",
+      "coverage": "complete_retrieved_fleet_page",
+      "transcribed_lead_count": 15,
+      "advertised_fleet_count": 15,
+      "source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "overnight_public_scope_basis": "Current press kit describes public cabin fares and full-board river holidays.",
+      "limitations": "Current fleet table only. ALEA/CLEA prior identities are unresolved; year/count/specification columns are deliberately not imported. A-ROSA VIVA is not the operator VIVA Cruises.",
+      "access_attempts": []
+    },
+    {
+      "operator_registry_id": "riverside-luxury-cruises",
+      "operator_name": "Riverside Luxury Cruises",
+      "registry_official_website": "https://riverside-cruises.com",
+      "checked_at": "2026-09-21",
+      "coverage": "complete_retrieved_fleet_page",
+      "transcribed_lead_count": 3,
+      "advertised_fleet_count": 3,
+      "source_ids": [
+        "b002-riverside-fleet"
+      ],
+      "overnight_public_scope_basis": "All-suite river ships with public trip-booking link.",
+      "limitations": "Complete current advertised list only. Former names and any operator transfers require separate permanent-identity checks.",
+      "access_attempts": []
+    },
+    {
+      "operator_registry_id": "avalon-waterways",
+      "operator_name": "Avalon Waterways",
+      "registry_official_website": "https://www.avalonwaterways.com",
+      "checked_at": "2026-09-21",
+      "coverage": "complete_retrieved_fleet_page",
+      "transcribed_lead_count": 19,
+      "advertised_fleet_count": null,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "overnight_public_scope_basis": "Fleet descriptions include suites/cabins and per-ship public cruise links across all three sections.",
+      "limitations": "Nineteen is a count of marketed ship entries, not an ownership claim. Delfin III, MS Infinity and MS Farah require operator/alias deduplication. MS Infinity sails the Galápagos, so it is not labeled river solely because this is a river-cruise website.",
+      "access_attempts": []
+    },
+    {
+      "operator_registry_id": "aurora-expeditions",
+      "operator_name": "Aurora Expeditions",
+      "registry_official_website": "https://www.auroraexpeditions.com.au",
+      "checked_at": "2026-09-21",
+      "coverage": "complete_retrieved_fleet_page",
+      "transcribed_lead_count": 3,
+      "advertised_fleet_count": 3,
+      "source_ids": [
+        "b002-aurora-fleet",
+        "b002-aurora-domain"
+      ],
+      "overnight_public_scope_basis": "Cabin configurations plus 12–34 day public voyage examples on fleet page.",
+      "limitations": "Registry AU website redirects to the new official domain. All three current advertised names recorded; source launch-year references were not imported as build dates.",
+      "access_attempts": []
+    },
+    {
+      "operator_registry_id": "swan-hellenic",
+      "operator_name": "Swan Hellenic",
+      "registry_official_website": "https://www.swanhellenic.com",
+      "checked_at": "2026-09-21",
+      "coverage": "complete_retrieved_fleet_page",
+      "transcribed_lead_count": 3,
+      "advertised_fleet_count": 3,
+      "source_ids": [
+        "b002-swan-fleet",
+        "b002-swan-overnight"
+      ],
+      "overnight_public_scope_basis": "Public cruise links and same three ships in the overnight stateroom/suite section.",
+      "limitations": "Advertised fleet list only. In particular SH Minerva needs a dated service-status check before publication. Fleet-wide capacity wording differs across operator pages; no capacities are imported.",
+      "access_attempts": []
+    },
+    {
+      "operator_registry_id": "coral-expeditions",
+      "operator_name": "Coral Expeditions",
+      "registry_official_website": "https://www.coralexpeditions.com",
+      "checked_at": "2026-09-21",
+      "coverage": "partial_access",
+      "transcribed_lead_count": 3,
+      "advertised_fleet_count": null,
+      "source_ids": [
+        "b002-coral-schedule"
+      ],
+      "overnight_public_scope_basis": "Indexed official schedule gives all three named ships multi-night public expedition itineraries.",
+      "limitations": "Main website inaccessible; full PDF timed out. Schedule was updated 2025-09-01, so this is partial historical planned-sailing evidence even though rows cover 2026–27. Do not infer current operating status or full current-fleet coverage.",
+      "access_attempts": [
+        {
+          "url": "https://www.coralexpeditions.com/",
+          "result": "tool_internal_error"
+        },
+        {
+          "url": "https://www.coralexpeditions.com/au/our-ships/",
+          "result": "tool_inaccessible"
+        },
+        {
+          "url": "https://media.coralexpeditions.com/media/All-Vessel-Sailing-Schedule-Coral-Expeditions.pdf",
+          "result": "timeout"
+        }
+      ]
+    }
+  ],
+  "leads": [
+    {
+      "lead_id": "b002:cunard:queen-mary-2",
+      "name": "Queen Mary 2",
+      "operator_registry_id": "cunard",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "The Cunard fleet",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-cunard-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-cunard-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:cunard:queen-anne",
+      "name": "Queen Anne",
+      "operator_registry_id": "cunard",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "The Cunard fleet",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-cunard-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-cunard-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:cunard:queen-victoria",
+      "name": "Queen Victoria",
+      "operator_registry_id": "cunard",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "The Cunard fleet",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-cunard-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-cunard-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:cunard:queen-elizabeth",
+      "name": "Queen Elizabeth",
+      "operator_registry_id": "cunard",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "The Cunard fleet",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-cunard-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-cunard-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:azamara:azamara-journey",
+      "name": "Azamara Journey",
+      "operator_registry_id": "azamara",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Our Ships",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-azamara-about"
+      ],
+      "scope_source_ids": [
+        "b002-azamara-about",
+        "b002-azamara-home"
+      ],
+      "fleet_listing_evidence": "official_indexed_excerpt",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:azamara:azamara-quest",
+      "name": "Azamara Quest",
+      "operator_registry_id": "azamara",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Our Ships",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-azamara-about"
+      ],
+      "scope_source_ids": [
+        "b002-azamara-about",
+        "b002-azamara-home"
+      ],
+      "fleet_listing_evidence": "official_indexed_excerpt",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:azamara:azamara-pursuit",
+      "name": "Azamara Pursuit",
+      "operator_registry_id": "azamara",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Our Ships",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-azamara-about"
+      ],
+      "scope_source_ids": [
+        "b002-azamara-about",
+        "b002-azamara-home"
+      ],
+      "fleet_listing_evidence": "official_indexed_excerpt",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:azamara:azamara-onward",
+      "name": "Azamara Onward",
+      "operator_registry_id": "azamara",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Our Ships",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-azamara-about"
+      ],
+      "scope_source_ids": [
+        "b002-azamara-about",
+        "b002-azamara-home"
+      ],
+      "fleet_listing_evidence": "official_indexed_excerpt",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:virgin-voyages:scarlet-lady",
+      "name": "Scarlet Lady",
+      "operator_registry_id": "virgin-voyages",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Full fleet",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-virgin-fleet-release"
+      ],
+      "scope_source_ids": [
+        "b002-virgin-fleet-release",
+        "b002-virgin-current-campaign"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:virgin-voyages:valiant-lady",
+      "name": "Valiant Lady",
+      "operator_registry_id": "virgin-voyages",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Full fleet",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-virgin-fleet-release"
+      ],
+      "scope_source_ids": [
+        "b002-virgin-fleet-release",
+        "b002-virgin-current-campaign"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:virgin-voyages:resilient-lady",
+      "name": "Resilient Lady",
+      "operator_registry_id": "virgin-voyages",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Full fleet",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-virgin-fleet-release"
+      ],
+      "scope_source_ids": [
+        "b002-virgin-fleet-release",
+        "b002-virgin-current-campaign"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:virgin-voyages:brilliant-lady",
+      "name": "Brilliant Lady",
+      "operator_registry_id": "virgin-voyages",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Full fleet",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-virgin-fleet-release"
+      ],
+      "scope_source_ids": [
+        "b002-virgin-fleet-release",
+        "b002-virgin-current-campaign"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:holland-america-line:eurodam",
+      "name": "Eurodam",
+      "operator_registry_id": "holland-america-line",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Signature",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-hal-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-hal-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:holland-america-line:koningsdam",
+      "name": "Koningsdam",
+      "operator_registry_id": "holland-america-line",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Pinnacle",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-hal-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-hal-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:holland-america-line:nieuw-amsterdam",
+      "name": "Nieuw Amsterdam",
+      "operator_registry_id": "holland-america-line",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Signature",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-hal-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-hal-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:holland-america-line:nieuw-statendam",
+      "name": "Nieuw Statendam",
+      "operator_registry_id": "holland-america-line",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Pinnacle",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-hal-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-hal-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:holland-america-line:noordam",
+      "name": "Noordam",
+      "operator_registry_id": "holland-america-line",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Vista",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-hal-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-hal-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:holland-america-line:oosterdam",
+      "name": "Oosterdam",
+      "operator_registry_id": "holland-america-line",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Vista",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-hal-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-hal-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:holland-america-line:rotterdam",
+      "name": "Rotterdam",
+      "operator_registry_id": "holland-america-line",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Pinnacle",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-hal-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-hal-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:holland-america-line:volendam",
+      "name": "Volendam",
+      "operator_registry_id": "holland-america-line",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "R",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-hal-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-hal-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:holland-america-line:westerdam",
+      "name": "Westerdam",
+      "operator_registry_id": "holland-america-line",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Vista",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-hal-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-hal-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:holland-america-line:zaandam",
+      "name": "Zaandam",
+      "operator_registry_id": "holland-america-line",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "R",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-hal-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-hal-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:holland-america-line:zuiderdam",
+      "name": "Zuiderdam",
+      "operator_registry_id": "holland-america-line",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "ocean",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Vista",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-hal-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-hal-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:a-rosa:a-rosa-bella",
+      "name": "A-ROSA BELLA",
+      "operator_registry_id": "a-rosa",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Danube",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:a-rosa:a-rosa-donna",
+      "name": "A-ROSA DONNA",
+      "operator_registry_id": "a-rosa",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Danube",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:a-rosa:a-rosa-mia",
+      "name": "A-ROSA MIA",
+      "operator_registry_id": "a-rosa",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Danube",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:a-rosa:a-rosa-riva",
+      "name": "A-ROSA RIVA",
+      "operator_registry_id": "a-rosa",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Danube",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:a-rosa:a-rosa-flora",
+      "name": "A-ROSA FLORA",
+      "operator_registry_id": "a-rosa",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Danube",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:a-rosa:a-rosa-aqua",
+      "name": "A-ROSA AQUA",
+      "operator_registry_id": "a-rosa",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Rhine",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:a-rosa:a-rosa-brava",
+      "name": "A-ROSA BRAVA",
+      "operator_registry_id": "a-rosa",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Rhine",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:a-rosa:a-rosa-silva",
+      "name": "A-ROSA SILVA",
+      "operator_registry_id": "a-rosa",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Rhine",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:a-rosa:a-rosa-sena",
+      "name": "A-ROSA SENA",
+      "operator_registry_id": "a-rosa",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Rhine",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:a-rosa:a-rosa-clea",
+      "name": "A-ROSA CLEA",
+      "operator_registry_id": "a-rosa",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Rhine",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:a-rosa:a-rosa-alea",
+      "name": "A-ROSA ALEA",
+      "operator_registry_id": "a-rosa",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Rhine",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:a-rosa:a-rosa-stella",
+      "name": "A-ROSA STELLA",
+      "operator_registry_id": "a-rosa",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Rhône",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:a-rosa:a-rosa-luna",
+      "name": "A-ROSA LUNA",
+      "operator_registry_id": "a-rosa",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Rhône",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:a-rosa:a-rosa-viva",
+      "name": "A-ROSA VIVA",
+      "operator_registry_id": "a-rosa",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Seine",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:a-rosa:a-rosa-alva",
+      "name": "A-ROSA ALVA",
+      "operator_registry_id": "a-rosa",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Douro",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-arosa-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:riverside-luxury-cruises:riverside-mozart",
+      "name": "Riverside Mozart",
+      "operator_registry_id": "riverside-luxury-cruises",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Our three luxury ships",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-riverside-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-riverside-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:riverside-luxury-cruises:riverside-ravel",
+      "name": "Riverside Ravel",
+      "operator_registry_id": "riverside-luxury-cruises",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Our three luxury ships",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-riverside-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-riverside-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:riverside-luxury-cruises:riverside-debussy",
+      "name": "Riverside Debussy",
+      "operator_registry_id": "riverside-luxury-cruises",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Our three luxury ships",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-riverside-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-riverside-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:avalon-waterways:avalon-alegria",
+      "name": "Avalon Alegria",
+      "operator_registry_id": "avalon-waterways",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Europe",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:avalon-waterways:avalon-artistry-ii",
+      "name": "Avalon Artistry II",
+      "operator_registry_id": "avalon-waterways",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Europe",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:avalon-waterways:avalon-envision",
+      "name": "Avalon Envision",
+      "operator_registry_id": "avalon-waterways",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Europe",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:avalon-waterways:avalon-expression",
+      "name": "Avalon Expression",
+      "operator_registry_id": "avalon-waterways",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Europe",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:avalon-waterways:avalon-illumination",
+      "name": "Avalon Illumination",
+      "operator_registry_id": "avalon-waterways",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Europe",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:avalon-waterways:avalon-imagery-ii",
+      "name": "Avalon Imagery II",
+      "operator_registry_id": "avalon-waterways",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Europe",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:avalon-waterways:avalon-impression",
+      "name": "Avalon Impression",
+      "operator_registry_id": "avalon-waterways",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Europe",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:avalon-waterways:avalon-panorama",
+      "name": "Avalon Panorama",
+      "operator_registry_id": "avalon-waterways",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Europe",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:avalon-waterways:avalon-passion",
+      "name": "Avalon Passion",
+      "operator_registry_id": "avalon-waterways",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Europe",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:avalon-waterways:avalon-poetry-ii",
+      "name": "Avalon Poetry II",
+      "operator_registry_id": "avalon-waterways",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Europe",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:avalon-waterways:avalon-tapestry-ii",
+      "name": "Avalon Tapestry II",
+      "operator_registry_id": "avalon-waterways",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Europe",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:avalon-waterways:avalon-tranquility-ii",
+      "name": "Avalon Tranquility II",
+      "operator_registry_id": "avalon-waterways",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Europe",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:avalon-waterways:avalon-view",
+      "name": "Avalon View",
+      "operator_registry_id": "avalon-waterways",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Europe",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:avalon-waterways:avalon-visionary",
+      "name": "Avalon Visionary",
+      "operator_registry_id": "avalon-waterways",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Europe",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:avalon-waterways:avalon-vista",
+      "name": "Avalon Vista",
+      "operator_registry_id": "avalon-waterways",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Europe",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:avalon-waterways:avalon-saigon",
+      "name": "Avalon Saigon",
+      "operator_registry_id": "avalon-waterways",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Asia",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:avalon-waterways:delfin-iii",
+      "name": "Delfin III",
+      "operator_registry_id": "avalon-waterways",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "South America & Africa",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": "Marketing relationship only; confirm actual operator and match any Delfin fleet entry before creating an identity."
+    },
+    {
+      "lead_id": "b002:avalon-waterways:ms-infinity",
+      "name": "MS Infinity",
+      "operator_registry_id": "avalon-waterways",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "expedition",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "South America & Africa",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": "Galápagos overnight small ship; expedition is a research classification. Confirm legal operator and permanent identity; do not merge with other Infinity-named ships."
+    },
+    {
+      "lead_id": "b002:avalon-waterways:ms-farah",
+      "name": "MS Farah",
+      "operator_registry_id": "avalon-waterways",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "river",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "South America & Africa",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-avalon-fleet"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": "Nile vessel marketed by Avalon; confirm actual operator and match any Farah fleet entry before creating an identity."
+    },
+    {
+      "lead_id": "b002:aurora-expeditions:greg-mortimer",
+      "name": "Greg Mortimer",
+      "operator_registry_id": "aurora-expeditions",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "expedition",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Three expedition vessels",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-aurora-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-aurora-fleet",
+        "b002-aurora-domain"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:aurora-expeditions:sylvia-earle",
+      "name": "Sylvia Earle",
+      "operator_registry_id": "aurora-expeditions",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "expedition",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Three expedition vessels",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-aurora-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-aurora-fleet",
+        "b002-aurora-domain"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:aurora-expeditions:douglas-mawson",
+      "name": "Douglas Mawson",
+      "operator_registry_id": "aurora-expeditions",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "expedition",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Three expedition vessels",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-aurora-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-aurora-fleet",
+        "b002-aurora-domain"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:swan-hellenic:sh-vega",
+      "name": "SH Vega",
+      "operator_registry_id": "swan-hellenic",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "expedition",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Our Ships",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-swan-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-swan-fleet",
+        "b002-swan-overnight"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:swan-hellenic:sh-minerva",
+      "name": "SH Minerva",
+      "operator_registry_id": "swan-hellenic",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "expedition",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Our Ships",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-swan-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-swan-fleet",
+        "b002-swan-overnight"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:swan-hellenic:sh-diana",
+      "name": "SH Diana",
+      "operator_registry_id": "swan-hellenic",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "expedition",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "Our Ships",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-swan-fleet"
+      ],
+      "scope_source_ids": [
+        "b002-swan-fleet",
+        "b002-swan-overnight"
+      ],
+      "fleet_listing_evidence": "official_retrieved_page",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:coral-expeditions:coral-adventurer",
+      "name": "Coral Adventurer",
+      "operator_registry_id": "coral-expeditions",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "expedition",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "2025–2027 all-vessel sailing schedule",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-coral-schedule"
+      ],
+      "scope_source_ids": [
+        "b002-coral-schedule"
+      ],
+      "fleet_listing_evidence": "official_indexed_excerpt",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:coral-expeditions:coral-geographer",
+      "name": "Coral Geographer",
+      "operator_registry_id": "coral-expeditions",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "expedition",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "2025–2027 all-vessel sailing schedule",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-coral-schedule"
+      ],
+      "scope_source_ids": [
+        "b002-coral-schedule"
+      ],
+      "fleet_listing_evidence": "official_indexed_excerpt",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    },
+    {
+      "lead_id": "b002:coral-expeditions:coral-discoverer",
+      "name": "Coral Discoverer",
+      "operator_registry_id": "coral-expeditions",
+      "checked_at": "2026-09-21",
+      "kind_candidate": "expedition",
+      "kind_verification": "research_classification_only",
+      "fleet_section": "2025–2027 all-vessel sailing schedule",
+      "listed_relationship": "marketed_by_named_operator",
+      "legal_operator_verified": false,
+      "source_ids": [
+        "b002-coral-schedule"
+      ],
+      "scope_source_ids": [
+        "b002-coral-schedule"
+      ],
+      "fleet_listing_evidence": "official_indexed_excerpt",
+      "operating_status": "unknown",
+      "operating_status_verified": false,
+      "scope_assessment": "overnight_public_cruise_candidate",
+      "identity_verified": false,
+      "canonical_ship_id": null,
+      "universe_id": null,
+      "imo": null,
+      "eni": null,
+      "prior_name_or_operator_match": null,
+      "identity_caution": null
+    }
+  ]
+}

@@ -29,9 +29,9 @@ export interface CardData {
   background_image_url?: string;
   background_video_url?: string;
   button_style?: string;
-  button_color?: string;
-  icon_color?: string;
-  social_icon_color?: string;
+  button_color?: string | null;
+  icon_color?: string | null;
+  social_icon_color?: string | null;
   font_style?: string;
   view_count?: number;
   tap_count?: number;
@@ -47,7 +47,7 @@ export interface CardData {
   videos?: { type: string; url: string }[];
   template_id?: string;
   color_scheme_id?: string;
-  banner_image_url?: string;
+  banner_image_url?: string | null;
   qr_style?: {
     shape?: 'square' | 'dots' | 'rounded';
     color?: string;
@@ -71,8 +71,9 @@ export interface CardData {
   website_label?: string;
   description?: string;
   card_name?: string;
-  font_color?: string;
+  font_color?: string | null;
   pronouns?: string;
+  business_type?: string;
   professional_category?: string;
   company_logo_url?: string;
 
@@ -302,16 +303,18 @@ export async function getCardBySlug(slug: string): Promise<CardData | null> {
 /**
  * Get links for a card
  */
-export async function getCardLinks(cardId: string): Promise<LinkItem[]> {
-  const { data, error } = await supabase
+export async function getCardLinks(cardId: string, options: { includeInactive?: boolean; throwOnError?: boolean } = {}): Promise<LinkItem[]> {
+  let query = supabase
     .from('digital_card_links')
     .select('*')
     .eq('card_id', cardId)
-    .eq('is_active', true)
     .order('sort_order', { ascending: true });
+  if (!options.includeInactive) query = query.eq('is_active', true);
+  const { data, error } = await query;
 
   if (error) {
     console.error('Error fetching card links:', error);
+    if (options.throwOnError) throw new Error('Your links could not be loaded. Retry before editing this card.');
     return [];
   }
 
@@ -435,32 +438,24 @@ export async function deleteCard(cardId: string): Promise<boolean> {
  * Save card links
  */
 export async function saveCardLinks(cardId: string, links: LinkItem[]): Promise<boolean> {
-  // First, delete existing links
-  await supabase
-    .from('digital_card_links')
-    .delete()
-    .eq('card_id', cardId);
-
-  // Then insert new links
-  if (links.length > 0) {
-    const linksToInsert = links.map((link, index) => ({
-      card_id: cardId,
+  // The installed owner-checked RPC validates and replaces links in one
+  // transaction. A failed insert keeps the previously saved list intact.
+  const { error } = await supabase.rpc('replace_ecard_links', {
+    p_card_id: cardId,
+    p_links: links.map((link, index) => ({
+      id: link.id,
       platform: link.platform,
       title: link.title || link.platform,
-      url: link.url || link.value,
+      url: link.url ?? link.value ?? '',
+      value: link.value ?? link.url,
       icon: link.icon || link.platform,
       sort_order: index,
-      is_active: true,
-    }));
-
-    const { error } = await supabase
-      .from('digital_card_links')
-      .insert(linksToInsert);
-
-    if (error) {
-      console.error('Error saving card links:', error);
-      return false;
-    }
+      is_active: link.is_active === undefined ? true : link.is_active === true,
+    })),
+  });
+  if (error) {
+    console.error('Error saving card links:', error);
+    return false;
   }
 
   return true;
@@ -517,41 +512,45 @@ export function generateSlug(name: string): string {
  * Publish a card
  */
 export async function publishCard(cardId: string, slug: string): Promise<boolean> {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('digital_cards')
     .update({ 
       is_published: true, 
       slug,
       updated_at: new Date().toISOString() 
     })
-    .eq('id', cardId);
+    .eq('id', cardId)
+    .select('id,is_published,slug')
+    .single();
 
   if (error) {
     console.error('Error publishing card:', error);
     return false;
   }
 
-  return true;
+  return data?.id === cardId && data?.is_published === true && data?.slug === slug;
 }
 
 /**
  * Unpublish a card
  */
 export async function unpublishCard(cardId: string): Promise<boolean> {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('digital_cards')
     .update({ 
       is_published: false,
       updated_at: new Date().toISOString() 
     })
-    .eq('id', cardId);
+    .eq('id', cardId)
+    .select('id,is_published')
+    .single();
 
   if (error) {
     console.error('Error unpublishing card:', error);
     return false;
   }
 
-  return true;
+  return data?.id === cardId && data?.is_published === false;
 }
 
 /**
@@ -649,6 +648,8 @@ export async function duplicateCard(sourceCardId: string, userId: string): Promi
       console.error('[duplicateCard] Source card not found:', sourceCardId);
       return null;
     }
+    // A failed read must never be treated as a card with no links.
+    const sourceLinks = await getCardLinks(sourceCardId, { includeInactive: true, throwOnError: true });
 
     // 2. Generate a unique slug for the copy
     const baseName = sourceCard.full_name || 'card';
@@ -670,6 +671,9 @@ export async function duplicateCard(sourceCardId: string, userId: string): Promi
       city: sourceCard.city || null,
       state: sourceCard.state || null,
       bio: sourceCard.bio || null,
+      pronouns: sourceCard.pronouns || null,
+      description: sourceCard.description || null,
+      business_type: sourceCard.business_type || null,
       address_1: sourceCard.address_1 || null,
       address_2: sourceCard.address_2 || null,
       zip_code: sourceCard.zip_code || null,
@@ -740,9 +744,15 @@ export async function duplicateCard(sourceCardId: string, userId: string): Promi
     }
 
     // 5. Copy links from the source card
-    const sourceLinks = await getCardLinks(sourceCardId);
     if (sourceLinks.length > 0) {
-      await saveCardLinks(newCard.id, sourceLinks);
+      // Source IDs belong to the original card; the copy needs its own IDs.
+      const copiedLinks = sourceLinks.map((link, index) => ({ ...link, id: `copy-${index}` }));
+      if (!await saveCardLinks(newCard.id, copiedLinks)) {
+        // Remove only this newly created draft row. Its images are shared with
+        // the source, so do not call the storage-cleaning deleteCard helper.
+        await supabase.from('digital_cards').delete().eq('id', newCard.id).eq('user_id', userId);
+        throw new Error('The card links could not be copied. The original card is unchanged.');
+      }
     }
 
     console.log('[duplicateCard] Successfully duplicated card:', sourceCardId, '->', newCard.id);

@@ -32,7 +32,7 @@ export default function ContactSection({ isDark, isPro }: ContactSectionProps) {
   return (
     <EditorSection
       id="contact"
-      title="Contact Info"
+      title="Contact info"
       icon={<IoCall size={20} />}
       defaultOpen={true}
       isDark={isDark}

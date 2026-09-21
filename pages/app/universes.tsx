@@ -1,3 +1,4 @@
+import ToolHeader from '../../components/ToolHeader';
 /**
  * Universes Screen - Web Version V3
  * EXACT pixel-perfect port from iOS Tavvy V2
@@ -71,7 +72,7 @@ const CATEGORY_CONFIG: { [key: string]: { icon: any; label: string } } = {
   'stadiums': { icon: MdSportsFootball, label: 'Stadiums' },
   'beaches': { icon: MdBeachAccess, label: 'Beaches' },
   'resorts': { icon: MdHotel, label: 'Resorts' },
-  'cruise-ports': { icon: MdDirectionsBoat, label: 'Cruise' },
+  'cruise-ports': { icon: MdDirectionsBoat, label: 'Cruise Ports' },
 };
 
 const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800';
@@ -149,6 +150,7 @@ export default function UniversesScreen() {
         .from('atlas_universes')
         .select('*')
         .eq('status', 'published')
+        .or('universe_kind.is.null,universe_kind.neq.cruise_ship')
         .eq('is_featured', true)
         .limit(1)
         .maybeSingle();
@@ -162,6 +164,7 @@ export default function UniversesScreen() {
         .from('atlas_universes')
         .select('*')
         .eq('status', 'published')
+        .or('universe_kind.is.null,universe_kind.neq.cruise_ship')
         .order('total_signals', { ascending: false })
         .limit(8);
 
@@ -178,6 +181,7 @@ export default function UniversesScreen() {
         .from('atlas_universes')
         .select('*')
         .eq('status', 'published')
+        .or('universe_kind.is.null,universe_kind.neq.cruise_ship')
         .order('name');
 
       if (allUniversesData) {
@@ -262,71 +266,9 @@ export default function UniversesScreen() {
           paddingBottom: '100px'
         }}>
 
-          {/* Header Nav Bar */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '12px 16px',
-            borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`
-          }}>
-            {/* Back Button */}
-            <button
-              onClick={() => router.back()}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '36px',
-                height: '36px',
-                backgroundColor: 'transparent',
-                border: 'none',
-                borderRadius: '18px',
-                cursor: 'pointer'
-              }}
-            >
-              <IoChevronBack size={24} color={textColor} />
-            </button>
+          <ToolHeader title="Universes" subtitle="Explore curated worlds." />
 
-            {/* Title */}
-            <div style={{ textAlign: 'center' }}>
-              <h1 style={{
-                fontSize: '18px',
-                fontWeight: '700',
-                color: textColor,
-                margin: 0
-              }}>
-                Universes
-              </h1>
-              <p style={{
-                fontSize: '12px',
-                color: COLORS.accent,
-                margin: 0,
-                fontWeight: '500'
-              }}>
-                Explore curated worlds.
-              </p>
-            </div>
-
-            {/* Login/Profile Icon */}
-            <button
-              onClick={() => router.push('/app/profile', undefined, { locale })}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '36px',
-                height: '36px',
-                backgroundColor: 'transparent',
-                border: 'none',
-                borderRadius: '18px',
-                cursor: 'pointer'
-              }}
-            >
-              <IoPersonCircleOutline size={28} color={textColor} />
-            </button>
-          </div>
-
+          <Link href="/app/cruises" locale={locale} style={{display:'block',margin:'16px 24px',padding:16,borderRadius:14,border:`1px solid ${isDark?'#524260':'#d7c9e4'}`,color:isDark?'#e2b8f4':'#74129b',textDecoration:'none'}}>Explore cruise ships →</Link>
           {/* Search Bar */}
           <div style={{ padding: '12px 16px 16px' }}>
             <div style={{

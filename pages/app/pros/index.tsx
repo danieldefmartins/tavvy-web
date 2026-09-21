@@ -1,3 +1,4 @@
+import ToolHeader from '../../../components/ToolHeader';
 /**
  * Pros Screen - Web Version
  * Pixel-perfect port from tavvy-mobile-app/screens/ProsHomeScreen.tsx
@@ -33,8 +34,8 @@ import {
 } from 'react-icons/io5';
 
 // V2 Design System Colors
-const COLORS = {
-  primaryBlue: '#6B7FFF',
+const BASE_COLORS = {
+  primaryBlue: '#8A05BE',
   accentTeal: '#00CED1',
   successGreen: '#00C2CB',
   warningAmber: '#F59E0B',
@@ -93,36 +94,30 @@ const EDUCATION_CONTENT = [
 
 export default function ProsScreen() {
   const { theme, isDark } = useThemeContext();
+  const COLORS = { ...BASE_COLORS, accentTeal: isDark ? '#43D8CA' : '#006B72', successGreen: isDark ? '#43D8CA' : '#006B72' };
   const { user } = useAuth();
   const { isPro } = useRoles();
   const router = useRouter();
   const { locale } = router;
   const { t } = useTranslation('common');
 
-  const bgColor = isDark ? '#121212' : '#FAFAFA';
-  const surfaceColor = isDark ? '#1E1E1E' : '#FFFFFF';
+  const bgColor = theme.background;
+  const surfaceColor = theme.surface;
   const surfaceAltColor = isDark ? '#2A2A2A' : '#F3F4F6';
-  const textColor = isDark ? '#FFFFFF' : '#111827';
-  const secondaryTextColor = isDark ? '#9CA3AF' : '#6B7280';
-  const borderColor = isDark ? '#333333' : '#E5E7EB';
+  const textColor = theme.text;
+  const secondaryTextColor = theme.textSecondary;
+  const borderColor = theme.border;
 
   return (
     <>
       <Head>
         <title>Pros | TavvY</title>
-        <meta name="description" content="Connect with any professional. Any job. Any service. We'll match you." />
+        <meta name="description" content="Find professional services. Tell us about your next project." />
       </Head>
 
       <AppLayout>
         <div className="pros-screen" style={{ backgroundColor: bgColor, minHeight: '100vh' }}>
-          {/* Header */}
-          <div className="header">
-            <h1 className="title">Pros</h1>
-            <p className="hero-tagline">
-              Connect with any professional.<br />
-              Any job. Any service. We'll match you.
-            </p>
-          </div>
+          <ToolHeader title="Pros" subtitle="Find professional services. Tell us about your next project." />
 
           {/* Segmented Control */}
           <div className="segmented-control-container">
@@ -161,19 +156,6 @@ export default function ProsScreen() {
             </div>
           </Link>
 
-          {/* Social Proof - No star rating */}
-          <div className="social-proof" style={{ borderColor }}>
-            <div className="proof-item">
-              <div className="proof-number">12,450+</div>
-              <div className="proof-label">PROJECTS</div>
-            </div>
-            <div className="proof-divider" />
-            <div className="proof-item">
-              <div className="proof-number">$340</div>
-              <div className="proof-label">AVG SAVINGS</div>
-            </div>
-          </div>
-
           {/* How It Works */}
           <div className="section">
             <h2 className="section-title">✨ How It Works</h2>
@@ -189,14 +171,14 @@ export default function ProsScreen() {
                 <div className="step-number">2</div>
                 <div className="step-content">
                   <h3 className="step-title">We match you with pros</h3>
-                  <p className="step-desc">Get quotes from vetted professionals in your area</p>
+                  <p className="step-desc">Request quotes from professionals in your area</p>
                 </div>
               </div>
               <div className="step-card" style={{ backgroundColor: surfaceColor, borderColor }}>
                 <div className="step-number">3</div>
                 <div className="step-content">
-                  <h3 className="step-title">Chat & hire securely</h3>
-                  <p className="step-desc">Your contact info stays private until you're ready</p>
+                  <h3 className="step-title">Discuss your project</h3>
+                  <p className="step-desc">Ask questions and compare responses before deciding.</p>
                 </div>
               </div>
             </div>
@@ -210,7 +192,7 @@ export default function ProsScreen() {
               </div>
               <div className="shield-content">
                 <h3 className="shield-title">Tavvy Shield</h3>
-                <p className="shield-desc">Want payment protection? Get covered with Tavvy Shield.</p>
+                <p className="shield-desc">Learn about Tavvy Shield and its terms.</p>
               </div>
               <IoChevronForward size={20} color={COLORS.accentTeal} />
             </div>
@@ -293,14 +275,14 @@ export default function ProsScreen() {
           <div className="section">
             <div className="promise-card">
               <div className="promise-gradient" style={{ backgroundColor: surfaceColor, borderColor }}>
-                <h3 className="promise-title">🛡️ The Tavvy Promise</h3>
+                <h3 className="promise-title">🛡️ Plan your next project</h3>
                 <div className="promise-list">
                   <div className="promise-item">
                     <div className="promise-check">
                       <IoCheckmark size={14} color="#FFFFFF" />
                     </div>
                     <p className="promise-text">
-                      <strong>Privacy protected</strong> - Contact info stays private until you hire
+                      <strong>Message professionals</strong> - Discuss your project and what you need
                     </p>
                   </div>
                   <div className="promise-item">
@@ -308,7 +290,7 @@ export default function ProsScreen() {
                       <IoCheckmark size={14} color="#FFFFFF" />
                     </div>
                     <p className="promise-text">
-                      <strong>Vetted pros</strong> - We verify licenses and reviews
+                      <strong>Review credentials</strong> - Ask about licensing, insurance and experience
                     </p>
                   </div>
                   <div className="promise-item">
@@ -316,7 +298,7 @@ export default function ProsScreen() {
                       <IoCheckmark size={14} color="#FFFFFF" />
                     </div>
                     <p className="promise-text">
-                      <strong>Match guarantee</strong> - We'll find the right pro for you
+                      <strong>Compare options</strong> - Review services and choose who to contact
                     </p>
                   </div>
                 </div>
@@ -435,7 +417,7 @@ export default function ProsScreen() {
             }
 
             /* Start Project Card */
-            .start-project-card {
+            .pros-screen :global(.start-project-card) {
               display: block;
               margin: 0 20px 20px;
               text-decoration: none;
@@ -449,7 +431,7 @@ export default function ProsScreen() {
             }
 
             .start-project-gradient {
-              background: linear-gradient(90deg, #6B7FFF 0%, #5563E8 100%);
+              background: linear-gradient(90deg, #8A05BE 0%, #653D91 100%);
               padding: 20px;
               display: flex;
               align-items: center;
@@ -579,7 +561,7 @@ export default function ProsScreen() {
             }
 
             /* Tavvy Shield */
-            .tavvy-shield-card {
+            .pros-screen :global(.tavvy-shield-card) {
               display: block;
               margin: 0 20px 24px;
               text-decoration: none;

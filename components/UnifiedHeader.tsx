@@ -96,7 +96,7 @@ export const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
           <img
             src={isDark ? '/tavvy-logo-white.png' : '/tavvy-logo-dark.png'}
             alt="Tavvy"
-            style={{ height: 26, width: 'auto' }}
+            style={{ height: 32, width: 'auto' }}
           />
         )}
 

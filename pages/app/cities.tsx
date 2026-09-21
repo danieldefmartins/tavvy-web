@@ -10,11 +10,12 @@ import { useRouter } from 'next/router';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
 import { supabase } from '../../lib/supabaseClient';
+import { loadActiveCities, matchesCity } from '../../lib/cities';
 import { spacing, borderRadius } from '../../constants/Colors';
 import { FiSearch, FiMapPin, FiChevronRight } from 'react-icons/fi';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-import { UnifiedHeader } from '../../components/UnifiedHeader';
+import ToolHeader from '../../components/ToolHeader';
 
 interface City {
   id: string;
@@ -30,17 +31,6 @@ interface City {
   best_time_to_visit?: string;
 }
 
-// Editorial "Featured this month" picks — curated for the current month with a real
-// recurring event/festival so there's a reason to read about each city.
-const FEATURED_MONTH_LABEL = 'June';
-const FEATURED_THIS_MONTH = [
-  { slug: 'new-york-city', event: 'Summer in the City', reason: "Summer kicks off with free SummerStage concerts in Central Park, rooftop dining, and golden evenings strolling the High Line." },
-  { slug: 'chicago', event: 'Chicago Blues Festival', reason: "The world's largest free blues festival fills Millennium Park in early June — live music, food trucks, and lakefront fun for everyone." },
-  { slug: 'nashville', event: 'CMA Fest', reason: "Four days of country music and family-friendly block parties turn downtown Music City into one big celebration." },
-  { slug: 'san-francisco', event: 'Golden Gate Summer', reason: "Sunny days for biking across the Golden Gate Bridge, exploring Golden Gate Park, and free Sunday concerts at Stern Grove." },
-  { slug: 'new-orleans', event: 'Creole Tomato Festival', reason: "The historic French Market celebrates summer's harvest with Creole cooking, live jazz, and family fun in mid-June." },
-];
-const FEATURED_SLUGS = FEATURED_THIS_MONTH.map((f) => f.slug);
 const CITY_FALLBACK_IMG = 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600';
 
 export default function CitiesBrowseScreen() {
@@ -50,12 +40,13 @@ export default function CitiesBrowseScreen() {
   const { t } = useTranslation('common');
   const [cities, setCities] = useState<City[]>([]);
   const [featured, setFeatured] = useState<City[]>([]);
+  const [loadError, setLoadError] = useState('');
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchCities();
-    fetchFeatured();
+
   }, []);
 
   const handleBackPress = () => {
@@ -63,47 +54,17 @@ export default function CitiesBrowseScreen() {
   };
 
   const fetchCities = async () => {
+    setLoading(true); setLoadError('');
     try {
-      const { data, error } = await supabase
-        .from('tavvy_cities')
-        .select('id,name,slug,state,country,cover_image_url,thumbnail_image_url,population,culture,best_time_to_visit')
-        .eq('is_active', true)
-        .order('population', { ascending: false })
-        .limit(50);
-
-      if (!error && data && data.length > 0) {
-        setCities(data);
-      }
+      const data = await loadActiveCities(supabase);
+      setCities(data);
+      setFeatured(data.filter(city => city.is_featured));
     } catch (error) {
-      console.error('Error fetching cities:', error);
-    } finally {
-      setLoading(false);
-    }
+      setCities([]); setFeatured([]);
+      setLoadError('Cities could not be loaded. Please try again.');
+    } finally { setLoading(false); }
   };
-
-  // Pull the curated featured cities (by slug) so we always have their real cover image + data
-  const fetchFeatured = async () => {
-    try {
-      const { data } = await supabase
-        .from('tavvy_cities')
-        .select('id,name,slug,state,country,cover_image_url,culture')
-        .in('slug', FEATURED_SLUGS);
-      if (data) {
-        // keep them in the curated order
-        const ordered = FEATURED_THIS_MONTH
-          .map((f) => data.find((c) => c.slug === f.slug))
-          .filter(Boolean) as City[];
-        setFeatured(ordered);
-      }
-    } catch (error) {
-      console.error('Error fetching featured cities:', error);
-    }
-  };
-
-  const filteredCities = cities.filter(city =>
-    city.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    city.state?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredCities = cities.filter(city => matchesCity(city, searchQuery));
 
   return (
     <AppLayout>
@@ -113,28 +74,26 @@ export default function CitiesBrowseScreen() {
       </Head>
 
         <div className="cities-screen" style={{ backgroundColor: theme.background }}>
-          {/* Unified Header */}
-          <UnifiedHeader
-            screenKey="cities"
-            title="Cities"
-            searchPlaceholder="Search cities..."
-            showBackButton={false}
-            onSearch={setSearchQuery}
-          />
+          <ToolHeader title="Cities" subtitle="Discover urban adventures.">
+            <div style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '0 14px', minHeight: 48, borderRadius: 14, background: theme.surface, border: `1px solid ${theme.border}` }}>
+              <FiSearch aria-hidden color={theme.textSecondary} />
+              <input type="search" aria-label="Search cities" placeholder="Search cities..." value={searchQuery} onChange={event => setSearchQuery(event.target.value)} style={{ minWidth: 0, width: '100%', minHeight: 44, background: 'transparent', color: theme.text, border: 0, fontSize: 16 }} />
+            </div>
+          </ToolHeader>
 
           {/* Featured This Month */}
           {!searchQuery && featured.length > 0 && (
             <section className="featured-section">
               <div className="featured-head">
-                <span className="featured-kicker">★ Featured in {FEATURED_MONTH_LABEL}</span>
-                <h2 style={{ color: theme.text }}>Where to go this month</h2>
+                <span className="featured-kicker">★ Featured cities</span>
+                <h2 style={{ color: theme.text }}>Explore featured cities</h2>
                 <p className="featured-sub" style={{ color: theme.textSecondary }}>
-                  Cities worth a trip right now — picked for what’s happening this June.
+                  Discover cities and their local culture.
                 </p>
               </div>
               <div className="featured-scroll">
                 {featured.map((city) => {
-                  const meta = FEATURED_THIS_MONTH.find((f) => f.slug === city.slug);
+                  const meta = { event: city.best_time_to_visit, reason: city.culture };
                   return (
                     <Link
                       key={city.id}
@@ -156,15 +115,15 @@ export default function CitiesBrowseScreen() {
                           className="feature-card-img"
                           onError={(e) => { if (!e.currentTarget.src.includes('photo-1477959858617')) e.currentTarget.src = CITY_FALLBACK_IMG; }}
                         />
-                        <span className="feature-card-badge">{FEATURED_MONTH_LABEL}</span>
+                        <span className="feature-card-badge">Featured</span>
                       </div>
                       <div className="feature-card-body">
                         <h3 className="feature-card-title" style={{ color: theme.text }}>{city.name}</h3>
                         <span className="feature-card-loc" style={{ color: theme.textSecondary }}>
                           <FiMapPin size={11} /> {city.state}
                         </span>
-                        {meta && <span className="feature-card-event">{meta.event}</span>}
-                        {meta && (
+                        {meta.event && <span className="feature-card-event">{meta.event}</span>}
+                        {meta.reason && (
                           <p className="feature-card-reason" style={{ color: theme.textSecondary }}>{meta.reason}</p>
                         )}
                         <span className="feature-card-cta">Read about {city.name} →</span>
@@ -182,7 +141,7 @@ export default function CitiesBrowseScreen() {
               {searchQuery ? 'Search Results' : 'All Cities'}
             </h2>
             
-            {loading ? (
+            {loadError ? (<div role="alert" className="empty-state"><p>{loadError}</p><button onClick={fetchCities}>Retry</button></div>) : loading ? (
               <div className="loading-container">
                 <div className="loading-spinner" />
               </div>
@@ -221,7 +180,7 @@ export default function CitiesBrowseScreen() {
                     </h3>
                     <div style={{ color: theme.textSecondary, fontSize: 12, marginBottom: 7 }}>
                       <FiMapPin size={11} style={{ verticalAlign: -1, marginRight: 3 }} />
-                      {city.state}, {city.country || 'USA'}
+                      {city.state}, {city.country || ''}
                     </div>
                     {city.culture && (
                       <p style={{ color: theme.textSecondary, fontSize: 13, lineHeight: 1.5, margin: 0 }}>
@@ -229,7 +188,7 @@ export default function CitiesBrowseScreen() {
                       </p>
                     )}
                     {city.best_time_to_visit && (
-                      <div style={{ color: theme.primary, fontSize: 11, fontWeight: 600, marginTop: 8, clear: 'both' }}>
+                      <div style={{ color: isDark ? '#D7B3F0' : '#8A05BE', fontSize: 11, fontWeight: 600, marginTop: 8, clear: 'both' }}>
                         Best time to visit: {city.best_time_to_visit}
                       </div>
                     )}
@@ -290,7 +249,7 @@ export default function CitiesBrowseScreen() {
             font-weight: 700;
             letter-spacing: 0.6px;
             text-transform: uppercase;
-            color: #8A05BE;
+            color: ${isDark ? '#D7B3F0' : '#8A05BE'};
             margin-bottom: 6px;
           }
 
@@ -363,13 +322,13 @@ export default function CitiesBrowseScreen() {
             margin-top: 4px;
             font-size: 11px;
             font-weight: 700;
-            color: #00C2CB;
+            color: ${isDark ? '#43D8CA' : '#006B72'};
             background: rgba(0,194,203,0.12);
             padding: 3px 9px;
             border-radius: 999px;
           }
           .feature-card-reason { font-size: 13px; line-height: 1.45; margin: 6px 0 0; }
-          .feature-card-cta { margin-top: 10px; font-size: 13px; font-weight: 700; color: #8A05BE; }
+          .feature-card-cta { margin-top: 10px; font-size: 13px; font-weight: 700; color: ${isDark ? '#D7B3F0' : '#8A05BE'}; }
           
           .cities-section {
             padding: 0 ${spacing.lg}px;

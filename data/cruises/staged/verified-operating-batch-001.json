@@ -1,0 +1,3645 @@
+{
+  "schemaVersion": 1,
+  "operators": [
+    {
+      "id": "royal-caribbean-international",
+      "name": "Royal Caribbean International",
+      "official_url": "https://www.royalcaribbean.com"
+    },
+    {
+      "id": "celebrity-cruises",
+      "name": "Celebrity Cruises",
+      "official_url": "https://www.celebritycruises.com"
+    },
+    {
+      "id": "norwegian-cruise-line",
+      "name": "Norwegian Cruise Line",
+      "official_url": "https://www.ncl.com"
+    },
+    {
+      "id": "msc-cruises",
+      "name": "MSC Cruises",
+      "official_url": "https://www.msccruisesusa.com"
+    },
+    {
+      "id": "amawaterways",
+      "name": "AmaWaterways",
+      "official_url": "https://www.amawaterways.com"
+    },
+    {
+      "id": "viking",
+      "name": "Viking",
+      "official_url": "https://www.vikingcruises.com"
+    },
+    {
+      "id": "hx-expeditions",
+      "name": "HX Expeditions",
+      "official_url": "https://www.travelhx.com"
+    },
+    {
+      "id": "quark-expeditions",
+      "name": "Quark Expeditions",
+      "official_url": "https://www.quarkexpeditions.com"
+    },
+    {
+      "id": "ponant-explorations",
+      "name": "Ponant Explorations",
+      "official_url": "https://en.ponant.com"
+    }
+  ],
+  "ships": [
+    {
+      "ship": {
+        "id": "df0fda09-7eb9-5a84-b6a0-30e309490456",
+        "universe_id": "a74a812c-21e3-5ae0-b32c-9faa16dcc4cd",
+        "slug": "icon-of-the-seas",
+        "name": "Icon of the Seas",
+        "operator_id": "royal-caribbean-international",
+        "operator_name": "Royal Caribbean International",
+        "kind": "ocean",
+        "operating_status": "operating",
+        "publication_status": "draft",
+        "overnight_public_cruise": true,
+        "identity_verified": true,
+        "status_source_ids": [
+          "ship"
+        ],
+        "imo": null,
+        "eni": null,
+        "official_url": "https://www.royalcaribbean.com/cruise-ships/icon-of-the-seas",
+        "name_history": [],
+        "facts": [
+          {
+            "key": "year_built",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "entered_service",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "last_refurbished",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "length_m",
+            "value": 364.5,
+            "source_ids": [
+              "size"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "Rounded to 0.1m after converting from 1196 ft × 0.3048; original measurement is rounded to feet."
+          },
+          {
+            "key": "gross_tonnage",
+            "value": 250800,
+            "source_ids": [
+              "size",
+              "age"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "conflicting",
+            "note": "Operator pages disagree: 250800 versus 248663. No preferred value published."
+          },
+          {
+            "key": "guests_double_occupancy",
+            "value": 5610,
+            "source_ids": [
+              "age"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "Operator explicitly describes this as approximate double-occupancy capacity."
+          },
+          {
+            "key": "guests_lower_berths",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_maximum",
+            "value": 7600,
+            "source_ids": [
+              "size"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "crew",
+            "value": 2350,
+            "source_ids": [
+              "age"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "decks_total",
+            "value": 20,
+            "source_ids": [
+              "size"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "decks_passenger",
+            "value": 18,
+            "source_ids": [
+              "age"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "restaurants",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "dining_outlets",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "cafes",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "bars",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "shops",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "pools",
+            "value": 7,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "deck_plan_url",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "accessibility_url",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          }
+        ],
+        "cabin_categories": [
+          {
+            "id": "c7645a62-81c5-54ca-9f76-bebe7f88fdbf",
+            "name": "Family Infinite Ocean View Balcony",
+            "description": null,
+            "accessible": true,
+            "source_ids": [
+              "rooms"
+            ]
+          },
+          {
+            "id": "fd3802cf-b900-5d84-bed4-62704ed96ee4",
+            "name": "Surfside Family Suites",
+            "description": null,
+            "accessible": true,
+            "source_ids": [
+              "rooms"
+            ]
+          },
+          {
+            "id": "fb5499b8-3001-584b-9aa3-13e684926082",
+            "name": "Ultimate Family Townhouse",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "rooms"
+            ]
+          }
+        ],
+        "photo": null
+      },
+      "sources": [
+        {
+          "id": "ship",
+          "url": "https://www.royalcaribbean.com/cruise-ships/icon-of-the-seas",
+          "publisher": "Royal Caribbean International",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        },
+        {
+          "id": "size",
+          "url": "https://www.royalcaribbean.com/guides/how-cruise-ships-float",
+          "publisher": "Royal Caribbean International",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        },
+        {
+          "id": "age",
+          "url": "https://www.royalcaribbean.com/guides/ships-by-age",
+          "publisher": "Royal Caribbean International",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        },
+        {
+          "id": "rooms",
+          "url": "https://www.royalcaribbean.com/cruise-ships/icon-of-the-seas/rooms",
+          "publisher": "Royal Caribbean International",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        }
+      ],
+      "venues": [
+        {
+          "id": "54776740-233e-5cc6-9ea9-7f89129299b9",
+          "ship_id": "df0fda09-7eb9-5a84-b6a0-30e309490456",
+          "name": "Empire Supper Club",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "2fc6b21c-1511-51cd-bca5-db6992a77557",
+          "ship_id": "df0fda09-7eb9-5a84-b6a0-30e309490456",
+          "name": "Chops Grille",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        }
+      ],
+      "programs": []
+    },
+    {
+      "ship": {
+        "id": "63128659-056e-5017-a4d7-34d63a757e87",
+        "universe_id": "17704f9c-fba0-59b5-b210-aeb47e75d3cb",
+        "slug": "celebrity-edge",
+        "name": "Celebrity Edge",
+        "operator_id": "celebrity-cruises",
+        "operator_name": "Celebrity Cruises",
+        "kind": "ocean",
+        "operating_status": "operating",
+        "publication_status": "draft",
+        "overnight_public_cruise": true,
+        "identity_verified": true,
+        "status_source_ids": [
+          "ship",
+          "itinerary"
+        ],
+        "imo": null,
+        "eni": null,
+        "official_url": "https://www.celebritycruises.com/cruise-ships/celebrity-edge",
+        "name_history": [],
+        "facts": [
+          {
+            "key": "year_built",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "entered_service",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "last_refurbished",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "length_m",
+            "value": 306.0,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "Rounded to 0.1m after converting from 1004 ft × 0.3048; original measurement is rounded to feet."
+          },
+          {
+            "key": "gross_tonnage",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_double_occupancy",
+            "value": 2918,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "guests_lower_berths",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_maximum",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "crew",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "decks_total",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "decks_passenger",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "restaurants",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "dining_outlets",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "cafes",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "bars",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "shops",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "pools",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "deck_plan_url",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "accessibility_url",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          }
+        ],
+        "cabin_categories": [
+          {
+            "id": "8a018f88-8de0-513f-abd5-a7bf790605d5",
+            "name": "Edge Villas",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "2275bc91-be2d-5b4a-b843-a23cc85ff40d",
+            "name": "Iconic Suites",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          }
+        ],
+        "photo": null
+      },
+      "sources": [
+        {
+          "id": "ship",
+          "url": "https://www.celebritycruises.com/cruise-ships/celebrity-edge",
+          "publisher": "Celebrity Cruises",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        },
+        {
+          "id": "itinerary",
+          "url": "https://www.celebritycruises.com/itinerary/7-night-alaska-dawes-glacier-cruise-from-seattle-washington?packageCode=EG07A397",
+          "publisher": "Celebrity Cruises",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        },
+        {
+          "id": "dining",
+          "url": "https://www.celebritycruises.com/cruise-ships/celebrity-edge/eat-and-drink",
+          "publisher": "Celebrity Cruises",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        }
+      ],
+      "venues": [
+        {
+          "id": "4b6f594f-22dc-5d2c-8e5c-464a471b93f3",
+          "ship_id": "63128659-056e-5017-a4d7-34d63a757e87",
+          "name": "Eden Café",
+          "kind": "cafe",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": true,
+          "availability_note": null,
+          "source_ids": [
+            "dining"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "1ba2b801-2358-5b5c-92d1-3d9d0f11fcba",
+          "ship_id": "63128659-056e-5017-a4d7-34d63a757e87",
+          "name": "Oceanview Café",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": true,
+          "availability_note": null,
+          "source_ids": [
+            "dining"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "03588363-94bd-54dc-b85e-29b0c17b710a",
+          "ship_id": "63128659-056e-5017-a4d7-34d63a757e87",
+          "name": "Mast Grill",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": true,
+          "availability_note": null,
+          "source_ids": [
+            "dining"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "e0609607-1810-54b3-b2b7-2d2bd0ee40ab",
+          "ship_id": "63128659-056e-5017-a4d7-34d63a757e87",
+          "name": "The Martini Bar",
+          "kind": "bar",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "dining"
+          ],
+          "verification": "verified"
+        }
+      ],
+      "programs": []
+    },
+    {
+      "ship": {
+        "id": "daa9d529-d06e-5d5b-8e29-8d56b5238a33",
+        "universe_id": "d118727e-0810-5224-bbf0-a6de609dc728",
+        "slug": "norwegian-prima",
+        "name": "Norwegian Prima",
+        "operator_id": "norwegian-cruise-line",
+        "operator_name": "Norwegian Cruise Line",
+        "kind": "ocean",
+        "operating_status": "operating",
+        "publication_status": "draft",
+        "overnight_public_cruise": true,
+        "identity_verified": true,
+        "status_source_ids": [
+          "ship"
+        ],
+        "imo": null,
+        "eni": null,
+        "official_url": "https://www.ncl.com/uk/en/cruise-ship/prima",
+        "name_history": [],
+        "facts": [
+          {
+            "key": "year_built",
+            "value": 2022,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "entered_service",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "last_refurbished",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "length_m",
+            "value": 294,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "gross_tonnage",
+            "value": 143535,
+            "source_ids": [
+              "flyer"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "Flyer explicitly labels Gross Tonnage; current page uses the imprecise label Gross Register Tonnage for the same number."
+          },
+          {
+            "key": "guests_double_occupancy",
+            "value": 3195,
+            "source_ids": [
+              "ship",
+              "flyer"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "conflicting",
+            "note": "3195 current page versus 3099 in official 03/23 flyer. Reconciliation required."
+          },
+          {
+            "key": "guests_lower_berths",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_maximum",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "crew",
+            "value": 1506,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "decks_total",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "decks_passenger",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "restaurants",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "dining_outlets",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "cafes",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "bars",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "shops",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "pools",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "deck_plan_url",
+            "value": "https://www.ncl.com/uk/en/cruise-ship/prima/deck-plans",
+            "source_ids": [
+              "deck"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "accessibility_url",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          }
+        ],
+        "cabin_categories": [
+          {
+            "id": "c7a55845-c9b1-5d71-a63b-df57a0f35232",
+            "name": "The Haven",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "89e87fde-42d2-5549-a68e-bb334c2db21f",
+            "name": "Club Balcony Suite",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "d37b387e-f51a-5dc0-9981-61ff7c1801a3",
+            "name": "Studio",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          }
+        ],
+        "photo": null
+      },
+      "sources": [
+        {
+          "id": "ship",
+          "url": "https://www.ncl.com/uk/en/cruise-ship/prima",
+          "publisher": "Norwegian Cruise Line",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        },
+        {
+          "id": "flyer",
+          "url": "https://www.ncl.com/sites/default/files/918843-CMI-Ship%20Fact%20Flyer-Prima.pdf",
+          "publisher": "Norwegian Cruise Line",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        },
+        {
+          "id": "deck",
+          "url": "https://www.ncl.com/uk/en/cruise-ship/prima/deck-plans",
+          "publisher": "Norwegian Cruise Line",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        }
+      ],
+      "venues": [
+        {
+          "id": "b33b7935-f923-5345-a206-0468649b6898",
+          "ship_id": "daa9d529-d06e-5d5b-8e29-8d56b5238a33",
+          "name": "Indulge Food Hall",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "28f71952-e500-5c78-b258-598c06e7d35d",
+          "ship_id": "daa9d529-d06e-5d5b-8e29-8d56b5238a33",
+          "name": "Palomar",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "cf669ffc-e0b6-54c8-9bc3-6eb6606f43c3",
+          "ship_id": "daa9d529-d06e-5d5b-8e29-8d56b5238a33",
+          "name": "Le Bistro",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "e820789a-4138-5aa4-9b32-0a573a0b1364",
+          "ship_id": "daa9d529-d06e-5d5b-8e29-8d56b5238a33",
+          "name": "Mandara Spa",
+          "kind": "spa",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "9ef560f6-49e8-5458-8575-16d5684701c2",
+          "ship_id": "daa9d529-d06e-5d5b-8e29-8d56b5238a33",
+          "name": "Prima Theatre & Club",
+          "kind": "theatre",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        }
+      ],
+      "programs": [
+        {
+          "id": "729dd2b5-97b2-5bc7-97af-38068566dfe6",
+          "ship_id": "daa9d529-d06e-5d5b-8e29-8d56b5238a33",
+          "name": "Broadway Cabaret",
+          "kind": "show",
+          "venue_id": null,
+          "description": null,
+          "as_of": "2026-09-21",
+          "availability_note": "Named on the current ship page. Lineup and performance dates vary by sailing; this is not a guaranteed timetable.",
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        }
+      ]
+    },
+    {
+      "ship": {
+        "id": "a2061812-add0-50d1-b7d7-0ab63818d059",
+        "universe_id": "5e16d9c3-dfb6-5efb-bdd8-fa760e0c000a",
+        "slug": "msc-world-europa",
+        "name": "MSC World Europa",
+        "operator_id": "msc-cruises",
+        "operator_name": "MSC Cruises",
+        "kind": "ocean",
+        "operating_status": "operating",
+        "publication_status": "draft",
+        "overnight_public_cruise": true,
+        "identity_verified": true,
+        "status_source_ids": [
+          "ship",
+          "sailings"
+        ],
+        "imo": null,
+        "eni": null,
+        "official_url": "https://www.msccruises.com/int/our-cruises/ships/msc-world-europa",
+        "name_history": [],
+        "facts": [
+          {
+            "key": "year_built",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "entered_service",
+            "value": "2022",
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "European separators normalized where applicable; service year is not year built."
+          },
+          {
+            "key": "last_refurbished",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "length_m",
+            "value": 333.3,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "gross_tonnage",
+            "value": 215863,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "guests_double_occupancy",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_lower_berths",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_maximum",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "crew",
+            "value": 2138,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "decks_total",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "decks_passenger",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "restaurants",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "dining_outlets",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "cafes",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "bars",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "shops",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "pools",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "deck_plan_url",
+            "value": "https://www.msccruises.com/int/our-cruises/ships/msc-world-europa",
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "Interactive deck plan is embedded on this ship page; total decks not inferred from numbering."
+          },
+          {
+            "key": "accessibility_url",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          }
+        ],
+        "cabin_categories": [
+          {
+            "id": "6e226850-7615-5022-ae99-5e8cf4b10a28",
+            "name": "Deluxe Balcony",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "3636ae55-e421-5d4c-9cd2-5fad9003b853",
+            "name": "Studio Interior",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "85ec830c-b73e-549f-8b49-05416ebdd49b",
+            "name": "MSC Yacht Club Deluxe Suite",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          }
+        ],
+        "photo": null
+      },
+      "sources": [
+        {
+          "id": "ship",
+          "url": "https://www.msccruises.com/int/our-cruises/ships/msc-world-europa",
+          "publisher": "MSC Cruises",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        },
+        {
+          "id": "sailings",
+          "url": "https://info.msccruises.com/rs/271-DJN-199/images/SEASATIONAL%20SALE%20-%20SUM26_FLYER_AU_FINAL.pdf?version=0",
+          "publisher": "MSC Cruises",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        }
+      ],
+      "venues": [
+        {
+          "id": "a94fc779-42f5-5e2a-bccb-093c0bab538d",
+          "ship_id": "a2061812-add0-50d1-b7d7-0ab63818d059",
+          "name": "Elixir - Mixology Bar",
+          "kind": "bar",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "fc9eaabc-ff3f-5886-816c-9c67a270fd1d",
+          "ship_id": "a2061812-add0-50d1-b7d7-0ab63818d059",
+          "name": "Raj Polo Tea House",
+          "kind": "cafe",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "8c0d7f51-f61d-56bc-9281-bd955786558a",
+          "ship_id": "a2061812-add0-50d1-b7d7-0ab63818d059",
+          "name": "Masters of The Sea",
+          "kind": "bar",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "d195b45b-e7a9-5300-a639-a7c2c78407cd",
+          "ship_id": "a2061812-add0-50d1-b7d7-0ab63818d059",
+          "name": "Top Sail Lounge",
+          "kind": "bar",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": "MSC Yacht Club access only.",
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        }
+      ],
+      "programs": []
+    },
+    {
+      "ship": {
+        "id": "a0af8cc7-015f-5e03-a5d3-b4de0e36ef57",
+        "universe_id": "32a953a7-9ba3-5dce-9522-c1bc28373eda",
+        "slug": "amamagna",
+        "name": "AmaMagna",
+        "operator_id": "amawaterways",
+        "operator_name": "AmaWaterways",
+        "kind": "river",
+        "operating_status": "operating",
+        "publication_status": "draft",
+        "overnight_public_cruise": true,
+        "identity_verified": true,
+        "status_source_ids": [
+          "ship"
+        ],
+        "imo": null,
+        "eni": null,
+        "official_url": "https://www.amawaterways.com/uk/ships/amamagna",
+        "name_history": [],
+        "facts": [
+          {
+            "key": "year_built",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "entered_service",
+            "value": "2019",
+            "source_ids": [
+              "history"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "Debut year only; construction year remains unknown."
+          },
+          {
+            "key": "last_refurbished",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "length_m",
+            "value": 135.0,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "Rounded to 0.1m after converting from 443 ft × 0.3048; original measurement is rounded to feet."
+          },
+          {
+            "key": "gross_tonnage",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_double_occupancy",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_lower_berths",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_maximum",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "crew",
+            "value": 70,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "decks_total",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "decks_passenger",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "restaurants",
+            "value": 4,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "dining_outlets",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "cafes",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "bars",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "shops",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "pools",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "deck_plan_url",
+            "value": "https://www.amawaterways.com/uk/ships/amamagna",
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "Embedded plan; deck totals are not inferred by counting visible deck labels."
+          },
+          {
+            "key": "accessibility_url",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          }
+        ],
+        "cabin_categories": [
+          {
+            "id": "4406cf68-d895-5f25-8343-4f5b02912b4a",
+            "name": "Owner's Suite",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "ee93e5c1-2721-52bd-926a-677d60485705",
+            "name": "Grand Suite",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "8230d367-3391-5903-a7d1-0c451bac5f4c",
+            "name": "Category SA",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          }
+        ],
+        "photo": null
+      },
+      "sources": [
+        {
+          "id": "ship",
+          "url": "https://www.amawaterways.com/uk/ships/amamagna",
+          "publisher": "AmaWaterways",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        },
+        {
+          "id": "history",
+          "url": "https://www.amawaterways.com/our-story",
+          "publisher": "AmaWaterways",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        }
+      ],
+      "venues": [
+        {
+          "id": "0a4884e0-8914-52e0-b456-73bfc6faf112",
+          "ship_id": "a0af8cc7-015f-5e03-a5d3-b4de0e36ef57",
+          "name": "Main Restaurant",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": true,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "8257b950-2029-5fde-877e-7958fab5e804",
+          "ship_id": "a0af8cc7-015f-5e03-a5d3-b4de0e36ef57",
+          "name": "The Chef’s Table",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": true,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "23805c6f-c84e-525c-9ce3-6dc78636f9c4",
+          "ship_id": "a0af8cc7-015f-5e03-a5d3-b4de0e36ef57",
+          "name": "Jimmy’s",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": true,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "1ea9967b-6755-5823-8ab5-3f9caaf09bab",
+          "ship_id": "a0af8cc7-015f-5e03-a5d3-b4de0e36ef57",
+          "name": "Al Fresco",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": true,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "0dc8b84c-adca-59f6-90d5-0fee063b6339",
+          "ship_id": "a0af8cc7-015f-5e03-a5d3-b4de0e36ef57",
+          "name": "Sun Deck pool",
+          "kind": "pool",
+          "place_id": null,
+          "description": null,
+          "deck_label": "Sun Deck",
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "a0dc7a54-fb33-5dc7-9788-cb8e86fdebb0",
+          "ship_id": "a0af8cc7-015f-5e03-a5d3-b4de0e36ef57",
+          "name": "Zen Wellness Studio",
+          "kind": "fitness",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        }
+      ],
+      "programs": []
+    },
+    {
+      "ship": {
+        "id": "a9faa575-d703-515b-8a22-e4146402ec17",
+        "universe_id": "717a6cff-fba1-599a-9766-ffd20ab3ab3f",
+        "slug": "amadouro",
+        "name": "AmaDouro",
+        "operator_id": "amawaterways",
+        "operator_name": "AmaWaterways",
+        "kind": "river",
+        "operating_status": "operating",
+        "publication_status": "draft",
+        "overnight_public_cruise": true,
+        "identity_verified": true,
+        "status_source_ids": [
+          "ship"
+        ],
+        "imo": null,
+        "eni": null,
+        "official_url": "https://www.amawaterways.com/ships/amadouro",
+        "name_history": [],
+        "facts": [
+          {
+            "key": "year_built",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "entered_service",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "last_refurbished",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "length_m",
+            "value": 79.2,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "Rounded to 0.1m after converting from 260 ft × 0.3048; original measurement is rounded to feet."
+          },
+          {
+            "key": "gross_tonnage",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_double_occupancy",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_lower_berths",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_maximum",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "crew",
+            "value": 38,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "decks_total",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "decks_passenger",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "restaurants",
+            "value": 1,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "dining_outlets",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "cafes",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "bars",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "shops",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "pools",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "deck_plan_url",
+            "value": "https://www.amawaterways.com/ships/amadouro",
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "Embedded plan; deck totals are not inferred by counting visible deck labels."
+          },
+          {
+            "key": "accessibility_url",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          }
+        ],
+        "cabin_categories": [
+          {
+            "id": "38fdf857-645c-5da4-9a2e-2f23412b3688",
+            "name": "Suite",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "61faf9ee-4733-5d86-b8d7-d2c81ca28cbc",
+            "name": "Category A",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "47976eed-6cd1-5765-b89f-c99b43884b2c",
+            "name": "Category C",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          }
+        ],
+        "photo": null
+      },
+      "sources": [
+        {
+          "id": "ship",
+          "url": "https://www.amawaterways.com/ships/amadouro",
+          "publisher": "AmaWaterways",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        }
+      ],
+      "venues": [
+        {
+          "id": "af9aea46-b033-5d02-8a8a-2f29509d167d",
+          "ship_id": "a9faa575-d703-515b-8a22-e4146402ec17",
+          "name": "Main Restaurant",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": true,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "ce46c897-71dd-559e-8495-01ea46bd81b0",
+          "ship_id": "a9faa575-d703-515b-8a22-e4146402ec17",
+          "name": "Sun Deck pool",
+          "kind": "pool",
+          "place_id": null,
+          "description": null,
+          "deck_label": "Sun Deck",
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        }
+      ],
+      "programs": []
+    },
+    {
+      "ship": {
+        "id": "36c6f3d9-9fb8-5e47-8db4-7b2d12cf87a4",
+        "universe_id": "36ca3906-9e1f-5290-a8b0-165659c15c61",
+        "slug": "amalea",
+        "name": "AmaLea",
+        "operator_id": "amawaterways",
+        "operator_name": "AmaWaterways",
+        "kind": "river",
+        "operating_status": "operating",
+        "publication_status": "draft",
+        "overnight_public_cruise": true,
+        "identity_verified": true,
+        "status_source_ids": [
+          "ship"
+        ],
+        "imo": null,
+        "eni": null,
+        "official_url": "https://www.amawaterways.com/ships/amalea",
+        "name_history": [],
+        "facts": [
+          {
+            "key": "year_built",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "entered_service",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "last_refurbished",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "length_m",
+            "value": 135.0,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "Rounded to 0.1m after converting from 443 ft × 0.3048; original measurement is rounded to feet."
+          },
+          {
+            "key": "gross_tonnage",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_double_occupancy",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_lower_berths",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_maximum",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "crew",
+            "value": 51,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "decks_total",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "decks_passenger",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "restaurants",
+            "value": 2,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "dining_outlets",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "cafes",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "bars",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "shops",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "pools",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "deck_plan_url",
+            "value": "https://www.amawaterways.com/ships/amalea",
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "Embedded plan; deck totals are not inferred by counting visible deck labels."
+          },
+          {
+            "key": "accessibility_url",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          }
+        ],
+        "cabin_categories": [
+          {
+            "id": "bc1bf482-2222-5db8-997a-a6498c6da0d9",
+            "name": "Suite",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "6fe0777c-7bfc-5eb4-ba70-befe114697aa",
+            "name": "Category AA",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "193775c3-1dc8-5de1-8647-c87d5ae1e4ba",
+            "name": "Category BA",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          }
+        ],
+        "photo": null
+      },
+      "sources": [
+        {
+          "id": "ship",
+          "url": "https://www.amawaterways.com/ships/amalea",
+          "publisher": "AmaWaterways",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        }
+      ],
+      "venues": [
+        {
+          "id": "3d2a8924-33cc-5994-8dc3-1355c9a4e355",
+          "ship_id": "36c6f3d9-9fb8-5e47-8db4-7b2d12cf87a4",
+          "name": "Main Restaurant",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": true,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "522edfde-9bba-5de4-b28a-8778187aaf90",
+          "ship_id": "36c6f3d9-9fb8-5e47-8db4-7b2d12cf87a4",
+          "name": "The Chef’s Table",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": true,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "d24e8a28-b11a-58ed-870d-6367016ddc88",
+          "ship_id": "36c6f3d9-9fb8-5e47-8db4-7b2d12cf87a4",
+          "name": "Sun Deck pool",
+          "kind": "pool",
+          "place_id": null,
+          "description": null,
+          "deck_label": "Sun Deck",
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        }
+      ],
+      "programs": []
+    },
+    {
+      "ship": {
+        "id": "e9729055-da0d-54dc-a42d-321641a9ddcf",
+        "universe_id": "0419c0ea-b717-580c-81b4-52439a1efd11",
+        "slug": "viking-kara",
+        "name": "Viking Kara",
+        "operator_id": "viking",
+        "operator_name": "Viking",
+        "kind": "river",
+        "operating_status": "operating",
+        "publication_status": "draft",
+        "overnight_public_cruise": true,
+        "identity_verified": true,
+        "status_source_ids": [
+          "ship"
+        ],
+        "imo": null,
+        "eni": null,
+        "official_url": "https://www.vikingrivercruises.com/ships/longships/viking-kara.html",
+        "name_history": [],
+        "facts": [
+          {
+            "key": "year_built",
+            "value": 2014,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "entered_service",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "last_refurbished",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "length_m",
+            "value": 135.0,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "Rounded to 0.1m after converting from 443 ft × 0.3048; original measurement is rounded to feet."
+          },
+          {
+            "key": "gross_tonnage",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_double_occupancy",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_lower_berths",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_maximum",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "crew",
+            "value": 53,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "decks_total",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "decks_passenger",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "restaurants",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "dining_outlets",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "cafes",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "bars",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "shops",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "pools",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "deck_plan_url",
+            "value": "https://www.vikingrivercruises.com/ships/longships/viking-kara.html",
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "Embedded ship plan."
+          },
+          {
+            "key": "accessibility_url",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          }
+        ],
+        "cabin_categories": [
+          {
+            "id": "bd7d79b1-eb8a-5aa5-9c43-122cb0361608",
+            "name": "Standard Stateroom",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "acde0771-a0fb-5873-ae55-3f99e0306a53",
+            "name": "French Balcony Stateroom",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "7d4c6c6c-d4b4-50a7-855a-73153cf6bf31",
+            "name": "Veranda Stateroom",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "cc9be4cb-2798-55d7-bc9f-872d8bd87a48",
+            "name": "Explorer Suite",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          }
+        ],
+        "photo": null
+      },
+      "sources": [
+        {
+          "id": "ship",
+          "url": "https://www.vikingrivercruises.com/ships/longships/viking-kara.html",
+          "publisher": "Viking",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        }
+      ],
+      "venues": [
+        {
+          "id": "070cd628-24c7-51cf-a03f-cf0238cd00c9",
+          "ship_id": "e9729055-da0d-54dc-a42d-321641a9ddcf",
+          "name": "Aquavit Terrace & Lounge",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "4bc45064-92d1-5d70-8559-418a6d6cc3bc",
+          "ship_id": "e9729055-da0d-54dc-a42d-321641a9ddcf",
+          "name": "Lounge & Bar",
+          "kind": "bar",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "408d440f-1c8f-5adf-ba6f-314356805ed0",
+          "ship_id": "e9729055-da0d-54dc-a42d-321641a9ddcf",
+          "name": "Restaurant",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "adcd21b1-2b5d-55a1-b898-7366ead70a89",
+          "ship_id": "e9729055-da0d-54dc-a42d-321641a9ddcf",
+          "name": "Onboard shop",
+          "kind": "shop",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        }
+      ],
+      "programs": []
+    },
+    {
+      "ship": {
+        "id": "9cdd2609-a923-51f1-8ffe-8b6354ebe584",
+        "universe_id": "c2588f2d-771e-59eb-833e-b3e1f941b659",
+        "slug": "ms-roald-amundsen",
+        "name": "MS Roald Amundsen",
+        "operator_id": "hx-expeditions",
+        "operator_name": "HX Expeditions",
+        "kind": "expedition",
+        "operating_status": "operating",
+        "publication_status": "draft",
+        "overnight_public_cruise": true,
+        "identity_verified": true,
+        "status_source_ids": [
+          "ship",
+          "itinerary"
+        ],
+        "imo": null,
+        "eni": null,
+        "official_url": "https://www.travelhx.com/en-us/ships/roald-amundsen/",
+        "name_history": [],
+        "facts": [
+          {
+            "key": "year_built",
+            "value": 2019,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "entered_service",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "last_refurbished",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "length_m",
+            "value": 140.0,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "Rounded to 0.1m after converting from 459.3 ft × 0.3048; source measurement is rounded to 0.1 ft."
+          },
+          {
+            "key": "gross_tonnage",
+            "value": 20889,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "guests_double_occupancy",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_lower_berths",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_maximum",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "crew",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "decks_total",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "decks_passenger",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "restaurants",
+            "value": 3,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "dining_outlets",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "cafes",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "bars",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "shops",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "pools",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "deck_plan_url",
+            "value": "https://www.travelhx.com/en-us/ships/roald-amundsen/",
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "Embedded deck plans; no deck count inferred."
+          },
+          {
+            "key": "accessibility_url",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          }
+        ],
+        "cabin_categories": [
+          {
+            "id": "5d4693c0-761e-5150-98f3-186604dcc870",
+            "name": "Expedition Suite",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "e0afb9af-17b2-5b8c-918c-d31518c25197",
+            "name": "Arctic Superior",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "cfa5b8f4-89a0-5760-a32d-aebf60a5733b",
+            "name": "Polar Outside",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          }
+        ],
+        "photo": null
+      },
+      "sources": [
+        {
+          "id": "ship",
+          "url": "https://www.travelhx.com/en-us/ships/roald-amundsen/",
+          "publisher": "HX Expeditions",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        },
+        {
+          "id": "itinerary",
+          "url": "https://www.travelhx.com/en-us/cruises/highlights-of-antarctica/",
+          "publisher": "HX Expeditions",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        }
+      ],
+      "venues": [
+        {
+          "id": "9825daa2-80bd-5a21-b351-09ad3d2b4dbe",
+          "ship_id": "9cdd2609-a923-51f1-8ffe-8b6354ebe584",
+          "name": "Restaurant Aune",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": true,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "ba73290e-d834-527c-b70b-d2b0b5ab1ba6",
+          "ship_id": "9cdd2609-a923-51f1-8ffe-8b6354ebe584",
+          "name": "Restaurant Fredheim",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "7ef7be3d-067d-5f8f-a6e4-50f906c6c4fd",
+          "ship_id": "9cdd2609-a923-51f1-8ffe-8b6354ebe584",
+          "name": "Restaurant Lindstrøm",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": "Included for suite guests; other cabins have paid reservations subject to availability.",
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "2493f53f-a183-5604-82cf-92217f547871",
+          "ship_id": "9cdd2609-a923-51f1-8ffe-8b6354ebe584",
+          "name": "Science Center",
+          "kind": "other",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "8c0120d9-139f-5ccf-a318-7e6ecd2ed167",
+          "ship_id": "9cdd2609-a923-51f1-8ffe-8b6354ebe584",
+          "name": "Explorer lounge & bar",
+          "kind": "bar",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        }
+      ],
+      "programs": [
+        {
+          "id": "22df6484-b296-503c-bb41-a76dff495d2a",
+          "ship_id": "9cdd2609-a923-51f1-8ffe-8b6354ebe584",
+          "name": "Onboard Science Program",
+          "kind": "enrichment",
+          "venue_id": "2493f53f-a183-5604-82cf-92217f547871",
+          "description": null,
+          "as_of": "2026-09-21",
+          "availability_note": "Published for the linked Antarctica itinerary. Topics and timings are confirmed onboard and vary by sailing.",
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "verification": "verified"
+        }
+      ]
+    },
+    {
+      "ship": {
+        "id": "b0761e7a-1cf8-57fe-ae99-5fb033ebf9ad",
+        "universe_id": "49eff970-e4b7-588d-b540-68b5ae09d4f1",
+        "slug": "viking-octantis",
+        "name": "Viking Octantis",
+        "operator_id": "viking",
+        "operator_name": "Viking",
+        "kind": "expedition",
+        "operating_status": "operating",
+        "publication_status": "draft",
+        "overnight_public_cruise": true,
+        "identity_verified": true,
+        "status_source_ids": [
+          "ship"
+        ],
+        "imo": null,
+        "eni": null,
+        "official_url": "https://www.vikingcruises.com/expeditions/ships/viking-octantis.html",
+        "name_history": [],
+        "facts": [
+          {
+            "key": "year_built",
+            "value": 2022,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "entered_service",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "last_refurbished",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "length_m",
+            "value": 202.7,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "Rounded to 0.1m after converting from 665 ft × 0.3048; original measurement is rounded to feet."
+          },
+          {
+            "key": "gross_tonnage",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_double_occupancy",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_lower_berths",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_maximum",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "crew",
+            "value": 256,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "decks_total",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "decks_passenger",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "restaurants",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "dining_outlets",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "cafes",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "bars",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "shops",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "pools",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "deck_plan_url",
+            "value": "https://docs.vikingcruises.com/ships/Expedition-Deck-Plans.pdf",
+            "source_ids": [
+              "deck"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "accessibility_url",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          }
+        ],
+        "cabin_categories": [
+          {
+            "id": "e7a6a489-a4cc-5556-a988-caa1686a1424",
+            "name": "Nordic Balcony",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "6fc59633-6941-53b4-9024-c374341ee14f",
+            "name": "Explorer Suite",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "9fe7e08f-6c66-5354-ab02-b5931c449734",
+            "name": "Owner’s Suite",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          }
+        ],
+        "photo": null
+      },
+      "sources": [
+        {
+          "id": "ship",
+          "url": "https://www.vikingcruises.com/expeditions/ships/viking-octantis.html",
+          "publisher": "Viking",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        },
+        {
+          "id": "deck",
+          "url": "https://docs.vikingcruises.com/ships/Expedition-Deck-Plans.pdf",
+          "publisher": "Viking",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        }
+      ],
+      "venues": [
+        {
+          "id": "c57e7ac3-cd2a-5b6f-aa1f-9d322e3133c7",
+          "ship_id": "b0761e7a-1cf8-57fe-ae99-5fb033ebf9ad",
+          "name": "Manfredi’s Italian Restaurant",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "deck"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "f0b9a249-1173-582e-82f5-c304b06aae78",
+          "ship_id": "b0761e7a-1cf8-57fe-ae99-5fb033ebf9ad",
+          "name": "The Restaurant",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "deck"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "09ac88a8-bec4-5ce6-b8df-374c5f0a3372",
+          "ship_id": "b0761e7a-1cf8-57fe-ae99-5fb033ebf9ad",
+          "name": "Shop",
+          "kind": "shop",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "deck"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "83241872-712e-5051-b683-756711fd8720",
+          "ship_id": "b0761e7a-1cf8-57fe-ae99-5fb033ebf9ad",
+          "name": "The Nordic Spa",
+          "kind": "spa",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "deck"
+          ],
+          "verification": "verified"
+        }
+      ],
+      "programs": []
+    },
+    {
+      "ship": {
+        "id": "2a8d132e-83a6-5e93-b9e3-55d50b28356c",
+        "universe_id": "961e06d9-ef68-5e8f-b839-d025c0edffad",
+        "slug": "ultramarine",
+        "name": "Ultramarine",
+        "operator_id": "quark-expeditions",
+        "operator_name": "Quark Expeditions",
+        "kind": "expedition",
+        "operating_status": "operating",
+        "publication_status": "draft",
+        "overnight_public_cruise": true,
+        "identity_verified": true,
+        "status_source_ids": [
+          "ship",
+          "fleet",
+          "itinerary"
+        ],
+        "imo": null,
+        "eni": null,
+        "official_url": "https://www.quarkexpeditions.com/uk/expedition-ships/ultramarine",
+        "name_history": [],
+        "facts": [
+          {
+            "key": "year_built",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "entered_service",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "last_refurbished",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "length_m",
+            "value": 128,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "Uses source metric value; does not convert the coarsely rounded 420 ft alias."
+          },
+          {
+            "key": "gross_tonnage",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_double_occupancy",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_lower_berths",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_maximum",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "crew",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "decks_total",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "decks_passenger",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "restaurants",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "dining_outlets",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "cafes",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "bars",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "shops",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "pools",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "deck_plan_url",
+            "value": "https://www.quarkexpeditions.com/uk/expedition-ships/ultramarine",
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": "Embedded deck plan."
+          },
+          {
+            "key": "accessibility_url",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          }
+        ],
+        "cabin_categories": [
+          {
+            "id": "cc5d581c-3801-5837-b9ea-0b377751afd6",
+            "name": "Solo Panorama",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "c6490c31-8d74-58b6-8602-cc5a1ab7849f",
+            "name": "Explorer Suite",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "6664b895-ceac-5c50-9628-f86b6e909f33",
+            "name": "Penthouse Suite",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          }
+        ],
+        "photo": null
+      },
+      "sources": [
+        {
+          "id": "ship",
+          "url": "https://www.quarkexpeditions.com/uk/expedition-ships/ultramarine",
+          "publisher": "Quark Expeditions",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        },
+        {
+          "id": "fleet",
+          "url": "https://www.quarkexpeditions.com/about-us/company-information",
+          "publisher": "Quark Expeditions",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        },
+        {
+          "id": "itinerary",
+          "url": "https://assets.quarkexpeditions.com/uploads/2025/01/2026.27-Ultramarine-Snow-Hill-2.pdf",
+          "publisher": "Quark Expeditions",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        }
+      ],
+      "venues": [
+        {
+          "id": "bf71ee2b-04f7-5cae-b6c6-10a8ac6fdf92",
+          "ship_id": "2a8d132e-83a6-5e93-b9e3-55d50b28356c",
+          "name": "Balena Restaurant",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": "5",
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "6de1e9ee-1d92-5340-ada8-7d9a074d16d4",
+          "ship_id": "2a8d132e-83a6-5e93-b9e3-55d50b28356c",
+          "name": "Bistro 487",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": "7",
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "4de6082d-b0ac-52e5-b565-25bf14d7e139",
+          "ship_id": "2a8d132e-83a6-5e93-b9e3-55d50b28356c",
+          "name": "Ambassador Theatre",
+          "kind": "theatre",
+          "place_id": null,
+          "description": null,
+          "deck_label": "5",
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "eebacb7c-b15b-5dd2-9026-6757d2d3cbd0",
+          "ship_id": "2a8d132e-83a6-5e93-b9e3-55d50b28356c",
+          "name": "Tundra Spa",
+          "kind": "spa",
+          "place_id": null,
+          "description": null,
+          "deck_label": "7",
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        }
+      ],
+      "programs": []
+    },
+    {
+      "ship": {
+        "id": "92834f32-5306-51c9-866c-c8daa4304ec8",
+        "universe_id": "06ac3039-255b-5fc9-a552-bfb4cf6533f8",
+        "slug": "le-commandant-charcot",
+        "name": "Le Commandant Charcot",
+        "operator_id": "ponant-explorations",
+        "operator_name": "Ponant Explorations",
+        "kind": "expedition",
+        "operating_status": "operating",
+        "publication_status": "draft",
+        "overnight_public_cruise": true,
+        "identity_verified": true,
+        "status_source_ids": [
+          "ship",
+          "itinerary"
+        ],
+        "imo": null,
+        "eni": null,
+        "official_url": "https://en.ponant.com/cruise-ships/le-commandant-charcot",
+        "name_history": [],
+        "facts": [
+          {
+            "key": "year_built",
+            "value": 2021,
+            "source_ids": [
+              "specs"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "entered_service",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "last_refurbished",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "length_m",
+            "value": 150,
+            "source_ids": [
+              "specs"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "gross_tonnage",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_double_occupancy",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_lower_berths",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "guests_maximum",
+            "value": 245,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "crew",
+            "value": 215,
+            "source_ids": [
+              "ship"
+            ],
+            "as_of": "2026-09-21",
+            "verification": "verified",
+            "note": null
+          },
+          {
+            "key": "decks_total",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "decks_passenger",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "restaurants",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "dining_outlets",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "cafes",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "bars",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "shops",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "pools",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "deck_plan_url",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          },
+          {
+            "key": "accessibility_url",
+            "value": null,
+            "source_ids": [],
+            "as_of": "2026-09-21",
+            "verification": "unverified",
+            "note": "Not established by the reviewed sources in batch 001."
+          }
+        ],
+        "cabin_categories": [
+          {
+            "id": "d7934293-8bd4-5bbe-898e-31b489fcb770",
+            "name": "Lower deck balcony stateroom",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "8301532e-dfc3-575e-b217-69e7d5e0d0c6",
+            "name": "Deluxe Suite",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          },
+          {
+            "id": "c84d40e9-a8c8-550a-8a9d-d6fe7ddd7657",
+            "name": "Owner's Suite",
+            "description": null,
+            "accessible": null,
+            "source_ids": [
+              "ship"
+            ]
+          }
+        ],
+        "photo": null
+      },
+      "sources": [
+        {
+          "id": "ship",
+          "url": "https://en.ponant.com/cruise-ships/le-commandant-charcot",
+          "publisher": "Ponant Explorations",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        },
+        {
+          "id": "specs",
+          "url": "https://de.ponant.com/unsere-schiffe/le-commandant-charcot",
+          "publisher": "Ponant Explorations",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        },
+        {
+          "id": "itinerary",
+          "url": "https://en.ponant.com/travel-in/2026/september",
+          "publisher": "Ponant Explorations",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        },
+        {
+          "id": "dining",
+          "url": "https://escales.ponant.com/us/a-typical-day-on-le-commandant-charcot/",
+          "publisher": "Ponant Explorations",
+          "checked_at": "2026-09-21",
+          "source_type": "operator"
+        }
+      ],
+      "venues": [
+        {
+          "id": "6a9d6590-7d48-5652-a65a-08122c4d0fb9",
+          "ship_id": "92834f32-5306-51c9-866c-c8daa4304ec8",
+          "name": "Nuna",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "dining"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "f481b4d7-3a17-57ce-9c74-ea8db2d9d495",
+          "ship_id": "92834f32-5306-51c9-866c-c8daa4304ec8",
+          "name": "Sila",
+          "kind": "restaurant",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "dining"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "85f77ccc-c61d-5d74-a8ab-91529419afd2",
+          "ship_id": "92834f32-5306-51c9-866c-c8daa4304ec8",
+          "name": "ILLU",
+          "kind": "shop",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "8d41d540-d766-540d-a8ca-377bc2bfc1df",
+          "ship_id": "92834f32-5306-51c9-866c-c8daa4304ec8",
+          "name": "Anori",
+          "kind": "other",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        },
+        {
+          "id": "57fddc03-291c-5570-89aa-27332493f8e1",
+          "ship_id": "92834f32-5306-51c9-866c-c8daa4304ec8",
+          "name": "Inneq",
+          "kind": "bar",
+          "place_id": null,
+          "description": null,
+          "deck_label": null,
+          "included": null,
+          "availability_note": null,
+          "source_ids": [
+            "ship"
+          ],
+          "verification": "verified"
+        }
+      ],
+      "programs": []
+    }
+  ]
+}

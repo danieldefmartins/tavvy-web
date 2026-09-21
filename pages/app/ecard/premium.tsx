@@ -1,3 +1,5 @@
+import { useReleaseCopy } from '../../../hooks/useReleaseCopy';
+import { fetchMyECardEntitlement } from '../../../lib/ecardEntitlement';
 /**
  * eCard Premium Upsell Screen
  * Subscription flow for eCard Pro features
@@ -76,12 +78,13 @@ const PLANS = {
 };
 
 export default function ECardPremiumScreen() {
+  const copy = useReleaseCopy();
   const { t } = useTranslation();
   const router = useRouter();
   const { locale } = router;
   const { feature, themeName } = router.query;
   const { theme, isDark } = useThemeContext();
-  const { user, refreshProfile } = useAuth();
+  const { user } = useAuth();
 
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly');
   const [isLoading, setIsLoading] = useState(false);
@@ -128,36 +131,12 @@ export default function ECardPremiumScreen() {
     setIsRestoring(true);
 
     try {
-      // Check if user has an active subscription in the database
-      const { data: subscription, error } = await supabase
-        .from('user_subscriptions')
-        .select('*')
-        .eq('user_id', user.id)
-        .in('status', ['active', 'trialing'])
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
-
-      if (subscription) {
-        // User has an active subscription, update their profile
-        await supabase
-          .from('profiles')
-          .update({ is_pro: true })
-          .eq('user_id', user.id);
-
-        // Refresh the auth context
-        if (refreshProfile) {
-          await refreshProfile();
-        }
-
-        alert('Your Pro subscription has been restored successfully!');
-        router.back();
+      const entitlement = await fetchMyECardEntitlement();
+      if (entitlement.is_pro) {
+        alert('Your Pro access is active.');
+        router.push('/app/ecard', undefined, { locale });
       } else {
-        alert('We couldn\'t find an active subscription for your account. If you believe this is an error, please contact support.');
+        alert('No active Pro access was found. If you just checked out, wait a moment and try again.');
       }
     } catch (error: any) {
       console.error('Restore error:', error);
@@ -173,7 +152,7 @@ export default function ECardPremiumScreen() {
     <>
       <Head>
         <title>Upgrade to Pro | TavvY eCard</title>
-        <meta name="description" content="Unlock premium features for your digital business card" />
+        <meta name={"description"} content="Unlock premium features for your digital business card" />
       </Head>
 
       <AppLayout hideTabBar>
@@ -199,6 +178,8 @@ export default function ECardPremiumScreen() {
               <strong>{feature}</strong>
             </div>
           )}
+
+          <p className="pro-extras-summary">{copy('Gallery photos, embedded videos, contact forms and professional credentials are Pro extras.')} {copy('Your existing content stays on your card.')}</p>
 
           {/* Features Grid */}
           <div className="features-grid">
@@ -229,7 +210,7 @@ export default function ECardPremiumScreen() {
                 onClick={() => setSelectedPlan('yearly')}
               >
                 {PLANS.yearly.savings && (
-                  <div className="savings-badge">Save {PLANS.yearly.savings}</div>
+                  <div className="savings-badge">{copy("Save")}{PLANS.yearly.savings}</div>
                 )}
                 <div className="plan-header">
                   <span className="plan-name">Yearly</span>
@@ -240,7 +221,7 @@ export default function ECardPremiumScreen() {
                   )}
                 </div>
                 <div className="plan-price">
-                  <span className="price">${PLANS.yearly.price}</span>
+                  <span className={"price"}>${PLANS.yearly.price}</span>
                   <span className="period">/{PLANS.yearly.period}</span>
                 </div>
                 <p className="plan-detail">
@@ -262,7 +243,7 @@ export default function ECardPremiumScreen() {
                   )}
                 </div>
                 <div className="plan-price">
-                  <span className="price">${PLANS.monthly.price}</span>
+                  <span className={"price"}>${PLANS.monthly.price}</span>
                   <span className="period">/{PLANS.monthly.period}</span>
                 </div>
                 <p className="plan-detail">
@@ -290,11 +271,11 @@ export default function ECardPremiumScreen() {
               {isRestoring ? 'Restoring...' : 'Restore Purchases'}
             </button>
 
-            <p className="terms">
+            <p className={"terms"}>
               By subscribing, you agree to our{' '}
-              <a href="/terms" target="_blank">Terms of Service</a>
-              {' '}and{' '}
-              <a href="/privacy" target="_blank">Privacy Policy</a>
+              <a href="/terms" target="_blank">{copy("Terms of Service")}</a>
+              {' '}{copy("and")}{' '}
+              <a href="/privacy" target="_blank">{copy("Privacy Policy")}</a>
             </p>
           </div>
         </div>
@@ -369,6 +350,8 @@ export default function ECardPremiumScreen() {
           .feature-context strong {
             color: ${ACCENT_GREEN};
           }
+
+          .pro-extras-summary { max-width: 680px; margin: 0 auto 24px; text-align: center; line-height: 1.6; color: #CBD5E1; font-size: 14px; }
 
           /* Features Grid */
           .features-grid {

@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { useReleaseCopy } from '../../../hooks/useReleaseCopy';
 import {
   IoBusinessOutline, IoPerson, IoFlagOutline,
   IoChevronForward, IoChevronBack, IoSearch, IoClose,
@@ -37,6 +38,7 @@ interface TypePickerProps {
 }
 
 export default function TypePicker({ onSelect, isDark }: TypePickerProps) {
+  const copy = useReleaseCopy();
   const [showCountries, setShowCountries] = useState(false);
   const [countrySearch, setCountrySearch] = useState('');
 
@@ -49,22 +51,23 @@ export default function TypePicker({ onSelect, isDark }: TypePickerProps) {
     const q = countrySearch.toLowerCase().trim();
     if (!q) return COUNTRIES;
     return COUNTRIES.filter(c =>
+      copy(c.name).toLowerCase().includes(q) ||
       c.name.toLowerCase().includes(q) ||
       c.nameLocal.toLowerCase().includes(q) ||
       c.code.toLowerCase().includes(q)
     );
-  }, [countrySearch]);
+  }, [countrySearch, copy]);
 
   if (showCountries) {
     return (
       <div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-          <button onClick={() => setShowCountries(false)} style={{ background: 'none', border: 'none', padding: 6, cursor: 'pointer', borderRadius: 8, display: 'flex' }}>
+          <button aria-label={copy('Back')} onClick={() => setShowCountries(false)} style={{ background: 'none', border: 'none', padding: 6, cursor: 'pointer', borderRadius: 8, display: 'flex' }}>
             <IoChevronBack size={22} color={textPrimary} />
           </button>
           <div>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: textPrimary, margin: 0 }}>Select your country</h2>
-            <p style={{ fontSize: 13, color: textSecondary, margin: '2px 0 0' }}>Choose where the politician operates</p>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: textPrimary, margin: 0 }}>{copy('Select your country')}</h2>
+            <p style={{ fontSize: 13, color: textSecondary, margin: '2px 0 0' }}>{copy('Choose where the politician operates')}</p>
           </div>
         </div>
 
@@ -76,13 +79,13 @@ export default function TypePicker({ onSelect, isDark }: TypePickerProps) {
         }}>
           <IoSearch size={18} color={textSecondary} />
           <input
-            type="text" placeholder="Search country..." value={countrySearch}
+            type="text" placeholder={copy('Search country...')} value={countrySearch}
             onChange={(e) => setCountrySearch(e.target.value)}
             style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', fontSize: 15, color: textPrimary }}
             autoFocus
           />
           {countrySearch && (
-            <button onClick={() => setCountrySearch('')} style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer', display: 'flex' }}>
+            <button aria-label={copy('Clear country search')} onClick={() => setCountrySearch('')} style={{ background: 'none', border: 'none', padding: 2, cursor: 'pointer', display: 'flex' }}>
               <IoClose size={16} color={textSecondary} />
             </button>
           )}
@@ -105,11 +108,11 @@ export default function TypePicker({ onSelect, isDark }: TypePickerProps) {
             >
               <span style={{ fontSize: 28, lineHeight: 1 }}>{country.flag}</span>
               <div style={{ flex: 1 }}>
-                <span style={{ fontSize: 15, fontWeight: country.featured ? 600 : 500, color: textPrimary, display: 'block' }}>{country.name}</span>
-                {country.nameLocal !== country.name && <span style={{ fontSize: 12, color: textSecondary }}>{country.nameLocal}</span>}
+                <span style={{ fontSize: 15, fontWeight: country.featured ? 600 : 500, color: textPrimary, display: 'block' }}>{copy(country.name)}</span>
+                {country.nameLocal !== copy(country.name) && <span style={{ fontSize: 12, color: textSecondary }}>{country.nameLocal}</span>}
               </div>
               {country.featured && (
-                <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 10px', borderRadius: 8, background: ACCENT, color: '#fff' }}>Civic Card</span>
+                <span style={{ fontSize: 10, fontWeight: 600, padding: '3px 10px', borderRadius: 8, background: ACCENT, color: '#fff' }}>{copy('Civic Card')}</span>
               )}
               <IoChevronForward size={16} color={textSecondary} />
             </button>
@@ -127,8 +130,8 @@ export default function TypePicker({ onSelect, isDark }: TypePickerProps) {
 
   return (
     <div>
-      <h2 style={{ fontSize: 24, fontWeight: 700, color: textPrimary, margin: '0 0 8px' }}>What kind of card?</h2>
-      <p style={{ fontSize: 15, color: textSecondary, margin: '0 0 24px' }}>Select the type that best fits your needs</p>
+      <h2 style={{ fontSize: 24, fontWeight: 700, color: textPrimary, margin: '0 0 8px' }}>{copy('What kind of card?')}</h2>
+      <p style={{ fontSize: 15, color: textSecondary, margin: '0 0 24px' }}>{copy('Select the type that best fits your needs')}</p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {TYPE_OPTIONS.map(({ id, name, desc, icon: Icon, gradient }, index) => (
@@ -153,8 +156,8 @@ export default function TypePicker({ onSelect, isDark }: TypePickerProps) {
               <Icon size={26} color="#fff" />
             </div>
             <div>
-              <span style={{ fontSize: 17, fontWeight: 600, color: textPrimary, display: 'block' }}>{name}</span>
-              <span style={{ fontSize: 13, color: textSecondary }}>{desc}</span>
+              <span style={{ fontSize: 17, fontWeight: 600, color: textPrimary, display: 'block' }}>{copy(name)}</span>
+              <span style={{ fontSize: 13, color: textSecondary }}>{copy(desc)}</span>
             </div>
             <IoChevronForward size={18} color={textSecondary} style={{ marginLeft: 'auto', flexShrink: 0 }} />
           </button>

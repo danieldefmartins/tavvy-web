@@ -1,3 +1,4 @@
+import ToolHeader from '../../components/ToolHeader';
 /**
  * Universes Screen - Explore curated worlds
  * Fixed layout with proper structure
@@ -46,7 +47,8 @@ const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1506905925346-21bda
 export default function ExploreScreen() {
   const router = useRouter();
   const locale = router.locale || 'en';
-  const { theme } = useThemeContext();
+  const { theme, isDark } = useThemeContext();
+  const readableAccent = isDark ? '#BFAAFF' : '#5843A8';
   const { user } = useAuth();
   const { t } = useTranslation('common');
   const [featuredUniverse, setFeaturedUniverse] = useState<Universe | null>(null);
@@ -119,59 +121,7 @@ export default function ExploreScreen() {
           backgroundColor: theme.background,
           paddingBottom: 100,
         }}>
-          {/* HEADER - Back | Title | Profile (WHITE) */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            padding: '12px 16px',
-            borderBottom: `1px solid ${theme.border}`,
-            backgroundColor: theme.background,
-            position: 'sticky',
-            top: 0,
-            zIndex: 100,
-          }}>
-            <button
-              onClick={() => router.back()}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#FFFFFF',
-                padding: 8,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <IoChevronBack size={24} />
-            </button>
-            
-            <div style={{ flex: 1, textAlign: 'center' }}>
-              <h1 style={{
-                fontSize: 18,
-                fontWeight: 700,
-                color: theme.text,
-                margin: 0,
-              }}>Universes</h1>
-              <p style={{
-                fontSize: 12,
-                color: COLORS.accent,
-                margin: '2px 0 0',
-              }}>Explore curated worlds.</p>
-            </div>
-            
-            <Link
-              href="/app/profile"
-              locale={locale}
-              style={{
-                color: '#FFFFFF',
-                padding: 8,
-                display: 'flex',
-                alignItems: 'center',
-              }}
-            >
-              <IoPersonCircleOutline size={28} />
-            </Link>
-          </div>
+          <ToolHeader title="Universes" subtitle="Explore curated worlds." />
 
           {/* SEARCH BAR */}
           <div style={{ padding: '12px 16px' }}>
@@ -184,7 +134,7 @@ export default function ExploreScreen() {
               borderRadius: 12,
             }}>
               <IoSearch size={20} color={theme.textSecondary} />
-              <input
+              <input aria-label="Search universes"
                 type="text"
                 placeholder="Search parks, airports, cities..."
                 value={searchQuery}
@@ -301,7 +251,7 @@ export default function ExploreScreen() {
                     padding: '3px 8px',
                     borderRadius: 5,
                   }}>
-                    <span style={{ color: COLORS.accent, fontSize: 9, fontWeight: 700, letterSpacing: 0.5 }}>
+                    <span style={{ color: readableAccent, fontSize: 9, fontWeight: 700, letterSpacing: 0.5 }}>
                       FEATURED
                     </span>
                   </div>
@@ -350,7 +300,7 @@ export default function ExploreScreen() {
                           backgroundColor: theme.surface,
                           border: isActive ? `2px solid ${COLORS.accent}` : 'none',
                           borderRadius: 12,
-                          color: isActive ? COLORS.accent : theme.textSecondary,
+                          color: isActive ? readableAccent : theme.textSecondary,
                           cursor: 'pointer',
                         }}
                       >
@@ -426,7 +376,7 @@ export default function ExploreScreen() {
                           }}>{u.location || 'Explore Now'}</p>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                             <span style={{ fontSize: 12 }}>🔥</span>
-                            <span style={{ fontSize: 12, fontWeight: 500, color: COLORS.activityHigh }}>Active</span>
+                            <span style={{ fontSize: 12, fontWeight: 500, color: isDark ? '#FF8F9D' : '#B91C1C' }}>Active</span>
                           </div>
                         </div>
                       </Link>

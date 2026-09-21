@@ -80,14 +80,18 @@ export default function ProDashboardScreen() {
     initiateCheckout
   } = useProSubscription();
 
+  const [savingQuote, setSavingQuote] = useState<string | null>(null);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [fullProfile, setFullProfile] = useState<any>(null);
   const [leads, setLeads] = useState<any[]>([]);
+  const [leadsError, setLeadsError] = useState<string | null>(null);
+  const [leadsLoading, setLeadsLoading] = useState(true);
   const [profileCompletion, setProfileCompletion] = useState(0);
 
   // Fetch full profile and leads data
   useEffect(() => {
-    if (!user) return;
+    if (!user) { setLeads([]); setLeadsLoading(false); return; }
 
     async function fetchDashboardData() {
       // Fetch full provider profile (with more fields than the hook provides)
@@ -102,16 +106,24 @@ export default function ProDashboardScreen() {
         setProfileCompletion(calcProfileCompletion(profile));
       }
 
-      // Fetch recent leads if provider exists
+      setLeadsLoading(true);
+      setLeadsError(null);
       if (provider?.id) {
-        const { data: leadsData } = await supabase
-          .from('pro_leads')
-          .select('*')
-          .eq('provider_id', provider.id)
-          .order('created_at', { ascending: false })
-          .limit(5);
-        if (leadsData) setLeads(leadsData);
-      }
+        const { data: leadsData, error } = await supabase
+          .from('pro_request_matches')
+          .select('*, project_request:project_requests(*)')
+          .eq('pro_id', provider.id)
+          .order('created_at', { ascending: false });
+        if (error) { setLeadsError(error.message); setLeads([]); }
+        else setLeads((leadsData || []).map((match: any) => ({
+          ...match,
+          status: match.pro_status,
+          customer_name: match.project_request?.customer_name,
+          service_type: match.project_request?.description,
+          location: [match.project_request?.city, match.project_request?.state].filter(Boolean).join(', '),
+        })));
+      } else setLeads([]);
+      setLeadsLoading(false);
     }
 
     fetchDashboardData();
@@ -139,6 +151,29 @@ export default function ProDashboardScreen() {
     }
   };
 
+  const saveQuote = async (event: React.FormEvent<HTMLFormElement>, leadId: string) => {
+    event.preventDefault();
+    if (!provider?.id || savingQuote) return;
+    const form = new FormData(event.currentTarget);
+    const amount = Math.round(Number(form.get('amount')) * 100);
+    const description = String(form.get('description') || '').trim();
+    setQuoteError(null);
+    if (!Number.isSafeInteger(amount) || amount <= 0 || amount > 2147483647 || !description) {
+      setQuoteError('Enter a positive quote amount and describe what is included.'); return;
+    }
+    setSavingQuote(leadId);
+    try {
+      const { error } = await supabase.from('pro_request_matches').update({
+        pro_status: 'quoted', quote_amount_cents: amount, quote_description: description,
+        pro_responded_at: new Date().toISOString(), updated_at: new Date().toISOString(),
+        quote_valid_until: new Date(Date.now() + 7 * 86400000).toISOString(),
+      }).eq('id', leadId).eq('pro_id', provider.id).select('id').single();
+      if (error) throw error;
+      setLeads(previous => previous.map(lead => lead.id === leadId ? { ...lead, status: 'quoted', quote_description: description } : lead));
+    } catch (error) { setQuoteError(error instanceof Error ? error.message : 'Unable to save your quote.'); }
+    finally { setSavingQuote(null); }
+  };
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -161,7 +196,7 @@ export default function ProDashboardScreen() {
 
   // Computed stats
   const newLeads = leads.filter(l => l.status === 'new' || l.status === 'pending').length;
-  const activeLeads = leads.filter(l => l.status === 'contacted' || l.status === 'in_progress').length;
+  const activeLeads = leads.filter(l => ['viewed', 'contacted', 'quoted'].includes(l.status)).length;
 
   if (rolesLoading || subLoading) {
     return (
@@ -247,7 +282,7 @@ export default function ProDashboardScreen() {
               <div className="stat-header">
                 <div>
                   <p className="stat-label" style={{ color: theme.textSecondary }}>Total Leads</p>
-                  <p className="stat-value" style={{ color: theme.text }}>{leads.length}</p>
+                  <p className="stat-value" style={{ color: theme.text }}>{leadsLoading || leadsError ? '—' : leads.length}</p>
                 </div>
                 <div className="stat-icon" style={{ backgroundColor: '#DBEAFE' }}>
                   <FiMessageSquare size={20} color="#2563EB" />
@@ -262,7 +297,7 @@ export default function ProDashboardScreen() {
               <div className="stat-header">
                 <div>
                   <p className="stat-label" style={{ color: theme.textSecondary }}>Active Leads</p>
-                  <p className="stat-value" style={{ color: theme.text }}>{activeLeads}</p>
+                  <p className="stat-value" style={{ color: theme.text }}>{leadsLoading || leadsError ? '—' : activeLeads}</p>
                 </div>
                 <div className="stat-icon" style={{ backgroundColor: '#FED7AA' }}>
                   <FiTrendingUp size={20} color="#EA580C" />
@@ -307,12 +342,13 @@ export default function ProDashboardScreen() {
             <div className="leads-section">
               <div className="section-header">
                 <div>
-                  <h3 style={{ color: theme.text }}>Recent Leads</h3>
+                  <h3 style={{ color: theme.text }}>Leads</h3>
                   <p className="section-desc" style={{ color: theme.textSecondary }}>Customers looking for your services</p>
                 </div>
               </div>
+              {quoteError && <p role="alert">{quoteError}</p>}
               <div className="leads-list" style={{ backgroundColor: theme.surface }}>
-                {leads.length === 0 ? (
+                {leadsLoading ? <p role="status">Loading leads…</p> : leadsError ? <p role="alert">Unable to load leads: {leadsError}</p> : leads.length === 0 ? (
                   <div className="leads-empty">
                     <FiMessageSquare size={32} color={theme.textSecondary} />
                     <p style={{ color: theme.textSecondary }}>No leads yet</p>
@@ -321,8 +357,8 @@ export default function ProDashboardScreen() {
                     </p>
                   </div>
                 ) : (
-                  leads.slice(0, 5).map((lead) => (
-                    <div key={lead.id} className="lead-row">
+                  leads.map((lead) => (
+                    <details key={lead.id}><summary className="lead-row" style={{ cursor: 'pointer' }}>
                       <div className="lead-avatar">
                         <FiUser size={16} color="#2563EB" />
                       </div>
@@ -350,7 +386,16 @@ export default function ProDashboardScreen() {
                           </span>
                         </div>
                       </div>
-                    </div>
+                    </summary><div style={{ padding: 16 }}>
+                      <p style={{ whiteSpace: 'pre-wrap' }}>{lead.project_request?.description || 'No description supplied.'}</p>
+                      <p>Status: {lead.status}</p>
+                      {lead.quote_description && <p>Quote: {lead.quote_description}</p>}
+                      <form onSubmit={event => saveQuote(event, lead.id)} style={{ display: 'grid', gap: 8 }}>
+                        <label>Quote amount ($) <input name="amount" type="number" min="0.01" step="0.01" required /></label>
+                        <label>What is included <textarea name="description" required /></label>
+                        <button type="submit" disabled={!!savingQuote}>{savingQuote === lead.id ? 'Saving…' : 'Save quote'}</button>
+                      </form>
+                    </div></details>
                   ))
                 )}
               </div>

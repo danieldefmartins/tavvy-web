@@ -1,3 +1,6 @@
+import { useReleaseCopy } from '../../hooks/useReleaseCopy';
+import featureCards from '../../config/featureCards.json';
+import discovery from '../../config/discovery.json';
 /**
  * Home Screen - Main app entry point
  * Pixel-perfect port from tavvy-mobile/screens/HomeScreen.tsx
@@ -25,9 +28,8 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import AppLayout from '../../components/AppLayout';
 import PlaceCard from '../../components/PlaceCard';
-import { fetchPlacesInBounds, searchPlaces, PlaceCard as PlaceCardType } from '../../lib/placeService';
-import { searchPlaces as typesenseSearchPlaces, getAutocompleteSuggestions } from '../../lib/typesenseService';
-import { parseSearchQuery } from '../../lib/smartQueryParser';
+import { fetchPlacesInBounds, PlaceCard as PlaceCardType } from '../../lib/placeService';
+import { DEMO_RESTAURANT_HREF, matchesDemoRestaurantQuery } from '../../lib/demoPlace';
 import Onboarding, { useOnboarding } from '../../components/Onboarding';
 import { spacing, borderRadius, Colors } from '../../constants/Colors';
 import { 
@@ -86,17 +88,7 @@ const exploreItems = [
 
 // Featured carousel — showcases the BREADTH of Tavvy (rides + every other feature)
 // Rides leads, but the rotation makes clear Tavvy is for everyone, not just thrill-seekers.
-const ASSET_BASE = 'https://scasgwrikoqdwlwlwcff.supabase.co/storage/v1/object/public/tavvy-assets/features';
-const featureSlides = [
-  { id: 'rides', tag: 'New', title: 'Rides', subtitle: 'Rate every ride — thrill, wait, theming', icon: '🎢', image: `${ASSET_BASE}/rides.png`, gradient: 'linear-gradient(135deg, #8A05BE 0%, #EC4899 100%)', route: '/app/rides' },
-  { id: 'restaurants', tag: 'Popular', title: 'Restaurants', subtitle: 'Real signals, not star ratings', icon: '🍽️', image: `${ASSET_BASE}/restaurants.png`, gradient: 'linear-gradient(135deg, #EF4444 0%, #F59E0B 100%)', route: '/app/map?category=Restaurants' },
-  { id: 'universes', tag: 'Explore', title: 'Universes', subtitle: 'Theme parks, airports & themed worlds', icon: '🌌', image: `${ASSET_BASE}/universes.png`, gradient: 'linear-gradient(135deg, #6366F1 0%, #8A05BE 100%)', route: '/app/universes' },
-  { id: 'hotels', tag: 'Stay', title: 'Hotels', subtitle: 'Find where to stay, by the signals that matter', icon: '🏨', image: `${ASSET_BASE}/hotels.png`, gradient: 'linear-gradient(135deg, #0EA5E9 0%, #6366F1 100%)', route: '/app/map?category=Hotels' },
-  { id: 'pros', tag: 'Hire', title: 'Pros', subtitle: 'Plumbers, electricians & trusted contractors', icon: '🛠️', image: `${ASSET_BASE}/pros.png`, gradient: 'linear-gradient(135deg, #00C2CB 0%, #6366F1 100%)', route: '/app/pros' },
-  { id: 'cities', tag: 'Discover', title: 'Cities', subtitle: 'Compare livability, food & culture', icon: '🌆', image: `${ASSET_BASE}/cities.png`, gradient: 'linear-gradient(135deg, #8A05BE 0%, #0EA5E9 100%)', route: '/app/cities' },
-  { id: 'atlas', tag: 'Travel', title: 'Atlas', subtitle: 'Bucket-list destinations worldwide', icon: '✈️', image: `${ASSET_BASE}/atlas.png`, gradient: 'linear-gradient(135deg, #F59E0B 0%, #EF4444 100%)', route: '/app/atlas' },
-  { id: 'rv-camping', tag: 'Outdoors', title: 'RV & Camping', subtitle: 'Campgrounds, sites & boondocking', icon: '🏕️', image: `${ASSET_BASE}/rv-camping.png`, gradient: 'linear-gradient(135deg, #00C2CB 0%, #10B981 100%)', route: '/app/rv-camping' },
-];
+const featureSlides = featureCards.map(card => ({ ...card, image: `/images/features-v2/${card.id}.jpg` }));
 
 // Category grid — the mockup's centerpiece. Theme-adaptive monochrome icons.
 const featureGrid = [
@@ -111,35 +103,10 @@ const featureGrid = [
   { id: 'signals', label: 'Signals', Icon: IoRadio, route: '/app/search' },
 ];
 
-// Top contributors mock data
-const topContributors = [
-  { rank: 1, name: 'Sarah M.', taps: 1247, badge: '🥇', streak: 45 },
-  { rank: 2, name: 'Mike R.', taps: 1089, badge: '🥈', streak: 32 },
-  { rank: 3, name: 'Jenny W.', taps: 956, badge: '🥉', streak: 28 },
-  { rank: 4, name: 'Tom C.', taps: 823, badge: '⭐', streak: 21 },
-  { rank: 5, name: 'Lisa K.', taps: 712, badge: '⭐', streak: 18 },
-];
-
-// Mock stories data
-const mockStories = [
-  { id: '1', name: 'Your Story', image: null, isUser: true },
-  { id: '2', name: 'Cafe Luna', image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=100&h=100&fit=crop', hasNew: true },
-  { id: '3', name: 'The Grill', image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=100&h=100&fit=crop', hasNew: true },
-  { id: '4', name: 'Brew Co', image: 'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?w=100&h=100&fit=crop', hasNew: false },
-  { id: '5', name: 'Pizza Place', image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=100&h=100&fit=crop', hasNew: true },
-];
-
-// Mock happening now data
-const mockHappeningNow = [
-  { id: '1', title: 'Happy Hour at The Pub', subtitleKey: 'hoursLeft', subtitleValue: '2', image: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=400&h=300&fit=crop', type: 'event' },
-  { id: '2', title: 'Live Music Tonight', subtitleKey: 'startsAt', subtitleValue: '8 PM', image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=300&fit=crop', type: 'event' },
-  { id: '3', title: 'Food Truck Festival', subtitleKey: 'allDayToday', subtitleValue: '', image: 'https://images.unsplash.com/photo-1565123409695-7b5ef63a2efb?w=400&h=300&fit=crop', type: 'event' },
-];
-
 // Search suggestion interface
 interface SearchSuggestion {
   id: string;
-  type: 'place' | 'category' | 'recent';
+  type: 'place' | 'category' | 'recent' | 'demo';
   title: string;
   subtitle: string;
   icon: string;
@@ -149,7 +116,8 @@ interface SearchSuggestion {
 // Location fallback is handled by IP geolocation - see getLocationFromIP()
 
 export default function HomeScreen() {
-  const { theme, isDark, setThemeMode } = useThemeContext();
+  const copy = useReleaseCopy();
+  const { theme, isDark } = useThemeContext();
   const { user } = useAuth();
   const { t } = useTranslation('common');
   const router = useRouter();
@@ -160,11 +128,12 @@ export default function HomeScreen() {
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
 
   // View mode
-  const [viewMode, setViewMode] = useState<'standard' | 'map'>('standard');
+  const [viewMode, setViewMode] = useState<'standard' | 'map'>("standard");
   
   // Data states
   const [places, setPlaces] = useState<PlaceCardType[]>([]);
   const [trendingPlaces, setTrendingPlaces] = useState<PlaceCardType[]>([]);
+  const [nearbyError, setNearbyError] = useState(false);
   const [loading, setLoading] = useState(true);
   
   // Search states
@@ -184,16 +153,24 @@ export default function HomeScreen() {
   // Featured carousel (rides + all Tavvy features)
   const [activeSlide, setActiveSlide] = useState(0);
   const [carouselPaused, setCarouselPaused] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setReduceMotion(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
   const carouselTouchX = useRef<number | null>(null);
 
   // Auto-advance the carousel every 4.5s unless paused (hover / touch)
   useEffect(() => {
-    if (carouselPaused) return;
+    if (carouselPaused || reduceMotion) return;
     const id = setInterval(() => {
       setActiveSlide((s) => (s + 1) % featureSlides.length);
     }, 4500);
     return () => clearInterval(id);
-  }, [carouselPaused]);
+  }, [carouselPaused, reduceMotion]);
 
   const goToSlide = useCallback((i: number) => {
     setActiveSlide(((i % featureSlides.length) + featureSlides.length) % featureSlides.length);
@@ -236,68 +213,16 @@ export default function HomeScreen() {
     return null;
   };
 
-  // Get user location with IP-based fallback
+  // Never present a guessed fallback city as the user's current location.
   useEffect(() => {
-    let locationTimeout: NodeJS.Timeout;
-    let locationResolved = false;
-
-    const setLocationFromIP = async () => {
-      if (locationResolved) return;
-      
-      console.log('[Location] Trying IP-based geolocation...');
-      const ipLocation = await getLocationFromIP();
-      
-      if (!locationResolved) {
-        locationResolved = true;
-        if (ipLocation) {
-          setUserLocation(ipLocation.coords);
-          setLocationName(ipLocation.city);
-        } else {
-          // Ultimate fallback if IP geolocation also fails
-          console.log('[Location] All methods failed, using New York as fallback');
-          setUserLocation([-74.006, 40.7128]); // New York
-          setLocationName('New York, NY');
-        }
-      }
-    };
-
-    // Set a timeout - if browser geolocation takes too long, try IP-based
-    locationTimeout = setTimeout(() => {
-      console.log('[Location] Browser geolocation timeout - trying IP fallback');
-      setLocationFromIP();
-    }, 5000); // 5 second timeout
-
-    if (typeof navigator !== 'undefined' && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          clearTimeout(locationTimeout);
-          if (!locationResolved) {
-            locationResolved = true;
-            const loc: [number, number] = [position.coords.longitude, position.coords.latitude];
-            console.log('[Location] Browser geolocation success:', loc);
-            setUserLocation(loc);
-            reverseGeocode(loc);
-          }
-        },
-        async (error) => {
-          clearTimeout(locationTimeout);
-          console.log('[Location] Browser geolocation error:', error.message);
-          await setLocationFromIP();
-        },
-        {
-          enableHighAccuracy: false,
-          timeout: 4000,
-          maximumAge: 300000 // 5 minutes cache
-        }
-      );
-    } else {
-      clearTimeout(locationTimeout);
-      setLocationFromIP();
-    }
-
-    return () => {
-      clearTimeout(locationTimeout);
-    };
+    let cancelled = false;
+    if (!navigator.geolocation) { setLocationName('Choose a city'); return; }
+    navigator.geolocation.getCurrentPosition(position => {
+      if (cancelled) return;
+      const loc: [number, number] = [position.coords.longitude, position.coords.latitude];
+      setUserLocation(loc); reverseGeocode(loc);
+    }, () => { if (!cancelled) setLocationName('Choose a city'); }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
+    return () => { cancelled = true; };
   }, []);
 
   // Reverse geocode to get location name
@@ -331,6 +256,7 @@ export default function HomeScreen() {
     }
     
     console.log('[Places] Fetching places near:', userLocation);
+    setNearbyError(false);
     setLoading(true);
     try {
       const bounds = {
@@ -354,6 +280,7 @@ export default function HomeScreen() {
       setTrendingPlaces(fetchedPlaces.slice(0, 10));
     } catch (error) {
       console.error('[Places] Error fetching places:', error);
+      setNearbyError(true);
     } finally {
       setLoading(false);
     }
@@ -370,10 +297,14 @@ export default function HomeScreen() {
       return;
     }
 
+    let cancelled = false;
     // Debounce search by 300ms
     searchDebounceRef.current = setTimeout(async () => {
       const suggestions: SearchSuggestion[] = [];
       const query = searchQuery.toLowerCase();
+      if (matchesDemoRestaurantQuery(searchQuery)) {
+        suggestions.push({ id: 'demo-restaurant', type: 'demo', title: 'Trattoria Tavvy', subtitle: 'Italian restaurant · Illustrative demo', icon: "location" });
+      }
 
       // Search for matching categories
       const matchingCategories = SEARCHABLE_CATEGORIES
@@ -383,7 +314,7 @@ export default function HomeScreen() {
       matchingCategories.forEach(cat => {
         suggestions.push({
           id: `category-${cat.name}`,
-          type: 'category',
+          type: "category",
           title: cat.name,
           subtitle: t('search.category'),
           icon: cat.icon,
@@ -391,29 +322,23 @@ export default function HomeScreen() {
         });
       });
 
-      // Parse query for location keywords (e.g., "pizza near Orlando, FL")
-      const parsed = parseSearchQuery(searchQuery);
-
-      // Search for matching places using Typesense
+      // Use the same search endpoint as the results page and map.
       try {
-        const typesenseResults = await typesenseSearchPlaces({
-          query: parsed.isParsed ? parsed.placeName : searchQuery,
-          latitude: userLocation?.[1],
-          longitude: userLocation?.[0],
-          radiusKm: parsed.isParsed ? undefined : 50,
-          locality: parsed.city,
-          region: parsed.region,
-          country: parsed.country,
-          limit: 5,
-        });
-
-        typesenseResults.places.forEach(place => {
+        const params = new URLSearchParams({ q: searchQuery, limit: '5', evidence: 'defer' });
+        if (userLocation) {
+          params.set('userLat', String(userLocation[1]));
+          params.set('userLng', String(userLocation[0]));
+        }
+        const response = await fetch(`/api/search?${params}`);
+        if (!response.ok) throw new Error(`Search failed: ${response.status}`);
+        const payload = await response.json();
+        (payload.suggestions || []).forEach((place: any) => {
           suggestions.push({
-            id: `place-${place.fsq_place_id}`,
-            type: 'place',
+            id: `place-${place.id}`,
+            type: "place",
             title: place.name,
-            subtitle: `${place.category || t('search.place')} • ${place.locality || t('search.nearby')}`,
-            icon: 'location',
+            subtitle: `${place.category || t('search.place')} • ${place.city || t('search.nearby')}`,
+            icon: "location",
             data: place,
           });
         });
@@ -421,10 +346,11 @@ export default function HomeScreen() {
         console.error('[Search] Typesense search error:', error);
       }
 
-      setSearchSuggestions(suggestions);
-    }, 300);
+      if (!cancelled) setSearchSuggestions(suggestions);
+    }, 180);
 
     return () => {
+      cancelled = true;
       if (searchDebounceRef.current) {
         clearTimeout(searchDebounceRef.current);
       }
@@ -432,54 +358,9 @@ export default function HomeScreen() {
   }, [searchQuery, userLocation]);
 
   // Handle search submission
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) {
-      fetchNearbyPlaces();
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // Parse query for location keywords (e.g., "pizza near Orlando, FL")
-      const parsed = parseSearchQuery(searchQuery.trim());
-
-      if (parsed.isParsed && (parsed.city || parsed.region)) {
-        // Use Typesense with parsed location filters
-        const typesenseResults = await typesenseSearchPlaces({
-          query: parsed.placeName,
-          locality: parsed.city,
-          region: parsed.region,
-          country: parsed.country,
-          limit: 50,
-        });
-        // Transform to PlaceCard format for display
-        const results = typesenseResults.places.map(p => ({
-          id: p.id,
-          source: p.id.startsWith('tavvy:') ? 'places' : 'fsq_raw',
-          source_id: p.fsq_place_id,
-          name: p.name,
-          latitude: p.latitude,
-          longitude: p.longitude,
-          address: p.address,
-          city: p.locality,
-          region: p.region,
-          country: p.country,
-          category: p.category,
-          subcategory: p.subcategory,
-          phone: p.tel,
-          website: p.website,
-          distance: p.distance,
-        }));
-        setPlaces(results as any);
-      } else {
-        const results = await searchPlaces(searchQuery, userLocation);
-        setPlaces(results);
-      }
-    } catch (error) {
-      console.error('Search error:', error);
-    } finally {
-      setLoading(false);
-    }
+  const handleSearch = (query = searchQuery) => {
+    if (!query.trim()) return;
+    router.push({ pathname: '/app/search', query: { q: query.trim(), ...(userLocation ? { location: 'current', lat: String(userLocation[1]), lng: String(userLocation[0]) } : {}) } }, undefined, { locale });
   };
 
   // Handle category selection
@@ -498,26 +379,26 @@ export default function HomeScreen() {
     setSearchSuggestions([]);
     
     switch (suggestion.type) {
-      case 'place':
+      case 'demo':
+        router.push(DEMO_RESTAURANT_HREF, undefined, { locale });
+        break;
+      case "place":
         // Navigate to place details
         const place = suggestion.data;
-        if (place.fsq_place_id) {
-          // Use fsq: prefix for consistency
-          console.log('[HomeScreen] Navigating to place:', place.fsq_place_id);
-          router.push(`/app/place/fsq:${place.fsq_place_id}`, undefined, { locale });
-        } else if (place.id) {
-          console.log('[HomeScreen] Navigating to place by ID:', place.id);
-          router.push(`/app/place/${place.id}`, undefined, { locale });
+        if (place.id) {
+          router.push(`/app/place/${encodeURIComponent(place.id)}`, undefined, { locale });
+        } else if (place.fsq_place_id) {
+          router.push(`/app/place/${encodeURIComponent(`fsq:${place.fsq_place_id}`)}`, undefined, { locale });
         }
         break;
-      case 'category':
+      case "category":
         // Navigate to map with category filter
         const categoryName = suggestion.data.name;
         router.push(`/app/map?category=${encodeURIComponent(categoryName)}`);
         break;
-      case 'recent':
+      case "recent":
         setSearchQuery(suggestion.title);
-        handleSearch();
+        handleSearch(suggestion.title);
         break;
     }
   };
@@ -528,8 +409,11 @@ export default function HomeScreen() {
   };
 
   // Render
-  const bgColor = isDark ? BG_DARK : BG_LIGHT;
+  const bgColor = isDark ? discovery.darkBackground : discovery.background;
   const textColor = isDark ? '#fff' : ACCENT;
+  // Opaque text tokens preserve contrast on both page and raised search/card surfaces.
+  const secondaryText = isDark ? '#BDB1CD' : '#62546F';
+  const accentText = isDark ? '#43D8CA' : '#006B72';
 
   return (
     <AppLayout>
@@ -545,24 +429,18 @@ export default function HomeScreen() {
               <div className="hero-header-top">
                 <img
                   src={isDark ? '/tavvy-logo-white.png' : '/tavvy-logo-dark.png'}
-                  alt="Tavvy"
+                  alt={copy("Tavvy")}
                   className="hero-logo"
                 />
-                <button
-                  className="theme-toggle-btn"
-                  onClick={() => setThemeMode(isDark ? 'light' : 'dark')}
-                >
-                  {isDark ? '🌙' : '🌞'}
-                </button>
               </div>
 
               <div className="hero-greeting">
                 <span className="hero-greeting-time">{greeting}</span>
-                <h1 className="hero-greeting-name">{t('home.greetingName')}</h1>
+                <h1 className="hero-greeting-name">{copy(discovery.title)}</h1>
               </div>
 
               <p className="hero-headline">
-                What are you looking for <span className="hero-highlight">today</span>?
+                {copy(discovery.subtitle)}
               </p>
 
               {/* Search */}
@@ -571,6 +449,7 @@ export default function HomeScreen() {
                 <IoSearch size={20} className="search-icon" />
                 <input
                   type="text"
+                  aria-label={t('home.searchPlaceholder')}
                   placeholder={t('home.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -581,7 +460,7 @@ export default function HomeScreen() {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       const q = searchQuery.trim();
-                      if (q) router.push(`/app/map?q=${encodeURIComponent(q)}`, undefined, { locale });
+                      if (q) handleSearch(q);
                     }
                   }}
                   className="search-input"
@@ -632,25 +511,25 @@ export default function HomeScreen() {
               <div className="hero-quick-actions">
                 <button className="hero-action" onClick={switchToMapMode}>
                   <div className="hero-action-icon" style={{ background: 'rgba(0, 194, 203, 0.12)' }}>
-                    <IoLocationSharp size={20} color="#00C2CB" />
+                    <IoLocationSharp size={20} color={isDark ? '#5EEAEF' : '#007F86'} />
                   </div>
                   <span>{t('home.nearMe')}</span>
                 </button>
                 <button className="hero-action" onClick={switchToMapMode}>
                   <div className="hero-action-icon" style={{ background: 'rgba(138, 5, 190, 0.12)' }}>
-                    <FiMapPin size={20} color="#8A05BE" />
+                    <FiMapPin size={20} color={isDark ? '#D4A0FF' : '#7905A8'} />
                   </div>
                   <span>{t('home.map')}</span>
                 </button>
                 <button className="hero-action" onClick={() => router.push('/app/search', undefined, { locale })}>
                   <div className="hero-action-icon" style={{ background: 'rgba(0, 194, 203, 0.12)' }}>
-                    <IoSparkles size={20} color="#00C2CB" />
+                    <IoSparkles size={20} color={isDark ? '#5EEAEF' : '#007F86'} />
                   </div>
-                  <span>{t('home.signals', 'Signals')}</span>
+                  <span>{t('home.signals', "Signals")}</span>
                 </button>
                 <button className="hero-action" onClick={() => router.push('/app/saved', undefined, { locale })}>
                   <div className="hero-action-icon" style={{ background: 'rgba(138, 5, 190, 0.12)' }}>
-                    <IoHeart size={20} color="#8A05BE" />
+                    <IoHeart size={20} color={isDark ? '#D4A0FF' : '#7905A8'} />
                   </div>
                   <span>{t('home.saved')}</span>
                 </button>
@@ -660,6 +539,9 @@ export default function HomeScreen() {
             {/* Featured Carousel — rides + every Tavvy feature (broad appeal) */}
             <section
               className="feature-carousel"
+              aria-label="Discover Tavvy"
+              onFocusCapture={() => setCarouselPaused(true)}
+              onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node)) setCarouselPaused(false); }}
               onMouseEnter={() => setCarouselPaused(true)}
               onMouseLeave={() => setCarouselPaused(false)}
               onTouchStart={(e) => { carouselTouchX.current = e.touches[0].clientX; setCarouselPaused(true); }}
@@ -674,26 +556,22 @@ export default function HomeScreen() {
               }}
             >
               <div className="feature-carousel-track" style={{ transform: `translateX(-${activeSlide * 100}%)` }}>
-                {featureSlides.map((slide) => (
+                {featureSlides.map((slide, index) => (
                   <button
                     key={slide.id}
                     className="feature-slide"
-                    style={{ background: slide.gradient }}
+                    tabIndex={index === activeSlide ? 0 : -1}
+                    aria-hidden={index !== activeSlide}
                     onClick={() => router.push(slide.route, undefined, { locale })}
-                    aria-label={`${slide.title} — ${slide.subtitle}`}
+                    aria-label={`${copy(slide.title)} — ${copy(slide.subtitle)}`}
                   >
-                    <span className="feature-slide-bg" style={{ backgroundImage: `url(${slide.image})` }} />
-                    <span className="feature-slide-tint" style={{ background: slide.gradient }} />
-                    <span className="feature-slide-scrim" />
-                    <span className="feature-slide-tag">{slide.tag}</span>
-                    <div className="feature-slide-body">
-                      <span className="feature-slide-icon">{slide.icon}</span>
-                      <div className="feature-slide-text">
-                        <h2 className="feature-slide-title">{slide.title}</h2>
-                        <p className="feature-slide-subtitle">{slide.subtitle}</p>
-                      </div>
+                    <span className="feature-slide-photo"><img src={index === activeSlide || index === (activeSlide + 1) % featureSlides.length ? slide.image : undefined} alt="" loading={index === 0 ? 'eager' : 'lazy'} /></span>
+                    <div className="feature-slide-copy">
+                      <span className="feature-slide-tag">{copy(slide.tag)}</span>
+                      <h2 className="feature-slide-title">{copy(slide.title)}</h2>
+                      <p className="feature-slide-subtitle">{copy(slide.subtitle)}</p>
+                      <span className="feature-slide-cta">{copy("Explore")}<IoChevronForward size={16} /></span>
                     </div>
-                    <span className="feature-slide-cta">Explore <IoChevronForward size={16} /></span>
                   </button>
                 ))}
               </div>
@@ -701,9 +579,10 @@ export default function HomeScreen() {
                 {featureSlides.map((slide, i) => (
                   <button
                     key={slide.id}
+                    aria-pressed={i === activeSlide}
                     className={`feature-dot ${i === activeSlide ? 'active' : ''}`}
                     onClick={() => goToSlide(i)}
-                    aria-label={`Go to ${slide.title}`}
+                    aria-label={`Go to ${copy(slide.title)}`}
                   />
                 ))}
               </div>
@@ -711,20 +590,41 @@ export default function HomeScreen() {
 
             {/* Category Grid — explore all of Tavvy (theme-adaptive icons) */}
             <section className="feature-grid-section">
-              <h2 className="section-title">{t('home.exploreTavvy', 'Explore Tavvy')}</h2>
+              <div className="section-header"><h2 className="section-title">{t('home.exploreTavvy', "Explore Tavvy")}</h2><Link href="/app/apps" locale={locale} className="see-all">{copy('All tools')} <IoChevronForward /></Link></div>
               <div className="feature-grid">
-                {featureGrid.map((item) => (
+                {featureGrid.slice(0, 6).map((item) => (
                   <button
                     key={item.id}
                     className="feature-grid-tile"
                     onClick={() => router.push(item.route, undefined, { locale })}
-                    aria-label={item.label}
+                    aria-label={copy(item.label)}
                   >
                     <span className="feature-grid-icon"><item.Icon size={24} /></span>
-                    <span className="feature-grid-label">{item.label}</span>
+                    <span className="feature-grid-label">{copy(item.label)}</span>
                   </button>
                 ))}
               </div>
+            </section>
+
+            <section className="places-discovery" aria-labelledby="places-discovery-title">
+              <div className="section-header">
+                <h2 id="places-discovery-title" className="section-title">{copy('Places to explore')}</h2>
+                <Link href="/app/map" locale={locale} className="see-all">{t('home.openMap', 'Open map')} <IoChevronForward /></Link>
+              </div>
+              {loading && userLocation ? <p role="status">{t('home.findingPlaces', 'Finding places around you…')}</p> : nearbyError ? (
+                <p role="status">{t('home.placesLoadError', 'We couldn’t load places.')} <button onClick={fetchNearbyPlaces}>{t('common.retry', "Try again")}</button></p>
+              ) : trendingPlaces.length ? (
+                <div className="places-discovery-grid">
+                  {trendingPlaces.slice(0, 3).map(place => {
+                    const photo = place.photo_url || place.cover_image_url || place.photos?.[0];
+                    const identifier = place.source === 'fsq_raw' ? `fsq:${place.source_id || place.id}` : place.id;
+                    return <Link key={place.id} href={`/app/place/${encodeURIComponent(identifier)}`} locale={locale} className="place-discovery-card">
+                      <div className="place-discovery-photo"><IoLocationSharp aria-hidden="true" size={32} />{photo && <img src={photo} alt="" loading="lazy" onError={event => { event.currentTarget.style.display = "none"; }} />}</div>
+                      <div className="place-discovery-copy"><h3>{place.name}</h3><p>{[place.category, place.city].filter(Boolean).join(' · ')}</p></div>
+                    </Link>;
+                  })}
+                </div>
+              ) : <p>{t('home.exploreMapPrompt', 'Open the map or search above to find your next stop.')}</p>}
             </section>
 
             {/* Onboarding Banner — optional, non-blocking */}
@@ -767,10 +667,6 @@ export default function HomeScreen() {
                   className="mood-card mood-card-hungry"
                   onClick={() => router.push('/app/map?category=Restaurants', undefined, { locale })}
                 >
-                  <div className="mood-badge">
-                    <span className="mood-badge-icon">🔥</span>
-                    <span className="mood-badge-text">{t('home.popular')}</span>
-                  </div>
                   <div className="mood-emoji">🍕</div>
                   <div className="mood-content">
                     <h3 className="mood-title">{t('home.hungry')}</h3>
@@ -781,10 +677,6 @@ export default function HomeScreen() {
                   className="mood-card mood-card-thirsty"
                   onClick={() => router.push('/app/map?category=Bars', undefined, { locale })}
                 >
-                  <div className="mood-badge">
-                    <span className="mood-badge-icon">📈</span>
-                    <span className="mood-badge-text">{t('home.trending')}</span>
-                  </div>
                   <div className="mood-emoji">🍸</div>
                   <div className="mood-content">
                     <h3 className="mood-title">{t('home.thirsty')}</h3>
@@ -794,43 +686,14 @@ export default function HomeScreen() {
               </div>
             </section>
 
-            {/* Live Now Section */}
-            <section className="section">
-              <div className="section-header">
-                <h2>{t('home.liveNow')}</h2>
-                <Link href="/app/explore" locale={locale} className="see-all">
-                  {t('common.seeMore')} <IoChevronForward size={16} />
-                </Link>
-              </div>
-              <div className="happening-scroll">
-                {mockHappeningNow.map((item) => (
-                  <div key={item.id} className="happening-card">
-                    <div 
-                      className="happening-image"
-                      style={{ backgroundImage: `url(${item.image})` }}
-                    />
-                    <div className="happening-content">
-                      <h3>{item.title}</h3>
-                      <p>{item.subtitleValue ? `${item.subtitleKey}: ${item.subtitleValue}` : item.subtitleKey}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Explore Something New - iOS Style */}
-            <div className="explore-new-card">
-              <div className="explore-new-header">
-                <span className="explore-sparkles">✨</span>
-                <span className="explore-count">3 {t('home.experiencesNearby')}</span>
-              </div>
+            <Link href="/app/happening-now" locale={locale} className="explore-new-card">
+              <div className="explore-new-header"><span className="explore-sparkles">✦</span><span>Make a little room for discovery</span></div>
               <h3 className="explore-new-title">{t('home.exploreSomethingNew')}</h3>
-              <p className="explore-new-subtitle">{t('home.eventsActivities')}</p>
-              <div className="explore-new-icon">🌟</div>
-            </div>
+              <p className="explore-new-subtitle">{t('home.eventsActivities')} <IoChevronForward /></p>
+            </Link>
 
             {/* Explore Tavvy */}
-            <section className="section explore-section" style={{ display: 'none' }}>
+            <section className="section explore-section" style={{ display: "none" }}>
               <div className="section-header">
                 <h2>{t('home.exploreTavvy')}</h2>
                 <Link href="/app/explore" locale={locale} className="see-all">
@@ -875,35 +738,6 @@ export default function HomeScreen() {
               </div>
             </section>
 
-            {/* Top Contributors */}
-            <section className="section">
-              <div className="section-header">
-                <h2>🏆 {t('home.topContributors')}</h2>
-                {/* See All button removed - LeaderboardScreen not yet implemented */}
-              </div>
-              <p className="section-subtitle">{t('home.communityMembers')}</p>
-              <div className="leaderboard-card">
-                {topContributors.map((user, index) => (
-                  <div key={user.rank} className="leaderboard-row">
-                    <div className="leaderboard-left">
-                      <span className="leaderboard-badge">{user.badge}</span>
-                      <div className="leaderboard-avatar">
-                        <span>{user.name.charAt(0)}</span>
-                      </div>
-                      <div className="leaderboard-info">
-                        <span className="leaderboard-name">{user.name}</span>
-                        <span className="leaderboard-streak">🔥 {user.streak} {t('home.dayStreak')}</span>
-                      </div>
-                    </div>
-                    <div className="leaderboard-right">
-                      <span className="leaderboard-taps">{user.taps.toLocaleString()}</span>
-                      <span className="leaderboard-label">{t('home.taps')}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
             {/* Bottom Spacing */}
             <div className="bottom-spacing" />
           </main>
@@ -915,9 +749,19 @@ export default function HomeScreen() {
             background-color: ${bgColor};
           }
 
+          button:focus-visible, a:focus-visible, input:focus-visible {
+            outline: 3px solid ${isDark ? '#00C2CB' : '#8A05BE'};
+            outline-offset: 4px;
+          }
+          @media (min-width: 760px) {
+            .hero-search { max-width: 740px; }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { transition: none !important; animation: none !important; }
+          }
           /* Hero Header */
           .hero-header {
-            padding: 20px 0 28px;
+            padding: 30px 0 32px;
             position: relative;
           }
 
@@ -929,26 +773,8 @@ export default function HomeScreen() {
           }
 
           .hero-logo {
-            height: 28px;
+            height: 34px;
             width: auto;
-          }
-
-          .theme-toggle-btn {
-            background: ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'};
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            cursor: pointer;
-            transition: all 0.2s;
-          }
-
-          .theme-toggle-btn:hover {
-            background: ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'};
           }
 
           .hero-greeting {
@@ -958,13 +784,15 @@ export default function HomeScreen() {
           .hero-greeting-time {
             font-size: 14px;
             font-weight: 500;
-            color: ${isDark ? 'rgba(255,255,255,0.45)' : '#999'};
+            color: ${isDark ? '#BDB1CD' : '#6C5D7B'};
             display: block;
             margin-bottom: 2px;
           }
 
           .hero-greeting-name {
-            font-size: 28px;
+            font-size: clamp(32px, 5vw, 52px);
+            line-height: 1.1;
+            max-width: 720px;
             font-weight: 800;
             color: ${isDark ? '#fff' : ACCENT};
             margin: 0;
@@ -973,13 +801,13 @@ export default function HomeScreen() {
 
           .hero-headline {
             font-size: 17px;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#888'};
+            color: ${isDark ? '#BDB1CD' : '#6C5D7B'};
             font-weight: 400;
             margin: 4px 0 20px;
           }
 
           .hero-highlight {
-            color: ${TEAL};
+            color: ${accentText};
             font-weight: 600;
           }
 
@@ -987,24 +815,25 @@ export default function HomeScreen() {
           .hero-search {
             display: flex;
             align-items: center;
-            background: ${isDark ? 'rgba(255,255,255,0.10)' : '#F5F5F5'};
+            background: ${isDark ? 'rgba(255,255,255,0.10)' : '#FFFFFF'};
             border-radius: 16px;
             padding: 0 16px;
             height: 52px;
             margin-bottom: 20px;
-            border: 1px solid ${isDark ? 'rgba(255,255,255,0.20)' : 'transparent'};
-            box-shadow: ${isDark ? '0 2px 10px rgba(0,0,0,0.35)' : 'none'};
-            transition: border-color 0.2s, background 0.2s;
+            border: 1px solid ${isDark ? 'rgba(255,255,255,0.20)' : '#998DA5'};
+            box-shadow: ${isDark ? '0 2px 10px rgba(0,0,0,0.35)' : '0 5px 16px rgba(23,1,58,0.10), 0 1px 3px rgba(23,1,58,0.06)'};
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
             position: relative;
           }
 
           .hero-search:focus-within {
-            border-color: ${isDark ? 'rgba(138, 5, 190, 0.7)' : 'rgba(138, 5, 190, 0.3)'};
-            background: ${isDark ? 'rgba(255,255,255,0.13)' : '#F5F5F5'};
+            border-color: ${isDark ? 'rgba(138, 5, 190, 0.7)' : '#8A05BE'};
+            background: ${isDark ? 'rgba(255,255,255,0.13)' : '#FFFFFF'};
+            box-shadow: ${isDark ? '0 2px 10px rgba(0,0,0,0.35)' : '0 0 0 3px rgba(138,5,190,0.12), 0 5px 16px rgba(23,1,58,0.10)'};
           }
 
-          .hero-search .search-icon {
-            color: ${isDark ? 'rgba(255,255,255,0.6)' : '#999'};
+          .hero-search :global(.search-icon) {
+            color: ${secondaryText};
             flex-shrink: 0;
           }
 
@@ -1020,13 +849,14 @@ export default function HomeScreen() {
           }
 
           .hero-search .search-input::placeholder {
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#999'};
+            opacity: 1;
+            color: ${secondaryText};
           }
 
           .hero-search .clear-btn {
             background: none;
             border: none;
-            color: ${isDark ? 'rgba(255,255,255,0.4)' : '#999'};
+            color: ${secondaryText};
             cursor: pointer;
             padding: 4px;
             display: flex;
@@ -1069,7 +899,7 @@ export default function HomeScreen() {
           .hero-action span {
             font-size: 12px;
             font-weight: 600;
-            color: ${isDark ? 'rgba(255,255,255,0.6)' : '#666'};
+            color: ${secondaryText};
           }
 
           /* Autocomplete below search */
@@ -1097,8 +927,8 @@ export default function HomeScreen() {
             margin-bottom: 16px;
           }
 
-          .search-input-wrapper .search-icon {
-            color: ${isDark ? 'rgba(255,255,255,0.4)' : '#999'};
+          .search-input-wrapper :global(.search-icon) {
+            color: ${secondaryText};
             margin-right: 12px;
           }
 
@@ -1112,13 +942,14 @@ export default function HomeScreen() {
           }
 
           .search-input::placeholder {
-            color: ${isDark ? 'rgba(255,255,255,0.4)' : '#999'};
+            opacity: 1;
+            color: ${secondaryText};
           }
 
           .clear-btn {
             background: none;
             border: none;
-            color: ${isDark ? 'rgba(255,255,255,0.4)' : '#999'};
+            color: ${secondaryText};
             cursor: pointer;
             padding: 4px;
             display: flex;
@@ -1127,7 +958,7 @@ export default function HomeScreen() {
           }
 
           .clear-btn:hover {
-            color: ${isDark ? 'rgba(255,255,255,0.6)' : '#666'};
+            color: ${secondaryText};
           }
 
           /* Autocomplete Dropdown */
@@ -1155,7 +986,7 @@ export default function HomeScreen() {
           }
 
           .suggestion-icon {
-            color: ${TEAL};
+            color: ${accentText};
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1174,7 +1005,7 @@ export default function HomeScreen() {
 
           .suggestion-subtitle {
             font-size: 13px;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#666'};
+            color: ${secondaryText};
           }
 
           /* Quick Actions - iOS Style */
@@ -1215,7 +1046,7 @@ export default function HomeScreen() {
           .quick-action-btn span {
             font-size: 12px;
             font-weight: 500;
-            color: ${isDark ? 'rgba(255,255,255,0.7)' : '#666'};
+            color: ${secondaryText};
           }
 
           /* Mood Section - iOS Style */
@@ -1235,104 +1066,26 @@ export default function HomeScreen() {
             will-change: transform;
           }
           .feature-slide {
-            position: relative;
-            flex: 0 0 100%;
-            min-width: 100%;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            text-align: left;
-            aspect-ratio: 3 / 2;
-            padding: 18px 20px;
-            border: none;
-            border-radius: 22px;
-            cursor: pointer;
-            color: #fff;
-            overflow: hidden;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            flex: 0 0 100%; min-width: 100%; display: grid; grid-template-columns: 1.3fr 1fr;
+            padding: 0; border: 1px solid ${theme.border}; border-radius: 22px; overflow: hidden;
+            text-align: left; cursor: pointer; color: ${theme.text}; background: ${theme.surface};
+            box-shadow: 0 8px 24px rgba(30, 15, 45, 0.07);
           }
-          .feature-slide:active {
-            transform: scale(0.99);
-          }
-          .feature-slide::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(120% 120% at 100% 0%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0) 45%);
-            pointer-events: none;
-          }
-          .feature-slide-bg {
-            position: absolute;
-            inset: 0;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            z-index: 0;
-            pointer-events: none;
-          }
-          .feature-slide-tint {
-            position: absolute;
-            inset: 0;
-            opacity: 0.18;
-            mix-blend-mode: multiply;
-            z-index: 0;
-            pointer-events: none;
-          }
-          .feature-slide-scrim {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, rgba(0,0,0,0) 22%, rgba(0,0,0,0.62) 100%);
-            z-index: 0;
-            pointer-events: none;
-          }
-          .feature-slide-tag {
-            align-self: flex-start;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.4px;
-            text-transform: uppercase;
-            padding: 5px 11px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.22);
-            backdrop-filter: blur(4px);
-            z-index: 1;
-          }
-          .feature-slide-body {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            z-index: 1;
-          }
-          .feature-slide-icon {
-            font-size: 46px;
-            line-height: 1;
-            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
-          }
-          .feature-slide-title {
-            font-size: 26px;
-            font-weight: 800;
-            margin: 0;
-            letter-spacing: -0.5px;
-          }
-          .feature-slide-subtitle {
-            font-size: 14px;
-            margin: 3px 0 0;
-            opacity: 0.92;
-            line-height: 1.3;
-          }
-          .feature-slide-cta {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            align-self: flex-start;
-            font-size: 14px;
-            font-weight: 700;
-            padding: 8px 14px;
-            border-radius: 999px;
-            background: rgba(0, 0, 0, 0.22);
-            z-index: 1;
+          .feature-slide-photo { display: block; height: 320px; background: ${isDark ? '#30223F' : '#F1EDF6'}; }
+          .feature-slide-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+          .feature-slide-copy { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 30px; }
+          .feature-slide-tag { color: ${theme.accent}; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+          .feature-slide-title { color: ${theme.text}; font-size: 30px; font-weight: 750; line-height: 1.15; margin: 0 0 10px; letter-spacing: -0.6px; }
+          .feature-slide-subtitle { color: ${theme.textSecondary}; font-size: 16px; line-height: 1.5; margin: 0; }
+          .feature-slide-cta { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 700; margin-top: 22px; color: ${theme.accent}; }
+          @media (max-width: 560px) {
+            .feature-slide { grid-template-columns: 1fr; }
+            .feature-slide-photo { height: 200px; }
+            .feature-slide-copy { padding: 20px; }
+            .feature-slide-title { font-size: 24px; }
+            .feature-slide-subtitle { font-size: 14px; }
+            .feature-slide-tag { margin-bottom: 8px; }
+            .feature-slide-cta { margin-top: 14px; }
           }
           .feature-dots {
             display: flex;
@@ -1341,18 +1094,29 @@ export default function HomeScreen() {
             margin-top: 14px;
           }
           .feature-dot {
-            width: 7px;
-            height: 7px;
-            padding: 0;
-            border: none;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.25);
-            cursor: pointer;
-            transition: width 0.3s ease, background 0.3s ease;
+            width: 36px; height: 44px; padding: 0; border: none;
+            background: transparent; cursor: pointer; display: grid; place-items: center;
           }
-          .feature-dot.active {
-            width: 22px;
-            background: #8A05BE;
+          .feature-dot::after {
+            content: ''; width: 7px; height: 7px; border-radius: 99px;
+            background: ${isDark ? '#A99CB8' : '#877494'};
+          }
+          .feature-dot.active::after { width: 22px; background: #8A05BE; }
+
+
+          .places-discovery { margin: 28px 0; color: ${theme.textSecondary}; }
+          .places-discovery-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+          .places-discovery :global(.place-discovery-card) { overflow: hidden; border: 1px solid ${theme.border}; border-radius: 18px; background: ${theme.surface}; text-decoration: none; color: ${theme.text}; }
+          .place-discovery-photo { height: 150px; position: relative; display: grid; place-items: center; background: ${isDark ? '#30223F' : '#F1EDF6'}; color: ${theme.textTertiary}; }
+          .place-discovery-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+          .place-discovery-copy { padding: 16px; }
+          .place-discovery-copy h3 { font-size: 17px; line-height: 1.35; margin-bottom: 6px; }
+          .place-discovery-copy p { font-size: 14px; color: ${theme.textSecondary}; }
+          .places-discovery button { color: ${theme.accent}; padding: 10px; border: none; background: none; cursor: pointer; }
+          @media (max-width: 560px) {
+            .places-discovery-grid { grid-template-columns: 1fr; }
+            .places-discovery :global(.place-discovery-card) { display: flex; align-items: center; }
+            .place-discovery-photo { width: 92px; height: 104px; flex-shrink: 0; }
           }
 
           /* Category Grid */
@@ -1404,7 +1168,7 @@ export default function HomeScreen() {
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#999'};
+            color: ${secondaryText};
             margin-bottom: 14px;
           }
 
@@ -1457,7 +1221,7 @@ export default function HomeScreen() {
           .mood-badge-text {
             font-size: 11px;
             font-weight: 600;
-            color: #fff;
+            color: #17013A;
           }
 
           .mood-emoji {
@@ -1476,14 +1240,14 @@ export default function HomeScreen() {
           .mood-title {
             font-size: 20px;
             font-weight: 700;
-            color: #fff;
+            color: #17013A;
             margin: 0 0 4px;
           }
 
           .mood-subtitle {
             font-size: 13px;
             font-weight: 500;
-            color: rgba(255,255,255,0.9);
+            color: #17013A;
             margin: 0;
           }
 
@@ -1512,7 +1276,7 @@ export default function HomeScreen() {
             gap: 4px;
             font-size: 14px;
             font-weight: 600;
-            color: ${TEAL};
+            color: ${accentText};
             text-decoration: none;
             transition: opacity 0.2s;
           }
@@ -1523,7 +1287,7 @@ export default function HomeScreen() {
 
           .section-subtitle {
             font-size: 14px;
-            color: ${isDark ? 'rgba(255,255,255,0.6)' : '#666'};
+            color: ${secondaryText};
             margin: 0 0 16px;
           }
 
@@ -1547,7 +1311,7 @@ export default function HomeScreen() {
             border-radius: 16px;
             overflow: hidden;
             background: ${isDark ? '#1C1C1E' : '#fff'};
-            box-shadow: ${isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.08)'};
+            box-shadow: ${isDark ? "none" : '0 2px 8px rgba(0,0,0,0.08)'};
           }
 
           .happening-image {
@@ -1570,14 +1334,17 @@ export default function HomeScreen() {
 
           .happening-content p {
             font-size: 14px;
-            color: ${isDark ? 'rgba(255,255,255,0.6)' : '#666'};
+            color: ${secondaryText};
             margin: 0;
           }
 
           /* Explore New Card */
-          .explore-new-card {
+          .home-screen :global(.explore-new-card) {
+            display: block;
+            color: #fff;
+            text-decoration: none;
             position: relative;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #4F5AC4 0%, #653D91 100%);
             border-radius: 20px;
             padding: 24px;
             margin-bottom: 32px;
@@ -1585,6 +1352,7 @@ export default function HomeScreen() {
           }
 
           .explore-new-header {
+            color: #fff;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -1598,7 +1366,7 @@ export default function HomeScreen() {
           .explore-count {
             font-size: 12px;
             font-weight: 600;
-            color: rgba(255,255,255,0.9);
+            color: #fff;
           }
 
           .explore-new-title {
@@ -1610,7 +1378,7 @@ export default function HomeScreen() {
 
           .explore-new-subtitle {
             font-size: 14px;
-            color: rgba(255,255,255,0.9);
+            color: #fff;
             margin: 0;
           }
 
@@ -1629,7 +1397,7 @@ export default function HomeScreen() {
             background: ${isDark ? '#1C1C1E' : '#fff'};
             border-radius: 16px;
             padding: 20px;
-            box-shadow: ${isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.04)'};
+            box-shadow: ${isDark ? "none" : '0 2px 8px rgba(0,0,0,0.04)'};
           }
 
           .dyk-icon {
@@ -1646,7 +1414,7 @@ export default function HomeScreen() {
 
           .dyk-content p {
             font-size: 14px;
-            color: ${isDark ? 'rgba(255,255,255,0.7)' : '#666'};
+            color: ${secondaryText};
             margin: 0;
             line-height: 1.5;
           }
@@ -1656,7 +1424,7 @@ export default function HomeScreen() {
             background: ${isDark ? '#1C1C1E' : '#fff'};
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: ${isDark ? 'none' : '0 2px 8px rgba(0,0,0,0.04)'};
+            box-shadow: ${isDark ? "none" : '0 2px 8px rgba(0,0,0,0.04)'};
           }
 
           .leaderboard-row {
@@ -1708,7 +1476,7 @@ export default function HomeScreen() {
 
           .leaderboard-streak {
             font-size: 12px;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#666'};
+            color: ${secondaryText};
           }
 
           .leaderboard-right {
@@ -1721,18 +1489,18 @@ export default function HomeScreen() {
           .leaderboard-taps {
             font-size: 18px;
             font-weight: 700;
-            color: ${TEAL};
+            color: ${accentText};
           }
 
           .leaderboard-label {
             font-size: 11px;
-            color: ${isDark ? 'rgba(255,255,255,0.5)' : '#999'};
+            color: ${secondaryText};
             text-transform: uppercase;
           }
 
           /* Container */
           .container {
-            max-width: 640px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 0 20px;
           }
@@ -1791,7 +1559,7 @@ export default function HomeScreen() {
           .onboarding-banner-dismiss {
             background: none;
             border: none;
-            color: ${isDark ? 'rgba(255,255,255,0.4)' : '#999'};
+            color: ${secondaryText};
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
@@ -1799,7 +1567,11 @@ export default function HomeScreen() {
           }
 
           .onboarding-banner-dismiss:hover {
-            color: ${isDark ? 'rgba(255,255,255,0.6)' : '#666'};
+            color: ${secondaryText};
+          }
+
+          @media (min-width: 760px) {
+            .feature-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
           }
 
           .bottom-spacing {

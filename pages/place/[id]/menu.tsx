@@ -1,3 +1,6 @@
+import { menuAppearance, readDemoMenuAppearance } from '../../../lib/menuAppearance';
+import { isDemoRestaurant, demoMenu, demoCategories, demoItems, readDemoCategories, recordDemoEvent, DEMO_HOME, DEMO_ORDER, DEMO_ORDER_KEY, DEMO_GUIDE } from '../../../lib/demoRestaurant';
+import DemoBanner from '../../../components/demo/DemoBanner';
 /**
  * Digital Services Page - Magazine Style
  * Path: pages/place/[id]/menu.tsx
@@ -12,6 +15,8 @@
  * - Owner CTA if no menu exists
  */
 
+import { useThemeContext } from '../../../contexts/ThemeContext';
+import { dietaryMatch } from '../../../lib/placePresentation';
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -55,6 +60,7 @@ interface Menu {
   place_id: string;
   name: string;
   style: string | null;
+  photo_gallery_enabled?: boolean;
   cover_image_url: string | null;
   show_cover: boolean;
   happy_hour_enabled: boolean;
@@ -125,11 +131,16 @@ const DIETARY_ICONS: Record<string, string> = {
 };
 
 export default function MenuPage() {
+  const {isDark}=useThemeContext();
+  const [showOtherDishes,setShowOtherDishes]=useState(false);
   const { t } = useTranslation();
   const router = useRouter();
   const { id } = router.query;
+  const isDemo = isDemoRestaurant(id);
+  const placeHref = isDemo ? DEMO_HOME : `/app/place/${id}`;
 
   const [menu, setMenu] = useState<Menu | null>(null);
+  const appearance = menuAppearance(menu);
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [placeName, setPlaceName] = useState<string>('');
   const [placeSlug, setPlaceSlug] = useState<string>('');
@@ -153,12 +164,21 @@ export default function MenuPage() {
   // Track menu view
   useEffect(() => {
     if (id && !loading && !noMenu) {
-      trackMenuView(id as string);
+      if (isDemo) recordDemoEvent('menuViews'); else trackMenuView(id as string);
     }
   }, [id, loading, noMenu]);
 
   const loadMenu = async (placeId: string) => {
     setLoading(true);
+    if (isDemoRestaurant(placeId)) {
+      const demoCategories = readDemoCategories();
+      const demoItems = demoCategories.flatMap(c => c.items.map(i => ({ ...i, category_id: c.id, category_name: c.name, meal_period: c.meal_period })));
+      setPlaceName('Trattoria Tavvy'); setPlaceSlug('demo-trattoria');
+      setMenu({ ...demoMenu, ...readDemoMenuAppearance() }); setCategories(demoCategories); setNoMenu(false);
+      setChefDish(demoItems.find(i => i.id === demoMenu.chef_recommendation_id) || null);
+      setDayDish(demoItems.find(i => i.id === demoMenu.dish_of_day_id) || null);
+      setLoading(false); return;
+    }
     try {
       // Get place name
       const { data: placeData } = await supabase
@@ -177,6 +197,7 @@ export default function MenuPage() {
         .from('menus')
         .select('*')
         .eq('place_id', placeId)
+        .eq('is_active', true)
         .maybeSingle();
 
       if (!menuData) {
@@ -194,7 +215,8 @@ export default function MenuPage() {
           const { data: featuredData } = await supabase
             .from('menu_items')
             .select('id, name, price, price_label, image_url')
-            .in('id', featuredIds);
+            .in('id', featuredIds)
+            .eq('is_available', true);
           if (featuredData) {
             featuredData.forEach((dish: any) => {
               if (dish.id === menuData.chef_recommendation_id) setChefDish(dish);
@@ -218,6 +240,7 @@ export default function MenuPage() {
           .from('menu_items')
           .select('*')
           .in('category_id', categoryIds)
+          .eq('is_available', true)
           .order('sort_order', { ascending: true });
 
         // Group items by category
@@ -259,7 +282,7 @@ export default function MenuPage() {
   };
 
   // Filter categories by meal period
-  const filteredCategories = activePeriod === 'all'
+  const periodCategories = activePeriod === 'all'
     ? categories
     : categories.filter(cat =>
         cat.meal_period === activePeriod || cat.meal_period === 'all_day' || !cat.meal_period
@@ -284,17 +307,11 @@ export default function MenuPage() {
     return tags.map(tag => DIETARY_ICONS[tag.toLowerCase()] || '').filter(Boolean).join(' ');
   };
 
-  const itemMatchesFilters = (item: MenuItem): boolean => {
-    if (activeFilters.length === 0) return true;
-    const tags = (item.dietary_tags || []).map(t => t.toLowerCase().replace('-', '_'));
-    return activeFilters.every(filter => {
-      // Match filter key against dietary tags (handle gf alias)
-      if (filter === 'gluten_free') return tags.includes('gluten_free') || tags.includes('gf') || tags.includes('gluten-free');
-      return tags.includes(filter);
-    });
-  };
-
+  const itemMatchesFilters = (item:MenuItem) => dietaryMatch(item.dietary_tags,activeFilters)==='match';
+  const matchingCount=periodCategories.reduce((total,c)=>total+c.items.filter(itemMatchesFilters).length,0);
+  const filteredCategories=periodCategories.map(c=>({...c,items:c.items.filter(i=>showOtherDishes||itemMatchesFilters(i))})).filter(c=>c.items.length);
   const toggleFilter = (filter: AllergenFilter) => {
+    setShowOtherDishes(false);
     setActiveFilters(prev =>
       prev.includes(filter) ? prev.filter(f => f !== filter) : [...prev, filter]
     );
@@ -306,6 +323,7 @@ export default function MenuPage() {
     if (!router.isReady || loading || categories.length === 0) return;
     const dishId = router.query.dish as string;
     if (!dishId) return;
+    setShowFullMenu(true);
     setHighlightedDish(dishId);
     setTimeout(() => {
       const el = document.getElementById(`menu-item-${dishId}`);
@@ -320,8 +338,8 @@ export default function MenuPage() {
   // Share a menu item
   const handleShareItem = async (item: MenuItem, e: React.MouseEvent) => {
     e.stopPropagation();
-    trackMenuShare(id as string);
-    trackItemShare(item.id);
+    if (!isDemo) trackMenuShare(id as string);
+    if (!isDemo) trackItemShare(item.id);
     const slug = placeSlug || id;
     const shareUrl = `https://tavvy.com/place/${id}/menu?dish=${item.id}`;
     const priceStr = formatPrice(item.price, item.price_label);
@@ -351,7 +369,7 @@ export default function MenuPage() {
   if (loading) {
     return (
       <AppLayout hideTabBar>
-        <style jsx global>{menuStyles}</style>
+        <style>{menuStyles.replace('@media (prefers-color-scheme: dark)', isDark ? '@media all' : '@media not all')}</style>
         <div className="menu-loading">
           <div className="menu-spinner" />
           <p>Loading menu...</p>
@@ -364,11 +382,16 @@ export default function MenuPage() {
   if (noMenu) {
     return (
       <AppLayout hideTabBar>
-        <style jsx global>{menuStyles}</style>
-        <Head>
+        <style>{menuStyles.replace('@media (prefers-color-scheme: dark)', isDark ? '@media all' : '@media not all')}</style>
+        <Head>{isDemo && <meta name="robots" content="noindex,nofollow" />}
           <title>{placeName ? `${placeName} Menu` : 'Menu'} | Tavvy</title>
         </Head>
-        <div className="menu-container">
+        <div className="menu-container" data-menu-style={appearance.style}>
+        {isDemo && <DemoBanner />}
+        <nav className="menu-destination-nav" aria-label="Menu destinations">
+          <Link href={placeHref}>← Back to restaurant</Link>
+          {isDemo&&<Link href={DEMO_ORDER}>Try table ordering →</Link>}
+        </nav>
           <div className="menu-header">
             <button className="menu-back-btn" onClick={() => router.back()}>
               ← Back
@@ -393,7 +416,7 @@ export default function MenuPage() {
 
   return (
     <AppLayout hideTabBar>
-      <Head>
+      <Head>{isDemo && <meta name="robots" content="noindex,nofollow" />}
         <title>{placeName ? `${placeName} Menu` : 'Menu'} | Tavvy</title>
         <meta name="description" content={`Browse the menu at ${placeName}. View dishes, prices, and photos from real customers on Tavvy.`} />
         <meta property="og:title" content={`${placeName} Menu | Tavvy`} />
@@ -401,11 +424,16 @@ export default function MenuPage() {
         {menu?.cover_image_url && <meta property="og:image" content={menu.cover_image_url} />}
       </Head>
 
-      <style jsx global>{menuStyles}</style>
+      <style>{menuStyles.replace('@media (prefers-color-scheme: dark)', isDark ? '@media all' : '@media not all')}</style>
 
-      <div className="menu-container">
+      <div className="menu-container" data-menu-style={appearance.style}>
+        {isDemo && <DemoBanner />}
+        <nav className="menu-destination-nav" aria-label="Menu destinations">
+          <Link href={placeHref}>← Back to restaurant</Link>
+          {isDemo&&<Link href={DEMO_ORDER}>Try table ordering →</Link>}
+        </nav>
         {/* Cover Page — Visual, Luxury Landing */}
-        {menu?.show_cover && !showFullMenu && (
+        {appearance.inlinePhotos && menu?.show_cover && !showFullMenu && (
           <div className="menu-cover-page">
             {/* Full-Width Hero with Gradient Overlay */}
             <div className="menu-hero">
@@ -416,7 +444,7 @@ export default function MenuPage() {
               />
               <div className="menu-hero-gradient" />
               <div className="menu-hero-text">
-                <Link href={`/place/${id}`}>
+                <Link href={placeHref}>
                   <h1 className="menu-hero-name" style={{ cursor: 'pointer' }}>{placeName}</h1>
                 </Link>
                 {menu.tagline && <p className="menu-hero-tagline">{menu.tagline}</p>}
@@ -535,27 +563,23 @@ export default function MenuPage() {
         )}
 
         {/* Cover image (fallback when show_cover is off, or after user taps See Full Menu) */}
-        {((!menu?.show_cover || showFullMenu) && menu?.cover_image_url) && (
+        {(appearance.inlinePhotos && (!menu?.show_cover || showFullMenu) && menu?.cover_image_url) && (
           <div className="menu-cover">
             <img src={menu.cover_image_url} alt={`${placeName} menu`} className="menu-cover-img" />
             <div className="menu-cover-overlay" />
           </div>
         )}
 
-        {(!menu?.show_cover || showFullMenu) && (
+        {(!appearance.inlinePhotos || !menu?.show_cover || showFullMenu) && (
         <>
         {/* ROW 1: Header */}
         <div className="menu-header">
-          <button className="menu-back-btn" onClick={() => menu?.show_cover ? setShowFullMenu(false) : router.back()}>
-            ← {menu?.show_cover ? 'Cover' : 'Back'}
-          </button>
+
           <div className="menu-title-section">
             <h1 className="menu-title">{menu?.name || `${placeName} Menu`}</h1>
-            {placeName && <Link href={`/place/${id}`}><p className="menu-subtitle" style={{ cursor: 'pointer' }}>{placeName}</p></Link>}
+            {placeName && <p className="menu-subtitle">{placeName}</p>}
           </div>
-          <Link href={`/place/${id}/menu-gallery`} className="menu-gallery-link">
-            Gallery
-          </Link>
+          <span className="menu-gallery-link" aria-current="page">List</span>{appearance.galleryEnabled && <Link href={`/place/${id}/menu-gallery`} className="menu-gallery-link">Photos</Link>}
         </div>
 
         {/* ROW 2: Meal periods + filter icon */}
@@ -604,7 +628,7 @@ export default function MenuPage() {
               <button
                 key={f.key}
                 className={`menu-allergen-pill ${activeFilters.includes(f.key) ? 'active' : ''}`}
-                onClick={() => toggleFilter(f.key)}
+                aria-pressed={activeFilters.includes(f.key)} onClick={() => toggleFilter(f.key)}
               >
                 {activeFilters.includes(f.key) ? '✓ ' : `${f.icon} `}{f.label}
               </button>
@@ -612,12 +636,14 @@ export default function MenuPage() {
           </div>
         )}
 
+        {activeFilters.length>0&&<div className="dietary-result" role="status"><strong>{matchingCount} dishes match</strong><button onClick={()=>{setActiveFilters([]);setShowOtherDishes(false)}}>Clear filters</button><button aria-pressed={showOtherDishes} onClick={()=>setShowOtherDishes(!showOtherDishes)}>{showOtherDishes?'Show matches only':'Show other dishes'}</button><p>Matches use the restaurant’s dietary tags. Missing tags mean unknown. Ask the restaurant about allergies.</p></div>}
         {/* Categories & Items */}
+        {!appearance.inlinePhotos && <div className="menu-text-intro">{menu?.welcome_message && <p>{menu.welcome_message}</p>}{menu?.happy_hour_enabled && <p><strong>{menu.happy_hour_text}</strong> {menu.happy_hour_times}</p>}{menu?.promo_banner_enabled && <p>{menu.promo_banner_text}</p>}{menu?.seasonal_special_enabled && <p>{menu.seasonal_special_text}</p>}{chefDish && <p>Chef’s pick · <a href={`#menu-item-${chefDish.id}`}>{chefDish.name}</a></p>}{dayDish && <p>Dish of the day · <a href={`#menu-item-${dayDish.id}`}>{dayDish.name}</a></p>}</div>}
         <div className="menu-content">
           {filteredCategories.map(category => (
             <div key={category.id} className="menu-category">
               <div className="menu-category-header">
-                {category.image_url && (
+                {appearance.inlinePhotos && category.image_url && (
                   <div className="menu-category-img-wrap">
                     <img src={category.image_url} alt={category.name} className="menu-category-img" />
                   </div>
@@ -635,7 +661,7 @@ export default function MenuPage() {
                   const itemPhotos = (item.linked_photo_ids || [])
                     .map(pid => linkedPhotos[pid])
                     .filter(Boolean);
-                  const displayImage = item.image_url || (itemPhotos.length > 0 ? itemPhotos[0].url : null);
+                  const displayImage = appearance.inlinePhotos ? item.image_url || (itemPhotos.length > 0 ? itemPhotos[0].url : null) : null;
                   const dietaryStr = getDietaryIcons(item.dietary_tags);
                   const isExpanded = expandedItem === item.id;
                   const matchesFilter = itemMatchesFilters(item);
@@ -644,16 +670,16 @@ export default function MenuPage() {
                     <div
                       key={item.id}
                       id={`menu-item-${item.id}`}
-                      className={`menu-item ${displayImage ? 'has-image' : ''} ${isExpanded ? 'expanded' : ''} ${highlightedDish === item.id ? 'highlighted' : ''} ${!matchesFilter ? 'filtered-out' : ''}`}
-                      onClick={() => { trackItemView(item.id); router.push(`/place/${id}/menu-gallery?dish=${item.id}`); }}
+                      className={`menu-item ${displayImage ? 'has-image' : ''} ${isExpanded ? 'expanded' : ''} ${highlightedDish === item.id ? 'highlighted' : ''}`}
+
                     >
-                      {!matchesFilter && <span className="menu-item-allergen-warn">⚠️</span>}
+                      {!matchesFilter && <p className="dietary-unknown">{dietaryMatch(item.dietary_tags,activeFilters)==='unknown'?'Dietary information not confirmed for these filters':'Other dish — does not match selected filters'}</p>}
                       <div className="menu-item-content">
                         <div className="menu-item-text">
                           <div className="menu-item-name-row">
-                            <span className="menu-item-name">{item.name}</span>
-                            {item.is_popular && <span className="menu-badge popular" title="Popular">🔥 Popular</span>}
-                            {item.is_new && <span className="menu-badge new" title="New">{'\u2728'}</span>}
+                            {appearance.galleryEnabled ? <Link href={`/place/${id}/menu-gallery?dish=${item.id}`} className="menu-item-name">{item.name}</Link> : <span className="menu-item-name">{item.name}</span>}
+                            {item.is_popular && <span className="menu-badge popular" title="Popular">{appearance.inlinePhotos ? '🔥 Popular' : 'Popular'}</span>}
+                            {item.is_new && <span className="menu-badge new" title="New">{appearance.inlinePhotos ? '\u2728' : 'New'}</span>}
                             <button
                               className="menu-item-share"
                               onClick={(e) => handleShareItem(item, e)}
@@ -679,7 +705,7 @@ export default function MenuPage() {
                               <span className="menu-item-calories">{item.calories} cal</span>
                             )}
                             {dietaryStr && (
-                              <span className="menu-item-dietary">{dietaryStr}</span>
+                              <span className="menu-item-dietary">{appearance.inlinePhotos ? dietaryStr : item.dietary_tags?.map(tag => tag.replace(/[-_]/g, ' ')).join(' · ')}</span>
                             )}
                             {item.order_url && (
                               <a
@@ -689,20 +715,18 @@ export default function MenuPage() {
                                 className="menu-item-order-btn"
                                 onClick={(e) => e.stopPropagation()}
                               >
-                                🛒 Order
+                                {appearance.inlinePhotos ? '🛒 Order' : 'Order'}
                               </a>
                             )}
                           </div>
                         </div>
                         {displayImage && (
-                          <div className="menu-item-img-wrap">
-                            <img src={displayImage} alt={item.name} className="menu-item-img" />
-                          </div>
+                          appearance.galleryEnabled ? <Link href={`/place/${id}/menu-gallery?dish=${item.id}`} className="menu-item-img-wrap" aria-label={`View ${item.name} photos`}><img src={displayImage} alt={item.name} className="menu-item-img" /></Link> : <div className="menu-item-img-wrap"><img src={displayImage} alt={item.name} className="menu-item-img" /></div>
                         )}
                       </div>
 
                       {/* Expanded: show all linked photos */}
-                      {isExpanded && itemPhotos.length > 1 && (
+                      {appearance.inlinePhotos && isExpanded && itemPhotos.length > 1 && (
                         <div className="menu-item-photos">
                           {itemPhotos.map(photo => (
                             <div key={photo.id} className="menu-item-photo">
@@ -721,7 +745,7 @@ export default function MenuPage() {
 
           {filteredCategories.length === 0 && (
             <div className="menu-empty-period">
-              <p>No items for this meal period.</p>
+              <p>{activeFilters.length?'No dishes with confirmed matching tags. Clear filters or show other dishes.':'No items for this meal period.'}</p>
             </div>
           )}
         </div>
@@ -729,7 +753,7 @@ export default function MenuPage() {
         {/* Footer */}
         <div className="menu-footer">
           <p>Prices may vary. Ask your server for today&apos;s specials.</p>
-          <img src="/tavvy-logo-white.png" alt="Tavvy" style={{ height: 18, opacity: 0.5 }} />
+          {appearance.inlinePhotos ? <img src="/tavvy-logo-white.png" alt="Tavvy" style={{ height: 18, opacity: 0.5 }} /> : <span>Menu by Tavvy</span>}
         </div>
         </>
         )}
@@ -740,6 +764,29 @@ export default function MenuPage() {
 
 // ===== STYLES =====
 const menuStyles = `
+  .dietary-result{padding:14px 20px;background:var(--surface);color:var(--text);font-size:14px}.dietary-result p{margin:8px 0 0;line-height:1.5;color:var(--text-secondary)}.dietary-result button{min-height:44px;margin-left:12px;padding:6px 8px;color:var(--link);border:0;background:transparent;text-decoration:underline}.dietary-unknown{font-size:13px;color:var(--text-secondary);margin:0 0 10px}.menu-item-name{text-decoration:none}.menu-container a:focus-visible,.menu-container button:focus-visible{outline:3px solid var(--link);outline-offset:3px}
+
+  .menu-destination-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: #fff;
+    border-bottom: 1px solid #e6ddeb;
+  }
+  .menu-destination-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: #7905a8;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+  .menu-destination-nav a:focus-visible { outline: 2px solid #7905a8; outline-offset: 3px; }
+  .menu-title-section { min-width: 0; overflow-wrap: anywhere; }
+
   .menu-loading {
     min-height: 100vh;
     display: flex;
@@ -1274,7 +1321,7 @@ const menuStyles = `
     left: 50%;
     transform: translate(-50%, -60%);
     font-size: 48px;
-    opacity: 0.3;
+    opacity: 1;
   }
   .menu-tile-content {
     position: relative;
@@ -1368,7 +1415,7 @@ const menuStyles = `
     font-weight: 600;
   }
   .menu-item.filtered-out {
-    opacity: 0.3;
+    opacity: 1;
     position: relative;
   }
   .menu-item-allergen-warn {
@@ -1436,7 +1483,7 @@ const menuStyles = `
     .menu-allergen-pill {
       background: #1a1a1a;
       border-color: #333;
-      color: #aaa;
+      color: var(--text-secondary);
     }
     .menu-allergen-pill.active {
       background: #059669;
@@ -1460,7 +1507,7 @@ const menuStyles = `
       color: #fff;
     }
     .menu-subtitle {
-      color: #888;
+      color: var(--text-secondary);
     }
     .menu-periods {
       background: #111;
@@ -1481,7 +1528,7 @@ const menuStyles = `
       color: #fff;
     }
     .menu-category-desc {
-      color: #888;
+      color: var(--text-secondary);
     }
     .menu-item {
       border-bottom-color: #1a1a1a;
@@ -1493,7 +1540,7 @@ const menuStyles = `
       color: #fff;
     }
     .menu-item-desc {
-      color: #888;
+      color: var(--text-secondary);
     }
     .menu-item-price {
       color: #fff;
@@ -1505,7 +1552,7 @@ const menuStyles = `
       color: #fff;
     }
     .menu-empty > p {
-      color: #888;
+      color: var(--text-secondary);
     }
     .menu-empty-cta {
       background: #111;
@@ -1514,9 +1561,38 @@ const menuStyles = `
       color: #fff;
     }
     .menu-empty-cta p {
-      color: #888;
+      color: var(--text-secondary);
     }
   }
+
+  .menu-destination-nav,.menu-header,.menu-periods,.menu-allergen-filters{background:var(--background);border-color:var(--border);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.menu-destination-nav a,.menu-gallery-link,.menu-item-order-btn{color:var(--link)}.menu-container{color:var(--text);background:var(--background)}.menu-item-name,.menu-item-price,.menu-category-name,.menu-title{color:var(--text)}.menu-item-desc,.menu-category-desc,.menu-subtitle{color:var(--text-secondary)}.menu-allergen-pill,.menu-period-tab{color:var(--text-secondary);background:var(--surface)}.menu-allergen-pill.active{color:#fff;background:#086B54}.menu-period-tab.active{color:#fff;background:#74209A}.menu-title{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.menu-item-order-btn{min-height:32px;padding:6px 9px}.menu-gallery-link{min-height:40px;display:inline-flex;align-items:center}
+
+.menu-container[data-menu-style="elegant_ivory"],.menu-container[data-menu-style="clean_white"]{--background:#fff;--surface:#fff;--text:#28251f;--text-secondary:#635d53;--border:#ded7ca;--link:#74438b;background:var(--background);color:var(--text);min-height:100vh}
+.menu-container[data-menu-style="elegant_ivory"]{--background:#f7f3ea;--surface:#f7f3ea;font-family:Georgia,'Times New Roman',serif}
+.menu-container:not([data-menu-style="visual"]) .menu-content{max-width:820px;margin:0 auto;padding:12px 24px 32px}
+.menu-container:not([data-menu-style="visual"]) .menu-header{padding:36px 24px 24px;max-width:900px;margin:auto;flex-wrap:wrap}
+.menu-container:not([data-menu-style="visual"]) .menu-title{font-size:36px;font-weight:500;line-height:1.15}
+.menu-container:not([data-menu-style="visual"]) .menu-category{margin-top:30px}
+.menu-container:not([data-menu-style="visual"]) .menu-category-name{font-size:26px;line-height:1.25;font-weight:500}
+.menu-container:not([data-menu-style="visual"]) .menu-item{background:transparent;border-radius:0;padding:20px 0;border-bottom:1px solid var(--border)}
+.menu-container:not([data-menu-style="visual"]) .menu-item-name{font-size:21px;font-weight:500;line-height:1.3}
+.menu-container:not([data-menu-style="visual"]) .menu-item-desc{font-size:15px;line-height:1.65;color:var(--text-secondary)}
+.menu-container:not([data-menu-style="visual"]) .menu-item-meta{margin-top:10px}
+.menu-container:not([data-menu-style="visual"]) .menu-item-price{color:var(--text);font-weight:500}
+.menu-container:not([data-menu-style="visual"]) .menu-footer{background:transparent;color:var(--text-secondary)}
+.menu-container[data-menu-style="elegant_ivory"] .menu-title,.menu-container[data-menu-style="elegant_ivory"] .menu-category-name,.menu-container[data-menu-style="elegant_ivory"] .menu-item-name,.menu-container[data-menu-style="elegant_ivory"] .menu-item-desc,.menu-container[data-menu-style="elegant_ivory"] .menu-item-price{font-family:Georgia,'Times New Roman',serif}
+.menu-text-intro{max-width:820px;margin:0 auto;padding:12px 24px;color:var(--text-secondary);font-size:15px;line-height:1.65;text-align:center}
+
+.menu-container:not([data-menu-style="visual"]) .menu-badge{color:#635d53;background:transparent;border:1px solid #c9bdab;box-shadow:none;animation:none;text-transform:none;letter-spacing:0;font-weight:500;font-size:11px;padding:3px 6px}
+.menu-container:not([data-menu-style="visual"]) .menu-item-order-btn{background:transparent;border:1px solid #b9aa94;color:#554633;box-shadow:none;min-height:36px;display:inline-flex;align-items:center}
+.menu-container:not([data-menu-style="visual"]) .menu-item-dietary{font-size:12px;color:#635d53;text-transform:capitalize;line-height:1.5}
+.menu-container:not([data-menu-style="visual"]) .menu-item-meta{flex-wrap:wrap;gap:10px}
+.menu-container:not([data-menu-style="visual"]) .menu-category-name{text-transform:none;letter-spacing:0}
+.menu-container[data-menu-style="clean_white"] .menu-item-desc,.menu-container[data-menu-style="clean_white"] .menu-category-desc,.menu-container[data-menu-style="clean_white"] .menu-text-intro{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-style:normal}
+.menu-container:not([data-menu-style="visual"]) .menu-footer{font-style:normal;font-size:12px;line-height:1.6}
+.menu-text-intro a{color:inherit;text-underline-offset:3px}
+.menu-container:not([data-menu-style="visual"]) .menu-item-share{color:#635d53;opacity:1;min-height:36px;min-width:36px}
+.menu-container:not([data-menu-style="visual"]) .menu-item-dietary{letter-spacing:0}
 `;
 
 export const getServerSideProps = async ({ locale }: { locale: string }) => ({

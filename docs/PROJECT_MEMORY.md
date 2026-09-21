@@ -59,8 +59,9 @@ Useful mobile source areas:
 - `i18n/locales/`, `contexts/ThemeContext.tsx`: language and app appearance.
 - `app.json`, `eas.json`, `ios/`: app identity, EAS profiles and native configuration.
 
-Some newer files exist in the active development workspace but have not yet been
-included in reviewed source commits. See the source/release warning in the status file.
+Reviewed application source handoff branches and relative-file manifests are listed in
+the status file. A source candidate, Simulator binary, production web deployment and
+EAS upload are separate release states. Preserve those distinctions.
 
 ## Product decisions to preserve
 

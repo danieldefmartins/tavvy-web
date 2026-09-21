@@ -23,6 +23,7 @@ interface ECardMessageButtonProps {
   cardSlug: string;
   cardOwnerName: string;
   accentColor?: string;
+  previewOnly?: boolean;
 }
 
 const ECardMessageButton: React.FC<ECardMessageButtonProps> = ({
@@ -30,6 +31,7 @@ const ECardMessageButton: React.FC<ECardMessageButtonProps> = ({
   cardSlug,
   cardOwnerName,
   accentColor = '#1E90FF',
+  previewOnly = false,
 }) => {
   const { t } = useTranslation('common');
   const [isOpen, setIsOpen] = useState(false);
@@ -44,6 +46,7 @@ const ECardMessageButton: React.FC<ECardMessageButtonProps> = ({
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
+    if (previewOnly) return;
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setIsLoggedIn(!!session);
@@ -52,6 +55,7 @@ const ECardMessageButton: React.FC<ECardMessageButtonProps> = ({
   }, []);
 
   const getAuthHeaders = async () => {
+    if (previewOnly) return;
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.access_token) return null;
     return {
@@ -67,6 +71,7 @@ const ECardMessageButton: React.FC<ECardMessageButtonProps> = ({
   };
 
   const loadMessages = async () => {
+    if (previewOnly) return;
     if (!threadId) return;
     setIsLoading(true);
     try {
@@ -92,6 +97,7 @@ const ECardMessageButton: React.FC<ECardMessageButtonProps> = ({
   }, [isOpen, threadId]);
 
   const handleSend = async () => {
+    if (previewOnly) return;
     if (!newMessage.trim() || isSending) return;
     setIsSending(true);
 
@@ -174,6 +180,7 @@ const ECardMessageButton: React.FC<ECardMessageButtonProps> = ({
       {/* Message Button */}
       <button
         onClick={() => {
+          if (previewOnly) return;
           if (!isLoggedIn) {
             window.location.href = `/app/login?returnUrl=${encodeURIComponent('/' + cardSlug)}`;
             return;

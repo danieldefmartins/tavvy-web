@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import { startOAuth } from '../../../lib/startOAuth';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -51,9 +52,15 @@ export default function ProLoginScreen() {
     }
   };
 
-  const handleSocialLogin = (provider: 'apple' | 'google') => {
-    // TODO: Implement social login for pros
-    console.log(`Pro login with ${provider}`);
+  const handleSocialLogin = async (provider: 'apple' | 'google') => {
+    setLoading(true);
+    setError(null);
+    try {
+      await startOAuth(provider, '/app/pros/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Unable to start sign in. Please try again.');
+      setLoading(false);
+    }
   };
 
   return (
@@ -195,6 +202,7 @@ export default function ProLoginScreen() {
               <button
                 type="button"
                 className="social-button"
+                disabled={loading}
                 onClick={() => handleSocialLogin('apple')}
                 style={{ 
                   backgroundColor: theme.surface,
@@ -209,6 +217,7 @@ export default function ProLoginScreen() {
               <button
                 type="button"
                 className="social-button"
+                disabled={loading}
                 onClick={() => handleSocialLogin('google')}
                 style={{ 
                   backgroundColor: theme.surface,

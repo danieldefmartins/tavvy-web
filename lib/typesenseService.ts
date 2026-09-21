@@ -1,20 +1,23 @@
+import { canonicalPlaceId } from './searchIntent';
+import { getPlaceCategories } from './placeCategories';
+import { createSearchCache } from './searchCache';
 /**
  * Typesense Search Service for Tavvy Mobile App - WITH TAP-BASED RANKING
- * 
+ *
  * This enhanced version uses user tap data to improve search relevance:
  * - Searches tap_signals field for user-validated attributes
  * - Ranks by tap_quality_score (weighted by signal importance)
  * - Falls back to popularity for places without taps
- * 
+ *
  * Example: "best food Miami" will prioritize places where users tapped "Quality Food"
- * 
+ *
  * @module typesenseService
  */
 
 const TYPESENSE_HOST = 'tavvy-typesense-production.up.railway.app';
 const TYPESENSE_PORT = '443';
 const TYPESENSE_PROTOCOL = 'https';
-const TYPESENSE_API_KEY = '231eb42383d0a3a2832f47ec44b817e33692211d9cf2d158f49e5c3e608e6277';
+const TYPESENSE_API_KEY = '1RCiJLedjuTvcPBq2kfL9VNpm6iw4wbf';
 
 export interface TypesensePlace {
   fsq_place_id: string;
@@ -90,31 +93,20 @@ export interface SearchResult {
  * Transform Typesense document to PlaceSearchResult
  */
 function transformTypesensePlace(doc: any, distance?: number): PlaceSearchResult {
-  const category = doc.categories && doc.categories.length > 0 
-    ? doc.categories[0].split('>')[0].trim() 
-    : undefined;
-  
-  const subcategory = doc.categories && doc.categories.length > 0
-    ? doc.categories[0].split('>').pop()?.trim()
+  const categories = getPlaceCategories(doc.categories);
+  const category = categories.length > 0
+    ? categories[0].split('>')[0].trim()
     : undefined;
 
-    // Determine ID prefix based on source
-  const isTavvy = doc.id?.startsWith('tavvy:');
-  let placeId: string;
-  let idPrefix: string;
-  if (isTavvy) {
-    idPrefix = 'tavvy:';
-    placeId = doc.id.replace(/^tavvy:/, '');
-  } else {
-    idPrefix = 'fsq-';
-    // CRITICAL: Use fsq_id (hex format) not doc.id (numeric Typesense auto-ID)
-    // fsq_id matches fsq_places_raw.fsq_place_id in Supabase
-    placeId = doc.fsq_id || doc.fsq_place_id || doc.id;
-  }
+  const subcategory = categories.length > 0
+    ? categories[0].split('>').pop()?.trim()
+    : undefined;
 
+  const sourceId = doc.id?.startsWith('tavvy:') ? doc.id : (doc.fsq_id || doc.fsq_place_id || doc.id);
+  const placeId = canonicalPlaceId(String(sourceId || ''));
   return {
-    id: `${idPrefix}${placeId}`,
-    fsq_place_id: doc.fsq_id || doc.fsq_place_id || placeId,
+    id: placeId,
+    fsq_place_id: doc.fsq_id || doc.fsq_place_id || placeId.replace(/^fsq:/, ''),
     name: doc.name,
     category,
     subcategory,
@@ -123,8 +115,8 @@ function transformTypesensePlace(doc: any, distance?: number): PlaceSearchResult
     region: doc.location_region || doc.region,
     country: doc.location_country || doc.country,
     postcode: doc.location_postcode || doc.postcode,
-    latitude: doc.geocodes_lat || doc.latitude,
-    longitude: doc.geocodes_lng || doc.longitude,
+    latitude: doc.geocodes_lat ?? doc.latitude ?? (Array.isArray(doc.location) ? doc.location[0] : undefined),
+    longitude: doc.geocodes_lng ?? doc.longitude ?? (Array.isArray(doc.location) ? doc.location[1] : undefined),
     tel: doc.tel,
     website: doc.website,
     email: doc.email,
@@ -141,11 +133,19 @@ function transformTypesensePlace(doc: any, distance?: number): PlaceSearchResult
 
 /**
  * Search places with TAP-BASED RANKING
- * 
+ *
  * This is the key enhancement: searches both place data AND tap signals,
  * then ranks by tap quality score.
  */
-export async function searchPlaces(options: SearchOptions): Promise<SearchResult> {
+const cachedSearch = createSearchCache<SearchResult>();
+export function searchPlaces(options: SearchOptions): Promise<SearchResult> {
+  const normalized = { ...options, query: options.query.trim() };
+  // Include every filter, coordinates and pagination in the identity.
+  const key = JSON.stringify(Object.entries(normalized).sort(([a], [b]) => a.localeCompare(b)));
+  return cachedSearch(key, () => fetchSearchPlaces(normalized));
+}
+
+async function fetchSearchPlaces(options: SearchOptions): Promise<SearchResult> {
   const {
     query,
     latitude,
@@ -159,7 +159,7 @@ export async function searchPlaces(options: SearchOptions): Promise<SearchResult
     offset = 0,
   } = options;
 
-  const hasGeoLocation = latitude !== undefined && longitude !== undefined && radiusKm !== undefined;
+  const hasGeoLocation = !locality && !region && !country && latitude !== undefined && longitude !== undefined && radiusKm !== undefined;
   // When the user types an actual search term, find matches ANYWHERE (ranked by
   // proximity) instead of hard-filtering to a radius — so a specific place like
   // "Riva Cucina" is findable even if it's not nearby. The radius filter is only
@@ -177,7 +177,7 @@ export async function searchPlaces(options: SearchOptions): Promise<SearchResult
       // a specific place like "Riva Cucina" findable no matter how far away it is.
       // For location-only browsing, sort by proximity.
       sort_by: hasTextQuery
-        ? '_text_match:desc,popularity:desc'
+        ? hasGeoLocation ? `_text_match:desc,location(${latitude}, ${longitude}):asc,popularity:desc` : '_text_match:desc,popularity:desc'
         : hasGeoLocation
           ? `location(${latitude}, ${longitude}):asc,popularity:desc`
           : 'popularity:desc',
@@ -186,7 +186,7 @@ export async function searchPlaces(options: SearchOptions): Promise<SearchResult
 
       num_typos: 2,
       typo_tokens_threshold: 1,
-      drop_tokens_threshold: 2,
+      drop_tokens_threshold: 0,
 
       text_match_type: 'max_score',
     };
@@ -194,15 +194,16 @@ export async function searchPlaces(options: SearchOptions): Promise<SearchResult
     // Build all filters
     const filters = [];
 
-    if (hasGeoLocation && !hasTextQuery) {
+    if (hasGeoLocation) {
       filters.push(`location:(${latitude}, ${longitude}, ${radiusKm} km)`);
     }
 
-    if (country) filters.push(`location_country:=${country}`);
-    if (region) filters.push(`location_region:=${region}`);
+    const filterValue = (value: string) => "`" + value.replace(/[`\\]/g, "") + "`";
+    if (country) filters.push(`location_country:=${filterValue(country)}`);
+    if (region) filters.push(`location_region:=${filterValue(region)}`);
     if (locality) {
       const capitalizedLocality = locality.charAt(0).toUpperCase() + locality.slice(1).toLowerCase();
-      filters.push(`location_locality:=${capitalizedLocality}`);
+      filters.push(`location_locality:=${filterValue(locality)}`);
     }
 
     // Add category filter (if provided)
@@ -316,7 +317,7 @@ export async function searchPlacesInBounds(options: {
 
     const data = await response.json();
 
-    const places = data.hits.map((hit: any) => 
+    const places = data.hits.map((hit: any) =>
       transformTypesensePlace(hit.document)
     );
 
@@ -346,10 +347,10 @@ export async function getAutocompleteSuggestions(
       q: query,
       // Search by name (tap_signals will be added after first sync)
       query_by: 'name',
-      
+
       // Sort by popularity (will use tap_total after sync)
       sort_by: 'popularity:desc',
-      
+
       per_page: limit.toString(),
     };
 
@@ -365,11 +366,11 @@ export async function getAutocompleteSuggestions(
     if (!response.ok) return [];
 
     const data = await response.json();
-    
+
     // Return unique place names
     const suggestions = data.hits
       .map((hit: any) => hit.document.name)
-      .filter((name: string, index: number, self: string[]) => 
+      .filter((name: string, index: number, self: string[]) =>
         self.indexOf(name) === index
       );
 

@@ -45,7 +45,7 @@ body {
 }
 
 a {
-  color: var(--primary);
+  color: var(--link, var(--primary));
   text-decoration: none;
 }
 
@@ -456,4 +456,11 @@ body {
     background: white;
     color: black;
   }
+}
+
+/* Shared navigation remains visible for keyboard users in either theme. */
+.tavvy-tab:focus-visible {
+  outline: 3px solid var(--link, var(--primary));
+  outline-offset: -3px;
+  border-radius: 12px;
 }

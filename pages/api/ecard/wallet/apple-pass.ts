@@ -17,10 +17,11 @@
  */
 
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { publicExportCard } from '../../../../lib/ecard/publicExport';
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 interface PassRequest {
   cardId?: string;
@@ -28,14 +29,15 @@ interface PassRequest {
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { cardId, slug } = req.body as PassRequest;
+    const { cardId, slug } = (req.body || {}) as PassRequest;
 
-    if (!cardId && !slug) {
+    if ((!cardId && !slug) || (cardId && typeof cardId !== 'string') || (slug && typeof slug !== 'string')) {
       return res.status(400).json({ error: 'cardId or slug is required' });
     }
 
@@ -55,12 +57,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Fetch card data
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    let query = supabase.from('digital_cards').select('*');
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    let query = supabase.from('digital_cards').select('*').eq('is_published', true).eq('is_active', true);
     if (cardId) query = query.eq('id', cardId);
     else if (slug) query = query.eq('slug', slug);
     
-    const { data: card, error } = await query.single();
+    const { data, error } = await query.single();
+    const card = publicExportCard(data);
     if (error || !card) {
       return res.status(404).json({ error: 'Card not found' });
     }
@@ -176,19 +179,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       altText: cardUrl,
     });
 
-    // Add profile photo as thumbnail if available
-    if (card.profile_photo_url) {
-      try {
-        const photoResponse = await fetch(card.profile_photo_url);
-        if (photoResponse.ok) {
-          const photoBuffer = Buffer.from(await photoResponse.arrayBuffer());
-          pass.addBuffer('thumbnail.png', photoBuffer);
-          pass.addBuffer('thumbnail@2x.png', photoBuffer);
-        }
-      } catch (e) {
-        // Photo fetch failed, continue without thumbnail
-      }
-    }
+    // Optional remote thumbnail omitted: never fetch a user-supplied URL server-side.
 
     // Generate the .pkpass file
     const passBuffer = pass.getAsBuffer();

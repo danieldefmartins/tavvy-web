@@ -1,3 +1,4 @@
+import ToolHeader from '../../components/ToolHeader';
 /**
  * Happening Now Screen
  * Live events and activities happening nearby
@@ -159,23 +160,9 @@ export default function HappeningNowScreen() {
 
       <AppLayout>
         <div className="happening-screen" style={{ backgroundColor: theme.background }}>
-          {/* Header */}
-          <header className="happening-header" style={{ background: 'linear-gradient(135deg, #F59E0B, #EF4444)' }}>
-            <div className="header-content">
-              <div className="header-badge">
-                <FiZap size={16} /> LIVE
-              </div>
-              <h1>🎉 Happening Now</h1>
-              <p>Real events from Ticketmaster, PredictHQ & more</p>
-            </div>
-            <button 
-              className="refresh-btn"
-              onClick={() => fetchEvents(true)}
-              disabled={refreshing}
-            >
-              <FiRefreshCw size={20} className={refreshing ? 'spinning' : ''} />
-            </button>
-          </header>
+          <ToolHeader title="Happening Now" subtitle="Time-sensitive experiences near you.">
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}><button type="button" onClick={() => fetchEvents(true)} disabled={refreshing} style={{ minHeight: 44, background: 'transparent', color: theme.text, border: 0, display: 'flex', gap: 8, alignItems: 'center' }}><FiRefreshCw aria-hidden size={20} />{refreshing ? 'Refreshing…' : 'Refresh events'}</button></div>
+          </ToolHeader>
 
           {locationError && (
             <div className="location-notice" style={{ backgroundColor: theme.surface }}>

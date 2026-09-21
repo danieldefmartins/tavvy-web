@@ -1,0 +1,223 @@
+{
+  "date": "2026-09-21",
+  "status": "Published catalog research; source snapshots retain their original draft state. Do not replay publication.",
+  "published_batches": [
+    "001",
+    "002-enriched",
+    "003",
+    "004",
+    "005"
+  ],
+  "superseded_not_active": [
+    "002"
+  ],
+  "published_ships": 342,
+  "worldwide_complete": false,
+  "files": [
+    {
+      "path": "data/cruises/README.md",
+      "sha256": "c75264d88b0314edf531850288b9002ca7418111d670710f2b36c30a79e902f8",
+      "bytes": 3622
+    },
+    {
+      "path": "data/cruises/research/batch-001-evidence.json",
+      "sha256": "13bad21528fb79659e7ff9d7b47a7d987a3161f007c459754fb7bb081d4d60ef",
+      "bytes": 82120
+    },
+    {
+      "path": "data/cruises/research/batch-001-validation.json",
+      "sha256": "ff2fe33887d83b803eb298ae631529b90ca4e9d1226370fc917f8684aa8dd794",
+      "bytes": 4716
+    },
+    {
+      "path": "data/cruises/research/batch-001-verification.md",
+      "sha256": "ab7dc9deb84b0e5b2b14041f95e0b2b183dd7f48d29d142667c2591291cca979",
+      "bytes": 6441
+    },
+    {
+      "path": "data/cruises/research/batch-002-enrichment-evidence.json",
+      "sha256": "d91e58af8c684660464056f8e565b140e6a75137766a230549362dad815c3b30",
+      "bytes": 284212
+    },
+    {
+      "path": "data/cruises/research/batch-002-enrichment-validate.cjs",
+      "sha256": "6f42b10eac351103977ac2f5f8db94fc3fe3f3d11d84dd36a72498f68c4aaf46",
+      "bytes": 12035
+    },
+    {
+      "path": "data/cruises/research/batch-002-enrichment-validation.json",
+      "sha256": "2590ccaeec79b8160a75c118b59a9210cb5e1792a036f345c77f1f9bba5c2626",
+      "bytes": 2820
+    },
+    {
+      "path": "data/cruises/research/batch-002-enrichment.md",
+      "sha256": "00fb3b9a699bb47ef90ec19389b8607e6725d7689991d9a83ae7766375eee8a5",
+      "bytes": 8407
+    },
+    {
+      "path": "data/cruises/research/batch-002-fleet-inventory.json",
+      "sha256": "acd6d1c1dd936d60c6843212ff176b8fbd6b2022b8d83188c01adcd12ff9a14a",
+      "bytes": 85134
+    },
+    {
+      "path": "data/cruises/research/batch-002-operating-evidence.json",
+      "sha256": "912fc17b4542461be74120640c9f056afdf824b6ed3fc7f9ace47a8ad9f50ecb",
+      "bytes": 326704
+    },
+    {
+      "path": "data/cruises/research/batch-002-operating-validation.json",
+      "sha256": "9a6236b18ad4275fca1d54a64a436501f8e4bf8a6d2ce949bd2cc2d3317f1b07",
+      "bytes": 2034
+    },
+    {
+      "path": "data/cruises/research/batch-002-operating-verification.md",
+      "sha256": "e3ebe03199a7f75464a9dff614ab0561f73c2c55b319104f9b64b81392ed637d",
+      "bytes": 8095
+    },
+    {
+      "path": "data/cruises/research/batch-002-validate.cjs",
+      "sha256": "fa74901d575f71f7696f0220a461f0332fcdafb290b43f438e3e844a413d510f",
+      "bytes": 12248
+    },
+    {
+      "path": "data/cruises/research/batch-002-validation.json",
+      "sha256": "53961899f899e36ca136d9ccf1d39a6dbf5bc31f8b4f0b9fe35c7b299d914f43",
+      "bytes": 2580
+    },
+    {
+      "path": "data/cruises/research/batch-002-verification.md",
+      "sha256": "254ad54319ab5c1347fde3a8cb6bf427a89454646ac97961e90f3d3b5e482610",
+      "bytes": 6738
+    },
+    {
+      "path": "data/cruises/research/batch-002-verified-validate.cjs",
+      "sha256": "edc43b02ec166de9361c2aa502e33ffb23044fb3afa50902aa8d0fddb9383431",
+      "bytes": 10664
+    },
+    {
+      "path": "data/cruises/research/batch-003-evidence.json",
+      "sha256": "56b30ea5067be178ba0c62c1cc6b00c649296cd9b14ec35a9c58be8577de6d83",
+      "bytes": 380541
+    },
+    {
+      "path": "data/cruises/research/batch-003-fleet-inventory.json",
+      "sha256": "9f2d9e30cbaed57b71796414b83f79903981a6d3cddb285e9fd493352ee2a392",
+      "bytes": 22934
+    },
+    {
+      "path": "data/cruises/research/batch-003-validate.cjs",
+      "sha256": "6532aeccbe5c564d0860f7ee239fedbab19ab26dad69ed83be92774604188afd",
+      "bytes": 12023
+    },
+    {
+      "path": "data/cruises/research/batch-003-validation.json",
+      "sha256": "45025b3c9de1e3fe6ce509de964f13dac3be1e554315cd7d2b2d4b7185667b8c",
+      "bytes": 3021
+    },
+    {
+      "path": "data/cruises/research/batch-003-verification.md",
+      "sha256": "8567aa24a2b426252dcedb553330b9acb8f2c08ea11d801d40f9cb57e5f51d6a",
+      "bytes": 6700
+    },
+    {
+      "path": "data/cruises/research/batch-004-evidence.json",
+      "sha256": "2fddd24168249e2cd664cb45e92a1651f2ed9a8248a5a23b52387dd2c930b67a",
+      "bytes": 423643
+    },
+    {
+      "path": "data/cruises/research/batch-004-fleet-inventory.json",
+      "sha256": "18149f410b3c8b741d0d212298ae1c66e627e9160fe5145ea298e229ed62b29a",
+      "bytes": 16659
+    },
+    {
+      "path": "data/cruises/research/batch-004-validate.cjs",
+      "sha256": "96e61760fe8bc960dea774dc546acc274808f778e9430141709b3518cce05b48",
+      "bytes": 13125
+    },
+    {
+      "path": "data/cruises/research/batch-004-validation.json",
+      "sha256": "bd098a2cd0b4cc4c249967afd48b69fcb62c63a15cb5ccbb9b278a2633e6fb76",
+      "bytes": 3291
+    },
+    {
+      "path": "data/cruises/research/batch-004-verification.md",
+      "sha256": "5bfc7f5fcaa8a65e8f3e9980b46050616f4269efec6da3367f6c84f7afcad9d0",
+      "bytes": 7598
+    },
+    {
+      "path": "data/cruises/research/batch-005-evidence.json",
+      "sha256": "5328121e0aa2caf681aa2a3ab35ddda47bbfc0a52cc64709dba93d1fe6c98902",
+      "bytes": 544446
+    },
+    {
+      "path": "data/cruises/research/batch-005-fleet-inventory.json",
+      "sha256": "1147c8e3b430ef0aa166dc28e50a641e80ee5bc56d9b37c7129f3a159a12d107",
+      "bytes": 77600
+    },
+    {
+      "path": "data/cruises/research/batch-005-validate.cjs",
+      "sha256": "be41c90e2ccc2a50b1dda89d5c83e4a02b6c0884d8db0df0da01d7019cb7ef61",
+      "bytes": 13767
+    },
+    {
+      "path": "data/cruises/research/batch-005-validation.json",
+      "sha256": "544ec5276c0af2b0f72ba1a0c7b6d740e5db5ecfeb1bd37c7c6a1a9456cb5880",
+      "bytes": 3529
+    },
+    {
+      "path": "data/cruises/research/batch-005-verification.md",
+      "sha256": "4a0f29e2b189a3df6658e8c8b0e4e5641efe9972ba4e49a2f9ca62d76ffd8c5b",
+      "bytes": 6970
+    },
+    {
+      "path": "data/cruises/research/operator-registry.json",
+      "sha256": "0b5fb3da1c17ed4765e798b958e916e6629bb4d321410757818785eeca8e2fdd",
+      "bytes": 20327
+    },
+    {
+      "path": "data/cruises/research/sources-initial.json",
+      "sha256": "8578ec49ee1759ce291c382544ea3319dacefa577da328adb3e1d0d08397d9db",
+      "bytes": 748
+    },
+    {
+      "path": "data/cruises/staged/verified-operating-batch-001.json",
+      "sha256": "bc87d6f4aabc3217f5af2b6d7b5e12e3d802bc9b33f2cb77020b69b7210cada3",
+      "bytes": 113396
+    },
+    {
+      "path": "data/cruises/staged/verified-operating-batch-002-enriched.json",
+      "sha256": "3fd875b18bd5a0234502dae66256fa9081b3195e09431b962c67bd4e87d73dea",
+      "bytes": 592250
+    },
+    {
+      "path": "data/cruises/staged/verified-operating-batch-002.json",
+      "sha256": "cb052ee196c0987169efec31118cf8ebf0fdb80670eb2f99e971e45469083526",
+      "bytes": 436090
+    },
+    {
+      "path": "data/cruises/staged/verified-operating-batch-003.json",
+      "sha256": "d791d164161e4e07cc44de28e2731196c05f362e52722bd9b607c380c77881ad",
+      "bytes": 720084
+    },
+    {
+      "path": "data/cruises/staged/verified-operating-batch-004.json",
+      "sha256": "e95de3c3be495a46c09622144b513cd27f94a2fc050b8f088f58e243ce710212",
+      "bytes": 704317
+    },
+    {
+      "path": "data/cruises/staged/verified-operating-batch-005.json",
+      "sha256": "673588e71c745325ac45ea6708a167eba79373721c49ad213ebf1a294f8e2457",
+      "bytes": 1109653
+    },
+    {
+      "path": "scripts/cruises/prepare-draft-import.cjs",
+      "sha256": "3221be31b8bb182b51aa50a510bfa9e4ff03f1f4887377fc05c5c0ebccaca5ad",
+      "bytes": 10015
+    },
+    {
+      "path": "scripts/cruises/validate-catalog.cjs",
+      "sha256": "236e222e328be0355b2ee36a09479007f1fcd3b1a22bec2e92bcdd5348623c76",
+      "bytes": 4307
+    }
+  ]
+}

@@ -1,5 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
+import { fetchPlaceEvidence } from '../../../lib/placeEvidenceService';
+import { contentViewer } from '../../../lib/contentSafetyServer';
+import { parseHours, openLineFrom } from '../../../lib/placeHours';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
@@ -17,8 +20,6 @@ const SIGNAL_TYPE_CAT: Record<string, 'good' | 'vibe' | 'headsup'> = {
 };
 
 const isUuid = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
-
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 // "2026-05-29T..." or Date -> "2 days ago" style relative string
 function relativeTime(iso: string): string {
@@ -40,144 +41,11 @@ function relativeTime(iso: string): string {
   return `${y} year${y === 1 ? '' : 's'} ago`;
 }
 
-function fmtTime(min: number): string {
-  let h = Math.floor(min / 60), m = min % 60;
-  const ap = h >= 12 ? 'PM' : 'AM';
-  h = h % 12; if (h === 0) h = 12;
-  return m === 0 ? `${h} ${ap}` : `${h}:${String(m).padStart(2, '0')} ${ap}`;
-}
-
-// Accepts a single "range" cell which may be a string ("9:00 AM - 8:00 PM"),
-// an array of {open,close} segments, or an object {open,close}. Returns minutes-from-midnight pairs.
-function parseRange(cell: any): Array<{ open: number; close: number }> {
-  const out: Array<{ open: number; close: number }> = [];
-  const toMin = (s: string): number | null => {
-    if (typeof s === 'number') {
-      // "0800" / 800 style HHMM
-      const str = String(s).padStart(4, '0');
-      return parseInt(str.slice(0, 2), 10) * 60 + parseInt(str.slice(2), 10);
-    }
-    if (typeof s !== 'string') return null;
-    const t = s.trim();
-    const m = t.match(/^(\d{1,2})(?::(\d{2}))?\s*([ap]\.?m\.?)?$/i);
-    if (m) {
-      let h = parseInt(m[1], 10);
-      const mm = m[2] ? parseInt(m[2], 10) : 0;
-      const ap = (m[3] || '').toLowerCase();
-      if (ap.startsWith('p') && h < 12) h += 12;
-      if (ap.startsWith('a') && h === 12) h = 0;
-      return h * 60 + mm;
-    }
-    const hhmm = t.match(/^(\d{2})(\d{2})$/);
-    if (hhmm) return parseInt(hhmm[1], 10) * 60 + parseInt(hhmm[2], 10);
-    return null;
-  };
-  const pushSeg = (o: any, c: any) => {
-    const a = toMin(o), b = toMin(c);
-    if (a != null && b != null) out.push({ open: a, close: b });
-  };
-  if (cell == null) return out;
-  if (typeof cell === 'string') {
-    const s = cell.trim();
-    if (/closed/i.test(s)) return out;
-    // split multiple segments on comma/semicolon/&
-    s.split(/[,;&]| and /i).forEach((part) => {
-      const m = part.match(/(\d{1,2}(?::\d{2})?\s*[ap]?\.?m?\.?)\s*(?:-|–|—|to)\s*(\d{1,2}(?::\d{2})?\s*[ap]?\.?m?\.?)/i);
-      if (m) pushSeg(m[1], m[2]);
-    });
-    return out;
-  }
-  if (Array.isArray(cell)) {
-    cell.forEach((seg) => {
-      if (seg && typeof seg === 'object') pushSeg(seg.open ?? seg.start ?? seg.from, seg.close ?? seg.end ?? seg.to);
-      else parseRange(seg).forEach((r) => out.push(r));
-    });
-    return out;
-  }
-  if (typeof cell === 'object') pushSeg(cell.open ?? cell.start ?? cell.from, cell.close ?? cell.end ?? cell.to);
-  return out;
-}
-
-// Normalize the raw `hours` column into { hoursList:[{day,range}], byDow:{0..6:[{open,close}]} }
-function parseHours(raw: any): { hoursList: Array<{ day: string; range: string }>; byDow: Record<number, Array<{ open: number; close: number }>> } {
-  let h = raw;
-  if (typeof h === 'string') {
-    const t = h.trim();
-    if (t.startsWith('{') || t.startsWith('[')) {
-      try { h = JSON.parse(t); } catch { /* keep as text */ }
-    }
-  }
-  const byDow: Record<number, Array<{ open: number; close: number }>> = {};
-  const hoursList: Array<{ day: string; range: string }> = [];
-  const dayKeys: Record<string, number> = {
-    sun: 0, sunday: 0, mon: 1, monday: 1, tue: 2, tues: 2, tuesday: 2,
-    wed: 3, weds: 3, wednesday: 3, thu: 4, thur: 4, thurs: 4, thursday: 4,
-    fri: 5, friday: 5, sat: 6, saturday: 6,
-  };
-
-  if (h && typeof h === 'object' && !Array.isArray(h)) {
-    for (const k of Object.keys(h)) {
-      const dow = dayKeys[k.toLowerCase()];
-      if (dow == null) continue;
-      byDow[dow] = parseRange(h[k]);
-    }
-  } else if (Array.isArray(h)) {
-    h.forEach((entry: any) => {
-      if (!entry || typeof entry !== 'object') return;
-      const dk = entry.day ?? entry.weekday ?? entry.name;
-      const dow = typeof dk === 'number' ? dk % 7 : dayKeys[String(dk || '').toLowerCase()];
-      if (dow == null) return;
-      byDow[dow] = parseRange(entry.range ?? entry.hours ?? entry);
-    });
-  } else if (typeof h === 'string') {
-    // line-per-day text: "Monday: 9 AM - 8 PM"
-    h.split(/\r?\n/).forEach((line) => {
-      const m = line.match(/^\s*([A-Za-z]+)\s*[:\-]\s*(.+)$/);
-      if (!m) return;
-      const dow = dayKeys[m[1].toLowerCase()];
-      if (dow == null) return;
-      byDow[dow] = parseRange(m[2]);
-    });
-  }
-
-  for (let d = 0; d < 7; d++) {
-    const segs = byDow[d];
-    let range = 'Closed';
-    if (segs && segs.length) range = segs.map((s) => `${fmtTime(s.open)} – ${fmtTime(s.close)}`).join(', ');
-    hoursList.push({ day: DAYS[d], range });
-  }
-  return { hoursList, byDow };
-}
-
-// Compute "Open till 8:00 PM" / "Closed · opens 7 AM" from parsed hours, in the place's local-ish frame (server time).
-function openLineFrom(byDow: Record<number, Array<{ open: number; close: number }>>): string {
-  const hasAny = Object.values(byDow).some((v) => v && v.length);
-  if (!hasAny) return '';
-  const now = new Date();
-  const dow = now.getDay();
-  const cur = now.getHours() * 60 + now.getMinutes();
-  const today = byDow[dow] || [];
-  for (const s of today) {
-    // handle overnight (close <= open means spills to next day)
-    const close = s.close <= s.open ? s.close + 1440 : s.close;
-    if (cur >= s.open && cur < close) return `Open till ${fmtTime(s.close)}`;
-  }
-  // not open now -> find next opening today, then upcoming days
-  const todayNext = today.filter((s) => s.open > cur).sort((a, b) => a.open - b.open)[0];
-  if (todayNext) return `Closed · opens ${fmtTime(todayNext.open)}`;
-  for (let i = 1; i <= 7; i++) {
-    const d = (dow + i) % 7;
-    const segs = (byDow[d] || []).slice().sort((a, b) => a.open - b.open);
-    if (segs.length) {
-      const label = i === 1 ? 'tomorrow' : DAYS[d];
-      return `Closed · opens ${label} ${fmtTime(segs[0].open)}`;
-    }
-  }
-  return '';
-}
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   res.setHeader("Cache-Control", "no-store, max-age=0");
+  res.setHeader('Vary','Authorization');
+  const {client:viewer,error:authError}=await contentViewer(req);
+  if(authError)return res.status(401).json({error:'Please sign in again to load your review feed.'});
   // Links across the app use several id forms: raw uuid, slug, tavvy:<uuid>, places-<uuid>, fsq-<id>, fsq:<id>
   const rawId = String(req.query.id || '');
   const isFsq = /^fsq[-:]/.test(rawId);
@@ -213,6 +81,35 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (error) return res.status(500).json({ error: error.message });
     if (!place) return res.status(404).json({ error: 'not found' });
 
+    // Existing external profiles may contain direct delivery listings. Only
+    // accept URLs on the matching provider domain; a search link is a separate
+    // fallback in the UI and must never be presented as a confirmed listing.
+    const deliveryDomains: Record<string, string> = {
+      doordash: 'doordash.com', door_dash: 'doordash.com',
+      ubereats: 'ubereats.com', uber_eats: 'ubereats.com',
+      grubhub: 'grubhub.com', postmates: 'postmates.com',
+    };
+    const deliveryLinks: Record<string, string> = {};
+    const socialDomains: Record<string, string[]> = {
+      instagram: ['instagram.com'], tiktok: ['tiktok.com'],
+      youtube: ['youtube.com', 'youtu.be'], facebook: ['facebook.com'],
+    };
+    const socialLinks: Record<string, string> = {};
+    const { data: externalProfiles } = await supabase.from('place_external_profiles')
+      .select('provider,external_url').eq('place_id', place.id);
+    for (const profile of externalProfiles || []) {
+      const provider = String(profile.provider || '').toLowerCase();
+      const domain = deliveryDomains[provider];
+      const allowed = domain ? [domain] : socialDomains[provider];
+      if (!allowed || !profile.external_url) continue;
+      try {
+        const url = new URL(profile.external_url);
+        if (url.protocol !== 'https:' || url.username || url.password || !allowed.some(host => url.hostname === host || url.hostname.endsWith(`.${host}`))) continue;
+        if (domain) deliveryLinks[provider.replace('_', '')] = url.toString();
+        else socialLinks[provider] = url.toString();
+      } catch { /* ignore malformed external links */ }
+    }
+
     // Aggregated signals for this place, joined to the signal catalog (review_items)
     const { data: aggs } = await supabase
       .from('place_signal_aggregates')
@@ -240,6 +137,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       groups[cat].push({ label: def.label, emoji: def.icon_emoji || '', tapCount: a.tap_total, category: cat });
     }
 
+    // Shared with search and mobile: complete visit history, distinct reviewers,
+    // and an explicit unavailable state when evidence cannot be loaded.
+    const evidence = await fetchPlaceEvidence(place.id, { category: place.tavvy_category, subcategory: place.tavvy_subcategory }, { client: supabase });
+
+    let stories: any[] = [];
+    try {
+      const { data: storyRows } = await viewer.from('place_stories')
+        .select('id,media_url,media_type,caption,created_at,user_id,is_permanent,story_kind,expires_at,thumbnail_url')
+        .eq('place_id', place.id).eq('status', 'active')
+        .or(`expires_at.gt.${new Date().toISOString()},and(is_permanent.eq.true,story_kind.eq.owner_highlight)`)
+        .order('created_at', { ascending: false }).limit(12);
+      stories = storyRows || [];
+    } catch (e) { console.warn('Could not load place stories', e); }
+
     // ---- hours / open status (resilient) ----
     let hoursList: Array<{ day: string; range: string }> = [];
     let openLine = '';
@@ -247,103 +158,63 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (place.hours != null && place.hours !== '') {
         const parsed = parseHours(place.hours);
         hoursList = parsed.hoursList;
-        openLine = openLineFrom(parsed.byDow);
+        openLine = openLineFrom(parsed.byDow, place.timezone);
       }
     } catch { hoursList = []; openLine = ''; }
 
-    // ---- photos (place_photos: place_id, url, caption) ----
+    // Viewer-filtered uploads and cover: never resurrect a hidden photo via places.cover_image_url.
     let gallery: string[] = [];
+    let photoEntries: {id:string;url:string;caption?:string}[] = [];
+    let safeCover: string | null = null;
+    let photosStatus: 'ready'|'unavailable' = 'unavailable';
     try {
-      const { data: ph } = await supabase
-        .from('place_photos')
-        .select('url, caption, created_at')
-        .eq('place_id', place.id)
-        .order('created_at', { ascending: false })
-        .limit(10);
-      gallery = (ph || []).map((p: any) => p.url).filter(Boolean);
+      const {data:media,error:mediaError}=await viewer.rpc('get_place_photo_safety_v1',{p_place_id:place.id});
+      if(mediaError||!Array.isArray(media?.photos))throw new Error('Photo feed unavailable');
+      photoEntries=media.photos;gallery=photoEntries.map(p=>p.url);safeCover=media.cover||null;photosStatus='ready';
     } catch { gallery = []; }
 
-    // ---- recent reviews (reconstruct each person's review from their signal taps) ----
+    // Read published reviews first: selecting taps first can expose withdrawn
+    // reviews and can cut off a review partway through its selected signals.
     let recentReviews: Array<{
-      initial: string; name: string; when: string;
-      signals: Array<{ label: string; category: 'good' | 'vibe' | 'headsup' }>;
+      id: string; initial: string; name: string; when: string; createdAt: string;
+      text?: string; signals: Array<{ label: string; category: 'good' | 'vibe' | 'headsup' }>;
     }> = [];
-    try {
-      const { data: taps } = await supabase
-        .from('place_review_signal_taps')
-        .select('review_id, signal_id, created_at')
-        .eq('place_id', place.id)
-        .order('created_at', { ascending: false })
-        .limit(60);
-
-      if (taps && taps.length) {
-        // signal catalog for these taps (label + signal_type -> category)
-        const sigIds = [...new Set(taps.map((t: any) => t.signal_id))];
-        const sigMap: Record<string, { label: string; category: 'good' | 'vibe' | 'headsup' }> = {};
-        if (sigIds.length) {
-          const { data: sigs } = await supabase
-            .from('review_items')
-            .select('id, label, signal_type')
-            .in('id', sigIds);
-          (sigs || []).forEach((s: any) => {
-            const cat = SIGNAL_TYPE_CAT[s.signal_type];
-            if (cat) sigMap[s.id] = { label: s.label, category: cat };
-          });
-        }
-
-        // group taps by review_id, newest review first
-        const order: string[] = [];
-        const byReview: Record<string, { created_at: string; signals: Array<{ label: string; category: 'good' | 'vibe' | 'headsup' }>; seen: Set<string> }> = {};
-        for (const t of taps as any[]) {
-          if (!byReview[t.review_id]) {
-            byReview[t.review_id] = { created_at: t.created_at, signals: [], seen: new Set() };
-            order.push(t.review_id);
-          }
-          const sig = sigMap[t.signal_id];
-          const bucket = byReview[t.review_id];
-          if (sig && !bucket.seen.has(t.signal_id)) {
-            bucket.seen.add(t.signal_id);
-            bucket.signals.push(sig);
-          }
-        }
-
-        const topReviewIds = order.slice(0, 6);
-
-        // resolve reviewer names: place_reviews.user_id -> profiles.display_name/username
-        const nameByReview: Record<string, string> = {};
-        try {
-          const { data: revs } = await supabase
-            .from('place_reviews')
-            .select('id, user_id')
-            .in('id', topReviewIds);
-          const userByReview: Record<string, string> = {};
-          const userIds = new Set<string>();
-          (revs || []).forEach((r: any) => { if (r.user_id) { userByReview[r.id] = r.user_id; userIds.add(r.user_id); } });
-          if (userIds.size) {
-            const { data: profs } = await supabase
-              .from('profiles')
-              .select('user_id, display_name, username')
-              .in('user_id', [...userIds]);
-            const dnByUser: Record<string, string> = {};
-            (profs || []).forEach((p: any) => { dnByUser[p.user_id] = p.display_name || p.username || ''; });
-            Object.entries(userByReview).forEach(([rid, uid]) => {
-              const dn = (dnByUser[uid] || '').trim();
-              if (dn && !/agent|system/i.test(dn)) nameByReview[rid] = dn;
-            });
-          }
-        } catch { /* names optional */ }
-
-        recentReviews = topReviewIds
-          .map((rid) => {
-            const r = byReview[rid];
-            if (!r || !r.signals.length) return null;
-            const name = nameByReview[rid] || 'Tavvy member';
-            const initial = (name.replace(/[^A-Za-z]/g, '')[0] || 'T').toUpperCase();
-            return { initial, name, when: relativeTime(r.created_at), signals: r.signals };
-          })
-          .filter(Boolean) as typeof recentReviews;
-      }
-    } catch { recentReviews = []; }
+    const { count: reviewCount, error: reviewCountError } = await supabase.from('place_reviews')
+      .select('id', {count:'exact',head:true}).eq('place_id',place.id).eq('status','live');
+    const { data: recentRows, error: recentReadError } = await viewer.rpc('get_place_recent_reviews', {
+      p_place_id: place.id, p_limit: 6, p_offset: 0,
+    });
+    const reviewsError = recentReadError || (!Array.isArray(recentRows) ? new Error('Review response unavailable') : null);
+    const publishedReviews = recentRows as Array<{id:string;user_id:string|null;created_at:string;public_note:string|null}> | null;
+    let recentReviewsStatus = reviewsError ? 'unavailable' : 'ready';
+    if (!reviewsError && publishedReviews?.length) {
+      const reviewIds = publishedReviews.map(review => review.id);
+      const { data: taps, error: tapsError } = await supabase.from('place_review_signal_taps')
+        .select('review_id,signal_id').eq('place_id', place.id).in('review_id', reviewIds);
+      const signalIds = [...new Set((taps || []).map(tap => tap.signal_id))];
+      const { data: definitions, error: catalogError } = signalIds.length
+        ? await supabase.from('review_items').select('id,label,signal_type').in('id', signalIds)
+        : { data: [], error: null };
+      const signalMap = new Map((definitions || []).map(definition => [definition.id, definition]));
+      const userIds = [...new Set(publishedReviews.map(review => review.user_id).filter(Boolean))];
+      const { data: profiles } = userIds.length
+        ? await supabase.from('profiles').select('user_id,display_name,username').in('user_id', userIds)
+        : { data: [] };
+      const names = new Map((profiles || []).map(profile => [profile.user_id, String(profile.display_name || profile.username || '').trim()]));
+      if (tapsError || catalogError) recentReviewsStatus = 'unavailable';
+      if (!tapsError && !catalogError) recentReviews = publishedReviews.map(review => {
+        const displayName = names.get(review.user_id) || '';
+        const name = displayName && !/agent|system/i.test(displayName) ? displayName : 'Tavvy member';
+        const signals = (taps || []).filter(tap => tap.review_id === review.id).flatMap(tap => {
+          const definition = signalMap.get(tap.signal_id);
+          const category = SIGNAL_TYPE_CAT[definition?.signal_type];
+          return definition && category ? [{ label: definition.label, category }] : [];
+        });
+        return { id: review.id, initial: (name.replace(/[^A-Za-z]/g, '')[0] || 'T').toUpperCase(),
+          name, when: relativeTime(review.created_at), createdAt: review.created_at,
+          text: review.public_note || undefined, signals };
+      });
+    }
 
     return res.status(200).json({
       place: {
@@ -351,8 +222,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         category: place.tavvy_category, subcategory: place.tavvy_subcategory,
         street: place.street, city: place.city, region: place.region, country: place.country,
         phone: place.phone, whatsapp: place.whatsapp_number, website: place.website, email: place.email,
-        instagram: place.instagram, tiktok: place.tiktok, youtube: place.youtube, facebook: place.facebook,
-        cover_image_url: place.cover_image_url || (gallery.length ? gallery[0] : null), photos: place.photos,
+        instagram: socialLinks.instagram, tiktok: socialLinks.tiktok, youtube: socialLinks.youtube, facebook: socialLinks.facebook,
+        cover_image_url: safeCover || (gallery.length ? gallery[0] : null), photos: gallery,
         description: place.description || place.short_description, hours: place.hours,
         ordering_enabled: place.ordering_enabled,
         latitude: place.latitude, longitude: place.longitude,
@@ -360,8 +231,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         hoursList, openLine, gallery,
       },
       groups,
+      evidence,
+      stories,
+      photoEntries,
+      photosStatus,
+      deliveryLinks,
       totalTaps,
-      reviewCount: (aggs || []).reduce((m, a) => Math.max(m, a.review_count || 0), 0),
+      reviewCount: reviewCountError ? null : reviewCount || 0,
+      recentReviewsStatus,
       recentReviews,
     });
   } catch (e: any) {

@@ -1,0 +1,95 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-09-21",
+  "validation_scope": "local research contract and rejection cases; does not re-fetch sources or verify operating status",
+  "checks_passed": 16,
+  "counts": {
+    "operators": 10,
+    "ship_name_leads": 69,
+    "exact_normalized_name_duplicates": 0,
+    "exact_batch001_name_overlaps": 0,
+    "complete_retrieved_fleet_pages": 7,
+    "complete_retrieved_full_fleet_statements": 1,
+    "partial_access_operators": 2,
+    "verified_operating_ships": 0,
+    "verified_physical_vessel_count": null,
+    "canonical_ship_ids_assigned": 0,
+    "candidate_kinds": {
+      "ocean": 23,
+      "river": 36,
+      "expedition": 10
+    }
+  },
+  "checks": [
+    {
+      "name": "Inventory meets research-only contract and all source/count/identity boundaries",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject an unsupported operating status",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject publication or global completeness claims",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject invented permanent ship IDs",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject spec or photo payloads in research leads",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject unknown/cross-operator source references",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject nonofficial source domains",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject duplicate normalized names",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject names already present in batch001",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject operators already present in batch001",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject falsely complete Azamara coverage",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject falsely retrieved Coral evidence",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject omitted ships masked by a changed summary",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject stale or fabricated evidence-check dates",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject treating Galapagos Infinity as a river ship",
+      "status": "PASS"
+    },
+    {
+      "name": "Preserve all four frozen batch001 files byte for byte",
+      "status": "PASS"
+    }
+  ],
+  "files": {
+    "batch-002-fleet-inventory.json": "acd6d1c1dd936d60c6843212ff176b8fbd6b2022b8d83188c01adcd12ff9a14a",
+    "batch-002-validate.cjs": "fa74901d575f71f7696f0220a461f0332fcdafb290b43f438e3e844a413d510f"
+  },
+  "batch001_preserved": true,
+  "registry_snapshot_still_matches": true
+}

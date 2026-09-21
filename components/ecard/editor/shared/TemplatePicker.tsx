@@ -1,177 +1,30 @@
-/**
- * TemplatePicker — horizontal scroll carousel of realistic card previews.
- * Renders each template using FullCardPreview at ~0.28 scale.
- */
-
+/** The same real 9:16 renderer used by the public gallery and creation wizard. */
 import React from 'react';
-import { TEMPLATES, Template } from '../../../../config/eCardTemplates';
-import { FullCardPreview } from '../../wizard/FullCardPreview';
+import { useReleaseCopy } from '../../../../hooks/useReleaseCopy';
+import { TEMPLATES } from '../../../../config/eCardTemplates';
+import { TEMPLATE_CATEGORIES, canUseTemplate } from '../../../../lib/ecard/templateSelection';
+import TemplateExamplePreview from '../../shared/TemplateExamplePreview';
 import { IoLockClosed } from 'react-icons/io5';
-
-const ACCENT = '#00C853';
-const PREVIEW_SCALE = 0.28;
-const CONTAINER_WIDTH = 140;
-const CONTAINER_HEIGHT = 220;
-const INNER_WIDTH = Math.round(CONTAINER_WIDTH / PREVIEW_SCALE); // ~500
-
 interface TemplatePickerProps {
   selectedTemplateId: string;
   onSelect: (templateId: string, colorSchemeId?: string) => void;
-  isPro: boolean;
-  isDark?: boolean;
-  filterCategory?: string;
+  isPro: boolean; isDark?: boolean; filterCategory?: string;
 }
-
-// Group templates for filtering
-const TEMPLATE_CATEGORIES: Record<string, string[]> = {
-  business: ['biz-traditional', 'biz-modern', 'biz-minimalist', 'business-card', 'pro-card', 'pro-corporate', 'pro-creative', 'cover-card', 'mobile-business'],
-  personal: ['basic', 'blogger', 'full-width', 'premium-static', 'pro-realtor', 'church'],
-  politician: ['civic-card', 'civic-card-flag', 'civic-card-bold', 'civic-card-clean', 'civic-card-rally', 'politician-generic'],
-};
-
-export default function TemplatePicker({
-  selectedTemplateId,
-  onSelect,
-  isPro,
-  isDark = false,
-  filterCategory,
-}: TemplatePickerProps) {
-  const border = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
-  const cardBg = isDark ? '#1A1A1A' : '#FFFFFF';
-  const textPrimary = isDark ? '#FFFFFF' : '#111111';
-  const textSecondary = isDark ? '#94A3B8' : '#6B7280';
-
-  const filtered = filterCategory
-    ? TEMPLATES.filter(t => TEMPLATE_CATEGORIES[filterCategory]?.includes(t.id))
-    : TEMPLATES;
-
-  return (
-    <div style={{
-      display: 'flex',
-      gap: 10,
-      overflowX: 'auto',
-      scrollSnapType: 'x mandatory',
-      paddingBottom: 4,
-      marginLeft: -2,
-      marginRight: -2,
-      paddingLeft: 2,
-      paddingRight: 2,
-    }}>
-      {filtered.map((template) => {
-        const isSelected = selectedTemplateId === template.id;
-        const isLocked = template.isPremium && !isPro;
-        const firstScheme = template.colorSchemes[0];
-
-        return (
-          <button
-            key={template.id}
-            onClick={() => {
-              if (isLocked) return;
-              onSelect(template.id, firstScheme?.id);
-            }}
-            style={{
-              flexShrink: 0,
-              scrollSnapAlign: 'start',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              padding: 8,
-              paddingBottom: 10,
-              borderRadius: 14,
-              border: `2px solid ${isSelected ? ACCENT : border}`,
-              background: cardBg,
-              cursor: isLocked ? 'not-allowed' : 'pointer',
-              transition: 'border-color 0.2s',
-              textAlign: 'center',
-              width: CONTAINER_WIDTH + 16,
-            }}
-          >
-            {/* Scaled card preview */}
-            <div style={{
-              width: CONTAINER_WIDTH,
-              height: CONTAINER_HEIGHT,
-              borderRadius: 10,
-              overflow: 'hidden',
-              marginBottom: 8,
-              position: 'relative',
-              backgroundColor: firstScheme?.cardBg || firstScheme?.primary || '#333',
-            }}>
-              <div style={{
-                width: INNER_WIDTH,
-                transformOrigin: 'top left',
-                transform: `scale(${PREVIEW_SCALE})`,
-              }}>
-                <FullCardPreview tmpl={template} />
-              </div>
-
-              {/* Lock overlay */}
-              {isLocked && (
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  backgroundColor: 'rgba(0,0,0,0.45)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                  <div style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 14,
-                    background: 'rgba(0,0,0,0.6)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}>
-                    <IoLockClosed size={14} color="#fff" />
-                  </div>
-                </div>
-              )}
-
-              {/* Selected check */}
-              {isSelected && (
-                <div style={{
-                  position: 'absolute',
-                  top: 6,
-                  left: 6,
-                  width: 22,
-                  height: 22,
-                  borderRadius: 11,
-                  background: ACCENT,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                </div>
-              )}
-            </div>
-
-            {/* Template name + badge */}
-            <span style={{
-              fontSize: 12,
-              fontWeight: 600,
-              color: textPrimary,
-              marginBottom: 2,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              maxWidth: CONTAINER_WIDTH,
-            }}>
-              {template.name}
-            </span>
-            <span style={{
-              fontSize: 10,
-              color: textSecondary,
-              lineHeight: 1.3,
-            }}>
-              {template.isPremium ? 'Pro' : 'Free'}
-            </span>
-          </button>
-        );
-      })}
-    </div>
-  );
+export default function TemplatePicker({ selectedTemplateId, onSelect, isPro, isDark = false, filterCategory }: TemplatePickerProps) {
+  const copy = useReleaseCopy();
+  const category = filterCategory ? TEMPLATE_CATEGORIES[filterCategory] : undefined;
+  const filtered = category ? TEMPLATES.filter(template => category.includes(template.id)) : TEMPLATES;
+  return <div aria-label={copy('Card designs')} style={{ display: 'flex', gap: 12, overflowX: 'auto', scrollSnapType: 'x proximity', padding: '4px 3px 12px' }}>
+    {filtered.map(template => {
+      const selected = selectedTemplateId === template.id;
+      const scheme = template.colorSchemes.find(item => isPro || item.isFree) || template.colorSchemes[0];
+      const locked = !canUseTemplate(template, scheme?.id, isPro);
+      return <div key={template.id} style={{ flex: '0 0 180px', scrollSnapAlign: 'start', position: 'relative', padding: 8, borderRadius: 18, border: `2px solid ${selected ? '#8A05BE' : isDark ? '#41404a' : '#d6d3dd'}`, background: isDark ? '#211e29' : '#fff', color: isDark ? '#fff' : '#26212d' }}>
+        <div aria-hidden="true" {...({ inert: '' } as any)} style={{ pointerEvents: 'none' }}><TemplateExamplePreview template={template} schemeId={scheme?.id}/></div>
+        <button type="button" aria-label={`${template.name} · ${locked ? copy('Pro required') : template.isPremium ? 'Pro' : copy('Free')}`} aria-pressed={selected} aria-disabled={locked} onClick={() => { if (!locked && scheme) onSelect(template.id, scheme.id); }} style={{ position: 'absolute', inset: 0, border: 0, borderRadius: 16, background: 'transparent', cursor: locked ? 'not-allowed' : 'pointer' }} />
+        <span style={{ position: 'absolute', top: 14, right: 14, pointerEvents: 'none', padding: '5px 8px', borderRadius: 8, background: '#211e29', color: '#fff', fontSize: 11 }}>{locked && <IoLockClosed aria-hidden="true"/>} {template.isPremium ? 'Pro' : copy('Free')}</span>
+        <div style={{ textAlign: 'center', pointerEvents: 'none', fontSize: 13, fontWeight: 650 }}>{selected ? '✓ ' : ''}{template.name}</div>
+      </div>;
+    })}
+  </div>;
 }

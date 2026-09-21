@@ -1,3 +1,4 @@
+import { useReleaseCopy } from '../../../hooks/useReleaseCopy';
 /**
  * User Profile Screen
  * View and edit user profile
@@ -10,6 +11,7 @@ import Link from 'next/link';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import AppLayout from '../../../components/AppLayout';
+import AppearanceSelector from '../../../components/AppearanceSelector';
 import { supabase } from '../../../lib/supabaseClient';
 import { spacing, borderRadius } from '../../../constants/Colors';
 import { FiArrowLeft, FiEdit2, FiMapPin, FiCalendar, FiStar, FiBookmark, FiSettings, FiLogOut } from 'react-icons/fi';
@@ -36,6 +38,7 @@ interface UserProfile {
 }
 
 export default function ProfileScreen() {
+  const copy = useReleaseCopy();
   const router = useRouter();
   const { locale } = router;
   const { theme } = useThemeContext();
@@ -85,8 +88,8 @@ export default function ProfileScreen() {
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return 'Recently';
-    return new Date(dateString).toLocaleDateString('en-US', {
+    if (!dateString) return copy('Recently');
+    return new Date(dateString).toLocaleDateString(locale || 'en', {
       month: 'long',
       year: 'numeric'
     });
@@ -97,16 +100,17 @@ export default function ProfileScreen() {
       <AppLayout>
         <div className="auth-prompt" style={{ backgroundColor: theme.background }}>
           <span>👤</span>
-          <h1 style={{ color: theme.text }}>Sign in to view your profile</h1>
+          <h1 style={{ color: theme.text }}>{copy("Sign in to view your profile")}</h1>
           <p style={{ color: theme.textSecondary }}>
-            Create an account to save places, leave reviews, and more
+            {copy("Create an account to save places, leave reviews, and more")}
           </p>
           <Link href="/app/login" locale={locale} className="sign-in-button" style={{ backgroundColor: theme.primary }}>
-            Sign In
+            {copy("Sign In")}
           </Link>
           <Link href="/app/signup" locale={locale} className="sign-up-link" style={{ color: theme.primary }}>
-            Don't have an account? Sign Up
+            {copy("Don't have an account? Sign Up")}
           </Link>
+          <div style={{width:"100%",maxWidth:420,marginTop:28,textAlign:"left"}}><AppearanceSelector /></div>
           <style jsx>{`
             .auth-prompt {
               min-height: 100vh;
@@ -143,7 +147,7 @@ export default function ProfileScreen() {
   return (
     <>
       <Head>
-        <title>Profile | TavvY</title>
+        <title>{copy('Profile')} | TavvY</title>
         <meta name="description" content="Your TavvY profile" />
       </Head>
 
@@ -154,11 +158,13 @@ export default function ProfileScreen() {
             <button className="back-button" onClick={() => router.back()}>
               <FiArrowLeft size={24} color={theme.text} />
             </button>
-            <h1 style={{ color: theme.text }}>Profile</h1>
+            <h1 style={{ color: theme.text }}>{copy("Profile")}</h1><Link href="/app/apps" style={{color:theme.text}}>{copy("Explore more")}</Link>
             <Link href="/app/settings" locale={locale} className="settings-button">
               <FiSettings size={24} color={theme.text} />
             </Link>
           </header>
+
+          <section className="profile-appearance"><AppearanceSelector /></section>
 
           {/* Profile Info */}
           <div className="profile-info">
@@ -194,7 +200,7 @@ export default function ProfileScreen() {
                 </span>
               )}
               <span style={{ color: theme.textTertiary }}>
-                <FiCalendar size={14} /> Joined {formatDate(profile?.created_at || user?.created_at)}
+                <FiCalendar size={14} /> {copy('Joined')} {formatDate(profile?.created_at || user?.created_at)}
               </span>
             </div>
 
@@ -203,19 +209,19 @@ export default function ProfileScreen() {
               <div className="stat" style={{ backgroundColor: theme.surface }}>
                 <FiStar size={20} color={theme.primary} />
                 <span className="stat-value" style={{ color: theme.text }}>{profile?.review_count || 0}</span>
-                <span className="stat-label" style={{ color: theme.textSecondary }}>Reviews</span>
+                <span className="stat-label" style={{ color: theme.textSecondary }}>{copy("Reviews")}</span>
               </div>
               <div className="stat" style={{ backgroundColor: theme.surface }}>
                 <FiBookmark size={20} color={theme.primary} />
                 <span className="stat-value" style={{ color: theme.text }}>{profile?.saved_count || 0}</span>
-                <span className="stat-label" style={{ color: theme.textSecondary }}>Saved</span>
+                <span className="stat-label" style={{ color: theme.textSecondary }}>{copy("Saved")}</span>
               </div>
             </div>
 
             {/* Social Media Links */}
             {(profile?.instagram_url || profile?.tiktok_url || profile?.youtube_url || profile?.twitter_url) && (
               <div className="social-links-section">
-                <p className="social-label" style={{ color: theme.textSecondary }}>Follow me on</p>
+                <p className="social-label" style={{ color: theme.textSecondary }}>{copy("Follow me on")}</p>
                 <div className="social-icons">
                   {profile?.instagram_url && (
                     <a href={profile.instagram_url} target="_blank" rel="noopener noreferrer" className="social-icon" style={{ backgroundColor: theme.surface }} title="Instagram">
@@ -243,7 +249,7 @@ export default function ProfileScreen() {
 
             {/* Edit Profile Button */}
             <Link href="/app/profile/edit" locale={locale} className="edit-button" style={{ borderColor: theme.border, color: theme.text }}>
-              <FiEdit2 size={16} /> Edit Profile
+              <FiEdit2 size={16} /> {copy("Edit Profile")}
             </Link>
           </div>
 
@@ -257,7 +263,7 @@ export default function ProfileScreen() {
                 borderColor: activeTab === 'reviews' ? theme.primary : 'transparent',
               }}
             >
-              <FiStar size={18} /> My Reviews
+              <FiStar size={18} /> {copy("My Reviews")}
             </button>
             <button
               className={`tab ${activeTab === 'saved' ? 'active' : ''}`}
@@ -267,7 +273,7 @@ export default function ProfileScreen() {
                 borderColor: activeTab === 'saved' ? theme.primary : 'transparent',
               }}
             >
-              <FiBookmark size={18} /> Saved
+              <FiBookmark size={18} /> {copy("Saved")}
             </button>
           </div>
 
@@ -276,23 +282,23 @@ export default function ProfileScreen() {
             {activeTab === 'reviews' ? (
               <div className="empty-state">
                 <FiStar size={48} color={theme.textTertiary} />
-                <h3 style={{ color: theme.text }}>No reviews yet</h3>
+                <h3 style={{ color: theme.text }}>{copy("No reviews yet")}</h3>
                 <p style={{ color: theme.textSecondary }}>
-                  Start exploring and leave your first review!
+                  {copy("Start exploring and leave your first review!")}
                 </p>
                 <Link href="/app" locale={locale} className="explore-link" style={{ color: theme.primary }}>
-                  Explore Places
+                  {copy("Explore Places")}
                 </Link>
               </div>
             ) : (
               <div className="empty-state">
                 <FiBookmark size={48} color={theme.textTertiary} />
-                <h3 style={{ color: theme.text }}>No saved places</h3>
+                <h3 style={{ color: theme.text }}>{copy("No saved places")}</h3>
                 <p style={{ color: theme.textSecondary }}>
-                  Save places you want to visit later
+                  {copy("Save places you want to visit later")}
                 </p>
                 <Link href="/app" locale={locale} className="explore-link" style={{ color: theme.primary }}>
-                  Explore Places
+                  {copy("Explore Places")}
                 </Link>
               </div>
             )}
@@ -301,7 +307,7 @@ export default function ProfileScreen() {
           {/* Sign Out Button */}
           <div className="sign-out-section">
             <button className="sign-out-button" onClick={handleSignOut} style={{ color: '#EF4444' }}>
-              <FiLogOut size={18} /> Sign Out
+              <FiLogOut size={18} /> {copy("Sign Out")}
             </button>
           </div>
         </div>
@@ -321,6 +327,7 @@ export default function ProfileScreen() {
           }
           
           .back-button,
+          .profile-appearance { margin: 16px 20px; padding: 18px; border: 1px solid ${theme.border}; border-radius: 16px; }
           .settings-button {
             width: 40px;
             height: 40px;

@@ -51,7 +51,7 @@ export default function SocialSection({ isDark, isPro }: SocialSectionProps) {
   return (
     <EditorSection
       id="social"
-      title="Featured Socials"
+      title="Social icons"
       icon={<IoShareSocial size={20} />}
       defaultOpen={true}
       isDark={isDark}

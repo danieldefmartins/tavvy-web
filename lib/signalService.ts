@@ -11,6 +11,8 @@
  */
 
 import { supabase } from './supabaseClient';
+import { getSignalPrefixesForCategory, signalMatchesCategory, loadActiveSignalCatalog, loadPlaceSignalCategory } from './signalCatalog';
+export { CATEGORY_SIGNAL_PREFIXES, SUBCATEGORY_SIGNAL_OVERRIDES, getSignalPrefixesForCategory } from './signalCatalog';
 
 // ============================================
 // TYPES
@@ -56,6 +58,8 @@ export interface SignalsByCategory {
 // ============================================
 
 interface CachedSignal {
+  is_universal?: boolean;
+  category?: string | null;
   id: string;
   slug: string;
   label: string;
@@ -70,208 +74,20 @@ let cacheLoaded = false;
 
 async function loadSignalCache(): Promise<void> {
   if (cacheLoaded) return;
-
-  try {
-    const { data, error } = await supabase
-      .from('review_items')
-      .select('id, slug, label, icon_emoji, signal_type, color')
-      .eq('is_active', true);
-
-    if (error) {
-      console.error('Error loading signal cache:', error);
-      return;
-    }
-
-    signalCache = new Map();
-    signalsBySlug = new Map();
-
-    (data || []).forEach((item: any) => {
-      // Only cache the 3 main signal types (not pro_endorsement)
-      if (!['best_for', 'vibe', 'heads_up'].includes(item.signal_type)) return;
-      
-      const signal: CachedSignal = {
-        id: item.id,
-        slug: item.slug,
-        label: item.label,
-        icon_emoji: item.icon_emoji,
-        signal_type: item.signal_type as ReviewCategory,
-        color: item.color,
-      };
-      signalCache.set(item.id, signal);
-      signalsBySlug.set(item.slug, signal);
-    });
-
-    cacheLoaded = true;
-    console.log(`✅ Signal cache loaded: ${signalCache.size} signals`);
-  } catch (err) {
-    console.error('Error loading signal cache:', err);
-  }
+  const data = await loadActiveSignalCatalog(supabase);
+  signalCache = new Map();
+  signalsBySlug = new Map();
+  data.forEach((item: any) => {
+    signalCache.set(item.id, item);
+    signalsBySlug.set(item.slug, item);
+  });
+  cacheLoaded = true;
 }
 
 // ============================================
 // CATEGORY TO SIGNAL PREFIX MAPPING
 // Matches iOS CATEGORY_SIGNAL_PREFIXES exactly
 // ============================================
-
-export const CATEGORY_SIGNAL_PREFIXES: Record<string, string[]> = {
-  // Core Categories (canonical singular + legacy plural aliases —
-  // DB data is being migrated to singular 'restaurant'/'hotel')
-  restaurant: ['restaurant_', 'generic_'],
-  restaurants: ['restaurant_', 'generic_'],
-  cafe: ['cafe_', 'generic_'],
-  cafes: ['cafe_', 'generic_'],
-  nightlife: ['bar_', 'generic_'],
-  hotel: ['hotel_', 'generic_'],
-  hotels: ['hotel_', 'generic_'],
-  lodging: ['hotel_', 'generic_'],
-  
-  // RV & Camping
-  rv_camping: ['rv_', 'dump_', 'water_', 'wifi_', 'restroom_', 'laundry_', 'generic_'],
-  
-  // Shopping & Services
-  shopping: ['shop_', 'laundry_', 'generic_'],
-  beauty: ['beauty_', 'generic_'],
-  health: ['health_', 'generic_'],
-  fitness: ['fitness_', 'generic_'],
-  
-  // Automotive
-  automotive: ['fuel_', 'auto_', 'dump_', 'generic_'],
-  
-  // Professional & Business
-  home_services: ['service_', 'generic_'],
-  professional: ['pro_', 'generic_'],
-  financial: ['bank_', 'generic_'],
-  
-  // Other Services
-  pets: ['pet_', 'generic_'],
-  education: ['edu_', 'generic_'],
-  arts: ['arts_', 'generic_'],
-  
-  // Entertainment
-  entertainment: ['tp_', 'ent_', 'generic_'],
-  attraction: ['tp_', 'ent_', 'generic_'],
-  
-  // Outdoors & Parks
-  outdoors: ['outdoor_', 'restroom_', 'generic_'],
-  
-  // Transportation
-  transportation: ['transit_', 'restroom_', 'generic_'],
-  
-  // Government
-  government: ['border_', 'gov_', 'generic_'],
-  
-  // Religious & Events
-  religious: ['religious_', 'generic_'],
-  events: ['venue_', 'generic_'],
-  
-  // Cities
-  city: ['city_', 'generic_'],
-  
-  // Other/Generic
-  other: ['generic_'],
-};
-
-export const SUBCATEGORY_SIGNAL_OVERRIDES: Record<string, string[]> = {
-  // RV & Camping subcategories
-  dump_station: ['dump_', 'generic_'],
-  propane_station: ['fuel_', 'generic_'],
-  water_fill_station: ['water_', 'generic_'],
-  public_showers: ['restroom_', 'generic_'],
-  laundromat: ['laundry_', 'generic_'],
-  wifi_hotspot: ['wifi_', 'generic_'],
-  restroom: ['restroom_', 'generic_'],
-  
-  // Theme Park subcategories
-  theme_park_ride: ['tp_', 'generic_'],
-  theme_park_attraction: ['tp_', 'generic_'],
-  theme_park_food: ['restaurant_', 'tp_', 'generic_'],
-  theme_park_restroom: ['restroom_', 'generic_'],
-  
-  // Attraction subcategories
-  show: ['tp_', 'generic_'],
-  dark_ride: ['tp_', 'generic_'],
-  boat_ride: ['tp_', 'generic_'],
-  roller_coaster: ['tp_', 'generic_'],
-  thrill_ride: ['tp_', 'generic_'],
-  water_ride: ['tp_', 'generic_'],
-  spinner: ['tp_', 'generic_'],
-  simulator: ['tp_', 'generic_'],
-  carousel: ['tp_', 'generic_'],
-  train: ['tp_', 'generic_'],
-  tour: ['tp_', 'generic_'],
-  meet_greet: ['tp_', 'generic_'],
-  playground: ['tp_', 'generic_'],
-  
-  // Restaurant cuisine subcategories (categoryConfig slugs)
-  italian: ['italian_', 'pizza_', 'restaurant_', 'generic_'],
-  mexican: ['mexican_', 'restaurant_', 'generic_'],
-  chinese: ['asian_', 'restaurant_', 'generic_'],
-  japanese: ['sushi_', 'restaurant_', 'generic_'],
-  thai: ['thai_', 'restaurant_', 'generic_'],
-  indian: ['indian_', 'restaurant_', 'generic_'],
-  seafood: ['seafood_', 'restaurant_', 'generic_'],
-  steakhouse: ['steak_', 'restaurant_', 'generic_'],
-  bbq: ['bbq_', 'restaurant_', 'generic_'],
-  pizza: ['pizza_', 'italian_', 'restaurant_', 'generic_'],
-  burgers: ['burger_', 'restaurant_', 'generic_'],
-  food_truck: ['foodtruck_', 'restaurant_', 'generic_'],
-  brazilian: ['brazilian_', 'restaurant_', 'generic_'],
-  korean: ['korean_', 'restaurant_', 'generic_'],
-  vietnamese: ['viet_', 'restaurant_', 'generic_'],
-  mediterranean: ['med_', 'restaurant_', 'generic_'],
-  greek: ['med_', 'restaurant_', 'generic_'],
-  french: ['french_', 'restaurant_', 'generic_'],
-
-  // FSQ raw subcategory names (extracted from category labels)
-  Pizzeria: ['pizza_', 'italian_', 'restaurant_', 'generic_'],
-  'Pizza Place': ['pizza_', 'italian_', 'restaurant_', 'generic_'],
-  'Sushi Restaurant': ['sushi_', 'restaurant_', 'generic_'],
-  'Japanese Restaurant': ['sushi_', 'restaurant_', 'generic_'],
-  'Ramen Restaurant': ['sushi_', 'restaurant_', 'generic_'],
-  'BBQ Joint': ['bbq_', 'restaurant_', 'generic_'],
-  'Barbecue Restaurant': ['bbq_', 'restaurant_', 'generic_'],
-  'Mexican Restaurant': ['mexican_', 'restaurant_', 'generic_'],
-  Taqueria: ['mexican_', 'restaurant_', 'generic_'],
-  'Italian Restaurant': ['italian_', 'pizza_', 'restaurant_', 'generic_'],
-  'Chinese Restaurant': ['asian_', 'restaurant_', 'generic_'],
-  'Asian Restaurant': ['asian_', 'restaurant_', 'generic_'],
-  'Dim Sum Restaurant': ['asian_', 'restaurant_', 'generic_'],
-  'Noodle House': ['asian_', 'restaurant_', 'generic_'],
-  'Indian Restaurant': ['indian_', 'restaurant_', 'generic_'],
-  'Thai Restaurant': ['thai_', 'restaurant_', 'generic_'],
-  'Seafood Restaurant': ['seafood_', 'restaurant_', 'generic_'],
-  'Fish Market': ['seafood_', 'restaurant_', 'generic_'],
-  Steakhouse: ['steak_', 'restaurant_', 'generic_'],
-  'Burger Joint': ['burger_', 'restaurant_', 'generic_'],
-  'Burger Restaurant': ['burger_', 'restaurant_', 'generic_'],
-  'Fast Food Restaurant': ['burger_', 'restaurant_', 'generic_'],
-  'Brazilian Restaurant': ['brazilian_', 'restaurant_', 'generic_'],
-  Churrascaria: ['brazilian_', 'restaurant_', 'generic_'],
-  'Korean Restaurant': ['korean_', 'restaurant_', 'generic_'],
-  'Korean BBQ Restaurant': ['korean_', 'restaurant_', 'generic_'],
-  'Vietnamese Restaurant': ['viet_', 'restaurant_', 'generic_'],
-  'Pho Restaurant': ['viet_', 'restaurant_', 'generic_'],
-  'Mediterranean Restaurant': ['med_', 'restaurant_', 'generic_'],
-  'Greek Restaurant': ['med_', 'restaurant_', 'generic_'],
-  'French Restaurant': ['french_', 'restaurant_', 'generic_'],
-  Bistro: ['french_', 'restaurant_', 'generic_'],
-  Brasserie: ['french_', 'restaurant_', 'generic_'],
-  'Food Truck': ['foodtruck_', 'restaurant_', 'generic_'],
-  'Food Stand': ['foodtruck_', 'restaurant_', 'generic_'],
-  'Food Court': ['restaurant_', 'generic_'],
-  
-  // Automotive subcategories
-  gas_station: ['fuel_', 'generic_'],
-  ev_charging: ['fuel_', 'generic_'],
-  car_wash: ['auto_', 'generic_'],
-  auto_repair: ['auto_', 'generic_'],
-  
-  // Government subcategories
-  border_crossing: ['border_', 'generic_'],
-  checkpoint: ['border_', 'generic_'],
-  dmv_gov: ['gov_', 'generic_'],
-  post_office: ['gov_', 'generic_'],
-};
 
 // ============================================
 // CONSTANTS
@@ -331,16 +147,6 @@ export function getCategoryFromSignal(signalId: string): ReviewCategory | null {
 // CATEGORY-SPECIFIC SIGNAL FILTERING
 // ============================================
 
-export function getSignalPrefixesForCategory(
-  primaryCategory: string,
-  subcategory?: string
-): string[] {
-  if (subcategory && SUBCATEGORY_SIGNAL_OVERRIDES[subcategory]) {
-    return SUBCATEGORY_SIGNAL_OVERRIDES[subcategory];
-  }
-  return CATEGORY_SIGNAL_PREFIXES[primaryCategory] || ['generic_'];
-}
-
 export async function getSignalsForCategory(
   primaryCategory: string,
   subcategory?: string
@@ -356,7 +162,7 @@ export async function getSignalsForCategory(
   };
   
   signalsBySlug.forEach((signal) => {
-    const matchesPrefix = prefixes.some(prefix => signal.slug.startsWith(prefix));
+    const matchesPrefix = signalMatchesCategory(signal, primaryCategory, subcategory);
     
     if (matchesPrefix) {
       const signalForUI: Signal = {
@@ -384,59 +190,8 @@ export async function getSignalsForCategory(
  * Matches iOS fetchSignalsForPlace exactly.
  */
 export async function fetchSignalsForPlace(placeId: string): Promise<SignalsByCategory> {
-  await loadSignalCache();
-  
-  try {
-    // Try places_unified first
-    const { data: place } = await supabase
-      .from('places_unified')
-      .select('tavvy_primary_category, tavvy_subcategory')
-      .eq('id', placeId)
-      .maybeSingle();
-    
-    if (place && place.tavvy_primary_category) {
-      return await getSignalsForCategory(
-        place.tavvy_primary_category,
-        place.tavvy_subcategory
-      );
-    }
-    
-    // Fallback: Try tavvy_places table
-    const { data: tavvyPlace } = await supabase
-      .from('tavvy_places')
-      .select('primary_category, subcategory')
-      .eq('id', placeId)
-      .maybeSingle();
-    
-    if (tavvyPlace && tavvyPlace.primary_category) {
-      return await getSignalsForCategory(
-        tavvyPlace.primary_category,
-        tavvyPlace.subcategory
-      );
-    }
-    
-    // Fallback: Try places table
-    const { data: simplePlace } = await supabase
-      .from('places')
-      .select('tavvy_category, tavvy_subcategory')
-      .eq('id', placeId)
-      .maybeSingle();
-    
-    if (simplePlace) {
-      const category = simplePlace.tavvy_category;
-      const subcategory = simplePlace.tavvy_subcategory;
-      if (category) {
-        return await getSignalsForCategory(category, subcategory);
-      }
-    }
-    
-    // Default: Return generic signals
-    return await getSignalsForCategory('other');
-    
-  } catch (error) {
-    console.error('Error fetching place category:', error);
-    return await getSignalsForCategory('other');
-  }
+  const category = await loadPlaceSignalCategory(supabase, placeId);
+  return getSignalsForCategory(category.primary, category.subcategory);
 }
 
 // ============================================

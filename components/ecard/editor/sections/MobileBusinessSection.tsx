@@ -26,7 +26,7 @@ export default function MobileBusinessSection({ isDark }: MobileBusinessSectionP
       <EditorField
         label="Business Type"
         value={(card as any).business_type || ''}
-        onChange={(v) => dispatch({ type: 'SET_FIELD', field: 'description' as any, value: v })}
+        onChange={(v) => dispatch({ type: 'SET_FIELD', field: 'business_type' as any, value: v })}
         placeholder="e.g. Food Truck, Pop-up Shop"
         isDark={isDark}
       />

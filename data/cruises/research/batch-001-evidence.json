@@ -1,0 +1,2447 @@
+{
+  "schemaVersion": 1,
+  "batch": "verified-operating-batch-001",
+  "checked_at": "2026-09-21",
+  "publication_status": "draft",
+  "worldwideComplete": false,
+  "operator_lead_inventory": {
+    "registry_count": 58,
+    "registry_status": "incomplete_operator_discovery",
+    "represented_in_this_batch": 9,
+    "none_claimed_fleet_complete": true,
+    "registry_file_modified": false
+  },
+  "identity_policy": "UUIDv5 values are minted once under the batch identity namespace, committed to this artifact and thereafter immutable. Do not regenerate from future names or URLs. Existing dataset contained no staged ship records at research start. Before production import, compare with live canonical catalog including official identifiers; this batch does not authorize an upsert by name.",
+  "as_of_policy": "checked_at/as_of is the UTC review date, not a claim that the operator published/updated every underlying fact that day. Historical document issue dates appear in observations. Operating means offered as a current operating fleet member, not live vessel tracking or confirmed cabin inventory.",
+  "unknown_policy": "No inferred occupancy basis, restaurant/shop totals, deck totals, build year from debut, or licenses. Missing facts are explicit null/unverified; conflicts remain hidden. Venue/cabin source dates inherit their referenced source checked_at and are repeated in field_evidence.",
+  "selection_changes": [
+    {
+      "candidate": "Avalon Envision",
+      "replacement": "AmaLea",
+      "reason": "Current fleet listing available, but detailed Envision page could not be retrieved; use directly verifiable ship-specific source for first batch. Avalon remains an operator research lead."
+    }
+  ],
+  "rejected_observations": [
+    {
+      "ship_slug": "amadouro",
+      "field": "stateroom_count",
+      "observations": [
+        {
+          "value": 51,
+          "url": "https://www.amawaterways.com/ships/amadouro"
+        },
+        {
+          "value": 52,
+          "url": "https://www.amawaterways.com/ships"
+        }
+      ],
+      "disposition": "No stateroom-count key exists in contract and current sources conflict; not imported."
+    }
+  ],
+  "ships": [
+    {
+      "ship_id": "df0fda09-7eb9-5a84-b6a0-30e309490456",
+      "slug": "icon-of-the-seas",
+      "checked_at": "2026-09-21",
+      "identity_basis": "Current operator ship page; no verified IMO/ENI yet. Stable IDs were minted once and must survive URL, name or operator changes.",
+      "scope_basis": "Current ship page offers individual seven-night Eastern/Western Caribbean cruises and rooms.",
+      "source_observations": [
+        {
+          "source_id": "ship",
+          "locator": "Cruises; seven pools; dining highlights",
+          "observation": "Current seven-night cruises; seven pools; named Empire Supper Club and Chops Grille."
+        },
+        {
+          "source_id": "size",
+          "locator": "Opening paragraph, published 2025-11-11",
+          "observation": "Icon: 250800 gross tonnage, 1196 feet, 20 total decks, 7600 maximum guests."
+        },
+        {
+          "source_id": "age",
+          "locator": "2024 Icon of the Seas entry",
+          "observation": "Icon: 248663 gross tonnage, approximately 5610 double occupancy, 2350 crew, 18 passenger decks. Year heading is not a build certificate."
+        },
+        {
+          "source_id": "rooms",
+          "locator": "Named room sections",
+          "observation": "Family Infinite Ocean View Balcony and Surfside Family Suites explicitly offer accessible rooms; Ultimate Family Townhouse also listed."
+        }
+      ],
+      "field_evidence": {
+        "ship.facts.gross_tonnage": {
+          "source_ids": [
+            "size",
+            "age"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Size article versus Icon row in age guide"
+        },
+        "ship.facts.length_m": {
+          "source_ids": [
+            "size"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Opening paragraph"
+        },
+        "ship.facts.guests_maximum": {
+          "source_ids": [
+            "size"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Named Icon specification or highlights"
+        },
+        "ship.facts.decks_total": {
+          "source_ids": [
+            "size"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Named Icon specification or highlights"
+        },
+        "ship.facts.decks_passenger": {
+          "source_ids": [
+            "age"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Named Icon specification or highlights"
+        },
+        "ship.facts.crew": {
+          "source_ids": [
+            "age"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Named Icon specification or highlights"
+        },
+        "ship.facts.pools": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Named Icon specification or highlights"
+        },
+        "ship.facts.guests_double_occupancy": {
+          "source_ids": [
+            "age"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "2024 Icon entry"
+        },
+        "venues.54776740-233e-5cc6-9ea9-7f89129299b9": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Dining highlights"
+        },
+        "venues.2fc6b21c-1511-51cd-bca5-db6992a77557": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Dining highlights"
+        },
+        "ship.cabin_categories.c7645a62-81c5-54ca-9f76-bebe7f88fdbf": {
+          "source_ids": [
+            "rooms"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Named room section"
+        },
+        "ship.cabin_categories.fd3802cf-b900-5d84-bed4-62704ed96ee4": {
+          "source_ids": [
+            "rooms"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Named room section"
+        },
+        "ship.cabin_categories.fb5499b8-3001-584b-9aa3-13e684926082": {
+          "source_ids": [
+            "rooms"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Named room section"
+        },
+        "ship.name": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_id": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_name": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.kind": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.official_url": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operating_status": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.overnight_public_cruise": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.identity_verified": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        }
+      },
+      "gaps": [
+        "Reconcile tonnage; verify year built and service date separately. Restaurant/shop totals and performance schedule remain unverified.",
+        "No image reuse permission established; photo is null. IMO/ENI and historical operator/rename records require later verification before duplicate-sensitive imports."
+      ],
+      "capacity_observations": [],
+      "unknown_fact_keys": [
+        "year_built",
+        "entered_service",
+        "last_refurbished",
+        "guests_lower_berths",
+        "restaurants",
+        "dining_outlets",
+        "cafes",
+        "bars",
+        "shops",
+        "deck_plan_url",
+        "accessibility_url"
+      ],
+      "coverage": {
+        "venues": "selected_verified_subset",
+        "cabin_categories": "selected_verified_subset",
+        "programs": "not_verified",
+        "photos": "none_permission_unverified",
+        "name_history": "not_established",
+        "official_identifiers": "not_established"
+      }
+    },
+    {
+      "ship_id": "63128659-056e-5017-a4d7-34d63a757e87",
+      "slug": "celebrity-edge",
+      "checked_at": "2026-09-21",
+      "identity_basis": "Current operator ship page; no verified IMO/ENI yet. Stable IDs were minted once and must survive URL, name or operator changes.",
+      "scope_basis": "Current operator fleet page plus recent September 11–18, 2026 public seven-night Alaska itinerary; not a charter listing.",
+      "source_observations": [
+        {
+          "source_id": "ship",
+          "locator": "Learn More About Edge; Accommodations",
+          "observation": "2918 double occupancy; 1004 feet; Edge Villas and Iconic Suites named. Unqualified tonnage 130818 not relabeled as GT."
+        },
+        {
+          "source_id": "itinerary",
+          "locator": "Cruise overview",
+          "observation": "Seven-night Celebrity Edge voyage Seattle–Vancouver, September 11–18, 2026; evidence of public overnight operation, not future availability."
+        },
+        {
+          "source_id": "dining",
+          "locator": "Complimentary Dining; Bars & Lounges",
+          "observation": "Eden Café, Oceanview Café and Mast Grill are complimentary dining; Martini Bar named. Mixed 29 food/beverage experiences is not a restaurant total."
+        }
+      ],
+      "field_evidence": {
+        "ship.facts.guests_double_occupancy": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Double Occupancy"
+        },
+        "ship.facts.length_m": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Length"
+        },
+        "venues.4b6f594f-22dc-5d2c-8e5c-464a471b93f3": {
+          "source_ids": [
+            "dining"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Named dining/bar section"
+        },
+        "venues.1ba2b801-2358-5b5c-92d1-3d9d0f11fcba": {
+          "source_ids": [
+            "dining"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Named dining/bar section"
+        },
+        "venues.03588363-94bd-54dc-b85e-29b0c17b710a": {
+          "source_ids": [
+            "dining"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Named dining/bar section"
+        },
+        "venues.e0609607-1810-54b3-b2b7-2d2bd0ee40ab": {
+          "source_ids": [
+            "dining"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Named dining/bar section"
+        },
+        "ship.cabin_categories.8a018f88-8de0-513f-abd5-a7bf790605d5": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Accommodations"
+        },
+        "ship.cabin_categories.2275bc91-be2d-5b4a-b843-a23cc85ff40d": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Accommodations"
+        },
+        "ship.name": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_id": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_name": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.kind": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.official_url": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operating_status": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.overnight_public_cruise": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.identity_verified": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        }
+      },
+      "gaps": [
+        "Tonnage basis is unqualified; build year, crew, deck totals and distinct restaurant/bar totals need further source review.",
+        "No image reuse permission established; photo is null. IMO/ENI and historical operator/rename records require later verification before duplicate-sensitive imports."
+      ],
+      "capacity_observations": [],
+      "unknown_fact_keys": [
+        "year_built",
+        "entered_service",
+        "last_refurbished",
+        "gross_tonnage",
+        "guests_lower_berths",
+        "guests_maximum",
+        "crew",
+        "decks_total",
+        "decks_passenger",
+        "restaurants",
+        "dining_outlets",
+        "cafes",
+        "bars",
+        "shops",
+        "pools",
+        "deck_plan_url",
+        "accessibility_url"
+      ],
+      "coverage": {
+        "venues": "selected_verified_subset",
+        "cabin_categories": "selected_verified_subset",
+        "programs": "not_verified",
+        "photos": "none_permission_unverified",
+        "name_history": "not_established",
+        "official_identifiers": "not_established"
+      }
+    },
+    {
+      "ship_id": "daa9d529-d06e-5d5b-8e29-8d56b5238a33",
+      "slug": "norwegian-prima",
+      "checked_at": "2026-09-21",
+      "identity_basis": "Current operator ship page; no verified IMO/ENI yet. Stable IDs were minted once and must survive URL, name or operator changes.",
+      "scope_basis": "Current ship page offers public Caribbean, transatlantic and other overnight cruise categories with cabin selection; no live departure availability is claimed.",
+      "source_observations": [
+        {
+          "source_id": "ship",
+          "locator": "Specification strip; What’s On Board; Staterooms; Destinations",
+          "observation": "Current specs: built 2022, length 294m, crew 1506, 3195 double occupancy; restaurants and Broadway Cabaret named."
+        },
+        {
+          "source_id": "flyer",
+          "locator": "Page 1 footer; copyright 03/23",
+          "observation": "2023 flyer: built 2022, gross tonnage 143535, 3099 double occupancy, crew 1506. Retained as conflicting historical evidence, not current show schedule."
+        },
+        {
+          "source_id": "deck",
+          "locator": "Official interactive ship deck plan",
+          "observation": "Dedicated Prima deck-plan destination."
+        }
+      ],
+      "field_evidence": {
+        "ship.facts.year_built": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Specification strip"
+        },
+        "ship.facts.length_m": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Specification strip"
+        },
+        "ship.facts.crew": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Specification strip"
+        },
+        "ship.facts.gross_tonnage": {
+          "source_ids": [
+            "flyer"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Page 1 footer"
+        },
+        "ship.facts.guests_double_occupancy": {
+          "source_ids": [
+            "ship",
+            "flyer"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current strip versus 2023 flyer"
+        },
+        "ship.facts.deck_plan_url": {
+          "source_ids": [
+            "deck"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Dedicated deck plan"
+        },
+        "venues.b33b7935-f923-5345-a206-0468649b6898": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "What’s On Board / named ship gallery"
+        },
+        "venues.28f71952-e500-5c78-b258-598c06e7d35d": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "What’s On Board / named ship gallery"
+        },
+        "venues.cf669ffc-e0b6-54c8-9bc3-6eb6606f43c3": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "What’s On Board / named ship gallery"
+        },
+        "venues.e820789a-4138-5aa4-9b32-0a573a0b1364": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "What’s On Board / named ship gallery"
+        },
+        "venues.9ef560f6-49e8-5458-8575-16d5684701c2": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "What’s On Board / named ship gallery"
+        },
+        "ship.cabin_categories.c7a55845-c9b1-5d71-a63b-df57a0f35232": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Staterooms"
+        },
+        "ship.cabin_categories.89e87fde-42d2-5549-a68e-bb334c2db21f": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Staterooms"
+        },
+        "ship.cabin_categories.d37b387e-f51a-5dc0-9981-61ff7c1801a3": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Staterooms"
+        },
+        "programs.729dd2b5-97b2-5bc7-97af-38068566dfe6": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Entertainment"
+        },
+        "ship.name": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_id": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_name": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.kind": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.official_url": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operating_status": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.overnight_public_cruise": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.identity_verified": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        }
+      },
+      "gaps": [
+        "Resolve guest capacity conflict. Historical flyer shows are deliberately not imported as current performances.",
+        "No image reuse permission established; photo is null. IMO/ENI and historical operator/rename records require later verification before duplicate-sensitive imports."
+      ],
+      "capacity_observations": [],
+      "unknown_fact_keys": [
+        "entered_service",
+        "last_refurbished",
+        "guests_lower_berths",
+        "guests_maximum",
+        "decks_total",
+        "decks_passenger",
+        "restaurants",
+        "dining_outlets",
+        "cafes",
+        "bars",
+        "shops",
+        "pools",
+        "accessibility_url"
+      ],
+      "coverage": {
+        "venues": "selected_verified_subset",
+        "cabin_categories": "selected_verified_subset",
+        "programs": "selected_source_backed_programs",
+        "photos": "none_permission_unverified",
+        "name_history": "not_established",
+        "official_identifiers": "not_established"
+      }
+    },
+    {
+      "ship_id": "a2061812-add0-50d1-b7d7-0ab63818d059",
+      "slug": "msc-world-europa",
+      "checked_at": "2026-09-21",
+      "identity_basis": "Current operator ship page; no verified IMO/ENI yet. Stable IDs were minted once and must survive URL, name or operator changes.",
+      "scope_basis": "Current operator ship page and official 2026 seven-night Mediterranean offer operating April–October; fares are not imported.",
+      "source_observations": [
+        {
+          "source_id": "ship",
+          "locator": "Introduction; In Numbers; Bars & Lounges; cabin categories",
+          "observation": "Entered service 2022; gross tonnage 215863, length 333.3m, crew 2138; unqualified passengers 6762; named bars and cabin categories."
+        },
+        {
+          "source_id": "sailings",
+          "locator": "MSC World Europa Mediterranean block",
+          "observation": "Public seven-night voyages from Barcelona, April–October 2026."
+        }
+      ],
+      "field_evidence": {
+        "ship.facts.entered_service": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Introduction / In Numbers"
+        },
+        "ship.facts.gross_tonnage": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Introduction / In Numbers"
+        },
+        "ship.facts.length_m": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Introduction / In Numbers"
+        },
+        "ship.facts.crew": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Introduction / In Numbers"
+        },
+        "ship.facts.deck_plan_url": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Deckplan"
+        },
+        "venues.a94fc779-42f5-5e2a-bccb-093c0bab538d": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Bars & Lounges / Yacht Club"
+        },
+        "venues.fc9eaabc-ff3f-5886-816c-9c67a270fd1d": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Bars & Lounges / Yacht Club"
+        },
+        "venues.8c0d7f51-f61d-56bc-9281-bd955786558a": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Bars & Lounges / Yacht Club"
+        },
+        "venues.d195b45b-e7a9-5300-a639-a7c2c78407cd": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Bars & Lounges / Yacht Club"
+        },
+        "ship.cabin_categories.6e226850-7615-5022-ae99-5e8cf4b10a28": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Cabin categories"
+        },
+        "ship.cabin_categories.3636ae55-e421-5d4c-9cd2-5fad9003b853": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Cabin categories"
+        },
+        "ship.cabin_categories.85ec830c-b73e-549f-8b49-05416ebdd49b": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Cabin categories"
+        },
+        "ship.name": {
+          "source_ids": [
+            "ship",
+            "sailings"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_id": {
+          "source_ids": [
+            "ship",
+            "sailings"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_name": {
+          "source_ids": [
+            "ship",
+            "sailings"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.kind": {
+          "source_ids": [
+            "ship",
+            "sailings"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.official_url": {
+          "source_ids": [
+            "ship",
+            "sailings"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operating_status": {
+          "source_ids": [
+            "ship",
+            "sailings"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.overnight_public_cruise": {
+          "source_ids": [
+            "ship",
+            "sailings"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.identity_verified": {
+          "source_ids": [
+            "ship",
+            "sailings"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        }
+      },
+      "gaps": [
+        "Capacity basis, restaurants, stores, shows and total/passenger deck counts remain unverified; selected bars are not a full venue inventory.",
+        "No image reuse permission established; photo is null. IMO/ENI and historical operator/rename records require later verification before duplicate-sensitive imports."
+      ],
+      "capacity_observations": [
+        {
+          "value": 6762,
+          "source_ids": [
+            "ship"
+          ],
+          "basis": "unspecified",
+          "disposition": "Not promoted to double-occupancy, lower-berth or maximum capacity.",
+          "note": "Passenger count does not state maximum or double occupancy."
+        }
+      ],
+      "unknown_fact_keys": [
+        "year_built",
+        "last_refurbished",
+        "guests_double_occupancy",
+        "guests_lower_berths",
+        "guests_maximum",
+        "decks_total",
+        "decks_passenger",
+        "restaurants",
+        "dining_outlets",
+        "cafes",
+        "bars",
+        "shops",
+        "pools",
+        "accessibility_url"
+      ],
+      "coverage": {
+        "venues": "selected_verified_subset",
+        "cabin_categories": "selected_verified_subset",
+        "programs": "not_verified",
+        "photos": "none_permission_unverified",
+        "name_history": "not_established",
+        "official_identifiers": "not_established"
+      }
+    },
+    {
+      "ship_id": "a0af8cc7-015f-5e03-a5d3-b4de0e36ef57",
+      "slug": "amamagna",
+      "checked_at": "2026-09-21",
+      "identity_basis": "Current operator ship page; no verified IMO/ENI yet. Stable IDs were minted once and must survive URL, name or operator changes.",
+      "scope_basis": "Current ship-specific page offers public seven-night river itineraries and individual stateroom quotes.",
+      "source_observations": [
+        {
+          "source_id": "ship",
+          "locator": "Specification strip; Featured Itineraries; Deck Plans; FAQs",
+          "observation": "Length 443 feet, crew 70, passengers 196 without occupancy basis; 4 restaurants explicitly stated; named cabins and venues."
+        },
+        {
+          "source_id": "history",
+          "locator": "2019 timeline",
+          "observation": "AmaMagna debuted on the Danube in 2019."
+        }
+      ],
+      "field_evidence": {
+        "ship.facts.length_m": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Length"
+        },
+        "ship.facts.crew": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Crew"
+        },
+        "ship.facts.restaurants": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Dining FAQ"
+        },
+        "ship.facts.deck_plan_url": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Deck Plans"
+        },
+        "ship.cabin_categories.4406cf68-d895-5f25-8343-4f5b02912b4a": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Deck Plans"
+        },
+        "ship.cabin_categories.ee93e5c1-2721-52bd-926a-677d60485705": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Deck Plans"
+        },
+        "ship.cabin_categories.8230d367-3391-5903-a7d1-0c451bac5f4c": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Deck Plans"
+        },
+        "venues.0a4884e0-8914-52e0-b456-73bfc6faf112": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Dining FAQ"
+        },
+        "venues.8257b950-2029-5fde-877e-7958fab5e804": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Dining FAQ"
+        },
+        "venues.23805c6f-c84e-525c-9ce3-6dc78636f9c4": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Dining FAQ"
+        },
+        "venues.1ea9967b-6755-5823-8ab5-3f9caaf09bab": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Dining FAQ"
+        },
+        "venues.0dc8b84c-adca-59f6-90d5-0fee063b6339": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Wellness FAQ"
+        },
+        "ship.facts.entered_service": {
+          "source_ids": [
+            "history"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "2019 timeline"
+        },
+        "venues.a0dc7a54-fb33-5dc7-9788-cb8e86fdebb0": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Wellness FAQ"
+        },
+        "ship.name": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_id": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_name": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.kind": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.official_url": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operating_status": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.overnight_public_cruise": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.identity_verified": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        }
+      },
+      "gaps": [
+        "Capacity basis, year built, shops and performances need verification. Cabin categories are a selected subset; accessibility is unknown per category.",
+        "No image reuse permission established; photo is null. IMO/ENI and historical operator/rename records require later verification before duplicate-sensitive imports."
+      ],
+      "capacity_observations": [
+        {
+          "value": 196,
+          "source_ids": [
+            "ship"
+          ],
+          "basis": "unspecified",
+          "disposition": "Not promoted to double-occupancy, lower-berth or maximum capacity.",
+          "note": "Ship page lists Passengers, without a maximum/lower-berth/double-occupancy label."
+        }
+      ],
+      "unknown_fact_keys": [
+        "year_built",
+        "last_refurbished",
+        "gross_tonnage",
+        "guests_double_occupancy",
+        "guests_lower_berths",
+        "guests_maximum",
+        "decks_total",
+        "decks_passenger",
+        "dining_outlets",
+        "cafes",
+        "bars",
+        "shops",
+        "pools",
+        "accessibility_url"
+      ],
+      "coverage": {
+        "venues": "selected_verified_subset",
+        "cabin_categories": "selected_verified_subset",
+        "programs": "not_verified",
+        "photos": "none_permission_unverified",
+        "name_history": "not_established",
+        "official_identifiers": "not_established"
+      }
+    },
+    {
+      "ship_id": "a9faa575-d703-515b-8a22-e4146402ec17",
+      "slug": "amadouro",
+      "checked_at": "2026-09-21",
+      "identity_basis": "Current operator ship page; no verified IMO/ENI yet. Stable IDs were minted once and must survive URL, name or operator changes.",
+      "scope_basis": "Current ship-specific page offers public seven-night river itineraries and individual stateroom quotes.",
+      "source_observations": [
+        {
+          "source_id": "ship",
+          "locator": "Specification strip; Featured Itineraries; Deck Plans; FAQs",
+          "observation": "Length 260 feet, crew 38, passengers 102 without occupancy basis; 1 restaurants explicitly stated; named cabins and venues."
+        }
+      ],
+      "field_evidence": {
+        "ship.facts.length_m": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Length"
+        },
+        "ship.facts.crew": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Crew"
+        },
+        "ship.facts.restaurants": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Dining FAQ"
+        },
+        "ship.facts.deck_plan_url": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Deck Plans"
+        },
+        "ship.cabin_categories.38fdf857-645c-5da4-9a2e-2f23412b3688": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Deck Plans"
+        },
+        "ship.cabin_categories.61faf9ee-4733-5d86-b8d7-d2c81ca28cbc": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Deck Plans"
+        },
+        "ship.cabin_categories.47976eed-6cd1-5765-b89f-c99b43884b2c": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Deck Plans"
+        },
+        "venues.af9aea46-b033-5d02-8a8a-2f29509d167d": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Dining FAQ"
+        },
+        "venues.ce46c897-71dd-559e-8495-01ea46bd81b0": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Wellness FAQ"
+        },
+        "ship.name": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_id": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_name": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.kind": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.official_url": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operating_status": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.overnight_public_cruise": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.identity_verified": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        }
+      },
+      "gaps": [
+        "Ship detail says 51 staterooms while fleet/itinerary listings say 52; no stateroom total imported. See rejected observations.",
+        "Capacity basis, year built, shops and performances need verification. Cabin categories are a selected subset; accessibility is unknown per category.",
+        "No image reuse permission established; photo is null. IMO/ENI and historical operator/rename records require later verification before duplicate-sensitive imports."
+      ],
+      "capacity_observations": [
+        {
+          "value": 102,
+          "source_ids": [
+            "ship"
+          ],
+          "basis": "unspecified",
+          "disposition": "Not promoted to double-occupancy, lower-berth or maximum capacity.",
+          "note": "Ship page lists Passengers, without a maximum/lower-berth/double-occupancy label."
+        }
+      ],
+      "unknown_fact_keys": [
+        "year_built",
+        "entered_service",
+        "last_refurbished",
+        "gross_tonnage",
+        "guests_double_occupancy",
+        "guests_lower_berths",
+        "guests_maximum",
+        "decks_total",
+        "decks_passenger",
+        "dining_outlets",
+        "cafes",
+        "bars",
+        "shops",
+        "pools",
+        "accessibility_url"
+      ],
+      "coverage": {
+        "venues": "selected_verified_subset",
+        "cabin_categories": "selected_verified_subset",
+        "programs": "not_verified",
+        "photos": "none_permission_unverified",
+        "name_history": "not_established",
+        "official_identifiers": "not_established"
+      }
+    },
+    {
+      "ship_id": "36c6f3d9-9fb8-5e47-8db4-7b2d12cf87a4",
+      "slug": "amalea",
+      "checked_at": "2026-09-21",
+      "identity_basis": "Current operator ship page; no verified IMO/ENI yet. Stable IDs were minted once and must survive URL, name or operator changes.",
+      "scope_basis": "Current ship-specific page offers public seven-night river itineraries and individual stateroom quotes.",
+      "source_observations": [
+        {
+          "source_id": "ship",
+          "locator": "Specification strip; Featured Itineraries; Deck Plans; FAQs",
+          "observation": "Length 443 feet, crew 51, passengers 156 without occupancy basis; 2 restaurants explicitly stated; named cabins and venues."
+        }
+      ],
+      "field_evidence": {
+        "ship.facts.length_m": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Length"
+        },
+        "ship.facts.crew": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Crew"
+        },
+        "ship.facts.restaurants": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Dining FAQ"
+        },
+        "ship.facts.deck_plan_url": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Deck Plans"
+        },
+        "ship.cabin_categories.bc1bf482-2222-5db8-997a-a6498c6da0d9": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Deck Plans"
+        },
+        "ship.cabin_categories.6fe0777c-7bfc-5eb4-ba70-befe114697aa": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Deck Plans"
+        },
+        "ship.cabin_categories.193775c3-1dc8-5de1-8647-c87d5ae1e4ba": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Deck Plans"
+        },
+        "venues.3d2a8924-33cc-5994-8dc3-1355c9a4e355": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Dining FAQ"
+        },
+        "venues.522edfde-9bba-5de4-b28a-8778187aaf90": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Dining FAQ"
+        },
+        "venues.d24e8a28-b11a-58ed-870d-6367016ddc88": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Wellness FAQ"
+        },
+        "ship.name": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_id": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_name": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.kind": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.official_url": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operating_status": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.overnight_public_cruise": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.identity_verified": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        }
+      },
+      "gaps": [
+        "Capacity basis, year built, shops and performances need verification. Cabin categories are a selected subset; accessibility is unknown per category.",
+        "No image reuse permission established; photo is null. IMO/ENI and historical operator/rename records require later verification before duplicate-sensitive imports."
+      ],
+      "capacity_observations": [
+        {
+          "value": 156,
+          "source_ids": [
+            "ship"
+          ],
+          "basis": "unspecified",
+          "disposition": "Not promoted to double-occupancy, lower-berth or maximum capacity.",
+          "note": "Ship page lists Passengers, without a maximum/lower-berth/double-occupancy label."
+        }
+      ],
+      "unknown_fact_keys": [
+        "year_built",
+        "entered_service",
+        "last_refurbished",
+        "gross_tonnage",
+        "guests_double_occupancy",
+        "guests_lower_berths",
+        "guests_maximum",
+        "decks_total",
+        "decks_passenger",
+        "dining_outlets",
+        "cafes",
+        "bars",
+        "shops",
+        "pools",
+        "accessibility_url"
+      ],
+      "coverage": {
+        "venues": "selected_verified_subset",
+        "cabin_categories": "selected_verified_subset",
+        "programs": "not_verified",
+        "photos": "none_permission_unverified",
+        "name_history": "not_established",
+        "official_identifiers": "not_established"
+      }
+    },
+    {
+      "ship_id": "e9729055-da0d-54dc-a42d-321641a9ddcf",
+      "slug": "viking-kara",
+      "checked_at": "2026-09-21",
+      "identity_basis": "Current operator ship page; no verified IMO/ENI yet. Stable IDs were minted once and must survive URL, name or operator changes.",
+      "scope_basis": "Current ship page offers eight-day Rhine Getaway and Christmas on the Rhine, with individual Price & Build links.",
+      "source_observations": [
+        {
+          "source_id": "ship",
+          "locator": "Specifications; Ship Features; Staterooms; Itineraries This Ship Sails",
+          "observation": "Built 2014, length 443 feet, crew 53, unqualified 190 guests; named restaurant, lounge, shop and cabin classes; eight-day itineraries."
+        }
+      ],
+      "field_evidence": {
+        "ship.facts.year_built": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Specifications"
+        },
+        "ship.facts.crew": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Specifications"
+        },
+        "ship.facts.length_m": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Length"
+        },
+        "ship.facts.deck_plan_url": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Interactive Deck Plan"
+        },
+        "venues.070cd628-24c7-51cf-a03f-cf0238cd00c9": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Ship Features"
+        },
+        "venues.4bc45064-92d1-5d70-8559-418a6d6cc3bc": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Ship Features"
+        },
+        "venues.408d440f-1c8f-5adf-ba6f-314356805ed0": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Ship Features"
+        },
+        "venues.adcd21b1-2b5d-55a1-b898-7366ead70a89": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Ship Features"
+        },
+        "ship.cabin_categories.bd7d79b1-eb8a-5aa5-9c43-122cb0361608": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Ship Features / Staterooms"
+        },
+        "ship.cabin_categories.acde0771-a0fb-5873-ae55-3f99e0306a53": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Ship Features / Staterooms"
+        },
+        "ship.cabin_categories.7d4c6c6c-d4b4-50a7-855a-73153cf6bf31": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Ship Features / Staterooms"
+        },
+        "ship.cabin_categories.cc9be4cb-2798-55d7-bc9f-872d8bd87a48": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Ship Features / Staterooms"
+        },
+        "ship.name": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_id": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_name": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.kind": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.official_url": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operating_status": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.overnight_public_cruise": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.identity_verified": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        }
+      },
+      "gaps": [
+        "No total restaurant, shop, deck or pool counts inferred from named amenities. Former-name/ENI and capacity basis need registry verification.",
+        "No image reuse permission established; photo is null. IMO/ENI and historical operator/rename records require later verification before duplicate-sensitive imports."
+      ],
+      "capacity_observations": [
+        {
+          "value": 190,
+          "source_ids": [
+            "ship"
+          ],
+          "basis": "unspecified",
+          "disposition": "Not promoted to double-occupancy, lower-berth or maximum capacity.",
+          "note": "Only 190 guests is not explicitly a typed capacity basis."
+        }
+      ],
+      "unknown_fact_keys": [
+        "entered_service",
+        "last_refurbished",
+        "gross_tonnage",
+        "guests_double_occupancy",
+        "guests_lower_berths",
+        "guests_maximum",
+        "decks_total",
+        "decks_passenger",
+        "restaurants",
+        "dining_outlets",
+        "cafes",
+        "bars",
+        "shops",
+        "pools",
+        "accessibility_url"
+      ],
+      "coverage": {
+        "venues": "selected_verified_subset",
+        "cabin_categories": "selected_verified_subset",
+        "programs": "not_verified",
+        "photos": "none_permission_unverified",
+        "name_history": "not_established",
+        "official_identifiers": "not_established"
+      }
+    },
+    {
+      "ship_id": "9cdd2609-a923-51f1-8ffe-8b6354ebe584",
+      "slug": "ms-roald-amundsen",
+      "checked_at": "2026-09-21",
+      "identity_basis": "Current operator ship page; no verified IMO/ENI yet. Stable IDs were minted once and must survive URL, name or operator changes.",
+      "scope_basis": "Current ship page lists upcoming 2026/2027 departures; linked 12-day Antarctica itinerary includes shipboard cabins and multi-day sea passages.",
+      "source_observations": [
+        {
+          "source_id": "ship",
+          "locator": "Specifications; Loving local food; Cabins and Suites; Upcoming Cruises",
+          "observation": "Built 2019, gross tonnage 20889, length 459.3 feet, unqualified capacity 490; three restaurants; cabins and Science Center named."
+        },
+        {
+          "source_id": "itinerary",
+          "locator": "Key Details; Itinerary; Included activities",
+          "observation": "12-day package from October 2026 onward, names Roald Amundsen and Fridtjof Nansen. Includes multiple shipboard nights and Onboard Science Program; package days are not cruise-night count."
+        }
+      ],
+      "field_evidence": {
+        "ship.facts.year_built": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Specifications / Loving local food"
+        },
+        "ship.facts.gross_tonnage": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Specifications / Loving local food"
+        },
+        "ship.facts.restaurants": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Specifications / Loving local food"
+        },
+        "ship.facts.length_m": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Specifications"
+        },
+        "ship.facts.deck_plan_url": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Decks"
+        },
+        "venues.9825daa2-80bd-5a21-b351-09ad3d2b4dbe": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Loving local food"
+        },
+        "venues.ba73290e-d834-527c-b70b-d2b0b5ab1ba6": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Loving local food"
+        },
+        "venues.7ef7be3d-067d-5f8f-a6e4-50f906c6c4fd": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Loving local food"
+        },
+        "venues.2493f53f-a183-5604-82cf-92217f547871": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Science Center"
+        },
+        "venues.8c0120d9-139f-5ccf-a318-7e6ecd2ed167": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Explorer lounge & bar"
+        },
+        "ship.cabin_categories.5d4693c0-761e-5150-98f3-186604dcc870": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Cabins and Suites"
+        },
+        "ship.cabin_categories.e0afb9af-17b2-5b8c-918c-d31518c25197": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Cabins and Suites"
+        },
+        "ship.cabin_categories.cfa5b8f4-89a0-5760-a32d-aebf60a5733b": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Cabins and Suites"
+        },
+        "programs.22df6484-b296-503c-bb41-a76dff495d2a": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Science Center; Included activities"
+        },
+        "ship.name": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_id": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_name": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.kind": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.official_url": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operating_status": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.overnight_public_cruise": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.identity_verified": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        }
+      },
+      "gaps": [
+        "Capacity basis and crew remain unknown. HX page uses some sister-ship photographs; none imported.",
+        "No image reuse permission established; photo is null. IMO/ENI and historical operator/rename records require later verification before duplicate-sensitive imports."
+      ],
+      "capacity_observations": [
+        {
+          "value": 490,
+          "source_ids": [
+            "ship"
+          ],
+          "basis": "unspecified",
+          "disposition": "Not promoted to double-occupancy, lower-berth or maximum capacity.",
+          "note": "Capacity label alone does not state occupancy basis."
+        }
+      ],
+      "unknown_fact_keys": [
+        "entered_service",
+        "last_refurbished",
+        "guests_double_occupancy",
+        "guests_lower_berths",
+        "guests_maximum",
+        "crew",
+        "decks_total",
+        "decks_passenger",
+        "dining_outlets",
+        "cafes",
+        "bars",
+        "shops",
+        "pools",
+        "accessibility_url"
+      ],
+      "coverage": {
+        "venues": "selected_verified_subset",
+        "cabin_categories": "selected_verified_subset",
+        "programs": "selected_source_backed_programs",
+        "photos": "none_permission_unverified",
+        "name_history": "not_established",
+        "official_identifiers": "not_established"
+      }
+    },
+    {
+      "ship_id": "b0761e7a-1cf8-57fe-ae99-5fb033ebf9ad",
+      "slug": "viking-octantis",
+      "checked_at": "2026-09-21",
+      "identity_basis": "Current operator ship page; no verified IMO/ENI yet. Stable IDs were minted once and must survive URL, name or operator changes.",
+      "scope_basis": "Current ship page advertises public eight-day Great Lakes and 13-day Antarctic itineraries with individual Price & Build links.",
+      "source_observations": [
+        {
+          "source_id": "ship",
+          "locator": "Specifications; Stateroom Features; Itineraries",
+          "observation": "Built 2022, crew 256, length 665 feet, 378 unqualified guests; Nordic Balcony, Explorer Suite and Owner’s Suite; current multi-day itineraries."
+        },
+        {
+          "source_id": "deck",
+          "locator": "Single-page deck plan, labeled Viking Octantis & Viking Polaris",
+          "observation": "Physical venues include Manfredi’s Italian Restaurant, The Restaurant, Shop and The Nordic Spa. Plan supports Octantis explicitly, not an inferred sister-ship transfer."
+        }
+      ],
+      "field_evidence": {
+        "ship.facts.year_built": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Specifications"
+        },
+        "ship.facts.crew": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Specifications"
+        },
+        "ship.facts.length_m": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Length"
+        },
+        "ship.facts.deck_plan_url": {
+          "source_ids": [
+            "deck"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Official PDF"
+        },
+        "venues.c57e7ac3-cd2a-5b6f-aa1f-9d322e3133c7": {
+          "source_ids": [
+            "deck"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Labeled physical venue on deck plan"
+        },
+        "venues.f0b9a249-1173-582e-82f5-c304b06aae78": {
+          "source_ids": [
+            "deck"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Labeled physical venue on deck plan"
+        },
+        "venues.09ac88a8-bec4-5ce6-b8df-374c5f0a3372": {
+          "source_ids": [
+            "deck"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Labeled physical venue on deck plan"
+        },
+        "venues.83241872-712e-5051-b683-756711fd8720": {
+          "source_ids": [
+            "deck"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Labeled physical venue on deck plan"
+        },
+        "ship.cabin_categories.e7a6a489-a4cc-5556-a988-caa1686a1424": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Stateroom Features"
+        },
+        "ship.cabin_categories.6fc59633-6941-53b4-9024-c374341ee14f": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Stateroom Features"
+        },
+        "ship.cabin_categories.9fe7e08f-6c66-5354-ab02-b5931c449734": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Stateroom Features"
+        },
+        "ship.name": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_id": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_name": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.kind": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.official_url": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operating_status": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.overnight_public_cruise": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.identity_verified": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        }
+      },
+      "gaps": [
+        "PDF labels tonnage GRT, not GT; not promoted to gross_tonnage. Deck/venue totals and capacity basis remain unknown.",
+        "No image reuse permission established; photo is null. IMO/ENI and historical operator/rename records require later verification before duplicate-sensitive imports."
+      ],
+      "capacity_observations": [
+        {
+          "value": 378,
+          "source_ids": [
+            "ship"
+          ],
+          "basis": "unspecified",
+          "disposition": "Not promoted to double-occupancy, lower-berth or maximum capacity.",
+          "note": "Only 378 guests lacks explicit occupancy basis."
+        }
+      ],
+      "unknown_fact_keys": [
+        "entered_service",
+        "last_refurbished",
+        "gross_tonnage",
+        "guests_double_occupancy",
+        "guests_lower_berths",
+        "guests_maximum",
+        "decks_total",
+        "decks_passenger",
+        "restaurants",
+        "dining_outlets",
+        "cafes",
+        "bars",
+        "shops",
+        "pools",
+        "accessibility_url"
+      ],
+      "coverage": {
+        "venues": "selected_verified_subset",
+        "cabin_categories": "selected_verified_subset",
+        "programs": "not_verified",
+        "photos": "none_permission_unverified",
+        "name_history": "not_established",
+        "official_identifiers": "not_established"
+      }
+    },
+    {
+      "ship_id": "2a8d132e-83a6-5e93-b9e3-55d50b28356c",
+      "slug": "ultramarine",
+      "checked_at": "2026-09-21",
+      "identity_basis": "Current operator ship page; no verified IMO/ENI yet. Stable IDs were minted once and must survive URL, name or operator changes.",
+      "scope_basis": "Official current 2026 fleet confirms operation; 2026/2027 Snow Hill brochure names this ship, November 2026 departures and shipboard accommodation. Charter flights in that package do not make the ship charter-only.",
+      "source_observations": [
+        {
+          "source_id": "ship",
+          "locator": "Specifications; Decks 5 and 7; Comparison of All Cabins",
+          "observation": "Length 128m, 199 unqualified guests, staff-and-crew 140; named cabins, Balena, Bistro 487, theatre and spa with deck locations."
+        },
+        {
+          "source_id": "fleet",
+          "locator": "Current Fleet: Ships Operated by Quark Expeditions (2026)",
+          "observation": "Ultramarine is explicitly in the current operating fleet."
+        },
+        {
+          "source_id": "itinerary",
+          "locator": "Cover; pages 11–12 of printed numbering",
+          "observation": "November 3–16 and 15–28, 2026 departures; shipboard accommodation. Specific itinerary reduces guests to 150; not the ship’s maximum."
+        }
+      ],
+      "field_evidence": {
+        "ship.facts.length_m": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Ship Specifications"
+        },
+        "ship.facts.deck_plan_url": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Deck Plans & Cabins"
+        },
+        "venues.bf71ee2b-04f7-5cae-b6c6-10a8ac6fdf92": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Deck 5 / Deck 7 public spaces"
+        },
+        "venues.6de1e9ee-1d92-5340-ada8-7d9a074d16d4": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Deck 5 / Deck 7 public spaces"
+        },
+        "venues.4de6082d-b0ac-52e5-b565-25bf14d7e139": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Deck 5 / Deck 7 public spaces"
+        },
+        "venues.eebacb7c-b15b-5dd2-9026-6757d2d3cbd0": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Deck 5 / Deck 7 public spaces"
+        },
+        "ship.cabin_categories.cc5d581c-3801-5837-b9ea-0b377751afd6": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Comparison of All Cabins"
+        },
+        "ship.cabin_categories.c6490c31-8d74-58b6-8602-cc5a1ab7849f": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Comparison of All Cabins"
+        },
+        "ship.cabin_categories.6664b895-ceac-5c50-9628-f86b6e909f33": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Comparison of All Cabins"
+        },
+        "ship.name": {
+          "source_ids": [
+            "ship",
+            "fleet",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_id": {
+          "source_ids": [
+            "ship",
+            "fleet",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_name": {
+          "source_ids": [
+            "ship",
+            "fleet",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.kind": {
+          "source_ids": [
+            "ship",
+            "fleet",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.official_url": {
+          "source_ids": [
+            "ship",
+            "fleet",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operating_status": {
+          "source_ids": [
+            "ship",
+            "fleet",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.overnight_public_cruise": {
+          "source_ids": [
+            "ship",
+            "fleet",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.identity_verified": {
+          "source_ids": [
+            "ship",
+            "fleet",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        }
+      },
+      "gaps": [
+        "140 combines expedition staff and crew; crew-only fact remains null. No build year, GT or typed capacity assumed. Dynamic page showing zero departures is not treated as retirement; explicit fleet and dated brochure support status.",
+        "No image reuse permission established; photo is null. IMO/ENI and historical operator/rename records require later verification before duplicate-sensitive imports."
+      ],
+      "capacity_observations": [
+        {
+          "value": 199,
+          "source_ids": [
+            "ship"
+          ],
+          "basis": "unspecified",
+          "disposition": "Not promoted to double-occupancy, lower-berth or maximum capacity.",
+          "note": "Guests does not specify maximum/double occupancy; itinerary-specific 150 is not a whole-ship specification."
+        }
+      ],
+      "unknown_fact_keys": [
+        "year_built",
+        "entered_service",
+        "last_refurbished",
+        "gross_tonnage",
+        "guests_double_occupancy",
+        "guests_lower_berths",
+        "guests_maximum",
+        "crew",
+        "decks_total",
+        "decks_passenger",
+        "restaurants",
+        "dining_outlets",
+        "cafes",
+        "bars",
+        "shops",
+        "pools",
+        "accessibility_url"
+      ],
+      "coverage": {
+        "venues": "selected_verified_subset",
+        "cabin_categories": "selected_verified_subset",
+        "programs": "not_verified",
+        "photos": "none_permission_unverified",
+        "name_history": "not_established",
+        "official_identifiers": "not_established"
+      }
+    },
+    {
+      "ship_id": "92834f32-5306-51c9-866c-c8daa4304ec8",
+      "slug": "le-commandant-charcot",
+      "checked_at": "2026-09-21",
+      "identity_basis": "Current operator ship page; no verified IMO/ENI yet. Stable IDs were minted once and must survive URL, name or operator changes.",
+      "scope_basis": "Current operator ship page plus September 28–October 14, 2026 public 16-night Greenland/Spitsbergen departure, priced per person.",
+      "source_observations": [
+        {
+          "source_id": "ship",
+          "locator": "Explore the ship; Staterooms; Life on board",
+          "observation": "245 maximum guests, 215 crew; named suites; ILLU boutique, Anori lounge and Inneq bar."
+        },
+        {
+          "source_id": "specs",
+          "locator": "Opening German specification paragraph",
+          "observation": "Baujahr 2021 and 150 Meter Länge establish construction year 2021 and length 150m."
+        },
+        {
+          "source_id": "itinerary",
+          "locator": "Polar Odyssey between Northeast Greenland & Spitsbergen",
+          "observation": "16 nights, September 28–October 14, 2026, Le Commandant Charcot; public per-person offer."
+        },
+        {
+          "source_id": "dining",
+          "locator": "Dining descriptions; modified 2026-03-03",
+          "observation": "Operator magazine describes Sila breakfast and Nuna lunch aboard the operating ship; no full restaurant count inferred."
+        }
+      ],
+      "field_evidence": {
+        "ship.facts.year_built": {
+          "source_ids": [
+            "specs"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Explicit ship specification"
+        },
+        "ship.facts.length_m": {
+          "source_ids": [
+            "specs"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Explicit ship specification"
+        },
+        "ship.facts.guests_maximum": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Explicit ship specification"
+        },
+        "ship.facts.crew": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Explicit ship specification"
+        },
+        "venues.6a9d6590-7d48-5652-a65a-08122c4d0fb9": {
+          "source_ids": [
+            "dining"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Named onboard venue"
+        },
+        "venues.f481b4d7-3a17-57ce-9c74-ea8db2d9d495": {
+          "source_ids": [
+            "dining"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Named onboard venue"
+        },
+        "venues.85f77ccc-c61d-5d74-a8ab-91529419afd2": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Named onboard venue"
+        },
+        "venues.8d41d540-d766-540d-a8ca-377bc2bfc1df": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Named onboard venue"
+        },
+        "venues.57fddc03-291c-5570-89aa-27332493f8e1": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Named onboard venue"
+        },
+        "ship.cabin_categories.d7934293-8bd4-5bbe-898e-31b489fcb770": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Staterooms and suites"
+        },
+        "ship.cabin_categories.8301532e-dfc3-575e-b217-69e7d5e0d0c6": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Staterooms and suites"
+        },
+        "ship.cabin_categories.c84d40e9-a8c8-550a-8a9d-d6fe7ddd7657": {
+          "source_ids": [
+            "ship"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Staterooms and suites"
+        },
+        "ship.name": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_id": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operator_name": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.kind": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.official_url": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.operating_status": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.overnight_public_cruise": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        },
+        "ship.identity_verified": {
+          "source_ids": [
+            "ship",
+            "itinerary"
+          ],
+          "checked_at": "2026-09-21",
+          "locator": "Current named operator ship page and scope evidence above"
+        }
+      },
+      "gaps": [
+        "No deck total inferred from highest deck label. Dining inclusion, shows, tonnage and standard-occupancy capacity require further verification.",
+        "No image reuse permission established; photo is null. IMO/ENI and historical operator/rename records require later verification before duplicate-sensitive imports."
+      ],
+      "capacity_observations": [],
+      "unknown_fact_keys": [
+        "entered_service",
+        "last_refurbished",
+        "gross_tonnage",
+        "guests_double_occupancy",
+        "guests_lower_berths",
+        "decks_total",
+        "decks_passenger",
+        "restaurants",
+        "dining_outlets",
+        "cafes",
+        "bars",
+        "shops",
+        "pools",
+        "deck_plan_url",
+        "accessibility_url"
+      ],
+      "coverage": {
+        "venues": "selected_verified_subset",
+        "cabin_categories": "selected_verified_subset",
+        "programs": "not_verified",
+        "photos": "none_permission_unverified",
+        "name_history": "not_established",
+        "official_identifiers": "not_established"
+      }
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "source": "Released public page before shared-renderer extraction, restaurant release 5bb63c3e, 2026-09-20",
+  "hashes": {
+    "biz-traditional": "511d09fa54ed11c1daa5948ef9bf515c8130ef6b1057ab5a29c6b12c85e25864",
+    "biz-modern": "ff63b1cc35ca86a99fbaadf97616742a95ad042fa8d12d40360530e7e219857e",
+    "biz-minimalist": "c4a6c9a851172270025c5a353c48c6c25fe8cf848346ef644a7153fdfbc36631",
+    "basic": "44758f96e0d1e5903575ee03f6d24a26d707c591526c774a0e186165ba3d1bdc",
+    "blogger": "2d333c43cc0585d25e66448344ea26e8736ef6761a103c92e3541a8a6c3a95b0",
+    "business-card": "767e21c6f25a16ac65aeb9a8224390bbc45e72ea23069772973952286ea75992",
+    "pro-card": "6204c3d93b896e7f39a1c23bb8d50a00ef1a2d898282a3ad11b92039bd109904",
+    "cover-card": "ffe6d8fd34d900202e898c484c5cd62bb45bd9cecb3428b8a35154a68c5b1da6",
+    "full-width": "6d6b77913213e3bfd997b03b75cfc557a1a72e66a401c871ccb1b4c555eb19a6",
+    "pro-realtor": "ac869b56d98c430a3d0e97f6d537104ffee10a88585a9b0a740915a6717e0163",
+    "pro-creative": "a56228b22f3aa09dd7944a07303915c9699b4788283a70f5c2d818ea78396d6e",
+    "pro-corporate": "97b4ad65e08ed59acfdcf7d074f9c876b930cda7f428fe8523470292dbadda5d",
+    "premium-static": "fdace8789b2dd5c7e34f63c9bb277f7ed514c3d472fdab30a638c2ed986a608b",
+    "civic-card": "7ea22ec876565eab9b23b91f6639dc6b5fee12bf8e44b6bab302e529053d1ff6",
+    "civic-card-flag": "8991fd923fa0f2985ef26046cd7d575ae942ab5fcab5d8b366e4861f6a1c6934",
+    "civic-card-bold": "3cbdc105a9f77894eec520c1f0287e5d1c68fa5f439e34ff68776e8dcb8339aa",
+    "civic-card-clean": "9c1e5bd225dd2420f33e36dce4bb29f79df396f3654b960723b22244cd63d0eb",
+    "civic-card-rally": "6af6435186b208c66dfc97d3c72c924a4e03ebba9fe7e3d6e0c823bea244f256",
+    "politician-generic": "15432b2f6f1df1620fb7a79c32d9ac0235116969bb90b2359f7ebd30480bc023",
+    "mobile-business": "ca640c9c81aea49f481ac7353d2fad37ffa49c662abc1295b9121c43cb47e56d",
+    "church": "a7c0747db21ade50b45902312ef2aa51b77610484d10d3f9e4995f7c724e06d5"
+  },
+  "intentionalChanges": {
+    "biz-modern": {
+      "reason": "Approved correction: white header text uses existing primary/secondary gradient instead of light page backdrop; layout unchanged.",
+      "hash": "74a87bf5d065cc41c88b008ad969ee7a12ac402007176fd28e564730cc50d267"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+// Mock-only regression checks against captured live schema. Never accesses the network.
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const ts = require('typescript');
+let responses = [], calls = [];
+const client = {};
+client.from = table => { const call = { table }; calls.push(call); const q = {}; for (const k of ['select','or','order','eq','single','insert']) q[k] = (...args) => { call[k] = args; return q; }; q.then = (ok,bad) => Promise.resolve(responses.shift()).then(ok,bad); return q; };
+client.rpc = (name,args) => { calls.push({rpc:name,args}); return Promise.resolve(responses.shift()); };
+const exportsMock = {};
+vm.runInNewContext(ts.transpileModule(fs.readFileSync('lib/tavvyChat.ts','utf8'), { compilerOptions: {module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020} }).outputText, {exports:exportsMock,require:()=>({supabase:client}),Map,Error});
+const api = exportsMock;
+const schema = JSON.parse(fs.readFileSync('docs/schema-audit/public-schema.json'));
+const columns = table => schema.columns.filter(c=>c.table===table).map(c=>c.column);
+const match = { id:'match',request_id:'request',pro_id:'provider-id',pro_status:'pending',project:{user_id:'customer',customer_name:'Customer'},provider:{user_id:'professional',business_name:'Pro'} };
+const row = { id:'m',match_id:'match',sender_id:'customer',sender_type:'customer',content:'hello',created_at:'2026-09-08' };
+(async()=>{
+ assert.ok(columns('pro_messages').includes('match_id'));
+ assert.ok(!columns('pro_messages').includes('thread_id'));
+ assert.ok(schema.foreign_keys.some(k=>k.table==='pro_messages' && k.definition.includes('REFERENCES pro_request_matches(id)')));
+ const c={id:'match',pro_id:'professional',customer_id:'customer'};
+ assert.equal(api.participantRole(c,'professional'),'pro'); assert.equal(api.participantRole(c,'customer'),'customer'); assert.throws(()=>api.participantRole(c,'provider-id'));
+ assert.equal(api.mergeMessages([row],[row]).length,1);
+ calls=[]; responses=[{data:match},{data:'customer'},{data:true},{data:row}];
+ const sent=await api.insertMessage('match','customer',' hello ');
+ assert.equal(sent.conversation_id,'match'); assert.equal(sent.content,'hello');
+ const insert=calls.find(c=>c.insert); assert.equal(insert.table,'pro_messages');
+ for(const key of Object.keys(insert.insert[0])) assert.ok(columns('pro_messages').includes(key),`Unknown inserted column ${key}`);
+ assert.equal(insert.insert[0].sender_type,'customer'); assert.equal(insert.insert[0].match_id,'match');
+ calls=[]; responses=[{data:match}]; await assert.rejects(api.insertMessage('match','outsider','hello')); assert.equal(calls.length,1);
+ calls=[]; responses=[{data:match},{data:'customer'},{data:false}]; await assert.rejects(api.insertMessage('match','customer','hello')); assert.ok(!calls.some(c=>c.insert));
+ calls=[]; responses=[{data:match},{error:{message:'RPC missing'}}]; await assert.rejects(api.loadMessages('match','customer')); assert.ok(!calls.some(c=>c.table==='pro_messages'));
+ calls=[]; responses=[{data:match},{data:'customer'},{data:[row]}]; assert.equal((await api.loadMessages('match','customer'))[0].content,'hello'); assert.equal(calls[2].eq[0],'match_id');
+ calls=[]; responses=[{data:[{id:'provider-id'}]},{data:[]},{data:[match]}]; assert.equal((await api.listConversations('professional')).length,1); assert.ok(calls[2].or[0].includes('pro_id.in.(provider-id)'));
+ calls=[]; responses=[{data:match},{data:'customer'},{error:{message:'denied'}}]; await assert.rejects(api.blockConversation('match','customer')); assert.equal(calls[2].insert[0].blocked_id,'professional'); assert.ok(!('conversation_id' in calls[2].insert[0]));
+ console.log('PASS actual-schema match FK, provider/user role separation, scoped list/read, insert columns, acknowledgment/dedupe, outsider/block/entitlement/missing-RPC rejection, block error propagation');
+})().catch(e=>{console.error(e);process.exitCode=1});

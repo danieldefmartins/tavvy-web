@@ -28,7 +28,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     try {
       const [card, links] = await Promise.all([
         getCardById(cardId),
-        getCardLinks(cardId),
+        getCardLinks(cardId, { includeInactive: true, throwOnError: true }),
       ]);
 
       if (!card) {
@@ -55,10 +55,10 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
       const normalizedLinks: LinkItem[] = links.map(l => ({
         id: l.id,
         card_id: l.card_id,
-        platform: l.icon || l.platform || 'other',
+        platform: l.platform || l.icon || 'other',
         title: l.title,
-        url: l.url,
-        value: l.url,
+        url: l.url ?? l.value ?? '',
+        value: l.value ?? l.url,
         icon: l.icon,
         sort_order: l.sort_order,
         is_active: l.is_active,
@@ -68,7 +68,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
       dispatch({ type: 'LOAD_CARD', card: normalizedCard, links: normalizedLinks });
     } catch (err) {
       console.error('[EditorContext] Failed to load card:', err);
-      dispatch({ type: 'SET_LOAD_ERROR', error: 'Failed to load card' });
+      dispatch({ type: 'SET_LOAD_ERROR', error: err instanceof Error ? err.message : 'Your card could not be loaded. Please retry.' });
     }
   }, []);
 

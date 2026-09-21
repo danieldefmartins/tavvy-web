@@ -453,14 +453,13 @@ export default function ArticleDetailScreen() {
             </div>
 
             {/* Audiobook player (Listen to this article) — free edge-tts narration, female/male */}
-            {(article.audio_url || article.audio_url_male) && (
-              <AudioPlayer
+            <AudioPlayer
+                key={article.id}
                 femaleUrl={article.audio_url}
                 maleUrl={article.audio_url_male}
                 isDark={isDark}
                 durationSeconds={article.audio_duration}
               />
-            )}
 
             {/* Reading options — right by the text, clear "Aa" control */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, margin: '2px 0 10px' }}>

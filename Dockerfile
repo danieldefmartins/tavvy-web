@@ -46,6 +46,10 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
+# Allow the non-root image optimizer to cache resized images.
+RUN mkdir -p .next/cache/images && chown -R nextjs:nodejs .next/cache
+RUN node -e "require('sharp')"
+
 # Set correct permissions
 USER nextjs
 

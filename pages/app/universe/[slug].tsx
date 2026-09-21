@@ -4,13 +4,17 @@
  * 
  * Features:
  * - Working tabs: Places, Map, Reviews, Info
- * - Add Place button for verified users
+ * - Add Place button for signed-in users
  * - Reviews section matching Place Details style
  * - Suggest Changes functionality
  */
 
-import React, { useState, useEffect } from 'react';
+import ContentSafetyActions,{CONTENT_SAFETY_CHANGED} from '../../../components/ContentSafetyActions';
+import CruiseUniverseEntry from '../../../components/cruises/CruiseUniverseEntry';
+import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
+import dynamic from 'next/dynamic';
+const UniverseMap = dynamic(() => import('../../../components/UniverseMap'), { ssr: false });
 import { useRouter } from 'next/router';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import AppLayout from '../../../components/AppLayout';
@@ -47,7 +51,12 @@ const getCategoryFallbackImage = (category: string): string => {
   return imageMap.default;
 };
 
+import { useAuth } from '../../../contexts/AuthContext';
+import { loadUniversePlaces, hasUniverseCoordinates } from '../../../lib/universePlaces';
+import { searchFoodMenus } from '../../../lib/foodMenu';
+
 interface Universe {
+  universe_kind?: 'place_collection' | 'cruise_ship';
   id: string;
   name: string;
   slug: string;
@@ -64,6 +73,7 @@ interface Universe {
 }
 
 interface Place {
+  universe_ids?: string[];
   id: string;
   name: string;
   tavvy_category?: string;
@@ -106,6 +116,10 @@ export default function UniverseLandingScreen() {
   const [subUniverses, setSubUniverses] = useState<Universe[]>([]);
   const [places, setPlaces] = useState<Place[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewType, setReviewType] = useState<'good' | 'vibe' | 'heads_up' | null>(null);
+  const [reviewText, setReviewText] = useState('');
+  const [reviewSaving, setReviewSaving] = useState(false);
+  const [reviewSubmitError, setReviewSubmitError] = useState('');
   const [activeTab, setActiveTab] = useState('Places');
   const [activeZone, setActiveZone] = useState('All Zones');
   const [searchQuery, setSearchQuery] = useState('');
@@ -121,9 +135,14 @@ export default function UniverseLandingScreen() {
   const [foodSearchQuery, setFoodSearchQuery] = useState('');
   const [foodSearchResults, setFoodSearchResults] = useState<MenuItem[]>([]);
   const [foodSearchLoading, setFoodSearchLoading] = useState(false);
+  const [foodSearchError, setFoodSearchError] = useState('');
+  const foodRequest = useRef(0);
   
-  // Check if user is verified (simplified - you'd check from auth context)
-  const [isVerified, setIsVerified] = useState(true); // TODO: Get from auth context
+  const { user } = useAuth();
+  const canContribute = !!user;
+  const [loadError, setLoadError] = useState('');
+  const [reviewsError, setReviewsError] = useState('');
+  const universeRequest = useRef(0);
   
   
 
@@ -131,30 +150,38 @@ export default function UniverseLandingScreen() {
     if (slug) {
       loadUniverseData();
     }
-  }, [slug]);
+    const refresh=()=>loadUniverseData();window.addEventListener(CONTENT_SAFETY_CHANGED,refresh);return()=>{universeRequest.current++;window.removeEventListener(CONTENT_SAFETY_CHANGED,refresh)};
+  }, [slug,user?.id]);
 
   const loadUniverseData = async () => {
+    const request=++universeRequest.current;
     setLoading(true);
+    setUniverse(null); setPlaces([]); setSubUniverses([]); setReviews([]);
+    setLoadError(''); setReviewsError(''); setActiveZone('All Zones');
     console.log('[Universe] Loading data for slug:', slug);
     console.log('[Universe] Supabase client:', supabase);
     try {
       // Fetch universe by slug or id
       let universeData = null;
       
-      const { data: bySlug } = await supabase
+      const { data: bySlug, error: slugError } = await supabase
         .from('atlas_universes')
         .select('*')
         .eq('slug', slug)
         .maybeSingle();
 
+      if(request!==universeRequest.current)return;
+      if (slugError) throw slugError;
       if (bySlug) {
         universeData = bySlug;
-      } else {
-        const { data: byId } = await supabase
+      } else if (typeof slug === 'string' && /^[0-9a-f]{8}-[0-9a-f-]{27}$/i.test(slug)) {
+        const { data: byId, error: idError } = await supabase
           .from('atlas_universes')
           .select('*')
           .eq('id', slug)
           .maybeSingle();
+        if(request!==universeRequest.current)return;
+        if (idError) throw idError;
         universeData = byId;
       }
 
@@ -164,60 +191,47 @@ export default function UniverseLandingScreen() {
       }
       
       setUniverse(universeData);
+      if (universeData.universe_kind === 'cruise_ship') return;
 
       // Fetch sub-universes
-      const { data: subUniversesData } = await supabase
+      const { data: subUniversesData, error: subError } = await supabase
         .from('atlas_universes')
         .select('*')
         .eq('parent_universe_id', universeData.id)
         .eq('status', 'published')
         .order('name', { ascending: true });
 
+      if(request!==universeRequest.current)return;
+      if (subError) throw subError;
       if (subUniversesData) {
         setSubUniverses(subUniversesData);
       }
 
-      // Fetch places - two-step approach for reliability
-      const { data: placeLinks, error: linksError } = await supabase
-        .from('atlas_universe_places')
-        .select('place_id')
-        .eq('universe_id', universeData.id)
-        .limit(100);
-
-      
-
-      if (placeLinks && placeLinks.length > 0) {
-        const placeIds = placeLinks.map(link => link.place_id);
-        const { data: placesData, error: placesError } = await supabase
-          .from('places')
-          .select('id, name, tavvy_category, tavvy_subcategory, cover_image_url, latitude, longitude')
-          .in('id', placeIds);
-        
-        
-        
-        if (placesData) {
-          setPlaces(placesData as Place[]);
-        }
-      } else {
-        console.log('[Universe] No place links found for this universe');
-      }
+      const loadedPlaces=await loadUniversePlaces([universeData.id, ...(subUniversesData || []).map(s => s.id)]);
+      if(request!==universeRequest.current)return;
+      setPlaces(loadedPlaces);
 
       // Fetch reviews
-      const { data: reviewsData } = await supabase
+      const { data: reviewsData, error: reviewReadError } = await supabase
         .from('universe_reviews')
         .select('*')
         .eq('universe_id', universeData.id)
         .order('created_at', { ascending: false })
         .limit(20);
 
+      if(request!==universeRequest.current)return;
+      if (reviewReadError) setReviewsError('Reviews are unavailable. Please try again later.');
       if (reviewsData) {
         setReviews(reviewsData);
       }
 
     } catch (error) {
+      if(request!==universeRequest.current)return;
+      setUniverse(null);
+      setLoadError('Unable to load this universe. Please try again.');
       console.error('Error loading universe:', error);
     } finally {
-      setLoading(false);
+      if(request===universeRequest.current)setLoading(false);
     }
   };
 
@@ -241,7 +255,7 @@ export default function UniverseLandingScreen() {
     { val: 'Info', label: 'Info', icon: IoInformationCircle },
   ];
 
-  const zones = ['All Zones', ...subUniverses.map(s => s.name)];
+  const zones = [{ id: 'All Zones', name: 'All Zones' }, ...subUniverses.map(s => ({ id: s.id, name: s.name }))];
 
   // Category filter definitions
   const RIDE_SUBCATEGORIES = ['water_rides', 'thrill_rides', 'dark_rides', 'family_rides', 'simulators'];
@@ -252,7 +266,7 @@ export default function UniverseLandingScreen() {
       p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (p.tavvy_category || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
       (p.tavvy_subcategory || '').toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesZone = activeZone === 'All Zones' || true;
+    const matchesZone = activeZone === 'All Zones' || !!p.universe_ids?.includes(activeZone);
     
     // Category filter
     let matchesFilter = true;
@@ -309,79 +323,23 @@ export default function UniverseLandingScreen() {
 
   // Handle add place
   const handleAddPlace = (type: string) => {
-    router.push(`/app/add-place?universeId=${universe?.id}&universeName=${encodeURIComponent(universe?.name || '')}&placeType=${type}`);
+    router.push(`/app/add?universeId=${universe?.id}&universeName=${encodeURIComponent(universe?.name || '')}&placeType=${type}`);
     setShowAddPlaceModal(false);
   };
 
-  // Handle food search
+  // Query the same menu data used by the restaurant's online menu.
   const handleFoodSearch = async (query: string) => {
-    setFoodSearchQuery(query);
-    if (!query.trim() || !universe?.id) {
-      setFoodSearchResults([]);
-      return;
-    }
-
+    const current = ++foodRequest.current;
+    setFoodSearchQuery(query); setFoodSearchError(''); setFoodSearchResults([]);
+    if (!query.trim() || !universe?.id) { setFoodSearchLoading(false); return; }
     setFoodSearchLoading(true);
     try {
-      // Get all dining places in this universe
-      const { data: placeLinks } = await supabase
-        .from('atlas_universe_places')
-        .select('place_id')
-        .eq('universe_id', universe.id);
-
-      if (!placeLinks || placeLinks.length === 0) {
-        setFoodSearchResults([]);
-        setFoodSearchLoading(false);
-        return;
-      }
-
-      const placeIds = placeLinks.map(link => link.place_id);
-
-      // Search menu items in those places
-      const { data: menuItems, error } = await supabase
-        .from('restaurant_menu_items')
-        .select(`
-          id,
-          place_id,
-          item_name,
-          description,
-          price,
-          category,
-          dietary_tags,
-          image_url
-        `)
-        .in('place_id', placeIds)
-        .ilike('item_name', `%${query}%`)
-        .eq('is_available', true)
-        .limit(20);
-
-      if (error) throw error;
-
-      // Get place names for the results
-      if (menuItems && menuItems.length > 0) {
-        const uniquePlaceIds = [...new Set(menuItems.map(item => item.place_id))];
-        const { data: placesData } = await supabase
-          .from('places')
-          .select('id, name, cover_image_url')
-          .in('id', uniquePlaceIds);
-
-        const placeMap = new Map(placesData?.map(p => [p.id, p]) || []);
-        
-        const resultsWithPlaces = menuItems.map(item => ({
-          ...item,
-          place_name: placeMap.get(item.place_id)?.name || 'Unknown Restaurant',
-          place_thumbnail: placeMap.get(item.place_id)?.cover_image_url
-        }));
-
-        setFoodSearchResults(resultsWithPlaces);
-      } else {
-        setFoodSearchResults([]);
-      }
+      const results = await searchFoodMenus({ query, universeId: universe?.id });
+      if (current === foodRequest.current) setFoodSearchResults(results as MenuItem[]);
     } catch (error) {
-      console.error('Error searching food:', error);
-      setFoodSearchResults([]);
+      if (current === foodRequest.current) setFoodSearchError((error as Error).message);
     } finally {
-      setFoodSearchLoading(false);
+      if (current === foodRequest.current) setFoodSearchLoading(false);
     }
   };
 
@@ -393,10 +351,12 @@ export default function UniverseLandingScreen() {
     }
 
     try {
+      if (!user) { alert('Sign in to submit a suggestion.'); return; }
       const { error } = await supabase
         .from('universe_suggestions')
         .insert({
           universe_id: universe?.id,
+          user_id: user.id,
           suggestion_text: suggestionText,
           status: 'pending'
         });
@@ -410,6 +370,17 @@ export default function UniverseLandingScreen() {
       console.error('Error submitting suggestion:', error);
       alert('Failed to submit suggestion. Please try again.');
     }
+  };
+
+  const submitReview = async () => {
+    if (!user || !universe || !reviewType || !reviewText.trim() || reviewSaving) return;
+    setReviewSaving(true); setReviewSubmitError('');
+    try {
+      const { error } = await supabase.from('universe_reviews').insert({ universe_id: universe.id, user_id: user.id, type: reviewType, text: reviewText.trim() });
+      if (error) throw error;
+      setReviewType(null); setReviewText(''); await loadUniverseData(); setActiveTab('Reviews');
+    } catch { setReviewSubmitError('Unable to post your review. Please try again.'); }
+    finally { setReviewSaving(false); }
   };
 
   if (loading) {
@@ -442,7 +413,7 @@ export default function UniverseLandingScreen() {
           color: colors.textSecondary 
         }}>
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>🌌</div>
-          <div>Universe not found</div>
+          <div>{loadError || 'Universe not found'}</div>
           <button 
             onClick={() => router.back()}
             style={{
@@ -462,6 +433,8 @@ export default function UniverseLandingScreen() {
       </AppLayout>
     );
   }
+
+  if (universe.universe_kind === 'cruise_ship') return <CruiseUniverseEntry universeId={universe.id}/>;
 
   // Render Places Tab
   const renderPlacesTab = () => (
@@ -503,13 +476,13 @@ export default function UniverseLandingScreen() {
           <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
             {zones.map((zone) => (
               <button
-                key={zone}
-                onClick={() => setActiveZone(zone)}
+                key={zone.id}
+                onClick={() => setActiveZone(zone.id)}
                 style={{
                   padding: '8px 14px',
                   borderRadius: '20px',
-                  backgroundColor: activeZone === zone ? colors.primary : colors.inputBg,
-                  color: activeZone === zone ? '#fff' : colors.textSecondary,
+                  backgroundColor: activeZone === zone.id ? colors.primary : colors.inputBg,
+                  color: activeZone === zone.id ? '#fff' : colors.textSecondary,
                   border: 'none',
                   fontSize: '12px',
                   fontWeight: '600',
@@ -517,7 +490,7 @@ export default function UniverseLandingScreen() {
                   whiteSpace: 'nowrap'
                 }}
               >
-                {zone}
+                {zone.name}
               </button>
             ))}
           </div>
@@ -676,7 +649,7 @@ export default function UniverseLandingScreen() {
           <div style={{ textAlign: 'center', padding: '40px 0' }}>
             <IoLocation size={48} color={colors.textTertiary} />
             <p style={{ marginTop: '12px', fontSize: '14px', color: colors.textSecondary }}>No places found</p>
-            {isVerified && (
+            {canContribute && (
               <button
                 onClick={() => setShowAddPlaceModal(true)}
                 style={{
@@ -700,48 +673,17 @@ export default function UniverseLandingScreen() {
   );
 
   // Render Map Tab
-  const renderMapTab = () => {
-    const hasCoordinates = universe?.latitude && universe?.longitude;
-    
-    return (
-      <div style={{ padding: '16px' }}>
-        {hasCoordinates ? (
-          <div style={{
-            height: '400px',
-            borderRadius: '16px',
-            overflow: 'hidden',
-            backgroundColor: '#E0F2FE'
-          }}>
-            <iframe
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              loading="lazy"
-              src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${universe.latitude},${universe.longitude}&zoom=15`}
-            />
-          </div>
-        ) : (
-          <div style={{
-            height: '400px',
-            backgroundColor: '#E0F2FE',
-            borderRadius: '16px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <IoMap size={64} color="#9CA3AF" />
-            <p style={{ fontSize: '18px', fontWeight: '600', color: '#0284C7', marginTop: '16px' }}>Map coming soon</p>
-            <p style={{ fontSize: '14px', color: colors.textSecondary, marginTop: '4px' }}>Location data not available yet</p>
-          </div>
-        )}
-      </div>
-    );
-  };
+  const renderMapTab = () => (
+    <div style={{ padding: 16 }}>
+      <p>{filteredPlaces.filter(hasUniverseCoordinates).length} of {filteredPlaces.length} matching places have map locations. Filters from Places apply here.</p>
+      <UniverseMap places={filteredPlaces} universe={universe!} onSelect={place => router.push(`/app/place/${place.id}`, undefined, { locale })} />
+    </div>
+  );
 
   // Render Reviews Tab
   const renderReviewsTab = () => (
     <div style={{ padding: '16px' }}>
+      {reviewsError && <p role="alert">{reviewsError}</p>}
       {/* Community Signals Card */}
       <div style={{
         backgroundColor: colors.surface,
@@ -754,7 +696,7 @@ export default function UniverseLandingScreen() {
         
         {/* The Good - Blue */}
         <button
-          onClick={() => router.push(`/app/add-review?universeId=${universe?.id}&universeName=${encodeURIComponent(universe?.name || '')}&type=good`)}
+          onClick={() => { setReviewSubmitError(''); setReviewType('good'); }}
           style={{
             width: '100%',
             display: 'flex',
@@ -775,7 +717,7 @@ export default function UniverseLandingScreen() {
         
         {/* The Vibe - Purple */}
         <button
-          onClick={() => router.push(`/app/add-review?universeId=${universe?.id}&universeName=${encodeURIComponent(universe?.name || '')}&type=vibe`)}
+          onClick={() => { setReviewSubmitError(''); setReviewType('vibe'); }}
           style={{
             width: '100%',
             display: 'flex',
@@ -796,7 +738,7 @@ export default function UniverseLandingScreen() {
         
         {/* Heads Up - Orange */}
         <button
-          onClick={() => router.push(`/app/add-review?universeId=${universe?.id}&universeName=${encodeURIComponent(universe?.name || '')}&type=heads_up`)}
+          onClick={() => { setReviewSubmitError(''); setReviewType('heads_up'); }}
           style={{
             width: '100%',
             display: 'flex',
@@ -844,6 +786,7 @@ export default function UniverseLandingScreen() {
               </div>
               <div style={{ flex: 1 }}>
                 <p style={{ fontSize: '14px', color: colors.text, marginBottom: '4px' }}>{review.text}</p>
+                <ContentSafetyActions kind="universe_review" contentId={review.id} />
                 <p style={{ fontSize: '12px', color: colors.textTertiary }}>{review.user_name} · {new Date(review.created_at).toLocaleDateString()}</p>
               </div>
             </div>
@@ -862,7 +805,7 @@ export default function UniverseLandingScreen() {
         <h3 style={{ fontSize: '20px', fontWeight: '700', color: colors.text, marginBottom: '4px' }}>Been here?</h3>
         <p style={{ fontSize: '14px', color: colors.textSecondary, marginBottom: '16px' }}>Share your experience with the community</p>
         <button
-          onClick={() => router.push(`/app/add-review?universeId=${universe?.id}&universeName=${encodeURIComponent(universe?.name || '')}`)}
+          onClick={() => { setReviewSubmitError(''); setReviewType('good'); }}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -1033,19 +976,7 @@ export default function UniverseLandingScreen() {
                 <IoArrowBack size={24} color="#1F2937" />
               </button>
               <div style={{ display: 'flex', gap: '10px' }}>
-                <button style={{
-                  width: '36px', height: '36px',
-                  backgroundColor: 'rgba(255,255,255,0.9)',
-                  border: 'none',
-                  borderRadius: '18px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer'
-                }}>
-                  <IoHeartOutline size={24} color="#1F2937" />
-                </button>
-                <button style={{
+                <button aria-label="Share universe" onClick={async () => { try { if (navigator.share) await navigator.share({ title: universe.name, url: window.location.href }); else { await navigator.clipboard.writeText(window.location.href); alert('Link copied'); } } catch (error) { if ((error as Error).name !== 'AbortError') alert('Unable to share this link.'); } }} style={{
                   width: '36px', height: '36px',
                   backgroundColor: 'rgba(255,255,255,0.9)',
                   border: 'none',
@@ -1181,7 +1112,7 @@ export default function UniverseLandingScreen() {
           <div style={{ height: '100px' }} />
 
           {/* Floating Add Place Button */}
-          {isVerified && (
+          {canContribute && (
             <button
               onClick={() => setShowAddPlaceModal(true)}
               style={{
@@ -1206,6 +1137,11 @@ export default function UniverseLandingScreen() {
           )}
 
           {/* Add Place Modal */}
+          {reviewType && <div role="dialog" aria-modal="true" aria-label="Write universe review" style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,.5)', display: 'grid', placeItems: 'center' }}><div style={{ background: colors.surface, color: colors.text, padding: 24, borderRadius: 16, width: 'min(90vw,480px)' }}>
+            <h2>Write a review</h2>
+            {!user ? <p>Sign in to post a review.</p> : <><label>Review type <select value={reviewType} onChange={e => setReviewType(e.target.value as 'good' | 'vibe' | 'heads_up')}><option value="good">The Good</option><option value="vibe">The Vibe</option><option value="heads_up">Heads Up</option></select></label><textarea aria-label="Your review" value={reviewText} onChange={e => setReviewText(e.target.value)} maxLength={4000} rows={5} style={{ width: '100%', margin: '16px 0' }} /><button disabled={reviewSaving || !reviewText.trim()} onClick={submitReview}>{reviewSaving ? 'Posting…' : 'Post review'}</button></>}
+            {reviewSubmitError && <p role="alert">{reviewSubmitError}</p>}<button disabled={reviewSaving} onClick={() => setReviewType(null)}>Close</button>
+          </div></div>}
           {showAddPlaceModal && (
             <div style={{
               position: 'fixed',
@@ -1431,7 +1367,7 @@ export default function UniverseLandingScreen() {
 
                 {/* Results */}
                 <div style={{ flex: 1, overflowY: 'auto' }}>
-                  {foodSearchLoading ? (
+                  {foodSearchError ? <p role="alert">{foodSearchError}</p> : foodSearchLoading ? (
                     <div style={{ textAlign: 'center', padding: '40px 0' }}>
                       <div style={{ fontSize: '24px', marginBottom: '8px' }}>🔍</div>
                       <p style={{ color: colors.textSecondary }}>Searching menus...</p>
@@ -1450,7 +1386,7 @@ export default function UniverseLandingScreen() {
                       {foodSearchResults.map((item) => (
                         <div
                           key={item.id}
-                          onClick={() => router.push(`/app/place/${item.place_id}`, undefined, { locale })}
+                          onClick={() => router.push(`/place/${item.place_id}/menu?dish=${item.id}`, undefined, { locale })}
                           style={{
                             display: 'flex',
                             backgroundColor: colors.inputBg,

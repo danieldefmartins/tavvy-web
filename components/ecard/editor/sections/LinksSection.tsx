@@ -1,3 +1,4 @@
+import { useReleaseCopy } from '../../../../hooks/useReleaseCopy';
 /**
  * LinksSection -- Manage link items with platform picker and free-tier limit notice.
  */
@@ -16,6 +17,7 @@ interface LinksSectionProps {
 }
 
 export default function LinksSection({ isDark, isPro }: LinksSectionProps) {
+  const copy = useReleaseCopy();
   const { state, dispatch } = useEditor();
   const links = state.links;
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -25,13 +27,14 @@ export default function LinksSection({ isDark, isPro }: LinksSectionProps) {
   const warningBg = isDark ? 'rgba(245,158,11,0.1)' : '#FFFBEB';
   const warningBorder = isDark ? 'rgba(245,158,11,0.3)' : '#FDE68A';
 
-  const isAtLimit = !isPro && links.length >= FREE_LINK_LIMIT;
+  const activeCount = links.filter(link => link.is_active !== false && link.is_active !== null).length;
+  const isAtLimit = !isPro && activeCount >= FREE_LINK_LIMIT;
 
   const handleAddLink = (platformId: string) => {
     if (isAtLimit) return;
 
     const newLink = {
-      id: `link_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      id: crypto.randomUUID(),
       platform: platformId,
       title: '',
       url: '',
@@ -48,7 +51,7 @@ export default function LinksSection({ isDark, isPro }: LinksSectionProps) {
   };
 
   const handleUpdateUrl = (id: string, url: string) => {
-    dispatch({ type: 'UPDATE_LINK', id, updates: { url } });
+    dispatch({ type: 'UPDATE_LINK', id, updates: { url, value: url } });
   };
 
   const handleRemoveLink = (id: string) => {
@@ -57,8 +60,8 @@ export default function LinksSection({ isDark, isPro }: LinksSectionProps) {
 
   return (
     <EditorSection
-      id="links"
-      title="Links"
+      id={"links"}
+      title={copy("Links & actions")}
       icon={<IoLink size={20} />}
       defaultOpen={true}
       isDark={isDark}
@@ -66,13 +69,15 @@ export default function LinksSection({ isDark, isPro }: LinksSectionProps) {
       {/* Link List */}
       {links.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
-          {links.map((link) => (
+          {links.map((link, index) => (
             <LinkEditor
               key={link.id}
               link={link}
               onUpdateTitle={(title) => handleUpdateTitle(link.id, title)}
               onUpdateUrl={(url) => handleUpdateUrl(link.id, url)}
               onRemove={() => handleRemoveLink(link.id)}
+              onMoveUp={index > 0 ? () => dispatch({ type: 'REORDER_LINKS', fromIndex: index, toIndex: index - 1 }) : undefined}
+              onMoveDown={index < links.length - 1 ? () => dispatch({ type: 'REORDER_LINKS', fromIndex: index, toIndex: index + 1 }) : undefined}
               isDark={isDark}
             />
           ))}
@@ -115,7 +120,7 @@ export default function LinksSection({ isDark, isPro }: LinksSectionProps) {
       {/* Link count */}
       <div style={{ marginBottom: 12 }}>
         <span style={{ fontSize: 12, color: textSecondary }}>
-          {links.length}{!isPro ? ` / ${FREE_LINK_LIMIT}` : ''} links
+          {activeCount}{!isPro ? ` / ${FREE_LINK_LIMIT}` : ''} active links{links.length > activeCount ? ` · ${links.length - activeCount} hidden` : ''}
         </span>
       </div>
 
@@ -132,7 +137,7 @@ export default function LinksSection({ isDark, isPro }: LinksSectionProps) {
                 padding: '10px 16px',
                 border: `1px dashed ${borderColor}`,
                 borderRadius: 10,
-                background: 'none',
+                background: "none",
                 cursor: 'pointer',
                 fontSize: 13,
                 fontWeight: 500,
@@ -142,8 +147,7 @@ export default function LinksSection({ isDark, isPro }: LinksSectionProps) {
               }}
             >
               <IoAdd size={18} />
-              Add Link
-            </button>
+              {"Add link"}</button>
           ) : (
             <div>
               <div
@@ -158,10 +162,11 @@ export default function LinksSection({ isDark, isPro }: LinksSectionProps) {
                   Choose a platform
                 </span>
                 <button
+                  aria-label="Close platform picker"
                   onClick={() => setPickerOpen(false)}
                   style={{
-                    background: 'none',
-                    border: 'none',
+                    background: "none",
+                    border: "none",
                     cursor: 'pointer',
                     padding: 4,
                   }}

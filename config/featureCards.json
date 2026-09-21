@@ -1,0 +1,58 @@
+[
+  {
+    "id": "rides",
+    "tag": "Explore",
+    "title": "Rides",
+    "subtitle": "Find your next theme park adventure.",
+    "route": "/app/rides"
+  },
+  {
+    "id": "restaurants",
+    "tag": "Discover",
+    "title": "Restaurants",
+    "subtitle": "Find good food and the signals that matter.",
+    "route": "/app/map?category=Restaurants"
+  },
+  {
+    "id": "universes",
+    "tag": "Explore",
+    "title": "Universes",
+    "subtitle": "Discover the places within parks, airports and more.",
+    "route": "/app/universes"
+  },
+  {
+    "id": "hotels",
+    "tag": "Stay",
+    "title": "Hotels",
+    "subtitle": "Find a stay that feels right for you.",
+    "route": "/app/map?category=Hotels"
+  },
+  {
+    "id": "pros",
+    "tag": "Connect",
+    "title": "Pros",
+    "subtitle": "Find local people to help with your next project.",
+    "route": "/app/pros"
+  },
+  {
+    "id": "cities",
+    "tag": "Discover",
+    "title": "Cities",
+    "subtitle": "Get to know a new neighborhood or city.",
+    "route": "/app/cities"
+  },
+  {
+    "id": "atlas",
+    "tag": "Inspire",
+    "title": "Atlas",
+    "subtitle": "Explore guides and ideas for your next trip.",
+    "route": "/app/atlas"
+  },
+  {
+    "id": "rv-camping",
+    "tag": "Outdoors",
+    "title": "RV & Camping",
+    "subtitle": "Find somewhere to park, camp and unwind.",
+    "route": "/app/rv-camping"
+  }
+]

@@ -1,0 +1,78 @@
+{
+  "status": "PASS",
+  "scope": "Local contract, provenance linkage, dedupe and rejection tests. Official source research is documented separately; live collision/rollback gate NOT executed.",
+  "checked_at": "2026-09-21",
+  "checks_passed": 12,
+  "ships": 59,
+  "operators": 8,
+  "withheld_leads": 10,
+  "worldwideComplete": false,
+  "counts": {
+    "kinds": {
+      "ocean": 19,
+      "river": 34,
+      "expedition": 6
+    },
+    "verified_facts": 127,
+    "unknown_facts": 994,
+    "venues": 88,
+    "cabins": 24,
+    "programs": 3,
+    "photos": 0
+  },
+  "checks": [
+    {
+      "name": "59 drafts meet contract, evidence, registry and original69 lead reconciliation",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject automatic publication",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject fake complete-world claim",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject duplicate identity",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject missing status source",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject nonofficial source",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject made-up venue place UUID",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject zero from unknown capacity",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject undated verified field",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject missing withheld lead",
+      "status": "PASS"
+    },
+    {
+      "name": "Preserve built versus service and ambiguous capacity boundaries",
+      "status": "PASS"
+    },
+    {
+      "name": "Prior four batch001 files and registry are byte-for-byte unchanged",
+      "status": "PASS"
+    }
+  ],
+  "files": {
+    "verified-operating-batch-002.json": "cb052ee196c0987169efec31118cf8ebf0fdb80670eb2f99e971e45469083526",
+    "batch-002-operating-evidence.json": "912fc17b4542461be74120640c9f056afdf824b6ed3fc7f9ace47a8ad9f50ecb",
+    "batch-002-verified-validate.cjs": "edc43b02ec166de9361c2aa502e33ffb23044fb3afa50902aa8d0fddb9383431"
+  }
+}

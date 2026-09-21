@@ -1,3 +1,5 @@
+import design from '../config/design.json';
+
 /**
  * Tavvy V2 Design System
  * 
@@ -17,11 +19,11 @@ export const tavvyTheme = {
   colors: {
     // Background Colors
     background: {
-      dark: '#000000',        // Primary dark background (iOS default)
-      light: '#FFFFFF',       // Light mode background
+      dark: design.dark.background,
+      light: design.light.background,
       surface: {
-        dark: '#1A1A1A',      // Cards, inputs in dark mode
-        light: '#F5F5F5',     // Cards, inputs in light mode
+        dark: design.dark.surface,
+        light: design.light.surface,
       },
       overlay: 'rgba(0, 0, 0, 0.5)', // Modal overlays
     },
@@ -29,16 +31,16 @@ export const tavvyTheme = {
     // Text Colors
     text: {
       primary: {
-        dark: '#FFFFFF',
-        light: '#000000',
+        dark: design.dark.text,
+        light: design.light.text,
       },
       secondary: {
-        dark: '#9CA3AF',      // Gray text in dark mode
-        light: '#6B7280',     // Gray text in light mode
+        dark: design.dark.textSecondary,
+        light: design.light.textSecondary,
       },
       tertiary: {
-        dark: '#6B7280',
-        light: '#9CA3AF',
+        dark: design.dark.textTertiary,
+        light: design.light.textTertiary,
       },
     },
 
@@ -85,8 +87,8 @@ export const tavvyTheme = {
 
     // Borders
     border: {
-      dark: '#374151',
-      light: '#E5E7EB',
+      dark: design.dark.border,
+      light: design.light.border,
       focus: '#667EEA',
     },
   },
@@ -222,21 +224,21 @@ export const getThemeColors = (isDark: boolean = true) => {
     textSecondary: isDark ? colors.text.secondary.dark : colors.text.secondary.light,
     textTertiary: isDark ? colors.text.tertiary.dark : colors.text.tertiary.light,
     border: isDark ? colors.border.dark : colors.border.light,
-    accent: colors.brand.universes,
+    accent: isDark ? design.dark.link : design.light.link,
     // Tab bar colors
-    tabBarBackground: isDark ? '#000000' : '#FFFFFF',
-    tabBarActive: isDark ? '#FFFFFF' : '#000000',
-    tabBarInactive: isDark ? '#6B7280' : '#9CA3AF',
+    tabBarBackground: isDark ? design.dark.surface : design.light.surface,
+    tabBarActive: isDark ? design.dark.link : design.light.link,
+    tabBarInactive: isDark ? design.dark.textTertiary : design.light.textTertiary,
     // Card backgrounds
     cardBackground: isDark ? colors.background.surface.dark : colors.background.surface.light,
     // Primary color
-    primary: colors.brand.universes,
+    primary: design.primary,
     primaryLight: isDark ? 'rgba(102, 126, 234, 0.15)' : 'rgba(102, 126, 234, 0.1)',
     // Input fields — always white background with dark text for readability
     inputBackground: '#FFFFFF',
     inputBorder: isDark ? '#374151' : '#E5E7EB',
     inputText: '#1a1a2e',
-    inputPlaceholder: '#9CA3AF',
+    inputPlaceholder: design.light.textTertiary,
     // Error colors
     error: colors.status.error,
     errorLight: isDark ? 'rgba(239, 68, 68, 0.15)' : 'rgba(239, 68, 68, 0.1)',

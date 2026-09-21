@@ -7,7 +7,7 @@ const PersonalSignalPreferences = () => {
     dogFriendly: false,
   });
 
-  const handleSignalChange = (signal: string) => {
+  const handleSignalChange = (signal: keyof typeof signals) => {
     setSignals((prevSignals) => ({
       ...prevSignals,
       [signal]: !prevSignals[signal],

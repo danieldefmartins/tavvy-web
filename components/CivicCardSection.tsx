@@ -6,6 +6,7 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'next-i18next';
+import ContentSafetyActions,{CONTENT_SAFETY_CHANGED} from './ContentSafetyActions';
 import { supabase } from '../lib/supabaseClient';
 
 interface CivicProposal {
@@ -49,6 +50,7 @@ interface CivicRecommendation {
 }
 
 interface CivicCardSectionProps {
+  previewOnly?: boolean;
   cardId: string;
   cardSlug: string;
   fullName: string;
@@ -61,6 +63,7 @@ interface CivicCardSectionProps {
   profilePhotoUrl: string | null;
   accentColor: string; // party primary color
   secondaryColor: string;
+  highlightColor?: string;
   proposals: CivicProposal[];
   questions: CivicQuestion[];
   commitments: CivicCommitment[];
@@ -72,6 +75,7 @@ interface CivicCardSectionProps {
 }
 
 const CivicCardSection: React.FC<CivicCardSectionProps> = ({
+  previewOnly = false,
   cardId,
   cardSlug,
   fullName,
@@ -84,6 +88,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
   profilePhotoUrl,
   accentColor,
   secondaryColor,
+  highlightColor = '#dfc274',
   proposals: initialProposals,
   questions: initialQuestions,
   commitments,
@@ -95,7 +100,19 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
 }) => {
   const { t } = useTranslation('common');
   const [proposals, setProposals] = useState(initialProposals);
-  const [questions, setQuestions] = useState(initialQuestions);
+  const [questions, setQuestions] = useState(previewOnly ? initialQuestions : []);
+  const [questionsError,setQuestionsError]=useState('');
+  const [questionsLoading,setQuestionsLoading]=useState(!previewOnly);
+  useEffect(()=>{
+    if(previewOnly){setQuestions(initialQuestions);return;}
+    let active=true;let generation=0;
+    const load=async()=>{const request=++generation;setQuestionsLoading(true);setQuestionsError('');setQuestions([]);try{
+      const {data,error}=await supabase.from('civic_questions').select('id,question_text,upvote_count,answer_text,answered_at,created_at').eq('card_id',cardId).eq('status','approved').eq('is_visible',true).order('upvote_count',{ascending:false}).limit(50);
+      if(error)throw error;if(active&&request===generation)setQuestions((data||[]).map(q=>({id:q.id,questionText:q.question_text,upvoteCount:q.upvote_count||0,answerText:q.answer_text,answeredAt:q.answered_at,createdAt:q.created_at})));
+    }catch{if(active&&request===generation)setQuestionsError('Community questions could not be loaded. Please try again.');}finally{if(active&&request===generation)setQuestionsLoading(false)}};
+    void load();const changed=()=>void load();window.addEventListener(CONTENT_SAFETY_CHANGED,changed);const {data:listener}=supabase.auth.onAuthStateChange(changed);
+    return()=>{active=false;window.removeEventListener(CONTENT_SAFETY_CHANGED,changed);listener.subscription.unsubscribe()};
+  },[cardId,previewOnly,initialQuestions]);
   const [expandedProposal, setExpandedProposal] = useState<string | null>(null);
   const [userReactions, setUserReactions] = useState<Record<string, string>>({});
   const [newQuestion, setNewQuestion] = useState('');
@@ -115,6 +132,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
   const disagreePct = totalVotes > 0 ? Math.round((totalReactions.disagree / totalVotes) * 100) : 0;
 
   const handleReaction = async (proposalId: string, reactionType: string) => {
+    if (previewOnly) return;
     // Optimistic update
     const prevReaction = userReactions[proposalId];
     setUserReactions(prev => ({ ...prev, [proposalId]: reactionType }));
@@ -167,6 +185,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
   };
 
   const handleSubmitQuestion = async () => {
+    if (previewOnly) return;
     if (!newQuestion.trim() || isSubmittingQuestion) return;
     setIsSubmittingQuestion(true);
 
@@ -203,6 +222,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
   };
 
   const handleUpvote = async (questionId: string) => {
+    if (previewOnly) return;
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
@@ -406,11 +426,11 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
         <div style={{ fontSize: 15, fontWeight: 600, color: accentColor, marginBottom: 12 }}>{officeRunningFor}</div>
 
         {/* Pill badge: Party · Region · Year */}
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 0, background: '#f5f5f5', borderRadius: 20, padding: '6px 16px', marginBottom: 16, border: '1px solid #e8e8e8' }}>
+        {(partyName || region || electionYear) && <div style={{ display: 'inline-flex', alignItems: 'center', gap: 0, background: '#f5f5f5', borderRadius: 20, padding: '6px 16px', marginBottom: 16, border: '1px solid #e8e8e8' }}>
           <span style={{ fontSize: 13, fontWeight: 600, color: '#555' }}>
-            {partyName}{region ? ` • ${region}` : ''}{electionYear ? ` • ${electionYear}` : ''}
+            {[partyName, region, electionYear].filter(Boolean).join(' • ')}
           </span>
-        </div>
+        </div>}
 
         {/* Separator */}
         <div style={{ width: '60%', height: 1, background: '#e8e8e8', margin: '0 auto 16px' }} />
@@ -442,7 +462,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
       marginBottom: 0,
     }}>
       {/* Yellow/Gold top section */}
-      <div style={{ background: '#FFD700', padding: '28px 24px 24px', textAlign: 'center' as const }}>
+      <div style={{ background: highlightColor, padding: '28px 24px 24px', textAlign: 'center' as const }}>
         {/* Photo with yellow border */}
         {profilePhotoUrl && (
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
@@ -463,8 +483,8 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
         {/* Yellow VOTE badge */}
         {ballotNumber && (
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: accentColor, borderRadius: 12, padding: '10px 24px', marginBottom: 8 }}>
-            <span style={{ fontSize: 13, fontWeight: 800, color: '#FFD700' }}>{t('civic.vote')}</span>
-            <span style={{ fontSize: 32, fontWeight: 900, color: '#FFD700', letterSpacing: 4, fontFamily: "'Inter', -apple-system, sans-serif" }}>{ballotNumber}</span>
+            <span style={{ fontSize: 13, fontWeight: 800, color: highlightColor }}>{t('civic.vote')}</span>
+            <span style={{ fontSize: 32, fontWeight: 900, color: highlightColor, letterSpacing: 4, fontFamily: "'Inter', -apple-system, sans-serif" }}>{ballotNumber}</span>
           </div>
         )}
       </div>
@@ -482,7 +502,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
   );
 
   /* Select the right header based on templateLayout */
-  const isNonClassic = templateLayout !== 'civic-card';
+  const isNonClassic = templateLayout !== 'civic-card' && templateLayout !== 'politician-generic';
   const isFlag = templateLayout === 'civic-card-flag';
   // Flag template uses classic-style rounded cards (not edge-to-edge like other non-classic)
   const useRoundedCards = !isNonClassic || isFlag;
@@ -752,7 +772,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
           </div>
 
           {/* Question list */}
-          {questions.length === 0 ? (
+          {questionsLoading ? <p role="status">Loading questions…</p> : questionsError ? <p role="alert">{questionsError}</p> : questions.length === 0 ? (
             <div style={{
               padding: '32px 20px', textAlign: 'center', background: '#FFFFFF',
               borderRadius: useRoundedCards ? 16 : 0, border: useRoundedCards ? '1px solid #f0f0f0' : 'none',
@@ -791,6 +811,7 @@ const CivicCardSection: React.FC<CivicCardSectionProps> = ({
                       {q.questionText}
                     </p>
 
+                    {!previewOnly&&<ContentSafetyActions kind="civic_question" contentId={q.id}/>}
                     {/* Answer from candidate */}
                     {q.answerText && (
                       <div style={{

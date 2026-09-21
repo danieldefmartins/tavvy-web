@@ -140,10 +140,15 @@ export default function UniversalAddScreen() {
   const { t } = useTranslation('common');
   const { theme, isDark } = useThemeContext();
   const {
-    currentDraft, pendingDraft, isLoading, isSaving,
+    currentDraft, pendingDraft, isLoading, isSaving, saveError,
     createDraft, updateDraft, deleteDraft, snoozeDraft, submitDraft,
     resumeDraft, dismissPendingDraft
-  } = useDrafts();
+  } = useDrafts({
+    universe_id: typeof router.query.universeId === 'string' ? router.query.universeId : undefined,
+    universe_place_type: typeof router.query.placeType === 'string' ? router.query.placeType : undefined,
+  });
+
+  useEffect(() => { if (saveError) alert(saveError); }, [saveError]);
 
   // UI State
   const [currentStep, setCurrentStep] = useState<StepType>('location');
@@ -211,8 +216,8 @@ export default function UniversalAddScreen() {
           zipCode: currentDraft.postal_code || '',
           country: currentDraft.country || 'USA',
           formattedAddress: currentDraft.formatted_address || '',
-          latitude: currentDraft.latitude || undefined,
-          longitude: currentDraft.longitude || undefined,
+          latitude: currentDraft.latitude ?? undefined,
+          longitude: currentDraft.longitude ?? undefined,
         });
       }
       
@@ -374,15 +379,15 @@ export default function UniversalAddScreen() {
         postal_code: manualAddressData.zipCode || null,
         country: manualAddressData.country || 'USA',
         formatted_address: formatted,
-        latitude: manualAddressData.latitude || null,
-        longitude: manualAddressData.longitude || null,
+        latitude: manualAddressData.latitude ?? null,
+        longitude: manualAddressData.longitude ?? null,
         status: 'draft_type_selected',
         current_step: 2,
       }, true);
     } else {
       await createDraft({
-        latitude: manualAddressData.latitude || 0,
-        longitude: manualAddressData.longitude || 0,
+        latitude: manualAddressData.latitude ?? null,
+        longitude: manualAddressData.longitude ?? null,
         address_line1: manualAddressData.address1,
         address_line2: manualAddressData.address2,
         city: manualAddressData.city,
@@ -417,6 +422,7 @@ export default function UniversalAddScreen() {
   const handleServiceLocationAnswer = async (hasPhysicalLocation: boolean) => {
     await updateDraft({
       data: { has_physical_location: hasPhysicalLocation },
+      ...(!hasPhysicalLocation ? { latitude: null, longitude: null, address_line1: null, address_line2: null, city: null, region: null, postal_code: null, formatted_address: null } : {}),
       status: 'draft_subtype_selected',
       current_step: 3,
     }, true);
@@ -465,18 +471,34 @@ export default function UniversalAddScreen() {
   };
 
   // Handle photo upload
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-    
-    // For now, just store file names - in production, upload to storage
-    const newPhotos = Array.from(files).map(f => URL.createObjectURL(f));
-    setPhotos(prev => [...prev, ...newPhotos]);
-    updateDraft({ photos: [...photos, ...newPhotos] });
+  const [isUploadingPhotos, setIsUploadingPhotos] = useState(false);
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (!files.length || isUploadingPhotos) return;
+    setIsUploadingPhotos(true);
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) throw new Error('Please sign in to upload photos');
+      const uploaded = [...photos];
+      for (const file of files.slice(0, 30 - photos.length)) {
+        if (!['image/jpeg', 'image/png', 'image/webp', 'image/heic'].includes(file.type) || file.size > 10 * 1024 * 1024) throw new Error('Choose images smaller than 10 MB');
+        const extension = file.name.split('.').pop()?.replace(/[^a-zA-Z0-9]/g, '') || 'jpg';
+        const path = `${user.id}/drafts/${crypto.randomUUID()}.${extension}`;
+        const { error } = await supabase.storage.from('place-photos').upload(path, file, { contentType: file.type });
+        if (error) throw error;
+        const { data } = supabase.storage.from('place-photos').getPublicUrl(path);
+        uploaded.push(data.publicUrl);
+        setPhotos([...uploaded]);
+        await updateDraft({ photos: [...uploaded] }, true);
+      }
+    } catch (error: any) { alert(error.message || 'Photo upload failed'); }
+    finally { setIsUploadingPhotos(false); }
   };
 
   // Handle submit
   const handleSubmit = async () => {
+    if (isUploadingPhotos) { alert('Please wait for photos to upload'); return; }
     const result = await submitDraft();
     if (result.success) {
       // Try to find the canonical places ID via the sync trigger
@@ -527,7 +549,7 @@ export default function UniversalAddScreen() {
   };
 
   const handleDiscardDraft = async () => {
-    if (pendingDraft) await deleteDraft(pendingDraft.id);
+    if (pendingDraft && !await deleteDraft(pendingDraft.id)) { alert('Could not delete the draft. Please retry.'); return; }
     setShowResumeModal(false);
     handleRequestLocation();
   };
@@ -535,7 +557,7 @@ export default function UniversalAddScreen() {
   const handleSnoozeDraft = async () => {
     if (pendingDraft) {
       resumeDraft(pendingDraft);
-      await snoozeDraft(24);
+      if (!await snoozeDraft(24)) return;
     }
     setShowResumeModal(false);
     router.back();
@@ -951,7 +973,7 @@ export default function UniversalAddScreen() {
                     <img src={photo} alt={`Photo ${index + 1}`} />
                     <button 
                       className="remove-photo"
-                      onClick={() => setPhotos(prev => prev.filter((_, i) => i !== index))}
+                      onClick={() => { const remaining = photos.filter((_, i) => i !== index); setPhotos(remaining); updateDraft({ photos: remaining }); }}
                     >
                       <FiX size={16} />
                     </button>
@@ -966,6 +988,7 @@ export default function UniversalAddScreen() {
                     accept="image/*"
                     multiple
                     onChange={handlePhotoUpload}
+                    disabled={isUploadingPhotos}
                     style={{ display: 'none' }}
                   />
                 </label>

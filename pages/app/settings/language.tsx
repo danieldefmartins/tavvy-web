@@ -48,8 +48,7 @@ const languages: Language[] = [
 export default function LanguageSettingsPage() {
   const { t } = useTranslation('common');
   const router = useRouter();
-  const { themeMode } = useThemeContext();
-  const isDark = themeMode === 'dark';
+  const { isDark } = useThemeContext();
   
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [isChanging, setIsChanging] = useState(false);

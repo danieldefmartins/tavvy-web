@@ -138,69 +138,38 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .update({ tap_count: newTapCount })
       .eq('id', cardId);
 
-    // ── Sync with place reviews for business cards ──
-    // If this card is linked to a place, also create a place_review + signal taps
-    if (cardData.place_id) {
-      try {
-        // Create a place_review for this endorsement
-        const { data: placeReview } = await supabase
-          .from('place_reviews')
-          .insert({
-            place_id: cardData.place_id,
-            user_id: user.id,
-            public_note: note || null,
-            source: 'ecard_endorsement',
-            status: 'published',
-            reviewer_zip: endorserProfile?.zip_code || null,
-            ip_address: geo.ip,
-            ip_city: geo.city,
-            ip_state: geo.state,
-            ip_country: geo.country,
-            ip_zip: geo.zip,
-          })
-          .select('id')
-          .single();
+    // Endorsements remain in their own tables; a card endorsement is not a place visit.
 
-        if (placeReview) {
-          // Create place_review_signal_taps for each signal (same signal_ids)
-          const placeSignalRows = signals.map((signalId: string) => ({
-            review_id: placeReview.id,
-            place_id: cardData.place_id,
-            signal_id: signalId,
-          }));
-
-          await supabase
-            .from('place_review_signal_taps')
-            .insert(placeSignalRows);
-        }
-      } catch (syncErr) {
-        // Non-blocking — don't fail the endorsement if place sync fails
-        console.error('Place review sync error:', syncErr);
-      }
-    }
-
+    // These are public totals: the admin writer must not bypass staff visibility RLS.
+    const publicReader = createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '', {auth:{persistSession:false,autoRefreshToken:false}});
+    let newEndorsementCount: number | null = null;
+    let updatedTags: {label:string;emoji:string;count:number}[] | null = null;
+    let evidenceStatus: 'ready'|'unavailable' = 'ready';
+    try {
     // Get the actual endorsement count (each signal tap = +1)
     // For business cards with a place, combine both sources
-    let newEndorsementCount = 0;
+
     if (cardData.place_id) {
       // Combined: ecard endorsement signals + place review signal taps (excluding ecard-sourced to avoid double count)
-      const { count: ecardCount } = await supabase
+      const { count: ecardCount, error: ecardCountError } = await publicReader
         .from('ecard_endorsement_signals')
         .select('*', { count: 'exact', head: true })
         .eq('card_id', cardId);
 
-      const { count: placeCount } = await supabase
+      const { count: placeCount, error: placeCountError } = await publicReader
         .from('place_review_signal_taps')
-        .select('*, place_reviews!inner(source)', { count: 'exact', head: true })
+        .select('*, place_reviews!inner(source,status)', { count: 'exact', head: true })
         .eq('place_id', cardData.place_id)
-        .neq('place_reviews.source', 'ecard_endorsement');
+        .neq('place_reviews.source', 'ecard_endorsement').eq('place_reviews.status','live');
 
+      if(ecardCountError||placeCountError||!Number.isInteger(ecardCount)||!Number.isInteger(placeCount))throw new Error('Public totals unavailable');
       newEndorsementCount = (ecardCount || 0) + (placeCount || 0);
     } else {
-      const { count } = await supabase
+      const { count, error: countError } = await publicReader
         .from('ecard_endorsement_signals')
         .select('*', { count: 'exact', head: true })
         .eq('card_id', cardId);
+      if(countError||!Number.isInteger(count))throw new Error('Public totals unavailable');
       newEndorsementCount = count || 0;
     }
 
@@ -208,11 +177,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const tagCounts: Record<string, { label: string; emoji: string; count: number }> = {};
 
     // Source 1: ecard endorsement signals
-    const { data: ecardSignalTaps } = await supabase
+    const { data: ecardSignalTaps, error: ecardTagsError } = await publicReader
       .from('ecard_endorsement_signals')
       .select('signal_id, review_items(label, icon_emoji)')
       .eq('card_id', cardId);
 
+    if(ecardTagsError)throw new Error('Public tags unavailable');
     (ecardSignalTaps || []).forEach((tap: any) => {
       const ri = tap.review_items;
       if (ri) {
@@ -223,12 +193,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Source 2: place review signal taps (only non-ecard-sourced to avoid double count)
     if (cardData.place_id) {
-      const { data: placeSignalTaps } = await supabase
+      const { data: placeSignalTaps, error: placeTagsError } = await publicReader
         .from('place_review_signal_taps')
-        .select('signal_id, review_items(label, icon_emoji), place_reviews!inner(source)')
+        .select('signal_id, review_items(label, icon_emoji), place_reviews!inner(source,status)')
         .eq('place_id', cardData.place_id)
-        .neq('place_reviews.source', 'ecard_endorsement');
+        .neq('place_reviews.source', 'ecard_endorsement').eq('place_reviews.status','live');
 
+      if(placeTagsError)throw new Error('Public tags unavailable');
       (placeSignalTaps || []).forEach((tap: any) => {
         const ri = tap.review_items;
         if (ri) {
@@ -238,12 +209,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    const updatedTags = Object.values(tagCounts).sort((a, b) => b.count - a.count).slice(0, 8);
+    updatedTags = Object.values(tagCounts).sort((a, b) => b.count - a.count).slice(0, 8);
+
+    } catch {
+      // The endorsement is already saved. Do not send a retryable failure or invent totals.
+      evidenceStatus='unavailable';newEndorsementCount=null;updatedTags=null;
+    }
 
     return res.status(200).json({
       success: true,
       endorsementId: endorsement.id,
-      endorsementCount: newEndorsementCount || 0,
+      endorsementCount: newEndorsementCount,
+      evidenceStatus,
       topEndorsementTags: updatedTags,
     });
   } catch (err) {

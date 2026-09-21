@@ -4,6 +4,8 @@ const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,
   skipWaiting: true,
+  // Large template originals load through optimized images when needed.
+  publicExcludes: ['!noprecache/**/*', '!images/ecard-examples/**/*'],
   disable: process.env.NODE_ENV === 'development',
 });
 
@@ -43,13 +45,19 @@ const nextConfig = withPWA({
     ignoreDuringBuilds: true,
   },
 
-  // Skip TypeScript errors during builds for faster builds
+  // Release builds must pass TypeScript validation.
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
 
   // Experimental features for faster builds
   experimental: {
+    // The PNG fallback reads this font at runtime in the standalone image.
+    outputFileTracingIncludes: {
+      '/api/og/cruise/*': ['./node_modules/next/dist/compiled/@vercel/og/noto-sans-v27-latin-regular.ttf'],
+      '/*': ['./next-i18next.config.js'],
+      '/api/og/place/*': ['./node_modules/next/dist/compiled/@vercel/og/noto-sans-v27-latin-regular.ttf'],
+    },
     // Optimize package imports to reduce bundle size
     optimizePackageImports: ['react-icons', 'lucide-react', '@supabase/supabase-js'],
   },

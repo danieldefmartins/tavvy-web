@@ -1,3 +1,4 @@
+import { useReleaseCopy } from '../../../../hooks/useReleaseCopy';
 /**
  * EditorField — reusable labeled input/textarea for the card editor.
  */
@@ -29,6 +30,7 @@ export default function EditorField({
   isDark = false,
   maxLength,
 }: EditorFieldProps) {
+  const copy = useReleaseCopy();
   const inputBg = isDark ? '#1E293B' : '#fff';
   const inputColor = isDark ? '#fff' : '#333';
   const labelColor = isDark ? '#94A3B8' : '#6B7280';
@@ -42,9 +44,9 @@ export default function EditorField({
     fontSize: 15,
     backgroundColor: inputBg,
     color: inputColor,
-    outline: 'none',
+    outline: "none",
     transition: 'border-color 0.2s',
-    resize: multiline ? 'vertical' : 'none',
+    resize: multiline ? 'vertical' : "none",
   };
 
   return (
@@ -56,13 +58,13 @@ export default function EditorField({
         color: labelColor,
         marginBottom: 6,
       }}>
-        {label}{required && ' *'}
+        {copy(label)}{required && ' *'}
       </label>
       {multiline ? (
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
+          placeholder={placeholder ? copy(placeholder) : placeholder}
           rows={rows}
           maxLength={maxLength}
           style={inputStyle}
@@ -72,7 +74,7 @@ export default function EditorField({
           type={type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
+          placeholder={placeholder ? copy(placeholder) : placeholder}
           maxLength={maxLength}
           style={inputStyle}
         />

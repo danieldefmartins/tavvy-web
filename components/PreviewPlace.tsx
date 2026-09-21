@@ -3,8 +3,14 @@
  * business type (restaurant, hotel, service, construction, airport, …) rendered
  * from a config so they stay consistent and are easy to wire to real data later.
  */
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useThemeContext } from '../contexts/ThemeContext';
+import ContentSafetyActions from './ContentSafetyActions';
+import DemoBanner from './demo/DemoBanner';
+import { reviewDateLabel } from '../lib/placePresentation';
+import type { PlaceEvidence } from '../lib/placeEvidence';
+import { coreForCategory, secondaryGoodSignals } from '../lib/placeEvidence';
+import { buildPlaceReviewSummary } from '../lib/placeReviewSummary';
 
 // dark/light palette for the place screen surfaces
 function usePalette() {
@@ -15,7 +21,7 @@ function usePalette() {
     border: 'rgba(255,255,255,0.09)', divider: 'rgba(255,255,255,0.08)', soft: 'rgba(255,255,255,0.05)',
     softer: 'rgba(255,255,255,0.03)', tileText: '#FFFFFF', pillBg: 'rgba(255,255,255,0.06)',
   } : {
-    isDark, bg: '#ffffff', sheet: '#ffffff', text: '#17013A', text2: '#8b8898', text3: '#b3b0bd',
+    isDark, bg: '#ffffff', sheet: '#ffffff', text: '#17013A', text2: '#625E70', text3: '#716C7D',
     border: 'rgba(23,1,58,0.08)', divider: 'rgba(23,1,58,0.07)', soft: 'rgba(23,1,58,0.05)',
     softer: 'rgba(23,1,58,0.025)', tileText: '#17013A', pillBg: 'rgba(23,1,58,0.05)',
   };
@@ -23,11 +29,12 @@ function usePalette() {
 
 export type Cat = 'good' | 'vibe' | 'headsup';
 export type Sig = { label: string; tapCount: number; category: Cat; emoji: string };
-export type Review = { initial: string; color: string; name: string; when: string; signals: { label: string; category: Cat }[] };
-export type InfoRow = { icon: string; main: string; act?: string; hours?: [string, string][] };
+export type Review = { id?: string; text?: string | null; createdAt?: string; dateSource?: string; isEdit?: boolean; initial: string; color: string; name: string; when: string; signals: { label: string; category: Cat }[] };
+export type InfoRow = { icon: string; main: string; act?: string; hours?: [string, string][]; href?: string };
 export type Extra = { title: string; kind: 'chips' | 'list'; sub?: string; items: any[] };
 export type PlaceConfig = {
   type: string;
+  reviewSubject?: { category?: string; subcategory?: string };
   name: string;
   photo: string;
   meta: string;
@@ -39,8 +46,24 @@ export type PlaceConfig = {
   popularLabel: string;        // "Popular for" | "Known for"
   popular: string[];
   info: InfoRow[];
+  extras?: Extra[];
   reviews: Review[];
+  reviewsStatus?: 'ready' | 'unavailable';
   cta: string;                 // "Add Review"
+  evidence?: PlaceEvidence;
+  gallery?: string[];
+  photosStatus?: 'ready'|'unavailable';
+  photoEntries?: {id:string;url:string;caption?:string}[];
+  stories?: { id: string; media_url: string; media_type: string; caption?: string; created_at: string; story_kind?:string }[];
+  demo?: boolean;
+  detailsContent?: React.ReactNode;
+  overviewContent?: React.ReactNode;
+  reviewDisabledReason?: string;
+  demoMenu?: { name: string; description: string; price: string }[];
+  demoCard?: { tagline: string; hours: string; contact: string };
+  demoCardHref?: string;
+  reviewsHref?: string;
+  deliveryLinks?: Record<string, string>;
 };
 
 export const CAT: Record<Cat, { name: string; accent: string; strong: string; tint: string; border: string }> = {
@@ -68,6 +91,8 @@ function Glyph({ name, color = '#fff', size = 26 }: { name: string; color?: stri
       return sv(<><circle cx="12" cy="12" r="9" {...s} /><path d="M3 12h18M12 3c2.6 2.6 2.6 15.4 0 18M12 3c-2.6 2.6-2.6 15.4 0 18" {...s} /></>);
     case 'menu':
       return sv(<path d="M7 3v8M5 3v3a2 2 0 0 0 4 0V3M7 11v10M16 3c-1.4 0-2 2.5-2 5s.7 3.5 2 3.7V21" {...s} />);
+    case 'story':
+      return sv(<><rect x="3" y="4" width="18" height="16" rx="3" {...s} /><path d="M12 8v8M8 12h8" {...s} /></>);
     case 'share':
       return sv(<path d="M12 15V4M12 4l-3.3 3.3M12 4l3.3 3.3M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" {...s} />);
     case 'order':
@@ -144,13 +169,15 @@ function Row({ s, max }: { s: Sig; max: number }) {
   );
 }
 
-function Reviewer({ r }: { r: Review }) {
+function Reviewer({ r, allowSafety }: { r: Review; allowSafety?:boolean }) {
   const t = usePalette();
   return (
     <div className="rv">
       <div className="rv-av" style={{ background: r.color }}>{r.initial}</div>
       <div className="rv-body">
-        <div className="rv-top"><span className="rv-name">{r.name}</span><span className="rv-when">{r.when}</span></div>
+        <div className="rv-top"><span className="rv-name">{r.name}</span><span className="rv-when">{r.createdAt ? reviewDateLabel(r.createdAt,r.dateSource) : r.when}{r.isEdit ? ' · Edited' : ''}</span></div>
+        {allowSafety && r.id && <ContentSafetyActions kind="place_review" contentId={r.id} />}
+        {r.text && <p className="rv-note">{r.text}</p>}
         <div className="rv-sigs">
           {r.signals.map((s, i) => { const c = CAT[s.category];
             return <span className="rv-chip" key={i} style={{ background: c.tint, color: t.text, borderColor: c.border }}>{s.label}</span>; })}
@@ -162,7 +189,8 @@ function Reviewer({ r }: { r: Review }) {
         .rv-body { flex: 1; min-width: 0; }
         .rv-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
         .rv-name { font-size: 14.5px; font-weight: 800; color: ${t.text}; }
-        .rv-when { font-size: 12px; color: ${t.text2}; flex: none; }
+        .rv-note { margin: 9px 0; color: ${t.text}; font-size: 15px; line-height: 1.55; white-space: pre-wrap; }
+        .rv-when { font-size: 13px; color: ${t.text2}; flex: none; }
         .rv-sigs { display: flex; flex-wrap: wrap; gap: 6px; margin: 7px 0 0; }
         .rv-chip { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; border: 1px solid; }
       `}</style>
@@ -173,27 +201,82 @@ function Reviewer({ r }: { r: Review }) {
 const EXTERNAL = ['website', 'instagram', 'tiktok', 'youtube', 'facebook', 'whatsapp'];
 
 export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave, saved }: { config: PlaceConfig; hrefs?: Record<string, string>; onAddReview?: () => void; onBack?: () => void; onSave?: () => void; saved?: boolean }) {
-  const [open, setOpen] = useState(false);
+  type PlaceTab = 'overview' | 'media' | 'menu' | 'details';
+  const [activeTab, setActiveTab] = useState<PlaceTab>('overview');
+  const hasMedia = !!(config.gallery?.length || config.stories?.length);
+  const hasMenu = !!(config.demoMenu?.length || hrefs?.menu);
+  const fullMenuHref = hrefs?.menu && !hrefs.menu.startsWith('#') ? hrefs.menu : undefined;
+  const availableTabs: PlaceTab[] = ['overview', 'media', 'details'];
+  useEffect(() => {
+    const syncTab = () => {
+      const requested = new URLSearchParams(window.location.search).get('tab') as PlaceTab;
+      if (requested === 'menu' && fullMenuHref) { window.location.replace(fullMenuHref); return; }
+      setActiveTab(availableTabs.includes(requested) ? requested : 'overview');
+    };
+    syncTab();
+    window.addEventListener('popstate', syncTab);
+    return () => window.removeEventListener('popstate', syncTab);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasMedia, hasMenu]);
+  const selectTab = (tab: PlaceTab) => {
+    if (tab === 'menu' && fullMenuHref) { window.location.assign(fullMenuHref); return; }
+    if (tab === activeTab) return;
+    setActiveTab(tab);
+    const url = new URL(window.location.href);
+    if (tab === 'overview') url.searchParams.delete('tab');
+    else url.searchParams.set('tab', tab);
+    window.history.pushState(window.history.state, '', url.toString());
+  };
+  const handleBack = () => {
+    if (onBack) return onBack();
+    if (window.history.length > 1) window.history.back();
+    else window.location.assign('/app/search');
+  };
+  const [selectedSummary, setSelectedSummary] = useState<'main' | 'good' | 'vibe' | 'headsup' | null>(null);
+  const [showAllDemoReviews, setShowAllDemoReviews] = useState(false);
+  const [shareMessage, setShareMessage] = useState('');
+  const sharePlace = async () => {
+    try {
+      const shareUrl = hrefs?.share || document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href || window.location.href.split(/[?#]/)[0];
+      if (navigator.share) await navigator.share({ title: config.name, url: shareUrl });
+      else { await navigator.clipboard.writeText(shareUrl); setShareMessage('Link copied'); }
+    } catch (error) { if ((error as Error).name !== 'AbortError') setShareMessage('Copy the address from your browser to share this place.'); }
+  };
+  const mediaDialogRef = useRef<HTMLDivElement>(null);
+  const [selectedMedia, setSelectedMedia] = useState<{ url: string; type: string; caption: string } | null>(null);
+  useEffect(() => {
+    if (!selectedMedia) return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const dialog = mediaDialogRef.current;
+    dialog?.querySelector<HTMLButtonElement>('button')?.focus();
+    const trap = (event: KeyboardEvent) => { if(event.key!=='Tab'||!dialog)return; const targets=Array.from(dialog.querySelectorAll<HTMLElement>('button, video[controls], a[href], [tabindex="0"]')); const first=targets[0],last=targets[targets.length-1]; if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();} };
+    window.addEventListener('keydown',trap);
+    const close = (event: KeyboardEvent) => { if (event.key === 'Escape') setSelectedMedia(null); };
+    const previous = document.body.style.overflow; document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', close);
+    return () => { window.removeEventListener('keydown', close); window.removeEventListener('keydown',trap); document.body.style.overflow = previous; previousFocus?.focus(); };
+  }, [selectedMedia]);
   const [hoursOpen, setHoursOpen] = useState<number | null>(null);
   const t = usePalette();
 
-  const all = config.groups.flatMap(g => g.items);
-  const top: Sig[] = [
-    config.groups.find(g => g.key === 'good')?.items[0],
-    config.groups.find(g => g.key === 'good')?.items[1],
-    config.groups.find(g => g.key === 'vibe')?.items[0],
-    config.groups.find(g => g.key === 'headsup')?.items[0],
-  ].filter(Boolean) as Sig[];
-
-  // In real mode (hrefs provided) only show socials that actually have a link.
-  const socialItems = SOCIALS.filter(s => !hrefs || hrefs[s.key]);
-  const actionColor = t.isDark ? '#EDEBF5' : '#17013A';
-  const bar = [
-    ...config.actions.map(a => ({ key: a.key, label: a.label, color: actionColor })),
-    { key: 'ecard', label: 'eCard', color: '' },
-    // TikTok's glyph is near-black; in dark mode use white so it's visible
-    ...socialItems.map(s => ({ key: s.key, label: s.label, color: (s.key === 'tiktok' && t.isDark) ? '#FFFFFF' : s.color })),
+  const evidence = config.evidence;
+  const reviewSubject = config.reviewSubject || config.type;
+  const core = coreForCategory(reviewSubject);
+  const unavailable = !evidence || evidence.dataStatus === 'unavailable';
+  const otherGood = evidence ? secondaryGoodSignals(evidence, reviewSubject) : [];
+  const currentWarnings = evidence?.warnings.filter(w => w.status === 'current' || w.status === 'unconfirmed') || [];
+  const summaryIcons = { main: /hotel/i.test(config.type) ? '🛏️' : /restaurant|cafe|bar/i.test(config.type) ? '🍽️' : '⭐', good: '✨', vibe: '🕯️', headsup: '⚠️' };
+  const summaryTiles = buildPlaceReviewSummary(evidence, reviewSubject).tiles.map(tile => ({ ...tile, icon: summaryIcons[tile.key] }));
+  const deliveryQuery = encodeURIComponent(`${config.name} ${config.meta}`);
+  const deliveryPlatforms = [
+    { key: 'doordash', label: 'DoorDash', search: `https://www.doordash.com/search/store/${deliveryQuery}` },
+    { key: 'ubereats', label: 'Uber Eats', search: `https://www.ubereats.com/search?q=${deliveryQuery}` },
+    { key: 'grubhub', label: 'Grubhub', search: `https://www.grubhub.com/search?orderMethod=delivery&query=${deliveryQuery}` },
   ];
+
+  const socialItems = SOCIALS.filter(s => hrefs?.[s.key]);
+  const supportLabels = new Set(selectedSummary === 'main' ? [...(evidence?.coreSignals||[]),...(evidence?.coreConcerns||[])].map(s=>s.label) : selectedSummary === 'good' ? otherGood.map(s=>s.label) : selectedSummary === 'vibe' ? (evidence?.vibeSignals||[]).map(s=>s.label) : currentWarnings.map(s=>s.label));
+  const supportingReviews = config.reviews.filter(r=>r.signals.some(s=>supportLabels.has(s.label))).slice(0,2);
 
   return (
     <div className="screen">
@@ -202,57 +285,77 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
           ? <img src={config.photo} alt={config.name} className="hero-img" />
           : <div className="hero-img hero-fallback" />}
         <div className="hero-scrim" />
-        <button className="icon-btn back" aria-label="Back" onClick={onBack}>‹</button>
+        <button className="icon-btn back" aria-label="Back" onClick={handleBack}>‹</button>
         <button className="icon-btn save" aria-label="Save" onClick={onSave}>{saved ? '♥' : '♡'}</button>
         <div className="hero-text">
           <span className="type-pill">{config.type}</span>
           <h1 className="name">{config.name}</h1>
-          <p className="meta">{config.meta} · <span className="open">{config.openLine}</span></p>
+          <p className="meta">{config.meta}{config.openLine && <> · <span className="open">{config.openLine}</span></>}</p>
         </div>
       </div>
 
       <div className="sheet">
-        <div className="quickbar">
-          <div className="bar-scroll">
-            {bar.map(b => {
-              const href = hrefs?.[b.key];
-              const ext = EXTERNAL.includes(b.key);
-              const inner = (<><span className="bi-ic"><Glyph name={b.key} color={b.color} size={26} /></span><span className="bi-lbl">{b.label}</span></>);
-              return href
-                ? <a className="bi" key={b.key} href={href} target={ext ? '_blank' : undefined} rel={ext ? 'noopener noreferrer' : undefined}>{inner}</a>
-                : <button className="bi" key={b.key}>{inner}</button>;
-            })}
+        {config.demo && <DemoBanner />}
+        <section className="review-summary" aria-label="Tavvy review summary">
+          <div className="section-head"><h2 className="section-title">What people experienced</h2><span className="section-sub">Last 6 months</span></div>
+          <div className="grid summary-grid">
+            {summaryTiles.map(tile => <button key={tile.key} className={`summary-tile ${tile.key}${selectedSummary === tile.key ? ' selected' : ''}`} aria-expanded={selectedSummary === tile.key} onClick={() => setSelectedSummary(selectedSummary === tile.key ? null : tile.key)}>
+              <span className="summary-title"><span>{tile.icon}</span>{tile.title}</span>
+              <strong>{unavailable ? 'Reviews unavailable' : tile.detail}</strong>
+              {tile.count != null && tile.count > 0 && <small>{tile.count} {tile.count === 1 ? 'person' : 'people'} mentioned this</small>}
+              {tile.note && <small>{tile.note}</small>}
+            </button>)}
           </div>
-        </div>
+          {selectedSummary && !unavailable && <div className="summary-detail">
+            <strong>{summaryTiles.find(tile => tile.key === selectedSummary)?.title}</strong>
+            {selectedSummary === 'main' && <><p>{evidence?.coreLabel}: {evidence?.coreSignals.length ? evidence.coreSignals.map(s => `${s.label} (${s.reports})`).join(' · ') : 'Not enough recent reviews yet.'}</p>{!!evidence?.coreConcerns.length && <p>Recent concerns: {evidence.coreConcerns.map(s => s.label).join(' · ')}</p>}</>}
+            {selectedSummary === 'good' && <p>{otherGood.length ? otherGood.slice(0, 4).map(s => `${s.label} (${s.reports})`).join(' · ') : 'More reviews are needed about other strengths.'}</p>}
+            {selectedSummary === 'vibe' && <p>{evidence?.vibeSignals.length ? evidence.vibeSignals.map(s => `${s.label} (${s.reports})`).join(' · ') : 'More reviews are needed about the atmosphere.'}</p>}
+            {selectedSummary === 'headsup' && <><p>{currentWarnings.length ? currentWarnings.map(w => `${w.label} (${w.status === 'current' ? 'repeated' : 'one report'})`).join(' · ') : 'No current Heads Up reports in Tavvy.'}</p>{evidence?.warnings.filter(w => w.status === 'faded' || w.status === 'improved').map(w => <p key={w.slug}>Older concern: {w.label} · {w.laterVisits} later visits without a repeat</p>)}{!!evidence?.practical.length && <p>Reported practical details: {evidence.practical.map(s => s.label).join(' · ')}. Confirm with the place.</p>}</>}
+            <small>{evidence?.recentReviewers ?? 0} recent reviewer{evidence?.recentReviewers === 1 ? '' : 's'} · {evidence?.confidence || 'limited'} evidence</small>
+            {supportingReviews.length > 0 && <><h3 className="support-title">Recent reviews mentioning this</h3>{supportingReviews.map((r,i)=><Reviewer key={r.id||i} r={r} allowSafety={!config.demo}/>)}</>}
+            {config.reviewsHref && <a className="text-link" href={config.reviewsHref}>See all reviews →</a>}
+          </div>}
+        </section>
 
-        <div className="section">
-          <div className="section-head"><span className="section-title">Reviews</span><span className="section-sub">{config.reviewsSub}</span></div>
-          <p className="review-note">Signal-based reviews — tap what's true, no fake stars. <a className="learn" href="/app/help">How it works</a></p>
-          <div className="grid">{top.map((s, i) => <Tile key={i} s={s} onClick={() => setOpen(o => !o)} />)}</div>
-          <button className="more" onClick={() => setOpen(o => !o)}>
-            {open ? 'Hide signals' : `See all ${all.length} signals`}<span className={`chev ${open ? 'up' : ''}`}>⌄</span>
-          </button>
-          {open && (
-            <div className="dropdown">
-              {config.groups.map(g => { const c = CAT[g.key]; const max = Math.max(...g.items.map(i => i.tapCount));
-                return (
-                  <div className="group" key={g.key}>
-                    <div className="group-head" style={{ color: c.accent }}><span className="group-dot" style={{ background: c.strong }} />{c.name}<span className="group-n">{g.items.length}</span></div>
-                    {g.items.map((s, i) => <Row key={i} s={s} max={max} />)}
-                  </div>
-                ); })}
-            </div>
-          )}
-        </div>
+        {activeTab === 'overview' && config.overviewContent}
 
-        <div className="divider" />
-        <div className="section">
+        <nav className="place-tabs" aria-label="Place sections">
+          {availableTabs.map(tab => tab === 'menu' && fullMenuHref
+            ? <a key={tab} className="place-tab" href={fullMenuHref}>{config.type === 'Hotel' ? 'Rooms' : 'Tavvy Menu'}</a>
+            : <button key={tab} type="button" className={activeTab === tab ? 'place-tab selected' : 'place-tab'} aria-current={activeTab === tab ? 'page' : undefined} onClick={() => selectTab(tab)}>{tab === 'media' ? 'Photos & Stories' : tab === 'menu' && config.type === 'Hotel' ? 'Rooms' : tab[0].toUpperCase() + tab.slice(1)}</button>)}
+        </nav>
+
+        {activeTab === 'overview' && <div className="section overview-reviews">
+          <div className="section-head"><h2 className="section-title">Recent reviews</h2><span className="section-sub">{config.reviewsSub}</span></div>
+          {config.reviewsStatus === 'unavailable' ? <p className="review-note" role="status">Reviews could not be loaded. Please try again later.</p> : config.reviews.length > 0 ? (showAllDemoReviews && !config.reviewsHref ? config.reviews : config.reviews.slice(0, 2)).map((review, i) => <Reviewer key={i} r={review} allowSafety={!config.demo} />) : <p className="review-note">No reviews yet. Be the first to share what you experienced.</p>}
+          {config.reviewsHref ? <a className="more" href={config.reviewsHref}>See all reviews →</a> : config.reviews.length > 2 && <button className="more" onClick={() => setShowAllDemoReviews(value => !value)}>{showAllDemoReviews ? 'Show fewer reviews' : 'See all reviews'}</button>}
+        </div>}
+
+        {activeTab === 'media' && <div className="media-section" id="demo-photos">
+          <div className="section-head"><span className="section-title">See the food & vibe</span></div>
+          {config.photosStatus==='unavailable'?<p className="review-note" role="status">Photos could not be loaded. Please try again later.</p>:!hasMedia && <p className="review-note">No photos or stories to show. Share a first look at this place.</p>}
+          <div className="media-scroll">
+            {(config.gallery || []).slice(0, 6).map((url, i) => <figure key={`${url}-${i}`}><button className="media-open" onClick={() => setSelectedMedia({ url, type: 'image', caption: `Place photo ${i + 1}` })}><img src={url} alt={`${config.name} photo ${i + 1}`} /></button><figcaption>Place photo</figcaption>{!config.demo && config.photoEntries?.find(photo=>photo.url===url)?.id && <ContentSafetyActions kind="place_photo" contentId={config.photoEntries.find(photo=>photo.url===url)!.id}/>}</figure>)}
+            {(config.stories || []).map(story => <figure key={story.id}>
+              {!config.demo&&<ContentSafetyActions kind="story" contentId={story.id}/>}
+
+              <button className="media-open" onClick={() => setSelectedMedia({ url: story.media_url, type: story.media_type, caption: story.caption || 'Place story' })}>{story.media_type === 'video' ? <video src={story.media_url} preload="metadata" /> : <img src={story.media_url} alt={story.caption || `${config.name} story`} />}</button>
+              <figcaption>{story.story_kind==='owner_highlight'?'From the restaurant':'Guest story'} · {new Date(story.created_at).toLocaleDateString()}{story.caption ? ` · ${story.caption}` : ''}</figcaption>
+            </figure>)}
+          </div>
+          {hrefs?.story && <a className="more" href={hrefs.story}>Add your story →</a>}
+        </div>}
+
+        {activeTab === 'details' && config.detailsContent}
+        {activeTab === 'details' && <div className="divider" />}
+        {activeTab === 'details' && <div className="section">
           <div className="tp-head"><span className="tp-badge">✦ Tavvy Places</span></div>
           {config.description && <p className="about">{config.description}</p>}
-          <div className="tags"><span className="tags-label">{config.popularLabel}</span>{config.popular.map((t, i) => <span className="tag" key={i}>{t}</span>)}</div>
-        </div>
 
-        {config.extras?.map((ex, i) => (
+        </div>}
+
+        {activeTab === 'details' && config.extras?.map((ex, i) => (
           <React.Fragment key={i}>
             <div className="divider" />
             <div className="section">
@@ -268,46 +371,70 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
           </React.Fragment>
         ))}
 
-        <div className="divider" />
-        <div className="section">
-          <span className="section-title">Info</span>
+        {activeTab === 'menu' && config.demoMenu && <div className="section" id="demo-menu">
+          <div className="section-head"><span className="section-title">Menu</span></div>
+          {config.demoMenu.map(item => <div className="demo-menu-row" key={item.name}><div><strong>{item.name}</strong><p>{item.description}</p></div><b>{item.price}</b></div>)}
+        </div>}
+        {activeTab === 'details' && config.demoCard && <div className="section demo-ecard" id="demo-ecard">
+          <div className="section-head"><span className="section-title">eCard</span></div>
+          <h3>{config.name}</h3><p>{config.demoCard.tagline}</p>
+          <p>{config.demoCard.hours}</p><small>{config.demoCard.contact}</small>
+          {config.demoCardHref && <p><a href={config.demoCardHref} style={{ color: '#00AAB4', fontWeight: 700 }}>Open eCard →</a></p>}
+        </div>}
+        {activeTab === 'details' && <div className="section">
+          <h2 className="section-title">Visit & contact</h2>
+          <div className="contact-actions">
+            {!config.detailsContent && [['phone',hrefs?.phone?.replace(/^tel:/,'')||'Call'],['website','Website'],['directions','Directions'],['reservation','Reserve a table'],['order','Order at your table']].filter(([key])=>hrefs?.[key]).map(([key,label])=><a key={key} href={hrefs![key]} target={hrefs![key].startsWith('http')?'_blank':undefined} rel="noopener noreferrer">{label} ↗</a>)}
+            {hrefs?.ecard && <a href={hrefs.ecard}>Restaurant eCard →</a>}
+            <button onClick={sharePlace}>{shareMessage || 'Share this place'}</button>
+          </div>
+          {!config.detailsContent && <div className="demo-links">{socialItems.map(item=><a key={item.key} href={hrefs![item.key]} target="_blank" rel="noopener noreferrer">{item.label}</a>)}</div>}
+          {!config.demo && Object.keys(config.deliveryLinks||{}).length>0 && <><h3>Order delivery</h3><div className="demo-links">{deliveryPlatforms.filter(p=>config.deliveryLinks?.[p.key]).map(p=><a key={p.key} href={config.deliveryLinks![p.key]} target="_blank" rel="noopener noreferrer">{p.label} ↗</a>)}</div></>}
+          {hrefs?.owner && <p><a className="text-link" href={hrefs.owner}>Manage or claim this place →</a></p>}
+        </div>}
+
+        {activeTab === 'details' && <div className="divider" />}
+        {activeTab === 'details' && <div className="section">
+          <h2 className="section-title">Location & hours</h2>
           <div className="info">
-            {config.info.map((r, i) => (
-              <button className={`info-row ${r.hours ? '' : 'static'}`} key={i} onClick={r.hours ? () => setHoursOpen(o => o === i ? null : i) : undefined}>
+            {config.info.filter(r=>!r.href?.startsWith('tel:')).map((r, i) => {
+              const content = <>
                 <span className="info-ic">{r.icon}</span>
                 <span className="info-mid">
-                  <span className="info-main" dangerouslySetInnerHTML={{ __html: r.main }} />
+                  <span className="info-main">{r.main}</span>
                   {r.hours && hoursOpen === i && <span className="hours">{r.hours.map(([d, h], j) => <span className="hr" key={j}><span>{d}</span><span>{h}</span></span>)}</span>}
                 </span>
                 {r.act && <span className="info-act">{r.act}</span>}
                 {r.hours && <span className={`chev ${hoursOpen === i ? 'up' : ''}`}>⌄</span>}
-              </button>
-            ))}
+              </>;
+              return r.href ? <a className="info-row" href={r.href} key={i} target={r.href.startsWith('http') ? '_blank' : undefined} rel={r.href.startsWith('http') ? 'noopener noreferrer' : undefined}>{content}</a>
+                : r.hours ? <button className="info-row" key={i} onClick={() => setHoursOpen(o => o === i ? null : i)}>{content}</button>
+                : <div className="info-row static" key={i}>{content}</div>;
+            })}
           </div>
-        </div>
+        </div>}
 
-        {config.reviews && config.reviews.length > 0 && (
-          <>
-            <div className="divider" />
-            <div className="section">
-              <div className="section-head"><span className="section-title">Recent reviews</span><span className="section-sub">{config.reviews.length * 47}+ total</span></div>
-              {config.reviews.map((r, i) => <Reviewer key={i} r={r} />)}
-              <button className="more" style={{ marginTop: 6 }}>Read all reviews</button>
-            </div>
-          </>
-        )}
       </div>
+      {selectedMedia && <div ref={mediaDialogRef} className="media-modal" role="dialog" aria-modal="true" aria-label={selectedMedia.caption} onClick={() => setSelectedMedia(null)}>
+        <button className="media-close" onClick={() => setSelectedMedia(null)} aria-label="Close media">×</button>
+        <div onClick={event => event.stopPropagation()}>{selectedMedia.type === 'video' ? <video src={selectedMedia.url} controls autoPlay playsInline /> : <img src={selectedMedia.url} alt={selectedMedia.caption} />}<p>{selectedMedia.caption}</p></div>
+      </div>}
 
       <div className="actionbar">
-        {hrefs?.directions
-          ? <a className="act ghost" href={hrefs.directions} target="_blank" rel="noopener noreferrer">Directions</a>
-          : <button className="act ghost">Directions</button>}
-        <button className="act primary" onClick={onAddReview}>{config.cta}</button>
+        {hasMenu && <button className="act ghost" onClick={()=>selectTab('menu')}>{config.type === 'Hotel' ? 'Rooms' : 'Tavvy Menu'}</button>}
+        <button className="act primary" onClick={onAddReview} disabled={!!config.reviewDisabledReason} aria-describedby={config.reviewDisabledReason ? 'review-disabled-reason' : undefined}>Add a review</button>
+        {config.reviewDisabledReason && <small id="review-disabled-reason" role="status">{config.reviewDisabledReason}</small>}
       </div>
 
       <style jsx>{`
+        .contact-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0; }
+        .contact-actions a,.contact-actions button { padding:14px; min-height:44px; border:1px solid ${t.border}; border-radius:12px; color:${t.text}; background:${t.soft}; text-decoration:none; font:inherit; font-size:14px; text-align:left; }
+        .text-link { color:${t.isDark ? '#4DDDE2' : '#00666C'}; font-weight:700; }
+        .support-title { font-size:14px; margin-top:20px; }
+        .screen :focus-visible { outline:3px solid #8A05BE; outline-offset:3px; }
         .screen { max-width: 480px; margin: 0 auto; min-height: 100vh; background: ${t.bg}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; position: relative; padding-bottom: 92px; }
         .hero { position: relative; width: 100%; height: 33vh; min-height: 232px; }
+        .hero:has(.hero-fallback) { height: 210px; min-height: 210px; }
         .hero-img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .hero-fallback { background: linear-gradient(135deg, #17013A 0%, #3a0a6b 50%, #8A05BE 100%); }
         .hero-scrim { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0) 32%, rgba(0,0,0,0.62) 100%); }
@@ -319,10 +446,54 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
         .meta { color: rgba(255,255,255,0.92); font-size: 14px; margin: 0; text-shadow: 0 1px 8px rgba(0,0,0,0.45); }
         .open { color: #4ADE80; font-weight: 700; }
         .sheet { position: relative; margin-top: -22px; background: ${t.sheet}; border-radius: 26px 26px 0 0; padding: 22px 20px 8px; box-shadow: 0 -8px 24px rgba(0,0,0,0.12); }
+        .review-summary { padding: 18px 0 5px; }
+        .summary-tile { min-height: 120px; display: flex; flex-direction: column; align-items: flex-start; gap: 7px; text-align: left; border: 1px solid ${t.border}; background: ${t.soft}; color: ${t.text}; border-radius: 16px; padding: 13px; cursor: pointer; font: inherit; }
+        .summary-tile.main { border-color: rgba(0,194,203,.42); background: rgba(0,194,203,.10); }
+        .summary-tile.headsup { border-color: rgba(245,166,35,.42); background: rgba(245,166,35,.10); }
+        .summary-tile.selected { outline: 2px solid #8A05BE; outline-offset: 1px; }
+        .summary-title { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 800; color: ${t.text2}; }
+        .summary-title span { font-size: 18px; }
+        .summary-tile strong { font-size: 15px; line-height: 1.2; }
+        .summary-tile small { color: ${t.text2}; font-size: 13px; line-height: 1.35; }
+        .summary-detail { margin-top: 11px; padding: 15px; border: 1px solid ${t.border}; border-radius: 14px; background: ${t.softer}; color: ${t.text}; }
+        .summary-detail p { margin: 8px 0; font-size: 14px; line-height: 1.45; }
+        .summary-detail small { color: ${t.text2}; }
+        .place-tabs { display: flex; overflow-x: auto; gap: 0; justify-content: space-between; margin: 18px -20px 0; padding: 0 20px; border-bottom: 1px solid ${t.border}; scrollbar-width: none; position: sticky; top: 0; z-index: 5; background: ${t.sheet}; }
+        .place-tabs::-webkit-scrollbar { display: none; }
+        .place-tab { flex: 0 1 auto; padding: 13px 2px 11px; border: 0; border-bottom: 3px solid transparent; background: none; color: ${t.text2}; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+        .place-tab.selected { color: ${t.text}; border-bottom-color: #8A05BE; }
+        .overview-buttons { display: grid; gap: 9px; margin-top: 14px; }
+        .overview-review-title { color: ${t.text}; font-size: 16px; margin: 18px 0 8px; }
+        .overview-buttons button, .overview-buttons a { text-align: left; border: 1px solid ${t.border}; background: ${t.soft}; color: ${t.text}; padding: 13px 14px; border-radius: 12px; font: inherit; font-weight: 700; cursor: pointer; text-decoration: none; }
+        .demo-banner { padding: 10px 12px; margin-bottom: 12px; border-radius: 10px; background: #FFF0C9; color: #573500; font-size: 11px; font-weight: 800; }
+        .decision { margin: 16px 0 8px; padding: 18px; background: ${t.soft}; border: 1px solid ${t.border}; border-radius: 18px; }
+        .decision .eyebrow { color: #00A6AE; font-size: 11px; font-weight: 900; letter-spacing: 1px; }
+        .decision h2 { margin: 5px 0 8px; color: ${t.text}; font-size: 23px; }
+        .decision p { margin: 0 0 9px; color: ${t.text}; font-size: 15px; line-height: 1.45; }
+        .decision .core-concerns { color: #A86500; font-weight: 700; }
+        .decision small { color: ${t.text2}; font-size: 12px; }
+        .decision-line { display: flex; flex-direction: column; gap: 3px; padding-top: 12px; margin-top: 12px; border-top: 1px solid ${t.divider}; color: ${t.text}; font-size: 14px; }
+        .decision-line strong { color: ${t.text2}; font-size: 12px; }
+        .media-section { padding: 18px 0 5px; }
+        .media-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; }
+        .media-scroll figure { flex: 0 0 164px; margin: 0; }
+        .media-open { border: 0; padding: 0; background: none; cursor: pointer; }
+        .media-scroll img, .media-scroll video { width: 164px; height: 120px; object-fit: cover; border-radius: 12px; background: ${t.soft}; }
+        .media-scroll figcaption { font-size: 11px; color: ${t.text2}; margin-top: 5px; }
+        .media-modal { position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,.92); display: flex; align-items: center; justify-content: center; padding: 18px; color: white; }
+        .media-modal > div { max-width: 900px; width: 100%; text-align: center; }
+        .media-modal img, .media-modal video { max-width: 100%; max-height: 76vh; object-fit: contain; }
+        .media-close { position: absolute; top: 16px; right: 18px; border: none; background: transparent; color: white; font-size: 34px; }
+        .demo-menu-row { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid ${t.divider}; color: ${t.text}; }
+        .demo-menu-row p { margin: 4px 0 0; font-size: 12px; color: ${t.text2}; }
+        .demo-ecard { padding: 18px; border: 1px solid #8A05BE; border-radius: 18px; background: ${t.soft}; color: ${t.text}; }
+        .demo-ecard h3 { margin: 4px 0; font-size: 22px; }
+        .demo-links { display: flex; flex-wrap: wrap; gap: 8px; }
+        .demo-links a, .demo-links button { color: #00AAB4; font-size: 13px; padding: 7px 10px; border: 1px solid #00AAB4; border-radius: 20px; text-decoration: none; background: transparent; cursor: pointer; }
         .quickbar { margin: 0 -20px; padding: 0 20px 16px; border-bottom: 1px solid ${t.divider}; }
         .bar-scroll { display: flex; gap: 16px; overflow-x: auto; scrollbar-width: none; }
         .bar-scroll::-webkit-scrollbar { display: none; }
-        .bi { flex: 0 0 auto; width: 54px; display: flex; flex-direction: column; align-items: center; gap: 7px; background: none; border: none; cursor: pointer; padding: 0; text-decoration: none; }
+        .bi { flex: 0 0 auto; width: 68px; display: flex; flex-direction: column; align-items: center; gap: 7px; background: none; border: none; cursor: pointer; padding: 0; text-decoration: none; }
         .bi-ic { width: 50px; height: 50px; border-radius: 50%; background: ${t.pillBg}; display: flex; align-items: center; justify-content: center; }
         .bi-lbl { font-size: 11px; font-weight: 600; color: ${t.text2}; white-space: nowrap; }
         .section { padding: 16px 0 16px; }
@@ -332,7 +503,7 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
         .review-note { font-size: 12.5px; color: ${t.text2}; margin: 0 0 14px; line-height: 1.4; }
         .learn { color: ${t.isDark ? '#3FE0E8' : '#00858C'}; font-weight: 700; text-decoration: none; }
         .grid { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; }
-        .more { width: 100%; margin-top: 14px; padding: 13px 0; border-radius: 12px; border: 1px solid ${t.border}; background: ${t.softer}; color: ${t.text}; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .more { width: 100%; margin-top: 14px; padding: 13px 0; border-radius: 12px; border: 1px solid ${t.border}; background: ${t.softer}; color: ${t.text}; font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
         .chev { transition: transform 0.2s ease; font-size: 16px; }
         .chev.up { transform: rotate(180deg); }
         .dropdown { margin-top: 14px; }
@@ -365,10 +536,10 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
         .hr { display: flex; justify-content: space-between; font-size: 13.5px; color: ${t.text2}; }
         .hr span:first-child { font-weight: 600; color: ${t.text}; }
         .divider { height: 1px; background: ${t.divider}; margin: 0; }
-        .actionbar { position: fixed; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto; display: flex; gap: 12px; padding: 14px 20px calc(14px + env(safe-area-inset-bottom)); background: ${t.isDark ? 'rgba(18,18,24,0.96)' : 'rgba(255,255,255,0.96)'}; backdrop-filter: blur(10px); border-top: 1px solid ${t.divider}; }
+        .actionbar { z-index: 20; position: fixed; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto; display: flex; gap: 12px; padding: 14px 20px calc(14px + env(safe-area-inset-bottom)); background: ${t.isDark ? 'rgba(18,18,24,0.96)' : 'rgba(255,255,255,0.96)'}; backdrop-filter: blur(10px); border-top: 1px solid ${t.divider}; }
         .act { flex: 1; padding: 15px 0; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; border: none; text-decoration: none; text-align: center; }
         .act.ghost { background: ${t.pillBg}; color: ${t.text}; }
-        .act.primary { background: #00C2CB; color: #fff; box-shadow: 0 6px 18px rgba(0,194,203,0.35); }
+        .act.primary { color:#07383A; background: #00C2CB; color: #07383A; box-shadow: 0 6px 18px rgba(0,194,203,0.35); }
       `}</style>
       <style jsx global>{`
         html, body { margin: 0; padding: 0; background: ${t.bg}; }

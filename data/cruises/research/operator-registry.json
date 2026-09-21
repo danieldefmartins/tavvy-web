@@ -1,0 +1,594 @@
+{
+  "scope": "Operating overnight ocean, river and expedition passenger cruise ships; excludes private charter-only and day-trip vessels",
+  "asOf": "2026-09-20",
+  "status": "incomplete_operator_discovery",
+  "worldwideComplete": false,
+  "operators": [
+    {
+      "id": "aida-cruises",
+      "name": "AIDA Cruises",
+      "officialWebsite": "https://aida.de",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "american-cruise-lines",
+      "name": "American Cruise Lines",
+      "officialWebsite": "https://www.americancruiselines.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "azamara",
+      "name": "Azamara",
+      "officialWebsite": "https://www.azamara.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "carnival-cruise-line",
+      "name": "Carnival Cruise Line",
+      "officialWebsite": "https://www.carnival.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "celebrity-cruises",
+      "name": "Celebrity Cruises",
+      "officialWebsite": "https://www.celebritycruises.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "celestyal-cruises",
+      "name": "Celestyal Cruises",
+      "officialWebsite": "https://americas.celestyalcruises.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "corazul-cruceros",
+      "name": "Corazul Cruceros",
+      "officialWebsite": "https://www.corazulcruceros.es",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "costa-cruises",
+      "name": "Costa Cruises",
+      "officialWebsite": "https://www.costacruises.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "crystal-cruises",
+      "name": "Crystal Cruises",
+      "officialWebsite": "https://www.crystalcruises.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "cunard",
+      "name": "Cunard",
+      "officialWebsite": "https://www.cunard.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "disney-cruise-line",
+      "name": "Disney Cruise Line",
+      "officialWebsite": "https://disneycruise.disney.go.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "emerald-cruises",
+      "name": "Emerald Cruises",
+      "officialWebsite": "https://www.emeraldcruises.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "explora-journeys",
+      "name": "Explora Journeys",
+      "officialWebsite": "https://explorajourneys.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "holland-america-line",
+      "name": "Holland America Line",
+      "officialWebsite": "https://www.hollandamerica.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "msc-cruises",
+      "name": "MSC Cruises",
+      "officialWebsite": "https://www.msccruisesusa.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "mystic-cruises-atlas-ocean-voyages",
+      "name": "Mystic Cruises / Atlas Ocean Voyages",
+      "officialWebsite": "https://www.mysticcruises.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "norwegian-cruise-line",
+      "name": "Norwegian Cruise Line",
+      "officialWebsite": "https://www.ncl.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "oceania-cruises",
+      "name": "Oceania Cruises",
+      "officialWebsite": "https://www.oceaniacruises.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "pearl-seas-cruises",
+      "name": "Pearl Seas Cruises",
+      "officialWebsite": "https://www.pearlseascruises.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "ponant-explorations",
+      "name": "Ponant Explorations",
+      "officialWebsite": "https://en.ponant.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "princess-cruises",
+      "name": "Princess Cruises",
+      "officialWebsite": "https://www.princess.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "quark-expeditions",
+      "name": "Quark Expeditions",
+      "officialWebsite": "https://www.quarkexpeditions.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "regent-seven-seas-cruises",
+      "name": "Regent Seven Seas Cruises",
+      "officialWebsite": "https://www.rssc.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "royal-caribbean-international",
+      "name": "Royal Caribbean International",
+      "officialWebsite": "https://www.royalcaribbean.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "scenic-luxury-cruises-and-tours",
+      "name": "Scenic Luxury Cruises and Tours",
+      "officialWebsite": "https://www.scenicusa.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "seabourn",
+      "name": "Seabourn",
+      "officialWebsite": "https://www.seabourn.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "seadream-yacht-club",
+      "name": "SeaDream Yacht Club",
+      "officialWebsite": "https://seadream.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "silversea-cruises",
+      "name": "Silversea Cruises",
+      "officialWebsite": "https://www.silversea.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "tui-cruises",
+      "name": "TUI Cruises",
+      "officialWebsite": "https://www.meinschiff.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "virgin-voyages",
+      "name": "Virgin Voyages",
+      "officialWebsite": "https://www.virginvoyages.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "windstar-cruises",
+      "name": "Windstar Cruises",
+      "officialWebsite": "https://www.windstarcruises.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "66-expeditions",
+      "name": "66 Expeditions",
+      "officialWebsite": "https://www.66expeditions.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "ambassador-cruise-line",
+      "name": "Ambassador Cruise Line",
+      "officialWebsite": "https://www.ambassadorcruiseline.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "aurora-expeditions",
+      "name": "Aurora Expeditions",
+      "officialWebsite": "https://www.auroraexpeditions.com.au",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "fred-olsen-cruise-lines",
+      "name": "Fred. Olsen Cruise Lines",
+      "officialWebsite": "https://www.fredolsencruises.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "hapag-lloyd-cruises",
+      "name": "Hapag-Lloyd Cruises",
+      "officialWebsite": "https://www.hl-cruises.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "hx-expeditions",
+      "name": "HX Expeditions",
+      "officialWebsite": "https://www.travelhx.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "marella-cruises",
+      "name": "Marella Cruises",
+      "officialWebsite": "https://www.tui.co.uk",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "p-o-cruises-uk",
+      "name": "P&O Cruises UK",
+      "officialWebsite": "https://www.pocruises.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "polar-latitudes-expeditions",
+      "name": "Polar Latitudes Expeditions",
+      "officialWebsite": "https://polar-latitudes.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "saga",
+      "name": "Saga",
+      "officialWebsite": "https://travel.saga.co.uk",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "swan-hellenic",
+      "name": "Swan Hellenic",
+      "officialWebsite": "https://www.swanhellenic.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "coral-expeditions",
+      "name": "Coral Expeditions",
+      "officialWebsite": "https://www.coralexpeditions.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "heritage-expeditions",
+      "name": "Heritage Expeditions",
+      "officialWebsite": "https://www.heritage-expeditions.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "paul-gauguin-cruises",
+      "name": "Paul Gauguin Cruises",
+      "officialWebsite": "https://www.pgcruises.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "a-rosa",
+      "name": "A-ROSA",
+      "officialWebsite": "https://www.arosa-cruises.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "apt-luxury-travel",
+      "name": "APT Luxury Travel",
+      "officialWebsite": "https://www.aptouring.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "croisieurope",
+      "name": "CroisiEurope",
+      "officialWebsite": "https://www.croisieuroperivercruises.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "riverside-luxury-cruises",
+      "name": "Riverside Luxury Cruises",
+      "officialWebsite": "https://riverside-cruises.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "trafalgar-river-cruises",
+      "name": "Trafalgar River Cruises",
+      "officialWebsite": "https://www.trafalgar.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "amadeus-river-cruises",
+      "name": "Amadeus River Cruises",
+      "officialWebsite": "https://www.amadeus-rivercruises.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "riviera-river-cruises",
+      "name": "Riviera River Cruises",
+      "officialWebsite": "https://www.rivierarivercruises.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "viva-cruises",
+      "name": "VIVA Cruises",
+      "officialWebsite": "https://www.viva-cruises.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "amawaterways",
+      "name": "AmaWaterways",
+      "officialWebsite": "https://www.amawaterways.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "avalon-waterways",
+      "name": "Avalon Waterways",
+      "officialWebsite": "https://www.avalonwaterways.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "century-cruises",
+      "name": "Century Cruises",
+      "officialWebsite": "https://centurycruise.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "uniworld",
+      "name": "Uniworld",
+      "officialWebsite": "https://www.uniworld.com",
+      "discoveredFrom": "https://cruising.org/CLIA-cruise-lines",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "not_started",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    },
+    {
+      "id": "viking",
+      "name": "Viking",
+      "officialWebsite": "https://www.vikingcruises.com",
+      "discoveredFrom": "https://www.vikingcruises.com/oceans/ships",
+      "checkedOn": "2026-09-20",
+      "fleetCoverage": "in_progress",
+      "candidateShips": null,
+      "verifiedOperatingShips": 0
+    }
+  ],
+  "coverageNotes": [
+    "CLIA membership is a starting source, not an exhaustive worldwide operator registry.",
+    "Operating status, vessel names, core facts and duplicate brand relationships still require individual verification.",
+    "Vessel marketing as a yacht does not exclude a publicly bookable overnight cruise.",
+    "Regional river fleets, Galapagos operators and nonmember operators require further discovery."
+  ]
+}

@@ -1,3 +1,6 @@
+import { getOrderingContext, getOrder, submitOrder, orderEstimate, orderRequestKey, parseTableQR, OrderingContext } from '../../../lib/orderService';
+import { isDemoRestaurant, demoMenu, demoCategories, demoItems, readDemoCategories, recordDemoEvent, DEMO_HOME, DEMO_ORDER, DEMO_ORDER_KEY, DEMO_GUIDE } from '../../../lib/demoRestaurant';
+import DemoBanner from '../../../components/demo/DemoBanner';
 /**
  * Customer Ordering Page
  * Path: pages/place/[id]/order.tsx
@@ -9,7 +12,7 @@
  * - Add to cart with "+" buttons
  * - Floating cart button with item count
  * - Cart drawer with quantity controls, item notes, special requests
- * - Place order → inserts into orders + order_items tables
+ * - Place order → authenticated atomic order RPC
  * - Real-time order status via Supabase realtime
  * - Mobile-first, dark/light theme support
  */
@@ -57,6 +60,7 @@ interface Order {
   status: string;
   created_at: string;
   total: number;
+  cancel_reason?: string | null;
 }
 
 interface StatusUpdate {
@@ -95,7 +99,15 @@ const STATUS_ICONS: Record<string, string> = {
 export default function OrderPage() {
   const router = useRouter();
   const { id, table } = router.query;
-  const tableNumber = table as string;
+  const isDemo = isDemoRestaurant(id);
+  const placeHref = isDemo ? DEMO_HOME : `/app/place/${id}`;
+  const [tableNumber, setTableNumber] = useState('');
+  useEffect(() => { if (typeof table === 'string') setTableNumber(table); }, [table]);
+  const [orderingContext, setOrderingContext] = useState<OrderingContext | null>(null);
+  const [orderError, setOrderError] = useState('');
+  const [signedIn, setSignedIn] = useState(false);
+  const requestRef = useRef<{ fingerprint: string; key: string } | null>(null);
+  const postingRef = useRef(false);
 
   // Menu state
   const [placeName, setPlaceName] = useState('');
@@ -105,6 +117,7 @@ export default function OrderPage() {
 
   // Cart state
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [cartHydrated,setCartHydrated]=useState(false);
   const [cartOpen, setCartOpen] = useState(false);
   const [specialRequests, setSpecialRequests] = useState('');
   const [customerName, setCustomerName] = useState('');
@@ -131,8 +144,18 @@ export default function OrderPage() {
   }, [id]);
 
   const loadMenu = async (placeId: string) => {
-    setLoading(true);
+    setLoading(true);setCartHydrated(false);setCart([]);setOrderError('');
+    if (isDemoRestaurant(placeId)) {
+      const demoCategories = readDemoCategories();
+      const demoItems = demoCategories.flatMap(c => c.items.map(i => ({ ...i, category_id: c.id, category_name: c.name, meal_period: c.meal_period })));
+      setPlaceName('Trattoria Tavvy'); setCategories(demoCategories); setOrderingContext({enabled:true,configured:true,ready:true,tableValid:true,tableNumber:'7',taxBasisPoints:0}); setLoading(false); return;
+    }
     try {
+      const { data: { user } } = await supabase.auth.getUser(); setSignedIn(!!user);
+      // Existing order tracking remains available even when new ordering is paused.
+      try { const orderId=sessionStorage.getItem(`tavvy:active-order:${placeId}`);if(orderId&&user){const savedOrder=await getOrder(orderId);setOrder(savedOrder);setOrderView(true);subscribeToOrder(savedOrder.id)} } catch {}
+      const context = await getOrderingContext(placeId, typeof table === 'string' ? table : undefined); setOrderingContext(context);
+      if (!context.ready) setOrderError('Online ordering is not available. Please ask the restaurant.');
       const { data: placeData } = await supabase
         .from('places')
         .select('name')
@@ -145,6 +168,7 @@ export default function OrderPage() {
         .from('menus')
         .select('id')
         .eq('place_id', placeId)
+        .eq('is_active', true).order('created_at',{ascending:false}).limit(1)
         .maybeSingle();
 
       if (!menuData) {
@@ -164,6 +188,7 @@ export default function OrderPage() {
           .from('menu_items')
           .select('id, name, description, price, price_label, image_url, is_popular, is_new, dietary_tags, calories, category_id')
           .in('category_id', categoryIds)
+          .eq('is_available', true).not('price', 'is', null)
           .order('sort_order', { ascending: true });
 
         const categoriesWithItems: MenuCategory[] = categoriesData.map((cat: any) => ({
@@ -172,9 +197,18 @@ export default function OrderPage() {
         }));
 
         setCategories(categoriesWithItems);
+        try {
+          const saved = JSON.parse(sessionStorage.getItem(`tavvy:order-cart:${placeId}`) || 'null');
+          if (Array.isArray(saved?.cart)) setCart(saved.cart.flatMap((line:any) => { const item=(itemsData||[]).find((row:any)=>row.id===line.menuItem?.id); return item ? [{ menuItem:item,quantity:Math.min(20,Math.max(1,Number(line.quantity)||1)),notes:String(line.notes||'').slice(0,500) }] : []; }));
+          if (saved?.specialRequests) setSpecialRequests(String(saved.specialRequests).slice(0,1000));
+          if(saved?.tableNumber && !table)setTableNumber(String(saved.tableNumber).slice(0,32));
+          if(saved?.customerName)setCustomerName(String(saved.customerName).slice(0,80));
+        } catch {}
+        setCartHydrated(true);
+
       }
     } catch (error) {
-      console.error('[OrderPage] Error loading menu:', error);
+      setOrderError(error instanceof Error ? error.message : 'The menu could not be loaded. Please retry.');
     } finally {
       setLoading(false);
     }
@@ -188,7 +222,7 @@ export default function OrderPage() {
       if (existing) {
         return prev.map(ci =>
           ci.menuItem.id === item.id
-            ? { ...ci, quantity: ci.quantity + 1 }
+            ? { ...ci, quantity: Math.min(20,ci.quantity + 1) }
             : ci
         );
       }
@@ -202,7 +236,7 @@ export default function OrderPage() {
     setCart(prev => {
       const updated = prev.map(ci => {
         if (ci.menuItem.id === itemId) {
-          const newQty = ci.quantity + delta;
+          const newQty = Math.min(20,ci.quantity + delta);
           return newQty <= 0 ? null : { ...ci, quantity: newQty };
         }
         return ci;
@@ -219,11 +253,12 @@ export default function OrderPage() {
     );
   }, []);
 
-  const cartTotal = cart.reduce((sum, ci) => sum + (ci.menuItem.price || 0) * ci.quantity, 0);
+  const estimate = orderEstimate(cart.map(ci => ({ price:ci.menuItem.price,quantity:ci.quantity })), orderingContext?.taxBasisPoints ?? null);
+  const cartTotal = estimate.subtotal;
   const cartCount = cart.reduce((sum, ci) => sum + ci.quantity, 0);
-  const taxRate = 0.0875; // 8.75% typical
-  const taxAmount = cartTotal * taxRate;
-  const orderTotal = cartTotal + taxAmount;
+  const taxAmount = estimate.tax ?? 0;
+  const orderTotal = estimate.total ?? cartTotal;
+  useEffect(() => { if (cartHydrated && !isDemo && id && !loading) { try { sessionStorage.setItem(`tavvy:order-cart:${id}`,JSON.stringify({cart,specialRequests,tableNumber,customerName})); } catch {} } }, [cart,specialRequests,tableNumber,customerName,cartHydrated,id,isDemo,loading]);
 
   // ─── QR Scan Verification ───────────────────────────────────────────────────
 
@@ -267,42 +302,25 @@ export default function OrderPage() {
               if (codes.length > 0) {
                 const url = codes[0].rawValue;
                 // Verify it contains our place ID or table route
-                if (url.includes(id as string) || url.includes('/table/')) {
+                const scannedTable = parseTableQR(url, String(id));
+                if (scannedTable) {
+                  setTableNumber(scannedTable);
                   scanning = false;
                   stopCamera();
                   setShowQrScan(false);
                   setQrVerified(true);
-                  placeOrder();
+                  setOrderError('');
                 }
               } else if (scanning) {
                 requestAnimationFrame(checkQR);
               }
             }).catch(() => { if (scanning) requestAnimationFrame(checkQR); });
-          } else {
-            // No BarcodeDetector — allow manual fallback after 3 seconds
-            setTimeout(() => {
-              if (scanning) {
-                // Auto-verify if they already have the table number from URL
-                if (tableNumber) {
-                  scanning = false;
-                  stopCamera();
-                  setShowQrScan(false);
-                  setQrVerified(true);
-                  placeOrder();
-                }
-              }
-            }, 3000);
-          }
+          } else { setOrderError('Camera scanning is unavailable. Enter your table number below.'); setShowQrScan(false); scanning=false;stopCamera(); }
+
         };
 
         requestAnimationFrame(checkQR);
-      } catch (err) {
-        // Camera not available — skip verification if table number exists
-        if (tableNumber) {
-          setShowQrScan(false);
-          placeOrder();
-        }
-      }
+      } catch (err) { setShowQrScan(false); setOrderError('Camera access is unavailable. Enter your table number below.'); }
     };
 
     startCamera();
@@ -311,53 +329,31 @@ export default function OrderPage() {
 
   // ─── Place Order ────────────────────────────────────────────────────────────
 
-  const placeOrder = async () => {
-    if (cart.length === 0 || !id) return;
-    setPlacingOrder(true);
-
+  const placeOrder = async (tableOverride?: string) => {
+    if (cart.length === 0 || !id || postingRef.current) return;
+    postingRef.current=true; setPlacingOrder(true); setOrderError('');
+    if (isDemo) {
+      recordDemoEvent('orders');
+      const demoOrder = { id: 'demo-order', order_number: 'TAVVY-007', status: 'pending', created_at: new Date().toISOString(), total: orderTotal };
+      try { localStorage.setItem(DEMO_ORDER_KEY, JSON.stringify({ ...demoOrder, items: cart.map(c => ({ name: c.menuItem.name, quantity: c.quantity, notes: c.notes })), specialRequests, customerName })); } catch {}
+      setOrder(demoOrder); setStatusHistory([{ status: 'pending', timestamp: demoOrder.created_at }]);
+      setOrderView(true); setCartOpen(false); setCart([]); setSpecialRequests(''); setPlacingOrder(false); postingRef.current=false; return;
+    }
     try {
-      // Get current user (optional)
-      const { data: { user } } = await supabase.auth.getUser();
-
-      // Generate order number
-      const orderNumber = `${Date.now().toString(36).toUpperCase()}`;
-
-      // Insert order
-      const { data: orderData, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          place_id: id as string,
-          table_number: tableNumber || null,
-          customer_id: user?.id || null,
-          customer_name: customerName || null,
-          order_number: orderNumber,
-          status: 'pending',
-          subtotal: cartTotal,
-          tax: taxAmount,
-          total: orderTotal,
-          special_requests: specialRequests || null,
-        })
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
-
-      // Insert order items
-      const orderItems = cart.map(ci => ({
-        order_id: orderData.id,
-        menu_item_id: ci.menuItem.id,
-        name: ci.menuItem.name,
-        price: ci.menuItem.price || 0,
-        quantity: ci.quantity,
-        notes: ci.notes || null,
-      }));
-
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
-
-      if (itemsError) throw itemsError;
-
+      if (!signedIn) { void router.push(`/app/login?returnUrl=${encodeURIComponent(router.asPath)}`); return; }
+      const selectedTable=tableOverride || tableNumber;
+      const context=await getOrderingContext(String(id),selectedTable);setOrderingContext(context);
+      if (!context.ready || !context.tableValid) throw new Error(context.ready ? 'Confirm your active table number with the restaurant.' : 'Ordering is unavailable. Please ask the restaurant.');
+      const draft={placeId:String(id),tableNumber:selectedTable,items:cart.map(ci=>({menu_item_id:ci.menuItem.id,quantity:ci.quantity,notes:ci.notes})),notes:specialRequests,customerName,expectedTotal:orderTotal};
+      const fingerprint=JSON.stringify(draft);
+      if (requestRef.current?.fingerprint!==fingerprint) {
+        let saved:any=null;try{saved=JSON.parse(sessionStorage.getItem(`tavvy:order-request:${id}`)||'null')}catch{}
+        requestRef.current=saved?.fingerprint===fingerprint?saved:{fingerprint,key:orderRequestKey()};
+        try{sessionStorage.setItem(`tavvy:order-request:${id}`,JSON.stringify(requestRef.current))}catch{}
+      }
+      const orderData=await submitOrder(draft,requestRef.current!.key);
+      try{sessionStorage.setItem(`tavvy:active-order:${id}`,orderData.id);sessionStorage.removeItem(`tavvy:order-request:${id}`)}catch{}
+      requestRef.current=null;
       // Set order and switch to confirmation view
       setOrder(orderData);
       setStatusHistory([{ status: 'pending', timestamp: orderData.created_at }]);
@@ -370,9 +366,9 @@ export default function OrderPage() {
       subscribeToOrder(orderData.id);
     } catch (error) {
       console.error('[OrderPage] Error placing order:', error);
-      alert('Failed to place order. Please try again.');
+      setOrderError(error instanceof Error ? error.message : 'Unable to send this order. Retry with the same cart.');
     } finally {
-      setPlacingOrder(false);
+      setPlacingOrder(false);postingRef.current=false;
     }
   };
 
@@ -395,7 +391,7 @@ export default function OrderPage() {
         },
         (payload: any) => {
           const newStatus = payload.new.status;
-          setOrder(prev => prev ? { ...prev, status: newStatus } : prev);
+          setOrder(prev => prev ? { ...prev, status: newStatus, cancel_reason: payload.new.cancel_reason } : prev);
           setStatusHistory(prev => {
             if (prev.find(s => s.status === newStatus)) return prev;
             return [...prev, { status: newStatus, timestamp: new Date().toISOString() }];
@@ -415,6 +411,8 @@ export default function OrderPage() {
       }
     };
   }, []);
+
+  useEffect(() => { if (isDemo || !order?.id) return; const timer=setInterval(()=>{getOrder(order.id).then(setOrder).catch(()=>setOrderError('Status could not refresh. We will keep trying.'));},15000); return ()=>clearInterval(timer); }, [isDemo,order?.id]);
 
   // ─── Filters ────────────────────────────────────────────────────────────────
 
@@ -442,7 +440,7 @@ export default function OrderPage() {
   if (loading) {
     return (
       <>
-        <Head><title>Loading... | Tavvy</title></Head>
+        <Head>{isDemo && <meta name="robots" content="noindex,nofollow" />}<title>Loading... | Tavvy</title></Head>
         <style jsx global>{orderStyles}</style>
         <div className="order-loading">
           <div className="order-spinner" />
@@ -459,13 +457,14 @@ export default function OrderPage() {
 
     return (
       <>
-        <Head><title>Order #{order.order_number} | Tavvy</title></Head>
+        <Head>{isDemo && <meta name="robots" content="noindex,nofollow" />}<title>Order #{order.order_number} | Tavvy</title></Head>
         <style jsx global>{orderStyles}</style>
-        <div className="order-page">
+        <div className="order-page">{isDemo && <DemoBanner />}{!isDemo && orderError && <p role="alert" style={{padding:16}}>{orderError}</p>}
           <div className="order-confirmation">
             <div className="order-conf-header">
               <div className="order-conf-emoji">🎉</div>
-              <h1>Order sent to kitchen!</h1>
+              <h1>{isDemo ? 'Your demo order is ready to follow' : order.status==='cancelled' ? 'Order cancelled' : 'Order received'}</h1>
+              {!isDemo && <p>{order.status==='cancelled' ? order.cancel_reason : 'Wait for restaurant confirmation. Payment is handled by the restaurant.'}</p>}
               <p className="order-conf-number">Order #{order.order_number}</p>
               {tableNumber && <span className="order-table-badge">Table {tableNumber}</span>}
             </div>
@@ -496,12 +495,21 @@ export default function OrderPage() {
               })}
             </div>
 
+            {isDemo && <div style={{ padding: 16, borderRadius: 16, background: '#eee5f5', color: '#271139', marginBottom: 20 }}>
+              <p style={{ margin: '0 0 12px' }}>Presentation mode · Follow an order from the table to the kitchen. No order or payment is sent.</p>
+              {currentStatusIdx < ORDER_STATUSES.length - 1 && <button className="order-new-btn" onClick={() => {
+                const status = ORDER_STATUSES[currentStatusIdx + 1];
+                setOrder({ ...order, status }); setStatusHistory(prev => [...prev, { status, timestamp: new Date().toISOString() }]);
+                try { const stored = JSON.parse(localStorage.getItem(DEMO_ORDER_KEY) || '{}'); localStorage.setItem(DEMO_ORDER_KEY, JSON.stringify({ ...stored, status })); } catch {}
+              }}>Show next step: {STATUS_LABELS[ORDER_STATUSES[currentStatusIdx + 1]]}</button>}
+              <a href={DEMO_GUIDE} style={{ display: 'block', marginTop: 14, color: '#7905a8' }}>Explore the restaurant owner experience →</a>
+            </div>}
             <div className="order-conf-total">
               <span>Total</span>
               <span>${order.total.toFixed(2)}</span>
             </div>
 
-            <button className="order-new-btn" onClick={() => { setOrderView(false); setOrder(null); }}>
+            <button className="order-new-btn" onClick={() => { setOrderView(false); setOrder(null); try{sessionStorage.removeItem(`tavvy:active-order:${id}`)}catch{} }}>
               Order More Items
             </button>
           </div>
@@ -514,13 +522,13 @@ export default function OrderPage() {
 
   return (
     <>
-      <Head>
+      <Head>{isDemo && <meta name="robots" content="noindex,nofollow" />}
         <title>{placeName ? `Order at ${placeName}` : 'Order'} | Tavvy</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
       </Head>
       <style jsx global>{orderStyles}</style>
 
-      <div className="order-page">
+      <div className="order-page">{isDemo && <DemoBanner />}{!isDemo && orderError && <p role="alert" style={{padding:16}}>{orderError}</p>}
         {/* Header */}
         <div className="order-header">
           <div className="order-header-info">
@@ -644,7 +652,8 @@ export default function OrderPage() {
                         type="text"
                         className="order-cart-item-notes"
                         placeholder="Add note (e.g. no onions)"
-                        value={ci.notes}
+                        maxLength={500}
+                      value={ci.notes}
                         onChange={e => updateItemNotes(ci.menuItem.id, e.target.value)}
                       />
                     </div>
@@ -653,9 +662,13 @@ export default function OrderPage() {
               </div>
 
               <div className="order-cart-extras">
+                {!isDemo && <label>Table number<input aria-label="Table number" maxLength={32} value={tableNumber} onChange={event=>setTableNumber(event.target.value)} /><button type="button" onClick={()=>setShowQrScan(true)}>Scan table QR</button></label>}
+                {orderError && <p role="alert">{orderError} {!isDemo&&<button type="button" onClick={()=>void loadMenu(String(id))}>Refresh menu and total</button>}</p>}
+                {!isDemo && <p>Menu prices and tax are checked when you submit. Pay the restaurant directly.</p>}
                 <textarea
                   className="order-special-requests"
                   placeholder="Special requests for the kitchen..."
+                  maxLength={1000}
                   value={specialRequests}
                   onChange={e => setSpecialRequests(e.target.value)}
                   rows={2}
@@ -664,6 +677,7 @@ export default function OrderPage() {
                   type="text"
                   className="order-customer-name"
                   placeholder="Your name (optional)"
+                  maxLength={80}
                   value={customerName}
                   onChange={e => setCustomerName(e.target.value)}
                 />
@@ -676,20 +690,20 @@ export default function OrderPage() {
                 </div>
                 <div className="order-cart-total-row">
                   <span>Tax</span>
-                  <span>${taxAmount.toFixed(2)}</span>
+                  <span>{estimate.tax===null?'Not configured':`$${taxAmount.toFixed(2)}`}</span>
                 </div>
                 <div className="order-cart-total-row total">
                   <span>Total</span>
-                  <span>${orderTotal.toFixed(2)}</span>
+                  <span>{estimate.total===null?'Unavailable':`$${orderTotal.toFixed(2)}`}</span>
                 </div>
               </div>
 
               <button
                 className="order-place-btn"
-                onClick={() => setShowQrScan(true)}
-                disabled={placingOrder || cart.length === 0}
+                onClick={() => void placeOrder()}
+                disabled={placingOrder || cart.length === 0 || (!isDemo && !orderingContext?.ready)}
               >
-                {placingOrder ? 'Placing Order...' : `Place Order — $${orderTotal.toFixed(2)}`}
+                {placingOrder ? 'Sending order...' : !isDemo && !signedIn ? 'Sign in to place order' : `Place Order — $${orderTotal.toFixed(2)}`}
               </button>
             </div>
           </div>
@@ -709,7 +723,7 @@ export default function OrderPage() {
               </div>
               <button
                 className="qr-scan-manual-btn"
-                onClick={() => { setShowQrScan(false); stopCamera(); placeOrder(); }}
+                onClick={() => { setShowQrScan(false); stopCamera(); }}
               >
                 Enter table number manually instead
               </button>
@@ -1033,13 +1047,14 @@ const orderStyles = `
   .order-cart-drawer {
     width: 100%;
     max-width: 640px;
-    max-height: 85vh;
+    max-height: 85dvh;
     background: #fff;
     border-radius: 20px 20px 0 0;
     display: flex;
     flex-direction: column;
     animation: order-drawer-in 0.3s ease;
-    overflow: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   @keyframes order-drawer-in {
     from { transform: translateY(100%); }
@@ -1075,8 +1090,8 @@ const orderStyles = `
 
   /* Cart Items */
   .order-cart-items {
-    flex: 1;
-    overflow-y: auto;
+    flex: 0 0 auto;
+    overflow: visible;
     padding: 16px 24px;
     -webkit-overflow-scrolling: touch;
   }
@@ -1139,6 +1154,7 @@ const orderStyles = `
   }
   .order-cart-item-notes {
     flex: 1;
+    min-width: 0;
     border: 1px solid #eee;
     border-radius: 8px;
     padding: 8px 12px;

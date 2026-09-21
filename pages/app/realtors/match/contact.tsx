@@ -16,7 +16,7 @@ export default function MatchContactScreen() {
   const isValid = form.name && form.email && form.phone && form.location;
 
   const handleSubmit = async () => {
-    if (!isValid) return;
+    if (!isValid || loading) return;
     setLoading(true);
     try {
       const matchData = {
@@ -28,8 +28,10 @@ export default function MatchContactScreen() {
         contact_phone: form.phone,
         status: 'pending',
       };
-      await supabase.from('realtor_match_requests').insert([matchData]);
-      sessionStorage.clear();
+      const { error } = await supabase.from('realtor_match_requests').insert([matchData]);
+      if (error) throw error;
+      sessionStorage.removeItem('match_goal');
+      sessionStorage.removeItem('match_property_type');
       router.push('/app/realtors/match/complete', undefined, { locale });
     } catch (error) {
       alert('Failed to submit. Please try again.');

@@ -1,0 +1,7 @@
+[
+ {"operator":"Royal Caribbean International","kind":"ocean","url":"https://www.royalcaribbean.com/cruise-ships","ship_path":"^/cruise-ships/[^/]+/?$"},
+ {"operator":"MSC Cruises","kind":"ocean","url":"https://www.msccruisesusa.com/cruise/ships","ship_path":"^/cruise/ships/msc-[^/]+/?$"},
+ {"operator":"Viking","kind":"ocean","url":"https://www.vikingcruises.com/oceans/ships","ship_path":"^/oceans/ships/viking-[^/]+(?:\\.html)?$"},
+ {"operator":"Viking","kind":"river","url":"https://www.vikingrivercruises.com/ships/index.html","ship_path":"^/ships/[^/]+(?:\\.html)?$"},
+ {"operator":"Viking","kind":"expedition","url":"https://www.vikingcruises.com/expeditions/ships/index.html","ship_path":"^/expeditions/ships/viking-[^/]+(?:\\.html)?$"}
+]

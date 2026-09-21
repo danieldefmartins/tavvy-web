@@ -1,356 +1,50 @@
-/**
- * RV & Camping Browse Screen
- * Find RV parks, campgrounds, and outdoor destinations
- */
-
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useThemeContext } from '../../contexts/ThemeContext';
-import AppLayout from '../../components/AppLayout';
-import PlaceCard from '../../components/PlaceCard';
-import { supabase } from '../../lib/supabaseClient';
-import { spacing, borderRadius } from '../../constants/Colors';
-import { FiSearch, FiMapPin, FiFilter } from 'react-icons/fi';
-import { UnifiedHeader } from '../../components/UnifiedHeader';
-import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
-
-interface Place {
-  id: string;
-  name: string;
-  tavvy_category?: string;
-  tavvy_subcategory?: string;
-  address_line1?: string;
-  city?: string;
-  region?: string;
-  photos?: string[];
-  signals?: any[];
-  latitude?: number;
-  longitude?: number;
-}
-
-const CATEGORIES = [
-  { id: 'all', name: 'All', icon: '🏕️' },
-  { id: 'rv-parks', name: 'RV Parks', icon: '🚐' },
-  { id: 'campgrounds', name: 'Campgrounds', icon: '⛺' },
-  { id: 'glamping', name: 'Glamping', icon: '🏠' },
-  { id: 'national-parks', name: 'National Parks', icon: '🌲' },
-  { id: 'beaches', name: 'Beaches', icon: '🏖️' },
-];
+import AppLayout from '../../components/AppLayout';
+import ToolHeader from '../../components/ToolHeader';
+import PlaceCard from '../../components/PlaceCard';
+import { useThemeContext } from '../../contexts/ThemeContext';
+import { useReleaseCopy } from '../../hooks/useReleaseCopy';
+import { useRVCatalog } from '../../hooks/useRVCatalog';
+import { RV_CATEGORIES, RVCategory, isRVCategory, rvPlaceCategory, rvPlacePhoto } from '../../lib/rvCategories';
 
 export default function RVCampingScreen() {
-  const router = useRouter();
-  const { locale } = router;
-  const { theme } = useThemeContext();
-  const [places, setPlaces] = useState<Place[]>([]);
-  const { t } = useTranslation('common');
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-
+  const router = useRouter(), { theme } = useThemeContext(), copy = useReleaseCopy();
+  const [query, setQuery] = useState(''), [category, setCategory] = useState<RVCategory>('all');
   useEffect(() => {
-    fetchPlaces();
-  }, [selectedCategory]);
-
-  const fetchPlaces = async () => {
-    setLoading(true);
-    try {
-      let query = supabase
-        .from('places')
-        .select('*, signals(*)')
-        .eq('tavvy_category', 'rv_camping')
-        .limit(50);
-
-      const { data, error } = await query;
-
-      if (!error) {
-        setPlaces(data || []);
-      }
-    } catch (error) {
-      console.error('Error fetching places:', error);
-    } finally {
-      setLoading(false);
-    }
+    if (!router.isReady) return;
+    setQuery(typeof router.query.q === 'string' ? router.query.q.slice(0,120) : '');
+    setCategory(isRVCategory(router.query.category) ? router.query.category : 'all');
+  }, [router.isReady, router.query.q, router.query.category]);
+  const catalog = useRVCatalog(category, query);
+  const change = (nextQuery: string, nextCategory: RVCategory) => {
+    setQuery(nextQuery); setCategory(nextCategory);
+    void router.replace({ pathname: router.pathname, query: { ...(nextQuery ? {q:nextQuery} : {}), ...(nextCategory !== 'all' ? {category:nextCategory} : {}) } }, undefined, { shallow: true, scroll: false });
   };
-
-  const filteredPlaces = places.filter(place =>
-    place.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    place.city?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  return (
-    <div style={{ display: 'contents' }}>
-      <Head>
-        <title>RV & Camping | TavvY</title>
-        <meta name="description" content="Find RV parks, campgrounds, and outdoor destinations on TavvY" />
-      </Head>
-
-      <AppLayout>
-        <div className="rv-screen" style={{ backgroundColor: theme.background }}>
-          {/* Standard App Header */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              paddingLeft: spacing.md,
-              paddingRight: spacing.md,
-              paddingTop: spacing.md,
-              paddingBottom: spacing.md,
-              height: '56px',
-              backgroundColor: theme.background,
-              borderBottomWidth: 1,
-              borderBottomColor: theme.border,
-              borderBottomStyle: 'solid',
-            }}
-          >
-            {/* Back Arrow */}
-            <button
-              onClick={() => router.back()}
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: spacing.sm,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: theme.text,
-              }}
-              aria-label="Go back"
-            >
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 12H5M12 19l-7-7 7-7" />
-              </svg>
-            </button>
-
-            {/* Page Title - Center */}
-            <h1
-              style={{
-                flex: 1,
-                textAlign: 'center',
-                fontSize: '18px',
-                fontWeight: '600',
-                color: theme.text,
-                margin: 0,
-                padding: `0 ${spacing.md}`,
-              }}
-            >
-              RV & Camping
-            </h1>
-
-            {/* Placeholder for alignment */}
-            <div style={{ width: '40px' }} />
-          </div>
-
-          {/* Unified Header */}
-          <UnifiedHeader
-            screenKey="rvCamping"
-            title="RV & Camping"
-            searchPlaceholder="Search campgrounds..."
-            showBackButton={false}
-            onSearch={setSearchQuery}
-          />
-
-          {/* Category Filter */}
-          <div className="category-filter">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat.id}
-                className={`category-chip ${selectedCategory === cat.id ? 'active' : ''}`}
-                onClick={() => setSelectedCategory(cat.id)}
-                style={{
-                  backgroundColor: selectedCategory === cat.id ? '#EA580C' : theme.surface,
-                  color: selectedCategory === cat.id ? 'white' : theme.text,
-                }}
-              >
-                <span>{cat.icon}</span>
-                <span>{cat.name}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Places List */}
-          <section className="places-section">
-            <h2 style={{ color: theme.text }}>
-              {searchQuery ? 'Search Results' : 'Popular Destinations'}
-            </h2>
-            
-            {loading ? (
-              <div className="loading-container">
-                <div className="loading-spinner" />
-                <p style={{ color: theme.textSecondary }}>Finding campgrounds...</p>
-              </div>
-            ) : filteredPlaces.length === 0 ? (
-              <div className="empty-state">
-                <span>🏕️</span>
-                <h3 style={{ color: theme.text }}>No places found</h3>
-                <p style={{ color: theme.textSecondary }}>
-                  Try adjusting your search or explore a different category
-                </p>
-              </div>
-            ) : (
-              <div className="places-list">
-                {filteredPlaces.map((place) => (
-                  <PlaceCard key={place.id} place={place as any} />
-                ))}
-              </div>
-            )}
-          </section>
-        </div>
-
-        <style jsx>{`
-          .rv-screen {
-            min-height: 100vh;
-            padding-bottom: 100px;
-          }
-          
-          .rv-header {
-            padding: ${spacing.lg}px;
-            padding-top: max(${spacing.xl}px, env(safe-area-inset-top));
-            padding-bottom: ${spacing.xl}px;
-          }
-          
-          .rv-header h1 {
-            font-size: 28px;
-            font-weight: 700;
-            color: white;
-            margin: 0 0 4px;
-          }
-          
-          .rv-header p {
-            font-size: 14px;
-            color: rgba(255,255,255,0.85);
-            margin: 0 0 ${spacing.lg}px;
-          }
-          
-          .search-container {
-            display: flex;
-            align-items: center;
-            gap: ${spacing.sm}px;
-            background: rgba(255,255,255,0.2);
-            padding: 12px 16px;
-            border-radius: ${borderRadius.md}px;
-          }
-          
-          .search-container input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            font-size: 16px;
-            color: white;
-            outline: none;
-          }
-          
-          .search-container input::placeholder {
-            color: rgba(255,255,255,0.7);
-          }
-          
-          .category-filter {
-            display: flex;
-            gap: ${spacing.sm}px;
-            padding: ${spacing.lg}px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-          }
-          
-          .category-filter::-webkit-scrollbar {
-            display: none;
-          }
-          
-          .category-chip {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 10px 16px;
-            border-radius: ${borderRadius.full}px;
-            border: none;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s;
-          }
-          
-          .places-section {
-            padding: 0 ${spacing.lg}px;
-          }
-          
-          .places-section h2 {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0 0 ${spacing.md}px;
-          }
-          
-          .loading-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 60px 20px;
-          }
-          
-          .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid ${theme.surface};
-            border-top-color: #EA580C;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: ${spacing.md}px;
-          }
-          
-          @keyframes spin { to { transform: rotate(360deg); } }
-          
-          .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 60px 20px;
-            text-align: center;
-          }
-          
-          .empty-state span {
-            font-size: 64px;
-            margin-bottom: ${spacing.lg}px;
-          }
-          
-          .empty-state h3 {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0 0 ${spacing.sm}px;
-          }
-          
-          .empty-state p {
-            font-size: 14px;
-            margin: 0;
-          }
-          
-          .places-list {
-            display: flex;
-            flex-direction: column;
-          }
-        `}</style>
-      </AppLayout>
-    </div>
-  );
+  return <AppLayout><Head><title>RV &amp; Camping | Tavvy</title><meta name="description" content="Explore existing RV parks, campgrounds, national parks and outdoor places on Tavvy." /></Head>
+    <main className="rv-screen" style={{background:theme.background,color:theme.text}}>
+      <ToolHeader title="RV & Camping" subtitle="Find your perfect campsite.">
+        <input type="search" maxLength={120} aria-label={copy('Search places or cities')} placeholder={copy('Search places or cities')} value={query} onChange={e=>change(e.target.value,category)} />
+      </ToolHeader>
+      <nav className="filters" aria-label={copy('Place category')}>{RV_CATEGORIES.map(item=><button key={item.id} aria-pressed={category===item.id} onClick={()=>change(query,item.id)}><span aria-hidden>{item.icon}</span> {copy(item.label)}</button>)}</nav>
+      <section className="results" aria-busy={catalog.loading}>
+        <h2>{copy(query.trim() ? 'Search results' : RV_CATEGORIES.find(c=>c.id===category&&c.id!=='all')?.label || 'Places to explore')}</h2>
+        <p className="scope">{copy('Browse all locations. Search a place or city to narrow the list.')}</p>
+        {catalog.error&&<div role="alert"><p>{copy(catalog.error)}</p><button onClick={catalog.places.length ? catalog.loadMore : catalog.reload}>{copy('Try again')}</button></div>}
+        {catalog.loading?<p role="status">{copy('Loading places…')}</p>:<>
+          {!catalog.error&&!catalog.places.length&&<div className="empty"><h3>{copy('No places found')}</h3><p>{copy('Try another place, city or category.')}</p></div>}
+          {catalog.places.map(place=><PlaceCard key={place.id} showReviewSummary place={{id:place.id,name:place.name,reviewSummary:catalog.reviewSummaries[place.id],evidenceStatus:catalog.reviewSummaries[place.id]?.status||'loading',tavvy_category:place.tavvy_category||undefined,subcategory:place.tavvy_subcategory||undefined,city:place.city||undefined,state_region:place.region||undefined,category:rvPlaceCategory(place),photo_url:rvPlacePhoto(place)||undefined}} />)}
+          {catalog.hasMore&&<button className="more" disabled={catalog.loadingMore} onClick={catalog.loadMore}>{copy(catalog.loadingMore?'Loading places…':'Load more places')}</button>}
+        </>}
+      </section>
+    </main>
+    <style jsx>{`
+      .rv-screen{min-height:100vh;padding-bottom:100px}input{width:100%;min-width:0;min-height:48px;padding:12px 14px;border:1px solid ${theme.border};border-radius:14px;background:${theme.surface};color:${theme.text};font:inherit;font-size:16px}.filters{display:flex;gap:8px;padding:16px;overflow:auto;scrollbar-width:thin}button{min-height:44px;padding:10px 15px;border:1px solid ${theme.border};border-radius:22px;background:${theme.surface};color:${theme.text};font:inherit;cursor:pointer;flex-shrink:0}button[aria-pressed=true]{background:${theme.primary};color:white;border-color:${theme.primary}}.results{max-width:850px;margin:auto;padding:0 16px}h2{font-size:20px;margin:12px 0 8px}.scope,.empty p{font-size:14px;line-height:1.5;color:${theme.textSecondary}}.scope{margin-bottom:20px}.empty{padding:30px 0}.more{display:block;margin:20px auto}button:disabled{opacity:.6;cursor:default}:focus-visible{outline:3px solid ${theme.primary};outline-offset:3px}[role=alert]{margin:16px 0;padding:14px;border:1px solid ${theme.border};border-radius:12px}
+    `}</style>
+  </AppLayout>;
 }
-
-export async function getStaticProps({ locale }: { locale: string }) {
-  return {
-    props: {
-      ...(await serverSideTranslations(locale, ['common'])),
-    },
-  };
+export async function getServerSideProps({ locale }: { locale: string }) {
+  return { props: { ...(await serverSideTranslations(locale || 'en', ['common'])) } };
 }

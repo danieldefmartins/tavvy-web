@@ -1,13 +1,14 @@
 import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { Session, User } from '@supabase/supabase-js';
+import { safeAuthRedirect } from '../lib/authRedirect';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, displayName?: string, zipCode?: string) => Promise<void>;
+  signUp: (email: string, password: string, displayName?: string, zipCode?: string, returnUrl?: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile?: () => Promise<void>;
 }
@@ -139,11 +140,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // ── Sign up ──────────────────────────────────────────────────────────────
-  const signUp = async (email: string, password: string, displayName?: string, zipCode?: string) => {
+  const signUp = async (email: string, password: string, displayName?: string, zipCode?: string, returnUrl?: string) => {
     const { error, data } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { display_name: displayName } },
+      options: { data: { display_name: displayName }, ...(returnUrl && typeof window !== 'undefined' ? { emailRedirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(safeAuthRedirect(returnUrl))}` } : {}) },
     });
     if (error) throw error;
 
