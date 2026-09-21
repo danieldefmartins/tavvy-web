@@ -103,6 +103,9 @@ such as Italian restaurants near Boston must not silently return the user's curr
 city. Named-place matching, category recognition, honest failures and clear location
 feedback are essential. Preserve browser Back state and validate draggable results
 sheets with touch/scroll interaction, not just desktop clicks.
+Use one main search field on web and mobile. A query without a named destination
+should use the device's available location. Saved already has a footer entry; do not
+repeat it as a quick action beneath search.
 
 ### Appearance and tools
 
