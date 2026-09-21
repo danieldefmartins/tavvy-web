@@ -227,3 +227,7 @@ An FSQ result with an indexed identity but no row in the older `fsq_places_raw` 
 ## On The Go session expiry — September 21
 
 The lifecycle expiry function was installed but had no production scheduler. Migration 028 schedules it every minute and also expires legacy sessions that have no Tavvy business ID. A production transaction rehearsal found one expired legacy row, then rolled back both the row change and cron registration before installation. The first scheduled run succeeded, and expired active sessions fell from one to zero. The public read policy also hides sessions past their scheduled end while physical cleanup catches up.
+
+## Pros/Realtors typed review submission — September 21
+
+Migration 029 adds four optional-to-legacy typed tap columns and an authenticated review action. The Main Thing and a written experience are required for new submissions; positive and style taps and Heads Up are optional. The action checks a live provider, blocks owner self-review, validates category-specific codes, and updates one reviewer/provider pair instead of duplicating it. The existing moderated review reader now returns the typed taps. A live transaction rehearsal passed and rolled back before migration installation; four columns, authenticated-only RPC access and unchanged legacy row count were verified afterward. Web and mobile composers use the same catalog; both application TypeScript checks and the web production build passed. Actual signed-in submit and device UI checks remain open; mobile source is not yet in an EAS binary.
