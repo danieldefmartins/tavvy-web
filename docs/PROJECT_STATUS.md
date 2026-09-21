@@ -1,6 +1,6 @@
 # Tavvy current engineering status
 
-As of September 20, 2026, America/New_York (September 21, 03:37 UTC).
+As of September 21, 2026, 00:16 America/New_York (04:16 UTC).
 Read [PROJECT_MEMORY.md](PROJECT_MEMORY.md) for product decisions and architecture.
 This is a dated checkpoint, not a claim that the full requested release is complete.
 
@@ -19,7 +19,7 @@ local migration has been applied.
 | Area | Verified result | Limits |
 | --- | --- | --- |
 | Web appearance / preview / language batch | Device/Light/Dark controls, larger logo, real 9:16 eCard preview and language-control corrections released and browser checked. | Remaining legacy labels and all cross-tool parity still require verification. |
-| Latest eCard visual release | Shared renderer corrections, template/palette preservation, corrected clipping and badge/contact spacing released. Build and 21-layout preview bridge passed. Five affected public cards passed postrelease iPhone Simulator Safari checks. | Curated new examples, design-first creation and remaining imitation previews are unfinished. Native palette changes still need the next mobile release. |
+| Latest eCard visual release | Shared renderer corrections, template/palette preservation, corrected clipping and badge/contact spacing released. Build and 21-layout preview bridge passed. Five affected public cards passed postrelease iPhone Simulator Safari checks. | Design-first creation, fictional examples and actual renderer galleries are now released separately below. Native changes still need the next mobile release. |
 | Public eCard availability | Bounded read retry; temporary lookup failures return unavailable/503 rather than a misleading not-found page. Ten focused checks passed. | Does not change ownership or bypass public visibility rules. |
 | Place sharing | New place-specific OG images and metadata with name, category/subcategory, location, trusted photo treatment and designed fallback are live. Crawler checks and actual 1200×630 output verified. | Arbitrary external photos use direct images; broader Arabic/CJK image font coverage remains. |
 | On The Go appearance | Earlier web Light/Dark background correction is live. | Full On The Go workflow is not released. |
@@ -27,23 +27,29 @@ local migration has been applied.
 | Native internal preview | Latest uploaded internal iOS preview finished: app version 1.0.1, build 26, from the 616-file snapshot. | Later 617-file candidate tested locally only; no App Store submission. |
 | iPad navigation | Account, RV & Camping, Universes, Realtors, Saved and personal sign-in passed fresh-install landscape and update portrait checks on the later local candidate. | Tested on iPad Air 11-inch M4 / iOS 26.5, not the original reviewer device/OS. |
 
-The latest verified web visual/share release was built September 21 at 02:48 UTC;
-its public Next build identifier is `NZ_Nb6MnlY7NE9n0CtySP`. Release evidence is held
-with the maintainer. Check the serving build again before making a new live claim.
+The latest verified web eCard gallery release was deployed September 21 at 04:06 UTC;
+its public Next build identifier is `oavnoo53VCKsT1-PCtvd8`. It includes design-first
+creation, all 21 layouts / 123 palettes, fictional portrait/background examples and
+real 9:16 gallery previews. Five unit checks, 17 creation-flow browser checks and
+21 real renderer checks passed before deployment; live gallery/image checks passed.
+A subsequent image-optimizer performance release is building. Release evidence is
+held with the maintainer. Check the serving build before making a new live claim.
 
 ## Active work and next actions
 
 ### Search — active recovery, preserve progress
 
-The interrupted import has **resumed from its verified 6,180,000-record checkpoint**.
-The full saved prefix was audited, two text fields restored from the backup, and all
-6,180,000 complete records rechecked with zero differences. At 03:37 UTC, more than
-6.27 million of the 34,883,915 total records had been individually acknowledged.
-This is a dated progress checkpoint, not a live counter or a completed migration.
-The current serving search remains unchanged.
+The interrupted import resumed from its verified 6,180,000-record checkpoint.
+The full saved prefix was audited, two text fields restored from backup, and all
+6,180,000 complete records rechecked with zero differences. A later interruption at
+6,348,000 was reconciled by exact readback of its unfinished batch, preserving all
+acknowledged progress. The latest continuation passed 6.7 million of 34,883,915
+records at this checkpoint. This is not a completed migration. Serving search remains
+unchanged. The full backup's immutable content-hash ledger is complete.
 
 The resumed importer uses ASCII JSON transport, durable per-batch journaling and
-exact per-record response checks. Any uncertain write stops for reconciliation. The
+exact per-record response checks. Uncertain writes receive bounded exact readback;
+only records proven absent may be retried. Unresolved outcomes stop for review. The
 approved migration still needs complete data/configuration verification, search and
 permission checks, replacement restart persistence, producer reconciliation and a
 verified traffic switch. Private infrastructure identifiers, keys, backup data and
@@ -52,17 +58,21 @@ operational commands are intentionally held in the maintainer's private runbook.
 Search product work also remains: explicit destination precedence, named-place/demo
 visibility, review-grid integration, browser Back state and smooth touch-sheet behavior.
 
-### eCards — highest-priority product finish
+### eCards — web chooser delivered; native and captures pending
 
-- Complete all curated fictional examples and their portrait/background assets.
-- Make design choice the default start; retain Quick setup and existing full options.
-- Replace remaining simulated template/editor gallery previews with the real renderer.
-- Preserve all 21 layouts / 123 palettes and all saved customer functionality.
-- Finish every template/sample's visual checks and final iPhone Simulator captures.
+- Design choice is the default web start; Quick setup and full type/country options remain.
+- Web gallery/editor previews use the actual renderer. All 21 layouts / 123 palettes
+  remain, with clear Pro restrictions and preservation of entered information.
+- Reusable decorations may populate drafts; fictional example identities/photos/links
+  are never copied into customers' saved cards.
+- Actual iPhone Safari captures include corrected Classic, Chef and Modern examples;
+  the complete 21-template Simulator set is still being captured. Browser-only captures
+  of every layout are separate evidence, not native or App Store screenshots.
+- Native parity passed 14 focused behavior checks, TypeScript and a new Xcode Simulator
+  build. Its current-source visual checks and EAS upload remain pending.
 - Existing-card audit covered 37 published cards, with baseline captures and five
-  postrelease comparisons. This is **not** the complete template-chooser screenshot
-  set, and those final template images have **not** all been added to the chooser.
-- Apply equivalent native changes and validate the final mobile build.
+  postrelease comparisons. Lower-page interactions remain a separate verification.
+- Newly introduced copy still needs the final multilingual pass.
 
 Existing real cards must not become template examples. Previously requested narrow
 real-card corrections have separate private evidence; no customer inventory belongs
