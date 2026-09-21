@@ -99,7 +99,7 @@ browser template capture and App Store submission are separate deliverables.
 
 ## Search
 
-The preserved import continuation has passed 18 million of 34,883,915 records with
+The preserved import continuation has passed more than 22 million of 34,883,915 records with
 no unresolved write outcomes at this checkpoint. The original serving search remains
 active. The immutable full-backup content-hash ledger is complete. Do not restart the
 writer, reset the target or replay acknowledged batches. Any interruption requires
