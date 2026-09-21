@@ -1,5 +1,5 @@
 {
-  "state": "Prepared and locally verified; not deployed",
+  "state": "Deployed and verified",
   "sourceManifestSha256": "8ec08260ed0b183c5603a4b1be6954916edb353cf9f5bd44b41261b696a72f3a",
   "files": [
     {
@@ -130,5 +130,9 @@
       "path": "scripts/tests/cruise-line-logos-complete.test.cjs",
       "sha256": "5f997da76a6f55dd01b89d9d811c924d17e34859c7079c8f09acfd2e030ac70d"
     }
-  ]
+  ],
+  "buildId": "w9SaMXYfyY0LIBlDDSuY6",
+  "commitSha": "e1ec9f5df059958a64884e4437af38eeb95199ce",
+  "httpChecks": 7,
+  "browserChecks": 24
 }

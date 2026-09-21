@@ -14,7 +14,12 @@ based only on their filenames; obtain private release evidence from the maintain
 
 ## Current web release
 
-Verified live build: `kgb4gXgRxNZrraBUwSWBt`. The cruise photo/Stories update is deployed
+Verified live build: `w9SaMXYfyY0LIBlDDSuY6`. The simplified cruise directory with all
+26 official line logos and one Filters control is deployed from reviewed commit
+`e1ec9f5`: seven live HTTP checks and 24 live browser checks passed, including touch,
+keyboard, themes, filters, pagination and Back state.
+
+The preceding cruise photo/Stories update (`kgb4gXgRxNZrraBUwSWBt`) is retained
 from reviewed web commit `79a17b8`. Seven live HTTP checks, 13 photo browser checks and
 16 Stories browser checks passed with the exact live build; no real records were changed
 by those browser checks. The registered uploaded ship photo appears in the live page
@@ -175,6 +180,18 @@ Eight original Simulator screenshots are archived. This is separate from complet
 internal EAS705; native706 has not been uploaded to EAS.
 
 The horizontal cruise-line logo strip and unified Filters control, with all 26 official
-operator logos, passed local web build/browser checks. Combined native device checks
-are underway; this separate discovery update is not deployed. Fleet/image/fact completeness is
+operator logos, is deployed on web and passed 24 live browser checks. Native737
+portrait iPhone/iPad workflows passed with 13 actual captures and all 26 bundled
+logos verified. Landscape remains unverified: the existing app stayed portrait before
+the modal opened, so no orientation policy was changed. No native737 EAS upload. Fleet/image/fact completeness is
 not yet established. Current inventory remains376 ships across26 operators.
+
+
+## New admin photo actions — in progress
+
+The user approved drag-and-drop and multi-file uploads, confirmed Delete photo, and
+automatic gallery saving after uploads. This supersedes the earlier staged-upload
+Save requirement. Backend/admin023 implementation is isolated and not deployed yet.
+Deletion must clear the matching cover and remove the stored file, with explicit
+cleanup status if storage fails. Successful photo operations must preserve unrelated
+unsaved information/fact/source edits. No actual customer photos are deleted for tests.

@@ -182,7 +182,10 @@ review ranking. Preserve filters on Back and never show unrelated ships as an em
 fallback. The admin Cruises section includes all ship publication states and provides
 Information, Photos, Facts and Sources. Keep source/history records, optimistic edit
 versions, image permissions and public/private metadata boundaries intact. The user subsequently removed required photo source and permission steps from admin
-uploads. The target workflow is upload, cover/gallery selection and Save. Preserve
+uploads. The latest requested workflow adds drag-and-drop, multi-file selection and
+automatic saving/publication of successful uploads, plus confirmed photo deletion.
+This supersedes requiring Save after uploading. Photo operations must preserve unrelated
+unsaved ship/fact/source edits and report partial failures accurately. Preserve
 historical metadata without manufacturing permission-verification claims; identity,
 status and factual sourcing stay unchanged. See PROJECT_STATUS for rollout state and
 [Cruise management](cruise-management.md) for the earlier deployed workflow.
