@@ -1189,6 +1189,21 @@
     "atlasCategoryStadiums": "スタジアム",
     "atlasCategoryThemeParks": "テーマパーク",
     "atlasCategoryTravelTips": "旅行のヒント",
-    "atlasCategoryVenues": "イベント会場"
+    "atlasCategoryVenues": "イベント会場",
+    "onboardPlace1": "船内施設の情報",
+    "onboardPlace2": "料金に含まれます",
+    "onboardPlace3": "別途料金",
+    "onboardPlace4": "これらのレビューは船内のこの施設についてのものです。船全体のレビューは船のページにあります。",
+    "onboardPlace5": "船の公式サイト ↗",
+    "onboardPlace6": "船内施設のストーリー投稿にはまだ対応していません。",
+    "onboardPlace7": "船が運航中の場合にレビューできます。",
+    "onboardPlace8": "この施設の写真やストーリーはまだありません。",
+    "onboardPlace9": "この施設のストーリーはまだありません。",
+    "onboardPlace10": "この船内施設は利用できません。",
+    "onboardPlace11": "船内施設の情報を読み込めませんでした。もう一度お試しください。",
+    "onboardPlace12": "施設の情報を読み込めませんでした。もう一度お試しください。",
+    "onboardPlace13": "写真とストーリー",
+    "onboardPlace14": "施設が見つかりません。",
+    "onboardPlace15": "リンクを開けません"
   }
 }

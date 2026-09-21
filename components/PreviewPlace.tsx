@@ -59,6 +59,9 @@ export type PlaceConfig = {
   detailsContent?: React.ReactNode;
   overviewContent?: React.ReactNode;
   reviewDisabledReason?: string;
+  mediaHeading?: string;
+  mediaEmptyMessage?: string;
+  mediaNotice?: string;
   demoMenu?: { name: string; description: string; price: string }[];
   demoCard?: { tagline: string; hours: string; contact: string };
   demoCardHref?: string;
@@ -333,8 +336,8 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
         </div>}
 
         {activeTab === 'media' && <div className="media-section" id="demo-photos">
-          <div className="section-head"><span className="section-title">See the food & vibe</span></div>
-          {config.photosStatus==='unavailable'?<p className="review-note" role="status">Photos could not be loaded. Please try again later.</p>:!hasMedia && <p className="review-note">No photos or stories to show. Share a first look at this place.</p>}
+          <div className="section-head"><span className="section-title">{config.mediaHeading || 'See the food & vibe'}</span></div>
+          {config.photosStatus==='unavailable'?<p className="review-note" role="status">Photos could not be loaded. Please try again later.</p>:!hasMedia && <p className="review-note">{config.mediaEmptyMessage || 'No photos or stories to show. Share a first look at this place.'}</p>}
           <div className="media-scroll">
             {(config.gallery || []).slice(0, 6).map((url, i) => <figure key={`${url}-${i}`}><button className="media-open" onClick={() => setSelectedMedia({ url, type: 'image', caption: `Place photo ${i + 1}` })}><img src={url} alt={`${config.name} photo ${i + 1}`} /></button><figcaption>Place photo</figcaption>{!config.demo && config.photoEntries?.find(photo=>photo.url===url)?.id && <ContentSafetyActions kind="place_photo" contentId={config.photoEntries.find(photo=>photo.url===url)!.id}/>}</figure>)}
             {(config.stories || []).map(story => <figure key={story.id}>
@@ -345,6 +348,7 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
             </figure>)}
           </div>
           {hrefs?.story && <a className="more" href={hrefs.story}>Add your story →</a>}
+          {config.mediaNotice && <p className="review-note">{config.mediaNotice}</p>}
         </div>}
 
         {activeTab === 'details' && config.detailsContent}
@@ -538,6 +542,7 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
         .divider { height: 1px; background: ${t.divider}; margin: 0; }
         .actionbar { z-index: 20; position: fixed; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto; display: flex; gap: 12px; padding: 14px 20px calc(14px + env(safe-area-inset-bottom)); background: ${t.isDark ? 'rgba(18,18,24,0.96)' : 'rgba(255,255,255,0.96)'}; backdrop-filter: blur(10px); border-top: 1px solid ${t.divider}; }
         .act { flex: 1; padding: 15px 0; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; border: none; text-decoration: none; text-align: center; }
+        .act.primary:disabled { color: ${t.text2}; background: ${t.soft}; box-shadow: none; cursor: not-allowed; }
         .act.ghost { background: ${t.pillBg}; color: ${t.text}; }
         .act.primary { color:#07383A; background: #00C2CB; color: #07383A; box-shadow: 0 6px 18px rgba(0,194,203,0.35); }
       `}</style>

@@ -1189,6 +1189,21 @@
     "atlasCategoryStadiums": "Stades",
     "atlasCategoryThemeParks": "Parcs à thème",
     "atlasCategoryTravelTips": "Conseils de voyage",
-    "atlasCategoryVenues": "Lieux d’événements"
+    "atlasCategoryVenues": "Lieux d’événements",
+    "onboardPlace1": "Informations sur le lieu à bord",
+    "onboardPlace2": "Inclus",
+    "onboardPlace3": "Supplément",
+    "onboardPlace4": "Ces avis concernent ce lieu à bord. Les avis sur le navire se trouvent sur sa page.",
+    "onboardPlace5": "Site officiel du navire ↗",
+    "onboardPlace6": "La publication de stories pour les lieux à bord n’est pas encore disponible.",
+    "onboardPlace7": "Les avis sont disponibles lorsque le navire est en service.",
+    "onboardPlace8": "Aucune photo ni story de ce lieu pour le moment.",
+    "onboardPlace9": "Aucune story de ce lieu pour le moment.",
+    "onboardPlace10": "Ce lieu à bord n’est pas disponible.",
+    "onboardPlace11": "Impossible de charger les informations sur ce lieu à bord. Réessayez.",
+    "onboardPlace12": "Impossible de charger les informations sur ce lieu. Réessayez.",
+    "onboardPlace13": "Photos et stories",
+    "onboardPlace14": "Lieu introuvable.",
+    "onboardPlace15": "Lien indisponible"
   }
 }

@@ -1572,6 +1572,21 @@
     "ecardFreeOffer9": "Contact forms",
     "ecardFreeOffer10": "Let visitors send an inquiry from your card.",
     "ecardFreeOffer11": "Professional credentials",
-    "ecardFreeOffer12": "Display your professional credentials."
+    "ecardFreeOffer12": "Display your professional credentials.",
+    "onboardPlace1": "Onboard place information",
+    "onboardPlace2": "Included",
+    "onboardPlace3": "Additional charge",
+    "onboardPlace4": "These reviews describe this place on board. Whole-ship reviews are on the ship page.",
+    "onboardPlace5": "Official ship website ↗",
+    "onboardPlace6": "Story uploads are not available for onboard places yet.",
+    "onboardPlace7": "Reviews are available when this ship is operating.",
+    "onboardPlace8": "No photos or stories from this place yet.",
+    "onboardPlace9": "No stories from this place yet.",
+    "onboardPlace10": "This onboard place is not available.",
+    "onboardPlace11": "Onboard place information could not be loaded. Please try again.",
+    "onboardPlace12": "Place information could not be loaded. Please try again.",
+    "onboardPlace13": "Photos & stories",
+    "onboardPlace14": "Place not found.",
+    "onboardPlace15": "Link unavailable"
   }
 }

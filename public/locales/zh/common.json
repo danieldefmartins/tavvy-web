@@ -1189,6 +1189,21 @@
     "atlasCategoryStadiums": "体育场",
     "atlasCategoryThemeParks": "主题公园",
     "atlasCategoryTravelTips": "旅行贴士",
-    "atlasCategoryVenues": "活动场所"
+    "atlasCategoryVenues": "活动场所",
+    "onboardPlace1": "船上场所信息",
+    "onboardPlace2": "已包含",
+    "onboardPlace3": "额外收费",
+    "onboardPlace4": "这些评价针对船上的这个场所。整艘船的评价请查看船舶页面。",
+    "onboardPlace5": "船舶官方网站 ↗",
+    "onboardPlace6": "暂不支持为船上场所上传动态。",
+    "onboardPlace7": "船舶运营期间可进行评价。",
+    "onboardPlace8": "此场所暂无照片或动态。",
+    "onboardPlace9": "此场所暂无动态。",
+    "onboardPlace10": "此船上场所暂不可用。",
+    "onboardPlace11": "无法加载船上场所信息。请重试。",
+    "onboardPlace12": "无法加载场所信息。请重试。",
+    "onboardPlace13": "照片与动态",
+    "onboardPlace14": "未找到场所。",
+    "onboardPlace15": "链接不可用"
   }
 }

@@ -1189,6 +1189,21 @@
     "atlasCategoryStadiums": "Stadyumlar",
     "atlasCategoryThemeParks": "Tema parkları",
     "atlasCategoryTravelTips": "Seyahat ipuçları",
-    "atlasCategoryVenues": "Etkinlik mekânları"
+    "atlasCategoryVenues": "Etkinlik mekânları",
+    "onboardPlace1": "Gemideki yer hakkında bilgi",
+    "onboardPlace2": "Dahil",
+    "onboardPlace3": "Ek ücret",
+    "onboardPlace4": "Bu değerlendirmeler gemideki bu yeri anlatır. Geminin tamamına ait değerlendirmeler gemi sayfasındadır.",
+    "onboardPlace5": "Geminin resmî web sitesi ↗",
+    "onboardPlace6": "Gemideki yerler için hikâye yükleme henüz kullanılamıyor.",
+    "onboardPlace7": "Değerlendirmeler, gemi hizmetteyken kullanılabilir.",
+    "onboardPlace8": "Bu yere ait henüz fotoğraf veya hikâye yok.",
+    "onboardPlace9": "Bu yere ait henüz hikâye yok.",
+    "onboardPlace10": "Gemideki bu yer kullanılamıyor.",
+    "onboardPlace11": "Gemideki yer bilgileri yüklenemedi. Lütfen tekrar deneyin.",
+    "onboardPlace12": "Yer bilgileri yüklenemedi. Lütfen tekrar deneyin.",
+    "onboardPlace13": "Fotoğraflar ve hikâyeler",
+    "onboardPlace14": "Yer bulunamadı.",
+    "onboardPlace15": "Bağlantı kullanılamıyor"
   }
 }

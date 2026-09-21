@@ -1366,3 +1366,22 @@ Object.assign(RELEASE_COPY_KEYS, {
   "Professional credentials": "ecardFreeOffer11",
   "Display your professional credentials.": "ecardFreeOffer12"
 });
+
+// Onboard place UI only; catalog names and descriptions remain unchanged.
+Object.assign(RELEASE_COPY_KEYS, {
+  "Onboard place information": "onboardPlace1",
+  "Included": "onboardPlace2",
+  "Additional charge": "onboardPlace3",
+  "These reviews describe this place on board. Whole-ship reviews are on the ship page.": "onboardPlace4",
+  "Official ship website ↗": "onboardPlace5",
+  "Story uploads are not available for onboard places yet.": "onboardPlace6",
+  "Reviews are available when this ship is operating.": "onboardPlace7",
+  "No photos or stories from this place yet.": "onboardPlace8",
+  "No stories from this place yet.": "onboardPlace9",
+  "This onboard place is not available.": "onboardPlace10",
+  "Onboard place information could not be loaded. Please try again.": "onboardPlace11",
+  "Place information could not be loaded. Please try again.": "onboardPlace12",
+  "Photos & stories": "onboardPlace13",
+  "Place not found.": "onboardPlace14",
+  "Link unavailable": "onboardPlace15"
+});

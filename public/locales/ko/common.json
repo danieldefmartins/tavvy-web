@@ -1189,6 +1189,21 @@
     "atlasCategoryStadiums": "경기장",
     "atlasCategoryThemeParks": "테마파크",
     "atlasCategoryTravelTips": "여행 팁",
-    "atlasCategoryVenues": "행사장"
+    "atlasCategoryVenues": "행사장",
+    "onboardPlace1": "선내 장소 정보",
+    "onboardPlace2": "포함됨",
+    "onboardPlace3": "추가 요금",
+    "onboardPlace4": "이 리뷰는 선내의 해당 장소에 대한 것입니다. 선박 전체 리뷰는 선박 페이지에서 확인하세요.",
+    "onboardPlace5": "선박 공식 웹사이트 ↗",
+    "onboardPlace6": "선내 장소의 스토리 업로드는 아직 지원되지 않습니다.",
+    "onboardPlace7": "선박이 운항 중일 때 리뷰를 작성할 수 있습니다.",
+    "onboardPlace8": "이 장소의 사진이나 스토리가 아직 없습니다.",
+    "onboardPlace9": "이 장소의 스토리가 아직 없습니다.",
+    "onboardPlace10": "이 선내 장소를 이용할 수 없습니다.",
+    "onboardPlace11": "선내 장소 정보를 불러오지 못했습니다. 다시 시도해 주세요.",
+    "onboardPlace12": "장소 정보를 불러오지 못했습니다. 다시 시도해 주세요.",
+    "onboardPlace13": "사진 및 스토리",
+    "onboardPlace14": "장소를 찾을 수 없습니다.",
+    "onboardPlace15": "링크를 사용할 수 없습니다"
   }
 }

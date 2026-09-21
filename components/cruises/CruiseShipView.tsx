@@ -17,6 +17,14 @@ export default function CruiseShipView({detail,reviews}:{detail:CruiseShipDetail
  const [description,setDescription]=useState<{universeId:string;value:string}|null>(null);
  useEffect(()=>{let active=true;setDescription(null);getCruiseDescription(detail.ship.universe_id).then(value=>{if(active)setDescription(value?{universeId:detail.ship.universe_id,value}:null)}).catch(()=>{if(active)setDescription(null)});return()=>{active=false};},[detail.ship.universe_id]);
  const {ship,sources}=detail,venues=useMemo(()=>visibleCruiseVenues(detail),[detail]),facts=displayCruiseFacts(ship,sources);
+ // Preserve the ship tab and onboard filters when a guest opens a canonical venue and returns.
+ const [restoredShip,setRestoredShip]=useState<string|null>(null);
+ useEffect(()=>{try{const saved=JSON.parse(sessionStorage.getItem(`cruise-ship-view:v1:${ship.universe_id}`)||'null');
+  setTab(saved&&TABS.some(([id])=>id===saved.tab)?saved.tab:'overview');
+  setKind(saved&&(saved.kind==='all'||venues.some(v=>v.kind===saved.kind))?saved.kind:'all');
+  setQuery(typeof saved?.query==='string'?saved.query.slice(0,160):'');
+ }catch{setTab('overview');setKind('all');setQuery('')}setRestoredShip(ship.universe_id);},[ship.universe_id]);
+ useEffect(()=>{if(restoredShip!==ship.universe_id)return;try{sessionStorage.setItem(`cruise-ship-view:v1:${ship.universe_id}`,JSON.stringify({tab,kind,query:query.slice(0,160)}))}catch{}},[restoredShip,ship.universe_id,tab,kind,query]);
  const filtered=venues.filter(v=>(kind==='all'||v.kind===kind)&&v.name.toLocaleLowerCase().includes(query.toLocaleLowerCase()));
  const image=visibleCruisePhoto(ship);
  const official=safeCruiseUrl(ship.official_url),canonical=`https://tavvy.com/app/cruises/${encodeURIComponent(ship.slug)}`;

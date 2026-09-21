@@ -1127,6 +1127,21 @@
     "atlasCategoryStadiums": "Sân vận động",
     "atlasCategoryThemeParks": "Công viên chủ đề",
     "atlasCategoryTravelTips": "Mẹo du lịch",
-    "atlasCategoryVenues": "Địa điểm tổ chức sự kiện"
+    "atlasCategoryVenues": "Địa điểm tổ chức sự kiện",
+    "onboardPlace1": "Thông tin địa điểm trên tàu",
+    "onboardPlace2": "Đã bao gồm",
+    "onboardPlace3": "Phụ phí",
+    "onboardPlace4": "Các đánh giá này mô tả địa điểm này trên tàu. Đánh giá về toàn bộ tàu nằm trên trang của tàu.",
+    "onboardPlace5": "Trang web chính thức của tàu ↗",
+    "onboardPlace6": "Chưa hỗ trợ tải tin lên cho các địa điểm trên tàu.",
+    "onboardPlace7": "Có thể đánh giá khi tàu đang hoạt động.",
+    "onboardPlace8": "Chưa có ảnh hoặc tin từ địa điểm này.",
+    "onboardPlace9": "Chưa có tin từ địa điểm này.",
+    "onboardPlace10": "Địa điểm này trên tàu hiện không khả dụng.",
+    "onboardPlace11": "Không thể tải thông tin địa điểm trên tàu. Vui lòng thử lại.",
+    "onboardPlace12": "Không thể tải thông tin địa điểm. Vui lòng thử lại.",
+    "onboardPlace13": "Ảnh và tin",
+    "onboardPlace14": "Không tìm thấy địa điểm.",
+    "onboardPlace15": "Liên kết không khả dụng"
   }
 }

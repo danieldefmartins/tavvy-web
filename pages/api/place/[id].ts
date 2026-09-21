@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { fetchPlaceEvidence } from '../../../lib/placeEvidenceService';
 import { contentViewer } from '../../../lib/contentSafetyServer';
 import { parseHours, openLineFrom } from '../../../lib/placeHours';
+import {loadCruiseVenueContext,CruiseVenueReadError} from '../../../lib/cruises/venueContext';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
@@ -80,6 +81,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { data: place, error } = await q.maybeSingle();
     if (error) return res.status(500).json({ error: error.message });
     if (!place) return res.status(404).json({ error: 'not found' });
+    const cruiseVenue = await loadCruiseVenueContext(supabase, place);
 
     // Existing external profiles may contain direct delivery listings. Only
     // accept URLs on the matching provider domain; a search link is a separate
@@ -139,7 +141,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Shared with search and mobile: complete visit history, distinct reviewers,
     // and an explicit unavailable state when evidence cannot be loaded.
-    const evidence = await fetchPlaceEvidence(place.id, { category: place.tavvy_category, subcategory: place.tavvy_subcategory }, { client: supabase });
+    const evidence = await fetchPlaceEvidence(place.id, { category: cruiseVenue?.review_category || place.tavvy_category, subcategory: cruiseVenue ? undefined : place.tavvy_subcategory }, { client: supabase });
 
     let stories: any[] = [];
     try {
@@ -218,18 +220,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     return res.status(200).json({
       place: {
-        id: place.id, slug: place.slug, name: place.name,
-        category: place.tavvy_category, subcategory: place.tavvy_subcategory,
+        id: place.id, slug: place.slug, source_type: place.source_type, name: cruiseVenue?.venue_name || place.name,
+        category: cruiseVenue?.review_category || place.tavvy_category, subcategory: cruiseVenue ? null : place.tavvy_subcategory,
         street: place.street, city: place.city, region: place.region, country: place.country,
         phone: place.phone, whatsapp: place.whatsapp_number, website: place.website, email: place.email,
         instagram: socialLinks.instagram, tiktok: socialLinks.tiktok, youtube: socialLinks.youtube, facebook: socialLinks.facebook,
         cover_image_url: safeCover || (gallery.length ? gallery[0] : null), photos: gallery,
-        description: place.description || place.short_description, hours: place.hours,
+        description: cruiseVenue ? cruiseVenue.description : place.description || place.short_description, hours: place.hours,
         ordering_enabled: place.ordering_enabled,
         latitude: place.latitude, longitude: place.longitude,
         // new fields
         hoursList, openLine, gallery,
       },
+      cruiseVenue,
       groups,
       evidence,
       stories,
@@ -242,6 +245,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       recentReviews,
     });
   } catch (e: any) {
+    if (e instanceof CruiseVenueReadError) return res.status(e.reason === 'hidden' ? 404 : 503).json({error:e.message});
     return res.status(500).json({ error: e.message });
   }
 }

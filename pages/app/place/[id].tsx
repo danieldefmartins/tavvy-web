@@ -1,3 +1,5 @@
+import {serverSideTranslations} from 'next-i18next/serverSideTranslations';
+import {useReleaseCopy} from '../../../hooks/useReleaseCopy';
 /**
  * Place detail — the live page, now rendered with the agreed signal-review design
  * (same as /preview/signal-spectrum), wired to real data via /api/place/[id].
@@ -14,6 +16,8 @@ import PlaceScreen, { PlaceConfig, Cat } from '../../../components/PreviewPlace'
 import {contentSafetyHeaders} from '../../../lib/contentSafety';
 import {CONTENT_SAFETY_CHANGED} from '../../../components/ContentSafetyActions';
 import OnTheGoStatus from '../../../components/OnTheGoStatus';
+import CruiseVenueInfo from '../../../components/cruises/CruiseVenueInfo';
+import {CruiseVenueContext,cruiseVenueShipHref,CRUISE_VENUE_STORY_NOTICE,CRUISE_VENUE_REVIEW_NOTICE} from '../../../lib/cruises/venueContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import AddReviewSheet from '../../../components/AddReviewSheet';
 import { supabase } from '../../../lib/supabaseClient';
@@ -40,10 +44,12 @@ export default function PlaceDetail({ placeShare }: { placeShare: PlaceShareMeta
 
 function PlaceDetailContent({resolvedPlaceId}:{resolvedPlaceId?:string}) {
   const router = useRouter();
+  const copy = useReleaseCopy();
   const { id } = router.query;
   const { user } = useAuth();
   const [data, setData] = useState<any>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [loadError,setLoadError] = useState('');
   const [saved, setSaved] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [ecardSlug, setEcardSlug] = useState<string | null>(null);
@@ -56,14 +62,15 @@ function PlaceDetailContent({resolvedPlaceId}:{resolvedPlaceId?:string}) {
     if (!id) return;
     if (showSpinner) setState('loading');
     contentSafetyHeaders().then(headers=>fetch(`/api/place/${encodeURIComponent(resolvedPlaceId || String(id))}`,{headers}))
-      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(r => r.ok ? r.json() : Promise.reject({status:r.status}))
       .then(d => { if(request!==requestId.current)return; setData(d); setState('ready'); })
-      .catch(() => {if(request===requestId.current)setState('error')});
+      .catch(error => {if(request===requestId.current){setLoadError(error?.status===404?'Place not found.':'Place information could not be loaded. Please try again.');setState('error')}});
   };
   useEffect(() => { load(); const changed=()=>load(false);window.addEventListener(CONTENT_SAFETY_CHANGED,changed);return()=>{++requestId.current;window.removeEventListener(CONTENT_SAFETY_CHANGED,changed)}; /* eslint-disable-next-line */ }, [id, resolvedPlaceId, user?.id]);
 
   const goBack = () => {
     if (typeof window !== 'undefined' && window.history.length > 1) router.back();
+    else if (data?.cruiseVenue) router.push(cruiseVenueShipHref(data.cruiseVenue));
     else router.push('/app/map');
   };
   const placeUuid = data?.place?.id && isUuid(String(data.place.id)) ? String(data.place.id) : null;
@@ -132,14 +139,17 @@ function PlaceDetailContent({resolvedPlaceId}:{resolvedPlaceId?:string}) {
     }
   };
   const onAddReview = () => {
+    if (data?.cruiseVenue && !data.cruiseVenue.accepts_reviews) return;
     if (!user) { router.push(`/app/login?redirect=${redirectTo}`); return; }
     setReviewOpen(true);
   };
 
   if (state === 'loading') return <Centered>Loading…</Centered>;
-  if (state === 'error' || !data?.place) return <Centered>Place not found.</Centered>;
+  if (state === 'error' || !data?.place) return <Centered><div role="alert" style={{padding:24,textAlign:'center'}}><p>{copy(loadError || 'Place not found.')}</p><button onClick={()=>load()} style={{padding:'12px 20px',borderRadius:12}}>{copy('Try again')}</button></div></Centered>;
 
   const p = data.place;
+  const cruiseVenue: CruiseVenueContext | null = data.cruiseVenue || null;
+  if (p.source_type === 'cruise_venue' && !cruiseVenue) return <Centered>{copy('This onboard place is not available.')}</Centered>;
   const g = data.groups || { good: [], vibe: [], headsup: [] };
   const pid = encodeURIComponent(String(p.id));
 
@@ -153,11 +163,11 @@ function PlaceDetailContent({resolvedPlaceId}:{resolvedPlaceId?:string}) {
   if (p.website) actions.push({ key: 'website', label: 'Website' });
   if (hasActiveMenu) actions.push({ key: 'menu', label: 'Menu' });
   if (p.ordering_enabled) actions.push({ key: 'order', label: 'Order' });
-  actions.push({ key: 'story', label: 'Add Story' });
+  if (!cruiseVenue) actions.push({ key: 'story', label: 'Add Story' });
   actions.push({ key: 'share', label: 'Share' });
 
-  const meta = [p.subcategory || TYPE_LABEL[p.category] || 'Place', p.city, p.region].filter(Boolean).join(' · ');
-  const directions = p.latitude && p.longitude
+  const meta = cruiseVenue ? [cruiseVenue.kind.replace(/_/g,' '),cruiseVenue.ship_name,cruiseVenue.deck_label].filter(Boolean).join(' · ') : [p.subcategory || TYPE_LABEL[p.category] || 'Place', p.city, p.region].filter(Boolean).join(' · ');
+  const directions = cruiseVenue ? undefined : p.latitude && p.longitude
     ? `https://www.google.com/maps/dir/?api=1&destination=${p.latitude},${p.longitude}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([p.name, p.street, p.city, p.region].filter(Boolean).join(' '))}`;
 
@@ -185,7 +195,7 @@ function PlaceDetailContent({resolvedPlaceId}:{resolvedPlaceId?:string}) {
     popularLabel: 'Top signals',
     popular: (g.good || []).slice(0, 4).map((s: any) => s.label),
     info: [
-      ...(p.street || p.city ? [{ icon: '📍', main: [p.street, p.city, p.region].filter(Boolean).join(', '), act: 'Directions', href: directions }] : []),
+      ...(!cruiseVenue && (p.street || p.city) ? [{ icon: '📍', main: [p.street, p.city, p.region].filter(Boolean).join(', '), act: 'Directions', href: directions }] : []),
       ...(p.openLine || hoursPairs.length ? [{ icon: '🕐', main: p.openLine || 'Hours', hours: hoursPairs.length ? hoursPairs : undefined }] : []),
       ...(p.phone ? [{ icon: '📞', main: p.phone, href: `tel:${String(p.phone).replace(/[^0-9+]/g, '')}` }] : []),
       { icon: '🏷️', main: [TYPE_LABEL[p.category] || 'Place', p.subcategory].filter(Boolean).join(' · ') },
@@ -193,6 +203,10 @@ function PlaceDetailContent({resolvedPlaceId}:{resolvedPlaceId?:string}) {
     reviews: recentReviews,
     reviewsStatus: data.recentReviewsStatus,
     cta: 'Add Review',
+    reviewDisabledReason: cruiseVenue && !cruiseVenue.accepts_reviews ? copy(CRUISE_VENUE_REVIEW_NOTICE) : undefined,
+    mediaHeading: cruiseVenue ? copy('Photos & stories') : undefined,
+    mediaEmptyMessage: cruiseVenue ? copy('No photos or stories from this place yet.') : undefined,
+    mediaNotice: cruiseVenue ? copy(CRUISE_VENUE_STORY_NOTICE) : undefined,
     evidence: data.evidence,
     gallery: p.gallery || [],
     stories: data.stories || [],
@@ -200,7 +214,7 @@ function PlaceDetailContent({resolvedPlaceId}:{resolvedPlaceId?:string}) {
     photosStatus: data.photosStatus,
     reviewsHref: `/app/place/${pid}/reviews`,
     deliveryLinks: data.deliveryLinks || {},
-    overviewContent: placeUuid && showMobileStatus ? <OnTheGoStatus canonicalPlaceId={placeUuid} /> : undefined,
+    overviewContent: cruiseVenue ? <CruiseVenueInfo context={cruiseVenue} /> : placeUuid && showMobileStatus ? <OnTheGoStatus canonicalPlaceId={placeUuid} /> : undefined,
   };
 
   const hrefs: Record<string, string> = {};
@@ -212,11 +226,11 @@ function PlaceDetailContent({resolvedPlaceId}:{resolvedPlaceId?:string}) {
   if (normUrl(p.youtube)) hrefs.youtube = normUrl(p.youtube)!;
   if (normUrl(p.facebook)) hrefs.facebook = normUrl(p.facebook)!;
   if (hasActiveMenu) hrefs.menu = `/place/${pid}/menu`;
-  hrefs.story = `/app/add-story?placeId=${pid}&placeName=${encodeURIComponent(p.name || '')}`;
+  if (!cruiseVenue) hrefs.story = `/app/add-story?placeId=${pid}&placeName=${encodeURIComponent(p.name || '')}`;
   if (p.ordering_enabled) hrefs.order = `/place/${pid}/order`;
-  hrefs.directions = directions;
+  if (directions) hrefs.directions = directions;
   if (ecardSlug) hrefs.ecard = `/${encodeURIComponent(ecardSlug)}`;
-  hrefs.owner = `/app/business/claim?placeId=${pid}`;
+  if (!cruiseVenue) hrefs.owner = `/app/business/claim?placeId=${pid}`;
   hrefs.share = placeShareUrl(p.id);
 
   return (
@@ -247,12 +261,12 @@ function Centered({ children }: { children: React.ReactNode }) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async ({params,res}) => {
+export const getServerSideProps: GetServerSideProps = async ({params,res,locale}) => {
   const identifier=typeof params?.id==='string'?params.id:'';
   if(identifier==='demo-trattoria')return {redirect:{destination:'/app/demo/restaurant',permanent:false}};
   const result=await fetchPlaceShareMetadata(identifier);
   res.setHeader('Cache-Control',result.status==='ready'?'public, max-age=0, s-maxage=300, stale-while-revalidate=3600':'no-store');
   if(result.status==='missing')res.statusCode=404;
   if(result.status==='unavailable')res.statusCode=503;
-  return {props:{placeShare:result.metadata}};
+  return {props:{placeShare:result.metadata,...await serverSideTranslations(locale || 'en',['common'])}};
 };
