@@ -1,0 +1,134 @@
+{
+  "state": "Prepared and locally verified; not deployed",
+  "sourceManifestSha256": "8ec08260ed0b183c5603a4b1be6954916edb353cf9f5bd44b41261b696a72f3a",
+  "files": [
+    {
+      "path": "docs/CRUISE_LINE_ASSETS.md",
+      "sha256": "4fd7ef6aa01f090a98ab26cc1cd918ed06be3ae955af7ba3e480c44fe9d4aa81"
+    },
+    {
+      "path": "lib/cruises/lineBrands.ts",
+      "sha256": "506ca904bd3234ea824ac029ec9711fa80be627f0ef722730fe4e97770a1d993"
+    },
+    {
+      "path": "pages/app/cruises/index.tsx",
+      "sha256": "84f65a27693f474aab66ba2d2b852b76dc72de75d8cf483f75645620b9ac0fca"
+    },
+    {
+      "path": "public/images/cruise-lines/a-rosa.png",
+      "sha256": "ad6a9b3624f9e3687ccdb8295ec7bfeb770b31d9864811cb109f1469ecbab5e7"
+    },
+    {
+      "path": "public/images/cruise-lines/amawaterways.png",
+      "sha256": "b0bda39bfbda2c6e64308b50702a9a547f5d0249916878d6728410b08dbd3d6c"
+    },
+    {
+      "path": "public/images/cruise-lines/aurora-expeditions.png",
+      "sha256": "10090ff8500840c938a985a643c5593be6c0354d833bd039a072436a78668c2d"
+    },
+    {
+      "path": "public/images/cruise-lines/avalon-waterways.png",
+      "sha256": "9b3478b1ec808e222d5dd2dd743c4b0cd2181db2dc6ef06bf89e4721c88dd676"
+    },
+    {
+      "path": "public/images/cruise-lines/azamara.png",
+      "sha256": "6314034f22617e4a6a0bd3582540d64d46a7ebbf6cdf2d78a7064da48976252e"
+    },
+    {
+      "path": "public/images/cruise-lines/carnival-cruise-line.png",
+      "sha256": "33d5208295d5c48439146b0287d35e230670fb5a90f03085c190b363757f7967"
+    },
+    {
+      "path": "public/images/cruise-lines/celebrity-cruises.png",
+      "sha256": "64b407e90c500f9e9023d94be125c756a578e8d13361bd4b12417de9a5b615a2"
+    },
+    {
+      "path": "public/images/cruise-lines/costa-cruises.png",
+      "sha256": "be56849b0cd2f06f3e9df9a1b224e22dddf9e0dda6e6770f4f0eea307a610f1d"
+    },
+    {
+      "path": "public/images/cruise-lines/cunard.png",
+      "sha256": "63e6f572efc09fa5d638297de984a5f2c7193f7c3aea9da0d5e4e9269b3fc2e4"
+    },
+    {
+      "path": "public/images/cruise-lines/disney-cruise-line.png",
+      "sha256": "8214f4aa254ac10ed8c25d57651b510a58912b96b87687c8b159e4d3ef987802"
+    },
+    {
+      "path": "public/images/cruise-lines/holland-america-line.png",
+      "sha256": "92eeb46a120e3df69a549ddca7a58d6de98aa68dd36c749cf5381a6cd169a9b0"
+    },
+    {
+      "path": "public/images/cruise-lines/hx-expeditions.png",
+      "sha256": "83dd8038eb11608bb745c195c6300f542cf90bfda331fb336713489fd8f837d8"
+    },
+    {
+      "path": "public/images/cruise-lines/msc-cruises.png",
+      "sha256": "e41e255774db2ed89433281b4c58aa4d0da9199a2b41d8ea20a3cd1e0b5b63ed"
+    },
+    {
+      "path": "public/images/cruise-lines/norwegian-cruise-line.png",
+      "sha256": "0cc788157c4b5bd04c2310faba1f363fcea68ffd5d938ad5133a8868fda0798b"
+    },
+    {
+      "path": "public/images/cruise-lines/oceania-cruises.png",
+      "sha256": "627ce4cb39c471fc2137589ea48e7ddc6c34bb53d9df1871c4157c71cf5bc613"
+    },
+    {
+      "path": "public/images/cruise-lines/ponant-explorations.png",
+      "sha256": "4b6629f97770c7ae8cec28c913cdd42881555a4cbf8c21ff322ecb5f9684009f"
+    },
+    {
+      "path": "public/images/cruise-lines/princess-cruises.png",
+      "sha256": "81e12396f049a3f8e4bb159984d2692c99791ac67a67ea721373883d355802f0"
+    },
+    {
+      "path": "public/images/cruise-lines/quark-expeditions.png",
+      "sha256": "806d7415af16ceb0dcfc1b3212854f93bd35528b7a887bde50c679cfd516b6cd"
+    },
+    {
+      "path": "public/images/cruise-lines/regent-seven-seas-cruises.png",
+      "sha256": "0005a5735850c12465e47382d85bba953374aa1d63dfb1ed22e4fb17f31126a5"
+    },
+    {
+      "path": "public/images/cruise-lines/riverside-luxury-cruises.png",
+      "sha256": "3b0c5e766bbf6bafbf1b6237107bb800aa93636f8b5c81126efc42daafc34580"
+    },
+    {
+      "path": "public/images/cruise-lines/royal-caribbean-international.png",
+      "sha256": "6dbd038c72a9a6c1320229adeb512c2512d4b4c2fb575ce05d892fb430bd7818"
+    },
+    {
+      "path": "public/images/cruise-lines/seabourn.png",
+      "sha256": "27aa2aecf248c8c10b2518a9d00c7f40bdfcbd082f69623cf9f025d35c3de67b"
+    },
+    {
+      "path": "public/images/cruise-lines/silversea-cruises.png",
+      "sha256": "89be93f3c3227c554018838167c291773e3dd6a3043c195cfe9f33833e2b7e0a"
+    },
+    {
+      "path": "public/images/cruise-lines/swan-hellenic.png",
+      "sha256": "dd1c031d24fb9fa42e969cdcb2a23e060aa2bac782e223d1d74cc6003c1218f1"
+    },
+    {
+      "path": "public/images/cruise-lines/viking.png",
+      "sha256": "05337655458048eb446f6e6d3787549fd199860d52669f2a971ef5638ca0095d"
+    },
+    {
+      "path": "public/images/cruise-lines/virgin-voyages.png",
+      "sha256": "aec35648ba9704bbdb0f16719c9ee4107ebc4d074acfa7575d25965ddd067b91"
+    },
+    {
+      "path": "scripts/tests/cruise-admin-upload.test.cjs",
+      "sha256": "4c7cafd8f5309c138ce8c3e01d50fda555d8a410708a839fafd75f5609b533a8"
+    },
+    {
+      "path": "scripts/tests/cruise-line-brands.test.cjs",
+      "sha256": "ac0136e9d679a538afbbc04904df7c2ee0b1cdf0b26f0491e7087fd23a03f356"
+    },
+    {
+      "path": "scripts/tests/cruise-line-logos-complete.test.cjs",
+      "sha256": "5f997da76a6f55dd01b89d9d811c924d17e34859c7079c8f09acfd2e030ac70d"
+    }
+  ]
+}

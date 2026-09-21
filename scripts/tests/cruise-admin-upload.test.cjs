@@ -29,6 +29,7 @@ function renderPhotoSurface(relative,detailValue,stateOverrides){
   if(name==='@react-navigation/native')return{useNavigation:()=>({goBack(){},navigate(){}})};
   if(name.includes('ThemeContext'))return{useThemeContext:()=>({isDark:false,theme:{}})};
   if(name.includes('useReleaseCopy'))return{useReleaseCopy:()=>x=>x};
+  if(name==='react-native-safe-area-context')return{useSafeAreaInsets:()=>({top:0,bottom:0,left:0,right:0})};if(name.endsWith('/lineBrands'))return load('lib/cruises/lineBrands.ts');if(name.endsWith('/lineLogoAssets'))return{CRUISE_LINE_LOGOS:{}};
   if(name.endsWith('/catalog'))return load('lib/cruises/catalog.ts');if(name.endsWith('/directoryState'))return load('lib/cruises/directoryState.ts');if(name.endsWith('/share'))return load('lib/cruises/share.ts');
   if(name.endsWith('/service'))return{};if(name==='react-icons/io5')return{IoBoatOutline:'IoBoatOutline',IoChevronDown:'IoChevronDown'};if(name==='@expo/vector-icons')return{Ionicons:'Ionicons'};
   if(name==='next-i18next/serverSideTranslations')return{serverSideTranslations(){}};
