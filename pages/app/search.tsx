@@ -87,7 +87,7 @@ export default function SearchScreen() {
       const value = router.query[key]; if (typeof value === 'string') params.set(apiKey, value);
     }
     const parsed = parseSearchQuery(query);
-    if (!parsed.city && !where && !params.has('userLat') && !params.has('location')) {
+    if (!parsed.city && !where && !params.has('userLat') && (!params.has('location') || params.get('location') === 'current')) {
       if (!navigator.geolocation) {
         setLocationLabel('Current location needed');
         setSearchError('Use your location or enter a city to search nearby.');
