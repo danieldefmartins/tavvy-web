@@ -58,8 +58,10 @@ assets and version checks passed; unauthenticated cruise queries return 401. No 
 records or photos were changed for deployment testing. See [Cruise management](cruise-management.md) for the workflow. Public web/native
 gallery rendering is live on web and included in the mobile candidate.
 
-Canonical onboard restaurants, bars, shops and other places, with separate venue
-reviews, remain explicitly deferred. Ship reviews must remain separate from venue reviews.
+The user approved canonical onboard restaurants, bars, shops and other places with
+separate venue reviews on September 21, superseding the earlier deferral. Architecture
+and identity/visibility checks are underway; venue creation is not implemented yet.
+Ship reviews must remain separate from venue reviews.
 
 ## eCard organization and approved offer
 
@@ -77,14 +79,17 @@ including the specifically approved Agent and civic palettes. There are now 10 F
 designs and 26 Free palettes. Pro retains premium designs, galleries, embedded videos,
 forms and professional credentials. Existing prices remain $4.99/month or $39.99/year.
 Creation, editing, persistence and publication use the approved design rules.
-The offer is live on web; final native verification and internal upload are pending.
+The offer is live on web and passed native iPhone/iPad verification. The native705 internal cloud build finished successfully; the physical-device IPA is available.
 Preserve existing published content and customer media.
 Restaurant membership remains a separate offer with unresolved final pricing.
 
 ## Mobile and Apple
 
-- Latest uploaded internal preview remains 1.0.1 build 26 from the older 616-file
-  snapshot. No App Store submission has been made.
+- Native705 was uploaded for an internal iOS preview build on September 21. Expo
+  accepted build `dd0a579c-31dd-4d46-b55e-2f87b7cbb816`, version 1.0.1 build 26;
+  status FINISHED. The physical-device IPA download was verified with a bounded read.
+  This is not evidence of installation on a physical device.
+  No App Store submission has been made.
 - Native 688 Cruise entry/navigation passed on iPhone and iPad. The new 705-file
   candidate includes the current Cruise, eCard, Atlas taxonomy and truthful account
   deletion UI work. Typecheck, 23 focused handler checks and configured Xcode build
@@ -94,8 +99,9 @@ Restaurant membership remains a separate offer with unresolved final pricing.
   preview Close and exact unsaved-input retention cases passed on both iPhone and
   iPad. The initial input test dropped simulated keystrokes; a corrected targeted
   test verified the exact value both before navigation and after return without any
-  app change or draft creation. EAS preview connection settings are being verified
-  before the authorized internal upload.
+  app change or draft creation. Existing EAS preview connection settings passed
+  the actual installed client read checks; no configuration changes were needed.
+  Exact source and device-QA receipts were verified before the internal upload.
 - Public client settings were verified in the binary; privileged server keys are absent.
 - Native 687 has 32 screenshots, including 28 Store candidates and 4 Atlas QA-only
   captures. Final screenshots must match the submitted binary. Native705 adds 12 archived frames: 4 English chooser candidates and 8 Cruise QA
@@ -126,9 +132,13 @@ traffic switch remain pending. Private cost, deadline and ambiguity limits still
 ## Other pending work
 
 - Complete worldwide overnight fleet research.
-- Fix the native StoriesRow global fallback when a Universe has linked places but
-  none are active or match the optional location filter. Keep the empty scoped result;
-  do not show stories from unrelated places. Zero-link Universes already exit safely.
+- The user removed mandatory source/permission steps for admin cruise photo uploads.
+  The coordinated backend/admin/web/native change is in progress; historical metadata
+  remains intact and ship factual verification remains separate. Existing705 does not
+  contain this new photo-publication change.
+- StoriesRow scope corrections are prepared separately for web and native, with
+  18 component regressions passing. They preserve empty Universe results and reject
+  stale scope/account responses. Release preparation is underway; not deployed yet.
 - Complete On The Go expiry scheduling and non-food owner features.
 - Persist remaining Settings preferences that currently only change component state.
 - RV offline maps need a provider permitting downloads; offline routing is separate.
@@ -138,3 +148,24 @@ traffic switch remain pending. Private cost, deadline and ambiguity limits still
 Further TDM/Aline card work and the attributed RV-article search were closed by the
 user. Do not reopen them. Keep operational logs, credentials, customer exports and
 private release evidence outside the public repositories.
+
+## Cruise completion checkpoint — September 21, later morning
+
+Active implementation is now focused on cruise fixes and complete catalog/content
+coverage. The user approved onboard canonical places and reviews; other new feature
+implementation is paused while the already-running search copy continues.
+
+Backend021 is installed:46 actual-database rollback checks, independent cleanup and
+10 exact post-install checks passed. The simplified admin photo editor is live as
+`2026-09-21-cruise-photo021`; production build, health, version, assets and anonymous
+authorization checks passed. Photo source/permission fields are no longer required.
+Historical metadata is preserved without inventing verification claims.
+
+The new web photo/Stories client passed local production checks but has not deployed:
+Railway failed while receiving the source archive, before compilation. The prior web
+release remains live. A configured native706 build and32 native tests passed; actual
+iPhone/iPad photo checks are underway. This is separate from completed internal EAS705.
+
+The horizontal cruise-line logo strip and unified Filters control are in development
+on both platforms, isolated from the photo release. Fleet/image/fact completeness is
+not yet established. Current inventory remains376 ships across26 operators.

@@ -169,7 +169,8 @@ block publication while preserving saved links and their hidden state.
   charters and day trips. Verify identity, dimensions/capacity, years, decks, dining,
   shopping and entertainment, preserving unknown values and source dates. A ship can
   contain canonical onboard venues through a Universe-style hierarchy. Creating those
-  clickable venue places and their separate reviews is explicitly deferred. Cruise-line
+  clickable venue places and their separate reviews is now approved; the user explicitly
+  superseded the earlier deferral on September 21. Cruise-line
   filtering, curated featured ships and admin ship/image management are now requested.
 - **Atlas:** readable Light / Sepia / Dark themes and text size, discoverable reading
   controls, and complete audio for both voices. There is no verified evidence of a
@@ -180,8 +181,11 @@ before pagination. Featured ships are an editorial selection, not a popularity o
 review ranking. Preserve filters on Back and never show unrelated ships as an empty-state
 fallback. The admin Cruises section includes all ship publication states and provides
 Information, Photos, Facts and Sources. Keep source/history records, optimistic edit
-versions, image permissions and public/private metadata boundaries intact. Public ship
-galleries use only active, permission-verified photos; see [Cruise management](cruise-management.md).
+versions, image permissions and public/private metadata boundaries intact. The user subsequently removed required photo source and permission steps from admin
+uploads. The target workflow is upload, cover/gallery selection and Save. Preserve
+historical metadata without manufacturing permission-verification claims; identity,
+status and factual sourcing stay unchanged. See PROJECT_STATUS for rollout state and
+[Cruise management](cruise-management.md) for the earlier deployed workflow.
 
 ## Languages and Apple release
 

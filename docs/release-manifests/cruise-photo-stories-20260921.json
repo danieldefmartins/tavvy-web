@@ -1,0 +1,38 @@
+{
+  "sourceManifestSha256": "e5764555acdb1ab1111a9bc9ac82615201e2f9bcbd5e9042eefa9a62f6141a3a",
+  "state": "Web deployment pending; native configured build passed, device verification pending; backend021 installed",
+  "files": [
+    {
+      "path": "components/StoriesRow.tsx",
+      "sha256": "7f131d595b7a31f26063a5b9f512204cba0a1ecb4d42b78f3874b707b7c94154"
+    },
+    {
+      "path": "components/cruises/CruiseShipView.tsx",
+      "sha256": "2aaa86bd66f7901ca1a3c8e799a06612e081395eefb3143e2e3755276d8132e7"
+    },
+    {
+      "path": "lib/cruises/catalog.ts",
+      "sha256": "362059504a7fa57ef347e2b28850f2e364a715b8cb4051379c7543d40d5c7608"
+    },
+    {
+      "path": "lib/cruises/gallery.ts",
+      "sha256": "c450e6f14085227fa30e0adf15a394ac800c2f472877e9ae317115b9265a51f2"
+    },
+    {
+      "path": "lib/cruises/share.ts",
+      "sha256": "26e235dd9c483e5d49315be5d542aa46eb606a8650befbfcd2ea36db894525ef"
+    },
+    {
+      "path": "pages/app/cruises/index.tsx",
+      "sha256": "41f86e6425d6831cf8bf04f801136cbd309f998846ae06b7f89d5f6e9ee89e01"
+    },
+    {
+      "path": "scripts/tests/cruise-admin-upload.test.cjs",
+      "sha256": "35526831095dea6c3013c6fca5c84b6e4ca9faf03d049ee3be808376dbdecdfa"
+    }
+  ],
+  "migration": {
+    "path": "supabase/migrations/202609210021_cruise_admin_photo_visibility.sql",
+    "sha256": "b64b71c2d654c8f2fab07f9abbefd1367170d1871665b71a7d686e0d187dff7a"
+  }
+}

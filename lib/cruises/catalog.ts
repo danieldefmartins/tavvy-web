@@ -15,6 +15,7 @@ export type CruiseVenue = {
  included: boolean | null; availability_note: string | null; source_ids: string[];
  verification: 'verified' | 'unverified';
 };
+export type CruisePhoto = { url: string; alt: string; permission_verified: boolean; source_id: string | null; origin?: 'admin_upload'; image_id?: string };
 export type CruiseShip = {
  id: string; universe_id: string; slug: string; name: string; operator_id: string; operator_name: string;
  kind: CruiseKind; operating_status: CruiseOperatingStatus; publication_status: CruisePublicationStatus;
@@ -22,8 +23,8 @@ export type CruiseShip = {
  overnight_public_cruise: boolean; identity_verified: boolean; status_source_ids: string[];
  imo: string | null; eni: string | null; official_url: string | null;
  name_history: CruiseNameHistory[]; facts: CruiseFact[]; cabin_categories: CruiseCabinCategory[];
- /** Asset may be shown only when its license/permission was reviewed. */
- photo: { url: string; alt: string; permission_verified: boolean; source_id: string } | null;
+ /** Registered admin uploads and legacy externally sourced photos keep separate provenance. */
+ photo: CruisePhoto | null;
 };
 export type CruiseProgram = { id:string; ship_id:string; name:string; kind:'show'|'music'|'enrichment'|'activity'; venue_id:string|null; description:string|null; as_of:string; availability_note:string|null; source_ids:string[]; verification:'verified'|'unverified' };
 export type CruiseShipDetail = { ship: CruiseShip; sources: CruiseSource[]; venues: CruiseVenue[]; programs?:CruiseProgram[] };
@@ -52,6 +53,24 @@ export const CRUISE_FACT_DEFINITIONS = {
 export function safeCruiseUrl(value: unknown): string | null {
  if (typeof value !== 'string') return null;
  try { const url = new URL(value); return url.protocol === 'https:' && !url.username && !url.password ? url.href : null; } catch { return null; }
+}
+/** Only the public RPC may mark registered, active uploads; this checks its storage identity. */
+export function adminCruiseUploadUrl(value: unknown, shipId: string, imageId: unknown): string | null {
+ const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+ if(typeof value!=='string'||typeof imageId!=='string'||!uuid.test(shipId)||!uuid.test(imageId))return null;
+ try {
+  const url=new URL(value);
+  return url.protocol==='https:'&&url.hostname==='scasgwrikoqdwlwlwcff.supabase.co'&&!url.port&&!url.username&&!url.password&&!url.search&&!url.hash&&url.pathname===`/storage/v1/object/public/universe-images/cruise-ships/${shipId}/${imageId}.webp`?url.href:null;
+ } catch {return null;}
+}
+/** Admin uploads need no source/permission assertion. Legacy external covers keep their existing gate. */
+export function visibleCruisePhoto(ship: Pick<CruiseShip,'id'|'name'|'photo'>): CruisePhoto | null {
+ const photo=ship.photo;
+ if(!photo||typeof photo.alt!=='string'||photo.alt.length>500)return null;
+ if(photo.origin==='admin_upload'&&(typeof photo.permission_verified!=='boolean'||(photo.source_id!==null&&typeof photo.source_id!=='string')))return null;
+ const url=photo.origin==='admin_upload'?adminCruiseUploadUrl(photo.url,ship.id,photo.image_id):photo.origin===undefined&&photo.permission_verified===true?safeCruiseUrl(photo.url):null;
+ if(!url)return null;
+ return {...photo,url,alt:photo.alt.trim()||ship.name};
 }
 function date(value: string): boolean { return /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0,10) === value; }
 export function verifiedSourceIds(ids: string[], sources: CruiseSource[]): boolean {

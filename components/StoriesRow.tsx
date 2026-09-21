@@ -5,7 +5,7 @@
 // Similar to Instagram/Facebook stories at the top
 
 import ContentSafetyActions,{CONTENT_SAFETY_CHANGED} from './ContentSafetyActions';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
 interface PlaceWithStories {
@@ -65,7 +65,16 @@ export default function StoriesRow({
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [viewedStoryIds, setViewedStoryIds] = useState<Set<string>>(new Set());
 
+  const scopeKey = JSON.stringify([universeId || null, placeIds || null, userId || null, maxPlaces]);
+  const scopeRef = useRef(scopeKey), loadGeneration = useRef(0);
+  const [loadedScope, setLoadedScope] = useState<string | null>(null);
+  if (scopeRef.current !== scopeKey) { scopeRef.current = scopeKey; loadGeneration.current += 1; }
+
   const fetchStoriesForUniverse = useCallback(async () => {
+    if (scopeRef.current !== scopeKey) return;
+    const generation = ++loadGeneration.current;
+    const isCurrent = () => generation === loadGeneration.current && scopeRef.current === scopeKey;
+    const commitPlaces = (next: PlaceWithStories[]) => { if (isCurrent()) { setPlacesWithStories(next); setLoadedScope(scopeKey); } };
     try {
       setLoading(true);
       const now = new Date().toISOString();
@@ -85,7 +94,7 @@ export default function StoriesRow({
       }
 
       if (targetPlaceIds.length === 0) {
-        setPlacesWithStories([]);
+        commitPlaces([]);
         return;
       }
 
@@ -111,7 +120,7 @@ export default function StoriesRow({
         .order('created_at', { ascending: false });
 
       if (storiesError || !stories || stories.length === 0) {
-        setPlacesWithStories([]);
+        commitPlaces([]);
         return;
       }
 
@@ -136,6 +145,7 @@ export default function StoriesRow({
           viewedIds = new Set(views.map((v: any) => v.story_id));
         }
       }
+      if (!isCurrent()) return;
       setViewedStoryIds(viewedIds);
 
       // Build places with stories data
@@ -166,20 +176,25 @@ export default function StoriesRow({
       });
 
       const result = Array.from(placesMap.values()).slice(0, maxPlaces);
-      setPlacesWithStories(result);
+      commitPlaces(result);
 
     } catch (err) {
-      console.error('[StoriesRow] Error:', err);
+      if (isCurrent()) { console.error('[StoriesRow] Error:', err); commitPlaces([]); }
     } finally {
-      setLoading(false);
+      if (isCurrent()) setLoading(false);
     }
-  }, [universeId, placeIds, userId, maxPlaces]);
+  }, [scopeKey]);
 
   useEffect(() => {
-    fetchStoriesForUniverse();
+    setShowStoryViewer(false); setSelectedStories([]);
+    void fetchStoriesForUniverse();
+    return () => { loadGeneration.current += 1; };
   }, [fetchStoriesForUniverse]);
 
   const handleStoryPress = async (placeId: string) => {
+    const generation = loadGeneration.current;
+    const isCurrent = () => generation === loadGeneration.current && scopeRef.current === scopeKey;
+    if (!isCurrent()) return;
     const now = new Date().toISOString();
     const { data: stories } = await supabase
       .from('place_stories')
@@ -189,6 +204,7 @@ export default function StoriesRow({
       .or(`expires_at.gt.${now},and(is_permanent.eq.true,story_kind.eq.owner_highlight)`)
       .order('created_at', { ascending: true });
 
+    if (!isCurrent()) return;
     if (stories && stories.length > 0) {
       const place = placesWithStories.find(p => p.placeId === placeId);
       const formattedStories: Story[] = stories.map((s: any) => ({
@@ -219,10 +235,12 @@ export default function StoriesRow({
   const markStoryAsViewed = async (storyId: string) => {
     if (!userId || viewedStoryIds.has(storyId)) return;
     
+    const generation = loadGeneration.current;
     await supabase
       .from('place_story_views')
       .insert({ story_id: storyId, user_id: userId });
     
+    if (generation !== loadGeneration.current || scopeRef.current !== scopeKey) return;
     setViewedStoryIds(prev => { const next = new Set(Array.from(prev)); next.add(storyId); return next; });
   };
 
@@ -255,7 +273,7 @@ export default function StoriesRow({
     }
   }, [showStoryViewer, currentStoryIndex, selectedStories]);
 
-  if (loading) {
+  if (loading || loadedScope !== scopeKey) {
     return (
       <div style={{
         padding: '16px',

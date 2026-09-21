@@ -12,9 +12,11 @@ the actual deployed version; the catalog does not yet cover every overnight flee
   operating status and publication status. Stable ship IDs and registry identities
   are preserved.
 - **Photos:** upload a real ship image, add descriptive text and a caption, select
-  its source, record permission, set its order and choose a cover. Uploaded images
-  remain unpublished drafts until their metadata is saved and publication conditions
-  are met. Public galleries include only active, permission-verified images.
+  its order and choose a cover, then Save. Source and permission fields are not
+  required for admin uploads. The first upload can be staged as the cover; an explicit
+  cover removal remains respected. A stored upload is not shown on the ship page until
+  saved for display. The media bucket itself is public. Active registered images
+  belong to exactly one ship; historical metadata remains intact.
 - **Facts:** maintain sourced dimensions, capacities, dates, decks and amenity counts.
   Keep unknown or conflicting values explicit; previous fact versions remain in history.
 - **Sources:** record publisher, HTTPS URL, source type and date checked. Earlier
@@ -38,4 +40,6 @@ The public web and mobile ship views consume the same approved gallery. Never us
 generated images as documentary ship photographs or invent review activity.
 
 Onboard venues remain sourced ship information. Creating canonical clickable Tavvy
-places for them, with individual venue reviews, is explicitly deferred by the user.
+places for them, with individual venue reviews, is now approved. Implementation must
+use ship-scoped identity, avoid duplicate places and invented land coordinates, and
+keep ship-level and venue-level review evidence separate. Check PROJECT_STATUS for rollout.
