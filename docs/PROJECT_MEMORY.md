@@ -189,3 +189,7 @@ Record what is **live**, **tested locally**, **prepared**, **blocked** or **not 
 Do not infer completion from a filename, a past plan or a migration that only passed
 a rollback test. Update the Git handoff after each completed release; keep confidential
 operational evidence with the maintainer, outside this public repository.
+
+Review writes and account deletion must preserve the distinction between current Auth
+identities and legacy user records. Never manufacture a legacy account or assume matching
+email addresses establish identity. Validate fresh-account writes as well as public reads.

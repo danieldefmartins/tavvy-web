@@ -1,6 +1,6 @@
 # Tavvy current engineering status
 
-As of September 21, 2026, 01:08 America/New_York (05:08 UTC).
+As of September 21, 2026, 02:08 America/New_York (06:08 UTC).
 Read [PROJECT_MEMORY.md](PROJECT_MEMORY.md) for product decisions and architecture.
 This is a dated checkpoint, not a claim that the full requested release is complete.
 
@@ -24,7 +24,7 @@ local migration has been applied.
 | Place sharing | New place-specific OG images and metadata with name, category/subcategory, location, trusted photo treatment and designed fallback are live. Crawler checks and actual 1200×630 output verified. | Arbitrary external photos use direct images; broader Arabic/CJK image font coverage remains. |
 | On The Go appearance | Earlier web Light/Dark background correction is live. | Full On The Go workflow is not released. |
 | Atlas audio | Full recordings for both voices repaired and checked for Los Angeles, Chicago and Nashville. Generation access guard released. | Full producer and audio UI rollout remains separate. |
-| Native internal preview | Latest uploaded internal iOS preview finished: app version 1.0.1, build 26, from the 616-file snapshot. | Later 617-file candidate tested locally only; no App Store submission. |
+| Native internal preview | Latest uploaded internal iOS preview finished: app version 1.0.1, build 26, from the 616-file snapshot. | Later 663-file Simulator build now passes compilation; current-binary UI checks are underway. No App Store submission. |
 | iPad navigation | Account, RV & Camping, Universes, Realtors, Saved and personal sign-in passed fresh-install landscape and update portrait checks on the later local candidate. | Tested on iPad Air 11-inch M4 / iOS 26.5, not the original reviewer device/OS. |
 
 The latest verified web eCard gallery release was deployed September 21 after 04:13 UTC;
@@ -51,6 +51,13 @@ reporting, blocking, hide/restore and evidence visibility, including stale accou
 requests. Logged-in production moderation actions have not been exercised against
 customer content. Native integration and account-deletion release gates remain.
 
+The newer shared-tools release is live with public build `alPQmC8IHFEztl5rzBgEO`.
+It preserves cruises, community safety and eCard features, and adds consistent tool
+headers, canonical RV filtering/pagination, actual review grids, domain-specific
+core matching and further eCard finishing. Root checked 35 focused web cases, nine
+RV browser scenarios and 28 live HTTP routes. The prepared On The Go release has
+not yet replaced this serving build at this checkpoint.
+
 ## Active work and next actions
 
 ### Search — active recovery, preserve progress
@@ -59,7 +66,7 @@ The interrupted import resumed from its verified 6,180,000-record checkpoint.
 The full saved prefix was audited, two text fields restored from backup, and all
 6,180,000 complete records rechecked with zero differences. A later interruption at
 6,348,000 was reconciled by exact readback of its unfinished batch, preserving all
-acknowledged progress. The latest continuation passed 9 million of 34,883,915
+acknowledged progress. The latest continuation passed 11.5 million of 34,883,915
 records at this checkpoint. This is not a completed migration. Serving search remains
 unchanged. The full backup's immutable content-hash ledger is complete.
 
@@ -72,21 +79,25 @@ verified traffic switch. Private infrastructure identifiers, keys, backup data a
 operational commands are intentionally held in the maintainer's private runbook.
 
 Search product work also remains: explicit destination precedence, named-place/demo
-visibility, review-grid integration, browser Back state and smooth touch-sheet behavior.
+visibility, browser Back state and smooth touch-sheet behavior. The shared review grid is now live in search and RV previews.
 
-### eCards — web chooser delivered; native and captures pending
+### eCards — web chooser and template captures delivered; native finishing underway
 
 - Design choice is the default web start; Quick setup and full type/country options remain.
 - Web gallery/editor previews use the actual renderer. All 21 layouts / 123 palettes
   remain, with clear Pro restrictions and preservation of entered information.
 - Reusable decorations may populate drafts; fictional example identities/photos/links
   are never copied into customers' saved cards.
-- Actual iPhone Safari captures include corrected Classic, Chef and Modern examples;
-  a fresh full set against the live gallery is underway, with five of 21 captured
-  and visually reviewed at this checkpoint. Browser-only captures
-  of every layout are separate evidence, not native or App Store screenshots.
-- Native parity passed 14 focused behavior checks, TypeScript and a new Xcode Simulator
-  build. Its current-source visual checks and EAS upload remain pending.
+- All 21 actual iPhone Simulator Safari template-gallery captures are complete and
+  visually reviewed. Three follow-up captures for the latest finishing polish are
+  being rechecked against the serving assets. These are web template captures, not
+  the native App Store screenshot set.
+- The newer native 663-file candidate passed application TypeScript and Xcode Simulator
+  compilation. Actual signed-in tests on the prior binary reached design selection,
+  Quick setup and the first deletion confirmation (cancelled, no deletion). A preview
+  Close button overlapping the status bar was fixed; fixed-binary QA and EAS remain.
+- English/Portuguese/Spanish Settings and appearance navigation were exercised.
+  Untranslated legacy labels remain under correction before final language screenshots.
 - Existing-card audit covered 37 published cards, with baseline captures and five
   postrelease comparisons. Lower-page interactions remain a separate verification.
 - Newly introduced copy still needs the final multilingual pass.
@@ -97,8 +108,9 @@ in this public status document.
 
 ### Place details, reviews and restaurant tools
 
-- Finish the shared four-part review grid on search previews and all detail surfaces.
-  Web/mobile source work has started; it is not a verified universal rollout.
+- The shared four-part grid is live in search, RV previews and canonical place details,
+  with category/subcategory core matching and deduplicated core taps. On The Go
+  preview integration has been added to the next candidate; full provider parity remains.
 - Verify category-specific core matching and correct ordinary-issue evidence aging.
 - Keep reviews prominent without duplicated sections. Preserve the full Tavvy Menu.
 - Verify owner onboarding, inline missing-place creation, profile/media/contact links,
@@ -113,10 +125,10 @@ in this public status document.
 
 | Tool | Prepared / known state | Next work |
 | --- | --- | --- |
-| Shared tool headers | Universe-style source changes and browser checks prepared. | Integrate and release; verify every tool in both themes. |
-| On The Go | Full discovery/detail/owner changes prepared; backend lifecycle dependency remains. | Resolve lifecycle/identity rules, confirmed mobile location, stories, authorization and expiry; apply validated migration and release. |
-| RV & Camping | Existing canonical parks/campgrounds remain; current bounded browse queries hide some records. | Correct filtering/pagination/classification, category-specific taps and canonical details. Offline maps are not implemented. |
-| Cruises | First 12 verified ships published and public web routes checked; 48 sourced venues and 36 cabin categories are present. No invented place links or unverified photos. | Continue worldwide fleet research and verified batches; finish native and language release. |
+| Shared tool headers | Universe-style web headers released across ten routes; native equivalents compiled. | Finish current native visual/language checks. |
+| On The Go | Two reviewed migrations applied; 13 function sources/JWT modes and 30 public/unauthenticated checks passed. Owner schedules support scoped listing and cancellation. Full web/native candidate builds passed. | Complete UI rollout and activation. Starts remain disabled at this checkpoint; admin lifecycle moderation and account deletion remain separate work. |
+| RV & Camping | Canonical category filtering before pagination, stable load-more, shared four-tile reviews and domain-specific core matching are live on web. Native equivalents compiled. | Final native verification. Offline map downloads are not implemented. |
+| Cruises | First 12 verified ships are public with 48 sourced venues and 36 cabin categories. Another 59 identities passed collision checks and are being enriched; they are not published yet. Conflicting or unverified facts remain withheld. | Publish the reviewed enriched batch, continue worldwide coverage and finish native/language release. |
 | Atlas | Existing reading themes/text-size confirmed; audio fixes partly live. | Improve discoverability/persistence checks; integrate full audio UI and atomically deploy the reviewed scheduled producer. |
 | UGC | Four backend migrations, web reporting/blocking and admin moderation released. Public access checks passed; local behavior and rollback checks preserved. | Finish native release, operational signed-in QA and remaining surface review. |
 
@@ -128,6 +140,10 @@ after no match was found. Do not substitute a person's eCard or invent attribute
 - Finish final iPhone and 13-inch iPad screenshot sets, prioritizing English,
   Portuguese and Spanish, against the final build.
 - Complete and verify account deletion backend behavior before claiming readiness.
+  The older draft assumes identity relationships that do not match the current schema;
+  the replacement must preserve shared business/payroll history and handle retries.
+- Correct and verify first-time review submission across the current identity model.
+  A code/schema mismatch is under review; do not assume successful reads prove writes.
 - Complete native UGC release and operational signed-in moderation verification.
 - Resolve the digital-purchase strategy and verify visible language coverage.
 - Prepare accurate reviewer sign-in instructions and rerun iPad navigation checks.
