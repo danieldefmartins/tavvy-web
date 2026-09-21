@@ -123,11 +123,10 @@ export default function SearchScreen() {
       if (requestId === requestIdRef.current) { setSearchError(error instanceof Error ? error.message : 'Search unavailable'); setResults(demoResult); }
     } finally { if (requestId === requestIdRef.current) setLoading(false); }
   };
-  const navigateSearch = (query: string, where = locationInput, need = diningNeed, extra: Record<string,string> = {}) => {
+  const navigateSearch = (query: string, where = '', need = diningNeed, extra: Record<string,string> = {}) => {
     const parsed = parseSearchQuery(query);
-    // Editing the separate location field replaces any earlier named location in the text.
     const text = query.trim();
-    if (parsed.city || parsed.useCurrentLocation) where = ''; // A newly typed destination overrides the previous location field.
+    if (parsed.city || parsed.useCurrentLocation) where = '';
     const previousScope = !where.trim() && !parsed.city && (!parsed.useCurrentLocation || router.query.location !== 'map') ? Object.fromEntries(["location",'lat','lng','minLat','maxLat','minLng','maxLng'].flatMap(key => typeof router.query[key] === 'string' ? [[key, router.query[key] as string]] : [])) : {};
     if (parsed.useCurrentLocation || extra.location === 'current') {
       for (const key of ['minLat','maxLat','minLng','maxLng']) delete previousScope[key];
@@ -178,10 +177,7 @@ export default function SearchScreen() {
               <button type={"submit"} className="search-button" style={{ backgroundColor: theme.primary }}>
                 {copy("Search")}</button>
             </form>
-            <form onSubmit={event => { event.preventDefault(); navigateSearch(parseSearchQuery(searchQuery || "restaurants").placeName, locationInput, diningNeed); }} className="location-form">
-              <label htmlFor="search-location">{copy("Where")}</label><input id="search-location" value={locationInput} onChange={event => setLocationInput(event.target.value)} placeholder={copy("City, state or any location")} />
-              <button type={"submit"}>{copy("Apply")}</button><button type="button" onClick={useLocation}>{copy("Near me")}</button>
-            </form>
+            <button type="button" className="near-me-button" onClick={useLocation}>{copy("Near me")}</button>
             <p className="resolved-location" role="status">{copy(locationLabel)}{checkingReviews ? ' · '+copy('Checking guest reports…') : ''}</p>
           </header>
 
@@ -191,7 +187,7 @@ export default function SearchScreen() {
               <h2 style={{ color: theme.text }}>{copy("What matters for this meal?")}</h2>
               <div className="need-list">{DINING_NEEDS.map(need => <button key={need.id} type="button" aria-pressed={diningNeed === need.id} onClick={() => {
                 const next = diningNeed === need.id ? '' : need.id;
-                if (searchQuery.trim()) navigateSearch(searchQuery, locationInput, next, Object.fromEntries(["location",'lat','lng'].flatMap(key => typeof router.query[key] === 'string' ? [[key, router.query[key] as string]] : []))); else setDiningNeed(next);
+                if (searchQuery.trim()) navigateSearch(searchQuery, '', next, Object.fromEntries(["location",'lat','lng'].flatMap(key => typeof router.query[key] === 'string' ? [[key, router.query[key] as string]] : []))); else setDiningNeed(next);
               }}>{copy(need.label)}</button>)}</div>
             </section>}
             {!!searchError && <p role="alert" style={{ color: theme.text }}>{copy(searchError)}</p>}
@@ -290,9 +286,7 @@ export default function SearchScreen() {
         </div>
 
         <style jsx>{`
-          .location-form { display: flex; align-items: center; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-          .location-form input { min-width: 130px; flex: 1; padding: 10px; border: 1px solid ${theme.border}; border-radius: 10px; color: ${theme.text}; background: ${theme.surface}; font: inherit; }
-          .location-form button { min-height: 44px; padding: 8px 12px; border: 1px solid ${theme.border}; border-radius: 10px; color: ${theme.text}; background: ${theme.surface}; cursor: pointer; }
+          .near-me-button { min-height: 40px; margin-top: 8px; padding: 6px 12px; border: 1px solid ${theme.border}; border-radius: 10px; color: ${theme.text}; background: ${theme.surface}; cursor: pointer; }
           .resolved-location { margin: 8px 0 0; color: ${theme.textSecondary}; font-size: 13px; }
           .search-screen {
             min-height: 100vh;
