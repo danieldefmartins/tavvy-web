@@ -1,134 +1,57 @@
-# TavvY Web App
+# Tavvy Web
 
-The official web application for TavvY - a signal-based community review platform.
+Tavvy helps people choose places and services through structured review taps,
+recent evidence, useful business information, menus, stories and media.
 
-## Pages
+## Start here
 
-- `/` - Landing page
-- `/privacy` - Privacy Policy
-- `/terms` - Terms of Service
+- [Project memory](docs/PROJECT_MEMORY.md): product decisions, architecture and behavior
+  that must be preserved across web and mobile.
+- [Current engineering status](docs/PROJECT_STATUS.md): verified releases, active work,
+  unfinished features and mobile/App Store readiness.
+- [Contributor handoff](AGENTS.md): how to continue work while preserving existing changes.
+- [Mobile repository](https://github.com/danieldefmartins/tavvy-mobile).
 
-## Tech Stack
-
-- **Framework:** Next.js 14
-- **Language:** TypeScript
-- **Styling:** CSS (global styles)
-- **Backend:** Supabase (shared with mobile app)
+The current development workspace is ahead of committed `main`. Recent production
+releases used reviewed source snapshots. Read the status document before building or
+deploying; this documentation update does not release unfinished application changes.
 
 ## Development
 
-```bash
-# Install dependencies
-npm install
+Next.js 14 Pages Router, React 18 and TypeScript, with Supabase shared by the mobile app.
+Use Node 20 or later and the existing npm lockfile.
 
-# Run development server
+```sh
+npm ci
 npm run dev
+```
 
-# Build for production
+Configure the existing project's Supabase connection in an uncommitted local
+environment file. Obtain environment settings from the maintainer; never put service
+credentials in `NEXT_PUBLIC_*` variables or commit them to this public repository.
+
+```sh
+npm run typecheck
 npm run build
-
-# Start production server
-npm start
 ```
 
-## Deployment to Railway
+Run the focused behavior/browser tests relevant to the changed feature. A successful
+web build does not verify native behavior, database migrations or production state.
 
-### Option 1: Deploy via Railway CLI
+## Main application areas
 
-```bash
-# Install Railway CLI
-npm install -g @railway/cli
+- `/app`: discovery and tools; `/app/place/[id]`: canonical place details.
+- `/app/ecard`: card management/creation; `/[username]`: public eCard.
+- `/place/[id]/...`: business owner, menu and ordering workflows.
+- `components/`, `lib/`, `config/`: UI, data/evidence rules and feature contracts.
+- `public/locales/`: translations; `supabase/`: backend migrations and functions.
 
-# Login to Railway
-railway login
+## Releases
 
-# Initialize project
-railway init
+Web production uses the existing Railway project. Deploy reviewed, isolated batches
+with their backend dependencies and evidence. Do not initialize a replacement Railway
+project or upload a mixed dirty workspace. Mobile EAS builds, Mac Mini producer jobs,
+database changes and App Store submission are separate release steps.
 
-# Deploy
-railway up
-```
-
-### Option 2: Deploy via GitHub
-
-1. Push this repo to GitHub
-2. Go to [Railway Dashboard](https://railway.app/dashboard)
-3. Click "New Project" → "Deploy from GitHub repo"
-4. Select your repository
-5. Railway will auto-detect Next.js and deploy
-
-### Option 3: Deploy via Railway Dashboard
-
-1. Go to [Railway Dashboard](https://railway.app/dashboard)
-2. Click "New Project" → "Empty Project"
-3. Add a new service → "GitHub Repo" or "Deploy from local"
-4. Configure the domain as `tavvy.com`
-
-## Environment Variables
-
-For production, set these in Railway:
-
-```
-# Optional: If you need Supabase on the web
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-
-## Custom Domain Setup
-
-After deploying to Railway:
-
-1. Go to your service settings
-2. Click "Settings" → "Networking" → "Custom Domain"
-3. Add `tavvy.com`
-4. Update your DNS records:
-   - Add a CNAME record pointing to your Railway domain
-   - Or use Railway's provided DNS settings
-
-## File Structure
-
-```
-tavvy-web/
-├── pages/
-│   ├── _app.tsx        # App wrapper
-│   ├── index.tsx       # Landing page
-│   ├── privacy.tsx     # Privacy Policy
-│   └── terms.tsx       # Terms of Service
-├── styles/
-│   └── globals.css     # Global styles (TavvY branding)
-├── public/
-│   └── logo-white.png  # TavvY logo
-├── package.json
-├── tsconfig.json
-├── next.config.js
-├── railway.json        # Railway deployment config
-└── README.md
-```
-
-## Adding New Pages
-
-To add a new page, create a file in the `pages/` directory:
-
-```tsx
-// pages/about.tsx
-import Head from 'next/head';
-
-export default function About() {
-  return (
-    <>
-      <Head>
-        <title>About | TavvY</title>
-      </Head>
-      <div>
-        <h1>About TavvY</h1>
-      </div>
-    </>
-  );
-}
-```
-
-This will automatically create a route at `/about`.
-
-## Support
-
-For questions or issues, contact: support@tavvy.com
+Update the project memory and status after each completed batch. Keep customer data,
+credentials and private operational runbooks outside Git.
