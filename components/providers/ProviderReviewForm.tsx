@@ -2,14 +2,17 @@ import React,{useState} from 'react';
 import Link from 'next/link';
 import {supabase} from '../../lib/supabaseClient';
 import {PROVIDER_TAPS,ProviderTapDimension,ProviderTapKind} from '../../lib/providerReviewTaps';
+import {useThemeContext} from '../../contexts/ThemeContext';
 
 export default function ProviderReviewForm({providerId,kind,signedIn,onSaved}:{providerId:string;kind:ProviderTapKind;signedIn:boolean;onSaved:()=>void}){
+  const {theme}=useThemeContext();
   const [main,setMain]=useState(''),[good,setGood]=useState(''),[vibe,setVibe]=useState(''),[headsUp,setHeadsUp]=useState('');
   const [rating,setRating]=useState(0),[title,setTitle]=useState(''),[content,setContent]=useState('');
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[saved,setSaved]=useState(false);
   const options=PROVIDER_TAPS[kind];
   const choose=(dimension:ProviderTapDimension,value:string)=>({main:setMain,good:setGood,vibe:setVibe,heads_up:setHeadsUp}[dimension])(value);
-  const field=(dimension:ProviderTapDimension,label:string,value:string,optional=false)=><fieldset style={{border:0,padding:'12px 0',margin:0}}><legend style={{fontWeight:700}}>{label}{optional?' (optional)':''}</legend><div style={{display:'flex',gap:8,flexWrap:'wrap'}}>{optional?<button type="button" aria-pressed={!value} onClick={()=>choose(dimension,'')}>Skip</button>:null}{options[dimension].map(option=><button key={option.code} type="button" aria-pressed={value===option.code} onClick={()=>choose(dimension,option.code)}>{option.label}</button>)}</div></fieldset>;
+  const chipStyle=(selected:boolean):React.CSSProperties=>({border:`1px solid ${selected?theme.primary:theme.border}`,borderRadius:999,background:selected?theme.surface:theme.background,color:theme.text,padding:'9px 13px',minHeight:44,cursor:'pointer',font:'inherit',fontWeight:selected?700:400});
+  const field=(dimension:ProviderTapDimension,label:string,value:string,optional=false)=><fieldset style={{border:0,padding:'12px 0',margin:0}}><legend style={{fontWeight:700}}>{label}{optional?' (optional)':''}</legend><div style={{display:'flex',gap:8,flexWrap:'wrap'}}>{optional?<button type="button" style={chipStyle(!value)} aria-pressed={!value} onClick={()=>choose(dimension,'')}>Skip</button>:null}{options[dimension].map(option=><button key={option.code} type="button" style={chipStyle(value===option.code)} aria-pressed={value===option.code} onClick={()=>choose(dimension,option.code)}>{option.label}</button>)}</div></fieldset>;
   async function submit(event:React.FormEvent){event.preventDefault();if(busy)return;setError('');setSaved(false);
     if(!main||!rating||content.trim().length<20){setError('Choose what mattered most, a rating, and describe your experience in at least 20 characters.');return;}
     setBusy(true);try{const {data,error:rpcError}=await supabase.rpc('submit_pro_provider_review_v1',{p_provider_id:providerId,p_rating:rating,p_title:title.trim(),p_content:content.trim(),p_main_tap:main,p_good_tap:good||null,p_vibe_tap:vibe||null,p_heads_up_tap:headsUp||null});if(rpcError||typeof data!=='string')throw rpcError||new Error('Your review could not be confirmed.');setSaved(true);onSaved();}catch(e){setError(e instanceof Error?e.message:'Your review could not be saved. Please try again.');}finally{setBusy(false);}}
