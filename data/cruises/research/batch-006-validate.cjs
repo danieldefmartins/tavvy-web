@@ -1,0 +1,69 @@
+#!/usr/bin/env node
+'use strict';
+// Offline dataset/evidence checks. No network or database execution.
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),assert=require('node:assert/strict'),vm=require('node:vm'),ts=require('typescript');
+const root=path.resolve(__dirname,'../../..');
+const stage='data/cruises/staged/verified-operating-batch-006.json',ep='data/cruises/research/batch-006-evidence.json',ip='data/cruises/research/batch-006-fleet-inventory.json';
+const read=p=>JSON.parse(fs.readFileSync(path.join(root,p),'utf8')),hash=b=>crypto.createHash('sha256').update(b).digest('hex');
+const data=read(stage),evidence=read(ep),inventory=read(ip),previous=evidence.bases.flatMap(b=>read(b.path).ships);
+const {validate:catalogValidate}=require('../../../scripts/cruises/validate-catalog.cjs');
+const renderer={};vm.runInNewContext(ts.transpileModule(fs.readFileSync(path.join(root,'lib/cruises/catalog.ts'),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText,{exports:renderer,URL});
+const norm=s=>s.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
+const hosts=new Set(['www.seabourn.com','www.silversea.com','cdn.sanity.io','www.sec.gov','www.oceaniacruises.com','oceaniacruises.zendesk.com','www.rssc.com','www.azamara.com','live.euronext.com']);
+const withheld=new Set(inventory.withheld.map(r=>r.slug));
+const imoValid=s=>/^\d{7}$/.test(s)&&[...s.slice(0,6)].reduce((sum,n,i)=>sum+Number(n)*(7-i),0)%10===Number(s[6]);
+const priorNames=new Set(previous.flatMap(d=>[d.ship.name,...d.ship.name_history.map(h=>h.name)]).map(norm));
+function validate(d,e){
+ const errors=[...catalogValidate(d).errors],check=(yes,message)=>{if(!yes)errors.push(message);};
+ check(d.ships.length===34&&d.operators.length===5,'exact34 ships/five operators');check(e.checked_at==='2026-09-21'&&e.ships.length===34,'dated per-ship evidence');
+ const ids=new Set(),names=new Set(),imos=new Set(),registry=new Set(read('data/cruises/research/operator-registry.json').operators.map(o=>o.id));
+ for(const row of d.ships){
+  const s=row.ship,ev=e.ships.find(x=>x.ship_id===s.id),src=new Map(row.sources.map(x=>[x.id,x]));
+  check(registry.has(s.operator_id),'known registry operator');check(!withheld.has(s.slug),'withheld/future identities excluded');
+  check(!previous.some(p=>p.ship.id===s.id||p.ship.universe_id===s.universe_id||p.ship.slug===s.slug||p.ship.official_url===s.official_url||(s.imo&&p.ship.imo===s.imo)||(s.eni&&p.ship.eni===s.eni))&&!priorNames.has(norm(s.name)),'no collision with342 prior identities');
+  check(!names.has(norm(s.name)),'no normalized duplicate name');names.add(norm(s.name));
+  check(s.publication_status==='draft'&&s.operating_status==='operating'&&s.identity_verified&&s.overnight_public_cruise,'verified overnight operating drafts');
+  check(s.eni===null&&s.photo===null,'unknown ENI/photo remains null');
+  check(!!ev&&ev.slug===s.slug&&!!ev.identity_basis,'matching identity evidence');if(!ev)continue;
+  if(s.imo!==null){check(imoValid(s.imo),'valid IMO checksum');check(!imos.has(s.imo),'unique IMO');imos.add(s.imo);check(ev.field_evidence.some(x=>x.path==='ship.imo'&&x.value===s.imo&&x.source_ids.includes('issuer2025')),'IMO has exact issuer evidence');}
+  check(src.size===row.sources.length,'unique source IDs');
+  for(const x of row.sources){let valid=false;try{const u=new URL(x.url);valid=u.protocol==='https:'&&hosts.has(u.hostname)&&!u.username&&!u.password;}catch{}
+   check(valid,'primary official source host');check(x.checked_at===e.checked_at&&!!x.publisher,'dated provenance');const obs=ev.source_observations.find(o=>o.source_id===x.id);check(!!obs&&!!obs.locator&&!!obs.observation&&!!obs.access,'source locator/access boundary');}
+  const identity=ev.field_evidence.find(x=>x.path==='ship.identity_and_operating_scope');check(!!identity&&identity.value.name===s.name&&identity.value.operator_id===s.operator_id&&identity.value.kind===s.kind,'identity fields match evidence');
+  check(s.facts.length===19&&new Set(s.facts.map(f=>f.key)).size===19,'all19 distinct fact keys');
+  for(const f of s.facts){check(f.as_of===e.checked_at,'real as-of date');if(f.value===null){check(f.verification==='unverified'&&f.source_ids.length===0,'unknown fact remains null and unsourced');continue;}
+   check(['verified','conflicting'].includes(f.verification),'explicit fact state');check(f.source_ids.length>0&&f.source_ids.every(x=>src.has(x)),'fact source linkage');const proof=ev.field_evidence.filter(x=>x.path==='ship.facts.'+f.key).at(-1);check(!!proof&&JSON.stringify(proof.value)===JSON.stringify(f.value)&&proof.verification===f.verification&&JSON.stringify(proof.source_ids)===JSON.stringify(f.source_ids),'fact matches recorded observation');}
+  for(const h of s.name_history){check(!priorNames.has(norm(h.name)),'historical alias collision');check(h.valid_from===null&&h.valid_until===null&&h.operator_name===null,'no invented historical dates or operator');check(h.source_ids.every(x=>src.has(x))&&ev.field_evidence.some(x=>x.path==='ship.name_history.'+h.name&&JSON.stringify(x.value)===JSON.stringify(h)),'exact sourced history');}
+  const childNames=new Set();for(const child of row.venues){check(!ids.has(child.id),'unique immutable IDs');ids.add(child.id);check(child.ship_id===s.id,'venue belongs to ship');check(child.place_id===null,'no invented canonical venue place ID');check(!childNames.has(norm(child.name)),'no duplicate physical venue name');childNames.add(norm(child.name));check(child.source_ids.length>0&&child.source_ids.every(x=>src.has(x)),'venue source linkage');check(ev.field_evidence.some(x=>x.path==='venues.'+child.id&&x.value.name===child.name&&x.value.kind===child.kind),'exact venue field evidence');}
+  check(row.programs.length===0&&s.cabin_categories.length===0,'unverified shows/cabin taxonomy omitted');
+  for(const id of [s.id,s.universe_id]){check(!ids.has(id),'unique immutable IDs');ids.add(id);}
+  const pub=structuredClone(row);pub.ship.publication_status='published';check(catalogValidate({schemaVersion:1,operators:d.operators,ships:[pub]}).errors.length===0,'existing publication contract satisfied');
+ }
+ return errors;
+}
+const checks=[];function test(name,run){run();checks.push({name,status:'PASS'});}const get=(slug,key)=>data.ships.find(d=>d.ship.slug===slug).ship.facts.find(f=>f.key===key);
+test('Five previous batches hash-pinned and342 identities preserved',()=>{assert.equal(previous.length,342);assert.equal(evidence.bases.length,5);for(const b of evidence.bases){assert.equal(hash(fs.readFileSync(path.join(root,b.path))),b.sha256);assert.equal(read(b.path).ships.length,b.ship_count);}});
+test('34 operating drafts pass actual catalog and per-field provenance validation',()=>assert.deepEqual(validate(data,evidence),[]));
+test('Six reviewed operators reconciled, Holland America11 already present',()=>{const expected={'seabourn':[5,5],'silversea-cruises':[12,12],'oceania-cruises':[9,7],'regent-seven-seas-cruises':[7,6],'azamara':[4,4],'holland-america-line':[11,0]};assert.equal(inventory.operators.length,6);for(const o of inventory.operators){assert.deepEqual([o.listed_count,o.staged_count],expected[o.operator_id]);for(const s of o.ships){if(s.disposition==='staged_operating')assert(data.ships.some(d=>d.ship.id===s.ship_id));else if(s.disposition==='existing_pinned_identity')assert(previous.some(d=>d.ship.id===s.ship_id));else assert(withheld.has(s.slug));}}});
+test('Four distinct sourced IMO identifiers pass checksum and match names',()=>{const expected={'azamara-journey':'9200940','azamara-onward':'9187887','azamara-pursuit':'9210220','azamara-quest':'9210218'};assert.deepEqual(Object.fromEntries(data.ships.filter(d=>d.ship.imo).map(d=>[d.ship.slug,d.ship.imo])),expected);for(const i of Object.values(expected))assert(imoValid(i));});
+test('History and short/future aliases do not collide with342 previous names',()=>{for(const a of inventory.identity_aliases_not_imported){assert(data.ships.some(d=>d.ship.slug===a.canonical_slug));for(const n of a.aliases)assert(!priorNames.has(norm(n)),n);}assert.equal(data.ships.reduce((n,d)=>n+d.ship.name_history.length,0),9);});
+function reject(name,mutate,reason){test(name,()=>{const d=structuredClone(data),e=structuredClone(evidence);mutate(d,e);assert(validate(d,e).some(x=>x.includes(reason)),reason);});}
+reject('Reject duplicate prior ship UUID',d=>d.ships[0].ship.id=previous[0].ship.id,'collision');
+reject('Reject unsourced IMO replacement',d=>d.ships[0].ship.imo='9187887','exact issuer evidence');
+reject('Reject invalid IMO checksum',d=>d.ships[0].ship.imo='9200941','checksum');
+reject('Reject future Prestige relabeled as operating',d=>d.ships[0].ship.slug='seven-seas-prestige','future');
+reject('Reject automatic publication of research drafts',d=>d.ships[0].ship.publication_status='published','drafts');
+reject('Reject unsourced fact edits',d=>d.ships[0].ship.facts.find(f=>f.value!==null).value=99999,'recorded observation');
+reject('Reject third-party reseller source',d=>d.ships[0].sources[0].url='https://reseller.invalid/ship','official source');
+reject('Reject fake canonical place IDs for dining rooms',d=>d.ships[0].venues[0].place_id=d.ships[0].ship.id,'canonical venue');
+reject('Reject synthetic history dates',d=>d.ships[0].ship.name_history[0].valid_from='2000-01-01','historical dates');
+test('Four unresolved Azamara passenger conflicts are hidden by actual renderer',()=>{let n=0;for(const d of data.ships){const shown=renderer.displayCruiseFacts(d.ship,d.sources);for(const f of d.ship.facts){if(f.verification!=='verified')assert(!shown.some(x=>x.key===f.key));if(f.verification==='conflicting'){n++;assert.equal(d.ship.operator_id,'azamara');assert.equal(f.key,'guests_double_occupancy');}}}assert.equal(n,4);});
+test('Typed capacity retains source basis and excludes untyped counts',()=>{for(const n of ['allura','vista']){assert.equal(get('oceania-'+n,'guests_maximum').value,1200);assert.equal(get('oceania-'+n,'guests_double_occupancy').value,null);}for(const n of ['marina','riviera'])assert.equal(get('oceania-'+n,'guests_double_occupancy').value,1250);for(const n of ['nautica','insignia','sirena'])assert.equal(get('oceania-'+n,'guests_double_occupancy').value,670);for(const d of data.ships.filter(d=>['seabourn','silversea-cruises','regent-seven-seas-cruises'].includes(d.ship.operator_id)))for(const k of ['guests_maximum','guests_double_occupancy','guests_lower_berths'])assert.equal(get(d.ship.slug,k).value,null);});
+test('Construction and service years remain distinct; launch-only years stay unknown',()=>{assert.equal(get('silver-dawn','year_built').value,2021);assert.equal(get('silver-dawn','entered_service').value,'2022');assert.equal(get('silver-endeavour','year_built').value,2021);assert.equal(get('silver-endeavour','entered_service').value,'2022');for(const n of ['pursuit','venture','quest'])assert.equal(get('seabourn-'+n,'year_built').value,null);assert.equal(get('seabourn-encore','year_built').value,2016);assert.equal(get('seabourn-ovation','year_built').value,2018);});
+test('Numbered decks and generic tonnage are never relabeled as totals or GT',()=>{for(const d of data.ships){assert.equal(get(d.ship.slug,'decks_total').value,null);if(d.ship.slug!=='silver-moon')assert.equal(get(d.ship.slug,'gross_tonnage').value,null);if(!['silversea-cruises','azamara'].includes(d.ship.operator_id))assert.equal(get(d.ship.slug,'decks_passenger').value,null);}assert.equal(get('silver-moon','gross_tonnage').value,40700);assert.equal(get('silver-nova','decks_passenger').value,9);});
+test('Partial physical venue lists do not imply counts or duplicate day/night service',()=>{for(const d of data.ships)for(const k of ['restaurants','dining_outlets','bars','shops','cafes','pools'])assert.equal(get(d.ship.slug,k).value,null);for(const n of ['silver-nova','silver-ray']){const v=data.ships.find(d=>d.ship.slug===n).venues;assert(v.some(v=>v.name==='The Marquee'));assert(!v.some(v=>['The Grill','Spaccanapoli'].includes(v.name)));}for(const d of data.ships.filter(d=>d.ship.operator_id==='regent-seven-seas-cruises')){assert.equal(d.venues.filter(v=>v.name.includes('Veranda')).length,1);assert(!d.venues.some(v=>v.name==='Sette Mari'));}});
+test('Future rename and Quest layout remain separate from current content',()=>{assert(!data.ships.some(d=>['oceania-aurelia','oceania-sonata','seven-seas-prestige','seabourn-sojourn','oceania-regatta'].includes(d.ship.slug)));assert(inventory.identity_aliases_not_imported.some(a=>a.canonical_slug==='oceania-nautica'&&a.aliases.includes('Oceania Aurelia')));assert(entriesFor('azamara-quest').unpromoted_observations.some(o=>o.key==='future_layout'));});
+function entriesFor(slug){return evidence.ships.find(x=>x.slug===slug);}
+test('Declared summary equals actual facts/venues/identities',()=>{const count={};for(const d of data.ships)for(const f of d.ship.facts)count[f.verification]=(count[f.verification]||0)+1;assert.deepEqual(count,evidence.summary.facts);assert.equal(data.ships.reduce((n,d)=>n+d.venues.length,0),evidence.summary.venues);assert.equal(evidence.summary.verified_imo_identifiers,4);assert.equal(evidence.summary.worldwide_complete,false);assert.equal(evidence.summary.existing_records_modified,false);});
+const report={status:'PASS',checked_at:evidence.checked_at,scope:'Offline actual catalog/display, identity and source checks only. No database collision queries, imports or publication performed.',worldwideComplete:false,checks_passed:checks.length,summary:evidence.summary,checks,files:Object.fromEntries([stage,ep,ip,'data/cruises/research/batch-006-validate.cjs'].map(p=>[p,hash(fs.readFileSync(path.join(root,p)))]))};
+if(process.argv.includes('--write'))fs.writeFileSync(path.join(__dirname,'batch-006-validation.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));

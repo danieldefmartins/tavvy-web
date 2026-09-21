@@ -1,0 +1,128 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-09-21",
+  "scope": "Offline actual catalog/display, identity and source checks only. No database collision queries, imports or publication performed.",
+  "worldwideComplete": false,
+  "checks_passed": 21,
+  "summary": {
+    "ships": 34,
+    "operators": 5,
+    "by_operator": {
+      "azamara": 4,
+      "oceania-cruises": 7,
+      "regent-seven-seas-cruises": 6,
+      "seabourn": 5,
+      "silversea-cruises": 12
+    },
+    "by_kind": {
+      "ocean": 28,
+      "expedition": 6
+    },
+    "facts": {
+      "verified": 155,
+      "unverified": 487,
+      "conflicting": 4
+    },
+    "venues": 368,
+    "programs": 0,
+    "cabin_categories": 0,
+    "verified_imo_identifiers": 4,
+    "name_history_rows": 9,
+    "unique_primary_urls": 70,
+    "registry_leads_total": 58,
+    "worldwide_complete": false,
+    "existing_records_modified": false
+  },
+  "checks": [
+    {
+      "name": "Five previous batches hash-pinned and342 identities preserved",
+      "status": "PASS"
+    },
+    {
+      "name": "34 operating drafts pass actual catalog and per-field provenance validation",
+      "status": "PASS"
+    },
+    {
+      "name": "Six reviewed operators reconciled, Holland America11 already present",
+      "status": "PASS"
+    },
+    {
+      "name": "Four distinct sourced IMO identifiers pass checksum and match names",
+      "status": "PASS"
+    },
+    {
+      "name": "History and short/future aliases do not collide with342 previous names",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject duplicate prior ship UUID",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject unsourced IMO replacement",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject invalid IMO checksum",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject future Prestige relabeled as operating",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject automatic publication of research drafts",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject unsourced fact edits",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject third-party reseller source",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject fake canonical place IDs for dining rooms",
+      "status": "PASS"
+    },
+    {
+      "name": "Reject synthetic history dates",
+      "status": "PASS"
+    },
+    {
+      "name": "Four unresolved Azamara passenger conflicts are hidden by actual renderer",
+      "status": "PASS"
+    },
+    {
+      "name": "Typed capacity retains source basis and excludes untyped counts",
+      "status": "PASS"
+    },
+    {
+      "name": "Construction and service years remain distinct; launch-only years stay unknown",
+      "status": "PASS"
+    },
+    {
+      "name": "Numbered decks and generic tonnage are never relabeled as totals or GT",
+      "status": "PASS"
+    },
+    {
+      "name": "Partial physical venue lists do not imply counts or duplicate day/night service",
+      "status": "PASS"
+    },
+    {
+      "name": "Future rename and Quest layout remain separate from current content",
+      "status": "PASS"
+    },
+    {
+      "name": "Declared summary equals actual facts/venues/identities",
+      "status": "PASS"
+    }
+  ],
+  "files": {
+    "data/cruises/staged/verified-operating-batch-006.json": "bff7c87fca292c456382aeb0b458978349bb4b17bd4ad56a1de2e30fa9ed4107",
+    "data/cruises/research/batch-006-evidence.json": "1efe13c4df57ca7ff1bdb535c72756e299bb112eff583f18e01849736c422edf",
+    "data/cruises/research/batch-006-fleet-inventory.json": "49e172303a7988e8c17d75ba779bc5387292baaccb7114ddc4928471ee408fae",
+    "data/cruises/research/batch-006-validate.cjs": "e93537e7880702933f6e411d942bf787173dd49f43221f614787f7fabbf0291e"
+  }
+}

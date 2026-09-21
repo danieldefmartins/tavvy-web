@@ -1,0 +1,577 @@
+{
+  "schemaVersion": 1,
+  "checked_at": "2026-09-21",
+  "bases": [
+    {
+      "path": "data/cruises/staged/verified-operating-batch-001.json",
+      "sha256": "bc87d6f4aabc3217f5af2b6d7b5e12e3d802bc9b33f2cb77020b69b7210cada3",
+      "ship_count": 12
+    },
+    {
+      "path": "data/cruises/staged/verified-operating-batch-002-enriched.json",
+      "sha256": "3fd875b18bd5a0234502dae66256fa9081b3195e09431b962c67bd4e87d73dea",
+      "ship_count": 59
+    },
+    {
+      "path": "data/cruises/staged/verified-operating-batch-003.json",
+      "sha256": "d791d164161e4e07cc44de28e2731196c05f362e52722bd9b607c380c77881ad",
+      "ship_count": 84
+    },
+    {
+      "path": "data/cruises/staged/verified-operating-batch-004.json",
+      "sha256": "e95de3c3be495a46c09622144b513cd27f94a2fc050b8f088f58e243ce710212",
+      "ship_count": 63
+    },
+    {
+      "path": "data/cruises/staged/verified-operating-batch-005.json",
+      "sha256": "673588e71c745325ac45ea6708a167eba79373721c49ad213ebf1a294f8e2457",
+      "ship_count": 124
+    }
+  ],
+  "scope": "Current official fleet lists, matching individual overnight ship products and separately dated technical sources. Operating means current marketed public-cruise fleet, not real-time sailing or booking availability.",
+  "operators": [
+    {
+      "operator_id": "seabourn",
+      "official_fleet_url": "https://www.seabourn.com/en/us/cruise-ships",
+      "checked_at": "2026-09-21",
+      "coverage": "Every current named operating ship on the reviewed official fleet list reconciled; future/transition observations kept separate. Not a daily operating-status feed.",
+      "listed_count": 5,
+      "staged_count": 5,
+      "ships": [
+        {
+          "slug": "seabourn-pursuit",
+          "name": "Seabourn Pursuit",
+          "ship_id": "034c0d38-0d47-5542-9ab4-fab4b6ec4828",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "seabourn-venture",
+          "name": "Seabourn Venture",
+          "ship_id": "a8a9dd52-50c8-53d3-992f-8951c6fe371c",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "seabourn-ovation",
+          "name": "Seabourn Ovation",
+          "ship_id": "4015b647-aee8-5886-94c8-1cc3a9119f2a",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "seabourn-encore",
+          "name": "Seabourn Encore",
+          "ship_id": "575de806-b251-59e7-8726-e2e9d4f4ee5a",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "seabourn-quest",
+          "name": "Seabourn Quest",
+          "ship_id": "b7e07311-458f-51eb-8fc0-404d78a1ccf4",
+          "disposition": "staged_operating"
+        }
+      ]
+    },
+    {
+      "operator_id": "silversea-cruises",
+      "official_fleet_url": "https://www.silversea.com/ships.html",
+      "checked_at": "2026-09-21",
+      "coverage": "Every current named operating ship on the reviewed official fleet list reconciled; future/transition observations kept separate. Not a daily operating-status feed.",
+      "listed_count": 12,
+      "staged_count": 12,
+      "ships": [
+        {
+          "slug": "silver-dawn",
+          "name": "Silver Dawn",
+          "ship_id": "16d0490a-5f80-5f23-981d-e2ee3fcfe57f",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "silver-moon",
+          "name": "Silver Moon",
+          "ship_id": "ee347484-e869-5a57-9249-82d38d7671b9",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "silver-muse",
+          "name": "Silver Muse",
+          "ship_id": "aa2dc772-6891-5f22-987e-17170f7a8a79",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "silver-nova",
+          "name": "Silver Nova",
+          "ship_id": "760e837e-299e-534c-a9e1-0dbc6f68d42a",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "silver-ray",
+          "name": "Silver Ray",
+          "ship_id": "db74f705-f612-5b97-b23e-3b0bd5dae813",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "silver-shadow",
+          "name": "Silver Shadow",
+          "ship_id": "5c357808-cb98-5d18-8abc-acc0bbaab160",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "silver-spirit",
+          "name": "Silver Spirit",
+          "ship_id": "284abaec-2d7f-5e34-be90-2d59ad1e4f41",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "silver-whisper",
+          "name": "Silver Whisper",
+          "ship_id": "ee9ce836-8597-505c-85ce-ba5996ac54bf",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "silver-cloud",
+          "name": "Silver Cloud",
+          "ship_id": "93f4f113-74ee-5243-afaa-af7a87abdac8",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "silver-endeavour",
+          "name": "Silver Endeavour",
+          "ship_id": "2e2dd925-ce52-5633-9a41-82535e97be32",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "silver-origin",
+          "name": "Silver Origin",
+          "ship_id": "93ac1c80-a337-5eb7-b1ab-2bb82c820f26",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "silver-wind",
+          "name": "Silver Wind",
+          "ship_id": "54264039-7a3f-582e-b897-facb8cf7f1ce",
+          "disposition": "staged_operating"
+        }
+      ]
+    },
+    {
+      "operator_id": "oceania-cruises",
+      "official_fleet_url": "https://www.oceaniacruises.com/ships",
+      "checked_at": "2026-09-21",
+      "coverage": "Every current named operating ship on the reviewed official fleet list reconciled; future/transition observations kept separate. Not a daily operating-status feed.",
+      "listed_count": 9,
+      "staged_count": 7,
+      "ships": [
+        {
+          "slug": "oceania-allura",
+          "name": "Oceania Allura",
+          "ship_id": "e9112eae-285c-5a0e-93a5-981792718d5a",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "oceania-vista",
+          "name": "Oceania Vista",
+          "ship_id": "6f214300-21fa-5f5f-86f6-d51496ca93c0",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "oceania-marina",
+          "name": "Oceania Marina",
+          "ship_id": "820ff532-52a8-5f2a-a312-cdea672b9c4a",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "oceania-riviera",
+          "name": "Oceania Riviera",
+          "ship_id": "6210802e-bd3d-53fd-b7ac-903826759bb3",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "oceania-nautica",
+          "name": "Oceania Nautica",
+          "ship_id": "398ea7ff-98a0-595a-97fd-c953205403a0",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "oceania-insignia",
+          "name": "Oceania Insignia",
+          "ship_id": "ba0d66fe-8dfb-5895-a5a9-a5b20216549a",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "oceania-sirena",
+          "name": "Oceania Sirena",
+          "ship_id": "8e9ef025-732f-5df7-ab1b-e453d962e65d",
+          "disposition": "staged_operating"
+        },
+        {
+          "operator_id": "oceania-cruises",
+          "slug": "oceania-sonata",
+          "name": "Oceania Sonata",
+          "disposition": "excluded_future",
+          "reason": "Official fleet lists an August2027 debut; not operating on checked date.",
+          "source_url": "https://www.oceaniacruises.com/ships"
+        },
+        {
+          "operator_id": "oceania-cruises",
+          "slug": "oceania-aurelia",
+          "name": "Oceania Aurelia",
+          "disposition": "excluded_future",
+          "reason": "November2027 future reimagining/rename of current Oceania Nautica. One existing hull, not an additional ship.",
+          "source_url": "https://experience.oceaniacruises.com/introducing-oceania-aurelia-the-ultimate-explorer"
+        }
+      ]
+    },
+    {
+      "operator_id": "regent-seven-seas-cruises",
+      "official_fleet_url": "https://www.rssc.com/ships",
+      "checked_at": "2026-09-21",
+      "coverage": "Every current named operating ship on the reviewed official fleet list reconciled; future/transition observations kept separate. Not a daily operating-status feed.",
+      "listed_count": 7,
+      "staged_count": 6,
+      "ships": [
+        {
+          "slug": "seven-seas-grandeur",
+          "name": "Seven Seas Grandeur",
+          "ship_id": "6a2ae91f-b058-53a2-95a7-20712015f1a6",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "seven-seas-explorer",
+          "name": "Seven Seas Explorer",
+          "ship_id": "236d56cf-1aa4-529c-8784-8ac796c95d69",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "seven-seas-splendor",
+          "name": "Seven Seas Splendor",
+          "ship_id": "24b29810-c527-5894-991a-124f61c41245",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "seven-seas-voyager",
+          "name": "Seven Seas Voyager",
+          "ship_id": "c61e1c7d-2b00-597a-b8a1-c039ca6397e7",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "seven-seas-mariner",
+          "name": "Seven Seas Mariner",
+          "ship_id": "7dcf1a79-3cc8-5ad2-bdbc-9bcf9d327ab7",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "seven-seas-navigator",
+          "name": "Seven Seas Navigator",
+          "ship_id": "be8ca872-ecdc-59bf-bb95-cac844faca85",
+          "disposition": "staged_operating"
+        },
+        {
+          "operator_id": "regent-seven-seas-cruises",
+          "slug": "seven-seas-prestige",
+          "name": "Seven Seas Prestige",
+          "disposition": "excluded_future",
+          "reason": "Official future ship product says first sailings winter2026; not established operating by September21.",
+          "source_url": "https://www.rssc.com/ships/seven_seas_prestige"
+        }
+      ]
+    },
+    {
+      "operator_id": "azamara",
+      "official_fleet_url": "https://www.azamara.com/our-ships",
+      "checked_at": "2026-09-21",
+      "coverage": "Every current named operating ship on the reviewed official fleet list reconciled; future/transition observations kept separate. Not a daily operating-status feed.",
+      "listed_count": 4,
+      "staged_count": 4,
+      "ships": [
+        {
+          "slug": "azamara-journey",
+          "name": "Azamara Journey",
+          "ship_id": "d31b1ee9-391d-50bd-a319-ae4003dbfb61",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "azamara-onward",
+          "name": "Azamara Onward",
+          "ship_id": "aa92b41f-417b-5101-8c77-22b0813f98a7",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "azamara-pursuit",
+          "name": "Azamara Pursuit",
+          "ship_id": "cff18214-288f-592c-9c65-a688501bf893",
+          "disposition": "staged_operating"
+        },
+        {
+          "slug": "azamara-quest",
+          "name": "Azamara Quest",
+          "ship_id": "58e6b9b7-eea5-5ea3-92dc-3cc2bf4f88fb",
+          "disposition": "staged_operating"
+        }
+      ]
+    },
+    {
+      "operator_id": "holland-america-line",
+      "official_fleet_url": "https://www.hollandamerica.com/en/us/cruise-ships",
+      "checked_at": "2026-09-21",
+      "coverage": "Every current named operating ship on the reviewed official fleet list reconciled; future/transition observations kept separate. Not a daily operating-status feed.",
+      "listed_count": 11,
+      "staged_count": 0,
+      "ships": [
+        {
+          "slug": "eurodam",
+          "name": "Eurodam",
+          "ship_id": "43935a22-ba4f-5865-b33e-4107240e292d",
+          "disposition": "existing_pinned_identity"
+        },
+        {
+          "slug": "koningsdam",
+          "name": "Koningsdam",
+          "ship_id": "69e6aad4-c5a9-56c3-9223-2d9b17c336ef",
+          "disposition": "existing_pinned_identity"
+        },
+        {
+          "slug": "nieuw-amsterdam",
+          "name": "Nieuw Amsterdam",
+          "ship_id": "77ca5b42-9f88-5051-86a3-30250bbaa1ab",
+          "disposition": "existing_pinned_identity"
+        },
+        {
+          "slug": "nieuw-statendam",
+          "name": "Nieuw Statendam",
+          "ship_id": "03dea0fc-d78d-558e-9ac8-5b2bfd359b28",
+          "disposition": "existing_pinned_identity"
+        },
+        {
+          "slug": "noordam",
+          "name": "Noordam",
+          "ship_id": "b2dbd2ad-c74d-5b40-b7ac-887f90aa1515",
+          "disposition": "existing_pinned_identity"
+        },
+        {
+          "slug": "oosterdam",
+          "name": "Oosterdam",
+          "ship_id": "b1b880b0-17be-5077-b2da-927f19337bfe",
+          "disposition": "existing_pinned_identity"
+        },
+        {
+          "slug": "rotterdam",
+          "name": "Rotterdam",
+          "ship_id": "2f6d7bc5-67d4-5b10-8a7c-719768579b8c",
+          "disposition": "existing_pinned_identity"
+        },
+        {
+          "slug": "volendam",
+          "name": "Volendam",
+          "ship_id": "287ca8a1-803b-5f1f-8efc-89aaeffadf22",
+          "disposition": "existing_pinned_identity"
+        },
+        {
+          "slug": "westerdam",
+          "name": "Westerdam",
+          "ship_id": "4198ae7a-aa5f-51b4-a384-de7dba24c83e",
+          "disposition": "existing_pinned_identity"
+        },
+        {
+          "slug": "zaandam",
+          "name": "Zaandam",
+          "ship_id": "f11a789a-6e5e-5c69-83c4-4ac5007e5952",
+          "disposition": "existing_pinned_identity"
+        },
+        {
+          "slug": "zuiderdam",
+          "name": "Zuiderdam",
+          "ship_id": "c7d97060-4bcc-52af-8889-25d4d9fc5a40",
+          "disposition": "existing_pinned_identity"
+        }
+      ]
+    }
+  ],
+  "withheld": [
+    {
+      "operator_id": "seabourn",
+      "slug": "seabourn-sojourn",
+      "name": "Seabourn Sojourn",
+      "disposition": "withheld_transition",
+      "reason": "Official sale announcement schedules transfer in May2026 and ship is absent from the current five-ship fleet. New owner/current operating brand not established by this batch.",
+      "source_url": "https://www.seabourn.com/en/us/news/press-release/2025-press-releases/march/seabourn-announces-sale-of-seabourn-sojourn-to-mitsui"
+    },
+    {
+      "operator_id": "oceania-cruises",
+      "slug": "oceania-sonata",
+      "name": "Oceania Sonata",
+      "disposition": "excluded_future",
+      "reason": "Official fleet lists an August2027 debut; not operating on checked date.",
+      "source_url": "https://www.oceaniacruises.com/ships"
+    },
+    {
+      "operator_id": "oceania-cruises",
+      "slug": "oceania-aurelia",
+      "name": "Oceania Aurelia",
+      "disposition": "excluded_future",
+      "reason": "November2027 future reimagining/rename of current Oceania Nautica. One existing hull, not an additional ship.",
+      "source_url": "https://experience.oceaniacruises.com/introducing-oceania-aurelia-the-ultimate-explorer"
+    },
+    {
+      "operator_id": "oceania-cruises",
+      "slug": "oceania-regatta",
+      "name": "Oceania Regatta",
+      "disposition": "withheld_transition",
+      "reason": "Absent from current fleet and individual URL redirects to fleet. Older annual/marketing pages still list it; present operator transition unresolved by reviewed primary evidence.",
+      "source_url": "https://www.oceaniacruises.com/ships/regatta"
+    },
+    {
+      "operator_id": "regent-seven-seas-cruises",
+      "slug": "seven-seas-prestige",
+      "name": "Seven Seas Prestige",
+      "disposition": "excluded_future",
+      "reason": "Official future ship product says first sailings winter2026; not established operating by September21.",
+      "source_url": "https://www.rssc.com/ships/seven_seas_prestige"
+    }
+  ],
+  "identity_aliases_not_imported": [
+    {
+      "canonical_slug": "oceania-allura",
+      "canonical_observed_name": "Oceania Allura",
+      "aliases": [
+        "Allura"
+      ],
+      "source_urls": [
+        "https://www.oceaniacruises.com/ships/allura",
+        "https://www.sec.gov/Archives/edgar/data/1513761/000110465926022067/nclh-20251231x10k.htm"
+      ],
+      "reason": "Current consumer prefix versus historical fleet-table short name; one physical ship."
+    },
+    {
+      "canonical_slug": "oceania-vista",
+      "canonical_observed_name": "Oceania Vista",
+      "aliases": [
+        "Vista"
+      ],
+      "source_urls": [
+        "https://www.oceaniacruises.com/ships/vista",
+        "https://www.sec.gov/Archives/edgar/data/1513761/000110465926022067/nclh-20251231x10k.htm"
+      ],
+      "reason": "Current consumer prefix versus historical fleet-table short name; one physical ship."
+    },
+    {
+      "canonical_slug": "oceania-marina",
+      "canonical_observed_name": "Oceania Marina",
+      "aliases": [
+        "Marina"
+      ],
+      "source_urls": [
+        "https://www.oceaniacruises.com/ships/marina",
+        "https://www.sec.gov/Archives/edgar/data/1513761/000110465926022067/nclh-20251231x10k.htm"
+      ],
+      "reason": "Current consumer prefix versus historical fleet-table short name; one physical ship."
+    },
+    {
+      "canonical_slug": "oceania-riviera",
+      "canonical_observed_name": "Oceania Riviera",
+      "aliases": [
+        "Riviera"
+      ],
+      "source_urls": [
+        "https://www.oceaniacruises.com/ships/riviera",
+        "https://www.sec.gov/Archives/edgar/data/1513761/000110465926022067/nclh-20251231x10k.htm"
+      ],
+      "reason": "Current consumer prefix versus historical fleet-table short name; one physical ship."
+    },
+    {
+      "canonical_slug": "oceania-nautica",
+      "canonical_observed_name": "Oceania Nautica",
+      "aliases": [
+        "Nautica"
+      ],
+      "source_urls": [
+        "https://www.oceaniacruises.com/ships/nautica",
+        "https://www.sec.gov/Archives/edgar/data/1513761/000110465926022067/nclh-20251231x10k.htm"
+      ],
+      "reason": "Current consumer prefix versus historical fleet-table short name; one physical ship."
+    },
+    {
+      "canonical_slug": "oceania-insignia",
+      "canonical_observed_name": "Oceania Insignia",
+      "aliases": [
+        "Insignia"
+      ],
+      "source_urls": [
+        "https://www.oceaniacruises.com/ships/insignia",
+        "https://www.sec.gov/Archives/edgar/data/1513761/000110465926022067/nclh-20251231x10k.htm"
+      ],
+      "reason": "Current consumer prefix versus historical fleet-table short name; one physical ship."
+    },
+    {
+      "canonical_slug": "oceania-sirena",
+      "canonical_observed_name": "Oceania Sirena",
+      "aliases": [
+        "Sirena"
+      ],
+      "source_urls": [
+        "https://www.oceaniacruises.com/ships/sirena",
+        "https://www.sec.gov/Archives/edgar/data/1513761/000110465926022067/nclh-20251231x10k.htm"
+      ],
+      "reason": "Current consumer prefix versus historical fleet-table short name; one physical ship."
+    },
+    {
+      "canonical_slug": "oceania-nautica",
+      "canonical_observed_name": "Oceania Nautica",
+      "aliases": [
+        "Oceania Aurelia",
+        "Aurelia"
+      ],
+      "source_urls": [
+        "https://experience.oceaniacruises.com/introducing-oceania-aurelia-the-ultimate-explorer"
+      ],
+      "reason": "Announced future name of Nautica; collision guard only, not current name or historical-name row."
+    },
+    {
+      "canonical_slug": "azamara-journey",
+      "canonical_observed_name": "Azamara Journey",
+      "aliases": [
+        "R Six",
+        "Blue Star",
+        "Blue Dream"
+      ],
+      "source_urls": [
+        "https://live.euronext.com/sites/default/files/contributions_live/2025-08/1754551563_32502_2025%2008%2006%20-%20SP%20Cruises%20Intermediate%20Limited%20-%20Admission%20Document%20%28executed%20version%29.pdf"
+      ],
+      "reason": "Verified former names of this IMO-identified hull; partial history, not separate ships."
+    },
+    {
+      "canonical_slug": "azamara-onward",
+      "canonical_observed_name": "Azamara Onward",
+      "aliases": [
+        "R Three",
+        "Pacific Princess"
+      ],
+      "source_urls": [
+        "https://live.euronext.com/sites/default/files/contributions_live/2025-08/1754551563_32502_2025%2008%2006%20-%20SP%20Cruises%20Intermediate%20Limited%20-%20Admission%20Document%20%28executed%20version%29.pdf"
+      ],
+      "reason": "Verified former names of this IMO-identified hull; partial history, not separate ships."
+    },
+    {
+      "canonical_slug": "azamara-pursuit",
+      "canonical_observed_name": "Azamara Pursuit",
+      "aliases": [
+        "R Eight"
+      ],
+      "source_urls": [
+        "https://live.euronext.com/sites/default/files/contributions_live/2025-08/1754551563_32502_2025%2008%2006%20-%20SP%20Cruises%20Intermediate%20Limited%20-%20Admission%20Document%20%28executed%20version%29.pdf"
+      ],
+      "reason": "Verified former names of this IMO-identified hull; partial history, not separate ships."
+    },
+    {
+      "canonical_slug": "azamara-quest",
+      "canonical_observed_name": "Azamara Quest",
+      "aliases": [
+        "R Seven",
+        "Delphin Renaissance",
+        "Blue Moon"
+      ],
+      "source_urls": [
+        "https://live.euronext.com/sites/default/files/contributions_live/2025-08/1754551563_32502_2025%2008%2006%20-%20SP%20Cruises%20Intermediate%20Limited%20-%20Admission%20Document%20%28executed%20version%29.pdf"
+      ],
+      "reason": "Verified former names of this IMO-identified hull; partial history, not separate ships."
+    }
+  ]
+}

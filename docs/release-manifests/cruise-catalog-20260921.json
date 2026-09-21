@@ -6,12 +6,13 @@
     "002-enriched",
     "003",
     "004",
-    "005"
+    "005",
+    "006"
   ],
   "superseded_not_active": [
     "002"
   ],
-  "published_ships": 342,
+  "published_ships": 376,
   "worldwide_complete": false,
   "files": [
     {
@@ -170,6 +171,31 @@
       "bytes": 6970
     },
     {
+      "path": "data/cruises/research/batch-006-evidence.json",
+      "sha256": "1efe13c4df57ca7ff1bdb535c72756e299bb112eff583f18e01849736c422edf",
+      "bytes": 253408
+    },
+    {
+      "path": "data/cruises/research/batch-006-fleet-inventory.json",
+      "sha256": "49e172303a7988e8c17d75ba779bc5387292baaccb7114ddc4928471ee408fae",
+      "bytes": 21624
+    },
+    {
+      "path": "data/cruises/research/batch-006-validate.cjs",
+      "sha256": "e93537e7880702933f6e411d942bf787173dd49f43221f614787f7fabbf0291e",
+      "bytes": 13897
+    },
+    {
+      "path": "data/cruises/research/batch-006-validation.json",
+      "sha256": "fc1cf9dc3a24fb6ffda57e7c0d0f3168b08f89c775ca8b8698e33883c52b64f5",
+      "bytes": 3707
+    },
+    {
+      "path": "data/cruises/research/batch-006-verification.md",
+      "sha256": "a1cf45102def98b79976b193242c15556bad14a1f194fe332d36e35c9ea6bae1",
+      "bytes": 7194
+    },
+    {
       "path": "data/cruises/research/operator-registry.json",
       "sha256": "0b5fb3da1c17ed4765e798b958e916e6629bb4d321410757818785eeca8e2fdd",
       "bytes": 20327
@@ -208,6 +234,11 @@
       "path": "data/cruises/staged/verified-operating-batch-005.json",
       "sha256": "673588e71c745325ac45ea6708a167eba79373721c49ad213ebf1a294f8e2457",
       "bytes": 1109653
+    },
+    {
+      "path": "data/cruises/staged/verified-operating-batch-006.json",
+      "sha256": "bff7c87fca292c456382aeb0b458978349bb4b17bd4ad56a1de2e30fa9ed4107",
+      "bytes": 440922
     },
     {
       "path": "scripts/cruises/prepare-draft-import.cjs",
