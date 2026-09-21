@@ -1,6 +1,6 @@
 # Tavvy current engineering status
 
-As of September 20, 2026, America/New_York (September 21 UTC).
+As of September 20, 2026, America/New_York (September 21, 03:37 UTC).
 Read [PROJECT_MEMORY.md](PROJECT_MEMORY.md) for product decisions and architecture.
 This is a dated checkpoint, not a claim that the full requested release is complete.
 
@@ -35,15 +35,15 @@ with the maintainer. Check the serving build again before making a new live clai
 
 ### Search — active recovery, preserve progress
 
-The persistent replacement contains 6,180,000 of 34,883,915 backed-up place records.
-An interrupted transfer is being recovered without discarding that progress. The
-current serving search remains unchanged. Exact verification found text differences;
-the saved prefix must be repaired and fully verified before import resumes. A count
-alone does not establish a safe resume cursor. A full audit is still incomplete at
-this checkpoint; do not describe the import as resumed or the migration as finished.
+The interrupted import has **resumed from its verified 6,180,000-record checkpoint**.
+The full saved prefix was audited, two text fields restored from the backup, and all
+6,180,000 complete records rechecked with zero differences. At 03:37 UTC, more than
+6.27 million of the 34,883,915 total records had been individually acknowledged.
+This is a dated progress checkpoint, not a live counter or a completed migration.
+The current serving search remains unchanged.
 
-ASCII JSON transport, durable per-batch journaling and exact per-record response
-checks are under review. Any uncertain write must stop for reconciliation. The
+The resumed importer uses ASCII JSON transport, durable per-batch journaling and
+exact per-record response checks. Any uncertain write stops for reconciliation. The
 approved migration still needs complete data/configuration verification, search and
 permission checks, replacement restart persistence, producer reconciliation and a
 verified traffic switch. Private infrastructure identifiers, keys, backup data and
@@ -89,7 +89,7 @@ in this public status document.
 | Shared tool headers | Universe-style source changes and browser checks prepared. | Integrate and release; verify every tool in both themes. |
 | On The Go | Full discovery/detail/owner changes prepared; backend lifecycle dependency remains. | Resolve lifecycle/identity rules, confirmed mobile location, stories, authorization and expiry; apply validated migration and release. |
 | RV & Camping | Existing canonical parks/campgrounds remain; current bounded browse queries hide some records. | Correct filtering/pagination/classification, category-specific taps and canonical details. Offline maps are not implemented. |
-| Cruises | Catalog/review source and rollback-tested migrations prepared. Operator research is not a complete fleet. | Verify ships and facts, prepare licensed/original media, validate onboard venues, apply migrations and publish reviewed batches. |
+| Cruises | Catalog/review source and rollback-tested migrations prepared. First sourced batch contains 12 draft ships (4 ocean, 4 river, 4 expedition), 48 venues and 36 cabin categories. Further operator fleet inventory is active. | Review canonical identity/deduplication, verify remaining facts/media permissions, apply migrations and publish reviewed batches. No fleet data has been published; worldwide coverage remains incomplete. |
 | Atlas | Existing reading themes/text-size confirmed; audio fixes partly live. | Improve discoverability/persistence checks; integrate full audio UI and atomically deploy the reviewed scheduled producer. |
 | UGC | Reporting/blocking/moderation source and rollback checks prepared. | Apply backend dependencies, complete operational moderation and verify all exposed surfaces. Not live yet. |
 
