@@ -35,7 +35,7 @@ export function resolveSearchIntent(query: string, context: SearchContext = {}):
 /** Context for a new typed query. Explicit relative intent cannot inherit a prior map center. */
 export function submittedSearchContext(query: string, previous: SearchContext, device?: SearchCoordinates, location?: string): SearchContext {
   if (parseSearchQuery(query).useCurrentLocation) return { mode: 'current', coordinates: validCoordinates(device) ? device : undefined };
-  return { ...previous, coordinates: previous.mode === 'map' ? previous.coordinates : device, location: location?.trim() || undefined };
+  return { mode: 'current', coordinates: validCoordinates(device) ? device : undefined, location: location?.trim() || undefined };
 }
 export function isDiningSearch(query: string): boolean {
   return /\b(restaurant|restaurants|food|dining|dinner|lunch|breakfast|brunch|italian|pizza|pasta|sushi|cafe|cafes|coffee|bistro|steak|seafood|burger|tacos|mexican|chinese|thai|indian|bakery|bar|bars|pub)\b/i.test(query);

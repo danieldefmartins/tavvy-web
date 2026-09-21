@@ -86,6 +86,27 @@ export default function SearchScreen() {
     for (const [key, apiKey] of [["location","location"],['lat','userLat'],['lng','userLng'],['minLat','minLat'],['maxLat','maxLat'],['minLng','minLng'],['maxLng','maxLng']]) {
       const value = router.query[key]; if (typeof value === 'string') params.set(apiKey, value);
     }
+    const parsed = parseSearchQuery(query);
+    if (!parsed.city && !where && !params.has('userLat') && !params.has('location')) {
+      if (!navigator.geolocation) {
+        setLocationLabel('Current location needed');
+        setSearchError('Use your location or enter a city to search nearby.');
+        setResults([]); setDining(isDiningSearch(query)); setLoading(false); return;
+      }
+      try {
+        const position = await new Promise<GeolocationPosition>((resolve, reject) =>
+          navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 }));
+        if (requestId !== requestIdRef.current) return;
+        params.set('location', 'current');
+        params.set('userLat', String(position.coords.latitude));
+        params.set('userLng', String(position.coords.longitude));
+      } catch {
+        if (requestId !== requestIdRef.current) return;
+        setLocationLabel('Current location needed');
+        setSearchError('Use your location or enter a city to search nearby.');
+        setResults([]); setDining(isDiningSearch(query)); setLoading(false); return;
+      }
+    }
     if (parseSearchQuery(query).useCurrentLocation && !params.has('userLat')) {
       setLocationLabel('Current location needed');
       setSearchError('Use your location or enter a city to search nearby.'); setResults([]); setDining(isDiningSearch(query)); setLoading(false); return;
@@ -127,7 +148,7 @@ export default function SearchScreen() {
     const parsed = parseSearchQuery(query);
     const text = query.trim();
     if (parsed.city || parsed.useCurrentLocation) where = '';
-    const previousScope = !where.trim() && !parsed.city && (!parsed.useCurrentLocation || router.query.location !== 'map') ? Object.fromEntries(["location",'lat','lng','minLat','maxLat','minLng','maxLng'].flatMap(key => typeof router.query[key] === 'string' ? [[key, router.query[key] as string]] : [])) : {};
+    const previousScope: Record<string,string> = {};
     if (parsed.useCurrentLocation || extra.location === 'current') {
       for (const key of ['minLat','maxLat','minLng','maxLng']) delete previousScope[key];
       previousScope.location = 'current';

@@ -86,6 +86,16 @@ test('explicit near-me discards stale named and map context, using only actual d
  assert.equal(resolveSearchIntent('pizza near me',submittedSearchContext('pizza near me',old,undefined,'Boston, MA')).needsLocation,true);
  assert.equal(resolveSearchIntent('pizza near me',{coordinates:device,location:'Boston, MA'}).kind,'current');
 });
+test('a new unqualified query uses device location instead of a previous map area', () => {
+ const { submittedSearchContext } = load('searchIntent');
+ const old={mode:'map',coordinates:point,bounds:{minLat:42,maxLat:43,minLng:-72,maxLng:-70}};
+ const device={latitude:28.54,longitude:-81.38};
+ const context=submittedSearchContext('Italian restaurants',old,device);
+ assert.equal(resolveSearchIntent('Italian restaurants',context).kind,'current');
+ assert.deepEqual(context.coordinates,device);
+ assert.equal(context.bounds,undefined);
+ assert.equal(resolveSearchIntent('Italian restaurants',submittedSearchContext('Italian restaurants',old)).needsLocation,true);
+});
 test('only explicit demo aliases are shortcuts; canonical and unrelated Trattoria queries search normally',()=>{
  const {matchesDemoRestaurantQuery}=load('demoPlace');
  for(const q of ['Trattoria Tavvy','trattoria tavvy in Boston','Trattoria Roma','best trattoria']) assert.equal(matchesDemoRestaurantQuery(q),false,q);
