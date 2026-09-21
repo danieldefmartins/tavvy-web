@@ -222,10 +222,15 @@ export default function NewProjectPage() {
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
   const addressRequest = useRef(0);
   const [nearbyPosition, setNearbyPosition] = useState<{ lat: number; lon: number } | null>(null);
+  const [approximateState, setApproximateState] = useState<string | null>(null);
   const [locationPending, setLocationPending] = useState(false);
 
   useEffect(() => {
-    if (step !== 6 || !navigator.geolocation) return;
+    if (step !== 5) return;
+    fetch('/api/pros/address-context').then(response => response.ok ? response.json() : null).then(data => {
+      if (typeof data?.state === 'string') setApproximateState(data.state);
+    }).catch(() => {});
+    if (!navigator.geolocation) return;
     setLocationPending(true);
     navigator.geolocation.getCurrentPosition(
       position => { setNearbyPosition({ lat: position.coords.latitude, lon: position.coords.longitude }); setLocationPending(false); },
@@ -350,7 +355,8 @@ export default function NewProjectPage() {
     setAddressLoading(true);
     try {
       const request = ++addressRequest.current;
-      const params = new URLSearchParams({ q: text, limit: '8', lang: 'en' });
+      const query = nearbyPosition ? text : [text, formData.state.trim() || approximateState].filter(Boolean).join(', ');
+      const params = new URLSearchParams({ q: query, limit: '8', lang: 'en' });
       if (nearbyPosition) {
         params.set('lat', String(nearbyPosition.lat));
         params.set('lon', String(nearbyPosition.lon));
@@ -370,13 +376,13 @@ export default function NewProjectPage() {
     } finally {
       setAddressLoading(false);
     }
-  }, [nearbyPosition, locationPending]);
+  }, [nearbyPosition, locationPending, approximateState, formData.state]);
 
   useEffect(() => {
-    if (step !== 6 || locationPending || formData.address.length < 3) return;
+    if (step !== 5 || locationPending || formData.address.length < 3) return;
     if (searchTimeout.current) clearTimeout(searchTimeout.current);
     searchTimeout.current = setTimeout(() => searchAddress(formData.address), 100);
-  }, [nearbyPosition, locationPending]);
+  }, [nearbyPosition, locationPending, approximateState]);
 
   const handleAddressTextChange = (text: string) => {
     addressRequest.current++;
@@ -1037,9 +1043,6 @@ export default function NewProjectPage() {
 
               {/* Address with autocomplete */}
               <div style={{ marginBottom: '20px', position: 'relative' }}>
-                <button type="button" onClick={() => navigator.geolocation?.getCurrentPosition(position => setNearbyPosition({ lat: position.coords.latitude, lon: position.coords.longitude }))} style={{ border: 'none', background: 'transparent', color: ProsColors.primary, cursor: 'pointer', padding: '0 0 10px' }}>
-                  {nearbyPosition ? 'Using your location for nearby addresses' : 'Use my location for nearby addresses'}
-                </button>
                 <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: ProsColors.textPrimary, marginBottom: '8px' }}>
                   Street Address
                 </label>
