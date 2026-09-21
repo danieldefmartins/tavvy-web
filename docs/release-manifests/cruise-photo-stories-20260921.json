@@ -1,6 +1,6 @@
 {
   "sourceManifestSha256": "e5764555acdb1ab1111a9bc9ac82615201e2f9bcbd5e9042eefa9a62f6141a3a",
-  "state": "Web deployment pending; native configured build passed, device verification pending; backend021 installed",
+  "state": "Web deployed and live verified; native configured build and actual iPhone/iPad checks passed; backend021 and admin installed; native706 EAS upload pending",
   "files": [
     {
       "path": "components/StoriesRow.tsx",
@@ -34,5 +34,12 @@
   "migration": {
     "path": "supabase/migrations/202609210021_cruise_admin_photo_visibility.sql",
     "sha256": "b64b71c2d654c8f2fab07f9abbefd1367170d1871665b71a7d686e0d187dff7a"
+  },
+  "webRelease": {
+    "commit": "79a17b8e9ed80ce1a6a85911ede73f6137895a8c",
+    "buildId": "kgb4gXgRxNZrraBUwSWBt",
+    "httpChecks": 7,
+    "photoBrowserChecks": 13,
+    "storiesBrowserChecks": 16
   }
 }

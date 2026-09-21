@@ -14,8 +14,12 @@ based only on their filenames; obtain private release evidence from the maintain
 
 ## Current web release
 
-Verified live build: `8AyFMYKC7PMLjYfxoIweN`. The 702-file cruise/eCard product
-release is deployed and health/route checks passed. Local production browser checks
+Verified live build: `kgb4gXgRxNZrraBUwSWBt`. The cruise photo/Stories update is deployed
+from reviewed web commit `79a17b8`. Seven live HTTP checks, 13 photo browser checks and
+16 Stories browser checks passed with the exact live build; no real records were changed
+by those browser checks. The registered uploaded ship photo appears in the live page
+and share metadata. This replaces `8AyFMYKC7PMLjYfxoIweN`, whose earlier cruise/eCard
+release passed the following checks. Local production browser checks
 passed 17 cruise, 18 eCard and two fully rendered 9:16 previews; all three suites
 also passed against the deployed build. Ten live HTTP checks and three read-only
 catalog checks passed. Browser data/write fixtures did not mutate real records.
@@ -50,7 +54,7 @@ private image metadata, public gallery projection and protected upload paths pas
 records or uploaded test images were retained.
 
 The dedicated admin ship editor is live at https://admin.tavvy.com/cruises, version
-`2026-09-21-cruise-admin020`. It includes all statuses,
+`2026-09-21-cruise-photo021` (updated from admin020). It includes all statuses,
 search and filters, Information/Photos/Facts/Sources tabs, cover/gallery management and
 in-memory unsaved-draft recovery. Production UI checks 28, cache checks 12 and focused
 server/image checks 13 passed. Railway Linux image decoding/re-encoding, live health,
@@ -133,12 +137,13 @@ traffic switch remain pending. Private cost, deadline and ambiguity limits still
 
 - Complete worldwide overnight fleet research.
 - The user removed mandatory source/permission steps for admin cruise photo uploads.
-  The coordinated backend/admin/web/native change is in progress; historical metadata
-  remains intact and ship factual verification remains separate. Existing705 does not
-  contain this new photo-publication change.
-- StoriesRow scope corrections are prepared separately for web and native, with
-  18 component regressions passing. They preserve empty Universe results and reject
-  stale scope/account responses. Release preparation is underway; not deployed yet.
+  Backend021, admin and web are live; native706 passed configured iPhone/iPad checks.
+  Historical metadata remains intact and ship factual verification remains separate.
+  Existing EAS705 does not contain this new photo-publication change.
+- StoriesRow scope corrections are deployed on web and included in verified native706,
+  with 18 component regressions and 16 live web browser checks passing. They preserve
+  empty Universe results and reject stale scope/account responses. Native706 has not
+  been uploaded to EAS.
 - Complete On The Go expiry scheduling and non-food owner features.
 - Persist remaining Settings preferences that currently only change component state.
 - RV offline maps need a provider permitting downloads; offline routing is separate.
@@ -161,11 +166,15 @@ Backend021 is installed:46 actual-database rollback checks, independent cleanup 
 authorization checks passed. Photo source/permission fields are no longer required.
 Historical metadata is preserved without inventing verification claims.
 
-The new web photo/Stories client passed local production checks but has not deployed:
-Railway failed while receiving the source archive, before compilation. The prior web
-release remains live. A configured native706 build and32 native tests passed; actual
-iPhone/iPad photo checks are underway. This is separate from completed internal EAS705.
+The new web photo/Stories client is deployed and passed its live checks. Railway
+archive transfers failed before compilation; fetching the exact reviewed Git commit
+through the existing repository connection succeeded. A configured native706 build and 32 native tests passed. Actual
+iPhone and iPad checks also passed: the real uploaded photo appears in the directory,
+hero and gallery, Photos & stories opens correctly, and Back preserves the ship filters.
+Eight original Simulator screenshots are archived. This is separate from completed
+internal EAS705; native706 has not been uploaded to EAS.
 
-The horizontal cruise-line logo strip and unified Filters control are in development
-on both platforms, isolated from the photo release. Fleet/image/fact completeness is
+The horizontal cruise-line logo strip and unified Filters control, with all 26 official
+operator logos, passed local web build/browser checks. Combined native device checks
+are underway; this separate discovery update is not deployed. Fleet/image/fact completeness is
 not yet established. Current inventory remains376 ships across26 operators.
