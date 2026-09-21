@@ -1,157 +1,132 @@
 # Tavvy current engineering status
 
-As of September 21, 2026, 02:08 America/New_York (06:08 UTC).
+As of September 21, 2026, 03:37 America/New_York (07:37 UTC).
 Read [PROJECT_MEMORY.md](PROJECT_MEMORY.md) for product decisions and architecture.
-This is a dated checkpoint, not a claim that the full requested release is complete.
+This checkpoint distinguishes live features, local verification and remaining work.
+The full requested release is not complete.
 
 ## Source and release warning
 
-The active web/mobile workspaces contain substantial changes beyond committed `main`,
-including both released code and unrelated unfinished work. Recent deployments used
-isolated, reviewed source snapshots. This documentation update does not commit those
-application changes, and Git HEAD alone does not reproduce the current deployed app.
-Obtain the reviewed release snapshot and private evidence from the maintainer before
-preparing the next release. Do not deploy a mixed working directory or assume every
-local migration has been applied.
+The active web/mobile workspaces contain released changes and unrelated unfinished
+work beyond committed `main`. Production releases use reviewed, isolated snapshots.
+Git HEAD alone does not reproduce the current app. Obtain the current release
+snapshot and private evidence from the maintainer before preparing another release.
+Do not deploy a mixed working directory or replay a migration based on its filename.
 
-## Verified recent deliveries
+## Live releases
 
-| Area | Verified result | Limits |
+The current verified web build is `-Gu0Rf0Yc1fVdvEMncgYo`. It includes the earlier
+appearance, place-sharing, eCard gallery, tools, cruise, community-safety, On The Go,
+Atlas audio and English/Portuguese/Spanish creation-copy batches. The current admin
+release includes verified review-author resolution. Both deployments succeeded;
+Two read-only live batches passed 172 and 80 checks, including all 218 cruise detail pages,
+sharing metadata, public tool routes and anonymous admin access denial.
+
+| Area | Delivered and verified | Remaining limits |
 | --- | --- | --- |
-| Web appearance / preview / language batch | Device/Light/Dark controls, larger logo, real 9:16 eCard preview and language-control corrections released and browser checked. | Remaining legacy labels and all cross-tool parity still require verification. |
-| Latest eCard visual release | Shared renderer corrections, template/palette preservation, corrected clipping and badge/contact spacing released. Build and 21-layout preview bridge passed. Five affected public cards passed postrelease iPhone Simulator Safari checks. | Design-first creation, fictional examples and actual renderer galleries are now released separately below. Native changes still need the next mobile release. |
-| Public eCard availability | Bounded read retry; temporary lookup failures return unavailable/503 rather than a misleading not-found page. Ten focused checks passed. | Does not change ownership or bypass public visibility rules. |
-| Place sharing | New place-specific OG images and metadata with name, category/subcategory, location, trusted photo treatment and designed fallback are live. Crawler checks and actual 1200×630 output verified. | Arbitrary external photos use direct images; broader Arabic/CJK image font coverage remains. |
-| On The Go appearance | Earlier web Light/Dark background correction is live. | Full On The Go workflow is not released. |
-| Atlas audio | Full recordings for both voices repaired and checked for Los Angeles, Chicago and Nashville. Generation access guard released. | Full producer and audio UI rollout remains separate. |
-| Native internal preview | Latest uploaded internal iOS preview finished: app version 1.0.1, build 26, from the 616-file snapshot. | Later 663-file Simulator build now passes compilation; current-binary UI checks are underway. No App Store submission. |
-| iPad navigation | Account, RV & Camping, Universes, Realtors, Saved and personal sign-in passed fresh-install landscape and update portrait checks on the later local candidate. | Tested on iPad Air 11-inch M4 / iOS 26.5, not the original reviewer device/OS. |
+| Appearance and tools | Device / Light / Dark choices, accessible appearance controls, larger logo and Universe-style headers across ten web tool routes. | Final native checks and all new workflow translations remain. |
+| Place sharing | Place-specific title, category/subcategory, location and designed image treatment; actual 1200×630 output checked. | Broader Arabic/CJK image font coverage remains. |
+| eCards | Design-first creation, Quick setup and full type/country path; all 21 layouts and 123 palettes; fictional examples; actual public renderer in 9:16 previews; preservation of entered and saved content. | Native release, remaining legacy preview paths and final language checks remain. |
+| Template evidence | All 21 actual iPhone Simulator Safari gallery captures and three latest finishing follow-ups completed and visually checked. | These are web template captures, not native App Store screenshots. |
+| Review summaries | Four-part grid in search, RV, On The Go and canonical details; category-specific core matching and deduplicated taps. | Pros/Realtors and other provider-specific paths still need a complete real-evidence audit. |
+| Review identity | Separate current Auth authorship preserves legacy identities. Fresh-account writes, old-client insert compatibility, readers, moderation identity and evidence visibility passed database rollback gates; exact migration and permissions verified after commit. | No production customer review was created for testing. Older raw user-ID queries cannot infer new Auth ownership. |
+| Community safety | Reporting/blocking and admin moderation released; hidden or blocked content excluded from appropriate feeds. Admin authorization uses actual current role grants. | Native release and operational signed-in moderation checks remain. |
+| On The Go | Discovery, canonical details, owner schedules/cancellation and live lifecycle are released and enabled. Public locations require active, unexpired, address-confirmed sessions. Admin disabling now uses actual Auth/role checks and atomic audit attribution. | No real merchant session was disabled for QA. Expiry cleanup scheduling and remaining non-food owner-feature coverage need follow-up. |
+| RV & Camping | Existing canonical places retained; category filtering before pagination, stable load-more and domain review vocabulary released. | Final native checks; offline map downloads and offline RV routing are not implemented. |
+| Atlas | Complete female/male recordings verified for Los Angeles, Chicago and Nashville; usable duration, seek, speed, voice switching, retry and unavailable states released. Reading themes and text size preserved. | Older recordings were checked for presence, not all for full transcript coverage. Final native playback checks remain. |
+| Atlas producer | Complete-article, validated, missing-only producer installed in the existing daily job. Prior schedule/load state preserved without an immediate run. Offline tests and a read-only article audit passed. | No claim that every old recording has been regenerated. |
 
-The latest verified web eCard gallery release was deployed September 21 after 04:13 UTC;
-its public Next build identifier is `Wqqvxviynheqtl3oYWT94`. It includes design-first
-creation, all 21 layouts / 123 palettes, fictional portrait/background examples and
-real 9:16 gallery previews. Five unit checks, 17 creation-flow browser checks and
-21 real renderer checks passed before deployment; live gallery/image checks passed.
-The image-optimizer performance release also passed production checks: tested 640px
-portraits now load as WebP at about 39KB and 77KB. All layouts/palettes remain available.
-Release evidence is held with the maintainer.
+### Cruise catalog
 
-The cruise and community-safety web release is now live, with public Next build
-`1Ag6HljLdoOBMpgGmZCnL`. It preserves the eCard gallery and image optimization above.
-Four reviewed database migrations were applied atomically and their exact bodies,
-permissions and row-level protections checked after commit. The initial 12 sourced
-ships are published: four ocean, four river and four expedition ships, from nine
-operators. All 12 public pages, crawler metadata, ship sharing image and anonymous
-catalog reads passed postrelease checks. Unknown facts and unverified photos remain
-unfilled. This is the first verified batch, not worldwide coverage.
+218 verified ships are published across 21 operators: 169 ocean, 38 river and 11
+expedition ships. This includes 1,188 sourced venues, 60 cabin categories and 71
+programs. Unknown facts remain unknown; conflicting values are withheld from display.
+No unverified ship photos, customer reviews or canonical venue links were invented.
+All 218 public pages and ship metadata passed live HTTP checks.
 
-The admin community-moderation release is also live. Its public login page and client
-asset load; anonymous moderation access is denied. Local behavior checks cover
-reporting, blocking, hide/restore and evidence visibility, including stale account
-requests. Logged-in production moderation actions have not been exercised against
-customer content. Native integration and account-deletion release gates remain.
+The latest 63 Carnival, Princess, Costa and Disney ships passed collision checks,
+the actual database rollback rehearsal, committed publication, exact anonymous
+projection checks and all 63 live detail pages. Further Viking and AmaWaterways
+research is underway. Worldwide fleet coverage is incomplete.
+Future launches and ownership/name transitions require dated status evidence and
+identity reconciliation, rather than treating every marketing page as an operating ship.
 
-The newer shared-tools release is live with public build `alPQmC8IHFEztl5rzBgEO`.
-It preserves cruises, community safety and eCard features, and adds consistent tool
-headers, canonical RV filtering/pagination, actual review grids, domain-specific
-core matching and further eCard finishing. Root checked 35 focused web cases, nine
-RV browser scenarios and 28 live HTTP routes. The prepared On The Go release has
-not yet replaced this serving build at this checkpoint.
+## Mobile and Apple
 
-## Active work and next actions
+- Latest uploaded internal iOS preview remains version 1.0.1, build 26, from the older
+  616-file snapshot. No App Store submission has been made.
+- The correctly configured 664-file Simulator build passed actual sign-in, one Free
+  unpublished eCard draft save, real preview, Close-button safe area and exact entered
+  name/title retention. Portuguese and Spanish Settings/creation checks passed.
+- Earlier compilation-only local builds omitted public connection settings and are
+  invalid release evidence. Use the configured build receipts. Public client settings
+  are checked in the actual bundle; private server credentials must remain absent.
+- The newer 672-file snapshot compiled successfully with validated public settings.
+  It includes Atlas, review identity readers, focus-aware status-bar restoration and
+  translated Profile/eCard labels. Actual iPhone/iPad QA is underway; it is not uploaded.
+- A separate Profile correction is prepared: Saved opens the existing Saved screen;
+  statistics without destinations remain readable text; version comes from app metadata.
+- Earlier Account, RV & Camping, Universes, Realtors, Saved and sign-in navigation
+  checks passed fresh-install and update paths on iPad Air 11-inch M4 / iOS 26.5.
+  This is not Apple's original M3 / iPadOS 26.2 review environment.
+- Final native iPhone and 13-inch iPad App Store screenshots remain incomplete.
+  Prioritize English, Portuguese and Spanish, then verify remaining supported locales
+  and RTL. The presence of 17 catalogs does not prove every new label is translated.
 
-### Search — active recovery, preserve progress
+### Remaining Apple release gates
 
-The interrupted import resumed from its verified 6,180,000-record checkpoint.
-The full saved prefix was audited, two text fields restored from backup, and all
-6,180,000 complete records rechecked with zero differences. A later interruption at
-6,348,000 was reconciled by exact readback of its unfinished batch, preserving all
-acknowledged progress. The latest continuation passed 11.5 million of 34,883,915
-records at this checkpoint. This is not a completed migration. Serving search remains
-unchanged. The full backup's immutable content-hash ledger is complete.
+Account deletion is not deployed. The older draft does not match current Auth/legacy
+identity boundaries or shared business/payroll retention requirements. A complete
+schema inventory and narrower durable-job design are prepared; cleanup, billing and
+provider-token handling still need implementation and verification. Settings copy must
+describe actual behavior rather than promise unimplemented deletion or cancellation.
 
-The resumed importer uses ASCII JSON transport, durable per-batch journaling and
-exact per-record response checks. Uncertain writes receive bounded exact readback;
-only records proven absent may be retried. Unresolved outcomes stop for review. The
-approved migration still needs complete data/configuration verification, search and
-permission checks, replacement restart persistence, producer reconciliation and a
-verified traffic switch. Private infrastructure identifiers, keys, backup data and
-operational commands are intentionally held in the maintainer's private runbook.
+Resolve digital-purchase behavior across storefronts, finish native community-safety
+checks, verify public support/privacy links, prepare accurate personal sign-in review
+instructions and create the final internal/production builds. A preview upload,
+browser template capture and App Store submission are separate deliverables.
 
-Search product work also remains: explicit destination precedence, named-place/demo
-visibility, browser Back state and smooth touch-sheet behavior. The shared review grid is now live in search and RV previews.
+## Search
 
-### eCards — web chooser and template captures delivered; native finishing underway
+The preserved import continuation has passed 16 million of 34,883,915 records with
+no unresolved write outcomes at this checkpoint. The original serving search remains
+active. The immutable full-backup content-hash ledger is complete. Do not restart the
+writer, reset the target or replay acknowledged batches. Any interruption requires
+exact checkpoint reconciliation before resuming.
 
-- Design choice is the default web start; Quick setup and full type/country options remain.
-- Web gallery/editor previews use the actual renderer. All 21 layouts / 123 palettes
-  remain, with clear Pro restrictions and preservation of entered information.
-- Reusable decorations may populate drafts; fictional example identities/photos/links
-  are never copied into customers' saved cards.
-- All 21 actual iPhone Simulator Safari template-gallery captures are complete and
-  visually reviewed. Three follow-up captures for the latest finishing polish are
-  being rechecked against the serving assets. These are web template captures, not
-  the native App Store screenshot set.
-- The newer native 663-file candidate passed application TypeScript and Xcode Simulator
-  compilation. Actual signed-in tests on the prior binary reached design selection,
-  Quick setup and the first deletion confirmation (cancelled, no deletion). A preview
-  Close button overlapping the status bar was fixed; fixed-binary QA and EAS remain.
-- English/Portuguese/Spanish Settings and appearance navigation were exercised.
-  Untranslated legacy labels remain under correction before final language screenshots.
-- Existing-card audit covered 37 published cards, with baseline captures and five
-  postrelease comparisons. Lower-page interactions remain a separate verification.
-- Newly introduced copy still needs the final multilingual pass.
+Migration gates still include complete target content/configuration verification,
+permissions and search checks, restart persistence, producer reconciliation and a
+verified traffic switch. The approved costs and overlap review checkpoint remain in
+the private runbook. No infrastructure identifiers or credentials belong here.
 
-Existing real cards must not become template examples. Previously requested narrow
-real-card corrections have separate private evidence; no customer inventory belongs
-in this public status document.
+The product audit reproduced demo interception of a real restaurant name, stale Where
+state affecting explicit near-me intent, browser Back skipping prior map searches and
+touch swipes scrolling inside a half-open results sheet. Narrow fixes are under test
+on web/mobile; they are not part of the current live build yet.
 
-### Place details, reviews and restaurant tools
+## Other work still required
 
-- The shared four-part grid is live in search, RV previews and canonical place details,
-  with category/subcategory core matching and deduplicated core taps. On The Go
-  preview integration has been added to the next candidate; full provider parity remains.
-- Verify category-specific core matching and correct ordinary-issue evidence aging.
-- Keep reviews prominent without duplicated sections. Preserve the full Tavvy Menu.
-- Verify owner onboarding, inline missing-place creation, profile/media/contact links,
-  ordering and menu appearance end to end.
-- Finish the restaurant demonstration and verify every route/action. Demo activity
-  must not be inserted into real customer review tables or imply real endorsements.
-- Finalize the separate restaurant membership offer before paid activation.
-- Audit Realtors and Pros carefully: known source paths still use inappropriate
-  mock/fallback ratings or identifiers. Do not carry those into shared review views.
+- Verify the restaurant owner portal, inline missing-place onboarding, contacts/social
+  links, the full Tavvy Menu, delivery links and all demonstration actions end to end.
+- Keep reviews prominent without duplicate complete sections; validate ordinary-issue
+  aging against independent later evidence. Do not turn silence into proof of a fix.
+- Finalize the separate restaurant membership offer before paid activation. Existing
+  eCard prices and approved Pro features remain unchanged.
+- Remove known mock/fallback rating and identifier assumptions in provider-specific
+  Pros/Realtor paths after mapping their real evidence and canonical identities.
+- Implement functional preference persistence where Settings currently only keeps local
+  component state; localization alone does not make a setting functional.
+- Select an offline-capable map provider and confirm downloading rights before claiming
+  RV maps work without a connection. Routing is a separate capability.
+- Continue the verified cruise inventory and native/language release.
 
-### Tools and content
-
-| Tool | Prepared / known state | Next work |
-| --- | --- | --- |
-| Shared tool headers | Universe-style web headers released across ten routes; native equivalents compiled. | Finish current native visual/language checks. |
-| On The Go | Two reviewed migrations applied; 13 function sources/JWT modes and 30 public/unauthenticated checks passed. Owner schedules support scoped listing and cancellation. Full web/native candidate builds passed. | Complete UI rollout and activation. Starts remain disabled at this checkpoint; admin lifecycle moderation and account deletion remain separate work. |
-| RV & Camping | Canonical category filtering before pagination, stable load-more, shared four-tile reviews and domain-specific core matching are live on web. Native equivalents compiled. | Final native verification. Offline map downloads are not implemented. |
-| Cruises | First 12 verified ships are public with 48 sourced venues and 36 cabin categories. Another 59 identities passed collision checks and are being enriched; they are not published yet. Conflicting or unverified facts remain withheld. | Publish the reviewed enriched batch, continue worldwide coverage and finish native/language release. |
-| Atlas | Existing reading themes/text-size confirmed; audio fixes partly live. | Improve discoverability/persistence checks; integrate full audio UI and atomically deploy the reviewed scheduled producer. |
-| UGC | Four backend migrations, web reporting/blocking and admin moderation released. Public access checks passed; local behavior and rollback checks preserved. | Finish native release, operational signed-in QA and remaining surface review. |
-
-The earlier request to locate an attributed RV article was closed by the requester
-after no match was found. Do not substitute a person's eCard or invent attributed content.
-
-### Apple, languages and screenshots — incomplete
-
-- Finish final iPhone and 13-inch iPad screenshot sets, prioritizing English,
-  Portuguese and Spanish, against the final build.
-- Complete and verify account deletion backend behavior before claiming readiness.
-  The older draft assumes identity relationships that do not match the current schema;
-  the replacement must preserve shared business/payroll history and handle retries.
-- Correct and verify first-time review submission across the current identity model.
-  A code/schema mismatch is under review; do not assume successful reads prove writes.
-- Complete native UGC release and operational signed-in moderation verification.
-- Resolve the digital-purchase strategy and verify visible language coverage.
-- Prepare accurate reviewer sign-in instructions and rerun iPad navigation checks.
-- Produce the final internal/production builds and submission materials. An internal
-  preview build, browser eCard screenshots and App Store screenshot sets are different.
+The attributed RV-article search and further TDM/Aline card work were closed by the
+requester. Do not reopen them or substitute personal cards for requested articles.
+Real people's cards remain separate from fictional template examples.
 
 ## Handoff discipline
 
-After each batch, record the release date, target, actual checks and remaining work.
-Mirror product behavior and this high-level status in the mobile repository. Preserve
-existing work and data, and keep operational evidence out of public Git history.
+Update both repositories after each verified release. Keep frozen source manifests,
+deployment receipts and screenshot indexes with the maintainer. Preserve all existing
+features, templates, prices and customer data. State what is live, locally tested,
+prepared and incomplete; never infer completion from a source edit or rollback test.

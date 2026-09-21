@@ -193,3 +193,13 @@ operational evidence with the maintainer, outside this public repository.
 Review writes and account deletion must preserve the distinction between current Auth
 identities and legacy user records. Never manufacture a legacy account or assume matching
 email addresses establish identity. Validate fresh-account writes as well as public reads.
+
+Live On The Go actions distinguish Auth actors from legacy user identities. Session
+starts are enabled; public GPS requires a confirmed, active, unexpired session.
+Administrative disabling requires an actual unexpired administrator role and an atomic
+audit record. Preserve terminal disabled history and the separate Auth attribution.
+
+Local native builds must include the approved public connection settings explicitly.
+A successful Xcode compile alone is not a release gate: verify the actual bundled
+configuration, sign-in, retained form values and preview navigation. Keep private server
+credentials out of every client bundle.
