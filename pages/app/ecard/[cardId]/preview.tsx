@@ -1,3 +1,4 @@
+import { ecardDesignRequiresPro } from '../../../../lib/ecard/designAccess';
 /**
  * eCard Interactive Preview — /app/ecard/[cardId]/preview
  * Shows the actual public card with a floating quick-edit toolbar.
@@ -22,7 +23,6 @@ import {
   LinkItem,
   getCardUrl,
   THEMES,
-  FREE_LINK_LIMIT,
 } from '../../../../lib/ecard';
 import { useECardPlan } from '../../../../hooks/useECardPlan';
 import { getTemplateById } from '../../../../config/eCardTemplates';
@@ -194,13 +194,7 @@ export default function ECardPreviewPage() {
   /** Check if this card uses premium features */
   const hasPremiumFeatures = (): boolean => {
     if (!cardData) return false;
-    // Check premium theme
-    const theme = THEMES.find(t => t.id === cardData.theme);
-    if (theme?.isPremium) return true;
-    // Check premium template
-    if (getTemplateById(cardData.template_id || 'basic')?.isPremium) return true;
-    // Check link limit
-    if (cardLinks.filter(link => link.is_active !== false && link.is_active !== null).length > FREE_LINK_LIMIT) return true;
+    if (ecardDesignRequiresPro(cardData)) return true;
     // Keep the existing legacy testimonial gate; the four approved extras use shared content-aware checks.
     if (Array.isArray((cardData as any).blocks) && (cardData as any).blocks.some((block: any) => block.type === 'testimonials')) return true;
     if (hasProExtras(cardData)) return true;

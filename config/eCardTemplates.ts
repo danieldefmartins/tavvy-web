@@ -1,5 +1,5 @@
 // Tavvy eCard Templates Configuration v4.0
-// 13 templates: 6 free + 7 paid (pro/premium)
+// 21 preserved layouts; access is determined by each design and palette.
 // Business cards first, then link pages, then premium
 // Step 1: Choose template layout
 // Step 2: Choose color/style variation
@@ -288,7 +288,7 @@ export const TEMPLATES: Template[] = [
   // 7. PRO CARD — The ultimate pro card
   {
     id: 'pro-card',
-    name: 'Pro Card',
+    name: 'Profile Card',
     description: 'The ultimate pro card. Industry, services, service area — all in one.',
     category: 'paid',
     previewImage: 'pro-card',
@@ -399,14 +399,14 @@ export const TEMPLATES: Template[] = [
     id: 'pro-realtor',
     name: 'Agent Card',
     description: 'Arch-framed photo with intro text. Perfect for realtors and agents.',
-    category: 'paid',
+    category: 'free',
     previewImage: 'pro-realtor',
-    isPremium: true,
+    isPremium: false,
     features: ['arch-photo', 'intro-text', 'accent-tab-buttons', 'social-icons', 'company-name'],
     layout: 'pro-realtor',
     colorSchemes: [
       // Warm Neutral
-      { id: 'warm-neutral', name: 'Warm Neutral', primary: '#f5f0eb', secondary: '#ede5db', accent: '#c8a87c', text: '#2d2d2d', textSecondary: '#666666', background: '#f5f0eb', cardBg: '#FFFFFF', border: '#c8a87c', isFree: false },
+      { id: 'warm-neutral', name: 'Warm Neutral', primary: '#f5f0eb', secondary: '#ede5db', accent: '#c8a87c', text: '#2d2d2d', textSecondary: '#666666', background: '#f5f0eb', cardBg: '#FFFFFF', border: '#c8a87c', isFree: true },
       // Navy Professional
       { id: 'navy', name: 'Navy', primary: '#0f172a', secondary: '#1e293b', accent: '#d4af37', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.8)', background: '#0f172a', cardBg: 'rgba(255,255,255,0.05)', border: '#d4af37' },
       // Forest
@@ -497,7 +497,7 @@ export const TEMPLATES: Template[] = [
   // 13. PREMIUM HERO — Full-width hero photo
   {
     id: 'premium-static',
-    name: 'Premium Hero',
+    name: 'Portrait Page',
     description: 'Full-width hero photo that scrolls with content. Same premium feel, no parallax.',
     category: 'paid',
     previewImage: 'premium-static',
@@ -696,13 +696,13 @@ export const TEMPLATES: Template[] = [
     id: 'politician-generic',
     name: 'Politician Card',
     description: 'Political e-Card for candidates and public servants worldwide. Photo, bio, platform positions, endorsements, and civic engagement.',
-    category: 'paid',
+    category: 'free',
     previewImage: 'politician-generic',
-    isPremium: true,
+    isPremium: false,
     features: ['candidate-photo', 'bio', 'platform-positions', 'endorsements', 'community-feedback', 'qa'],
     layout: 'politician-generic',
     colorSchemes: [
-      { id: 'classic-blue', name: 'Classic Blue', primary: '#1a365d', secondary: '#2a4a7f', accent: '#c9a84c', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF' },
+      { id: 'classic-blue', name: 'Classic Blue', primary: '#1a365d', secondary: '#2a4a7f', accent: '#c9a84c', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f2f5', cardBg: '#FFFFFF', isFree: true },
       { id: 'patriot-red', name: 'Patriot Red', primary: '#8b1a1a', secondary: '#6b1010', accent: '#FFFFFF', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#faf0f0', cardBg: '#FFFFFF' },
       { id: 'forest-green', name: 'Forest Green', primary: '#1a4d2e', secondary: '#0d3320', accent: '#c9a84c', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f0f5f0', cardBg: '#FFFFFF' },
       { id: 'royal-purple', name: 'Royal Purple', primary: '#4a1a6b', secondary: '#350f50', accent: '#c9a84c', text: '#FFFFFF', textSecondary: 'rgba(255,255,255,0.85)', background: '#f5f0fa', cardBg: '#FFFFFF' },

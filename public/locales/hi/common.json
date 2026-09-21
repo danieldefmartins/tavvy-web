@@ -1178,6 +1178,17 @@
     "publicFinishMentionedMany": "{{count}} लोगों ने इसका ज़िक्र किया",
     "publicFinishByAuthor": "लेखक:",
     "publicFinishSearchResults": "खोज के परिणाम",
-    "publicFinishSearchLocations": "जगहें या स्थान खोजें"
+    "publicFinishSearchLocations": "जगहें या स्थान खोजें",
+    "atlasCategoryAirports": "हवाई अड्डे",
+    "atlasCategoryCampuses": "विश्वविद्यालय परिसर",
+    "atlasCategoryFamilyKids": "परिवार और बच्चे",
+    "atlasCategoryFoodDrink": "भोजन और पेय",
+    "atlasCategoryHospitals": "अस्पताल",
+    "atlasCategoryMalls": "शॉपिंग मॉल",
+    "atlasCategoryPorts": "बंदरगाह",
+    "atlasCategoryStadiums": "स्टेडियम",
+    "atlasCategoryThemeParks": "थीम पार्क",
+    "atlasCategoryTravelTips": "यात्रा के सुझाव",
+    "atlasCategoryVenues": "कार्यक्रम स्थल"
   }
 }

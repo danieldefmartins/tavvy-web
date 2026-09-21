@@ -14,7 +14,7 @@ import {
   uploadEcardFile,
   CardData,
 } from '../ecard';
-import { getTemplateById } from '../../config/eCardTemplates';
+import { ecardDesignChangeRequiresPro } from './designAccess';
 
 interface UseAutoSaveOptions {
   userId: string | undefined;
@@ -48,9 +48,8 @@ export function useAutoSave({ userId, isPro, debounceMs = 2000, enabled = true }
     if (inFlightRef.current) return false;
     if (!card.id || !userId) return false;
 
-    // Validate template access
-    const tpl = getTemplateById(card.template_id || 'basic');
-    if (tpl?.isPremium && !isPro) { dispatch({ type: 'MARK_SAVE_ERROR', error: 'This template requires an active Pro subscription.' }); return false; }
+    // Preserve unchanged saved designs when a subscription changes.
+    if (!isPro && ecardDesignChangeRequiresPro(card, savedBadges.current.card)) { dispatch({ type: 'MARK_SAVE_ERROR', error: 'This template requires an active Pro subscription.' }); return false; }
     inFlightRef.current = true;
 
     dispatch({ type: 'MARK_SAVING' });
@@ -168,7 +167,7 @@ export function useAutoSave({ userId, isPro, debounceMs = 2000, enabled = true }
 
       // 3. Save card + links
       if (!await updateCard(card.id, fullPayload as any)) throw new Error('Card save failed. Retry to save your changes.');
-      if (!await saveCardLinks(card.id, links)) throw new Error('Links could not be saved. Retry before publishing.');
+      if (!await saveCardLinks(card.id, links, { throwOnError: true })) throw new Error('Links could not be saved. Retry before publishing.');
       savedBadges.current = { cardId: card.id, card };
 
       if (isMountedRef.current) {

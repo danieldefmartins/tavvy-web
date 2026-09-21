@@ -1,3 +1,4 @@
+import { atlasCategoryName } from '../../../lib/atlasCategoryCopy';
 import { useReleaseCopy } from '../../../hooks/useReleaseCopy';
 import ToolHeader from '../../../components/ToolHeader';
 /**
@@ -240,7 +241,7 @@ export default function AtlasHomeScreen() {
                 style={{ backgroundColor: selectedCategory === category.id ? COLORS.accent : surfaceColor }}
               >
                 {category.icon && <span className="chip-icon">{category.icon}</span>}
-                <span className="chip-text">{category.name}</span>
+                <span className="chip-text">{atlasCategoryName(category, copy)}</span>
               </button>
             ))}
           </div>

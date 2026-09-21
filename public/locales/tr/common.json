@@ -1178,6 +1178,17 @@
     "publicFinishMentionedMany": "{{count}} kişi bundan bahsetti",
     "publicFinishByAuthor": "Yazan",
     "publicFinishSearchResults": "Arama sonuçları",
-    "publicFinishSearchLocations": "Yer veya konum ara"
+    "publicFinishSearchLocations": "Yer veya konum ara",
+    "atlasCategoryAirports": "Havalimanları",
+    "atlasCategoryCampuses": "Kampüsler",
+    "atlasCategoryFamilyKids": "Aile ve çocuklar",
+    "atlasCategoryFoodDrink": "Yeme içme",
+    "atlasCategoryHospitals": "Hastaneler",
+    "atlasCategoryMalls": "Alışveriş merkezleri",
+    "atlasCategoryPorts": "Limanlar",
+    "atlasCategoryStadiums": "Stadyumlar",
+    "atlasCategoryThemeParks": "Tema parkları",
+    "atlasCategoryTravelTips": "Seyahat ipuçları",
+    "atlasCategoryVenues": "Etkinlik mekânları"
   }
 }

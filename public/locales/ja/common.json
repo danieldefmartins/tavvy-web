@@ -1178,6 +1178,17 @@
     "publicFinishMentionedMany": "{{count}}人がこの点に言及しました",
     "publicFinishByAuthor": "著者：",
     "publicFinishSearchResults": "検索結果",
-    "publicFinishSearchLocations": "場所やエリアを検索"
+    "publicFinishSearchLocations": "場所やエリアを検索",
+    "atlasCategoryAirports": "空港",
+    "atlasCategoryCampuses": "キャンパス",
+    "atlasCategoryFamilyKids": "家族・子ども",
+    "atlasCategoryFoodDrink": "グルメ",
+    "atlasCategoryHospitals": "病院",
+    "atlasCategoryMalls": "ショッピングモール",
+    "atlasCategoryPorts": "港",
+    "atlasCategoryStadiums": "スタジアム",
+    "atlasCategoryThemeParks": "テーマパーク",
+    "atlasCategoryTravelTips": "旅行のヒント",
+    "atlasCategoryVenues": "イベント会場"
   }
 }

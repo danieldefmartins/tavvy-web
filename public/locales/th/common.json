@@ -1116,6 +1116,17 @@
     "publicFinishMentionedMany": "มี {{count}} คนกล่าวถึงเรื่องนี้",
     "publicFinishByAuthor": "โดย",
     "publicFinishSearchResults": "ผลการค้นหา",
-    "publicFinishSearchLocations": "ค้นหาสถานที่หรือพื้นที่"
+    "publicFinishSearchLocations": "ค้นหาสถานที่หรือพื้นที่",
+    "atlasCategoryAirports": "สนามบิน",
+    "atlasCategoryCampuses": "วิทยาเขต",
+    "atlasCategoryFamilyKids": "ครอบครัวและเด็ก",
+    "atlasCategoryFoodDrink": "อาหารและเครื่องดื่ม",
+    "atlasCategoryHospitals": "โรงพยาบาล",
+    "atlasCategoryMalls": "ศูนย์การค้า",
+    "atlasCategoryPorts": "ท่าเรือ",
+    "atlasCategoryStadiums": "สนามกีฬา",
+    "atlasCategoryThemeParks": "สวนสนุก",
+    "atlasCategoryTravelTips": "เคล็ดลับการเดินทาง",
+    "atlasCategoryVenues": "สถานที่จัดงาน"
   }
 }

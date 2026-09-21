@@ -1116,6 +1116,17 @@
     "publicFinishMentionedMany": "{{count}} người đã nhắc đến điều này",
     "publicFinishByAuthor": "Bởi",
     "publicFinishSearchResults": "Kết quả tìm kiếm",
-    "publicFinishSearchLocations": "Tìm địa điểm hoặc vị trí"
+    "publicFinishSearchLocations": "Tìm địa điểm hoặc vị trí",
+    "atlasCategoryAirports": "Sân bay",
+    "atlasCategoryCampuses": "Khuôn viên trường",
+    "atlasCategoryFamilyKids": "Gia đình và trẻ em",
+    "atlasCategoryFoodDrink": "Ăn uống",
+    "atlasCategoryHospitals": "Bệnh viện",
+    "atlasCategoryMalls": "Trung tâm mua sắm",
+    "atlasCategoryPorts": "Cảng",
+    "atlasCategoryStadiums": "Sân vận động",
+    "atlasCategoryThemeParks": "Công viên chủ đề",
+    "atlasCategoryTravelTips": "Mẹo du lịch",
+    "atlasCategoryVenues": "Địa điểm tổ chức sự kiện"
   }
 }

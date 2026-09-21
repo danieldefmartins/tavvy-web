@@ -1178,6 +1178,17 @@
     "publicFinishMentionedMany": "{{count}} Personen haben dies erwähnt",
     "publicFinishByAuthor": "Von",
     "publicFinishSearchResults": "Suchergebnisse",
-    "publicFinishSearchLocations": "Orte oder Standorte suchen"
+    "publicFinishSearchLocations": "Orte oder Standorte suchen",
+    "atlasCategoryAirports": "Flughäfen",
+    "atlasCategoryCampuses": "Universitätsgelände",
+    "atlasCategoryFamilyKids": "Familie und Kinder",
+    "atlasCategoryFoodDrink": "Essen und Trinken",
+    "atlasCategoryHospitals": "Krankenhäuser",
+    "atlasCategoryMalls": "Einkaufszentren",
+    "atlasCategoryPorts": "Häfen",
+    "atlasCategoryStadiums": "Stadien",
+    "atlasCategoryThemeParks": "Freizeitparks",
+    "atlasCategoryTravelTips": "Reisetipps",
+    "atlasCategoryVenues": "Veranstaltungsorte"
   }
 }

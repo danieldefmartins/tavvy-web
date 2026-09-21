@@ -31,36 +31,11 @@ const ACCENT_GREEN = '#00C853';
 const BG_DARK = '#000000';
 
 const FEATURES = [
-  {
-    icon: IoColorPalette,
-    title: 'Premium Themes',
-    description: 'Access 20+ stunning premium themes',
-  },
-  {
-    icon: IoLink,
-    title: 'Unlimited Links',
-    description: 'Add as many links as you want',
-  },
-  {
-    icon: IoBarChart,
-    title: 'Advanced Analytics',
-    description: 'Track views, clicks, and engagement',
-  },
-  {
-    icon: IoVideocam,
-    title: 'Video Backgrounds',
-    description: 'Make your card stand out with video',
-  },
-  {
-    icon: IoBrush,
-    title: 'Custom Fonts',
-    description: 'Choose from 50+ premium fonts',
-  },
-  {
-    icon: IoShieldCheckmark,
-    title: 'Priority Support',
-    description: 'Get help when you need it',
-  },
+  { icon: IoColorPalette, title: "Premium designs", description: "Choose from premium layouts and color palettes." },
+  { icon: IoLink, title: "Photo galleries", description: "Show multiple photos on your card." },
+  { icon: IoVideocam, title: "Embedded videos", description: "Add playable videos to your card." },
+  { icon: IoBrush, title: "Contact forms", description: "Let visitors send an inquiry from your card." },
+  { icon: IoShieldCheckmark, title: "Professional credentials", description: "Display your professional credentials." },
 ];
 
 const PLANS = {
@@ -179,7 +154,7 @@ export default function ECardPremiumScreen() {
             </div>
           )}
 
-          <p className="pro-extras-summary">{copy('Gallery photos, embedded videos, contact forms and professional credentials are Pro extras.')} {copy('Your existing content stays on your card.')}</p>
+          <p className="pro-extras-summary">{copy('Free includes a design in every category and no plan-based link limit. Pro adds premium designs, galleries, embedded videos, contact forms and professional credentials.')} {copy('Your existing content stays on your card.')}</p>
 
           {/* Features Grid */}
           <div className="features-grid">
@@ -191,8 +166,8 @@ export default function ECardPremiumScreen() {
                     <IconComponent size={24} color={ACCENT_GREEN} />
                   </div>
                   <div className="feature-content">
-                    <h3>{item.title}</h3>
-                    <p>{item.description}</p>
+                    <h3>{copy(item.title)}</h3>
+                    <p>{copy(item.description)}</p>
                   </div>
                 </div>
               );

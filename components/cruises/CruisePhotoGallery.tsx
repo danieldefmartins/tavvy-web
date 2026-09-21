@@ -1,0 +1,10 @@
+import React,{useEffect,useState} from 'react';
+import {getCruiseGallery} from '../../lib/cruises/service';
+import {CruiseGalleryPhoto,galleryWithCover} from '../../lib/cruises/gallery';
+import {useReleaseCopy} from '../../hooks/useReleaseCopy';
+export default function CruisePhotoGallery({shipId,cover}:{shipId:string;cover:{url:string;alt:string}|null}){
+ const copy=useReleaseCopy(),[photos,setPhotos]=useState<CruiseGalleryPhoto[]>([]),[loading,setLoading]=useState(true),[error,setError]=useState(false),[retry,setRetry]=useState(0);
+ useEffect(()=>{let active=true;setPhotos([]);setLoading(true);setError(false);getCruiseGallery(shipId).then(rows=>{if(active)setPhotos(rows)}).catch(()=>{if(active)setError(true)}).finally(()=>{if(active)setLoading(false)});return()=>{active=false};},[shipId,retry]);
+ const visible=galleryWithCover(photos,cover);
+ return <section aria-label={copy('Photos')}><div className="cruise-photo-grid">{visible.map(photo=><figure key={photo.id}><a href={photo.url} target="_blank" rel="noopener noreferrer" aria-label={photo.alt||copy('Photos')}><img loading="lazy" src={photo.url} alt={photo.alt}/></a>{photo.caption&&<figcaption>{photo.caption}</figcaption>}</figure>)}</div>{loading&&<p role="status">{copy('Loading…')}</p>}{error&&<p role="status">{copy('Photos could not be loaded.')} <button type="button" onClick={()=>setRetry(v=>v+1)}>{copy('Try again')}</button></p>}<style jsx>{`.cruise-photo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}figure{margin:0;min-width:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--panel)}img{width:100%;height:300px;object-fit:contain;display:block}a{display:block}figcaption{padding:12px;color:var(--muted);font-size:14px;line-height:1.5}p{color:var(--muted)}button{font:inherit;border:1px solid var(--line);background:var(--panel);color:var(--text);min-height:44px;border-radius:10px;padding:8px 14px;cursor:pointer}:focus-visible{outline:3px solid var(--accent);outline-offset:3px}@media(max-width:600px){.cruise-photo-grid{grid-template-columns:1fr}img{height:auto;max-height:460px}}`}</style></section>;
+}

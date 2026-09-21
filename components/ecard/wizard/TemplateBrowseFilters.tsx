@@ -1,0 +1,6 @@
+import {BROWSE_CATEGORIES,BrowsePlan} from '../../../lib/ecard/templateSelection';
+import {useReleaseCopy} from '../../../hooks/useReleaseCopy';
+export default function TemplateBrowseFilters({category,plan,onChange}:{category:string;plan:BrowsePlan;onChange:(category:string,plan:BrowsePlan)=>void}){
+ const copy=useReleaseCopy();
+ return <div className="browse-filters"><label>{copy('Design category')}<select aria-label={copy('Design category')} value={category} onChange={e=>onChange(e.target.value,plan)}>{BROWSE_CATEGORIES.map(item=><option key={item.id} value={item.id}>{copy(item.label)}</option>)}</select></label><label>{copy('Design plan')}<select aria-label={copy('Design plan')} value={plan} onChange={e=>onChange(category,e.target.value as BrowsePlan)}>{(['all','free','pro'] as const).map(value=><option key={value} value={value}>{copy(value==='all'?'All plans':value==='free'?'Free':'Pro')}</option>)}</select></label><style jsx>{`.browse-filters{display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:10px;margin-bottom:20px}.browse-filters label{display:flex;flex-direction:column;gap:6px;font-size:12px}.browse-filters select{width:100%;min-height:44px;background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:8px;font:inherit;font-size:13px}`}</style></div>;
+}

@@ -1116,6 +1116,17 @@
     "publicFinishMentionedMany": "{{count}} orang menyebutkan ini",
     "publicFinishByAuthor": "Oleh",
     "publicFinishSearchResults": "Hasil pencarian",
-    "publicFinishSearchLocations": "Cari tempat atau lokasi"
+    "publicFinishSearchLocations": "Cari tempat atau lokasi",
+    "atlasCategoryAirports": "Bandara",
+    "atlasCategoryCampuses": "Kampus",
+    "atlasCategoryFamilyKids": "Keluarga dan anak",
+    "atlasCategoryFoodDrink": "Makanan dan minuman",
+    "atlasCategoryHospitals": "Rumah sakit",
+    "atlasCategoryMalls": "Pusat perbelanjaan",
+    "atlasCategoryPorts": "Pelabuhan",
+    "atlasCategoryStadiums": "Stadion",
+    "atlasCategoryThemeParks": "Taman hiburan",
+    "atlasCategoryTravelTips": "Tips perjalanan",
+    "atlasCategoryVenues": "Lokasi acara"
   }
 }

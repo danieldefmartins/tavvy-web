@@ -4,12 +4,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useEditor } from '../../../lib/ecard/EditorContext';
 import { useAutoSave } from '../../../lib/ecard/useAutoSave';
-import { publishCard, unpublishCard, THEMES, FREE_LINK_LIMIT } from '../../../lib/ecard';
+import { publishCard, unpublishCard, THEMES } from '../../../lib/ecard';
 import { getTemplateById } from '../../../config/eCardTemplates';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useECardPlan } from '../../../hooks/useECardPlan';
 import CardPreview from '../CardPreview';
+import { ecardDesignRequiresPro } from '../../../lib/ecard/designAccess';
 import {hasProExtras} from '../../../lib/ecard/premiumContent';
 import StyledQRCode from '../StyledQRCode';
 import ProfileSection from './sections/ProfileSection';
@@ -49,7 +50,7 @@ export default function CardStudioLayout() {
     window.addEventListener('beforeunload', warn); return () => window.removeEventListener('beforeunload', warn);
   }, []);
   const goBack = () => { if ((!isDirty && !isSaving) || window.confirm('You have unsaved changes. Leave the editor?')) void router.push('/app/ecard'); };
-  const paidFeatures = () => !!(getTemplateById(templateId)?.isPremium || THEMES.find(t => t.id === card.theme)?.isPremium || hasProExtras(card) || state.links.filter(link=>link.is_active!==false&&link.is_active!==null).length>FREE_LINK_LIMIT);
+  const paidFeatures = () => !!(ecardDesignRequiresPro(card) || hasProExtras(card));
   const publish = async () => {
     if (!cardId || publishingRef.current || isSaving || unavailable) return;
     if (!plan.isPro && paidFeatures()) { setDialog("premium"); return; }

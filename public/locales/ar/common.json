@@ -1178,6 +1178,17 @@
     "publicFinishMentionedMany": "عدد الأشخاص الذين ذكروا ذلك: {{count}}",
     "publicFinishByAuthor": "بقلم",
     "publicFinishSearchResults": "نتائج البحث",
-    "publicFinishSearchLocations": "ابحث عن أماكن أو مواقع"
+    "publicFinishSearchLocations": "ابحث عن أماكن أو مواقع",
+    "atlasCategoryAirports": "المطارات",
+    "atlasCategoryCampuses": "الحرم الجامعي",
+    "atlasCategoryFamilyKids": "العائلة والأطفال",
+    "atlasCategoryFoodDrink": "الطعام والشراب",
+    "atlasCategoryHospitals": "المستشفيات",
+    "atlasCategoryMalls": "مراكز التسوق",
+    "atlasCategoryPorts": "الموانئ",
+    "atlasCategoryStadiums": "الملاعب",
+    "atlasCategoryThemeParks": "مدن الملاهي",
+    "atlasCategoryTravelTips": "نصائح السفر",
+    "atlasCategoryVenues": "أماكن الفعاليات"
   }
 }

@@ -1178,6 +1178,17 @@
     "publicFinishMentionedMany": "{{count}} mensen hebben dit genoemd",
     "publicFinishByAuthor": "Door",
     "publicFinishSearchResults": "Zoekresultaten",
-    "publicFinishSearchLocations": "Zoek plaatsen of locaties"
+    "publicFinishSearchLocations": "Zoek plaatsen of locaties",
+    "atlasCategoryAirports": "Luchthavens",
+    "atlasCategoryCampuses": "Campussen",
+    "atlasCategoryFamilyKids": "Familie en kinderen",
+    "atlasCategoryFoodDrink": "Eten en drinken",
+    "atlasCategoryHospitals": "Ziekenhuizen",
+    "atlasCategoryMalls": "Winkelcentra",
+    "atlasCategoryPorts": "Havens",
+    "atlasCategoryStadiums": "Stadions",
+    "atlasCategoryThemeParks": "Themaparken",
+    "atlasCategoryTravelTips": "Reistips",
+    "atlasCategoryVenues": "Evenementenlocaties"
   }
 }

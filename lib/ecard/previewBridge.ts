@@ -19,7 +19,7 @@ function clean(value: any, key = '', depth = 0): any {
     if (/(url|uri|src)$/i.test(key)) return safePreviewUrl(value, /photo|image|banner|logo|thumbnail|background|uri|src/i.test(key));
     return value;
   }
-  if (Array.isArray(value)) { if (value.length > 500) throw new Error('Preview contains too many items.'); return value.map(item => clean(item, key, depth + 1)); }
+  if (Array.isArray(value)) { if (key !== 'links' && value.length > 500) throw new Error('Preview contains too many items.'); return value.map(item => clean(item, key, depth + 1)); }
   if (value && typeof value === 'object') {
     const result: Record<string, any> = {};
     for (const name of Object.keys(value)) {

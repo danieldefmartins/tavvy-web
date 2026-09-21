@@ -1,3 +1,4 @@
+import { readECardLinks, replaceECardLinks } from './ecard/linkPersistence';
 /**
  * eCard Library - Data fetching and management functions
  * Ported from tavvy-mobile eCard implementation
@@ -240,8 +241,7 @@ export const PHOTO_SIZES = [
   { id: 'cover', name: 'Cover', size: -1 },
 ];
 
-// Free tier limits
-export const FREE_LINK_LIMIT = 5;
+// Basic links have no plan-based count limit. Atomic saves enforce a resource budget.
 
 // ============ Data Fetching Functions ============
 
@@ -304,21 +304,8 @@ export async function getCardBySlug(slug: string): Promise<CardData | null> {
  * Get links for a card
  */
 export async function getCardLinks(cardId: string, options: { includeInactive?: boolean; throwOnError?: boolean } = {}): Promise<LinkItem[]> {
-  let query = supabase
-    .from('digital_card_links')
-    .select('*')
-    .eq('card_id', cardId)
-    .order('sort_order', { ascending: true });
-  if (!options.includeInactive) query = query.eq('is_active', true);
-  const { data, error } = await query;
-
-  if (error) {
-    console.error('Error fetching card links:', error);
-    if (options.throwOnError) throw new Error('Your links could not be loaded. Retry before editing this card.');
-    return [];
-  }
-
-  return data || [];
+  try { return await readECardLinks(supabase, cardId, !!options.includeInactive); }
+  catch (error) { if (options.throwOnError) throw error; return []; }
 }
 
 /**
@@ -437,28 +424,9 @@ export async function deleteCard(cardId: string): Promise<boolean> {
 /**
  * Save card links
  */
-export async function saveCardLinks(cardId: string, links: LinkItem[]): Promise<boolean> {
-  // The installed owner-checked RPC validates and replaces links in one
-  // transaction. A failed insert keeps the previously saved list intact.
-  const { error } = await supabase.rpc('replace_ecard_links', {
-    p_card_id: cardId,
-    p_links: links.map((link, index) => ({
-      id: link.id,
-      platform: link.platform,
-      title: link.title || link.platform,
-      url: link.url ?? link.value ?? '',
-      value: link.value ?? link.url,
-      icon: link.icon || link.platform,
-      sort_order: index,
-      is_active: link.is_active === undefined ? true : link.is_active === true,
-    })),
-  });
-  if (error) {
-    console.error('Error saving card links:', error);
-    return false;
-  }
-
-  return true;
+export async function saveCardLinks(cardId: string, links: LinkItem[], options: { throwOnError?: boolean } = {}): Promise<boolean> {
+  try { await replaceECardLinks(supabase, cardId, links); return true; }
+  catch (error) { if (options.throwOnError) throw error; return false; }
 }
 
 /**
@@ -743,6 +711,8 @@ export async function duplicateCard(sourceCardId: string, userId: string): Promi
       return null;
     }
 
+    if (newCard.id === sourceCardId || newCard.user_id !== userId || newCard.is_published !== false) throw new Error('The new draft could not be verified.');
+
     // 5. Copy links from the source card
     if (sourceLinks.length > 0) {
       // Source IDs belong to the original card; the copy needs its own IDs.
@@ -750,7 +720,7 @@ export async function duplicateCard(sourceCardId: string, userId: string): Promi
       if (!await saveCardLinks(newCard.id, copiedLinks)) {
         // Remove only this newly created draft row. Its images are shared with
         // the source, so do not call the storage-cleaning deleteCard helper.
-        await supabase.from('digital_cards').delete().eq('id', newCard.id).eq('user_id', userId);
+        await supabase.from('digital_cards').delete().eq('id', newCard.id).eq('user_id', userId).eq('is_published', false);
         throw new Error('The card links could not be copied. The original card is unchanged.');
       }
     }

@@ -1,12 +1,11 @@
 import { useReleaseCopy } from '../../../../hooks/useReleaseCopy';
 /**
- * LinksSection -- Manage link items with platform picker and free-tier limit notice.
+ * LinksSection -- Manage link items with a platform picker and no plan-based count limit.
  */
 
 import React, { useState } from 'react';
 import { IoLink, IoAdd, IoClose, IoLockClosed } from 'react-icons/io5';
 import { useEditor } from '../../../../lib/ecard/EditorContext';
-import { FREE_LINK_LIMIT } from '../../../../lib/ecard';
 import EditorSection from '../shared/EditorSection';
 import LinkEditor from '../shared/LinkEditor';
 import PlatformPicker, { SOCIAL_PLATFORMS } from '../shared/PlatformPicker';
@@ -24,14 +23,10 @@ export default function LinksSection({ isDark, isPro }: LinksSectionProps) {
 
   const textSecondary = isDark ? '#94A3B8' : '#6B7280';
   const borderColor = isDark ? '#334155' : '#E5E7EB';
-  const warningBg = isDark ? 'rgba(245,158,11,0.1)' : '#FFFBEB';
-  const warningBorder = isDark ? 'rgba(245,158,11,0.3)' : '#FDE68A';
 
   const activeCount = links.filter(link => link.is_active !== false && link.is_active !== null).length;
-  const isAtLimit = !isPro && activeCount >= FREE_LINK_LIMIT;
 
   const handleAddLink = (platformId: string) => {
-    if (isAtLimit) return;
 
     const newLink = {
       id: crypto.randomUUID(),
@@ -91,41 +86,17 @@ export default function LinksSection({ isDark, isPro }: LinksSectionProps) {
         </p>
       )}
 
-      {/* Free tier limit notice */}
-      {isAtLimit && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            padding: '12px 14px',
-            borderRadius: 10,
-            background: warningBg,
-            border: `1px solid ${warningBorder}`,
-            marginBottom: 16,
-          }}
-        >
-          <IoLockClosed size={16} color="#F59E0B" />
-          <div>
-            <p style={{ fontSize: 13, fontWeight: 500, color: '#F59E0B', margin: 0 }}>
-              Free plan limit reached ({FREE_LINK_LIMIT} links)
-            </p>
-            <p style={{ fontSize: 12, color: textSecondary, margin: '4px 0 0' }}>
-              Upgrade to Pro for unlimited links.
-            </p>
-          </div>
-        </div>
-      )}
+      <p style={{ fontSize: 12, color: textSecondary }}>{copy('No plan-based link limit')}</p>
 
       {/* Link count */}
       <div style={{ marginBottom: 12 }}>
         <span style={{ fontSize: 12, color: textSecondary }}>
-          {activeCount}{!isPro ? ` / ${FREE_LINK_LIMIT}` : ''} active links{links.length > activeCount ? ` · ${links.length - activeCount} hidden` : ''}
+          {activeCount} active links{links.length > activeCount ? ` · ${links.length - activeCount} hidden` : ''}
         </span>
       </div>
 
       {/* Add button / Picker */}
-      {!isAtLimit && (
+      {(
         <>
           {!pickerOpen ? (
             <button

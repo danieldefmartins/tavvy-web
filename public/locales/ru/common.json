@@ -1178,6 +1178,17 @@
     "publicFinishMentionedMany": "Об этом упомянули: {{count}} чел.",
     "publicFinishByAuthor": "Автор:",
     "publicFinishSearchResults": "Результаты поиска",
-    "publicFinishSearchLocations": "Поиск мест или локаций"
+    "publicFinishSearchLocations": "Поиск мест или локаций",
+    "atlasCategoryAirports": "Аэропорты",
+    "atlasCategoryCampuses": "Кампусы",
+    "atlasCategoryFamilyKids": "Семья и дети",
+    "atlasCategoryFoodDrink": "Еда и напитки",
+    "atlasCategoryHospitals": "Больницы",
+    "atlasCategoryMalls": "Торговые центры",
+    "atlasCategoryPorts": "Порты",
+    "atlasCategoryStadiums": "Стадионы",
+    "atlasCategoryThemeParks": "Тематические парки",
+    "atlasCategoryTravelTips": "Советы путешественникам",
+    "atlasCategoryVenues": "Площадки мероприятий"
   }
 }

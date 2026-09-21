@@ -9,7 +9,7 @@ import React, { useMemo, useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useEditor } from '../../../lib/ecard/EditorContext';
 import { useAutoSave } from '../../../lib/ecard/useAutoSave';
-import { publishCard, unpublishCard, THEMES, FREE_LINK_LIMIT } from '../../../lib/ecard';
+import { publishCard, unpublishCard, THEMES } from '../../../lib/ecard';
 import { useThemeContext } from '../../../contexts/ThemeContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useRoles } from '../../../hooks/useRoles';

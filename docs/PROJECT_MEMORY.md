@@ -147,6 +147,14 @@ published content and saved design rights. Existing web Pro pricing is $4.99/mon
 Restaurant membership is a separate offer whose final pricing is unresolved; do not
 reuse Tavvy Pros billing for it. New eCard features and pricing changes require a decision.
 
+Browse categories are Business & Services, Personal & Creators, Food & Mobile
+Businesses, Real Estate, Faith & Community, and Politics & Public Service. Keep the
+Free/Pro filter independent of category and preserve persisted card purpose. Re-selecting
+an active filter must not invalidate a usable design or discard entered information.
+Basic links have no plan-based count limit; the persistence request has a resource
+bound. A failed read must never turn into an editable empty list, and failed saves must
+block publication while preserving saved links and their hidden state.
+
 ### Other tools
 
 - **Tavvy Menu:** retain the full native product, with elegant off-white, text-first
@@ -166,6 +174,14 @@ reuse Tavvy Pros billing for it. New eCard features and pricing changes require 
 - **Atlas:** readable Light / Sepia / Dark themes and text size, discoverable reading
   controls, and complete audio for both voices. There is no verified evidence of a
   previously shipped font-family selector in the history examined.
+
+Cruise-line filters must compose with ship type, operating status and name search
+before pagination. Featured ships are an editorial selection, not a popularity or
+review ranking. Preserve filters on Back and never show unrelated ships as an empty-state
+fallback. The admin Cruises section includes all ship publication states and provides
+Information, Photos, Facts and Sources. Keep source/history records, optimistic edit
+versions, image permissions and public/private metadata boundaries intact. Public ship
+galleries use only active, permission-verified photos; see [Cruise management](cruise-management.md).
 
 ## Languages and Apple release
 

@@ -1,0 +1,86 @@
+[
+  {
+    "id": "74f99eab-4141-4d79-ac4a-b244ed7adaa2",
+    "slug": "airports",
+    "name": "Airports",
+    "icon": "\ud83d\udccd"
+  },
+  {
+    "id": "6d262f3b-40bc-44ff-b076-c9aff3409f43",
+    "slug": "campuses",
+    "name": "Campuses",
+    "icon": "\ud83d\udccd"
+  },
+  {
+    "id": "1dbc3421-fc5d-416e-ac8d-078b528c249b",
+    "slug": "cities",
+    "name": "Cities",
+    "icon": "\ud83d\udccd"
+  },
+  {
+    "id": "1e831d41-186c-414c-80e0-ee0896f77dc2",
+    "slug": "family-kids",
+    "name": "Family & Kids",
+    "icon": "\ud83d\udccd"
+  },
+  {
+    "id": "e3a9c3a6-41ea-4884-9ecd-8bb5d5ad647c",
+    "slug": "food-drink",
+    "name": "Food & Drink",
+    "icon": "\ud83d\udccd"
+  },
+  {
+    "id": "2fc9c1e7-2744-4378-9e1d-07368209cb90",
+    "slug": "hospitals",
+    "name": "Hospitals",
+    "icon": "\ud83d\udccd"
+  },
+  {
+    "id": "99aa1234-17fd-4c08-8351-4ea598240986",
+    "slug": "malls",
+    "name": "Malls",
+    "icon": "\ud83d\udccd"
+  },
+  {
+    "id": "4538293c-b3c6-4e33-8673-6413c692e4b9",
+    "slug": "national-parks",
+    "name": "National Parks",
+    "icon": "\ud83d\udccd"
+  },
+  {
+    "id": "6be213c2-86e2-4ace-aec2-34cc4f125ce3",
+    "slug": "ports",
+    "name": "Ports",
+    "icon": "\ud83d\udccd"
+  },
+  {
+    "id": "26917772-0a8f-432f-9243-99883165209b",
+    "slug": "stadiums",
+    "name": "Stadiums",
+    "icon": "\ud83d\udccd"
+  },
+  {
+    "id": "370839a3-f138-4e05-b357-bffa554a1a43",
+    "slug": "theme-parks",
+    "name": "Theme Parks",
+    "icon": "\ud83d\udccd"
+  },
+  {
+    "id": "ea98e64c-fc90-4e69-88b9-4c688d71c2f1",
+    "slug": "travel-tips",
+    "name": "Travel Tips",
+    "icon": "\ud83d\udccd"
+  },
+  {
+    "id": "e33acb3f-c739-4e1a-ae6f-35ab48ba94ce",
+    "slug": "venues",
+    "name": "Venues",
+    "icon": "\ud83d\udccd"
+  },
+  {
+    "id": "custom-category",
+    "slug": "custom-editorial",
+    "name": "Airports by Jamie",
+    "icon": "\ud83d\udccd"
+  }
+]

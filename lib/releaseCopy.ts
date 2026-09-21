@@ -1,5 +1,30 @@
 /** Explicit UI copy only. Never apply to user or place content. */
 export const RELEASE_COPY_KEYS: Record<string, string> = {
+  "Design category": "ecardBrowse1",
+  "Design plan": "ecardBrowse2",
+  "All plans": "ecardBrowse3",
+  "Business & Services": "ecardBrowse4",
+  "Personal & Creators": "ecardBrowse5",
+  "Food & Mobile Businesses": "ecardBrowse6",
+  "Real Estate": "ecardBrowse7",
+  "Faith & Community": "ecardBrowse8",
+  "Politics & Public Service": "ecardBrowse9",
+  "No designs match these filters. Choose All plans or another category.": "ecardBrowse10",
+  "Free design. Some colors require Pro.": "ecardBrowse11",
+  "Profile Card": "ecardBrowse12",
+  "Portrait Page": "ecardBrowse13",
+
+  "Airports": "atlasCategoryAirports",
+  "Campuses": "atlasCategoryCampuses",
+  "Family & Kids": "atlasCategoryFamilyKids",
+  "Food & Drink": "atlasCategoryFoodDrink",
+  "Hospitals": "atlasCategoryHospitals",
+  "Malls": "atlasCategoryMalls",
+  "Ports": "atlasCategoryPorts",
+  "Stadiums": "atlasCategoryStadiums",
+  "Theme Parks": "atlasCategoryThemeParks",
+  "Travel Tips": "atlasCategoryTravelTips",
+  "Venues": "atlasCategoryVenues",
   "Cruises": "cruiseToolTitle",
   "Explore ocean, river and expedition ships.": "cruiseToolDescription",
   "Good night": "publicFinishGoodNight",
@@ -1324,4 +1349,20 @@ Object.assign(RELEASE_COPY_KEYS, {
   "Search places or locations": "publicFinishSearchLocations",
   "Location is off. Enter a city to find places.": "locationDenied",
   "Location is unavailable. Enter a city to find places.": "locationUnavailable"
+});
+
+// Approved Free/Pro offer; prices and saved customer content are unchanged.
+Object.assign(RELEASE_COPY_KEYS, {
+  "No plan-based link limit": "ecardFreeOffer1",
+  "Free includes a design in every category and no plan-based link limit. Pro adds premium designs, galleries, embedded videos, contact forms and professional credentials.": "ecardFreeOffer2",
+  "Premium designs": "ecardFreeOffer3",
+  "Choose from premium layouts and color palettes.": "ecardFreeOffer4",
+  "Photo galleries": "ecardFreeOffer5",
+  "Show multiple photos on your card.": "ecardFreeOffer6",
+  "Embedded videos": "ecardFreeOffer7",
+  "Add playable videos to your card.": "ecardFreeOffer8",
+  "Contact forms": "ecardFreeOffer9",
+  "Let visitors send an inquiry from your card.": "ecardFreeOffer10",
+  "Professional credentials": "ecardFreeOffer11",
+  "Display your professional credentials.": "ecardFreeOffer12"
 });

@@ -284,7 +284,7 @@ export default function SettingsScreen() {
             {user && <section className="section">
               <h2 className="section-label">{copy("Account")}</h2>
               <Link href="/app/settings/delete-account" locale={locale} className="setting-row clickable">
-                <span className="row-title">{"Delete account"}</span><FiChevronRight size={20} />
+                <span className="row-title">{t('auth.deleteAccount', { defaultValue: 'Delete account' })}</span><FiChevronRight size={20} />
               </Link>
             </section>}
 

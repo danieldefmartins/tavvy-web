@@ -1178,6 +1178,17 @@
     "publicFinishMentionedMany": "{{count}}명이 이 내용을 언급했습니다",
     "publicFinishByAuthor": "작성자:",
     "publicFinishSearchResults": "검색 결과",
-    "publicFinishSearchLocations": "장소 또는 위치 검색"
+    "publicFinishSearchLocations": "장소 또는 위치 검색",
+    "atlasCategoryAirports": "공항",
+    "atlasCategoryCampuses": "캠퍼스",
+    "atlasCategoryFamilyKids": "가족과 어린이",
+    "atlasCategoryFoodDrink": "음식과 음료",
+    "atlasCategoryHospitals": "병원",
+    "atlasCategoryMalls": "쇼핑몰",
+    "atlasCategoryPorts": "항구",
+    "atlasCategoryStadiums": "경기장",
+    "atlasCategoryThemeParks": "테마파크",
+    "atlasCategoryTravelTips": "여행 팁",
+    "atlasCategoryVenues": "행사장"
   }
 }

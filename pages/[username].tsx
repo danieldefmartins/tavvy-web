@@ -1,3 +1,4 @@
+import { readECardLinks } from '../lib/ecard/linkPersistence';
 /** Public eCard SSR: data access stays here; the same view renders studio previews. */
 import { GetServerSideProps } from 'next';
 import { createClient } from '@supabase/supabase-js';
@@ -81,12 +82,7 @@ export const getServerSideProps: GetServerSideProps<PageProps> = async (context)
     
     // Fetch links from digital_card_links (primary) and card_links (legacy fallback)
     let linksData: any[] = [];
-    const { data: digitalLinksData } = await serverSupabase
-      .from('digital_card_links')
-      .select('*')
-      .eq('card_id', data.id)
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true });
+    const digitalLinksData = await readECardLinks(serverSupabase, data.id);
     
     if (digitalLinksData && digitalLinksData.length > 0) {
       linksData = digitalLinksData;

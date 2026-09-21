@@ -84,8 +84,8 @@ export default function PrivacyPolicy() {
           <h2>4. Your Choices</h2>
           <h3>4.1. Account Information</h3>
           <p>
-            You may update, correct, or delete your account information at any time by logging into your account. 
-            If you wish to delete your account, please contact us at support@tavvy.com.
+            In-app account deletion is currently unavailable. For questions about accessing, correcting,
+            or deleting your personal information, contact us at support@tavvy.com.
           </p>
 
           <h3>4.2. Location Information</h3>

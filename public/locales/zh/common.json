@@ -1178,6 +1178,17 @@
     "publicFinishMentionedMany": "{{count}}人提到了这一点",
     "publicFinishByAuthor": "作者：",
     "publicFinishSearchResults": "搜索结果",
-    "publicFinishSearchLocations": "搜索地点或位置"
+    "publicFinishSearchLocations": "搜索地点或位置",
+    "atlasCategoryAirports": "机场",
+    "atlasCategoryCampuses": "大学校园",
+    "atlasCategoryFamilyKids": "亲子家庭",
+    "atlasCategoryFoodDrink": "餐饮",
+    "atlasCategoryHospitals": "医院",
+    "atlasCategoryMalls": "购物中心",
+    "atlasCategoryPorts": "港口",
+    "atlasCategoryStadiums": "体育场",
+    "atlasCategoryThemeParks": "主题公园",
+    "atlasCategoryTravelTips": "旅行贴士",
+    "atlasCategoryVenues": "活动场所"
   }
 }
