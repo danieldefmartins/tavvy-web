@@ -4,6 +4,7 @@ import { fetchPlaceEvidence } from '../../../lib/placeEvidenceService';
 import { contentViewer } from '../../../lib/contentSafetyServer';
 import { parseHours, openLineFrom } from '../../../lib/placeHours';
 import {loadCruiseVenueContext,CruiseVenueReadError} from '../../../lib/cruises/venueContext';
+import { getPlaceById } from '../../../lib/typesenseService';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
@@ -54,8 +55,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!raw) return res.status(400).json({ error: 'missing id' });
 
   try {
-    // FSQ (Foursquare) places aren't in the Tavvy `places` table — resolve them
-    // from fsq_places_raw and render with no signals ("Be the first").
+    // FSQ (Foursquare) places aren't in the Tavvy `places` table. The search
+    // index can contain places that are absent from the older raw table, so a
+    // result must remain openable from the same exact indexed identity.
     if (isFsq || (!isUuid(raw) && /^[0-9a-f]{24}$/i.test(raw))) {
       const { data: f } = await supabase.from('fsq_places_raw').select('*').eq('fsq_place_id', raw).maybeSingle();
       if (f) {
@@ -71,6 +73,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           },
           groups: { good: [], vibe: [], headsup: [] }, totalTaps: 0, reviewCount: 0,
         });
+      }
+      if (/^[0-9a-f]{24}$/i.test(raw)) {
+        const indexed = await getPlaceById(raw);
+        if (indexed?.fsq_place_id?.toLowerCase() === raw.toLowerCase() && indexed.name) {
+          return res.status(200).json({
+            place: {
+              id: `fsq:${raw}`, name: indexed.name,
+              category: indexed.category || 'Place', subcategory: indexed.subcategory,
+              street: indexed.address, city: indexed.locality, region: indexed.region,
+              country: indexed.country, phone: indexed.tel, website: indexed.website,
+              email: indexed.email, cover_image_url: null, photos: null,
+              description: null, latitude: indexed.latitude, longitude: indexed.longitude,
+            },
+            groups: { good: [], vibe: [], headsup: [] }, totalTaps: 0, reviewCount: 0,
+          });
+        }
       }
       return res.status(404).json({ error: 'not found' });
     }

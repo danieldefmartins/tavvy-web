@@ -413,6 +413,7 @@ export async function getPlaceById(placeId: string): Promise<PlaceSearchResult |
       headers: {
         'X-TYPESENSE-API-KEY': TYPESENSE_API_KEY,
       },
+      signal: AbortSignal.timeout(5000),
     });
 
     if (!response.ok) return null;
