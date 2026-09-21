@@ -222,14 +222,16 @@ export default function NewProjectPage() {
   const searchTimeout = useRef<NodeJS.Timeout | null>(null);
   const addressRequest = useRef(0);
   const [nearbyPosition, setNearbyPosition] = useState<{ lat: number; lon: number } | null>(null);
+  const [locationPending, setLocationPending] = useState(false);
 
   useEffect(() => {
     if (step !== 6 || !navigator.geolocation) return;
-    navigator.permissions?.query({ name: 'geolocation' }).then(permission => {
-      if (permission.state === 'granted') {
-        navigator.geolocation.getCurrentPosition(position => setNearbyPosition({ lat: position.coords.latitude, lon: position.coords.longitude }));
-      }
-    }).catch(() => {});
+    setLocationPending(true);
+    navigator.geolocation.getCurrentPosition(
+      position => { setNearbyPosition({ lat: position.coords.latitude, lon: position.coords.longitude }); setLocationPending(false); },
+      () => setLocationPending(false),
+      { timeout: 8000, maximumAge: 300000 }
+    );
   }, [step]);
 
   // Step 6: Submit
@@ -339,6 +341,7 @@ export default function NewProjectPage() {
 
   // Photon supports address autocomplete and ranks results near a supplied position.
   const searchAddress = useCallback(async (text: string) => {
+    if (locationPending && !nearbyPosition) return;
     if (text.length < 3) {
       setAddressSuggestions([]);
       setShowSuggestions(false);
@@ -367,7 +370,13 @@ export default function NewProjectPage() {
     } finally {
       setAddressLoading(false);
     }
-  }, [nearbyPosition]);
+  }, [nearbyPosition, locationPending]);
+
+  useEffect(() => {
+    if (step !== 6 || locationPending || formData.address.length < 3) return;
+    if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    searchTimeout.current = setTimeout(() => searchAddress(formData.address), 100);
+  }, [nearbyPosition, locationPending]);
 
   const handleAddressTextChange = (text: string) => {
     addressRequest.current++;
