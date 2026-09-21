@@ -1,6 +1,6 @@
 # Tavvy current engineering status
 
-As of September 21, 2026, 00:37 America/New_York (04:37 UTC).
+As of September 21, 2026, 01:08 America/New_York (05:08 UTC).
 Read [PROJECT_MEMORY.md](PROJECT_MEMORY.md) for product decisions and architecture.
 This is a dated checkpoint, not a claim that the full requested release is complete.
 
@@ -36,6 +36,21 @@ The image-optimizer performance release also passed production checks: tested 64
 portraits now load as WebP at about 39KB and 77KB. All layouts/palettes remain available.
 Release evidence is held with the maintainer.
 
+The cruise and community-safety web release is now live, with public Next build
+`1Ag6HljLdoOBMpgGmZCnL`. It preserves the eCard gallery and image optimization above.
+Four reviewed database migrations were applied atomically and their exact bodies,
+permissions and row-level protections checked after commit. The initial 12 sourced
+ships are published: four ocean, four river and four expedition ships, from nine
+operators. All 12 public pages, crawler metadata, ship sharing image and anonymous
+catalog reads passed postrelease checks. Unknown facts and unverified photos remain
+unfilled. This is the first verified batch, not worldwide coverage.
+
+The admin community-moderation release is also live. Its public login page and client
+asset load; anonymous moderation access is denied. Local behavior checks cover
+reporting, blocking, hide/restore and evidence visibility, including stale account
+requests. Logged-in production moderation actions have not been exercised against
+customer content. Native integration and account-deletion release gates remain.
+
 ## Active work and next actions
 
 ### Search — active recovery, preserve progress
@@ -44,7 +59,7 @@ The interrupted import resumed from its verified 6,180,000-record checkpoint.
 The full saved prefix was audited, two text fields restored from backup, and all
 6,180,000 complete records rechecked with zero differences. A later interruption at
 6,348,000 was reconciled by exact readback of its unfinished batch, preserving all
-acknowledged progress. The latest continuation passed 7.7 million of 34,883,915
+acknowledged progress. The latest continuation passed 9 million of 34,883,915
 records at this checkpoint. This is not a completed migration. Serving search remains
 unchanged. The full backup's immutable content-hash ledger is complete.
 
@@ -67,7 +82,8 @@ visibility, review-grid integration, browser Back state and smooth touch-sheet b
 - Reusable decorations may populate drafts; fictional example identities/photos/links
   are never copied into customers' saved cards.
 - Actual iPhone Safari captures include corrected Classic, Chef and Modern examples;
-  the complete 21-template Simulator set is still being captured. Browser-only captures
+  a fresh full set against the live gallery is underway, with five of 21 captured
+  and visually reviewed at this checkpoint. Browser-only captures
   of every layout are separate evidence, not native or App Store screenshots.
 - Native parity passed 14 focused behavior checks, TypeScript and a new Xcode Simulator
   build. Its current-source visual checks and EAS upload remain pending.
@@ -100,9 +116,9 @@ in this public status document.
 | Shared tool headers | Universe-style source changes and browser checks prepared. | Integrate and release; verify every tool in both themes. |
 | On The Go | Full discovery/detail/owner changes prepared; backend lifecycle dependency remains. | Resolve lifecycle/identity rules, confirmed mobile location, stories, authorization and expiry; apply validated migration and release. |
 | RV & Camping | Existing canonical parks/campgrounds remain; current bounded browse queries hide some records. | Correct filtering/pagination/classification, category-specific taps and canonical details. Offline maps are not implemented. |
-| Cruises | Catalog/review source and rollback-tested migrations prepared. First sourced batch contains 12 draft ships (4 ocean, 4 river, 4 expedition), 48 venues and 36 cabin categories. Further operator fleet inventory is active. | Review canonical identity/deduplication, verify remaining facts/media permissions, apply migrations and publish reviewed batches. No fleet data has been published; worldwide coverage remains incomplete. |
+| Cruises | First 12 verified ships published and public web routes checked; 48 sourced venues and 36 cabin categories are present. No invented place links or unverified photos. | Continue worldwide fleet research and verified batches; finish native and language release. |
 | Atlas | Existing reading themes/text-size confirmed; audio fixes partly live. | Improve discoverability/persistence checks; integrate full audio UI and atomically deploy the reviewed scheduled producer. |
-| UGC | Reporting/blocking/moderation source and rollback checks prepared. | Apply backend dependencies, complete operational moderation and verify all exposed surfaces. Not live yet. |
+| UGC | Four backend migrations, web reporting/blocking and admin moderation released. Public access checks passed; local behavior and rollback checks preserved. | Finish native release, operational signed-in QA and remaining surface review. |
 
 The earlier request to locate an attributed RV article was closed by the requester
 after no match was found. Do not substitute a person's eCard or invent attributed content.
@@ -112,7 +128,7 @@ after no match was found. Do not substitute a person's eCard or invent attribute
 - Finish final iPhone and 13-inch iPad screenshot sets, prioritizing English,
   Portuguese and Spanish, against the final build.
 - Complete and verify account deletion backend behavior before claiming readiness.
-- Release and test UGC reporting, blocking and moderation.
+- Complete native UGC release and operational signed-in moderation verification.
 - Resolve the digital-purchase strategy and verify visible language coverage.
 - Prepare accurate reviewer sign-in instructions and rerun iPad navigation checks.
 - Produce the final internal/production builds and submission materials. An internal

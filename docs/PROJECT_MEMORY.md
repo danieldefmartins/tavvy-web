@@ -1,6 +1,6 @@
 # Tavvy project memory
 
-Updated September 20, 2026, America/New_York. This is the current product and
+Updated September 21, 2026, America/New_York. This is the current product and
 engineering handoff. Read [PROJECT_STATUS.md](PROJECT_STATUS.md) for release status
 and remaining work. Update both documents as decisions and releases change.
 
