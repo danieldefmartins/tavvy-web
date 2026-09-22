@@ -1283,6 +1283,10 @@
     "reviewExperience78": "محطة المياه",
     "reviewExperience79": "إعادة التعبئة",
     "reviewExperience80": "وصلت إلى حد الاختيارات. أزل كلمة لاختيار أخرى.",
-    "reviewExperience81": "لم تُذكر مخاوف حديثة أخرى"
+    "reviewExperience81": "لم تُذكر مخاوف حديثة أخرى",
+    "reviewExperience82": "من الجيد معرفته",
+    "reviewExperience83": "حول هذه الأرقام",
+    "reviewExperience84": "{{count}} أشخاص · آخر 6 أشهر",
+    "reviewExperience85": "تُظهر الأشرطة عدد من ذكروا ذلك من بين {{count}} شخصًا"
   }
 }

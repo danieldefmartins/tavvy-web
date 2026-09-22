@@ -1656,6 +1656,10 @@
     "reviewExperience78": "A parada para água",
     "reviewExperience79": "O abastecimento",
     "reviewExperience80": "Limite de seleção atingido. Remova uma palavra para escolher outra.",
-    "reviewExperience81": "Nenhuma outra preocupação recente relatada"
+    "reviewExperience81": "Nenhuma outra preocupação recente relatada",
+    "reviewExperience82": "Bom saber",
+    "reviewExperience83": "Sobre estes números",
+    "reviewExperience84": "{{count}} pessoas · Últimos 6 meses",
+    "reviewExperience85": "As barras mostram quantas das {{count}} pessoas mencionaram isso"
   }
 }

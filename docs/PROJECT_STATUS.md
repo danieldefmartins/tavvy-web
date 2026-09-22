@@ -361,17 +361,30 @@ and the live read-only Boston search ran in the existing iPhone Simulator app.
 A new distributed binary, full iPad release QA and remaining-language translation
 are still outstanding. Claude's separate Apple readiness branch was not modified.
 
-## Review design preview — September 22
+## Review presentation redesign — September 22, release candidate
 
-An unlinked design preview at `/preview/review` proposes how a review looks: a
-main-experience hero with people bars, tone pills for The Good, The Vibe and Heads
-Up, dated older reports, practical details kept apart, experience cards with
-verified-visit and imported-review badges, and the compact search-card rows. Its
-numbers come from fictional visits run through the live evidence rules
-(`buildPlaceEvidence`, `buildPlaceReviewSummary`); the page and its hub link touch no
-shared logic, catalog, review data or real place screens. The verified-visit and
-imported-review badges are proposals only; no verification or import feature exists.
-Web TypeScript, the production build and 390-px light/dark/topic-filter browser
-captures passed locally with no console errors or horizontal overflow. Release
-target: Tavvy.com from `release/verified-web-20260921`. The design awaits the user's
-approval before any real screen changes.
+The user approved the review design direction after designer review; this batch
+implements it on the real components. `components/PlaceReviewGrid.tsx` now renders
+every displayed topic the same way in both modes: the word, the number of people who
+mentioned it and a thin frequency bar on one scale per place (teal positive, purple
+atmosphere, amber concern; bars hidden below five recent reviewers). The place page
+section is titled Reviews, opens with `{{count}} people · Last 6 months` and an
+About these numbers control, shows the core experience in a tinted panel with praise
+before concerns, starts supporting sections at three topics with Show all, and adds a
+neutral Good to know row for practical details (`summary.practical`). Search cards use
+`searchReviewSections()`: at most three highlight lines, Heads Up before supporting
+praise. Individual reviews keep tone-colored word chips with the `!` marker and no
+bars; Report or block is visually secondary. `/preview/review` and its hub link now
+render the real components from fictional evidence. Four copy keys
+(`reviewExperience82`–`85`) were added to the en/es/pt/ar catalogs.
+
+Checks: web TypeScript, 31 focused unit tests (including a new search-highlight
+regression), the production build, the compact-card browser suite (updated to three
+rows and the people wording) and the composer browser suite passed locally; 390-px
+light/dark/topic-filter captures showed no console errors or horizontal overflow.
+Matching mobile source is prepared on `preview/review-design-mobile` (mirrored
+`lib/placeReviewSummary.ts`, native `PlaceReviewGrid`, place-screen title and chip
+markers, 4 locale keys) with application TypeScript and 16 focused unit tests passing;
+it is not in any binary. Release target: Tavvy.com from `release/verified-web-20260921`;
+confirm the deployment before calling it released. No live device or production
+write was used.

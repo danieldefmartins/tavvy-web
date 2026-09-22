@@ -44,22 +44,26 @@ Each redesigned place card contains:
 - Distance when usable distance data is available.
 - Address information when supplied by the place record.
 - A 112 × 104 photo beside the identity information, replacing the earlier 76 × 76 thumbnail. Narrow web screens use 96 × 96 to leave room for the place name.
-- Up to two compact review rows.
-- One evidence-period/reviewer-count line.
+- Up to three compact review highlight lines, each a word, its people count and a thin
+  frequency bar (September 22 presentation update).
+- One evidence-period/people-count line.
 - Available actions, such as Directions, Call, Website and opening the full place.
 
 Web uses `components/SignalCard.tsx`. Native search results use the card renderer in `screens/HomeScreen.tsx`. Both use `components/PlaceReviewGrid.tsx` in its default compact mode.
 
 The card grows when text needs to wrap; its height is not fixed. The phone-width browser fixture stayed below 290 pixels per card. That is a checked example, not a guarantee for every translated label or accessibility text size.
 
-### How the two review rows are selected
+### How the highlight lines are selected
 
-`compactReviewSections()` in `lib/placeReviewSummary.ts` chooses:
+`searchReviewSections()` in `lib/placeReviewSummary.ts` fills at most three lines:
 
-1. **The core experience:** the first available positive core topic and the first core concern. When there is no core concern, it can show a second positive core topic. A concern can appear without any positive topic.
-2. **Supporting evidence:** the first available nonduplicated topic from Heads Up, otherwise The Vibe, otherwise The Good.
+1. **The core experience:** the first available positive core topic and the first core concern. A concern can appear without any positive topic.
+2. **Heads Up:** the most relevant remaining concern, when one exists. It takes priority over supporting praise because it changes decisions.
+3. **Supporting evidence:** one nonduplicated topic from The Good, otherwise The Vibe.
 
-When supporting evidence does not exist, the UI does not invent a second row. When core evidence is missing, its row explains that more recent reviews are needed.
+When evidence for a line does not exist, the UI does not invent it. When core evidence is missing, its line explains that more recent reviews are needed. The earlier two-row `compactReviewSections()` remains exported for compatibility and tests.
+
+Every highlight line uses the same treatment as the place page: the word, the number of people who mentioned it, and a thin bar whose length is that count out of the recent reviewers. Bars use teal for positive topics, purple for atmosphere and amber for concerns; concerns also keep their `!` marker. Bars are hidden when fewer than five people reviewed recently, because a tiny sample would otherwise look like a full bar.
 
 Illustrative layout only; these are not published reviews or a real business:
 
@@ -68,9 +72,10 @@ Example Bistro                         [photo]
 Italian restaurant · 0.4 mi
 Example Street, Boston
 
-The food   Delicious food 12 · ! Food arrived cold 3
-Heads Up   ! Slow service 2
-12 reviewers · Last 6 months
+The food   Delicious food   ▬▬▬▬▬▬▬░░░  12
+           ! Food arrived cold ▬▬░░░░░░░   3
+Heads Up   ! Slow service    ▬░░░░░░░░░   2
+12 people · Last 6 months
 
 Directions     Call     Website     Details
 ```
@@ -108,7 +113,13 @@ The full summary displays four conceptual sections:
 
 The core heading is more prominent. Concern topics have an explicit `!` marker and distinct text treatment; color is not the only distinction.
 
-Full sections initially display up to six supplied topics and offer **Show all** when more are available. This expansion reveals the topics in the summary payload, not every historical review. The evidence builder currently retains the top four positive core topics and up to twenty positive/supporting atmosphere topics.
+### Presentation (September 22 update)
+
+The place-page section is titled **Reviews** and opens with one quiet line, `{{count}} people · Last 6 months` (or `Early impressions · 1 reviewer`), followed by an **About these numbers** control that reveals the counting explanation on demand. The main experience sits in a tinted panel; the three supporting sections follow with a colored dot and label. Every displayed topic, in every section, is the same object: the word, the number of people who mentioned it, and a thin frequency bar on one scale per place (people who mentioned it out of recent reviewers). Bar length is frequency only — never quality or severity — so a rarely mentioned serious concern keeps its `!` marker and its priority position instead of relying on bar length. Bars are hidden below five recent reviewers.
+
+Practical details from `evidence.practical` (for example cash only or reservation policy) appear in a neutral **Good to know** row, separate from Heads Up. Individual reviews show the reviewer, the date, the words they chose as tone-colored chips (concerns marked `!`), and the optional note; they never show frequency bars. The report/block control stays available but is visually secondary.
+
+Full sections initially display up to three supplied topics and offer **Show all** when more are available. This expansion reveals the topics in the summary payload, not every historical review. The evidence builder currently retains the top four positive core topics and up to twenty positive/supporting atmosphere topics.
 
 ### Opening supporting reviews
 
@@ -474,6 +485,8 @@ The underlying evidence still contains a legacy `confidence` field. The redesign
 - The browser sheet has dialog semantics and keyboard focus handling.
 - A written error/status accompanies loading and save failures.
 - Concern meaning is explicit in text, not color alone.
+
+The September 22 presentation update adds four phrases (`reviewExperience82`–`85`: Good to know, About these numbers, the people/period line and the bar explanation) to the same four catalogs.
 
 New shared review UI phrases have English, Spanish, Portuguese and Arabic entries in:
 

@@ -37,7 +37,7 @@ const places = [
       const first = await page.$eval('article.card', e => ({text:e.innerText,src:e.querySelector('img').getAttribute('src'),tiles:e.querySelectorAll('[data-review-section]').length,overflow:e.scrollWidth>e.clientWidth}));
       assert.match(first.text,/9.9 mi/); assert.doesNotMatch(first.text,/16000/);
       assert.match(first.text,/69 Example Street, Boston, MA/);
-      assert.match(first.text,/12 reviewers/); assert.equal(first.tiles,2); assert.equal(first.overflow,false);
+      assert.match(first.text,/12 people/); assert.equal(first.tiles,3); assert.equal(first.overflow,false);
       assert.match(first.src,/restaurant-1.webp/);
       const second=await page.$$eval('article.card', cards=>({text:cards[1].innerText,src:cards[1].querySelector('img').getAttribute('src')}));
       assert.match(second.text,/Nearby/); assert.equal(second.src,'/qa-real-photo.webp');
@@ -64,6 +64,6 @@ const places = [
     assert.equal(await page.$eval('body',e=>e.innerText.includes('Edit location & filters')),false);
     await page.screenshot({path:path.join(out,'map-preview.png')});
     assert.deepEqual(errors,[]);
-    console.log('PASS: light/dark cards, two compact review rows, real counts, address, meters conversion, zero distance, no overflow, real-photo replacement');
+    console.log('PASS: light/dark cards, three compact review highlight rows with bars, real counts, address, meters conversion, zero distance, no overflow, real-photo replacement');
   } catch(error) { console.log('URL',page.url(),'ERRORS',errors,'PAGE',await page.$eval('body',e=>e.innerText.slice(0,1600))); await page.screenshot({path:path.join(out,'failure.png'),fullPage:true}); throw error; } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode=1; });

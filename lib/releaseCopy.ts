@@ -2,6 +2,10 @@
 export const RELEASE_COPY_KEYS: Record<string, string> = {
   "Selection limit reached. Remove a word to choose another.": "reviewExperience80",
   "No other recent concerns reported": "reviewExperience81",
+  "Good to know": "reviewExperience82",
+  "About these numbers": "reviewExperience83",
+  "{{count}} people · Last 6 months": "reviewExperience84",
+  "Bars show how many of the {{count}} people mentioned it": "reviewExperience85",
   "What stood out?": "reviewExperience1",
   "Choose what you experienced. Tap again to remove. Every section is optional.": "reviewExperience2",
   "Find a word": "reviewExperience3",

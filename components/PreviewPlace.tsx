@@ -180,30 +180,35 @@ function Row({ s, max }: { s: Sig; max: number }) {
   );
 }
 
-function Reviewer({ r, allowSafety }: { r: Review; allowSafety?:boolean }) {
+export function Reviewer({ r, allowSafety }: { r: Review; allowSafety?:boolean }) {
   const t = usePalette();
+  // Chip text takes the category tone so a review reads with the same colors as the summary above it.
+  const tone = { good: t.isDark ? '#58D9DE' : '#067A80', vibe: t.isDark ? '#D9B6FF' : '#74209A', headsup: t.isDark ? '#FFD38A' : '#885000' };
   return (
     <div className="rv">
       <div className="rv-av" style={{ background: r.color }}>{r.initial}</div>
       <div className="rv-body">
         <div className="rv-top"><span className="rv-name">{r.name}</span><span className="rv-when">{r.createdAt ? reviewDateLabel(r.createdAt,r.dateSource) : r.when}{r.isEdit ? ' · Edited' : ''}</span></div>
-        {allowSafety && r.id && <ContentSafetyActions kind="place_review" contentId={r.id} />}
-        {r.text && <p className="rv-note">{r.text}</p>}
         <div className="rv-sigs">
           {r.signals.map((s, i) => { const c = CAT[s.category];
-            return <span className="rv-chip" key={i} style={{ background: c.tint, color: t.text, borderColor: c.border }}>{s.label}</span>; })}
+            return <span className="rv-chip" key={i} style={{ background: c.tint, color: tone[s.category], borderColor: c.border }}>{s.category === 'headsup' && <span className="rv-mark" aria-hidden="true">!</span>}{s.label}</span>; })}
         </div>
+        {r.text && <p className="rv-note">{r.text}</p>}
+        {allowSafety && r.id && <div className="rv-safety"><ContentSafetyActions kind="place_review" contentId={r.id} compact /></div>}
       </div>
       <style jsx>{`
-        .rv { display: flex; gap: 12px; padding: 14px 0; }
+        .rv { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid ${t.divider}; }
+        .rv:last-of-type { border-bottom: 0; }
         .rv-av { flex: none; width: 38px; height: 38px; border-radius: 50%; color: #fff; font-weight: 800; font-size: 15px; display: flex; align-items: center; justify-content: center; }
         .rv-body { flex: 1; min-width: 0; }
         .rv-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-        .rv-name { font-size: 14.5px; font-weight: 800; color: ${t.text}; }
-        .rv-note { margin: 9px 0; color: ${t.text}; font-size: 15px; line-height: 1.55; white-space: pre-wrap; }
-        .rv-when { font-size: 13px; color: ${t.text2}; flex: none; }
-        .rv-sigs { display: flex; flex-wrap: wrap; gap: 6px; margin: 7px 0 0; }
-        .rv-chip { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; border: 1px solid; }
+        .rv-name { font-size: 15px; font-weight: 800; color: ${t.text}; }
+        .rv-note { margin: 9px 0 0; color: ${t.text2}; font-size: 14.5px; line-height: 1.55; white-space: pre-wrap; }
+        .rv-when { font-size: 12.5px; color: ${t.text2}; flex: none; }
+        .rv-sigs { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0; }
+        .rv-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 700; padding: 5px 10px; border-radius: 20px; border: 1px solid; }
+        .rv-mark { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; border-radius: 50%; background: #F5A623; color: #17013A; font-size: 9.5px; font-weight: 900; line-height: 1; }
+        .rv-safety { display: flex; justify-content: flex-end; }
       `}</style>
     </div>
   );
@@ -329,7 +334,7 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
           {saveMessage && <span role="status" className="share-status">{saveMessage}</span>}
         </nav>
         <section className="review-summary" aria-label="Tavvy review summary">
-          <div className="section-head"><h2 className="section-title">What people experienced</h2><span className="section-sub">Last 6 months</span></div>
+          <div className="section-head"><h2 className="section-title">{copy('Reviews')}</h2></div>
           <PlaceReviewGrid mode="full" summary={buildPlaceReviewSummary(evidence, reviewSubject)} selectedTopic={selectedTopic} onSelect={(section, topic) => { setSelectedSummary(section); setSelectedTopic(topic.label); }} />
           {selectedSummary && !unavailable && <div className="summary-detail">
             <div className="section-head"><strong>{selectedTopic || summaryTiles.find(tile => tile.key === selectedSummary)?.title}</strong><button type="button" className="text-link" onClick={() => {setSelectedSummary(null);setSelectedTopic(null);}}>{copy("All experiences")}</button></div>

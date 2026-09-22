@@ -11,7 +11,8 @@ export interface ReviewSummaryTile {
 }
 export interface ReviewTopic { label: string; count: number; tone: 'positive' | 'neutral' | 'concern'; slug?: string; lastReportedAt?: string; older?: boolean }
 export interface ReviewSection { key: ReviewTileKey; title: string; topics: ReviewTopic[] }
-export interface PlaceReviewSummary { status: ReviewSummaryStatus; tiles: ReviewSummaryTile[]; recentReviewers?: number; coreLabel?: string; sections?: ReviewSection[] }
+export interface ReviewPractical { label: string; count: number }
+export interface PlaceReviewSummary { status: ReviewSummaryStatus; tiles: ReviewSummaryTile[]; recentReviewers?: number; coreLabel?: string; sections?: ReviewSection[]; practical?: ReviewPractical[] }
 
 /** Compact projection of the same recent, independent reports used on place details. */
 export function buildPlaceReviewSummary(evidence?: PlaceEvidence | null, category?: EvidenceSubject, status?: ReviewSummaryStatus): PlaceReviewSummary {
@@ -37,7 +38,9 @@ export function buildPlaceReviewSummary(evidence?: PlaceEvidence | null, categor
     { key: 'vibe', title: coreForCategory(category).vibeLabel || 'The Vibe', topics: !unavailable && evidence ? topics(evidence.vibeSignals.filter(item => !coreLabels.has(item.label)), 'neutral') : [] },
     { key: 'headsup', title: 'Heads Up', topics: concerns.filter(topic => !coreLabels.has(topic.label)) },
   ];
-  return { status: state, coreLabel, sections, recentReviewers: unavailable ? undefined : evidence?.recentReviewers, tiles: [
+  // Practical details (cash only, reservations) are facts to know, never quality complaints.
+  const practical: ReviewPractical[] = !unavailable && evidence ? evidence.practical.map(item => ({ label: item.label, count: item.reports })) : [];
+  return { status: state, coreLabel, sections, practical, recentReviewers: unavailable ? undefined : evidence?.recentReviewers, tiles: [
     { key: 'main', title: 'The Main Thing', detail: core ? `${coreLabel}: ${core.label}` : coreLabel, count: core?.reports,
       note: unavailable || (evidence?.coreConcerns.length ? 'Recent concerns reported' : core ? undefined : 'More recent reviews needed') },
     { key: 'good', title: 'The Good', detail: unavailable || good?.label || 'More recent reviews needed', count: good?.reports },
@@ -52,6 +55,32 @@ export function reviewSections(summary: PlaceReviewSummary): ReviewSection[] {
   if (summary.sections) return summary.sections;
   return summary.tiles.map(tile => ({ key: tile.key, title: tile.key === 'main' ? summary.coreLabel || (tile.detail.includes(': ') ? tile.detail.split(': ')[0] : 'The main experience') : tile.title,
     topics: tile.count && tile.count > 0 ? [{ label: tile.key === 'main' ? tile.detail.replace(/^[^:]+: /, '') : tile.detail, count: tile.count, tone: tile.key === 'headsup' ? 'concern' : tile.key === 'vibe' ? 'neutral' : 'positive' }] : [] }));
+}
+
+/**
+ * Search cards: at most three highlight lines. The core word and its concern come first;
+ * the remaining lines go to the most relevant Heads Up, then one supporting Good/Vibe word.
+ */
+export function searchReviewSections(summary: PlaceReviewSummary): ReviewSection[] {
+  const sections = reviewSections(summary);
+  const find = (key: ReviewTileKey) => sections.find(section => section.key === key);
+  const main = find('main');
+  const positive = main?.topics.find(topic => topic.tone !== 'concern');
+  const concern = main?.topics.find(topic => topic.tone === 'concern');
+  const mainTopics = [positive, concern].filter(Boolean) as ReviewTopic[];
+  const used = new Set(mainTopics.map(topic => topic.label));
+  let budget = 3 - mainTopics.length;
+  const rows: ReviewSection[] = main ? [{ ...main, topics: mainTopics }] : [];
+  const take = (key: ReviewTileKey) => {
+    const section = find(key);
+    const topic = section?.topics.find(item => !used.has(item.label));
+    if (!section || !topic || budget <= 0) return null;
+    budget -= 1; used.add(topic.label);
+    return { ...section, topics: [topic] };
+  };
+  const headsUp = take('headsup');
+  const support = take('good') || take('vibe');
+  return [...rows, ...(support ? [support] : []), ...(headsUp ? [headsUp] : [])];
 }
 
 /** Two rows for comparison: core praise AND concerns, then the most useful supporting evidence. */
