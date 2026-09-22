@@ -432,6 +432,25 @@ screenshots of the demo Overview/Reviews tabs and the photo menu (cover, dish, f
 Mobile: application TypeScript clean (the repository's Deno functions and a jest-style test
 file report pre-existing environment errors); no device run in this batch.
 
+Third follow-up the same day: the map screen (`pages/app/map.tsx`) is the whole screen — the
+tab bar is hidden there (`AppLayout hideTabBar`, `.map-screen` reaches the bottom) and returns
+on every other screen; Weather, Layers, My location and Legend ride just above the results
+sheet (`--sheet-h` on the viewport follows the sheet height, also while dragging) and hide when
+the sheet is fully open; and a new result set fits the map to its nearest dozen places
+(`MapFitResults`, padding for the search row and the sheet) so markers are on screen — before,
+the map stayed on the user's point and every marker landed below the viewport. The place page
+gained a Stories action next to Website (`story` glyph) whenever the place has stories: a
+rotating ring in the logo colours (`.story-ring`, conic gradient #00AAB4 → #8A05BE → #58D9DE,
+3 s, off under reduced motion) says a story is waiting, and tapping opens the first story in
+the media viewer. Trattoria Tavvy now reads as a real place for sizing: no demo banner on the
+place or menu pages, a street address, "You" for the visitor's own review, neutral dialog copy
+(Call / Reserve / Delivery / social) and titles; the owner-facing showcase, card and website
+pages keep their demo framing. Checks: web TypeScript, 40 unit tests, a clean production
+build, the six browser suites (restaurant-demo updated for the neutral copy), and phone-width
+screenshots of the map and the action row. Mobile: `StoryActionRing` (rotating
+`expo-linear-gradient`) around an Albums icon next to Website when stories exist; TypeScript
+clean; no device run.
+
 Checks: web TypeScript, 31 focused unit tests (including a new search-highlight
 regression), the production build, the compact-card browser suite (updated to three
 four expandable rows, the people wording, the photo header bounds and counter, row

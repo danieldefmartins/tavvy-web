@@ -1,6 +1,5 @@
 import { menuAppearance, readDemoMenuAppearance } from '../../../lib/menuAppearance';
 import { isDemoRestaurant, demoMenu, demoCategories, demoItems, readDemoCategories, recordDemoEvent, DEMO_HOME, DEMO_ORDER, DEMO_ORDER_KEY, DEMO_GUIDE } from '../../../lib/demoRestaurant';
-import DemoBanner from '../../../components/demo/DemoBanner';
 /**
  * Menu Gallery Page - Full-Screen Image-First Experience
  * Path: pages/place/[id]/menu-gallery.tsx
@@ -390,7 +389,7 @@ export default function MenuGalleryPage() {
   }
 
   if (loadError) {
-    return <><style jsx global>{galleryStyles}</style><div className="gallery-shell">{isDemo && <DemoBanner compact />}<div className="gallery-empty" role="alert"><p>{loadError}</p><button className="gallery-back-link" onClick={() => loadMenu(id as string)}>Try again</button><Link href={placeHref}>Back to restaurant</Link></div></div></>;
+    return <><style jsx global>{galleryStyles}</style><div className="gallery-shell"><div className="gallery-empty" role="alert"><p>{loadError}</p><button className="gallery-back-link" onClick={() => loadMenu(id as string)}>Try again</button><Link href={placeHref}>Back to restaurant</Link></div></div></>;
   }
 
   // No menu
@@ -401,7 +400,7 @@ export default function MenuGalleryPage() {
         <Head>{isDemo && <meta name="robots" content="noindex,nofollow" />}
           <title>{placeName ? `${placeName} Menu` : 'Menu'} | Tavvy</title>
         </Head>
-        <div className="gallery-shell">{isDemo && <DemoBanner compact />}
+        <div className="gallery-shell">
           <div className="gallery-empty">
             <p>No menu available yet.</p>
             <Link href={placeHref} className="gallery-back-link">Back to restaurant</Link>
@@ -426,7 +425,7 @@ export default function MenuGalleryPage() {
 
       <style jsx global>{galleryStyles}</style>
 
-      <div className="gallery-shell">{isDemo && <DemoBanner compact />}
+      <div className="gallery-shell">
         <div className="gallery-stage">
           {/* The menu is the whole screen: no place details on top, no arrows underneath.
               A floating bar holds back, the position and the switch to the text menu; the filters float under it. */}

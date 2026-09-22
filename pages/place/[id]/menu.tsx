@@ -1,6 +1,5 @@
 import { menuAppearance, readDemoMenuAppearance } from '../../../lib/menuAppearance';
 import { isDemoRestaurant, demoMenu, demoCategories, demoItems, readDemoCategories, recordDemoEvent, DEMO_HOME, DEMO_ORDER, DEMO_ORDER_KEY, DEMO_GUIDE } from '../../../lib/demoRestaurant';
-import DemoBanner from '../../../components/demo/DemoBanner';
 /**
  * Digital Services Page - Magazine Style
  * Path: pages/place/[id]/menu.tsx
@@ -395,10 +394,8 @@ export default function MenuPage() {
           <title>{placeName ? `${placeName} Menu` : 'Menu'} | Tavvy</title>
         </Head>
         <div className="menu-container" data-menu-style={appearance.style}>
-        {isDemo && <DemoBanner />}
         <nav className="menu-destination-nav" aria-label="Menu destinations">
           <Link href={placeHref}>← Back to restaurant</Link>
-          {isDemo&&<Link href={DEMO_ORDER}>Try table ordering →</Link>}
         </nav>
           <div className="menu-header">
             <button className="menu-back-btn" onClick={() => router.back()}>
@@ -435,7 +432,6 @@ export default function MenuPage() {
       <style>{menuStyles.replace('@media (prefers-color-scheme: dark)', isDark ? '@media all' : '@media not all')}</style>
 
       <div className="menu-container" data-menu-style={appearance.style}>
-        {isDemo && <DemoBanner />}
         <nav className="menu-destination-nav" aria-label="Menu destinations">
           <Link href={placeHref}>← Back to restaurant</Link>
           {isDemo&&<Link href={DEMO_ORDER}>Try table ordering →</Link>}

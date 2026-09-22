@@ -7,7 +7,6 @@ import { categoryImageForPlace, realPlacePhotos } from '../lib/placePreviewImage
 import React, { useEffect, useState, useRef } from 'react';
 import { useThemeContext } from '../contexts/ThemeContext';
 import ContentSafetyActions from './ContentSafetyActions';
-import DemoBanner from './demo/DemoBanner';
 import { reviewDateLabel } from '../lib/placePresentation';
 import type { PlaceEvidence } from '../lib/placeEvidence';
 import { coreForCategory, secondaryGoodSignals } from '../lib/placeEvidence';
@@ -274,6 +273,8 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
   };
   const mediaDialogRef = useRef<HTMLDivElement>(null);
   const [selectedMedia, setSelectedMedia] = useState<{ url: string; type: string; caption: string } | null>(null);
+  const hasStories = !!config.stories?.length;
+  const openStories = () => { const story = config.stories?.[0]; if (story) setSelectedMedia({ url: story.media_url, type: story.media_type, caption: story.caption || 'Place story' }); };
   useEffect(() => {
     if (!selectedMedia) return;
     const previousFocus = document.activeElement as HTMLElement | null;
@@ -347,14 +348,16 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
       </div>
 
       <div className="sheet">
-        {config.demo && <DemoBanner />}
         <nav className="quickbar" aria-label="Place actions">
           <div className="bar-scroll">
             {([
-              ['phone','Phone','phone'],['address','Address','map'],['website','Website','website'],
+              ['phone','Phone','phone'],['address','Address','map'],['website','Website','website'],['stories','Stories','story'],
               ['directions','Directions','directions'],['menu','Menu','menu'],['reservation','Reserve','book'],['order','Order','order'],
               ['ecard','eCard','ecard'],
-            ] as const).filter(([key])=>!!hrefs?.[key]).map(([key,label,icon])=><a className="bi" key={key} href={hrefs![key]} target={hrefs![key].startsWith('http')?'_blank':undefined} rel={hrefs![key].startsWith('http')?'noopener noreferrer':undefined} aria-label={label}>
+            ] as const).filter(([key])=>key==='stories' ? hasStories : !!hrefs?.[key]).map(([key,label,icon])=> key==='stories'
+              /* Stories sit next to Website; the rotating ring in the logo colours says a story is waiting, like Instagram. */
+              ? <button className="bi" type="button" key={key} onClick={openStories} aria-label="Stories"><span className="story-ring" aria-hidden="true"><span className="bi-ic"><Glyph name={icon} color={t.text} size={23}/></span></span><span className="bi-lbl">{label}</span></button>
+              : <a className="bi" key={key} href={hrefs![key]} target={hrefs![key].startsWith('http')?'_blank':undefined} rel={hrefs![key].startsWith('http')?'noopener noreferrer':undefined} aria-label={label}>
               <span className="bi-ic"><Glyph name={icon} color={t.text} size={23}/></span><span className="bi-lbl">{label}</span>
             </a>)}
             <button className="bi" type="button" onClick={sharePlace} aria-label="Share place"><span className="bi-ic"><Glyph name="share" color={t.text} size={23}/></span><span className="bi-lbl">Share</span></button>
@@ -584,7 +587,13 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
         .bar-scroll::-webkit-scrollbar { display: none; }
         .bi { flex: 0 0 auto; width: 68px; display: flex; flex-direction: column; align-items: center; gap: 7px; background: none; border: none; cursor: pointer; padding: 0; text-decoration: none; }
         .bi-ic { width: 50px; height: 50px; border-radius: 50%; background: ${t.pillBg}; display: flex; align-items: center; justify-content: center; }
-        .bi-lbl { font-size: 11px; font-weight: 600; color: ${t.text2}; white-space: nowrap; }
+        .story-ring { position: relative; width: 56px; height: 56px; margin: -3px -3px 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.story-ring::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, #00AAB4, #8A05BE, #58D9DE, #00AAB4); animation: tvring 3s linear infinite; }
+.story-ring::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: ${t.sheet}; }
+.story-ring .bi-ic { position: relative; z-index: 1; }
+@keyframes tvring { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .story-ring::before { animation: none; } }
+.bi-lbl { font-size: 11px; font-weight: 600; color: ${t.text2}; white-space: nowrap; }
         .share-status { display:block; margin-top:8px; font-size:12px; color:${t.text2}; }
         .section { padding: 16px 0 16px; }
         .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }

@@ -181,6 +181,27 @@ const MapCenterUpdater = dynamic(
   { ssr: false }
 );
 
+// Fits the map to a new result set (nearest dozen), leaving room for the top controls and the sheet.
+const MapFitResults = dynamic(
+  () => import('react-leaflet').then((mod) => {
+    const { useMap } = mod;
+    return {
+      default: function InnerMapFit({ places, fitKey, bottomPad }: { places: { latitude: number; longitude: number }[]; fitKey: number; bottomPad: number }) {
+        const map = useMap();
+        React.useEffect(() => {
+          if (!map || !fitKey) return;
+          const points = places.filter(p => Number.isFinite(p.latitude) && Number.isFinite(p.longitude)).slice(0, 12).map(p => [p.latitude, p.longitude] as [number, number]);
+          if (!points.length) return;
+          map.fitBounds(points, { paddingTopLeft: [24, 130], paddingBottomRight: [24, bottomPad + 24], maxZoom: 15, animate: true });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        }, [map, fitKey]);
+        return null;
+      }
+    };
+  }),
+  { ssr: false }
+);
+
 // MapEvents component - detects map pan/zoom to show "Search this area" button
 const MapEvents = dynamic(
   () => import('react-leaflet').then((mod) => {
@@ -289,6 +310,11 @@ export default function MapScreen() {
   const SNAP_COLLAPSED = 120;
   const SNAP_HALF = typeof window !== 'undefined' ? window.innerHeight * 0.5 : 400;
   const [sheetHeightPx, setSheetHeightPx] = useState(SNAP_HALF);
+  // Map controls sit just above the sheet; when it is fully open they get out of the way.
+  useEffect(() => { mapViewportRef.current?.style.setProperty('--sheet-h', `${sheetHeightPx}px`); }, [sheetHeightPx]);
+  const sheetFull = typeof window !== 'undefined' && sheetHeightPx >= window.innerHeight * 0.8;
+  // Fit the map to a fresh result set (nearby or search) so the markers are on screen; pans keep the user's view.
+  const [fitKey, setFitKey] = useState(0);
   const sheetRef = useRef<HTMLDivElement>(null);
   const dragStartY = useRef<number>(0);
   const dragStartHeight = useRef<number>(0);
@@ -338,6 +364,7 @@ export default function MapScreen() {
     if (pendingHeight.current != null && sheetRef.current) {
       sheetRef.current.style.transition = 'none';
       sheetRef.current.style.height = `${pendingHeight.current}px`;
+      mapViewportRef.current?.style.setProperty('--sheet-h', `${pendingHeight.current}px`);
     }
   };
 
@@ -601,7 +628,7 @@ export default function MapScreen() {
         });
         
         console.log(`[Map] Fetched ${fetchedPlaces.length} places, ${uniquePlaces.length} unique via API`, data.metrics);
-        if (requestId === placesRequestRef.current && !searchIntentRef.current) { setPlaces(uniquePlaces); setLoadedRoute(router.asPath); }
+        if (requestId === placesRequestRef.current && !searchIntentRef.current) { setPlaces(uniquePlaces); setLoadedRoute(router.asPath); setFitKey(requestId); }
       }
     } catch (error) {
       console.error('Error fetching places:', error);
@@ -701,14 +728,10 @@ export default function MapScreen() {
               evidenceStatus: s.evidenceStatus,
             }));
           
-          if (requestId === placesRequestRef.current) setPlaces(searchPlaces);
+          if (requestId === placesRequestRef.current) { setPlaces(searchPlaces); setFitKey(requestId); }
           
-          // Center map on first result
-          if (searchPlaces[0] && requestId === placesRequestRef.current) {
-            setMapCenter([searchPlaces[0].latitude, searchPlaces[0].longitude]);
-            setMapZoom(14);
-            setSelectedPlaceId(searchPlaces[0].id);
-          }
+          // The map fits the results (MapFitResults); the first one is selected.
+          if (searchPlaces[0] && requestId === placesRequestRef.current) setSelectedPlaceId(searchPlaces[0].id);
           
           console.log(`[MapScreen] Search "${query}" returned ${searchPlaces.length} places on map`);
           setLoading(false);
@@ -889,7 +912,7 @@ export default function MapScreen() {
   const categoryName = categories.find(c => c.id === selectedCategory)?.name || 'Places';
 
   return (
-    <AppLayout>
+    <AppLayout hideTabBar>
       <Head>
         <title>Map | TavvY</title>
         <meta name="description" content="Explore places on the map" />
@@ -1125,11 +1148,12 @@ export default function MapScreen() {
               })}
               {/* Map center updater - responds to mapCenter state changes */}
               <MapCenterUpdater center={mapCenter} zoom={mapZoom} />
+              <MapFitResults places={places} fitKey={fitKey} bottomPad={sheetHeightPx} />
             </MapContainer>
           )}
 
           {/* Map Controls - Bottom Right */}
-          <div className="map-controls-bottom">
+          <div className="map-controls-bottom" style={sheetFull ? { display: 'none' } : undefined}>
             <button 
               className={`map-control-btn ${showWeatherPopup ? 'active' : ''}`} 
               title="Weather"
@@ -1160,6 +1184,7 @@ export default function MapScreen() {
           {/* Info/Legend Button - Bottom Left */}
           <button 
             className={`info-btn ${showLegendPopup ? 'active' : ''}`} 
+            style={sheetFull ? { display: 'none' } : undefined}
             title="Legend"
             onClick={() => {
               setShowLegendPopup(!showLegendPopup);
@@ -1424,18 +1449,14 @@ export default function MapScreen() {
       </div>
 
       <style jsx>{`
+        /* The map is the whole screen: no tab bar underneath (it returns on every other screen). */
         .map-screen {
           position: fixed;
           top: 0;
           left: 0;
           right: 0;
-          bottom: 85px;
+          bottom: 0;
           background: ${bgColor};
-        }
-        @media (max-width: 768px) {
-          .map-screen {
-            bottom: 70px;
-          }
         }
 
         /* Top Controls */
@@ -1807,10 +1828,12 @@ export default function MapScreen() {
         }
 
         /* Map Controls - Bottom Right */
+        /* Controls ride on top of the results sheet (--sheet-h follows its height, also while dragging). */
         .map-controls-bottom {
           position: absolute;
           right: 16px;
-          bottom: 16px;
+          bottom: calc(var(--sheet-h, 0px) + 16px);
+          transition: bottom 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
           z-index: 1000;
           display: flex;
           flex-direction: column;
@@ -1846,7 +1869,8 @@ export default function MapScreen() {
         .info-btn {
           position: absolute;
           left: 16px;
-          bottom: 16px;
+          bottom: calc(var(--sheet-h, 0px) + 16px);
+          transition: bottom 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
           z-index: 1000;
           width: 40px;
           height: 40px;
