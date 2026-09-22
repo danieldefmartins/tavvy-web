@@ -64,7 +64,7 @@ const REVIEWS: Review[] = [
 const CARD_PLACE = {
   id: 'preview-casa-verde', name: 'Casa Verde Kitchen', category: 'Restaurant', subcategory: 'Brazilian Restaurant',
   address_line1: '12 Union Square', city: 'Somerville', region: 'MA', distance: 1287, phone: '+16175550142', website: 'https://example.test/menu',
-  photos: ['/preview-dinner.jpg'], reviewSummary: SUMMARY, evidenceStatus: 'ready' as const,
+  photos: ['/preview-dinner.jpg', '/preview-bakery.jpg', '/preview-cafe.jpg'], reviewSummary: SUMMARY, evidenceStatus: 'ready' as const,
 };
 
 export default function ReviewDesignPreview() {

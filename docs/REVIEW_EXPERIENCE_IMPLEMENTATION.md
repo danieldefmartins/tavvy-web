@@ -43,7 +43,7 @@ Each redesigned place card contains:
 - Place name and category/subcategory.
 - Distance when usable distance data is available.
 - Address information when supplied by the place record.
-- A 112 × 104 photo beside the identity information, replacing the earlier 76 × 76 thumbnail. Narrow web screens use 96 × 96 to leave room for the place name.
+- A full-width 16:9 photo gallery above the identity information (September 22 update): up to five real photos swipe horizontally with a position counter and dots; a category illustration is a single labeled image, never a gallery. This replaces the earlier 112 × 104 side thumbnail.
 - Up to three compact review highlight lines, each a word, its people count and a thin
   frequency bar (September 22 presentation update).
 - One evidence-period/people-count line.
@@ -63,7 +63,7 @@ The card grows when text needs to wrap; its height is not fixed. The phone-width
 
 When evidence for a line does not exist, the UI does not invent it. When core evidence is missing, its line explains that more recent reviews are needed. The earlier two-row `compactReviewSections()` remains exported for compatibility and tests.
 
-Every highlight line uses the same treatment as the place page: the word, the number of people who mentioned it, and a thin bar whose length is that count out of the recent reviewers. Bars use teal for positive topics, purple for atmosphere and amber for concerns; concerns also keep their `!` marker. Bars are hidden when fewer than five people reviewed recently, because a tiny sample would otherwise look like a full bar.
+The card's review block opens with a `Reviews · {{count}} people · Last 6 months` line so the rows read as reviews at a glance. Every highlight line uses the same treatment as the place page: a small-caps section label on the first line of each section, the word, the number of people who mentioned it, and a full-width thin bar whose length is that count out of the recent reviewers. Bars use teal for positive topics, purple for atmosphere and amber for concerns; concerns also keep their `!` marker. Bars are hidden when fewer than five people reviewed recently, because a tiny sample would otherwise look like a full bar.
 
 Illustrative layout only; these are not published reviews or a real business:
 
@@ -88,7 +88,7 @@ The numbers can overlap: the same reviewer may mention food quality and slow ser
 - An illustration is labeled **Illustration**; it does not claim to depict the business.
 - Category images are display fallbacks, not uploaded business photos.
 - The web card tries remaining real images when an image fails, then falls back to the category illustration.
-- More than one real photo produces a `+N` badge. Full place media remains available on the detail page.
+- More than one real photo produces the swipeable gallery with a `1/N` counter. Full place media remains available on the detail page.
 - Distance stays in meters until `lib/placeDistance.ts` formats it. Zero and invalid coordinates have explicit handling.
 - Native can calculate distance from available device coordinates; web displays the distance supplied for its search context. These are not driving distances.
 

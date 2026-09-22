@@ -50,8 +50,10 @@ const places = [
     assert.equal(await page.$('article.card .illustration'),null);
     assert.equal(await page.$eval('article.card a[href^="tel:"]',e=>e.getAttribute('href')),'tel:+16175550100');
     assert.equal(await page.$eval('article.card a[href^="https://example.test"]',e=>e.getAttribute('href')),'https://example.test/menu');
-    assert.equal(await page.$eval('article.card .photo',e=>Math.round(e.getBoundingClientRect().height)),104);
-    assert.ok(await page.$eval('article.card',e=>e.getBoundingClientRect().height)<290);
+    const gallery=await page.$eval('article.card .gallery',e=>({h:Math.round(e.getBoundingClientRect().height),w:Math.round(e.getBoundingClientRect().width),slides:e.querySelectorAll('.slide').length}));
+    assert.ok(gallery.h>=160&&gallery.h<=214,'gallery height '+gallery.h); assert.equal(gallery.slides,3);
+    assert.equal(await page.$eval('article.card .photo-count',e=>e.innerText),'1/3');
+    assert.ok(await page.$eval('article.card',e=>e.getBoundingClientRect().height)<480);
     unavailable=true;
     await page.reload({waitUntil:'networkidle2'});
     await page.waitForSelector('article.card');
@@ -60,7 +62,7 @@ const places = [
     await page.screenshot({path:path.join(out,'compact-unavailable.png'),fullPage:true});
     await page.goto(base+'/app/map?q=Restaurants%20in%20Boston%2C%20MA',{waitUntil:'networkidle2'});
     await page.waitForSelector('article.card');
-    assert.equal(await page.$eval('article.card .photo-count',e=>e.innerText),'+2');
+    assert.equal(await page.$eval('article.card .photo-count',e=>e.innerText),'1/3');
     assert.equal(await page.$eval('body',e=>e.innerText.includes('Edit location & filters')),false);
     await page.screenshot({path:path.join(out,'map-preview.png')});
     assert.deepEqual(errors,[]);

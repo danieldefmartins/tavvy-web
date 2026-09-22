@@ -51,8 +51,8 @@ export default function PlaceReviewGrid({ summary, mode = 'compact', selectedTop
     const bar = showBars && <span className="track"><span className="fill" style={{ width: width(topic), background: ACCENT[tone] }} /></span>;
     const number = <b className="count" style={{ color: toneColor[tone] }}>{topic.count}</b>;
     if (compact) return <div key={topic.slug || topic.label} className={`topic ${topic.tone}`} data-review-topic={topic.tone}>
-      <span className="rlabel" style={{ color: toneColor[SECTION_TONE[section]] }}>{first ? copy(title) : ''}</span>
-      {word}{bar || <span className="track none" aria-hidden="true" />}{number}
+      <span className="line">{first && <span className="rlabel" style={{ color: toneColor[SECTION_TONE[section]] }}>{copy(title)}</span>}{word}{number}</span>
+      {bar}
     </div>;
     const content = <><span className="top">{word}{number}</span>{bar}</>;
     return interactive
@@ -72,7 +72,7 @@ export default function PlaceReviewGrid({ summary, mode = 'compact', selectedTop
       {!compact && <span className="label" style={{ color: toneColor[SECTION_TONE[section.key]] }}>{!main && <span className="dot" aria-hidden="true" style={{ background: ACCENT[SECTION_TONE[section.key]] }} />}{copy(section.title)}</span>}
       <div className="topics">
         {topics.map((topic, index) => topicRow(section.key, topic, index === 0, section.title))}
-        {!topics.length && (compact ? <div className="topic empty-line"><span className="rlabel" style={{ color: toneColor[SECTION_TONE[section.key]] }}>{copy(section.title)}</span><span className="empty">{emptyText(section.key)}</span></div> : <span className="empty">{emptyText(section.key)}</span>)}
+        {!topics.length && (compact ? <div className="topic empty-line"><span className="line"><span className="rlabel" style={{ color: toneColor[SECTION_TONE[section.key]] }}>{copy(section.title)}</span><span className="empty">{emptyText(section.key)}</span></span></div> : <span className="empty">{emptyText(section.key)}</span>)}
         {!compact && !main && section.topics.length > FULL_INITIAL_TOPICS && <button type="button" className="more" aria-expanded={open} onClick={() => setExpanded(previous => open ? previous.filter(key => key !== section.key) : [...previous, section.key])}>{copy(open ? 'Show less' : 'Show all')}</button>}
       </div>
     </div>;
@@ -87,11 +87,11 @@ export default function PlaceReviewGrid({ summary, mode = 'compact', selectedTop
     </div>}
     {!compact && about && <p className="legend" id={`${id}-about`}>{copy('Numbers count people, not repeat taps. A person can mention more than one topic.')}{showBars && <> {copy('Bars show how many of the {{count}} people mentioned it').replace('{{count}}', String(count))}.</>}{onSelect && <> {copy('Choose a topic to see experiences.')}</>}</p>}
     {rows}
+    {compact && <div className="evidence-note head"><b>{copy('Reviews')}</b> · {evidenceLine}</div>}
     {!compact && !!summary.practical?.length && <div className="review-row practical" data-review-practical="true">
       <span className="label" style={{ color: theme.textSecondary }}><span className="dot" aria-hidden="true" style={{ background: theme.textSecondary }} />{copy('Good to know')}</span>
       <div className="chips">{summary.practical.map(item => <span key={item.label} className="chip" style={{ background: theme.surface, borderColor: theme.border, color: theme.textSecondary }}>{item.label}<b>{item.count}</b></span>)}</div>
     </div>}
-    {compact && <div className="evidence-note">{evidenceLine}</div>}
     <style jsx global>{`
       .tvr{color:${theme.text};text-align:start;min-width:0}.tvr .review-row{min-width:0}
       .tvr .empty,.tvr .evidence-note,.tvr .legend{font-size:11px;line-height:17px;color:${theme.textSecondary}}
@@ -100,12 +100,15 @@ export default function PlaceReviewGrid({ summary, mode = 'compact', selectedTop
       .tvr .track{display:block;height:6px;border-radius:3px;background:${isDark ? 'rgba(255,255,255,.09)' : 'rgba(23,1,58,.08)'};overflow:hidden}.tvr .fill{display:block;height:100%;border-radius:3px}
       .tvr .count{font-variant-numeric:tabular-nums;font-weight:800;flex:none}
 
-      .tvr.compact .topics{display:flex;flex-direction:column;gap:3px}
-      .tvr.compact .topic{display:grid;grid-template-columns:minmax(0,24%) minmax(0,1fr) 30px auto;align-items:center;column-gap:8px;min-height:22px}
-      .tvr.compact .rlabel{font-size:11px;line-height:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      .tvr.compact .word{font-size:13px;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tvr.compact .word .mark{width:13px;height:13px;font-size:9px;margin-inline-end:4px}
-      .tvr.compact .track{height:4px}.tvr.compact .track.none{background:none}.tvr.compact .count{font-size:13px;text-align:end}
-      .tvr.compact .empty-line{grid-template-columns:minmax(0,24%) minmax(0,1fr)}.tvr.compact .review-row+.review-row{margin-top:3px}.tvr.compact .evidence-note{margin-top:7px}
+      .tvr.compact{display:flex;flex-direction:column}
+      .tvr.compact .head{order:-1;font-size:11.5px;line-height:16px;margin-bottom:5px}.tvr.compact .head b{color:${theme.text};font-weight:800}
+      .tvr.compact .topics{display:flex;flex-direction:column;gap:4px}
+      .tvr.compact .topic{display:flex;flex-direction:column;gap:3px;min-width:0}
+      .tvr.compact .line{display:flex;align-items:baseline;gap:6px;min-width:0}
+      .tvr.compact .rlabel{flex:none;max-width:38%;font-size:10px;line-height:16px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .tvr.compact .word{flex:1;font-size:13px;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tvr.compact .word .mark{width:13px;height:13px;font-size:9px;margin-inline-end:4px}
+      .tvr.compact .track{height:3px}.tvr.compact .count{font-size:13px;line-height:18px}
+      .tvr.compact .review-row+.review-row{margin-top:4px}
 
       .tvr.full .evidence-line{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}.tvr.full .evidence-note{font-size:13px;line-height:18px;font-weight:650;color:${theme.text}}
       .tvr .about{display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:0 2px;min-height:44px;font:inherit;font-size:12px;font-weight:600;color:${theme.textSecondary};cursor:pointer}.tvr .info{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1.5px solid currentColor;font-size:10px;font-weight:800;font-style:italic;line-height:1}
