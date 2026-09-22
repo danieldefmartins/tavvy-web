@@ -48,9 +48,21 @@ export default function RVCampingScreen() {
         <p className="scope">{copy('Browse all locations. Search a place or city to narrow the list.')}</p>
         {catalog.error&&<div role="alert"><p>{copy(catalog.error)}</p><button onClick={catalog.places.length ? catalog.loadMore : catalog.reload}>{copy('Try again')}</button></div>}
         {view==='map'&&<div className="map-block">
-          <div className="map-options"><button onClick={locate} disabled={locating}>{copy(locating?'Finding your location…':'My location')}</button><span>{copy(`${mappable} of ${catalog.places.length} places on the map`)}</span><select aria-label={copy('Map layer')} value={layer} onChange={e=>setLayer(e.target.value)}><option value="standard">{copy('Standard')}</option><option value="dark">{copy('Dark')}</option><option value="satellite">{copy('Satellite')}</option></select></div>
-          {!!locationNote&&<p className="scope" role="status">{locationNote}</p>}
-          <div className="map-frame" aria-label={copy('Places map')}>{catalog.loading?<p role="status">{copy('Loading places…')}</p>:<PlacesMap places={catalog.places} location={location} layer={layer} onSelect={openPlace}/>}</div>
+          <p className="scope" role="status">{copy(`${mappable} of ${catalog.places.length} places on the map`)}{locationNote?` · ${locationNote}`:''}</p>
+          <div className="map-frame" aria-label={copy('Places map')}>
+            {/* Small icon controls over the map: my location + Standard / Dark / Satellite layers */}
+            <div className="map-controls" role="group" aria-label={copy('Map controls')}>
+              <button type="button" className={location?'on':''} aria-label={copy('My location')} title={copy('My location')} onClick={locate} disabled={locating}>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+              </button>
+              {([['standard','Standard'],['dark','Dark'],['satellite','Satellite']] as const).map(([id,label])=><button key={id} type="button" className={layer===id?'on':''} aria-pressed={layer===id} aria-label={copy(label)} title={copy(label)} onClick={()=>setLayer(id)}>
+                {id==='standard'&&<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg>}
+                {id==='dark'&&<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>}
+                {id==='satellite'&&<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>}
+              </button>)}
+            </div>
+            {catalog.loading?<p role="status">{copy('Loading places…')}</p>:<PlacesMap places={catalog.places} location={location} layer={layer} onSelect={openPlace}/>}
+          </div>
           {catalog.hasMore&&<button className="more" disabled={catalog.loadingMore} onClick={catalog.loadMore}>{copy(catalog.loadingMore?'Loading places…':'Load more places')}</button>}
         </div>}
         {view==='list'&&(catalog.loading?<p role="status">{copy('Loading places…')}</p>:<>
@@ -61,7 +73,7 @@ export default function RVCampingScreen() {
       </section>
     </main>
     <style jsx>{`
-      .results-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.view-switch{display:flex;gap:6px}.view-switch button{min-height:40px;padding:8px 14px;border-radius:12px}.map-block{display:grid;gap:10px;margin-bottom:16px}.map-options{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;color:${theme.textSecondary}}.map-options select{min-height:40px;padding:6px 10px;border:1px solid ${theme.border};border-radius:10px;background:${theme.surface};color:${theme.text};font:inherit}.map-frame{height:min(65vh,560px);min-height:320px;border:1px solid ${theme.border};border-radius:16px;overflow:hidden;background:${theme.surface}}.map-frame :global(.leaflet-container){height:100%;width:100%}
+      .results-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.view-switch{display:flex;gap:6px}.view-switch button{min-height:40px;padding:8px 14px;border-radius:12px}.map-block{display:grid;gap:10px;margin-bottom:16px}.map-frame{position:relative;height:min(65vh,560px);min-height:320px;border:1px solid ${theme.border};border-radius:16px;overflow:hidden;background:${theme.surface}}.map-frame :global(.leaflet-container){height:100%;width:100%}.map-controls{position:absolute;top:10px;right:10px;z-index:1000;display:flex;flex-direction:column;gap:8px}.map-controls button{width:40px;height:40px;min-height:40px;padding:0;border-radius:20px;display:grid;place-items:center;background:#fff;color:#17013A;border:1px solid rgba(23,1,58,.15);box-shadow:0 2px 6px rgba(0,0,0,.18)}.map-controls button.on{background:${theme.primary};color:#fff;border-color:${theme.primary}}.map-controls button:disabled{opacity:.6}
       .rv-screen{min-height:100vh;padding-bottom:100px}input{width:100%;min-width:0;min-height:48px;padding:12px 14px;border:1px solid ${theme.border};border-radius:14px;background:${theme.surface};color:${theme.text};font:inherit;font-size:16px}.filters{display:flex;gap:8px;padding:16px;overflow:auto;scrollbar-width:thin}button{min-height:44px;padding:10px 15px;border:1px solid ${theme.border};border-radius:22px;background:${theme.surface};color:${theme.text};font:inherit;cursor:pointer;flex-shrink:0}button[aria-pressed=true]{background:${theme.primary};color:white;border-color:${theme.primary}}.results{max-width:850px;margin:auto;padding:0 16px}h2{font-size:20px;margin:12px 0 8px}.scope,.empty p{font-size:14px;line-height:1.5;color:${theme.textSecondary}}.scope{margin-bottom:20px}.empty{padding:30px 0}.more{display:block;margin:20px auto}button:disabled{opacity:.6;cursor:default}:focus-visible{outline:3px solid ${theme.primary};outline-offset:3px}[role=alert]{margin:16px 0;padding:14px;border:1px solid ${theme.border};border-radius:12px}
     `}</style>
   </AppLayout>;

@@ -27,7 +27,7 @@ export default function OnTheGoMap({ businesses, location, layer, onSelect }: { 
   const [tileState, setTileState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [attempt, setAttempt] = useState(0);
   useEffect(() => { setTileState('loading'); const timer = setTimeout(() => setTileState(state => state === 'loading' ? 'error' : state), 15000); return () => clearTimeout(timer); }, [layer, attempt]);
-  return <div style={{ height: '100%', width: '100%', position: 'relative' }}><MapContainer center={[20, 0]} zoom={2} style={{ height: '100%', width: '100%' }}>
+  return <div style={{ height: '100%', width: '100%', position: 'relative' }}><MapContainer center={[39, -98]} zoom={3} style={{ height: '100%', width: '100%' }}>
     <TileLayer className={layer === 'dark' ? 'onthego-dark-tile' : undefined} key={`${layer}-${attempt}`} url={tiles.url} attribution={tiles.attribution} eventHandlers={{ tileload: () => setTileState('ready') }} />
     <Frame businesses={businesses} location={location} />
     {location && <CircleMarker center={location} radius={8} pathOptions={{ color: '#fff', fillColor: '#2563eb', fillOpacity: 1 }}><Popup>Your location</Popup></CircleMarker>}
