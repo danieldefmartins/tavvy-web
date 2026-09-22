@@ -154,7 +154,12 @@ function PlaceDetailContent({resolvedPlaceId}:{resolvedPlaceId?:string}) {
   };
   const onAddReview = () => {
     if (data?.cruiseVenue && !data.cruiseVenue.accepts_reviews) return;
-    if (!user) { router.push(`/app/login?redirect=${redirectTo}`); return; }
+    if (!user) {
+      const place = data.place;
+      const reviewQuery = new URLSearchParams({ placeId: String(place.id), placeName: place.name || '', primaryCategory: place.category || 'other', ...(place.subcategory ? { subcategory: place.subcategory } : {}) });
+      router.push('/app/login?redirect=' + encodeURIComponent('/app/add-review?' + reviewQuery));
+      return;
+    }
     setReviewOpen(true);
   };
 
@@ -196,6 +201,7 @@ function PlaceDetailContent({resolvedPlaceId}:{resolvedPlaceId?:string}) {
     || [p.category, p.subcategory, p.place_type].some(value => /\b(on the go|food trucks?|mobile)\b/i.test(String(value || '').replace(/[_-]/g, ' ')));
 
   const config: PlaceConfig = {
+    placeId: String(p.id),
     type: TYPE_LABEL[p.category] || 'Place',
     reviewSubject: { category: p.category, subcategory: p.subcategory },
     name: p.name,

@@ -68,14 +68,14 @@ EAS upload are separate release states. Preserve those distinctions.
 ### Reviews and place details
 
 The intended four-part summary is **The Main Thing**, **The Good**, **The Vibe** and
-**Heads Up**. The first tile represents the core experience: food for a restaurant,
+**Heads Up**. The main section represents the core experience: food for a restaurant,
 sleep for a hotel, and an appropriate equivalent for other domains. It must be based
 on actual matching review evidence. Free-text reviews are not automatically classified
 into the core experience by an implemented AI pipeline.
 
 Reviews belong prominently on the main place overview. Avoid repeating a complete
 review section on both Overview and Reviews, or duplicating the same Main Thing in
-multiple blocks. Keep the review grid near the top, alongside an understandable
+multiple blocks. Keep the review summary near the top, alongside an understandable
 summary and the most useful actions. Tabs organize additional information.
 
 Concerns should become less prominent only with elapsed time, enough independent
@@ -237,6 +237,8 @@ credentials out of every client bundle.
 
 
 ## Review experience redesign — September 21, 2026
+
+See [Review experience implementation](REVIEW_EXPERIENCE_IMPLEMENTATION.md) for the full product flow, source map, evidence rules and verification limits.
 
 The user approved implementation on web and mobile after the design discussion.
 Search results use a small photo beside place information and two compact evidence

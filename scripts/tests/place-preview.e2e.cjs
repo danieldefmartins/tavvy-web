@@ -50,7 +50,7 @@ const places = [
     assert.equal(await page.$('article.card .illustration'),null);
     assert.equal(await page.$eval('article.card a[href^="tel:"]',e=>e.getAttribute('href')),'tel:+16175550100');
     assert.equal(await page.$eval('article.card a[href^="https://example.test"]',e=>e.getAttribute('href')),'https://example.test/menu');
-    assert.equal(await page.$eval('article.card .photo',e=>Math.round(e.getBoundingClientRect().height)),76);
+    assert.equal(await page.$eval('article.card .photo',e=>Math.round(e.getBoundingClientRect().height)),104);
     assert.ok(await page.$eval('article.card',e=>e.getBoundingClientRect().height)<290);
     unavailable=true;
     await page.reload({waitUntil:'networkidle2'});

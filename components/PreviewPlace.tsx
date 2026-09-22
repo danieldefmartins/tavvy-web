@@ -1,3 +1,4 @@
+import { categoryImageForPlace, realPlacePhotos } from '../lib/placePreviewImage';
 /**
  * PREVIEW — reusable, config-driven Tavvy place screen. One design, every
  * business type (restaurant, hotel, service, construction, airport, …) rendered
@@ -35,6 +36,7 @@ export type Review = { id?: string; text?: string | null; createdAt?: string; da
 export type InfoRow = { icon: string; main: string; act?: string; hours?: [string, string][]; href?: string };
 export type Extra = { title: string; kind: 'chips' | 'list'; sub?: string; items: any[] };
 export type PlaceConfig = {
+  placeId?: string;
   type: string;
   reviewSubject?: { category?: string; subcategory?: string };
   name: string;
@@ -211,6 +213,10 @@ const EXTERNAL = ['website', 'instagram', 'tiktok', 'youtube', 'facebook', 'what
 
 export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave, saved, saveMessage }: { config: PlaceConfig; hrefs?: Record<string, string>; onAddReview?: () => void; onBack?: () => void; onSave?: () => void; saved?: boolean; saveMessage?: string }) {
   const copy = useReleaseCopy();
+  const [failedPhotos, setFailedPhotos] = useState<string[]>([]);
+  const imagePlace = { id: config.placeId || config.name, category: config.reviewSubject?.category || config.type, subcategory: config.reviewSubject?.subcategory, photo: config.photo, photos: config.gallery };
+  const realHero = realPlacePhotos(imagePlace).find(url => !failedPhotos.includes(url));
+  const heroPhoto = realHero || categoryImageForPlace(imagePlace);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   type PlaceTab = 'overview' | 'media' | 'menu' | 'details';
   const [activeTab, setActiveTab] = useState<PlaceTab>('overview');
@@ -294,10 +300,9 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
   return (
     <div className="screen">
       <div className="hero">
-        {config.photo
-          ? <img src={config.photo} alt={config.name} className="hero-img" />
-          : <div className="hero-img hero-fallback" />}
+        <img src={heroPhoto} alt={realHero ? config.name : copy('Category illustration')} className="hero-img" onError={() => { if (realHero) setFailedPhotos(previous => [...previous, realHero]); }} />
         <div className="hero-scrim" />
+        {!realHero && <span className="hero-illustration">{copy('Category illustration')}</span>}
         <button className="icon-btn back" aria-label="Back" onClick={handleBack}>‹</button>
         <div className="hero-text">
           <span className="type-pill">{config.type}</span>
@@ -439,7 +444,7 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
 
       <div className="actionbar">
         {hasMenu && <button className="act ghost" onClick={()=>selectTab('menu')}>{config.type === 'Hotel' ? 'Rooms' : 'Tavvy Menu'}</button>}
-        <button className="act primary" onClick={onAddReview} disabled={!!config.reviewDisabledReason} aria-describedby={config.reviewDisabledReason ? 'review-disabled-reason' : undefined}>Add a review</button>
+        <button className="act primary" onClick={onAddReview} disabled={!!config.reviewDisabledReason || !onAddReview} aria-describedby={config.reviewDisabledReason ? 'review-disabled-reason' : undefined}>Add a review</button>
         {config.reviewDisabledReason && <small id="review-disabled-reason" role="status">{config.reviewDisabledReason}</small>}
       </div>
 
@@ -453,6 +458,7 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
         .hero { position: relative; width: 100%; height: 33vh; min-height: 232px; }
         .hero:has(.hero-fallback) { height: 210px; min-height: 210px; }
         .hero-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .hero-illustration { position:absolute;top:20px;inset-inline-end:16px;max-width:65%;padding:5px 8px;border-radius:7px;background:rgba(0,0,0,.65);color:white;font-size:11px; }
         .hero-fallback { background: linear-gradient(135deg, #17013A 0%, #3a0a6b 50%, #8A05BE 100%); }
         .hero-scrim { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0) 32%, rgba(0,0,0,0.62) 100%); }
         .icon-btn { position: absolute; top: 18px; width: 40px; height: 40px; border-radius: 50%; border: none; background: rgba(255,255,255,0.92); font-size: 22px; line-height: 1; color: #17013A; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.18); display: flex; align-items: center; justify-content: center; }
@@ -558,7 +564,7 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
         .act { flex: 1; padding: 15px 0; border-radius: 14px; font-size: 15px; font-weight: 700; cursor: pointer; border: none; text-decoration: none; text-align: center; }
         .act.primary:disabled { color: ${t.text2}; background: ${t.soft}; box-shadow: none; cursor: not-allowed; }
         .act.ghost { background: ${t.pillBg}; color: ${t.text}; }
-        .act.primary { color:#07383A; background: #00C2CB; color: #07383A; box-shadow: 0 6px 18px rgba(0,194,203,0.35); }
+        .act.primary { background: #8A05BE; color: #fff; box-shadow: 0 6px 18px rgba(138,5,190,0.22); }
       `}</style>
       <style jsx global>{`
         html, body { margin: 0; padding: 0; background: ${t.bg}; }

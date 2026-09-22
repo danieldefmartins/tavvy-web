@@ -1,5 +1,35 @@
 # Tavvy current engineering status
 
+## Review entry and place imagery — September 22, release candidate
+
+The standard place Add a review sheet had a styled-jsx scope bug: its outer overlay
+was unstyled, so clicking the actual place action rendered the form below the page.
+The overlay now fills the viewport, keeps its Post action visible and clears navigation.
+Signed-out visitors return directly to the review form after login. The standalone
+form hides bottom navigation.
+
+Web and mobile now combine duplicate catalog labels and a small explicit synonym list
+into one choice, retaining saved IDs and emphasis. Sections expand one at a time;
+word search crosses all sections, and selections survive section changes. No catalog
+records or review history were deleted. Existing summary labels are not migrated.
+
+Search photos are now 112 × 104 (96 × 96 on narrow web screens). The standard detail
+hero uses the same category illustration when real approved photos are missing; real
+photos take priority and failed real images fall through to another photo/illustration.
+Illustrations remain labeled and are never added to the place gallery or database.
+
+Web production build, both application TypeScript commands, 27 focused unit checks,
+and the production-build composer/card browser tests passed. The composer test now
+clicks the actual place action after scrolling and checks overlay/footer bounds,
+duplicate choices, close behavior and real-photo replacement. Browser writes use
+intercepted fixtures. The enlarged native search card was checked in the existing
+iPhone development app; no new native/EAS build or production review was created.
+
+Release target: Tavvy.com from `release/verified-web-20260921`; mobile source on
+`release/native-preview-20260921`, with distribution still on hold. This entry records
+the verified candidate; confirm the deployment before calling the website released.
+Full implementation and rules: [Review experience implementation](REVIEW_EXPERIENCE_IMPLEMENTATION.md).
+
 ## Search previews — September 21 evening, web released
 
 Search and map previews now put the name, specific category, address and distance before

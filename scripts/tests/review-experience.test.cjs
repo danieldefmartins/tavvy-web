@@ -13,7 +13,7 @@ function load(file, cache = {}) {
 }
 const { buildPlaceEvidence, coreForCategory } = load('lib/placeEvidence.ts');
 const { buildPlaceReviewSummary, compactReviewSections } = load('lib/placeReviewSummary.ts');
-const { reviewComposerSections, toggleReviewChoice, visibleReviewChoices } = load('lib/reviewComposer.ts');
+const { reviewComposerSections, toggleReviewChoice, visibleReviewChoices, reviewComposerChoices, toggleComposerChoice, emphasizeComposerChoice, reviewChoiceIntensity } = load('lib/reviewComposer.ts');
 const now = new Date('2026-09-22T12:00:00Z');
 const signal = (slug, label, category = 'good') => ({ slug, label, category, intensity: 3 });
 const visit = (userId, signals, date = '2026-09-20T12:00:00Z', reviewId = userId) => ({ reviewId, userId, visitedAt: date, signals });
@@ -62,6 +62,35 @@ test('tap again removes directly and changing another word preserves saved empha
   assert.deepEqual(toggleReviewChoice({saved:3}, 'new'), { saved:3, new:1 });
   assert.deepEqual(toggleReviewChoice({saved:3, new:1}, 'new'), { saved:3 });
   assert.deepEqual(toggleReviewChoice({saved:3}, 'saved'), {});
+});
+test('duplicate labels and deliberate synonyms produce one choice with stable identity', () => {
+  const choices = [
+    {id:'one',slug:'generic_cash_only',label:'Cash Only',signal_type:'heads_up'},
+    {id:'two',slug:'generic_heads_up_cash_only',label:'Cash Only',signal_type:'heads_up'},
+    {id:'three',slug:'cash_only',label:'Cash only',signal_type:'heads_up'},
+    {id:'four',slug:'restaurant_amazing_food',label:'Amazing Food',signal_type:'best_for'},
+    {id:'five',slug:'restaurant_great_food',label:'Great Food',signal_type:'best_for'},
+    {id:'six',slug:'restaurant_slow_service',label:'Slow Service',signal_type:'heads_up'},
+    {id:'seven',slug:'restaurant_slow_kitchen',label:'Slow Kitchen',signal_type:'heads_up'},
+  ];
+  const grouped = reviewComposerChoices(choices);
+  assert.equal(grouped.length,4);
+  assert.deepEqual(reviewComposerChoices([...choices].reverse()).map(c=>c.id).sort(),grouped.map(c=>c.id).sort());
+  assert.equal(grouped.find(c=>c.label==='Great Food').id,'five');
+  assert.equal(reviewComposerSections(choices,'restaurant','amazing')[0].signals[0].id,'five');
+});
+test('editing an alias preserves stored IDs and emphasis until the user changes it', () => {
+  const choice = reviewComposerChoices([
+    {id:'one',slug:'generic_cozy',label:'Cozy',signal_type:'vibe'},
+    {id:'two',slug:'generic_vibe_cozy',label:'Cozy',signal_type:'vibe'},
+  ])[0];
+  const selected={two:3,unrelated:2};
+  assert.equal(reviewChoiceIntensity(selected,choice),3);
+  assert.deepEqual(selected,{two:3,unrelated:2});
+  assert.deepEqual(emphasizeComposerChoice(selected,choice,2),{two:2,unrelated:2});
+  assert.deepEqual(toggleComposerChoice(selected,choice),{unrelated:2});
+  assert.deepEqual(toggleComposerChoice({one:1,two:3,unrelated:2},choice),{unrelated:2});
+  assert.deepEqual(toggleComposerChoice({},choice),{one:1});
 });
 test('older mobile/API summaries remain compatible without inventing people', () => {
   const rows = compactReviewSections({status:'ready',recentReviewers:3,tiles:[{key:'main',title:'The Main Thing',detail:'The food: Fresh pasta',count:2},{key:'headsup',title:'Heads Up',detail:'Slow service',count:1}]});

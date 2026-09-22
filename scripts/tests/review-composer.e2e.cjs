@@ -1,14 +1,15 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),puppeteer=require('puppeteer');
 const base=process.env.TAVVY_PREVIEW_BASE||'http://127.0.0.1:3851',out='/private/tmp/tavvy-review-experience-20260922';fs.mkdirSync(out,{recursive:true});
 const place='00000000-0000-4000-8000-000000000001',author='00000000-0000-4000-8000-000000000099',review='00000000-0000-4000-8000-000000000088';
-const labels=[['restaurant_delicious_food','Delicious food','best_for'],['restaurant_cold_food','Food arrived cold','heads_up'],['generic_friendly_staff','Friendly staff','best_for'],['restaurant_lively','Lively atmosphere','vibe'],['restaurant_slow_service','Slow service','heads_up'],['hotel_quiet_rooms','Quiet rooms','best_for'],['hotel_noisy_rooms','Noisy rooms','heads_up']];
-const catalog=labels.map(([slug,label,signal_type],i)=>({id:`00000000-0000-4000-8000-${String(i+10).padStart(12,'0')}`,slug,label,signal_type,icon_emoji:'',color:'#8A05BE',is_universal:slug.startsWith('generic_')}));
+const labels=[['restaurant_delicious_food','Delicious food','best_for'],['restaurant_cold_food','Food arrived cold','heads_up'],['generic_friendly_staff','Friendly staff','best_for'],['restaurant_lively','Lively atmosphere','vibe'],['restaurant_slow_service','Slow service','heads_up'],['hotel_quiet_rooms','Quiet rooms','best_for'],['hotel_noisy_rooms','Noisy rooms','heads_up'],['generic_cash_only','Cash Only','heads_up'],['generic_heads_up_cash_only','Cash Only','heads_up'],['cash_only','Cash Only','heads_up'],['generic_cozy','Cozy','vibe'],['generic_vibe_cozy','Cozy','vibe']];
+const catalog=labels.map(([slug,label,signal_type],i)=>({id:`00000000-0000-4000-8000-${String(i+10).padStart(12,'0')}`,slug,label,signal_type,icon_emoji:'',color:'#8A05BE',is_universal:slug.startsWith('generic_')||slug==='cash_only'}));
 (async()=>{
  const browser=await puppeteer.launch({executablePath:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',headless:true,args:['--no-sandbox']});
- const page=await browser.newPage();let past=false,fail=true,posts=[],errors=[];
+ const page=await browser.newPage();let past=false,fail=true,posts=[],errors=[],realPhoto=false;
  page.on('pageerror',e=>errors.push(e.message));await page.setViewport({width:390,height:844});await page.setBypassServiceWorker(true);
  await page.evaluateOnNewDocument(({author})=>{const user={id:author,aud:'authenticated',email:'review-fixture@example.invalid'};localStorage.setItem('sb-scasgwrikoqdwlwlwcff-auth-token',JSON.stringify({user,access_token:'fixture.token.only',refresh_token:'fixture',token_type:'bearer',expires_at:Math.floor(Date.now()/1000)+3600}));if(!localStorage.getItem('@tavvy_theme_mode'))localStorage.setItem('@tavvy_theme_mode','light');},{author});
  await page.setRequestInterception(true);page.on('request',r=>{const u=new URL(r.url());
+  if(u.origin===new URL(base).origin&&u.pathname==='/api/place/'+place)return r.respond({status:200,contentType:'application/json',body:JSON.stringify({place:{id:place,name:'Review QA Place',category:'restaurant',subcategory:'italian',cover_image_url:realPhoto?'/images/demo-trattoria/pasta.jpg':null,gallery:[],city:'Boston',region:'MA',street:'1 Example Street'},groups:{good:[],vibe:[],headsup:[]},recentReviews:[],recentReviewsStatus:'ready',reviewCount:0})});
   if(u.origin===new URL(base).origin)return r.continue();
   if(!u.hostname.endsWith('.supabase.co'))return r.abort();
   const send=(v,status=200)=>r.respond({status,contentType:'application/json',headers:{'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':r.headers()['access-control-request-headers']||'*','Access-Control-Allow-Methods':'GET,POST,OPTIONS'},body:JSON.stringify(v)});
@@ -24,6 +25,25 @@ const catalog=labels.map(([slug,label,signal_type],i)=>({id:`00000000-0000-4000-
  const visit=async(category='restaurant',locale='')=>{if(page.url().startsWith(base))await page.evaluate(value=>localStorage.setItem('tavvy-locale',value),locale.replace('/','')||'en');await page.goto(base+locale+'/app/add-review?'+new URLSearchParams({placeId:place,placeName:'Review QA Place',primaryCategory:category}),{waitUntil:'networkidle2'});await page.waitForSelector('.review-choices .choice');};
  const click=async(label,tag='button')=>{await page.evaluate(({label,tag})=>{const el=[...document.querySelectorAll(tag)].find(e=>e.textContent.trim()===label);if(!el)throw Error('Missing control: '+label);el.click();},{label,tag});};
  try{
+  await page.goto(base+'/app/place/'+place,{waitUntil:'networkidle2'});
+  await page.waitForSelector('.actionbar .primary');
+  assert.match(await page.$eval('.hero-img',e=>e.getAttribute('src')),/place-categories\/restaurant-1/);
+  await page.evaluate(()=>window.scrollTo(0,document.body.scrollHeight));
+  await page.click('.actionbar .primary');await page.waitForSelector('.review-choices .choice');
+  const bounds=await page.$eval('[role=dialog]',el=>{const b=el.getBoundingClientRect(),o=el.parentElement;return {top:b.top,bottom:b.bottom,height:innerHeight,position:getComputedStyle(o).position,footer:el.querySelector('footer').getBoundingClientRect().bottom};});
+  assert.equal(bounds.position,'fixed','Add review must open an overlay, not a form below the page');
+  assert(bounds.top>=0&&bounds.bottom<=bounds.height+1&&bounds.footer<=bounds.height+1,JSON.stringify(bounds));
+  await page.screenshot({path:path.join(out,'composer-place-entry.png')});
+  await page.click('.review-choices input[type=search]');await page.type('.review-choices input[type=search]','cash');
+  assert.equal(await page.$$eval('.choice',a=>a.length),1,'three legacy Cash Only records become one choice');
+  await click('Cash Only');await page.$eval('.review-choices input',e=>{const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;setter.call(e,'');e.dispatchEvent(new Event('input',{bubbles:true}));});
+  await page.click('.headsup .section-toggle');assert.equal(await page.$$eval('.headsup .choice[aria-pressed=true]',a=>a.length),1);
+  await page.keyboard.press('Escape');assert.equal(await page.$$eval('[role=dialog]',a=>a.length),0);
+  assert.equal(await page.$eval('body',e=>e.style.overflow),'');
+  realPhoto=true;await page.reload({waitUntil:'networkidle2'});await page.waitForSelector('.hero-img');
+  assert.equal(await page.$eval('.hero-img',e=>e.getAttribute('src')),'/images/demo-trattoria/pasta.jpg');
+  assert.equal(await page.$$('.hero-illustration').then(a=>a.length),0,'real photo replaces illustration');
+  realPhoto=false;
   await visit();assert.equal(await page.$eval('footer .primary',e=>e.disabled),true);
   assert.equal(await page.$eval('.review-choices .main',e=>e.innerText.includes('Food arrived cold')),true);
   await click('Delicious food');assert.equal(await page.$$eval('.choice[aria-pressed=true]',a=>a.length),1);
