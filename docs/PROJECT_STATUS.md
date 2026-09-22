@@ -306,3 +306,21 @@ or on-device release-build certification. No real production review was posted.
 At this checkpoint source publication and the web deployment receipt are recorded
 in the follow-up release entry. The mobile changes need the next consolidated binary;
 the 13 remaining locale fallbacks remain part of the Apple language-completion gate.
+
+
+### Confirmed review rollout
+
+Web source `1c5e8e4` is live: Railway deployment
+`f0a9dc24-5eeb-49cf-9a77-6d08e92e6939` completed successfully and passed its health
+check. The deployed site passed the compact-card and composer browser checks,
+including light/dark, PT/AR, concern-only saves, retries and edit preservation;
+all test writes were intercepted. Public health, Boston search, the previously
+reported indexed FSQ place and the restaurant demonstration route returned HTTP 200.
+The final focused suite passed 29 tests with zero failures.
+
+Matching mobile source `5da4f2e` is published on
+`release/native-preview-20260921`. Its application TypeScript check passed after the
+temporary native fixture was removed. Native component visual/interaction checks
+and the live read-only Boston search ran in the existing iPhone Simulator app.
+A new distributed binary, full iPad release QA and remaining-language translation
+are still outstanding. Claude's separate Apple readiness branch was not modified.
