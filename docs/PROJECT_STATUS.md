@@ -1,6 +1,6 @@
 # Tavvy current engineering status
 
-## Review entry and place imagery — September 22, release candidate
+## Review entry and place imagery — September 22, web released; mobile source published
 
 The standard place Add a review sheet had a styled-jsx scope bug: its outer overlay
 was unstyled, so clicking the actual place action rendered the form below the page.
@@ -25,9 +25,15 @@ duplicate choices, close behavior and real-photo replacement. Browser writes use
 intercepted fixtures. The enlarged native search card was checked in the existing
 iPhone development app; no new native/EAS build or production review was created.
 
-Release target: Tavvy.com from `release/verified-web-20260921`; mobile source on
-`release/native-preview-20260921`, with distribution still on hold. This entry records
-the verified candidate; confirm the deployment before calling the website released.
+Web commit `3127da8` deployed successfully to Tavvy.com; the Railway health gate and
+public health endpoint passed. The composer/card browser checks also passed against
+the live build, with all review writes intercepted. The signed-out review action
+was checked on a real public place page and retains the return-to-form URL.
+
+Mobile commit `55a686b` is published on `release/native-preview-20260921`. The existing
+iPhone development app additionally passed isolated duplicate-choice, selection,
+section-switching and dark/light checks. The temporary fixture was removed and the
+normal app restored. Mobile distribution remains on hold.
 Full implementation and rules: [Review experience implementation](REVIEW_EXPERIENCE_IMPLEMENTATION.md).
 
 ## Search previews — September 21 evening, web released

@@ -1,6 +1,6 @@
 # Tavvy review experience — implementation guide
 
-**Updated:** September 22, 2026. The original redesign was released September 21; this guide also describes the review-entry and image corrections prepared after user feedback. See the latest status entry for deployment confirmation.
+**Updated:** September 22, 2026. The original redesign was released September 21; this guide also describes the deployed review-entry and image corrections made after user feedback. See the latest status entry for deployment confirmation.
 
 **Scope:** the implemented review and search-card redesign across Tavvy web and mobile, including the existing data services it uses. This is not a completion report for every historical Tavvy task. See [PROJECT_STATUS.md](PROJECT_STATUS.md) for the wider project.
 
@@ -15,6 +15,10 @@ The implementation has three parts:
 3. **Share an experience:** a short form where customers select words, optionally add context, and post.
 
 The same evidence and choice logic is used on web and mobile. Platform-specific components handle browser and native interactions.
+
+### September 22 corrections
+
+Web commit `3127da8` is deployed to Tavvy.com with a successful health gate and live browser checks. It fixes the off-screen review sheet, combines duplicate choices, simplifies section navigation, enlarges search photos and adds the detail-page image fallback. Matching mobile source `55a686b` is published and checked in the existing iPhone development app; it has not been distributed as a new binary.
 
 ### Original redesign release status
 
