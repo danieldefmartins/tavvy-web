@@ -9,6 +9,8 @@ export interface ReviewSummaryProps {
   onSelect?: (section: ReviewTileKey, topic: ReviewTopic) => void;
   /** Compact mode: a row opens the place's reviews instead of expanding in place (Overview teaser). */
   onOpen?: (section: ReviewTileKey, topic: ReviewTopic) => void;
+  /** Compact only: a control shown at the right of the "Reviews · N people" line (e.g. See experiences). */
+  action?: React.ReactNode;
 }
 type Tone = ReviewTopic['tone'];
 const SECTION_TONE: Record<ReviewTileKey, Tone> = { main: 'neutral', good: 'positive', vibe: 'neutral', headsup: 'concern' };
@@ -26,7 +28,7 @@ const Chevron = () => <svg className="chev" viewBox="0 0 24 24" width="15" heigh
  * and the Overview teaser; full mode is the Reviews tab, where every word can be selected to show
  * matching experiences. Historical name retained for callers; there is no four-tile grid.
  */
-export default function PlaceReviewGrid({ summary, mode = 'compact', selectedTopic, onSelect, onOpen }: ReviewSummaryProps) {
+export default function PlaceReviewGrid({ summary, mode = 'compact', selectedTopic, onSelect, onOpen, action }: ReviewSummaryProps) {
   const { theme, isDark } = useThemeContext();
   const copy = useReleaseCopy();
   const id = useId();
@@ -98,7 +100,7 @@ export default function PlaceReviewGrid({ summary, mode = 'compact', selectedTop
   // Rows are built by helpers above, outside the returned JSX, so scoped styled-jsx classes
   // would not reach them; the stylesheet is global and anchored to the .tvr root instead.
   return <div className={`tvr review-summary-content ${compact ? 'compact' : 'full'}`} data-review-summary={summary.status} aria-label={copy('Recent reviews')}>
-    {compact && <div className="evidence-note head"><b>{copy('Reviews')}</b> · {evidenceLine}</div>}
+    {compact && <div className="evidence-note head"><span><b>{copy('Reviews')}</b> · {evidenceLine}</span>{action}</div>}
     {!compact && <div className="evidence-line">
       <span className="evidence-note">{evidenceLine}</span>
       <button type="button" className="about" aria-expanded={about} aria-controls={`${id}-about`} onClick={() => setAbout(value => !value)}><span className="info" aria-hidden="true">i</span>{copy('About these numbers')}</button>
@@ -128,7 +130,7 @@ export default function PlaceReviewGrid({ summary, mode = 'compact', selectedTop
       .tvr .empty-row .empty{flex:1}
       .tvr .more{display:flex;flex-direction:column;gap:3px;padding:3px 0 2px}.tvr .more .wrow{padding-inline-start:12px;min-height:32px}.tvr.compact .more .wrow::after{content:'';flex:0 0 15px}.tvr.full .more .wrow.shell{padding-inline-start:0}.tvr.full .more .wsel{padding-inline-start:23px}.tvr.full .more .wrow.shell::after{content:'';flex:0 0 44px}
 
-      .tvr.compact .head{font-size:12px;line-height:17px;margin-bottom:8px}.tvr.compact .head b{color:${theme.text};font-weight:800}
+      .tvr.compact .head{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;line-height:17px;margin-bottom:8px}.tvr.compact .head b{color:${theme.text};font-weight:800}
 
       .tvr.full .evidence-line{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.tvr.full .evidence-note{font-size:13px;line-height:18px;font-weight:650;color:${theme.text}}
       .tvr .about{display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:0 2px;min-height:44px;font:inherit;font-size:12px;font-weight:600;color:${theme.textSecondary};cursor:pointer}.tvr .info{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1.5px solid currentColor;font-size:10px;font-weight:800;font-style:italic;line-height:1}

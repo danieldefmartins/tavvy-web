@@ -34,11 +34,10 @@ export default function DemoRestaurant() {
     groups: [], description: 'Pasta rolled by hand. Tomatoes at their sweetest. A candlelit table and one more story before dessert. Welcome to our little corner of Italy in Winter Park.',
     popularLabel: 'Good to know', popular: ['Handmade pasta', 'Vegetarian options', 'Date night', 'Outdoor seating'],
     info: [
-      { icon: '🕒', main: 'Lunch & dinner · See weekly hours', hours: [['Monday', 'Closed'], ['Tuesday', '12–3 PM · 5–10 PM'], ['Wednesday', '12–3 PM · 5–10 PM'], ['Thursday', '12–3 PM · 5–10 PM'], ['Friday', '12–3 PM · 5–11 PM'], ['Saturday', '12–11 PM'], ['Sunday', '12–9 PM']] },
+      { icon: '🕒', main: 'Tuesday–Sunday · See weekly hours', hours: [['Monday', 'Closed'], ['Tuesday', '12–3 PM · 5–10 PM'], ['Wednesday', '12–3 PM · 5–10 PM'], ['Thursday', '12–3 PM · 5–10 PM'], ['Friday', '12–3 PM · 5–11 PM'], ['Saturday', '12–11 PM'], ['Sunday', '12–9 PM']] },
       { icon: '📍', main: 'Winter Park, Florida · Sample location' },
       { icon: '💳', main: 'Cards, contactless payments & cash' },
       { icon: '♿', main: 'Step-free entrance · Accessible restroom' },
-      { icon: '🌿', main: 'Vegetarian options · Ask about dietary needs' },
     ],
     reviews: visits.map((v, i) => ({ initial: v.userId === 'demo-you' ? 'Y' : names[i][0], color: ['#155d50','#8A05BE','#A85B28'][i % 3], name: v.userId === 'demo-you' ? 'You · Demo visit' : names[i], text: names[i] === 'Oliver B.' ? 'The pasta tasted fresh, and our server helped us choose a sauce. We settled in quickly and stayed for dessert.' : names[i] === 'Sofia D.' ? 'A cozy spot for a quiet meal. The handmade pasta was the highlight, and service felt friendly without rushing us.' : undefined, when: v.userId === 'demo-you' ? 'Just now' : `${Math.round((Date.now() - Date.parse(v.visitedAt)) / 86400000)} days ago`, signals: v.signals })).reverse(),
     cta: 'Add your taps', evidence, demo: true,
@@ -50,11 +49,10 @@ export default function DemoRestaurant() {
       { id: 'demo-story-burrata', media_url: demoImage('burrata'), media_type: 'image', caption: 'A little something to share', created_at: new Date().toISOString() },
     ],
     detailsContent: <DemoContact />,
-    overviewContent: <div className="tavvy-demo-next"><Link href={DEMO_CARD}>Our digital business card ↗</Link><Link href={DEMO_GUIDE}>See what Tavvy can do for your restaurant ↗</Link></div>,
   };
   return <><Head><title>Trattoria Tavvy · The complete Tavvy restaurant demo</title><meta name="robots" content="noindex,nofollow" /><meta name="description" content="Explore the complete Tavvy restaurant experience: food, stories, a visual menu, eCard and table ordering." /></Head>
     <PlaceScreen config={config} hrefs={{ share: DEMO_PLACE_SHARE.url, menu: DEMO_MENU, ecard: DEMO_CARD, order: DEMO_ORDER, website: '/app/demo/restaurant-website' }} saved={saved} onSave={() => { const next = !saved; setSaved(next); try { localStorage.setItem('tavvy:restaurant-demo:saved', String(next)); } catch {} setMessage(next ? 'Saved to your demo favorites.' : 'Removed from demo favorites.'); }} onAddReview={() => setReviewOpen(true)} />
-    {reviewOpen && <DemoReview onClose={() => setReviewOpen(false)} onSave={review => { recordDemoEvent('reviews'); setYourReview(review); try { localStorage.setItem(DEMO_REVIEW_KEY, JSON.stringify(review)); } catch {} setReviewOpen(false); setMessage('Your taps are now reflected in the four review tiles.'); }} />}
+    {reviewOpen && <DemoReview onClose={() => setReviewOpen(false)} onSave={review => { recordDemoEvent('reviews'); setYourReview(review); try { localStorage.setItem(DEMO_REVIEW_KEY, JSON.stringify(review)); } catch {} setReviewOpen(false); setMessage('Your taps now count in the review bars.'); }} />}
     {message && <div className="demo-toast" role="status">{message}<button aria-label="Dismiss notification" onClick={() => setMessage('')}>×</button></div>}
     <style jsx>{`:global(.tavvy-demo-next){display:grid;gap:10px;margin-top:12px}:global(.tavvy-demo-next a){padding:14px;border:1px solid #b9cfc6;border-radius:12px;color:inherit;text-decoration:none;font-size:14px;font-weight:700}.demo-toast{position:fixed;left:50%;transform:translateX(-50%);bottom:90px;width:min(420px,calc(100vw - 40px));box-sizing:border-box;padding:15px;background:#155d50;color:white;border-radius:14px;z-index:80;box-shadow:0 6px 30px #0003;display:flex;align-items:center;gap:16px;font-size:14px}.demo-toast button{background:none;border:0;color:white;font-size:24px;cursor:pointer}`}</style>
   </>;

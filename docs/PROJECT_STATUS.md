@@ -396,6 +396,42 @@ folded into Overview. Share images use larger type (tagline 24, category 31, tit
 to 94, location 31, footer 22). The cruise browser test now expects core concerns
 under the Heads Up row.
 
+Later the same day, on the user's direction, the place page dropped everything that was
+already reachable elsewhere: the Overview keeps the review bars first (the grid's own
+`Reviews · {{count}} people · Last 6 months` line is the heading, with See experiences
+beside it), then Tavvy Places, Location & hours, Order & pay (delivery links plus reported
+payment details) and any place-specific content; the former Visit & contact section is gone
+because Call, Website, Directions, Reserve, Order, eCard and Share are the icon row (only
+social links and Manage or claim remain, as Follow). The demo's Plan your visit keeps Call
+and Reserve only, its delivery row no longer repeats table ordering, and the demo info
+list no longer repeats the hero's `Lunch & dinner` or the Vegetarian chip. The Reviews tab
+is a deeper browser: the summary rows, then Recent reviews with filters (the selected word,
+Last 6 months / All time, With comments, Newest/Oldest first) and Show more reviews, with
+a `{{shown}} of {{total}} reviews` count (copy keys `reviewExperience88`–`96`).
+
+The restaurant menu was reworked in the same batch. `pages/place/[id]/menu-gallery.tsx` is
+now a full-screen photo menu: one full-bleed photo page per dish with the details over its
+lower part (long text scrolls over the still photo), a floating bar (back, `n / N`, a list
+icon to the text menu) and floating filters (All, the meal periods, the categories, and a
+funnel for dietary filters); no place details on top, no arrows underneath (pointer
+devices get mid-height step buttons), always dark. The owner's Menu design (menu editor →
+Appearance, `menus.style`) now also decides what `/place/[id]/menu` opens: Elegant Ivory and
+Clean White open the text list, Visual — the default when nothing is chosen — redirects to
+the photo menu; `?view=list` always stays on the list and `?dish=` carries over
+(`menuAppearance().entryView` in `lib/menuAppearance.ts`, mirrored on mobile). The text
+menu's List/Photos links became one photo icon; the QR page now encodes `/menu` so the
+code follows the owner's choice. Tests updated for the new structure: `restaurant-demo`
+(review rows selector, Reviews tab for individual reviews, tab persistence instead of the
+removed Details link, `?view=list` for list checks), `menu-appearance` (`Photo menu` icon,
+`?view=list`) and `place-ui` (`?view=list`; the Tools item already in the main navigation).
+
+Checks for this follow-up: web TypeScript, the 40 focused unit tests, a clean production
+build, and the six browser suites against the served build (place-preview,
+review-composer, restaurant-demo, menu-appearance, place-ui, cruise-ui), plus phone-width
+screenshots of the demo Overview/Reviews tabs and the photo menu (cover, dish, filters).
+Mobile: application TypeScript clean (the repository's Deno functions and a jest-style test
+file report pre-existing environment errors); no device run in this batch.
+
 Checks: web TypeScript, 31 focused unit tests (including a new search-highlight
 regression), the production build, the compact-card browser suite (updated to three
 four expandable rows, the people wording, the photo header bounds and counter, row

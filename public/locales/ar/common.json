@@ -1289,6 +1289,15 @@
     "reviewExperience84": "{{count}} أشخاص · آخر 6 أشهر",
     "reviewExperience85": "تُظهر الأشرطة عدد من ذكروا ذلك من بين {{count}} شخصًا",
     "reviewExperience86": "قديم",
-    "reviewExperience87": "عرض كل الصور"
+    "reviewExperience87": "عرض كل الصور",
+    "reviewExperience88": "آخر 6 أشهر",
+    "reviewExperience89": "كل الفترات",
+    "reviewExperience90": "مع تعليقات",
+    "reviewExperience91": "الأحدث أولاً",
+    "reviewExperience92": "الأقدم أولاً",
+    "reviewExperience93": "{{shown}} من {{total}} مراجعة",
+    "reviewExperience94": "عرض المزيد من المراجعات",
+    "reviewExperience95": "عوامل التصفية",
+    "reviewExperience96": "محمّلة"
   }
 }

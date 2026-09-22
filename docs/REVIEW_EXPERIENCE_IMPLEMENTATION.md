@@ -403,6 +403,12 @@ Native `AddReviewScreen` preserves its event branch and delegates to `lib/eventR
 
 RV, On The Go and other callers of the shared place-summary components inherit the summary presentation and category behavior. Their location/session, catalog, permissions and business-specific features remain separate systems.
 
+### Overview without repeats, Reviews tab filters, and the photo menu (September 22 follow-up)
+
+- Overview order: review rows first (the grid's `Reviews · N people · Last 6 months` line is the heading; `action` prop carries See experiences), Tavvy Places, Location & hours, Order & pay (delivery links + reported payment facts), place-specific content, then Follow (social links) and Manage or claim. Anything in the icon row (Call, Website, Directions, Reserve, Order, eCard, Share) is never repeated below it. Same on mobile.
+- Reviews tab: summary rows, then Recent reviews filtered by the selected word, period (Last 6 months / All time, 180-day cutoff on `createdAt`), With comments, and order, ten at a time with Show more.
+- Photo menu (`/place/[id]/menu-gallery`, mobile `MenuGalleryScreen` photo mode): full-screen photo pages, floating bar and filters, no place header or bottom arrows. `menuAppearance().entryView` decides what `/menu` opens (text designs → list; Visual/default → photos; `?view=list` stays on the list); one icon switches views. QR codes encode `/menu`.
+
 ## 10. Preference-based search ordering
 
 Dining preference options remain **Great food**, **Quiet conversation**, **Quick visit** and **Good value**.

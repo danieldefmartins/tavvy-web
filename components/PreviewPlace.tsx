@@ -260,7 +260,10 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
   };
   const [selectedSummary, setSelectedSummary] = useState<'main' | 'good' | 'vibe' | 'headsup' | null>(null);
   useEffect(() => { setSelectedTopic(null); setSelectedSummary(null); }, [hrefs?.share, config.name, config.meta]);
-  const [showAllDemoReviews, setShowAllDemoReviews] = useState(false);
+  const [reviewPeriod, setReviewPeriod] = useState<'recent' | 'all'>('recent');
+  const [withNotes, setWithNotes] = useState(false);
+  const [sortOldest, setSortOldest] = useState(false);
+  const [reviewsShown, setReviewsShown] = useState(10);
   const [shareMessage, setShareMessage] = useState('');
   const sharePlace = async () => {
     try {
@@ -310,8 +313,14 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
   const openReviews = (topic?: string | null, section?: 'main' | 'good' | 'vibe' | 'headsup' | null) => { selectTab('reviews'); setSelectedSummary(section ?? null); setSelectedTopic(topic ?? null); };
   const paymentFacts = (reviewSummary.practical || []).filter(item => /cash|card|pay/i.test(item.label));
   const hasOrderAndPay = !config.demo && (Object.keys(config.deliveryLinks || {}).length > 0 || paymentFacts.length > 0);
-  const supportLabels = new Set(selectedTopic ? [selectedTopic] : selectedSummary === 'main' ? [...(evidence?.coreSignals||[]),...(evidence?.coreConcerns||[])].map(s=>s.label) : selectedSummary === 'good' ? otherGood.map(s=>s.label) : selectedSummary === 'vibe' ? (evidence?.vibeSignals||[]).map(s=>s.label) : currentWarnings.map(s=>s.label));
-  const supportingReviews = config.reviews.filter(r=>r.signals.some(s=>supportLabels.has(s.label))).slice(0,2);
+  // Reviews tab filters. Dates come from createdAt; previews without dates hide the period and order chips.
+  const hasReviewDates = config.reviews.some(r => r.createdAt);
+  const reviewCutoff = Date.now() - 180 * 86400000;
+  const filteredReviews = config.reviews
+    .filter(r => !selectedTopic || r.signals.some(s => s.label === selectedTopic))
+    .filter(r => !withNotes || !!r.text)
+    .filter(r => reviewPeriod === 'all' || !r.createdAt || Date.parse(r.createdAt) >= reviewCutoff)
+    .sort((a, b) => !a.createdAt || !b.createdAt ? 0 : (sortOldest ? 1 : -1) * (Date.parse(a.createdAt) - Date.parse(b.createdAt)));
 
   return (
     <div className="screen">
@@ -360,7 +369,11 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
             : <button key={tab} type="button" className={activeTab === tab ? 'place-tab selected' : 'place-tab'} aria-current={activeTab === tab ? 'page' : undefined} onClick={() => selectTab(tab)}>{tab === 'media' ? 'Photos & Stories' : tab === 'reviews' ? copy('Reviews') : tab === 'menu' ? (config.type === 'Hotel' ? 'Rooms' : 'Tavvy Menu') : 'Overview'}</button>)}
         </nav>
 
-        {activeTab === 'overview' && config.overviewContent}
+        {activeTab === 'overview' && <section className="section review-teaser" aria-label="Tavvy review summary">
+          {/* The grid's own "Reviews · N people" line is the heading here; no second title above it. */}
+          <PlaceReviewGrid mode="compact" summary={reviewSummary} onOpen={(section, topic) => openReviews(topic.label, section)} action={<button type="button" className="text-link" onClick={() => openReviews()}>{copy('See experiences')} →</button>} />
+        </section>}
+
 
         {activeTab === 'overview' && <div className="section">
           <div className="tp-head"><span className="tp-badge">✦ Tavvy Places</span></div>
@@ -368,10 +381,27 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
           {config.popular?.length > 0 && <div className="tags"><span className="tags-label">{config.popularLabel}</span>{config.popular.map((t, i) => <span className="tag" key={i}>{t}</span>)}</div>}
         </div>}
 
-        {activeTab === 'overview' && <section className="section review-teaser" aria-label="Tavvy review summary">
-          <div className="section-head"><h2 className="section-title">{copy('Reviews')}</h2><button type="button" className="text-link" onClick={() => openReviews()}>{copy('See experiences')} →</button></div>
-          <PlaceReviewGrid mode="compact" summary={reviewSummary} onOpen={(section, topic) => openReviews(topic.label, section)} />
-        </section>}
+        {activeTab === 'overview' && <div className="divider" />}
+        {activeTab === 'overview' && <div className="section">
+          <h2 className="section-title">Location & hours</h2>
+          <div className="info">
+            {config.info.filter(r=>!r.href?.startsWith('tel:')).map((r, i) => {
+              const content = <>
+                <span className="info-ic">{r.icon}</span>
+                <span className="info-mid">
+                  <span className="info-main">{r.main}</span>
+                  {r.hours && hoursOpen === i && <span className="hours">{r.hours.map(([d, h], j) => <span className="hr" key={j}><span>{d}</span><span>{h}</span></span>)}</span>}
+                </span>
+                {r.act && <span className="info-act">{r.act}</span>}
+                {r.hours && <span className={`chev ${hoursOpen === i ? 'up' : ''}`}>⌄</span>}
+              </>;
+              return r.href ? <a className="info-row" href={r.href} key={i} target={r.href.startsWith('http') ? '_blank' : undefined} rel={r.href.startsWith('http') ? 'noopener noreferrer' : undefined}>{content}</a>
+                : r.hours ? <button className="info-row" key={i} onClick={() => setHoursOpen(o => o === i ? null : i)}>{content}</button>
+                : <div className="info-row static" key={i}>{content}</div>;
+            })}
+          </div>
+        </div>}
+
 
         {activeTab === 'overview' && hasOrderAndPay && <div className="section">
           <div className="section-head"><h2 className="section-title">Order & pay</h2></div>
@@ -382,17 +412,25 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
         {activeTab === 'reviews' && <section className="section review-summary" aria-label="Tavvy review summary">
           <div className="section-head"><h2 className="section-title">{copy('Reviews')}</h2></div>
           <PlaceReviewGrid mode="full" summary={reviewSummary} selectedTopic={selectedTopic} onSelect={(section, topic) => { setSelectedSummary(section); setSelectedTopic(selectedTopic === topic.label ? null : topic.label); }} />
-          {selectedSummary && selectedTopic && !unavailable && <div className="summary-detail">
-            <div className="section-head"><strong>{selectedTopic}</strong><button type="button" className="text-link" onClick={() => {setSelectedSummary(null);setSelectedTopic(null);}}>{copy("All experiences")}</button></div>
-            {!supportingReviews.length && <p>{copy('No matching experiences in the recent preview. Open all reviews to explore the history.')}</p>}
-            {supportingReviews.length > 0 && <><h3 className="support-title">Recent reviews mentioning this</h3>{supportingReviews.map((r,i)=><Reviewer key={r.id||i} r={r} allowSafety={!config.demo}/>)}</>}
-          </div>}
         </section>}
 
         {activeTab === 'reviews' && <div className="section overview-reviews">
-          <div className="section-head"><h2 className="section-title">Recent reviews</h2><span className="section-sub">{config.reviewsSub}</span></div>
-          {config.reviewsStatus === 'unavailable' ? <p className="review-note" role="status">Reviews could not be loaded. Please try again later.</p> : config.reviews.length > 0 ? (showAllDemoReviews && !config.reviewsHref ? config.reviews : config.reviews.slice(0, 3)).map((review, i) => <Reviewer key={i} r={review} allowSafety={!config.demo} />) : <p className="review-note">No reviews yet. Be the first to share what you experienced.</p>}
-          {config.reviewsHref ? <a className="more" href={config.reviewsHref}>See all reviews →</a> : config.reviews.length > 3 && <button className="more" onClick={() => setShowAllDemoReviews(value => !value)}>{showAllDemoReviews ? 'Show fewer reviews' : 'See all reviews'}</button>}
+          <div className="section-head"><h2 className="section-title">Recent reviews</h2></div>
+          {/* Filters: a selected word (from the rows above), the evidence period, comments only, and order. */}
+          <div className="review-filters" role="group" aria-label={copy('Filters')}>
+            {selectedTopic && <button type="button" className="chip on" onClick={() => { setSelectedSummary(null); setSelectedTopic(null); }} aria-label={`${selectedTopic} · ${copy('All experiences')}`}>{selectedTopic} ✕</button>}
+            {hasReviewDates && <button type="button" className={`chip ${reviewPeriod === 'recent' ? 'on' : ''}`} aria-pressed={reviewPeriod === 'recent'} onClick={() => setReviewPeriod('recent')}>{copy('Last 6 months')}</button>}
+            {hasReviewDates && <button type="button" className={`chip ${reviewPeriod === 'all' ? 'on' : ''}`} aria-pressed={reviewPeriod === 'all'} onClick={() => setReviewPeriod('all')}>{copy('All time')}</button>}
+            <button type="button" className={`chip ${withNotes ? 'on' : ''}`} aria-pressed={withNotes} onClick={() => setWithNotes(value => !value)}>{copy('With comments')}</button>
+            {hasReviewDates && <button type="button" className="chip" onClick={() => setSortOldest(value => !value)}>{copy(sortOldest ? 'Oldest first' : 'Newest first')} ⇅</button>}
+          </div>
+          <p className="review-note" role="status">{copy('{{shown}} of {{total}} reviews').replace('{{shown}}', String(Math.min(reviewsShown, filteredReviews.length))).replace('{{total}}', String(filteredReviews.length))}</p>
+          {config.reviewsStatus === 'unavailable' ? <p className="review-note" role="status">Reviews could not be loaded. Please try again later.</p>
+            : config.reviews.length === 0 ? <p className="review-note">No reviews yet. Be the first to share what you experienced.</p>
+            : filteredReviews.length === 0 ? <p className="review-note">{copy('No matching experiences in the recent preview. Open all reviews to explore the history.')}</p>
+            : filteredReviews.slice(0, reviewsShown).map((review, i) => <Reviewer key={review.id || i} r={review} allowSafety={!config.demo} />)}
+          {filteredReviews.length > reviewsShown && <button className="more" onClick={() => setReviewsShown(value => value + 10)}>{copy('Show more reviews')}</button>}
+          {config.reviewsHref && <a className="more" href={config.reviewsHref}>See all reviews →</a>}
         </div>}
 
         {activeTab === 'media' && <div className="media-section" id="demo-photos">
@@ -440,37 +478,15 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
           <p>{config.demoCard.hours}</p><small>{config.demoCard.contact}</small>
           {config.demoCardHref && <p><a href={config.demoCardHref} style={{ color: '#00AAB4', fontWeight: 700 }}>Open eCard →</a></p>}
         </div>}
-        {activeTab === 'overview' && <div className="section">
-          <h2 className="section-title">Visit & contact</h2>
-          <div className="contact-actions">
-            {!config.detailsContent && [['phone',hrefs?.phone?.replace(/^tel:/,'')||'Call'],['website','Website'],['directions','Directions'],['reservation','Reserve a table'],['order','Order at your table']].filter(([key])=>hrefs?.[key]).map(([key,label])=><a key={key} href={hrefs![key]} target={hrefs![key].startsWith('http')?'_blank':undefined} rel="noopener noreferrer">{label} ↗</a>)}
-            {hrefs?.ecard && <a href={hrefs.ecard}>Restaurant eCard →</a>}
-            <button onClick={sharePlace}>{shareMessage || 'Share this place'}</button>
-          </div>
-          {!config.detailsContent && <div className="demo-links">{socialItems.map(item=><a key={item.key} href={hrefs![item.key]} target="_blank" rel="noopener noreferrer">{item.label}</a>)}</div>}
+        {/* Phone, website, directions, reserve, order, eCard and share are already the icon row, so they are not repeated here. */}
+        {activeTab === 'overview' && ((!config.detailsContent && socialItems.length > 0) || hrefs?.owner) && <div className="section">
+          {!config.detailsContent && socialItems.length > 0 && <><h2 className="section-title">Follow</h2>
+            <div className="demo-links">{socialItems.map(item=><a key={item.key} href={hrefs![item.key]} target="_blank" rel="noopener noreferrer">{item.label}</a>)}</div></>}
           {hrefs?.owner && <p><a className="text-link" href={hrefs.owner}>Manage or claim this place →</a></p>}
         </div>}
 
-        {activeTab === 'overview' && <div className="divider" />}
-        {activeTab === 'overview' && <div className="section">
-          <h2 className="section-title">Location & hours</h2>
-          <div className="info">
-            {config.info.filter(r=>!r.href?.startsWith('tel:')).map((r, i) => {
-              const content = <>
-                <span className="info-ic">{r.icon}</span>
-                <span className="info-mid">
-                  <span className="info-main">{r.main}</span>
-                  {r.hours && hoursOpen === i && <span className="hours">{r.hours.map(([d, h], j) => <span className="hr" key={j}><span>{d}</span><span>{h}</span></span>)}</span>}
-                </span>
-                {r.act && <span className="info-act">{r.act}</span>}
-                {r.hours && <span className={`chev ${hoursOpen === i ? 'up' : ''}`}>⌄</span>}
-              </>;
-              return r.href ? <a className="info-row" href={r.href} key={i} target={r.href.startsWith('http') ? '_blank' : undefined} rel={r.href.startsWith('http') ? 'noopener noreferrer' : undefined}>{content}</a>
-                : r.hours ? <button className="info-row" key={i} onClick={() => setHoursOpen(o => o === i ? null : i)}>{content}</button>
-                : <div className="info-row static" key={i}>{content}</div>;
-            })}
-          </div>
-        </div>}
+        {activeTab === 'overview' && config.overviewContent}
+
 
       </div>
       {selectedMedia && <div ref={mediaDialogRef} className="media-modal" role="dialog" aria-modal="true" aria-label={selectedMedia.caption} onClick={() => setSelectedMedia(null)}>
@@ -505,6 +521,9 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
         .hero-more { position: absolute; right: 16px; top: 22px; border: 0; border-radius: 20px; padding: 7px 12px; background: rgba(0,0,0,0.55); color: #fff; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
         .hero-illustration { top: 64px; }
         .review-teaser .text-link { border: 0; background: none; font: inherit; font-size: 13px; cursor: pointer; padding: 0; }
+        .review-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 8px; }
+        .review-filters .chip { border: 1px solid ${t.border}; background: ${t.softer}; color: ${t.text}; border-radius: 20px; padding: 8px 12px; min-height: 40px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .review-filters .chip.on { background: rgba(0,194,203,0.14); border-color: rgba(0,194,203,0.45); color: ${t.isDark ? '#58D9DE' : '#067A80'}; }
         .hero-illustration { position:absolute;top:20px;inset-inline-end:16px;max-width:65%;padding:5px 8px;border-radius:7px;background:rgba(0,0,0,.65);color:white;font-size:11px; }
         .hero-fallback { background: linear-gradient(135deg, #17013A 0%, #3a0a6b 50%, #8A05BE 100%); }
         .hero-scrim { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0) 32%, rgba(0,0,0,0.62) 100%); }

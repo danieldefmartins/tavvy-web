@@ -366,7 +366,15 @@ export default function MenuPage() {
   };
 
   // Loading state
-  if (loading) {
+  // The owner's menu design decides what opens first: Visual → the full-screen photo menu, text designs → this list.
+  // ?view=list always stays here (the photo menu's list icon), and ?dish= carries over.
+  const opensAsPhotos = !!menu && appearance.entryView === 'photos' && router.query.view !== 'list';
+  useEffect(() => {
+    if (!opensAsPhotos || !router.isReady) return;
+    void router.replace(`/place/${id}/menu-gallery${typeof router.query.dish === 'string' ? `?dish=${encodeURIComponent(router.query.dish)}` : ''}`);
+  }, [opensAsPhotos, router.isReady, id]);
+
+  if (loading || opensAsPhotos) {
     return (
       <AppLayout hideTabBar>
         <style>{menuStyles.replace('@media (prefers-color-scheme: dark)', isDark ? '@media all' : '@media not all')}</style>
@@ -579,7 +587,7 @@ export default function MenuPage() {
             <h1 className="menu-title">{menu?.name || `${placeName} Menu`}</h1>
             {placeName && <p className="menu-subtitle">{placeName}</p>}
           </div>
-          <span className="menu-gallery-link" aria-current="page">List</span>{appearance.galleryEnabled && <Link href={`/place/${id}/menu-gallery`} className="menu-gallery-link">Photos</Link>}
+          {appearance.galleryEnabled && <Link href={`/place/${id}/menu-gallery`} className="menu-gallery-link" aria-label="Photo menu" title="Photo menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></Link>}
         </div>
 
         {/* ROW 2: Meal periods + filter icon */}
@@ -875,16 +883,19 @@ const menuStyles = `
     margin: 2px 0 0;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   }
+  /* One small icon switches to the full-screen photo menu (the photo menu has the matching list icon). */
   .menu-gallery-link {
-    font-size: 12px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
     color: #8A05BE;
     text-decoration: none;
-    font-weight: 500;
-    padding: 6px 12px;
     border: 1px solid rgba(138, 5, 190, 0.3);
-    border-radius: 16px;
-    white-space: nowrap;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
     transition: background 0.2s;
   }
   .menu-gallery-link:hover {

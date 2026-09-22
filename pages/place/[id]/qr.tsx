@@ -28,7 +28,8 @@ export default function QRCodePage() {
   const [includeLogo, setIncludeLogo] = useState(true);
   const qrContainerRef = useRef<HTMLDivElement>(null);
 
-  const menuUrl = `https://tavvy.com/place/${id}/menu-gallery`;
+  // /menu opens whichever view the owner chose in Menu design (photo menu by default).
+  const menuUrl = `https://tavvy.com/place/${id}/menu`;
   const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(menuUrl)}&margin=10`;
 
   useEffect(() => {

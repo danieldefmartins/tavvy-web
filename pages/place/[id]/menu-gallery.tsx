@@ -6,13 +6,11 @@ import DemoBanner from '../../../components/demo/DemoBanner';
  * Path: pages/place/[id]/menu-gallery.tsx
  * URL: tavvy.com/place/[uuid]/menu-gallery
  *
- * Features:
- * - Full-screen horizontal scroll (Instagram Stories style)
- * - Big food images on black background
- * - Scroll-snap for one-card-at-a-time swiping
- * - Category filter pills, meal period toggle
- * - Dot indicators for position
- * - Dark, minimal, premium feel
+ * The whole screen is the menu: each dish is a full-bleed photo page with its details over the lower
+ * part, swiped horizontally (scroll-snap). A floating bar holds back, the position and the switch to
+ * the text menu; period, category and dietary filters float under it. No place details on top and
+ * no arrows underneath (pointer devices get mid-height step buttons). Always dark.
+ * The owner's Menu design decides whether /menu opens here or in the text list (lib/menuAppearance).
  */
 
 import { dietaryMatch } from '../../../lib/placePresentation';
@@ -413,6 +411,10 @@ export default function MenuGalleryPage() {
     );
   }
 
+  const total = filteredItems.length + coverOffset;
+  const categoryPills = categories.filter(cat => activePeriod === 'all' || cat.meal_period === activePeriod || cat.meal_period === 'all_day' || !cat.meal_period);
+  const step = (direction: 1 | -1) => scrollRef.current?.scrollBy({ left: direction * scrollRef.current.clientWidth, behavior: 'smooth' });
+
   return (
     <>
       <Head>{isDemo && <meta name="robots" content="noindex,nofollow" />}
@@ -425,145 +427,76 @@ export default function MenuGalleryPage() {
       <style jsx global>{galleryStyles}</style>
 
       <div className="gallery-shell">{isDemo && <DemoBanner compact />}
-        {/* ROW 1: Navigation */}
-        <div className="gallery-nav">
-          <Link href={placeHref} className="gallery-nav-title">← {placeName||'Back to restaurant'}</Link>
-          <Link href={`/place/${id}/menu`} className="gallery-nav-classic">List</Link><span className="gallery-nav-classic" aria-current="page">Photos</span>
-        </div>
-
-        {/* ROW 2: Meal periods + filter icon */}
-        <div style={{ display: 'flex', alignItems: 'center', padding: '0 12px', gap: 6, flexShrink: 0, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-          {availablePeriods.length > 2 && (
-            <div className="gallery-periods" style={{ flex: 1 }}>
-              {availablePeriods.map(period => (
-                <button
-                  key={period}
-                  className={`gallery-period-btn ${activePeriod === period ? 'active' : ''}`}
-                  onClick={() => setActivePeriod(period)}
-                >
-                  {PERIOD_LABELS[period]}
-                </button>
-              ))}
+        <div className="gallery-stage">
+          {/* The menu is the whole screen: no place details on top, no arrows underneath.
+              A floating bar holds back, the position and the switch to the text menu; the filters float under it. */}
+          <div className="gallery-top">
+            <div className="gallery-top-row">
+              <Link href={placeHref} className="gallery-icon-btn" aria-label={`Back to ${placeName || 'restaurant'}`}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+              </Link>
+              <span className="gallery-position" aria-live="polite">{filteredItems.length ? `${activeIndex + 1} / ${total}` : '0 dishes'}</span>
+              <Link href={`/place/${id}/menu?view=list`} className="gallery-icon-btn" aria-label="Text menu" title="Text menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+              </Link>
             </div>
-          )}
-          {/* Filter icon — toggles category panel */}
-          <button
-            aria-label="Filter menu"
-            aria-expanded={showCategoryPanel}
-            onClick={() => setShowCategoryPanel(!showCategoryPanel)}
-            style={{
-              width: 34, height: 34, borderRadius: 8,
-              border: activeCategory !== 'all' ? '2px solid #8A05BE' : '1px solid rgba(255,255,255,0.2)',
-              background: activeCategory !== 'all' ? 'rgba(138,5,190,0.2)' : 'rgba(255,255,255,0.06)',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0, position: 'relative',
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={activeCategory !== 'all' ? '#8A05BE' : '#aaa'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-            </svg>
-            {activeCategory !== 'all' && (
-              <span style={{
-                position: 'absolute', top: -4, right: -4, width: 8, height: 8,
-                borderRadius: '50%', background: '#8A05BE',
-              }} />
-            )}
-          </button>
-        </div>
 
-        {/* Filter panel — categories + allergens, hidden by default */}
-        {showCategoryPanel && (
-          <div style={{ flexShrink: 0, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-            <div style={{ display: 'flex', gap: 6, padding: '8px 12px', overflowX: 'auto' }}>
-              <button
-                className={`gallery-cat-pill ${activeCategory === 'all' ? 'active' : ''}`}
-                onClick={() => { setActiveCategory('all'); setShowCategoryPanel(false); }}
-              >
-                All
-              </button>
-              {categories
-                .filter(cat => {
-                  if (activePeriod === 'all') return true;
-                  return cat.meal_period === activePeriod || cat.meal_period === 'all_day' || !cat.meal_period;
-                })
-                .map(cat => (
-                  <button
-                    key={cat.id}
-                    className={`gallery-cat-pill ${activeCategory === cat.id ? 'active' : ''}`}
-                    onClick={() => { setActiveCategory(cat.id); setShowCategoryPanel(false); }}
-                  >
-                    {cat.name}
-                  </button>
+            <div className="gallery-filter-row">
+              <div className="gallery-pills" role="group" aria-label="Menu filters">
+                <button type="button" className={`gallery-pill ${activePeriod === 'all' && activeCategory === 'all' ? 'active' : ''}`} aria-pressed={activePeriod === 'all' && activeCategory === 'all'} onClick={() => { setActivePeriod('all'); setActiveCategory('all'); }}>All</button>
+                {availablePeriods.filter(period => period !== 'all').map(period => (
+                  <button type="button" key={period} className={`gallery-pill ${activePeriod === period ? 'active' : ''}`} aria-pressed={activePeriod === period} onClick={() => setActivePeriod(activePeriod === period ? 'all' : period)}>{PERIOD_LABELS[period]}</button>
                 ))}
+                {categoryPills.map(cat => (
+                  <button type="button" key={cat.id} className={`gallery-pill ${activeCategory === cat.id ? 'active' : ''}`} aria-pressed={activeCategory === cat.id} onClick={() => setActiveCategory(activeCategory === cat.id ? 'all' : cat.id)}>{cat.name}</button>
+                ))}
+              </div>
+              <button type="button" className={`gallery-icon-btn ${activeFilters.length ? 'on' : ''}`} aria-label="Dietary filters" aria-expanded={showCategoryPanel} onClick={() => setShowCategoryPanel(open => !open)}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                {activeFilters.length > 0 && <span className="gallery-dot-badge">{activeFilters.length}</span>}
+              </button>
             </div>
-            <div style={{ display: 'flex', gap: 6, padding: '4px 12px 8px', overflowX: 'auto' }}>
-              {ALLERGEN_FILTERS.map(f => (
-                <button
-                  key={f.key}
-                  className={`gallery-allergen-pill ${activeFilters.includes(f.key) ? 'active' : ''}`}
-                  aria-pressed={activeFilters.includes(f.key)} onClick={() => toggleFilter(f.key)}
-                >
-                  {activeFilters.includes(f.key) ? '✓ ' : `${f.icon} `}{f.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
 
-        {activeFilters.length>0&&<div className="gallery-dietary-result" role="status"><strong>{matchingCount} dishes match</strong><button onClick={()=>{setActiveFilters([]);setShowOtherDishes(false)}}>Clear</button><button aria-pressed={showOtherDishes} onClick={()=>setShowOtherDishes(!showOtherDishes)}>{showOtherDishes?'Matches only':'Other dishes'}</button><p>Missing dietary tags mean unknown. Ask the restaurant about allergies.</p></div>}
-        {/* Gallery Cards - Horizontal Scroll */}
-        {filteredItems.length > 0 ? (
-          <>
-            <div
-              className="gallery-scroll"
-              ref={scrollRef}
-              onScroll={handleScroll}
-            >
-              {/* Cover Card — Full-screen image background */}
+            {showCategoryPanel && (
+              <div className="gallery-panel">
+                <div className="gallery-pills wrap">
+                  {ALLERGEN_FILTERS.map(f => (
+                    <button type="button" key={f.key} className={`gallery-pill diet ${activeFilters.includes(f.key) ? 'active' : ''}`} aria-pressed={activeFilters.includes(f.key)} onClick={() => toggleFilter(f.key)}>
+                      {activeFilters.includes(f.key) ? '✓ ' : `${f.icon} `}{f.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {activeFilters.length > 0 && <div className="gallery-dietary-result" role="status"><strong>{matchingCount} dishes match</strong><button type="button" onClick={() => { setActiveFilters([]); setShowOtherDishes(false); }}>Clear</button><button type="button" aria-pressed={showOtherDishes} onClick={() => setShowOtherDishes(!showOtherDishes)}>{showOtherDishes ? 'Matches only' : 'Other dishes'}</button><p>Missing dietary tags mean unknown. Ask the restaurant about allergies.</p></div>}
+          </div>
+
+          {filteredItems.length > 0 ? (
+            <div className="gallery-scroll" ref={scrollRef} onScroll={handleScroll}>
+              {/* Cover page */}
               {menu?.show_cover && (
                 <div className="gallery-card gallery-cover-card" tabIndex={0} aria-label="Menu cover">
-                  <div className="gallery-card-image">
-                    {menu.cover_image_url ? (
-                      <img src={menu.cover_image_url} alt={placeName} className="gallery-cover-hero-img" />
-                    ) : (
-                      <div className="gallery-cover-bg" />
-                    )}
-                    <div className="gallery-card-gradient" />
+                  {menu.cover_image_url ? <img src={menu.cover_image_url} alt="" className="gallery-card-bg" /> : <div className="gallery-card-bg gallery-cover-bg" />}
+                  <div className="gallery-card-shade" />
+                  <div className="gallery-card-body">
                     <div className="gallery-cover-content">
                       <h1 className="gallery-cover-name">{placeName}</h1>
                       {menu.tagline && <p className="gallery-cover-tagline">{menu.tagline}</p>}
 
-                      {/* Food thumbnails teaser */}
-                      {filteredItems.length > 0 && (
-                        <div className="gallery-cover-thumbs">
-                          {filteredItems.slice(0, 4).map(item => (
-                            <div key={item.id} className="gallery-cover-thumb">
-                              {item.image_url ? (
-                                <img src={item.image_url} alt={item.name} />
-                              ) : (
-                                <div className="gallery-thumb-placeholder" />
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      <div className="gallery-cover-thumbs">
+                        {filteredItems.slice(0, 4).map(item => (
+                          <div key={item.id} className="gallery-cover-thumb">
+                            {item.image_url ? <img src={item.image_url} alt={item.name} /> : <div className="gallery-thumb-placeholder" />}
+                          </div>
+                        ))}
+                      </div>
 
                       <div className="gallery-cover-pills">
-                        {menu.happy_hour_enabled && menu.happy_hour_times && (
-                          <span className="gallery-cover-pill pill-happy">🍸 Happy Hour {menu.happy_hour_times}</span>
-                        )}
-                        {chefDish && (
-                          <span className="gallery-cover-pill pill-chef">👨‍🍳 {chefDish.name}</span>
-                        )}
-                        {dayDish && (
-                          <span className="gallery-cover-pill pill-day">⭐ {dayDish.name}</span>
-                        )}
-                        {menu.promo_banner_enabled && menu.promo_banner_text && (
-                          <span className="gallery-cover-pill pill-promo">🎉 {menu.promo_banner_text}</span>
-                        )}
-                        {menu.seasonal_special_enabled && menu.seasonal_special_text && (
-                          <span className="gallery-cover-pill pill-seasonal">🌿 {menu.seasonal_special_text}</span>
-                        )}
+                        {menu.happy_hour_enabled && menu.happy_hour_times && <span className="gallery-cover-pill pill-happy">🍸 Happy Hour {menu.happy_hour_times}</span>}
+                        {chefDish && <span className="gallery-cover-pill pill-chef">👨‍🍳 {chefDish.name}</span>}
+                        {dayDish && <span className="gallery-cover-pill pill-day">⭐ {dayDish.name}</span>}
+                        {menu.promo_banner_enabled && menu.promo_banner_text && <span className="gallery-cover-pill pill-promo">🎉 {menu.promo_banner_text}</span>}
+                        {menu.seasonal_special_enabled && menu.seasonal_special_text && <span className="gallery-cover-pill pill-seasonal">🌿 {menu.seasonal_special_text}</span>}
                       </div>
 
                       <p className="gallery-cover-swipe">Swipe to start →</p>
@@ -572,89 +505,50 @@ export default function MenuGalleryPage() {
                 </div>
               )}
 
-              {filteredItems.map((item, idx) => {
+              {/* One full-screen page per dish: the photo fills the screen, the details sit over its lower part. */}
+              {filteredItems.map(item => {
                 const priceStr = formatPrice(item.price, item.price_label);
                 const imageUrl = item.image_url || menu?.cover_image_url || null;
                 const matchesFilter = itemMatchesFilters(item);
-
                 return (
                   <div key={item.id} className={`gallery-card ${!matchesFilter ? 'gallery-card-filtered' : ''}`} tabIndex={0} aria-label={item.name}>
-                    {/* Dish image, with the restaurant cover as fallback */}
-                    <div className="gallery-card-image">
-                      {imageUrl ? (
-                        <img src={imageUrl} alt={item.name} />
-                      ) : (
-                        <div className="gallery-card-placeholder">
-                          <span>{item.category_name}</span>
-                        </div>
-                      )}
-                      {/* Gradient overlay for text readability */}
-                      <div className="gallery-card-gradient" />
-
-                      {/* Allergen warning overlay */}
-                      {!matchesFilter && (
-                        <div className="gallery-card-allergen-overlay">
-                          <span>{dietaryMatch(item.dietary_tags,activeFilters)==='unknown'?'Dietary information not confirmed for these filters':'Other dish — does not match selected filters'}</span>
-                        </div>
-                      )}
-
-                      {/* Price badge + calories + share (top right) */}
-                      <div className="gallery-card-top-right">
-                        {priceStr && (
-                          <div className="gallery-card-price">
-                            {priceStr}{item.calories ? ` · ${item.calories} cal` : ''}
+                    {imageUrl ? <img src={imageUrl} alt={item.name} className="gallery-card-bg" /> : <div className="gallery-card-bg gallery-card-placeholder"><span>{item.category_name}</span></div>}
+                    <div className="gallery-card-shade" />
+                    <div className="gallery-card-body">
+                      <div className="gallery-card-spacer" aria-hidden="true" />
+                      <div className="gallery-card-text-block">
+                        {!matchesFilter && (
+                          <div className="gallery-card-allergen-overlay">
+                            {dietaryMatch(item.dietary_tags, activeFilters) === 'unknown' ? 'Dietary information not confirmed for these filters' : 'Other dish — does not match selected filters'}
                           </div>
                         )}
-                        {item.order_url && (
-                          <a
-                            href={item.order_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="gallery-card-order"
-                            aria-label={`Order ${item.name}`}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            🛒
-                          </a>
+                        {(item.is_popular || item.is_new) && (
+                          <div className="gallery-card-badges-top">
+                            {item.is_popular && <span className="gallery-badge fire gallery-badge-pulse">🔥 Popular</span>}
+                            {item.is_new && <span className="gallery-badge new">{'✨'} New</span>}
+                          </div>
                         )}
-                        <button
-                          className="gallery-card-share"
-                          onClick={(e) => { e.stopPropagation(); handleShareDish(item); }}
-                          aria-label={`Share ${item.name}`}
-                        >
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
-                            <polyline points="16 6 12 2 8 6"/>
-                            <line x1="12" y1="2" x2="12" y2="15"/>
-                          </svg>
-                        </button>
-                      </div>
-
-                      {/* Badges (top left) — enhanced popular */}
-                      <div className="gallery-card-badges-top">
-                        {item.is_popular && <span className="gallery-badge fire gallery-badge-pulse">🔥 Popular</span>}
-                        {item.is_new && <span className="gallery-badge new">{'\u2728'} New</span>}
-                      </div>
-
-                      {/* Full text flows below the image and actions. */}
-                      <div className="gallery-card-text-block">
+                        {item.category_name && <p className="gallery-card-category">{item.category_name}</p>}
                         <h2 className="gallery-card-name">{item.name}</h2>
-                        <p className="gallery-card-desc">
-                          {item.description || '\u00A0'}
-                        </p>
-                        <div className="gallery-card-dietary">
-                          {item.dietary_tags && item.dietary_tags.length > 0 ? (
-                            item.dietary_tags.map(tag => {
+                        {item.description && <p className="gallery-card-desc">{item.description}</p>}
+                        {item.dietary_tags && item.dietary_tags.length > 0 && (
+                          <div className="gallery-card-dietary">
+                            {item.dietary_tags.map(tag => {
                               const info = DIETARY_LABELS[tag.toLowerCase()] || { icon: '', label: tag.replace(/[_-]/g, ' ') };
-                              return (
-                                <span key={tag} className="gallery-dietary-pill">
-                                  {info.icon} {info.label}
-                                </span>
-                              );
-                            })
-                          ) : (
-                            null
+                              return <span key={tag} className="gallery-dietary-pill">{info.icon} {info.label}</span>;
+                            })}
+                          </div>
+                        )}
+                        <div className="gallery-card-actions">
+                          <div className="gallery-card-price">{priceStr}{item.calories ? <small> · {item.calories} cal</small> : null}</div>
+                          {item.order_url && (
+                            <a href={item.order_url} target="_blank" rel="noopener noreferrer" className="gallery-card-order" aria-label={`Order ${item.name}`} onClick={e => e.stopPropagation()}>
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+                            </a>
                           )}
+                          <button type="button" className="gallery-card-share" onClick={e => { e.stopPropagation(); handleShareDish(item); }} aria-label={`Share ${item.name}`}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -662,37 +556,19 @@ export default function MenuGalleryPage() {
                 );
               })}
             </div>
+          ) : (
+            <div className="gallery-empty-items">
+              <p>{activeFilters.length ? 'No dishes with confirmed matching tags. Clear filters or show other dishes.' : 'No dishes in this category.'}</p>
+            </div>
+          )}
 
-            {/* Dot indicators */}
-            {(filteredItems.length + coverOffset) > 1 && (filteredItems.length + coverOffset) <= 20 && (
-              <div className="gallery-dots">
-                {Array.from({ length: filteredItems.length + coverOffset }).map((_, idx) => (
-                  <span
-                    key={idx}
-                    className={`gallery-dot ${idx === activeIndex ? 'active' : ''}`}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Counter for large menus */}
-            {(filteredItems.length + coverOffset) > 20 && (
-              <div className="gallery-counter">
-                {activeIndex + 1} / {filteredItems.length + coverOffset}
-              </div>
-            )}
-          </>
-        ) : (
-          <div className="gallery-empty-items">
-            <p>{activeFilters.length?'No dishes with confirmed matching tags. Clear filters or show other dishes.':'No dishes in this category.'}</p>
-          </div>
-        )}
-
-        {/* Powered by footer with logo */}
-        <div className="gallery-footer">
-          <button className="gallery-back-link" disabled={activeIndex === 0} onClick={() => scrollRef.current?.scrollBy({ left: -scrollRef.current.clientWidth, behavior: 'smooth' })}>Previous</button>
-          <span aria-live="polite">{filteredItems.length?`${activeIndex + 1} / ${filteredItems.length + coverOffset}`:'0 dishes'}</span>
-          <button className="gallery-back-link" disabled={activeIndex >= filteredItems.length + coverOffset - 1} onClick={() => scrollRef.current?.scrollBy({ left: scrollRef.current.clientWidth, behavior: 'smooth' })}>Next</button>
+          {/* Pointer devices get step buttons at mid-height; phones swipe. */}
+          {filteredItems.length > 0 && (
+            <>
+              <button type="button" className="gallery-step prev" aria-label="Previous dish" disabled={activeIndex === 0} onClick={() => step(-1)}>‹</button>
+              <button type="button" className="gallery-step next" aria-label="Next dish" disabled={activeIndex >= total - 1} onClick={() => step(1)}>›</button>
+            </>
+          )}
         </div>
       </div>
     </>
@@ -701,563 +577,126 @@ export default function MenuGalleryPage() {
 
 // ===== STYLES =====
 const galleryStyles = `
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; overflow: hidden; background: #000; }
 
-  html, body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    background: #000;
-  }
-
+  /* The photo menu is always dark and full-screen, whatever the app theme. */
   .gallery-shell {
-    position: fixed;
-    inset: 0;
-    background: #000;
-    display: flex;
-    flex-direction: column;
+    position: fixed; inset: 0; background: #000; color: #fff; display: flex; flex-direction: column; align-items: stretch; overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
-    color: #fff;
-    overflow: hidden;
   }
+  .gallery-stage { position: relative; flex: 1; min-height: 0; width: 100%; }
+  @media (min-width: 720px) { .gallery-shell { align-items: center; } .gallery-stage { max-width: 560px; } }
 
-  /* Loading */
-  .gallery-loading {
-    position: fixed;
-    inset: 0;
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .gallery-spinner {
-    width: 32px;
-    height: 32px;
-    border: 3px solid #222;
-    border-top-color: #8A05BE;
-    border-radius: 50%;
-    animation: gspin 0.7s linear infinite;
-  }
+  /* Loading / empty / error */
+  .gallery-loading { position: fixed; inset: 0; background: #000; display: flex; align-items: center; justify-content: center; }
+  .gallery-spinner { width: 32px; height: 32px; border: 3px solid #222; border-top-color: #fff; border-radius: 50%; animation: gspin 0.7s linear infinite; }
   @keyframes gspin { to { transform: rotate(360deg); } }
+  .gallery-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px; text-align: center; color: #aaa; }
+  .gallery-empty a { color: #fff; }
+  .gallery-back-link { background: none; border: 1px solid #444; color: #fff; padding: 10px 24px; border-radius: 24px; font: inherit; font-size: 14px; cursor: pointer; text-decoration: none; }
+  .gallery-empty-items { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 24px; text-align: center; color: #aaa; font-size: 15px; }
 
-  /* Empty state */
-  .gallery-empty {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    color: #888;
+  /* Floating top bar over the photo */
+  .gallery-top {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 20; padding: max(10px, env(safe-area-inset-top)) 12px 16px; pointer-events: none;
+    background: linear-gradient(to bottom, rgba(0,0,0,.7), rgba(0,0,0,.35) 65%, transparent);
   }
-  .gallery-back-link {
-    background: none;
-    border: 1px solid #333;
-    color: #fff;
-    padding: 10px 24px;
-    border-radius: 24px;
-    font-size: 14px;
-    cursor: pointer;
+  .gallery-top > * { pointer-events: auto; }
+  .gallery-top-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .gallery-icon-btn {
+    position: relative; width: 40px; height: 40px; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    background: rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.18); color: #fff; text-decoration: none; cursor: pointer;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   }
+  .gallery-icon-btn.on { background: #fff; color: #111; border-color: #fff; }
+  .gallery-position { font-size: 13px; font-weight: 600; letter-spacing: .02em; color: rgba(255,255,255,.9); font-variant-numeric: tabular-nums; text-shadow: 0 1px 6px rgba(0,0,0,.6); }
+  .gallery-filter-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+  .gallery-pills { display: flex; gap: 6px; flex: 1; min-width: 0; padding: 2px 0; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; }
+  .gallery-pills::-webkit-scrollbar { display: none; }
+  .gallery-pills.wrap { flex-wrap: wrap; overflow: visible; }
+  .gallery-pill {
+    flex-shrink: 0; min-height: 34px; padding: 7px 14px; border-radius: 20px; white-space: nowrap; cursor: pointer;
+    border: 1px solid rgba(255,255,255,.18); background: rgba(0,0,0,.42); color: #fff; font: inherit; font-size: 13px; font-weight: 600;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  }
+  .gallery-pill.active { background: #fff; color: #111; border-color: #fff; }
+  .gallery-pill.diet.active { background: #34d399; border-color: #34d399; color: #062b1f; }
+  .gallery-dot-badge { position: absolute; top: -3px; right: -3px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: #34d399; color: #062b1f; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+  .gallery-panel { margin-top: 10px; padding: 12px; border-radius: 16px; background: rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.12); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  .gallery-dietary-result { margin-top: 10px; padding: 10px 12px; border-radius: 14px; background: rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.12); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); font-size: 13px; color: #fff; }
+  .gallery-dietary-result button { min-height: 36px; margin-left: 10px; color: #fff; background: transparent; border: 0; text-decoration: underline; font: inherit; cursor: pointer; }
+  .gallery-dietary-result p { margin: 4px 0 0; color: rgba(255,255,255,.7); }
 
-  /* Navigation bar */
-  .gallery-nav {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap; justify-content: center; gap: 8px;
-    padding: 12px 16px;
-    padding-top: max(12px, env(safe-area-inset-top));
-    z-index: 20;
-    position: relative;
-    flex-shrink: 0;
-  }
-  .gallery-nav-back {
-    background: none;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-  }
-  .gallery-nav-title {
-    flex: 1 0 100%; min-width: 0; text-align: center; font-size: 1rem; font-weight: 600; padding: 0 8px; color: #fff; text-decoration: none; overflow-wrap: anywhere;
-  }
-  .gallery-nav-title:hover {
-    opacity: 0.8;
-  }
-  .gallery-nav-classic {
-    font-size: 12px;
-    color: #8A05BE;
-    text-decoration: none;
-    font-weight: 500;
-    padding: 6px 12px;
-    border: 1px solid rgba(138, 5, 190, 0.4);
-    border-radius: 16px;
-    white-space: nowrap;
-  }
-
-  /* Filters */
-  .gallery-filters {
-    flex-shrink: 0;
-    padding: 0 16px 10px;
-    z-index: 10;
-  }
-  .gallery-periods {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 8px; min-width: 0; overflow-x: auto;
-  }
-  .gallery-period-btn {
-    padding: 6px 14px;
-    border: none;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
-    color: #888;
-    background: #1a1a1a;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.2s;
-  }
-  .gallery-period-btn.active {
-    background: #8A05BE;
-    color: #fff;
-  }
-  .gallery-categories {
-    display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    padding-bottom: 2px;
-  }
-  .gallery-categories::-webkit-scrollbar { display: none; }
-  .gallery-cat-pill {
-    padding: 6px 14px;
-    border: 1px solid #333;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
-    color: #aaa;
-    background: transparent;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.2s;
-    flex-shrink: 0;
-  }
-  .gallery-cat-pill.active {
-    background: #8A05BE;
-    border-color: #8A05BE;
-    color: #fff;
-  }
-
-  /* Gallery Scroll Container — fills ALL available space */
-  .gallery-scroll {
-    flex: 1;
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    min-height: 0;
-  }
+  /* Full-bleed pages, one per dish */
+  .gallery-scroll { position: absolute; inset: 0; display: flex; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; -ms-overflow-style: none; }
   .gallery-scroll::-webkit-scrollbar { display: none; }
+  .gallery-card { position: relative; flex: 0 0 100%; width: 100%; height: 100%; min-width: 0; scroll-snap-align: start; overflow: hidden; background: #0b0b0e; }
+  .gallery-card-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gallery-card-placeholder { display: grid; place-items: center; padding: 24px; background: radial-gradient(ellipse at center, #26262e, #0b0b0e 75%); color: #bbb; font-size: 14px; letter-spacing: .1em; text-transform: uppercase; }
+  .gallery-cover-bg { background: radial-gradient(ellipse at center top, #1a0a2e 0%, #000 70%); }
+  .gallery-card-shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to bottom, rgba(0,0,0,.55) 0%, rgba(0,0,0,.05) 24%, rgba(0,0,0,0) 42%, rgba(0,0,0,.55) 66%, rgba(0,0,0,.92) 100%); }
+  .gallery-cover-card .gallery-card-shade { background: rgba(0,0,0,.55); }
+  .gallery-card-filtered .gallery-card-bg { filter: grayscale(.6) brightness(.55); }
 
-  /* Horizontal pages; each card scrolls vertically for its complete content. */
-  .gallery-card {
-    flex: 0 0 100%; width: 100%; min-width: 0; height: 100%;
-    scroll-snap-align: start; position: relative; overflow-y: auto; overflow-x: hidden;
-    overscroll-behavior-y: contain; background: #101014;
+  /* Details sit over the lower part of the photo. Long text scrolls over the still image;
+     the spacer keeps the photo visible on the first look and margin-top:auto keeps short text at the bottom. */
+  .gallery-card-body { position: absolute; inset: 0; display: flex; flex-direction: column; overflow-y: auto; overscroll-behavior-y: contain; scrollbar-width: none; }
+  .gallery-card-body::-webkit-scrollbar { display: none; }
+  .gallery-card-spacer { flex: 0 0 min(44dvh, 420px); }
+  .gallery-card-text-block { margin-top: auto; padding: 20px 20px calc(22px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 10px; overflow-wrap: anywhere; }
+  .gallery-card-category { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.72); }
+  .gallery-card-name { margin: 0; font-size: clamp(26px, 7vw, 34px); font-weight: 800; line-height: 1.15; letter-spacing: -.01em; color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,.5); }
+  .gallery-card-desc { margin: 0; font-size: 15.5px; line-height: 1.55; color: rgba(255,255,255,.88); white-space: pre-wrap; text-shadow: 0 1px 8px rgba(0,0,0,.6); }
+  .gallery-card-badges-top { display: flex; flex-wrap: wrap; gap: 6px; }
+  .gallery-badge { padding: 5px 10px; border-radius: 16px; font-size: 12px; font-weight: 700; color: #fff; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.14); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .gallery-badge.fire { background: rgba(255,80,0,.75); border-color: transparent; }
+  .gallery-badge.new { background: rgba(138,5,190,.75); border-color: transparent; }
+  .gallery-card-dietary { display: flex; flex-wrap: wrap; gap: 6px; }
+  .gallery-dietary-pill { padding: 4px 9px; border-radius: 10px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,.85); background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.1); white-space: nowrap; }
+  .gallery-card-actions { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+  .gallery-card-price { flex: 1; min-width: 0; font-size: 22px; font-weight: 800; letter-spacing: -.01em; color: #fff; font-variant-numeric: tabular-nums; text-shadow: 0 2px 10px rgba(0,0,0,.5); }
+  .gallery-card-price small { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.7); }
+  .gallery-card-share, .gallery-card-order {
+    width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none;
+    border: 1px solid rgba(255,255,255,.18); background: rgba(0,0,0,.45); color: #fff; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   }
+  .gallery-card-order { background: #fff; color: #111; border-color: #fff; }
+  .gallery-card-allergen-overlay { padding: 10px 14px; border-radius: 12px; background: rgba(0,0,0,.65); border: 1px solid rgba(255,255,255,.14); font-size: 13px; color: rgba(255,255,255,.9); }
 
-  /* Image first, followed by normal-flow details inside each scrollable card. */
-  .gallery-card-image {
-    position: relative; min-height: 100%;
-  }
-  .gallery-card-image img {
-    display: block; width: 100%; height: clamp(180px, 42dvh, 440px); object-fit: cover;
-  }
-  .gallery-card-placeholder {
-    height: clamp(180px, 42dvh, 440px); display: grid; place-items: center; padding: 24px; background: #202026; color: #bbb; overflow-wrap: anywhere;
-  }
-  /* Gradient only at the very bottom for text readability */
-  .gallery-card-gradient {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(0,0,0,0.2) 0%,
-      transparent 15%,
-      transparent 60%,
-      rgba(0,0,0,0.85) 90%,
-      rgba(0,0,0,0.95) 100%
-    );
-    pointer-events: none;
-  }
+  /* Cover page */
+  .gallery-cover-content { margin: auto 0; padding: calc(150px + env(safe-area-inset-top)) 20px calc(40px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; text-align: center; overflow-wrap: anywhere; }
+  .gallery-cover-name { margin: 0; font-size: clamp(30px, 8vw, 40px); font-weight: 800; letter-spacing: -.02em; line-height: 1.1; color: #fff; text-shadow: 0 2px 14px rgba(0,0,0,.6); }
+  .gallery-cover-tagline { margin: 8px 0 0; font-size: 16px; color: rgba(255,255,255,.78); }
+  .gallery-cover-thumbs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 22px; width: 164px; }
+  .gallery-cover-thumb { width: 79px; height: 79px; border-radius: 12px; overflow: hidden; border: 2px solid rgba(255,255,255,.25); }
+  .gallery-cover-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gallery-thumb-placeholder { width: 100%; height: 100%; background: rgba(255,255,255,.08); }
+  .gallery-cover-pills { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 26px; max-width: 340px; }
+  .gallery-cover-pill { padding: 8px 12px; border-radius: 20px; font-size: 14px; line-height: 1.4; max-width: 100%; overflow-wrap: anywhere; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.16); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .pill-happy { background: rgba(251,191,36,.15); border-color: rgba(251,191,36,.4); color: #fbbf24; }
+  .pill-chef { background: rgba(138,5,190,.15); border-color: rgba(138,5,190,.4); color: #d8b4fe; }
+  .pill-day { background: rgba(20,184,166,.15); border-color: rgba(20,184,166,.4); color: #5eead4; }
+  .pill-promo { background: rgba(244,114,182,.15); border-color: rgba(244,114,182,.4); color: #f9a8d4; }
+  .pill-seasonal { background: rgba(74,222,128,.15); border-color: rgba(74,222,128,.4); color: #86efac; }
+  .gallery-cover-swipe { margin: 26px 0 0; font-size: 15px; color: rgba(255,255,255,.85); animation: gallery-swipe-pulse 1.6s ease-in-out infinite; }
+  @keyframes gallery-swipe-pulse { 0%, 100% { opacity: .6; transform: translateX(0); } 50% { opacity: 1; transform: translateX(4px); } }
+  .gallery-badge-pulse { animation: gallery-fire-pulse 1.5s ease-in-out infinite; }
+  @keyframes gallery-fire-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,80,0,.4); } 50% { box-shadow: 0 0 12px 4px rgba(255,80,0,.3); } }
+  @media (prefers-reduced-motion: reduce) { .gallery-cover-swipe, .gallery-badge-pulse { animation: none; } }
 
-  /* Price and actions wrap below the image. */
-  .gallery-card-top-right {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 16px 20px 0;
-  }
-  .gallery-card-price {
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 16px;
-    font-weight: 700;
-    color: #fff;
-  }
-  .gallery-card-share {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: none;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .gallery-card-share:hover {
-    background: rgba(138, 5, 190, 0.7);
-  }
-
-  /* Badges flow above the dish details. */
-  .gallery-card-badges-top {
-    display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 20px 0;
-  }
-  .gallery-badge {
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    padding: 5px 10px;
-    border-radius: 16px;
-    font-size: 12px;
-    font-weight: 600;
-    color: #fff;
-  }
-  .gallery-badge.fire {
-    background: rgba(255, 80, 0, 0.7);
-  }
-  .gallery-badge.new {
-    background: rgba(138, 5, 190, 0.7);
-  }
-
-  /* Full dish text stays readable without truncation. */
-  .gallery-card-text-block {
-    position: relative; display: flex; flex-direction: column; gap: 12px; padding: 20px; overflow-wrap: anywhere;
-  }
-  .gallery-card-name {
-    margin: 0; font-size: 1.5rem; font-weight: 800; color: #fff; line-height: 1.3; overflow-wrap: anywhere;
-  }
-  .gallery-card-desc {
-    margin: 0; font-size: 1rem; color: #d5d5dd; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere;
-  }
-  .gallery-card-dietary {
-    display: flex; gap: 6px; flex-wrap: wrap; align-items: flex-start;
-  }
-  .gallery-dietary-pill {
-    padding: 2px 7px;
-    border-radius: 8px;
-    font-size: 10px;
-    font-weight: 500;
-    background: rgba(255,255,255,0.12);
-    color: rgba(255,255,255,0.75);
-    backdrop-filter: blur(4px);
-    border: 1px solid rgba(255,255,255,0.08);
-    white-space: nowrap;
-  }
-
-  /* Pagination indicators stay outside the scrollable cards. */
-  .gallery-dots {
-    display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; padding: 8px; flex-shrink: 0;
-  }
-  .gallery-dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.3);
-    transition: all 0.2s;
-  }
-  .gallery-dot.active {
-    background: #fff;
-    transform: scale(1.3);
-  }
-
-  /* Counter for larger menus. */
-  .gallery-counter {
-    text-align: center; padding: 8px; font-size: .875rem; flex-shrink: 0;
-  }
-
-  /* Empty items */
-  .gallery-empty-items {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #555;
-    font-size: 15px;
-  }
-
-  /* Footer */
-  .gallery-footer {
-    flex-shrink: 0;
-    padding: 10px 16px;
-    padding-bottom: max(10px, env(safe-area-inset-bottom));
-    text-align: center;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .gallery-footer-logo {
-    height: 18px;
-    width: auto;
-    opacity: 0.5;
-  }
-
-  /* Cover Card */
-  .gallery-cover-card .gallery-card-image {
-    background: #000;
-  }
-  .gallery-cover-bg {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at center top, #1a0a2e 0%, #000 70%);
-  }
-  .gallery-cover-content {
-    position: relative; display: flex; flex-direction: column; align-items: center; padding: 28px 20px; text-align: center; z-index: 2; min-height: 100%; overflow-wrap: anywhere;
-  }
-  .gallery-cover-name {
-    margin: 0;
-    font-size: 32px;
-    font-weight: 800;
-    color: #fff;
-    letter-spacing: -0.5px;
-    line-height: 1.2;
-  }
-  .gallery-cover-tagline {
-    margin: 8px 0 0;
-    font-size: 15px;
-    color: rgba(255,255,255,0.6);
-    font-weight: 400;
-  }
-  .gallery-cover-welcome {
-    margin: 20px 0 0;
-    font-size: 14px;
-    color: rgba(255,255,255,0.5);
-    font-style: italic;
-    line-height: 1.6;
-    max-width: 300px;
-  }
-  .gallery-cover-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-    margin-top: 28px;
-    max-width: 320px;
-  }
-  .gallery-cover-pill {
-    padding: 8px 12px; border-radius: 20px; font-size: .875rem; line-height: 1.5; max-width: 100%; white-space: normal; overflow-wrap: anywhere; background: #17171c;
-  }
-  .pill-happy {
-    background: rgba(251, 191, 36, 0.15);
-    border: 1px solid rgba(251, 191, 36, 0.4);
-    color: #fbbf24;
-  }
-  .pill-chef {
-    background: rgba(138, 5, 190, 0.15);
-    border: 1px solid rgba(138, 5, 190, 0.4);
-    color: #c4b5fd;
-  }
-  .pill-day {
-    background: rgba(20, 184, 166, 0.15);
-    border: 1px solid rgba(20, 184, 166, 0.4);
-    color: #5eead4;
-  }
-  .pill-promo {
-    background: rgba(244, 114, 182, 0.15);
-    border: 1px solid rgba(244, 114, 182, 0.4);
-    color: #f9a8d4;
-  }
-  .pill-seasonal {
-    background: rgba(74, 222, 128, 0.15);
-    border: 1px solid rgba(74, 222, 128, 0.4);
-    color: #86efac;
-  }
-  .gallery-cover-swipe {
-    margin: 24px 0 0; font-size: 1rem; color: #ddd;
-  }
-  @keyframes gallery-swipe-pulse {
-    0%, 100% { opacity: 0.35; transform: translateX(0); }
-    50% { opacity: 0.7; transform: translateX(4px); }
-  }
-
-  /* Cover hero image */
-  .gallery-cover-hero-img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  /* Cover food thumbnails teaser */
-  .gallery-cover-thumbs {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    margin-top: 20px;
-    width: 160px;
-  }
-  .gallery-cover-thumb {
-    width: 72px;
-    height: 72px;
-    border-radius: 10px;
-    overflow: hidden;
-    border: 2px solid rgba(255,255,255,0.2);
-  }
-  .gallery-cover-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .gallery-thumb-placeholder {
-    width: 100%;
-    height: 100%;
-    background: rgba(255,255,255,0.05);
-  }
-
-  /* Allergen filter row in gallery */
-  .gallery-allergens {
-    display: flex;
-    gap: 6px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    margin-top: 8px;
-    padding-bottom: 2px;
-  }
-  .gallery-allergens::-webkit-scrollbar { display: none; }
-  .gallery-allergen-pill {
-    padding: 5px 12px;
-    border: 1px solid #333;
-    border-radius: 16px;
-    font-size: 11px;
-    font-weight: 500;
-    color: #aaa;
-    background: transparent;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.2s;
-    flex-shrink: 0;
-  }
-  .gallery-allergen-pill.active {
-    background: #059669;
-    border-color: #059669;
-    color: #fff;
-    font-weight: 600;
-  }
-
-  /* Filtered card */
-  .gallery-card-filtered {
-    opacity: 0.3;
-  }
-  .gallery-card-allergen-overlay {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(4px);
-    padding: 10px 16px;
-    border-radius: 12px;
-    z-index: 5;
-    font-size: 12px;
-    color: rgba(255,255,255,0.8);
-    text-align: center;
-  }
-
-  /* Order button in gallery */
-  .gallery-card-order {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(138, 5, 190, 0.7);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: none;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    text-decoration: none;
-    font-size: 14px;
-    transition: background 0.2s;
-  }
-  .gallery-card-order:hover {
-    background: rgba(138, 5, 190, 0.9);
-  }
-
-  /* Enhanced popular badge pulse */
-  .gallery-badge-pulse {
-    animation: gallery-fire-pulse 1.5s ease-in-out infinite;
-  }
-  @keyframes gallery-fire-pulse {
-    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,80,0,0.4); }
-    50% { transform: scale(1.1); box-shadow: 0 0 12px 4px rgba(255,80,0,0.3); }
-  }
-
-  .gallery-card:not(.gallery-cover-card) .gallery-card-gradient { display: none; }
-  .gallery-cover-thumbs .gallery-cover-thumb img { height: 100%; width: 100%; }
-  .gallery-cover-card .gallery-cover-hero-img { position: absolute; height: 100%; opacity: .3; }
-  .gallery-cover-card .gallery-card-gradient { background: rgba(0,0,0,.45); }
-  .gallery-card-price, .gallery-dietary-pill, .gallery-badge { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
-  .gallery-card-share, .gallery-card-order { flex-shrink: 0; width: 44px; height: 44px; }
-  .gallery-card-allergen-overlay { position: static; transform: none; margin: 12px 20px 0; }
-  .gallery-card-filtered { opacity: 1; }
-  .gallery-footer { flex-wrap: wrap; gap: 10px; }
-  .gallery-footer a { color: #ddd; font-size: .875rem; }
-  .gallery-footer button { padding: 6px 10px; }
-  .gallery-footer button:disabled { opacity: .4; cursor: default; }
-  .gallery-cover-name { font-size: 2rem; }
-  .gallery-cover-pills { width: 100%; }
-  .gallery-scroll { overflow-y: hidden; }
-  .gallery-nav-classic { color: #d8b4fe; }
-  .gallery-card:focus-visible, .gallery-shell a:focus-visible, .gallery-shell button:focus-visible { outline: 2px solid #d8b4fe; outline-offset: -2px; }
-  @media (max-height: 500px) { .gallery-shell { overflow-y: auto; } .gallery-scroll { flex: 0 0 65dvh; } }
-
-  /* Smooth momentum scrolling feel */
-  @media (hover: hover) {
-    .gallery-scroll {
-      scroll-behavior: smooth;
+  /* Pointer devices get step buttons at mid-height; phones swipe. */
+  .gallery-step { display: none; }
+  @media (hover: hover) and (pointer: fine) {
+    .gallery-step {
+      display: inline-flex; position: absolute; top: 50%; transform: translateY(-50%); z-index: 15; width: 44px; height: 44px; border-radius: 50%; align-items: center; justify-content: center; cursor: pointer;
+      border: 1px solid rgba(255,255,255,.2); background: rgba(0,0,0,.5); color: #fff; font-size: 28px; line-height: 1; padding: 0 0 3px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     }
+    .gallery-step.prev { left: 12px; } .gallery-step.next { right: 12px; }
+    .gallery-step:disabled { opacity: .25; cursor: default; }
+    .gallery-scroll { scroll-behavior: smooth; }
   }
-
-  html,body,.gallery-shell,.gallery-loading{background:var(--background);color:var(--text)}
-  .gallery-nav,.gallery-periods,.gallery-footer,.gallery-card-info,.gallery-empty{background:var(--background);color:var(--text)}
-  .gallery-nav-title,.gallery-nav-back,.gallery-card-name,.gallery-card-title,.gallery-empty h2{color:var(--text)}
-  .gallery-nav-classic,.gallery-footer a,.gallery-back-link{color:var(--link)}
-  .gallery-card-desc,.gallery-empty p,.gallery-card-category,.gallery-empty-sub{color:var(--text-secondary)}
-  .gallery-cat-pill,.gallery-allergen-pill,.gallery-period-btn{background:var(--surface);color:var(--text-secondary);border-color:var(--border)}
-  .gallery-cat-pill.active,.gallery-period-btn.active{background:#74209A;color:#fff}.gallery-allergen-pill.active{background:#086B54;color:#fff}
-  .gallery-dietary-result{padding:8px 12px;color:var(--text);background:var(--surface);font-size:13px;flex-shrink:0}.gallery-dietary-result button{min-height:40px;margin-left:10px;color:var(--link);background:transparent;border:0;text-decoration:underline}.gallery-dietary-result p{margin:0;color:var(--text-secondary)}
-  .gallery-cover-title,.gallery-cover-subtitle,.gallery-cover-hint{color:#fff}.gallery-card-filtered{opacity:1}
-  .gallery-card:not(.gallery-cover-card){background:var(--surface)}.gallery-dietary-pill{font-size:13px;color:var(--text-secondary);background:var(--background);border-color:var(--border)}.gallery-card-placeholder{color:var(--text-secondary);background:var(--surface)}.gallery-footer button{min-height:44px}.gallery-dot{background:var(--border)}.gallery-dot.active{background:var(--link)}
+  .gallery-card:focus-visible, .gallery-shell a:focus-visible, .gallery-shell button:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
 `;
 
 export const getServerSideProps = async ({ locale }: { locale: string }) => ({

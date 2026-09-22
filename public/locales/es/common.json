@@ -1583,6 +1583,15 @@
     "reviewExperience84": "{{count}} personas · Últimos 6 meses",
     "reviewExperience85": "Las barras muestran cuántas de las {{count}} personas lo mencionaron",
     "reviewExperience86": "Antiguo",
-    "reviewExperience87": "Ver todas las fotos"
+    "reviewExperience87": "Ver todas las fotos",
+    "reviewExperience88": "Últimos 6 meses",
+    "reviewExperience89": "Todo el tiempo",
+    "reviewExperience90": "Con comentarios",
+    "reviewExperience91": "Más recientes primero",
+    "reviewExperience92": "Más antiguas primero",
+    "reviewExperience93": "{{shown}} de {{total}} reseñas",
+    "reviewExperience94": "Mostrar más reseñas",
+    "reviewExperience95": "Filtros",
+    "reviewExperience96": "cargadas"
   }
 }

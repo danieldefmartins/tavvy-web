@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import Link from 'next/link';
 import DemoDialog from './DemoDialog';
 import { DEMO_ORDER, DEMO_HOME } from '../../lib/demoRestaurant';
 export default function DemoContact() {
@@ -7,9 +6,10 @@ export default function DemoContact() {
   const [reserved, setReserved] = useState(false);
   const [date, setDate] = useState('');
   return <section className="contact-demo">
-    <h2>Plan your visit</h2><p>Everything you need for a good evening.</p>
-    <div className="contact-grid"><button onClick={() => setAction('Call')}>☎ Call the restaurant<span>(407) 555-0142</span></button><button onClick={() => { setReserved(false); setAction('Reserve a table'); }}>◷ Reserve a table<span>Choose your evening</span></button><Link href="/app/demo/restaurant-website">↗ Website<span>Meet the restaurant</span></Link><a href="https://www.google.com/maps/search/?api=1&query=Winter+Park+Florida" target="_blank" rel="noopener noreferrer">⌖ Neighborhood<span>Explore Winter Park, FL</span></a></div>
-    <h3>Order your way</h3><div className="contact-links"><Link href={DEMO_ORDER}>Tavvy table ordering</Link>{['DoorDash', 'Uber Eats', 'Grubhub'].map(p => <button key={p} onClick={() => setAction(p)}>{p}</button>)}</div>
+    {/* Website, table ordering and the map are already in the icon row / Location & hours, so only what is new lives here. */}
+    <h2>Plan your visit</h2>
+    <div className="contact-grid"><button onClick={() => setAction('Call')}>☎ Call the restaurant<span>(407) 555-0142</span></button><button onClick={() => { setReserved(false); setAction('Reserve a table'); }}>◷ Reserve a table<span>Choose your evening</span></button></div>
+    <h3>Delivery</h3><div className="contact-links">{['DoorDash', 'Uber Eats', 'Grubhub'].map(p => <button key={p} onClick={() => setAction(p)}>{p}</button>)}</div>
     <h3>Follow the food & the room</h3><div className="contact-links">{['Instagram', 'TikTok', 'Facebook'].map(p => <button key={p} onClick={() => setAction(p)}>{p}</button>)}</div>
     {action && <DemoDialog title={action} onClose={() => setAction(null)}>
       {action === 'Reserve a table' ? reserved ? <><p><strong>Your demo reservation is confirmed.</strong></p><p>{date} · A table for your evening. No real booking has been made.</p><button className="demo-primary" onClick={() => setAction(null)}>Back to the restaurant</button></> : <form onSubmit={e => { e.preventDefault(); setReserved(true); }}>

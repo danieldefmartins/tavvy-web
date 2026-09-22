@@ -1672,6 +1672,15 @@
     "reviewExperience84": "{{count}} people · Last 6 months",
     "reviewExperience85": "Bars show how many of the {{count}} people mentioned it",
     "reviewExperience86": "Older",
-    "reviewExperience87": "View all photos"
+    "reviewExperience87": "View all photos",
+    "reviewExperience88": "Last 6 months",
+    "reviewExperience89": "All time",
+    "reviewExperience90": "With comments",
+    "reviewExperience91": "Newest first",
+    "reviewExperience92": "Oldest first",
+    "reviewExperience93": "{{shown}} of {{total}} reviews",
+    "reviewExperience94": "Show more reviews",
+    "reviewExperience95": "Filters",
+    "reviewExperience96": "loaded"
   }
 }
