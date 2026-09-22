@@ -381,8 +381,20 @@ expandable row per section from `cardReviewRows()` (core concerns first under He
 then an icon row with the place-page shortcuts (Call, Directions, Website, Details).
 Individual reviews keep tone-colored word chips with the `!` marker and no bars;
 Report or block is visually secondary. `/preview/review` and its hub link render the
-real components from fictional evidence. Five copy keys (`reviewExperience82`–`86`)
+real components from fictional evidence. Six copy keys (`reviewExperience82`–`87`)
 were added to the en/es/pt/ar catalogs.
+
+Follow-up in the same day, on the user's direction: the place page now uses the card's
+row concept everywhere (one row per section, the chevron opens the other words, a
+tapped word shows matching experiences) with the logo teal as the accent; the photo
+header swipes through real photos with a `1 / N` counter and a View all photos chip;
+the category pill reads `CATEGORY · SUBCATEGORY`; and the tabs under the action icons
+are Overview (Tavvy Places, the four-row review teaser, Order & pay when delivery links
+or reported payment details exist, Visit & contact, Location & hours), Reviews, Photos &
+Stories and Tavvy Menu (only with a menu; opens the full menu page as before). Details
+folded into Overview. Share images use larger type (tagline 24, category 31, title up
+to 94, location 31, footer 22). The cruise browser test now expects core concerns
+under the Heads Up row.
 
 Checks: web TypeScript, 31 focused unit tests (including a new search-highlight
 regression), the production build, the compact-card browser suite (updated to three

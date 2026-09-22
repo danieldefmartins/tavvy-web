@@ -103,6 +103,20 @@ The standard place detail hero now uses the same deterministic category-image li
 
 ## 3. Place details: a fuller explanation of the evidence
 
+### Page structure (September 22 update)
+
+Every place on Tavvy uses the same screen; only category-driven content changes. The photo
+header swipes through the place's real photos (`1 / N` counter, step buttons, a **View all
+photos** chip that opens the Photos & Stories tab) and shows the category pill as
+`CATEGORY · SUBCATEGORY` when a subcategory exists. Under the action icons sit sticky tabs:
+**Overview** (Tavvy Places description and tags, the compact four-row review teaser — tapping a
+row opens the Reviews tab on that word — an **Order & pay** block when delivery links or
+reported payment details exist, Visit & contact, Location & hours), **Reviews** (the full
+summary below, matching experiences for a selected word, and the recent reviews list),
+**Photos & Stories**, and **Tavvy Menu** only when the place has a menu ("Rooms" for hotels;
+it opens the full menu page as before). The old Details tab folded into Overview; `?tab=details`
+links still open Overview.
+
 The full summary displays four conceptual sections:
 
 | Section | Purpose |
@@ -116,11 +130,11 @@ The core heading is more prominent. Concern topics have an explicit `!` marker a
 
 ### Presentation (September 22 update)
 
-The place-page section is titled **Reviews** and opens with one quiet line, `{{count}} people · Last 6 months` (or `Early impressions · 1 reviewer`), followed by an **About these numbers** control that reveals the counting explanation on demand. The main experience heading leads; the three supporting sections follow with a colored dot and label. Every displayed topic, in every section, is the same row used on search cards: the row background is a frequency bar on one scale per place (people who mentioned it out of recent reviewers), with the word and the count on top; tapping a row selects that topic and shows matching experiences. Bar length is frequency only — never quality or severity — so a rarely mentioned serious concern keeps its `!` marker and its priority position instead of relying on bar length. Bars are hidden below five recent reviewers.
+The Reviews tab is titled **Reviews** and opens with one quiet line, `{{count}} people · Last 6 months` (or `Early impressions · 1 reviewer`), followed by an **About these numbers** control that reveals the counting explanation on demand. It then shows exactly the rows a search card shows — one per section from `cardReviewRows()` — with the row background as a frequency bar on one scale per place (people who mentioned it out of recent reviewers), the section label, the word and the count on top. Tapping a row selects that word and shows matching experiences; the chevron at the row's end opens the section's other words, each of which can be selected too. Bar length is frequency only — never quality or severity — so a rarely mentioned serious concern keeps its `!` marker and its priority position instead of relying on bar length. Bars are hidden below five recent reviewers. The accent for section headings and controls is the logo teal.
 
 Practical details from `evidence.practical` (for example cash only or reservation policy) appear in a neutral **Good to know** row, separate from Heads Up. Individual reviews show the reviewer, the date, the words they chose as tone-colored chips (concerns marked `!`), and the optional note; they never show frequency bars. The report/block control stays available but is visually secondary.
 
-Full sections initially display up to three supplied topics and offer **Show all** when more are available. This expansion reveals the topics in the summary payload, not every historical review. The evidence builder currently retains the top four positive core topics and up to twenty positive/supporting atmosphere topics.
+Expanding a row reveals the topics in the summary payload, not every historical review. The evidence builder currently retains the top four positive core topics and up to twenty positive/supporting atmosphere topics.
 
 ### Opening supporting reviews
 

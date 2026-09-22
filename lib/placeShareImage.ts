@@ -139,20 +139,21 @@ export function wrapShareText(value: string, width: number, font: number, maxLin
 }
 export function buildPlaceShareSvg(metadata: PlaceShareMetadata, photo: SharePhoto | null, brand: SharePhoto | null = null): string {
     const taxonomy = [metadata.category, metadata.subcategory].filter(Boolean).join(' · ');
-    const categories = wrapShareText(taxonomy, 1040, 27, 2);
-    let font = 82;
-    for (const size of [82, 74, 66, 58]) {
+    // Sizes read comfortably in chat-app link previews, which show the image at roughly a third of its size.
+    const categories = wrapShareText(taxonomy, 1040, 31, 2);
+    let font = 94;
+    for (const size of [94, 84, 74, 64]) {
         font = size;
         if (wrapShareText(metadata.name, 1040, size, 20).length <= 3)
             break;
     }
     let title = wrapShareText(metadata.name, 1040, font, 3);
-    if (title.length === 3 && font > 74) {
-        font = 74;
+    if (title.length === 3 && font > 76) {
+        font = 76;
         title = wrapShareText(metadata.name, 1040, font, 3);
     }
-    const start = title.length === 3 ? (categories.length > 1 ? 306 : 274) : title.length === 2 ? (categories.length > 1 ? 320 : 298) : (categories.length > 1 ? 356 : 340);
-    const location = wrapShareText(metadata.location || 'Explore this place', 940, 27, 1)[0];
+    const start = title.length === 3 ? (categories.length > 1 ? 312 : 284) : title.length === 2 ? (categories.length > 1 ? 330 : 306) : (categories.length > 1 ? 366 : 348);
+    const location = wrapShareText(metadata.location || 'Explore this place', 940, 31, 1)[0];
     const hero = photo ? `<image href="data:${photo.mime};base64,${photo.bytes.toString('base64')}" width="1200" height="630" preserveAspectRatio="xMidYMid slice"/><rect width="1200" height="630" fill="url(#photoShade)"/>` : '';
     return `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#21103D"/><stop offset=".52" stop-color="#32105B"/><stop offset="1" stop-color="#053D4B"/></linearGradient><radialGradient id="glow"><stop stop-color="#9E29D3" stop-opacity=".5"/><stop offset="1" stop-color="#9E29D3" stop-opacity="0"/></radialGradient><linearGradient id="photoShade" x1="0" y1="0" x2="1" y2=".35"><stop stop-color="#160C2D" stop-opacity=".96"/><stop offset=".63" stop-color="#1E123A" stop-opacity=".83"/><stop offset="1" stop-color="#071D29" stop-opacity=".55"/></linearGradient><pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse"><path d="M64 0H0V64" fill="none" stroke="#FFFFFF" stroke-opacity=".035"/></pattern></defs>
@@ -161,13 +162,13 @@ export function buildPlaceShareSvg(metadata: PlaceShareMetadata, photo: SharePho
  <circle cx="1180" cy="570" r="210" fill="none" stroke="#40D3CC" stroke-width="1" stroke-opacity=".17"/><circle cx="1180" cy="570" r="265" fill="none" stroke="#40D3CC" stroke-width="1" stroke-opacity=".1"/>
  <rect width="1200" height="630" fill="url(#grid)"/>${hero}
  ${brand ? `<image href="data:${brand.mime};base64,${brand.bytes.toString('base64')}" x="80" y="51" width="180" height="53" preserveAspectRatio="xMinYMid meet"/>` : '<text x="80" y="93" font-family="Noto Sans" font-size="36" fill="#FFFFFF">Tavvy</text>'}
- <text x="1120" y="90" text-anchor="end" font-family="Noto Sans" font-size="20" fill="#D1C7DD">Discover your kind of place</text>
- ${categories.map((line, i) => `<text x="80" y="${176 + i * 34}" font-family="Noto Sans" font-size="27" fill="#7BE5DE">${escape(line)}</text>`).join('')}
+ <text x="1120" y="92" text-anchor="end" font-family="Noto Sans" font-size="24" fill="#D1C7DD">Discover your kind of place</text>
+ ${categories.map((line, i) => `<text x="80" y="${178 + i * 38}" font-family="Noto Sans" font-size="31" fill="#7BE5DE">${escape(line)}</text>`).join('')}
  ${title.map((line, i) => `<text x="77" y="${start + i * (font + 12)}" font-family="Noto Sans" font-size="${font}" fill="#FFFFFF">${escape(line)}</text>`).join('')}
  <path d="M89 544s-10-9-10-16a10 10 0 0 1 20 0c0 7-10 16-10 16z" fill="none" stroke="#7BE5DE" stroke-width="2"/><circle cx="89" cy="528" r="3" fill="none" stroke="#7BE5DE" stroke-width="2"/>
- <text x="116" y="541" font-family="Noto Sans" font-size="27" fill="#EEE7F5">${escape(location)}</text>
+ <text x="116" y="542" font-family="Noto Sans" font-size="31" fill="#EEE7F5">${escape(location)}</text>
  <path d="M80 576H1120" stroke="#FFFFFF" stroke-opacity=".17"/>
- <text x="80" y="610" font-family="Noto Sans" font-size="18" fill="#C9BDDA">Visitor experiences · Photos · Place details</text><text x="1120" y="610" text-anchor="end" font-family="Noto Sans" font-size="19" fill="#C9BDDA">tavvy.com</text></svg>`;
+ <text x="80" y="611" font-family="Noto Sans" font-size="22" fill="#C9BDDA">Visitor experiences · Photos · Place details</text><text x="1120" y="611" text-anchor="end" font-family="Noto Sans" font-size="22" fill="#C9BDDA">tavvy.com</text></svg>`;
 }
 export function renderPlaceSharePng(metadata: PlaceShareMetadata, photo: SharePhoto | null, root = process.cwd()): Buffer {
     const fontFile = path.join(root, 'node_modules/next/dist/compiled/@vercel/og/noto-sans-v27-latin-regular.ttf');

@@ -7,6 +7,7 @@ export const RELEASE_COPY_KEYS: Record<string, string> = {
   "{{count}} people · Last 6 months": "reviewExperience84",
   "Bars show how many of the {{count}} people mentioned it": "reviewExperience85",
   "Older": "reviewExperience86",
+  "View all photos": "reviewExperience87",
   "What stood out?": "reviewExperience1",
   "Choose what you experienced. Tap again to remove. Every section is optional.": "reviewExperience2",
   "Find a word": "reviewExperience3",

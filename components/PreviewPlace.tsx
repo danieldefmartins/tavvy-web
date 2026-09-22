@@ -223,17 +223,20 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
   const realHero = realPlacePhotos(imagePlace).find(url => !failedPhotos.includes(url));
   const heroPhoto = realHero || categoryImageForPlace(imagePlace);
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
-  type PlaceTab = 'overview' | 'media' | 'menu' | 'details';
+  type PlaceTab = 'overview' | 'reviews' | 'media' | 'menu';
   const [activeTab, setActiveTab] = useState<PlaceTab>('overview');
   const hasMedia = !!(config.gallery?.length || config.stories?.length);
   const hasMenu = !!(config.demoMenu?.length || hrefs?.menu);
   const fullMenuHref = hrefs?.menu && !hrefs.menu.startsWith('#') ? hrefs.menu : undefined;
-  const availableTabs: PlaceTab[] = ['overview', 'media', 'details'];
+  const availableTabs: PlaceTab[] = ['overview', 'reviews', 'media'];
+  const [heroIndex, setHeroIndex] = useState(0);
+  const heroTrackRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const syncTab = () => {
-      const requested = new URLSearchParams(window.location.search).get('tab') as PlaceTab;
+      const requested = new URLSearchParams(window.location.search).get('tab') as PlaceTab | 'details';
       if (requested === 'menu' && fullMenuHref) { window.location.replace(fullMenuHref); return; }
-      setActiveTab(availableTabs.includes(requested) ? requested : 'overview');
+      // "details" folded into Overview; old links keep working.
+      setActiveTab(requested === 'details' ? 'overview' : availableTabs.includes(requested as PlaceTab) ? requested as PlaceTab : 'overview');
     };
     syncTab();
     window.addEventListener('popstate', syncTab);
@@ -289,8 +292,6 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
   const unavailable = !evidence || evidence.dataStatus === 'unavailable';
   const otherGood = evidence ? secondaryGoodSignals(evidence, reviewSubject) : [];
   const currentWarnings = evidence?.warnings.filter(w => w.status === 'current' || w.status === 'unconfirmed') || [];
-  const summaryIcons = { main: /hotel/i.test(config.type) ? '🛏️' : /restaurant|cafe|bar/i.test(config.type) ? '🍽️' : '⭐', good: '✨', vibe: '🕯️', headsup: '⚠️' };
-  const summaryTiles = buildPlaceReviewSummary(evidence, reviewSubject).tiles.map(tile => ({ ...tile, icon: summaryIcons[tile.key] }));
   const deliveryQuery = encodeURIComponent(`${config.name} ${config.meta}`);
   const deliveryPlatforms = [
     { key: 'doordash', label: 'DoorDash', search: `https://www.doordash.com/search/store/${deliveryQuery}` },
@@ -299,18 +300,38 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
   ];
 
   const socialItems = SOCIALS.filter(s => hrefs?.[s.key]);
+  const reviewSummary = buildPlaceReviewSummary(evidence, reviewSubject);
+  // Every place shares this screen; only category-driven content changes (core label, pill, menu tab, delivery).
+  const subcategoryRaw = (config.reviewSubject?.subcategory || '').replace(/_/g, ' ').trim();
+  const subcategoryLabel = subcategoryRaw && subcategoryRaw.toLowerCase() !== config.type.toLowerCase() ? subcategoryRaw : '';
+  const heroPhotos = realHero ? [realHero, ...realPlacePhotos(imagePlace).filter(url => url !== realHero && !failedPhotos.includes(url))].slice(0, 6) : [heroPhoto];
+  const heroCurrent = Math.min(heroIndex, heroPhotos.length - 1);
+  const stepHero = (direction: number) => { const el = heroTrackRef.current; if (!el) return; const next = Math.max(0, Math.min(heroPhotos.length - 1, heroCurrent + direction)); el.scrollTo({ left: next * el.clientWidth, behavior: 'smooth' }); setHeroIndex(next); };
+  const openReviews = (topic?: string | null, section?: 'main' | 'good' | 'vibe' | 'headsup' | null) => { selectTab('reviews'); setSelectedSummary(section ?? null); setSelectedTopic(topic ?? null); };
+  const paymentFacts = (reviewSummary.practical || []).filter(item => /cash|card|pay/i.test(item.label));
+  const hasOrderAndPay = !config.demo && (Object.keys(config.deliveryLinks || {}).length > 0 || paymentFacts.length > 0);
   const supportLabels = new Set(selectedTopic ? [selectedTopic] : selectedSummary === 'main' ? [...(evidence?.coreSignals||[]),...(evidence?.coreConcerns||[])].map(s=>s.label) : selectedSummary === 'good' ? otherGood.map(s=>s.label) : selectedSummary === 'vibe' ? (evidence?.vibeSignals||[]).map(s=>s.label) : currentWarnings.map(s=>s.label));
   const supportingReviews = config.reviews.filter(r=>r.signals.some(s=>supportLabels.has(s.label))).slice(0,2);
 
   return (
     <div className="screen">
       <div className="hero">
-        <img src={heroPhoto} alt={realHero ? config.name : copy('Category illustration')} className="hero-img" onError={() => { if (realHero) setFailedPhotos(previous => [...previous, realHero]); }} />
+        <div className="hero-track" ref={heroTrackRef} role="region" aria-roledescription="carousel" aria-label={copy(realHero ? 'Photos' : 'Category illustration')} onScroll={event => { const el = event.currentTarget; if (!el.clientWidth) return; const next = Math.round(el.scrollLeft / el.clientWidth); if (next !== heroIndex) setHeroIndex(next); }}>
+          {heroPhotos.map((src, i) => <div className="hero-slide" key={src + i} role="group" aria-roledescription="slide" aria-label={`${i + 1} / ${heroPhotos.length}`}>
+            <img src={src} alt={realHero ? config.name : copy('Category illustration')} className="hero-img" loading={i < 2 ? 'eager' : 'lazy'} onError={() => { if (realHero) setFailedPhotos(previous => [...previous, src]); }} />
+          </div>)}
+        </div>
         <div className="hero-scrim" />
         {!realHero && <span className="hero-illustration">{copy('Category illustration')}</span>}
         <button className="icon-btn back" aria-label="Back" onClick={handleBack}>‹</button>
+        {heroPhotos.length > 1 && <div className="hero-nav" aria-label={copy('Photos')}>
+          <button type="button" className="hero-step" aria-label="Previous photo" disabled={heroCurrent === 0} onClick={() => stepHero(-1)}>‹</button>
+          <span className="hero-count" aria-live="polite">{heroCurrent + 1} / {heroPhotos.length}</span>
+          <button type="button" className="hero-step" aria-label="Next photo" disabled={heroCurrent === heroPhotos.length - 1} onClick={() => stepHero(1)}>›</button>
+        </div>}
+        {hasMedia && <button type="button" className="hero-more" onClick={() => selectTab('media')}>{copy('View all photos')} →</button>}
         <div className="hero-text">
-          <span className="type-pill">{config.type}</span>
+          <span className="type-pill">{config.type}{subcategoryLabel && <> · {subcategoryLabel}</>}</span>
           <h1 className="name">{config.name}</h1>
           <p className="meta">{config.meta}{config.openLine && <> · <span className="open">{config.openLine}</span></>}</p>
         </div>
@@ -333,29 +354,45 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
           {shareMessage && <span role="status" className="share-status">{shareMessage}</span>}
           {saveMessage && <span role="status" className="share-status">{saveMessage}</span>}
         </nav>
-        <section className="review-summary" aria-label="Tavvy review summary">
-          <div className="section-head"><h2 className="section-title">{copy('Reviews')}</h2></div>
-          <PlaceReviewGrid mode="full" summary={buildPlaceReviewSummary(evidence, reviewSubject)} selectedTopic={selectedTopic} onSelect={(section, topic) => { setSelectedSummary(section); setSelectedTopic(topic.label); }} />
-          {selectedSummary && !unavailable && <div className="summary-detail">
-            <div className="section-head"><strong>{selectedTopic || summaryTiles.find(tile => tile.key === selectedSummary)?.title}</strong><button type="button" className="text-link" onClick={() => {setSelectedSummary(null);setSelectedTopic(null);}}>{copy("All experiences")}</button></div>
-            {!supportingReviews.length && <p>{copy('No matching experiences in the recent preview. Open all reviews to explore the history.')}</p>}
-            {supportingReviews.length > 0 && <><h3 className="support-title">Recent reviews mentioning this</h3>{supportingReviews.map((r,i)=><Reviewer key={r.id||i} r={r} allowSafety={!config.demo}/>)}</>}
-            {config.reviewsHref && <a className="text-link" href={config.reviewsHref}>See all reviews →</a>}
-          </div>}
-        </section>
+        <nav className="place-tabs" aria-label="Place sections">
+          {[...availableTabs, ...(hasMenu ? ['menu' as PlaceTab] : [])].map(tab => tab === 'menu' && fullMenuHref
+            ? <a key={tab} className="place-tab" href={fullMenuHref}>{config.type === 'Hotel' ? 'Rooms' : 'Tavvy Menu'}</a>
+            : <button key={tab} type="button" className={activeTab === tab ? 'place-tab selected' : 'place-tab'} aria-current={activeTab === tab ? 'page' : undefined} onClick={() => selectTab(tab)}>{tab === 'media' ? 'Photos & Stories' : tab === 'reviews' ? copy('Reviews') : tab === 'menu' ? (config.type === 'Hotel' ? 'Rooms' : 'Tavvy Menu') : 'Overview'}</button>)}
+        </nav>
 
         {activeTab === 'overview' && config.overviewContent}
 
-        <nav className="place-tabs" aria-label="Place sections">
-          {availableTabs.map(tab => tab === 'menu' && fullMenuHref
-            ? <a key={tab} className="place-tab" href={fullMenuHref}>{config.type === 'Hotel' ? 'Rooms' : 'Tavvy Menu'}</a>
-            : <button key={tab} type="button" className={activeTab === tab ? 'place-tab selected' : 'place-tab'} aria-current={activeTab === tab ? 'page' : undefined} onClick={() => selectTab(tab)}>{tab === 'media' ? 'Photos & Stories' : tab === 'menu' && config.type === 'Hotel' ? 'Rooms' : tab[0].toUpperCase() + tab.slice(1)}</button>)}
-        </nav>
+        {activeTab === 'overview' && <div className="section">
+          <div className="tp-head"><span className="tp-badge">✦ Tavvy Places</span></div>
+          {config.description ? <p className="about">{config.description}</p> : <p className="review-note">{copy('More recent reviews needed')}</p>}
+          {config.popular?.length > 0 && <div className="tags"><span className="tags-label">{config.popularLabel}</span>{config.popular.map((t, i) => <span className="tag" key={i}>{t}</span>)}</div>}
+        </div>}
 
-        {activeTab === 'overview' && <div className="section overview-reviews">
+        {activeTab === 'overview' && <section className="section review-teaser" aria-label="Tavvy review summary">
+          <div className="section-head"><h2 className="section-title">{copy('Reviews')}</h2><button type="button" className="text-link" onClick={() => openReviews()}>{copy('See experiences')} →</button></div>
+          <PlaceReviewGrid mode="compact" summary={reviewSummary} onOpen={(section, topic) => openReviews(topic.label, section)} />
+        </section>}
+
+        {activeTab === 'overview' && hasOrderAndPay && <div className="section">
+          <div className="section-head"><h2 className="section-title">Order & pay</h2></div>
+          {Object.keys(config.deliveryLinks||{}).length>0 && <div className="demo-links">{deliveryPlatforms.filter(p=>config.deliveryLinks?.[p.key]).map(p=><a key={p.key} href={config.deliveryLinks![p.key]} target="_blank" rel="noopener noreferrer">{p.label} ↗</a>)}</div>}
+          {paymentFacts.length>0 && <div className="tags" style={{ marginTop: 10 }}><span className="tags-label">{copy('Good to know')}</span>{paymentFacts.map(item => <span className="tag" key={item.label}>{item.label} · {item.count}</span>)}</div>}
+        </div>}
+
+        {activeTab === 'reviews' && <section className="section review-summary" aria-label="Tavvy review summary">
+          <div className="section-head"><h2 className="section-title">{copy('Reviews')}</h2></div>
+          <PlaceReviewGrid mode="full" summary={reviewSummary} selectedTopic={selectedTopic} onSelect={(section, topic) => { setSelectedSummary(section); setSelectedTopic(selectedTopic === topic.label ? null : topic.label); }} />
+          {selectedSummary && selectedTopic && !unavailable && <div className="summary-detail">
+            <div className="section-head"><strong>{selectedTopic}</strong><button type="button" className="text-link" onClick={() => {setSelectedSummary(null);setSelectedTopic(null);}}>{copy("All experiences")}</button></div>
+            {!supportingReviews.length && <p>{copy('No matching experiences in the recent preview. Open all reviews to explore the history.')}</p>}
+            {supportingReviews.length > 0 && <><h3 className="support-title">Recent reviews mentioning this</h3>{supportingReviews.map((r,i)=><Reviewer key={r.id||i} r={r} allowSafety={!config.demo}/>)}</>}
+          </div>}
+        </section>}
+
+        {activeTab === 'reviews' && <div className="section overview-reviews">
           <div className="section-head"><h2 className="section-title">Recent reviews</h2><span className="section-sub">{config.reviewsSub}</span></div>
-          {config.reviewsStatus === 'unavailable' ? <p className="review-note" role="status">Reviews could not be loaded. Please try again later.</p> : config.reviews.length > 0 ? (showAllDemoReviews && !config.reviewsHref ? config.reviews : config.reviews.slice(0, 2)).map((review, i) => <Reviewer key={i} r={review} allowSafety={!config.demo} />) : <p className="review-note">No reviews yet. Be the first to share what you experienced.</p>}
-          {config.reviewsHref ? <a className="more" href={config.reviewsHref}>See all reviews →</a> : config.reviews.length > 2 && <button className="more" onClick={() => setShowAllDemoReviews(value => !value)}>{showAllDemoReviews ? 'Show fewer reviews' : 'See all reviews'}</button>}
+          {config.reviewsStatus === 'unavailable' ? <p className="review-note" role="status">Reviews could not be loaded. Please try again later.</p> : config.reviews.length > 0 ? (showAllDemoReviews && !config.reviewsHref ? config.reviews : config.reviews.slice(0, 3)).map((review, i) => <Reviewer key={i} r={review} allowSafety={!config.demo} />) : <p className="review-note">No reviews yet. Be the first to share what you experienced.</p>}
+          {config.reviewsHref ? <a className="more" href={config.reviewsHref}>See all reviews →</a> : config.reviews.length > 3 && <button className="more" onClick={() => setShowAllDemoReviews(value => !value)}>{showAllDemoReviews ? 'Show fewer reviews' : 'See all reviews'}</button>}
         </div>}
 
         {activeTab === 'media' && <div className="media-section" id="demo-photos">
@@ -374,15 +411,10 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
           {config.mediaNotice && <p className="review-note">{config.mediaNotice}</p>}
         </div>}
 
-        {activeTab === 'details' && config.detailsContent}
-        {activeTab === 'details' && <div className="divider" />}
-        {activeTab === 'details' && <div className="section">
-          <div className="tp-head"><span className="tp-badge">✦ Tavvy Places</span></div>
-          {config.description && <p className="about">{config.description}</p>}
+        {activeTab === 'overview' && config.detailsContent}
+        {activeTab === 'overview' && <div className="divider" />}
 
-        </div>}
-
-        {activeTab === 'details' && config.extras?.map((ex, i) => (
+        {activeTab === 'overview' && config.extras?.map((ex, i) => (
           <React.Fragment key={i}>
             <div className="divider" />
             <div className="section">
@@ -402,13 +434,13 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
           <div className="section-head"><span className="section-title">Menu</span></div>
           {config.demoMenu.map(item => <div className="demo-menu-row" key={item.name}><div><strong>{item.name}</strong><p>{item.description}</p></div><b>{item.price}</b></div>)}
         </div>}
-        {activeTab === 'details' && config.demoCard && <div className="section demo-ecard" id="demo-ecard">
+        {activeTab === 'overview' && config.demoCard && <div className="section demo-ecard" id="demo-ecard">
           <div className="section-head"><span className="section-title">eCard</span></div>
           <h3>{config.name}</h3><p>{config.demoCard.tagline}</p>
           <p>{config.demoCard.hours}</p><small>{config.demoCard.contact}</small>
           {config.demoCardHref && <p><a href={config.demoCardHref} style={{ color: '#00AAB4', fontWeight: 700 }}>Open eCard →</a></p>}
         </div>}
-        {activeTab === 'details' && <div className="section">
+        {activeTab === 'overview' && <div className="section">
           <h2 className="section-title">Visit & contact</h2>
           <div className="contact-actions">
             {!config.detailsContent && [['phone',hrefs?.phone?.replace(/^tel:/,'')||'Call'],['website','Website'],['directions','Directions'],['reservation','Reserve a table'],['order','Order at your table']].filter(([key])=>hrefs?.[key]).map(([key,label])=><a key={key} href={hrefs![key]} target={hrefs![key].startsWith('http')?'_blank':undefined} rel="noopener noreferrer">{label} ↗</a>)}
@@ -416,12 +448,11 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
             <button onClick={sharePlace}>{shareMessage || 'Share this place'}</button>
           </div>
           {!config.detailsContent && <div className="demo-links">{socialItems.map(item=><a key={item.key} href={hrefs![item.key]} target="_blank" rel="noopener noreferrer">{item.label}</a>)}</div>}
-          {!config.demo && Object.keys(config.deliveryLinks||{}).length>0 && <><h3>Order delivery</h3><div className="demo-links">{deliveryPlatforms.filter(p=>config.deliveryLinks?.[p.key]).map(p=><a key={p.key} href={config.deliveryLinks![p.key]} target="_blank" rel="noopener noreferrer">{p.label} ↗</a>)}</div></>}
           {hrefs?.owner && <p><a className="text-link" href={hrefs.owner}>Manage or claim this place →</a></p>}
         </div>}
 
-        {activeTab === 'details' && <div className="divider" />}
-        {activeTab === 'details' && <div className="section">
+        {activeTab === 'overview' && <div className="divider" />}
+        {activeTab === 'overview' && <div className="section">
           <h2 className="section-title">Location & hours</h2>
           <div className="info">
             {config.info.filter(r=>!r.href?.startsWith('tel:')).map((r, i) => {
@@ -462,7 +493,18 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
         .screen { max-width: 480px; margin: 0 auto; min-height: 100vh; background: ${t.bg}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; position: relative; padding-bottom: 92px; }
         .hero { position: relative; width: 100%; height: 33vh; min-height: 232px; }
         .hero:has(.hero-fallback) { height: 210px; min-height: 210px; }
+        .hero-track { display: flex; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+        .hero-track::-webkit-scrollbar { display: none; }
+        .hero-slide { flex: 0 0 100%; min-width: 0; height: 100%; scroll-snap-align: start; }
         .hero-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .hero-scrim { pointer-events: none; }
+        .hero-nav { position: absolute; right: 14px; bottom: 96px; display: inline-flex; align-items: center; gap: 2px; background: rgba(0,0,0,0.55); border-radius: 20px; padding: 2px; }
+        .hero-step { width: 32px; height: 32px; border: 0; border-radius: 50%; background: none; color: #fff; font-size: 20px; line-height: 1; cursor: pointer; }
+        .hero-step:disabled { opacity: 0.35; cursor: default; }
+        .hero-count { color: #fff; font-size: 12px; font-weight: 600; padding: 0 4px; font-variant-numeric: tabular-nums; }
+        .hero-more { position: absolute; right: 16px; top: 22px; border: 0; border-radius: 20px; padding: 7px 12px; background: rgba(0,0,0,0.55); color: #fff; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .hero-illustration { top: 64px; }
+        .review-teaser .text-link { border: 0; background: none; font: inherit; font-size: 13px; cursor: pointer; padding: 0; }
         .hero-illustration { position:absolute;top:20px;inset-inline-end:16px;max-width:65%;padding:5px 8px;border-radius:7px;background:rgba(0,0,0,.65);color:white;font-size:11px; }
         .hero-fallback { background: linear-gradient(135deg, #17013A 0%, #3a0a6b 50%, #8A05BE 100%); }
         .hero-scrim { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0) 32%, rgba(0,0,0,0.62) 100%); }
