@@ -587,7 +587,7 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
         .bar-scroll::-webkit-scrollbar { display: none; }
         .bi { flex: 0 0 auto; width: 68px; display: flex; flex-direction: column; align-items: center; gap: 7px; background: none; border: none; cursor: pointer; padding: 0; text-decoration: none; }
         .bi-ic { width: 50px; height: 50px; border-radius: 50%; background: ${t.pillBg}; display: flex; align-items: center; justify-content: center; }
-        .story-ring { position: relative; width: 56px; height: 56px; margin: -3px -3px 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .story-ring { position: relative; width: 56px; height: 56px; margin: -3px -3px -1.5px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .story-ring::before { content: ""; position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 0deg, #00AAB4, #8A05BE, #58D9DE, #00AAB4); animation: tvring 3s linear infinite; }
 .story-ring::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; background: ${t.sheet}; }
 .story-ring .bi-ic { position: relative; z-index: 1; }
