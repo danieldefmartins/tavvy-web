@@ -65,7 +65,7 @@ h3{font-size:19px;line-height:1.3;margin:0 0 6px;font-weight:750;overflow-wrap:a
 .illustration{position:absolute;right:8px;bottom:8px;padding:4px 6px;border-radius:5px;background:rgba(0,0,0,.65);color:white;font-size:10px}
 .reviews{display:block;width:100%;padding:12px 16px;text-align:left;border:0;background:none}
 .actions{display:flex;gap:8px;overflow-x:auto;padding:0 16px 16px;scrollbar-width:none}
-.actions a,.actions button{display:inline-flex;align-items:center;justify-content:center;gap:6px;flex-shrink:0;border:0;border-radius:24px;padding:10px 13px;background:${isDark?"#163C40":"#E4F5F5"};color:${isDark?"#8AE9E9":"#075B61"};text-decoration:none;font-size:12px;font-weight:600;min-height:40px}
+.actions a,.actions button{display:inline-flex;align-items:center;justify-content:center;gap:6px;flex-shrink:0;border:0;border-radius:24px;padding:10px 13px;background:${theme.primary};color:#FFFFFF;text-decoration:none;font-size:12px;font-weight:600;min-height:44px}
     `}</style>
   </article>;
 }

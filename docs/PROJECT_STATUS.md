@@ -1,6 +1,6 @@
 # Tavvy current engineering status
 
-## Search previews — September 21 evening, prepared release
+## Search previews — September 21 evening, web released
 
 Search and map previews now put the name, specific category, address and distance before
 photos, followed by recent Tavvy experiences and available direct actions. Real place
@@ -25,7 +25,11 @@ Web/mobile TypeScript and six focused distance/photo/review regressions passed.
 Local Chrome checks passed for light/dark cards, true counts, all four review sections,
 compact unavailable state, gallery scrolling, phone/website links, photo replacement
 and map rendering. Map tiles were blocked in the synthetic browser fixture.
-Web deployment is pending for this batch; native source has not been rebuilt.
+Web source `dffb662` deployed successfully through Railway's build and health gate.
+Matching mobile source `c55eaf4` is published; native has not been rebuilt.
+The subsequent user-approved color adjustment uses the logo's primary purple for
+preview action buttons, with white icons/text and 44-point minimum targets.
+Its light/dark browser checks and mobile TypeScript passed before publication.
 Real opening hours, menu availability, accessibility and other missing business data
 are not fabricated. Full translations of the new helper copy remain release follow-up.
 
