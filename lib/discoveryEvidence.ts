@@ -19,7 +19,14 @@ export function matchNeed(evidence: PlaceEvidence | undefined, needId: string): 
   if (!need) return { score: 0, reason: '' };
   const matches = [...evidence.goodSignals, ...evidence.vibeSignals].filter(s => need.positive.test(normalizeEvidenceText(s.label)));
   const concerns = evidence.warnings.filter(w => isCurrentWarning(w) && need.opposing.test(normalizeEvidenceText(`${w.slug} ${w.label}`)));
-  const score = matches.reduce((sum, item) => sum + item.reports, 0) - concerns.reduce((sum, item) => sum + (item.recentReports || item.reports) * 2, 0);
+  const support = evidence.aspectSupport?.[needId];
+  // Ranking only, never a percentage: one account contributes once per aspect.
+  // Five neutral observations temper very small samples without inventing reviews.
+  const positive = support?.positive ?? Math.max(0, ...matches.map(item => item.reports));
+  const negative = support?.concerns ?? Math.max(0, ...concerns.map(item => item.recentReports || 0));
+  const respondents = support?.respondents ?? Math.max(positive, negative);
+  const score = respondents ? (positive - negative) / (respondents + 5) : -1;
+
   const positiveReason = matches.length ? matches.map(m => m.label).join(' · ') : 'No recent positive signal for this preference';
   const reason = `${positiveReason}${concerns.length ? ` · Heads up: ${concerns.map(c => c.label).join(', ')}` : ''} · ${evidence.recentReviewers} recent reviewers`;
   return { score, reason };

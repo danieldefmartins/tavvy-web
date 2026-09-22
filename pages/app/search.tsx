@@ -198,8 +198,8 @@ export default function SearchScreen() {
               <button type={"submit"} className="search-button" style={{ backgroundColor: theme.primary }}>
                 {copy("Search")}</button>
             </form>
-            <button type="button" className="near-me-button" onClick={useLocation}>{copy("Near me")}</button>
-            <p className="resolved-location" role="status">{copy(locationLabel)}{checkingReviews ? ' · '+copy('Checking guest reports…') : ''}</p>
+            <div className="search-scope"><button type="button" className="near-me-button" onClick={useLocation}>{copy("Near me")}</button>
+            <p className="resolved-location" role="status">{copy(locationLabel)}{checkingReviews ? ' · '+copy('Checking guest reports…') : ''}</p></div>
           </header>
 
           {/* Content */}
@@ -285,7 +285,7 @@ export default function SearchScreen() {
                 <div className="results-header">
                   <Link href={{ pathname: '/app/map', query: router.query }} locale={locale}>Show on map</Link>
                   <p style={{ color: theme.textSecondary }}>
-                    {results.length} result{results.length !== 1 ? 's' : ''} for "{searchQuery}"
+                    {results.length} result{results.length !== 1 ? 's' : ''}
                   </p>
                 </div>
                 <div className="results-list">
@@ -297,7 +297,7 @@ export default function SearchScreen() {
                   ) : (
                     <div key={place.id} className="result-item">
                       <PlaceCard place={place} compact showQuickActions={false} showReviewSummary />
-                      {diningNeed && <p className="match-reason" style={{ color: theme.textSecondary }}>{place.matchReason}</p>}
+
                     </div>
                   ))}
                 </div>
@@ -365,11 +365,11 @@ export default function SearchScreen() {
           .search-content {
             padding: 0 ${spacing.lg}px;
           }
-          .dining-needs { margin-bottom: 18px; }
-          .dining-needs h2 { font-size: 17px; margin: 0 0 10px; }
+          .search-scope{display:flex;align-items:center;gap:12px;min-height:44px}.search-scope p{margin:0;font-size:12px}.dining-needs { margin-bottom: 8px; }
+          .dining-needs h2 { font-size: 13px; margin: 0 0 6px; }
           .need-list { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
-          .need-list button { flex: none; border: 1px solid #00AEB8; border-radius: 20px; background: ${theme.surface}; color: ${theme.text}; padding: 9px 12px; font-size: 13px; }
-          .need-list button[aria-pressed="true"] { background: #00C2CB; color: #17013A; font-weight: 700; }
+          .need-list button { flex: none; border: 1px solid ${theme.border}; border-radius: 20px; background: ${theme.surface}; color: ${theme.text}; padding: 9px 12px; font-size: 13px; min-height:44px; }
+          .need-list button[aria-pressed="true"] { background: ${theme.primary}; color: white; font-weight: 700; }
           .match-reason { font-size: 12px; margin: 4px 12px 14px; }
           
           .popular-section,
@@ -463,11 +463,12 @@ export default function SearchScreen() {
           }
           
           .results-header {
+            display:flex;align-items:center;justify-content:space-between;gap:12px;
             padding: ${spacing.sm}px 0 ${spacing.md}px;
           }
           
           .results-header p {
-            font-size: 14px;
+            font-size: 12px;
             margin: 0;
           }
           

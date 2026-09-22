@@ -11,6 +11,8 @@ import { reviewDateLabel } from '../lib/placePresentation';
 import type { PlaceEvidence } from '../lib/placeEvidence';
 import { coreForCategory, secondaryGoodSignals } from '../lib/placeEvidence';
 import { buildPlaceReviewSummary } from '../lib/placeReviewSummary';
+import PlaceReviewGrid from './PlaceReviewGrid';
+import { useReleaseCopy } from '../hooks/useReleaseCopy';
 
 // dark/light palette for the place screen surfaces
 function usePalette() {
@@ -208,6 +210,8 @@ function Reviewer({ r, allowSafety }: { r: Review; allowSafety?:boolean }) {
 const EXTERNAL = ['website', 'instagram', 'tiktok', 'youtube', 'facebook', 'whatsapp'];
 
 export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave, saved, saveMessage }: { config: PlaceConfig; hrefs?: Record<string, string>; onAddReview?: () => void; onBack?: () => void; onSave?: () => void; saved?: boolean; saveMessage?: string }) {
+  const copy = useReleaseCopy();
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
   type PlaceTab = 'overview' | 'media' | 'menu' | 'details';
   const [activeTab, setActiveTab] = useState<PlaceTab>('overview');
   const hasMedia = !!(config.gallery?.length || config.stories?.length);
@@ -241,6 +245,7 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
     else window.location.assign('/app/search');
   };
   const [selectedSummary, setSelectedSummary] = useState<'main' | 'good' | 'vibe' | 'headsup' | null>(null);
+  useEffect(() => { setSelectedTopic(null); setSelectedSummary(null); }, [hrefs?.share, config.name, config.meta]);
   const [showAllDemoReviews, setShowAllDemoReviews] = useState(false);
   const [shareMessage, setShareMessage] = useState('');
   const sharePlace = async () => {
@@ -283,7 +288,7 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
   ];
 
   const socialItems = SOCIALS.filter(s => hrefs?.[s.key]);
-  const supportLabels = new Set(selectedSummary === 'main' ? [...(evidence?.coreSignals||[]),...(evidence?.coreConcerns||[])].map(s=>s.label) : selectedSummary === 'good' ? otherGood.map(s=>s.label) : selectedSummary === 'vibe' ? (evidence?.vibeSignals||[]).map(s=>s.label) : currentWarnings.map(s=>s.label));
+  const supportLabels = new Set(selectedTopic ? [selectedTopic] : selectedSummary === 'main' ? [...(evidence?.coreSignals||[]),...(evidence?.coreConcerns||[])].map(s=>s.label) : selectedSummary === 'good' ? otherGood.map(s=>s.label) : selectedSummary === 'vibe' ? (evidence?.vibeSignals||[]).map(s=>s.label) : currentWarnings.map(s=>s.label));
   const supportingReviews = config.reviews.filter(r=>r.signals.some(s=>supportLabels.has(s.label))).slice(0,2);
 
   return (
@@ -320,21 +325,10 @@ export default function PlaceScreen({ config, hrefs, onAddReview, onBack, onSave
         </nav>
         <section className="review-summary" aria-label="Tavvy review summary">
           <div className="section-head"><h2 className="section-title">What people experienced</h2><span className="section-sub">Last 6 months</span></div>
-          <div className="grid summary-grid">
-            {summaryTiles.map(tile => <button key={tile.key} className={`summary-tile ${tile.key}${selectedSummary === tile.key ? ' selected' : ''}`} aria-expanded={selectedSummary === tile.key} onClick={() => setSelectedSummary(selectedSummary === tile.key ? null : tile.key)}>
-              <span className="summary-title"><span>{tile.icon}</span>{tile.title}</span>
-              <strong>{unavailable ? 'Reviews unavailable' : tile.detail}</strong>
-              {tile.count != null && tile.count > 0 && <small>{tile.count} {tile.count === 1 ? 'person' : 'people'} mentioned this</small>}
-              {tile.note && <small>{tile.note}</small>}
-            </button>)}
-          </div>
+          <PlaceReviewGrid mode="full" summary={buildPlaceReviewSummary(evidence, reviewSubject)} selectedTopic={selectedTopic} onSelect={(section, topic) => { setSelectedSummary(section); setSelectedTopic(topic.label); }} />
           {selectedSummary && !unavailable && <div className="summary-detail">
-            <strong>{summaryTiles.find(tile => tile.key === selectedSummary)?.title}</strong>
-            {selectedSummary === 'main' && <><p>{evidence?.coreLabel}: {evidence?.coreSignals.length ? evidence.coreSignals.map(s => `${s.label} (${s.reports})`).join(' · ') : 'Not enough recent reviews yet.'}</p>{!!evidence?.coreConcerns.length && <p>Recent concerns: {evidence.coreConcerns.map(s => s.label).join(' · ')}</p>}</>}
-            {selectedSummary === 'good' && <p>{otherGood.length ? otherGood.slice(0, 4).map(s => `${s.label} (${s.reports})`).join(' · ') : 'More reviews are needed about other strengths.'}</p>}
-            {selectedSummary === 'vibe' && <p>{evidence?.vibeSignals.length ? evidence.vibeSignals.map(s => `${s.label} (${s.reports})`).join(' · ') : 'More reviews are needed about the atmosphere.'}</p>}
-            {selectedSummary === 'headsup' && <><p>{currentWarnings.length ? currentWarnings.map(w => `${w.label} (${w.status === 'current' ? 'repeated' : 'one report'})`).join(' · ') : 'No current Heads Up reports in Tavvy.'}</p>{evidence?.warnings.filter(w => w.status === 'faded' || w.status === 'improved').map(w => <p key={w.slug}>Older concern: {w.label} · {w.laterVisits} later visits without a repeat</p>)}{!!evidence?.practical.length && <p>Reported practical details: {evidence.practical.map(s => s.label).join(' · ')}. Confirm with the place.</p>}</>}
-            <small>{evidence?.recentReviewers ?? 0} recent reviewer{evidence?.recentReviewers === 1 ? '' : 's'} · {evidence?.confidence || 'limited'} evidence</small>
+            <div className="section-head"><strong>{selectedTopic || summaryTiles.find(tile => tile.key === selectedSummary)?.title}</strong><button type="button" className="text-link" onClick={() => {setSelectedSummary(null);setSelectedTopic(null);}}>{copy("All experiences")}</button></div>
+            {!supportingReviews.length && <p>{copy('No matching experiences in the recent preview. Open all reviews to explore the history.')}</p>}
             {supportingReviews.length > 0 && <><h3 className="support-title">Recent reviews mentioning this</h3>{supportingReviews.map((r,i)=><Reviewer key={r.id||i} r={r} allowSafety={!config.demo}/>)}</>}
             {config.reviewsHref && <a className="text-link" href={config.reviewsHref}>See all reviews →</a>}
           </div>}

@@ -274,3 +274,35 @@ A rollback-only production write test created a synthetic auth account, submitte
 The shared place layout now puts a horizontal row of actual Phone, Address, Website, Directions, Menu, Reserve, Order, eCard, Share and Save actions directly above “What people experienced”; absent links stay hidden. The place hero no longer duplicates Save. Web place tabs replace their URL entry instead of consuming Back, and the place Back button uses the existing in-app navigation marker rather than raw browser history length. Matching mobile source adds the same action row and a Home fallback when a place opens without a previous screen.
 
 Indexed-only FSQ places previously appeared saved locally without a durable record. Migration 030 adds private user-owned external bookmarks; web/mobile Save and both Saved lists now use it for unpromoted FSQ identities. Its live rollback rehearsal and ownership check passed, with zero test rows retained. Web production build and web/mobile TypeScript passed. Source deployment and device/browser journey verification are next.
+
+
+## Review experience redesign — September 21 evening
+
+Implemented in this release branch: compact search cards, full topic summaries on
+place/cruise details, shared neutral review choices, optional emphasis, preserved
+edit history/private notes, and domain-specific provider wording. The web direct
+review route now uses the same sheet as the place page. No production schema changes
+or synthetic customer reviews were made for this batch.
+
+Verification: web production build and both application TypeScript checks passed.
+The focused suite includes distinct-person counts, sparse/older concerns, domain
+classification, single-tap removal, category images/distances, RV/On The Go summary
+lifecycle and local PostgreSQL review-history tests. Intercepted browser tests cover
+place cards, a concern-only submission, failed-save retry with the same request key,
+editing with the original date/private note/emphasis, hotel vocabulary, PT/AR,
+light/dark mode, provider submission and cruise save/moderation/late-response guards.
+The older atomic-review script additionally depends on a private admin migration
+absent from this public release checkout; its complete legacy gate was not rerun.
+The review-history SQL gate passed using private schema-only fixtures kept outside Git.
+
+The existing iPhone 17 development app loaded this branch's JavaScript through local
+Metro. Boston search/results were checked against live read-only services. Native
+summary and selection components were also rendered with isolated in-memory fixtures
+in light/dark mode; selection/removal worked. The temporary fixture entry was removed
+and the normal application entry restored. No EAS upload or native compilation was
+started, honoring the user's build hold. This is not final iPad/App Store screenshot
+or on-device release-build certification. No real production review was posted.
+
+At this checkpoint source publication and the web deployment receipt are recorded
+in the follow-up release entry. The mobile changes need the next consolidated binary;
+the 13 remaining locale fallbacks remain part of the Apple language-completion gate.

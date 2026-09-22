@@ -234,3 +234,37 @@ Local native builds must include the approved public connection settings explici
 A successful Xcode compile alone is not a release gate: verify the actual bundled
 configuration, sign-in, retained form values and preview navigation. Keep private server
 credentials out of every client bundle.
+
+
+## Review experience redesign — September 21, 2026
+
+The user approved implementation on web and mobile after the design discussion.
+Search results use a small photo beside place information and two compact evidence
+rows, rather than four equally weighted tiles. The core experience can show both
+praise and a concern. A second row prioritizes a relevant Heads Up, then atmosphere
+or another benefit. There is no overall quality score, invented match percentage or
+thermometer. Default category images remain explicitly labeled illustrations and
+real place photos take priority.
+
+Place details use the full shared summary, with the main experience first and
+clickable topics that reveal matching actual reviews. Topic counts are distinct
+people in the recent evidence window, never the sum of tap intensity or visits.
+Older unresolved reports retain an explicit date/older label; absence of complaints
+does not prove a fix. Main topics are not repeated in the supporting sections.
+Core wording follows the place domain: food, sleep, campground, onboard experience,
+professional work, Realtor service/style and the existing other categories.
+
+Review entry is one scrollable form with one-tap select/remove, optional public
+context, expandable choices/search, and optional emphasis. Positive words are not
+required. Editing preserves the original visit, private note and existing emphasis.
+Place/direct-link composers share one implementation on web. Cruise composers reuse
+the same choices while retaining sailing date, cabin privacy, idempotent persistence
+and moderation. Provider forms retain their existing required written experience
+and assessment contract; those constraints were not removed from the database.
+
+The historical PlaceReviewGrid component name and summary.tiles payload remain for
+compatibility. New consumers use summary.sections; do not restore a four-tile card
+or interpret legacy intensity as independent people. Web/native shared evidence,
+summary and choice logic must stay aligned. English, Spanish, Portuguese and Arabic
+have the new UI copy; the other existing locales currently fall back to English for
+new phrases. Stored catalog/user content is never machine-translated by the UI hook.

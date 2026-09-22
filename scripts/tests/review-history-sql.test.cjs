@@ -2,7 +2,7 @@ const {PGlite}=require('@electric-sql/pglite');
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 (async()=>{
 const db=new PGlite(),base=path.join(__dirname,'../..');
-const schema=JSON.parse(fs.readFileSync(path.join(base,'docs/schema-audit/public-schema.json')));
+const schema=JSON.parse(fs.readFileSync(path.join(process.env.TAVVY_SCHEMA_FIXTURE_DIR || path.join(base,'docs/schema-audit'),'public-schema.json')));
 await db.exec(`CREATE ROLE authenticated;CREATE ROLE anon;CREATE SCHEMA auth;CREATE DOMAIN geography AS text;CREATE FUNCTION st_makepoint(double precision,double precision) RETURNS text LANGUAGE sql AS $$ SELECT $1::text || ',' || $2::text $$;CREATE FUNCTION st_setsrid(text,integer) RETURNS text LANGUAGE sql AS $$ SELECT $1 $$;CREATE FUNCTION unaccent(text) RETURNS text LANGUAGE sql AS $$ SELECT $1 $$;CREATE FUNCTION uuid_generate_v4() RETURNS uuid LANGUAGE sql AS $$ SELECT gen_random_uuid() $$;
 CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
 CREATE FUNCTION auth.role() RETURNS text LANGUAGE sql STABLE AS $$ SELECT current_user::text $$;
@@ -22,9 +22,9 @@ for(const p of schema.policies.filter(p=>tables.includes(p.table))) {
  if(!['places','fsq_places_raw','place_reviews','place_review_signal_taps','place_signal_aggregates','review_items'].includes(p.table))continue;
  await db.exec(`CREATE POLICY "${p.name}" ON ${p.table} FOR ${p.command} TO ${p.roles.join(',')}${p.using?` USING (${p.using})`:''}${p.check?` WITH CHECK (${p.check})`:''}`);
 }
-const details=JSON.parse(fs.readFileSync(path.join(base,'docs/schema-audit/review-constraints.json')));
+const details=JSON.parse(fs.readFileSync(path.join(process.env.TAVVY_SCHEMA_FIXTURE_DIR || path.join(base,'docs/schema-audit'),'review-constraints.json')));
 await db.exec('ALTER TABLE place_stats ADD PRIMARY KEY(place_id); ALTER TABLE places_search ADD PRIMARY KEY(place_id)');
-await db.exec(JSON.parse(fs.readFileSync(path.join(base,'docs/schema-audit/place-search-trigger.json'))).rows[0].definition);
+await db.exec(JSON.parse(fs.readFileSync(path.join(process.env.TAVVY_SCHEMA_FIXTURE_DIR || path.join(base,'docs/schema-audit'),'place-search-trigger.json'))).rows[0].definition);
 await db.exec('CREATE TRIGGER places_search_sync AFTER INSERT OR UPDATE ON places FOR EACH ROW EXECUTE FUNCTION sync_places_search()');
 await db.exec(details.functions.find(f=>f.name==='update_place_stats').definition);
 await db.exec('CREATE TRIGGER place_stats_update AFTER INSERT ON place_reviews FOR EACH ROW EXECUTE FUNCTION update_place_stats()');

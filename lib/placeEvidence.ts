@@ -38,18 +38,24 @@ export interface PlaceEvidence {
   warnings: WarningEvidence[];
   practical: { label: string; reports: number; lastReportedAt: string }[];
   recentReviewers: number;
+  aspectSupport?: Record<string, { positive: number; concerns: number; respondents: number }>;
   confidence: 'limited' | 'developing' | 'strong';
 }
 
 type CoreDefinition = { label: string; match: RegExp; vibeLabel?: string };
 const CORE: Record<string, CoreDefinition> = {
   cruise_ship: { label: 'The onboard experience', match: /cabin|sleep|bed|food|dining|comfort|clean|upkeep|maintain|show|entertainment/i },
-  restaurant: { label: 'The food', match: /food|dish|pasta|pizza|sauce|flavo[u]?r|taste|fresh|portion|steak|seafood|sushi|brunch|breakfast|coffee|dessert|authentic/i },
-  hotel: { label: 'The sleep', match: /sleep|bed|mattress|pillow|quiet|noise|room|clean/i },
+  restaurant: { label: 'The food', match: /food|dish|pasta|pizza|sauce|flavo[u]?r|taste|fresh|portion|steak|seafood|sushi|brunch|breakfast|coffee|dessert|authentic|bland|undercook|overcook|burnt|stale|allergen/i },
+  hotel: { label: 'The sleep', match: /sleep|bed|mattress|pillow|quiet|noise|room|clean|walls|restful/i },
   cafe: { label: 'The coffee & food', match: /coffee|espresso|pastry|food|fresh|taste|flavo[u]?r/i },
-  bar: { label: 'The drinks', match: /drink|cocktail|beer|wine|bar|service/i },
+  bar: { label: 'The drinks', match: /drink|cocktail|beer|wine|pour|watered down/i },
   nightlife: { label: 'The night out', match: /music|drink|crowd|dance|service|fun/i },
   rv_camping: { label: 'The stay', match: /site|camp|hookup|water|power|quiet|clean|sleep/i },
+  restroom: { label: 'The facilities', match: /clean|dirty|toilet|soap|paper|water|working|maintain|accessible/i },
+  laundry: { label: 'The laundry', match: /machine|dryer|wash|clean|working|broken/i },
+  wifi_hotspot: { label: 'The connection', match: /wifi|signal|connection|speed|reliable|internet/i },
+  water_fill_station: { label: 'The water stop', match: /water|access|fill|pressure|working/i },
+  propane_station: { label: 'The refill', match: /propane|refill|service|wait|price/i },
   airport: { label: 'The travel experience', match: /terminal|security|navigation|clean|wait|service/i },
   attraction: { label: 'The experience', match: /ride|show|fun|experience|wait|value/i },
   entertainment: { label: 'The experience', match: /show|performance|fun|experience|value/i },
@@ -109,6 +115,8 @@ export function coreForCategory(subject?: EvidenceSubject): CoreDefinition {
   const exactKey = key.replace(/ /g, '_');
   const exact = CORE[exactKey] || CORE[exactKey.replace(/s$/, '')];
   if (exact) return exact;
+  if (/\b(restrooms?|bathrooms?|toilets?|public showers?)\b/.test(key)) return CORE.restroom;
+  if (/\b(laundromats?|laundry)\b/.test(key)) return CORE.laundry;
   if (/\b(mobile coffee|coffee carts?)\b/.test(key)) return CORE.cafe;
   if (/\b(food trucks?|catering|ice cream)\b/.test(key)) return CORE.restaurant;
   if (/\b(mobile pet|pet groom\w*|dog train\w*|mobile vet)\b/.test(key)) return CORE.pets;
@@ -153,10 +161,10 @@ export function buildPlaceEvidence(visits: EvidenceVisit[], category?: EvidenceS
   // Every visit contributes to issue history. A newer visit cannot erase an older complaint.
   const valid = visits.filter(v => Number.isFinite(Date.parse(v.visitedAt)) && Date.parse(v.visitedAt) <= now.getTime());
   const recent = valid.filter(v => Date.parse(v.visitedAt) >= cutoff);
-  const count = (category: EvidenceCategory, match?: RegExp) => {
+  const count = (category: EvidenceCategory | EvidenceCategory[], match?: RegExp) => {
     const map = new Map<string, { slug: string; label: string; users: Set<string> }>();
     for (const visit of recent) for (const signal of visit.signals) {
-      if (signal.category !== category || (match && !match.test(signalText(signal)))) continue;
+      if (!(Array.isArray(category) ? category.includes(signal.category) : signal.category === category) || (match && !match.test(signalText(signal)))) continue;
       const key = signalKey(signal);
       if (!map.has(key)) map.set(key, { slug: signal.slug, label: signal.label, users: new Set() });
       map.get(key)!.users.add(reviewerKey(visit));
@@ -164,7 +172,7 @@ export function buildPlaceEvidence(visits: EvidenceVisit[], category?: EvidenceS
     return [...map.values()].map(s => ({ slug: s.slug, label: s.label, reports: s.users.size })).sort((a, b) => b.reports - a.reports || a.label.localeCompare(b.label));
   };
   const core = coreForCategory(category);
-  const coreSignals = count('good', core.match).slice(0, 4);
+  const coreSignals = count(['good', 'vibe'], core.match).slice(0, 4);
   const warningKeys = new Map<string, { slug: string; label: string; visits: Map<string, EvidenceVisit> }>();
   for (const visit of valid) for (const signal of visit.signals) {
     if (signal.category !== 'headsup') continue;
@@ -201,8 +209,16 @@ export function buildPlaceEvidence(visits: EvidenceVisit[], category?: EvidenceS
       : recentReports >= 2 ? 'current' : 'unconfirmed';
     return { slug: data.slug, label: data.label, status, reports: reporters.size, recentReports, laterVisits: later.length, directImprovementReports, lastReportedAt };
   }).sort((a, b) => Date.parse(b.lastReportedAt) - Date.parse(a.lastReportedAt));
+  const aspectSupport = Object.fromEntries(Object.entries(EVIDENCE_ASPECTS).map(([key, aspect]) => {
+    const positive = new Set<string>(), concerns = new Set<string>();
+    for (const visit of recent) for (const signal of visit.signals) {
+      if (signal.category !== 'headsup' && aspect.positive.test(signalText(signal))) positive.add(reviewerKey(visit));
+      if (signal.category === 'headsup' && aspect.opposing.test(signalText(signal))) concerns.add(reviewerKey(visit));
+    }
+    return [key, { positive: positive.size, concerns: concerns.size, respondents: new Set([...positive, ...concerns]).size }];
+  }));
   return {
-    dataStatus: valid.length ? 'ready' : 'empty', rulesVersion: EVIDENCE_RULES_VERSION, asOf: now.toISOString(),
+    aspectSupport, dataStatus: valid.length ? 'ready' : 'empty', rulesVersion: EVIDENCE_RULES_VERSION, asOf: now.toISOString(),
     coreLabel: core.label, coreSignals,
     coreConcerns: warnings.filter(w => isCurrentWarning(w) && core.match.test(signalText(w))).map(w => ({ slug: w.slug, label: w.label, reports: w.recentReports || w.reports })),
     goodSignals: count('good').slice(0, 20), vibeSignals: count('vibe').slice(0, 20), warnings, practical,
