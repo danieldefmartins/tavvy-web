@@ -360,3 +360,18 @@ temporary native fixture was removed. Native component visual/interaction checks
 and the live read-only Boston search ran in the existing iPhone Simulator app.
 A new distributed binary, full iPad release QA and remaining-language translation
 are still outstanding. Claude's separate Apple readiness branch was not modified.
+
+## Review design preview — September 22
+
+An unlinked design preview at `/preview/review` proposes how a review looks: a
+main-experience hero with people bars, tone pills for The Good, The Vibe and Heads
+Up, dated older reports, practical details kept apart, experience cards with
+verified-visit and imported-review badges, and the compact search-card rows. Its
+numbers come from fictional visits run through the live evidence rules
+(`buildPlaceEvidence`, `buildPlaceReviewSummary`); the page and its hub link touch no
+shared logic, catalog, review data or real place screens. The verified-visit and
+imported-review badges are proposals only; no verification or import feature exists.
+Web TypeScript, the production build and 390-px light/dark/topic-filter browser
+captures passed locally with no console errors or horizontal overflow. Release
+target: Tavvy.com from `release/verified-web-20260921`. The design awaits the user's
+approval before any real screen changes.
