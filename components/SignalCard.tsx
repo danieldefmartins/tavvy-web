@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Navigation } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { ArrowUpRight, ChevronLeft, ChevronRight, Globe, Navigation, Phone } from 'lucide-react';
 import { useThemeContext } from '../contexts/ThemeContext';
 import { useReleaseCopy } from '../hooks/useReleaseCopy';
 import PlaceReviewGrid from './PlaceReviewGrid';
@@ -15,55 +15,83 @@ export type SignalCardPlace = {
   distance?:number; distanceLabel?:string; latitude?:number; longitude?:number; phone?:string; website?:string;
   tavvy_category?:string; subcategory?:string; reviewSummary?:PlaceReviewSummary; evidenceStatus?:ReviewSummaryStatus;
 };
+const MAX_CARD_PHOTOS = 5;
+function safeWebsite(value?:string) {
+  if (!value) return '';
+  try { const url=new URL(/^https?:\/\//i.test(value)?value:'https://'+value); return ['https:','http:'].includes(url.protocol)?url.href:''; } catch { return ''; }
+}
 /**
- * Comparison card: name and useful facts first with a substantial photo beside them, three
- * compact review rows, and one shortcut. The name and photo open the place; phone and website
- * stay on the place page so one result plus part of the next fits a phone screen.
+ * Search card: the name and facts sit on a swipeable photo header, the review rows carry
+ * their bars as row backgrounds, and the icon row keeps the same shortcuts as the place page.
  */
 export default function SignalCard({place,onClick}:{place:SignalCardPlace;onClick?:()=>void}) {
   const {theme,isDark}=useThemeContext(); const copy=useReleaseCopy();
   const [failedPhotos,setFailedPhotos]=useState<string[]>([]);
+  const [slide,setSlide]=useState(0);
+  const trackRef=useRef<HTMLDivElement>(null);
   const actual=realPlacePhotos(place).filter(url=>!failedPhotos.includes(url));
   const isCategory=!actual.length;
-  const photo=isCategory?categoryImageForPlace(place):actual[0];
+  // Real photos swipe; a category illustration is a single labeled fallback, never a gallery.
+  const photos=isCategory?[categoryImageForPlace(place)]:actual.slice(0,MAX_CARD_PHOTOS);
+  const current=Math.min(slide,photos.length-1);
+  const step=(direction:number)=>{const el=trackRef.current; if(!el) return; const next=Math.max(0,Math.min(photos.length-1,current+direction)); el.scrollTo({left:next*el.clientWidth,behavior:'smooth'}); setSlide(next);};
+  const onScroll=(event:React.UIEvent<HTMLDivElement>)=>{const el=event.currentTarget; if(!el.clientWidth) return; const next=Math.round(el.scrollLeft/el.clientWidth); if(next!==slide) setSlide(next);};
   const candidateSummary=place.reviewSummary && (!place.evidenceStatus || place.reviewSummary.status===place.evidenceStatus)
     ? place.reviewSummary : buildPlaceReviewSummary(null,{category:place.tavvy_category||place.category,subcategory:place.subcategory},place.evidenceStatus||'unavailable');
   const summary={...candidateSummary,coreLabel:candidateSummary.coreLabel||coreForCategory({category:place.tavvy_category||place.category,subcategory:place.subcategory}).label};
   const distance=formatPlaceDistance(place.distance);
   const category=(place.subcategory||place.category||'').replace(/_/g,' ');
   const address=[place.address_line1||place.address,place.city,place.state_region||place.region].filter(Boolean).join(', ');
+  const website=safeWebsite(place.website);
   const coordinates=Number.isFinite(place.latitude)&&Number.isFinite(place.longitude)&&Math.abs(place.latitude!)<=90&&Math.abs(place.longitude!)<=180;
   const directions=coordinates?place.latitude+','+place.longitude:address;
+  const phone=place.phone?.replace(/[^+\d,;*#]/g,'');
   return <article className="card" aria-label={place.name}>
-    <div className="top">
+    <header className="hero">
+      <div className="track" ref={trackRef} onScroll={onScroll} role="region" aria-roledescription="carousel" aria-label={place.name+' · '+copy(isCategory?'Category illustration':'Photos')}>
+        {photos.map((src,i)=><div className="slide" key={src+i} role="group" aria-roledescription="slide" aria-label={`${i+1} / ${photos.length}`}>
+          <img src={src} loading={i<2?'eager':'lazy'} alt={isCategory?copy('Category illustration'):place.name} onError={()=>{if(!isCategory)setFailedPhotos(previous=>[...previous,src]);}}/>
+        </div>)}
+      </div>
+      <div className="shade" aria-hidden="true"/>
       <button className="identity" onClick={onClick} type="button">
         <h3>{place.name}</h3>
-        <div className="meta"><span>{category}</span>{distance&&<span title={place.distanceLabel||'Straight-line distance from the search location'}> · {distance}</span>}</div>
+        <p className="meta"><span>{category}</span>{distance&&<span title={place.distanceLabel||'Straight-line distance from the search location'}> · {distance}</span>}</p>
         {address&&<p className="address">{address}</p>}
       </button>
-      <button className="photo" onClick={onClick} type="button" aria-label={place.name+' · '+copy(isCategory?'Category illustration':'Photos')}>
-        <img src={photo} loading="lazy" alt={isCategory?copy('Category illustration'):place.name} onError={()=>{if(!isCategory)setFailedPhotos(previous=>[...previous,photo]);}}/>
-        {isCategory ? <span className="illustration">{copy('Illustration')}</span> : actual.length>1 && <span className="photo-count">+{actual.length-1}</span>}
-      </button>
-    </div>
-    <button className="reviews" onClick={onClick} type="button"><PlaceReviewGrid summary={summary} explain /></button>
-    {directions&&<nav className="actions" aria-label={copy('Place actions')}>
-      <a href={'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(directions)} target="_blank" rel="noopener noreferrer"><Navigation size={15}/>{copy('Directions')}</a>
-    </nav>}
+      {isCategory&&<span className="illustration">{copy('Illustration')}</span>}
+      {photos.length>1&&<div className="photo-nav" aria-label={copy('Photos')}>
+        <button type="button" className="step" aria-label="Previous photo" disabled={current===0} onClick={()=>step(-1)}><ChevronLeft size={16}/></button>
+        <span className="photo-count" aria-live="polite">{current+1} / {photos.length}</span>
+        <button type="button" className="step" aria-label="Next photo" disabled={current===photos.length-1} onClick={()=>step(1)}><ChevronRight size={16}/></button>
+      </div>}
+    </header>
+    <div className="reviews"><PlaceReviewGrid summary={summary} explain /></div>
+    <nav className="actions" aria-label={copy('Place actions')}>
+      {phone&&<a href={'tel:'+phone}><span className="ic"><Phone size={18}/></span>{copy('Call')}</a>}
+      {directions&&<a href={'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(directions)} target="_blank" rel="noopener noreferrer"><span className="ic"><Navigation size={18}/></span>{copy('Directions')}</a>}
+      {website&&<a href={website} target="_blank" rel="noopener noreferrer"><span className="ic"><Globe size={18}/></span>{copy('Website')}</a>}
+      <button onClick={onClick} type="button"><span className="ic"><ArrowUpRight size={18}/></span>{copy('Details')}</button>
+    </nav>
     <style jsx>{`
-.card{width:100%;overflow:hidden;background:${theme.cardBackground};color:${theme.text};border:1px solid ${theme.border};border-radius:18px;margin-bottom:10px;box-shadow:0 3px 14px ${isDark?"rgba(0,0,0,.18)":"rgba(23,1,58,.06)"}}
+.card{width:100%;overflow:hidden;background:${theme.cardBackground};color:${theme.text};border:1px solid ${theme.border};border-radius:20px;margin-bottom:12px;box-shadow:0 3px 14px ${isDark?"rgba(0,0,0,.18)":"rgba(23,1,58,.06)"}}
 button{font:inherit;cursor:pointer;color:inherit}button:focus-visible,a:focus-visible{outline:3px solid #8a05be;outline-offset:-3px}
-.top{display:flex;gap:12px;align-items:flex-start;padding:12px 12px 4px 14px}
-.identity{display:block;flex:1;min-width:0;text-align:left;padding:2px 0 0;border:0;background:none}
-h3{font-size:17px;line-height:1.25;margin:0 0 4px;font-weight:750;overflow-wrap:anywhere}
-.meta{font-size:13px;line-height:1.45;color:${theme.textSecondary}}.meta>span:first-child{text-transform:capitalize}
-.address{font-size:12px;line-height:1.45;margin:3px 0 0;color:${theme.textSecondary};overflow-wrap:anywhere}
-.photo{position:relative;flex:none;width:38%;max-width:136px;aspect-ratio:1;padding:0;border:0;border-radius:14px;overflow:hidden;background:${theme.surface}}.photo img{display:block;width:100%;height:100%;object-fit:cover}
-.illustration,.photo-count{position:absolute;inset-inline-end:6px;bottom:6px;padding:2px 6px;border-radius:5px;background:rgba(0,0,0,.66);color:white;font-size:10px;font-weight:700}
-.reviews{display:block;width:100%;padding:6px 14px 4px;text-align:start;border:0;background:none}
-.actions{display:flex;padding:0 8px 6px}
-.actions a{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:10px;padding:8px 8px;background:transparent;color:${isDark ? "#D9B6FF" : theme.primary};text-decoration:none;font-size:12.5px;font-weight:650;min-height:40px}
-      @media(max-width:360px){.photo{width:34%}}
+.hero{position:relative;height:172px;background:${theme.surface}}
+.track{display:flex;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-overflow-scrolling:touch}.track::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;min-width:0;height:100%;scroll-snap-align:start}.slide img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 57%}
+.shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(to bottom,rgba(0,0,0,.74) 0%,rgba(0,0,0,.38) 46%,rgba(0,0,0,.10) 100%)}
+.identity{position:absolute;left:14px;top:12px;max-width:calc(100% - 28px);text-align:left;padding:0;border:0;background:none;color:white;text-shadow:0 1px 8px rgba(0,0,0,.45)}
+h3{font-size:21px;line-height:1.2;margin:0 0 4px;font-weight:700;letter-spacing:-.3px;overflow-wrap:anywhere}
+.meta{margin:0;font-size:13px;line-height:1.4;color:rgba(255,255,255,.94)}.meta>span:first-child{text-transform:capitalize}
+.address{margin:2px 0 0;font-size:12px;line-height:1.4;color:rgba(255,255,255,.88);overflow-wrap:anywhere}
+.illustration{position:absolute;left:12px;bottom:12px;padding:4px 8px;border-radius:8px;background:rgba(0,0,0,.55);color:white;font-size:12px;font-weight:600}
+.photo-nav{position:absolute;right:10px;bottom:10px;display:inline-flex;align-items:center;gap:2px;background:rgba(0,0,0,.55);border-radius:20px;padding:2px}
+.step{width:32px;height:32px;border:0;border-radius:50%;background:none;color:white;display:inline-flex;align-items:center;justify-content:center}.step:disabled{opacity:.35;cursor:default}
+.photo-count{color:white;font-size:12px;font-weight:600;padding:0 4px;font-variant-numeric:tabular-nums}
+.reviews{padding:10px 14px 2px}
+.actions{display:flex;gap:4px;overflow-x:auto;padding:6px 8px 10px;scrollbar-width:none}.actions::-webkit-scrollbar{display:none}
+.actions a,.actions button{display:flex;flex-direction:column;align-items:center;gap:5px;flex:0 0 auto;width:66px;border:0;background:none;padding:2px 0;color:${theme.textSecondary};font-size:11px;font-weight:600;text-decoration:none;white-space:nowrap}
+.ic{width:40px;height:40px;border-radius:50%;background:${theme.surface};color:${theme.text};display:inline-flex;align-items:center;justify-content:center}
     `}</style>
   </article>;
 }

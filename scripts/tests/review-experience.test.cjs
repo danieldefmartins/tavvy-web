@@ -12,7 +12,7 @@ function load(file, cache = {}) {
   return exports;
 }
 const { buildPlaceEvidence, coreForCategory } = load('lib/placeEvidence.ts');
-const { buildPlaceReviewSummary, compactReviewSections, searchReviewSections } = load('lib/placeReviewSummary.ts');
+const { buildPlaceReviewSummary, compactReviewSections, searchReviewSections, cardReviewRows } = load('lib/placeReviewSummary.ts');
 const { reviewComposerSections, toggleReviewChoice, visibleReviewChoices, reviewComposerChoices, toggleComposerChoice, emphasizeComposerChoice, reviewChoiceIntensity } = load('lib/reviewComposer.ts');
 const now = new Date('2026-09-22T12:00:00Z');
 const signal = (slug, label, category = 'good') => ({ slug, label, category, intensity: 3 });
@@ -119,4 +119,15 @@ test('search highlights stay within three lines and give Heads Up priority over 
   const practical = buildPlaceReviewSummary(buildPlaceEvidence([visit('e', [signal('cash_only', 'Cash only', 'headsup')])], 'restaurant', now), 'restaurant');
   assert.deepEqual(practical.practical, [{ label: 'Cash only', count: 1 }]);
   assert.equal(practical.sections.find(s => s.key === 'headsup').topics.length, 0);
+});
+
+test('card rows keep praise in the main row and surface core concerns first under Heads Up', () => {
+  const visits = [
+    visit('a', [signal('delicious_food', 'Delicious food'), signal('cozy', 'Cozy', 'vibe'), signal('slow_service', 'Slow service', 'headsup')]),
+    visit('b', [signal('delicious_food', 'Delicious food'), signal('cold_food', 'Cold food', 'headsup'), signal('slow_service', 'Slow service', 'headsup')]),
+    visit('c', [signal('cold_food', 'Cold food', 'headsup'), signal('slow_service', 'Slow service', 'headsup')]),
+  ];
+  const rows = cardReviewRows(buildPlaceReviewSummary(buildPlaceEvidence(visits, 'restaurant', now), 'restaurant'));
+  assert.deepEqual(rows.map(row => [row.key, row.topics.map(t => t.label)]), [['main', ['Delicious food']], ['good', []], ['vibe', ['Cozy']], ['headsup', ['Cold food', 'Slow service']]]);
+  assert.equal(rows[3].topics[0].tone, 'concern');
 });

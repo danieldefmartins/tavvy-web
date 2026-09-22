@@ -83,6 +83,24 @@ export function searchReviewSections(summary: PlaceReviewSummary): ReviewSection
   return [...rows, ...(support ? [support] : []), ...(headsUp ? [headsUp] : [])];
 }
 
+/**
+ * Search cards, one expandable row per section: the core experience's praise, The Good,
+ * The Vibe, and every current concern under Heads Up with core (and serious) concerns
+ * first, so the most relevant concern is the one visible when the row is collapsed.
+ */
+export function cardReviewRows(summary: PlaceReviewSummary): ReviewSection[] {
+  const sections = reviewSections(summary);
+  const find = (key: ReviewTileKey) => sections.find(section => section.key === key);
+  const main = find('main'), good = find('good'), vibe = find('vibe'), headsUp = find('headsup');
+  const coreConcerns = main ? main.topics.filter(topic => topic.tone === 'concern') : [];
+  const concerns = [...coreConcerns, ...(headsUp?.topics || []).filter(topic => !coreConcerns.some(item => item.label === topic.label))];
+  return [
+    ...(main ? [{ ...main, topics: main.topics.filter(topic => topic.tone !== 'concern') }] : []),
+    ...(good ? [good] : []), ...(vibe ? [vibe] : []),
+    ...(headsUp || concerns.length ? [{ key: 'headsup' as ReviewTileKey, title: headsUp?.title || 'Heads Up', topics: concerns }] : []),
+  ];
+}
+
 /** Two rows for comparison: core praise AND concerns, then the most useful supporting evidence. */
 export function compactReviewSections(summary: PlaceReviewSummary): ReviewSection[] {
   const sections = reviewSections(summary);

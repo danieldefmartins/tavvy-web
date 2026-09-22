@@ -363,32 +363,31 @@ are still outstanding. Claude's separate Apple readiness branch was not modified
 
 ## Review presentation redesign — September 22, release candidate
 
-The user approved the review design direction after designer review; this batch
-implements it on the real components. `components/PlaceReviewGrid.tsx` now renders
-every displayed topic the same way in both modes: the word, the number of people who
-mentioned it and a thin frequency bar on one scale per place (teal positive, purple
-atmosphere, amber concern; bars hidden below five recent reviewers). The place page
-section is titled Reviews, opens with `{{count}} people · Last 6 months` and an
-About these numbers control, shows the core experience in a tinted panel with praise
-before concerns, starts supporting sections at three topics with Show all, and adds a
-neutral Good to know row for practical details (`summary.practical`). Search cards use
-`searchReviewSections()`: at most three highlight lines, Heads Up before supporting
-praise, opening with a `Reviews · {{count}} people · Last 6 months` line; each line is a
-muted section label, the experience word and a short bar beside the count. After
-comparing Google, Apple and Yelp cards with the user and an engineer's review, the
-search card keeps the name and facts first with a substantial square photo beside
-them (about 38% of the width, `+N` badge for more photos), one Directions shortcut,
-and fewer dividers, so a full result and part of the next fit a phone screen
-(~280 px). Hero galleries and thumbnail strips were tried and rejected. Individual
-reviews keep tone-colored word chips with the `!` marker and no bars; Report or block
-is visually secondary. `/preview/review` and its hub link now
-render the real components from fictional evidence. Four copy keys
-(`reviewExperience82`–`85`) were added to the en/es/pt/ar catalogs.
+The user approved the review design direction after designer review and several
+compared iterations (Google, Apple and Yelp cards, an engineer's compact proposal, and
+a local carousel-card preview the user preferred); this batch implements the final
+concept on the real components. `components/PlaceReviewGrid.tsx` renders every
+displayed topic the same way in both modes: a row whose background is its frequency
+bar on one scale per place (teal positive, purple atmosphere, amber concern; bars
+hidden below five recent reviewers) with the word and the people count on top. The
+place page section is titled Reviews, opens with `{{count}} people · Last 6 months` and
+an About these numbers control, leads with the core experience (praise before
+concerns), starts supporting sections at three rows with Show all, lets a tapped row
+show matching experiences, and adds a neutral Good to know row for practical details
+(`summary.practical`). Search cards (`components/SignalCard.tsx`) put the name, category,
+distance and address on a 172 px swipeable photo header (`1 / N` counter, step
+buttons, labeled illustrations), then `Reviews · {{count}} people · Last 6 months` and one
+expandable row per section from `cardReviewRows()` (core concerns first under Heads Up),
+then an icon row with the place-page shortcuts (Call, Directions, Website, Details).
+Individual reviews keep tone-colored word chips with the `!` marker and no bars;
+Report or block is visually secondary. `/preview/review` and its hub link render the
+real components from fictional evidence. Five copy keys (`reviewExperience82`–`86`)
+were added to the en/es/pt/ar catalogs.
 
 Checks: web TypeScript, 31 focused unit tests (including a new search-highlight
 regression), the production build, the compact-card browser suite (updated to three
-rows, the people wording, the square photo bounds, the Directions-only actions and a
-310-px card limit) and the composer browser suite passed locally; 390-px
+four expandable rows, the people wording, the photo header bounds and counter, row
+expansion and a 470-px card limit) and the composer browser suite passed locally; 390-px
 light/dark/topic-filter captures showed no console errors or horizontal overflow.
 Matching mobile source is prepared on `preview/review-design-mobile` (mirrored
 `lib/placeReviewSummary.ts`, native `PlaceReviewGrid`, place-screen title and chip

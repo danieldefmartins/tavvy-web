@@ -43,41 +43,42 @@ Each redesigned place card contains:
 - Place name and category/subcategory.
 - Distance when usable distance data is available.
 - Address information when supplied by the place record.
-- A substantial square photo beside the identity information (September 22 update): about 38% of the card width, up to 136 px, with a `+N` badge when more real photos exist; a category illustration is labeled. Hero galleries and thumbnail strips were tried and rejected for height; the name and photo both open the place.
-- Up to three compact review highlight lines, each a word, its people count and a thin
-  frequency bar (September 22 presentation update).
-- One evidence-period/people-count line.
+- A 172 px photo header (September 22 update) with the name, category, distance and address set on a dark shade; up to five real photos swipe with a `1 / N` counter and step buttons, and a category illustration is a single labeled image. The name opens the place.
+- One expandable review row per section (September 22 presentation update): the row's
+  background is the frequency bar, with the section label, the word and the people count on it.
+- One `Reviews · people · period` line above the rows.
 - Available actions, such as Directions, Call, Website and opening the full place.
 
 Web uses `components/SignalCard.tsx`. Native search results use the card renderer in `screens/HomeScreen.tsx`. Both use `components/PlaceReviewGrid.tsx` in its default compact mode.
 
 The card grows when text needs to wrap; its height is not fixed. The phone-width browser fixture stayed below 290 pixels per card. That is a checked example, not a guarantee for every translated label or accessibility text size.
 
-### How the highlight lines are selected
+### How the card rows are selected
 
-`searchReviewSections()` in `lib/placeReviewSummary.ts` fills at most three lines:
+`cardReviewRows()` in `lib/placeReviewSummary.ts` builds one row per section:
 
-1. **The core experience:** the first available positive core topic and the first core concern. A concern can appear without any positive topic.
-2. **Heads Up:** the most relevant remaining concern, when one exists. It takes priority over supporting praise because it changes decisions.
-3. **Supporting evidence:** one nonduplicated topic from The Good, otherwise The Vibe.
+1. **The core experience:** its positive topics, most-mentioned first.
+2. **The Good** and **The Vibe:** their topics as supplied.
+3. **Heads Up:** every current concern, with core concerns (serious ones first) ahead of the others, so the most relevant concern is the one visible while the row is collapsed.
 
-When evidence for a line does not exist, the UI does not invent it. When core evidence is missing, its line explains that more recent reviews are needed. The earlier two-row `compactReviewSections()` remains exported for compatibility and tests.
+Each row shows its first topic; a chevron expands the row to the section's other words without leaving the results. When a section has no evidence, its row says so (more recent reviews needed, or no recent concerns reported). `searchReviewSections()` (three highlight lines) and the earlier two-row `compactReviewSections()` remain exported for compatibility and tests.
 
-The card's review block opens with a `Reviews · {{count}} people · Last 6 months` line so the rows read as reviews at a glance. Each highlight is one quiet row: a muted section label, the experience word (up to two lines), and a short frequency bar beside the people count. Dated older concerns show a short `· Older` suffix on cards; the full `Older report · date` stays on the place page. The card offers one shortcut, Directions; phone and website stay on the place page. Bars use teal for positive topics, purple for atmosphere and amber for concerns; concerns also keep their `!` marker. Bars are hidden when fewer than five people reviewed recently, because a tiny sample would otherwise look like a full bar.
+Every row uses the same treatment as the place page: the row background is a frequency bar whose length is the people count out of the recent reviewers — teal for positive topics, purple for atmosphere, amber for concerns — with the section label, the word and the count on top. Concerns keep their `!` marker. Bars are hidden when fewer than five people reviewed recently, because a tiny sample would otherwise look like a full bar.
+
+The card's review block opens with a `Reviews · {{count}} people · Last 6 months` line so the rows read as reviews at a glance. Dated older concerns show a short `· Older` suffix on cards; the full `Older report · date` stays on the place page. Below the rows, an icon row offers the same shortcuts as the place page action row (Call, Directions, Website, Details), each present only when its link exists.
 
 Illustrative layout only; these are not published reviews or a real business:
 
 ```text
-Example Bistro                         [photo]
-Italian restaurant · 0.4 mi
-Example Street, Boston
+[photo header: Example Bistro · Italian restaurant · 0.4 mi · Example Street, Boston   1 / 3]
 
-The food   Delicious food   ▬▬▬▬▬▬▬░░░  12
-           ! Food arrived cold ▬▬░░░░░░░   3
-Heads Up   ! Slow service    ▬░░░░░░░░░   2
-12 people · Last 6 months
+Reviews · 12 people · Last 6 months
+[The food   Delicious food ██████████░░░░░░░░░░  12  ⌄]
+[The Good   Friendly staff █████░░░░░░░░░░░░░░░   6  ⌄]
+[The Vibe   Relaxed ████░░░░░░░░░░░░░░░░░░░░░░   5  ⌄]
+[Heads Up   ! Food arrived cold ██░░░░░░░░░░░░░   3  ⌄]
 
-Directions     Call     Website     Details
+(Call)   (Directions)   (Website)   (Details)
 ```
 
 The numbers can overlap: the same reviewer may mention food quality and slow service.
@@ -115,7 +116,7 @@ The core heading is more prominent. Concern topics have an explicit `!` marker a
 
 ### Presentation (September 22 update)
 
-The place-page section is titled **Reviews** and opens with one quiet line, `{{count}} people · Last 6 months` (or `Early impressions · 1 reviewer`), followed by an **About these numbers** control that reveals the counting explanation on demand. The main experience sits in a tinted panel; the three supporting sections follow with a colored dot and label. Every displayed topic, in every section, is the same object: the word, the number of people who mentioned it, and a thin frequency bar on one scale per place (people who mentioned it out of recent reviewers). Bar length is frequency only — never quality or severity — so a rarely mentioned serious concern keeps its `!` marker and its priority position instead of relying on bar length. Bars are hidden below five recent reviewers.
+The place-page section is titled **Reviews** and opens with one quiet line, `{{count}} people · Last 6 months` (or `Early impressions · 1 reviewer`), followed by an **About these numbers** control that reveals the counting explanation on demand. The main experience heading leads; the three supporting sections follow with a colored dot and label. Every displayed topic, in every section, is the same row used on search cards: the row background is a frequency bar on one scale per place (people who mentioned it out of recent reviewers), with the word and the count on top; tapping a row selects that topic and shows matching experiences. Bar length is frequency only — never quality or severity — so a rarely mentioned serious concern keeps its `!` marker and its priority position instead of relying on bar length. Bars are hidden below five recent reviewers.
 
 Practical details from `evidence.practical` (for example cash only or reservation policy) appear in a neutral **Good to know** row, separate from Heads Up. Individual reviews show the reviewer, the date, the words they chose as tone-colored chips (concerns marked `!`), and the optional note; they never show frequency bars. The report/block control stays available but is visually secondary.
 

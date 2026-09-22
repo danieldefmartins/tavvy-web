@@ -37,7 +37,7 @@ const places = [
       const first = await page.$eval('article.card', e => ({text:e.innerText,src:e.querySelector('img').getAttribute('src'),tiles:e.querySelectorAll('[data-review-section]').length,overflow:e.scrollWidth>e.clientWidth}));
       assert.match(first.text,/9.9 mi/); assert.doesNotMatch(first.text,/16000/);
       assert.match(first.text,/69 Example Street, Boston, MA/);
-      assert.match(first.text,/12 people/); assert.equal(first.tiles,3); assert.equal(first.overflow,false);
+      assert.match(first.text,/12 people/); assert.equal(first.tiles,4); assert.equal(first.overflow,false);
       assert.match(first.src,/restaurant-1.webp/);
       const second=await page.$$eval('article.card', cards=>({text:cards[1].innerText,src:cards[1].querySelector('img').getAttribute('src')}));
       assert.match(second.text,/Nearby/); assert.equal(second.src,'/qa-real-photo.webp');
@@ -48,12 +48,15 @@ const places = [
     await page.waitForSelector('article.card img');
     assert.equal(await page.$eval('article.card img',e=>e.getAttribute('src')),'/qa-real-photo.webp');
     assert.equal(await page.$('article.card .illustration'),null);
-    assert.equal(await page.$('article.card a[href^="tel:"]'),null);
-    assert.equal(await page.$eval('article.card a[href*="google.com/maps/dir"]',e=>e.getAttribute('target')),'_blank');
-    const photo=await page.$eval('article.card .photo',e=>({h:Math.round(e.getBoundingClientRect().height),w:Math.round(e.getBoundingClientRect().width)}));
-    assert.ok(photo.w>=110&&photo.w<=136&&Math.abs(photo.w-photo.h)<=2,'photo box '+JSON.stringify(photo));
+    assert.equal(await page.$eval('article.card a[href^="tel:"]',e=>e.getAttribute('href')),'tel:+16175550100');
+    assert.equal(await page.$eval('article.card a[href^="https://example.test"]',e=>e.getAttribute('href')),'https://example.test/menu');
+    const hero=await page.$eval('article.card .hero',e=>({h:Math.round(e.getBoundingClientRect().height),slides:e.querySelectorAll('.slide').length,count:e.querySelector('.photo-count')?.innerText}));
+    assert.ok(hero.h>=160&&hero.h<=184,'hero height '+hero.h); assert.equal(hero.slides,3); assert.equal(hero.count,'1 / 3');
     const card=await page.$eval('article.card',e=>Math.round(e.getBoundingClientRect().height));
-    assert.ok(card<310,'card height '+card);
+    assert.ok(card<470,'card height '+card);
+    // This fixture carries one word per section, so rows are plain (no expand control) and every row has its bar.
+    const rows=await page.$eval('article.card',e=>({all:e.querySelectorAll('.wrow').length,buttons:e.querySelectorAll('button.wrow').length,filled:[...e.querySelectorAll('.wrow .fill')].filter(x=>parseFloat(getComputedStyle(x).width)>0).length}));
+    assert.deepEqual(rows,{all:4,buttons:0,filled:4});
     unavailable=true;
     await page.reload({waitUntil:'networkidle2'});
     await page.waitForSelector('article.card');
@@ -62,10 +65,10 @@ const places = [
     await page.screenshot({path:path.join(out,'compact-unavailable.png'),fullPage:true});
     await page.goto(base+'/app/map?q=Restaurants%20in%20Boston%2C%20MA',{waitUntil:'networkidle2'});
     await page.waitForSelector('article.card');
-    assert.equal(await page.$eval('article.card .photo-count',e=>e.innerText),'+2');
+    assert.equal(await page.$eval('article.card .photo-count',e=>e.innerText),'1 / 3');
     assert.equal(await page.$eval('body',e=>e.innerText.includes('Edit location & filters')),false);
     await page.screenshot({path:path.join(out,'map-preview.png')});
     assert.deepEqual(errors,[]);
-    console.log('PASS: light/dark cards, three compact review highlight rows with bars, real counts, address, meters conversion, zero distance, no overflow, real-photo replacement');
+    console.log('PASS: light/dark cards, four expandable review rows with bar backgrounds, real counts, address, meters conversion, zero distance, no overflow, real-photo replacement');
   } catch(error) { console.log('URL',page.url(),'ERRORS',errors,'PAGE',await page.$eval('body',e=>e.innerText.slice(0,1600))); await page.screenshot({path:path.join(out,'failure.png'),fullPage:true}); throw error; } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode=1; });
