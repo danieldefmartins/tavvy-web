@@ -1581,6 +1581,7 @@
     "reviewExperience82": "Conviene saber",
     "reviewExperience83": "Sobre estos números",
     "reviewExperience84": "{{count}} personas · Últimos 6 meses",
-    "reviewExperience85": "Las barras muestran cuántas de las {{count}} personas lo mencionaron"
+    "reviewExperience85": "Las barras muestran cuántas de las {{count}} personas lo mencionaron",
+    "reviewExperience86": "Antiguo"
   }
 }

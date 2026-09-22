@@ -46,13 +46,15 @@ export default function PlaceReviewGrid({ summary, mode = 'compact', selectedTop
     const word = <span className="word" style={{ color: topic.tone === 'concern' ? toneColor.concern : theme.text }} title={compact && topic.older ? `${copy('Older report')}${olderDate ? ` · ${olderDate}` : ''}` : undefined}>
       {topic.tone === 'concern' && <span className="mark" aria-hidden="true">!</span>}
       {topic.label}
-      {topic.older && <small className="older"> · {copy('Older report')}{!compact && olderDate ? ` · ${olderDate}` : ''}</small>}
+      {topic.older && <small className="older"> · {compact ? copy('Older') : copy('Older report')}{!compact && olderDate ? ` · ${olderDate}` : ''}</small>}
     </span>;
     const bar = showBars && <span className="track"><span className="fill" style={{ width: width(topic), background: ACCENT[tone] }} /></span>;
     const number = <b className="count" style={{ color: toneColor[tone] }}>{topic.count}</b>;
+    // Search cards: quiet label · word · short bar beside the count, one line per topic.
     if (compact) return <div key={topic.slug || topic.label} className={`topic ${topic.tone}`} data-review-topic={topic.tone}>
-      <span className="line">{first && <span className="rlabel" style={{ color: toneColor[SECTION_TONE[section]] }}>{copy(title)}</span>}{word}{number}</span>
-      {bar}
+      <span className="rlabel">{first ? copy(title) : ''}</span>
+      {word}
+      <span className="side">{bar || <span className="track none" aria-hidden="true" />}{number}</span>
     </div>;
     const content = <><span className="top">{word}{number}</span>{bar}</>;
     return interactive
@@ -72,7 +74,7 @@ export default function PlaceReviewGrid({ summary, mode = 'compact', selectedTop
       {!compact && <span className="label" style={{ color: toneColor[SECTION_TONE[section.key]] }}>{!main && <span className="dot" aria-hidden="true" style={{ background: ACCENT[SECTION_TONE[section.key]] }} />}{copy(section.title)}</span>}
       <div className="topics">
         {topics.map((topic, index) => topicRow(section.key, topic, index === 0, section.title))}
-        {!topics.length && (compact ? <div className="topic empty-line"><span className="line"><span className="rlabel" style={{ color: toneColor[SECTION_TONE[section.key]] }}>{copy(section.title)}</span><span className="empty">{emptyText(section.key)}</span></span></div> : <span className="empty">{emptyText(section.key)}</span>)}
+        {!topics.length && (compact ? <div className="topic empty-line"><span className="rlabel">{copy(section.title)}</span><span className="empty">{emptyText(section.key)}</span></div> : <span className="empty">{emptyText(section.key)}</span>)}
         {!compact && !main && section.topics.length > FULL_INITIAL_TOPICS && <button type="button" className="more" aria-expanded={open} onClick={() => setExpanded(previous => open ? previous.filter(key => key !== section.key) : [...previous, section.key])}>{copy(open ? 'Show less' : 'Show all')}</button>}
       </div>
     </div>;
@@ -101,14 +103,13 @@ export default function PlaceReviewGrid({ summary, mode = 'compact', selectedTop
       .tvr .count{font-variant-numeric:tabular-nums;font-weight:800;flex:none}
 
       .tvr.compact{display:flex;flex-direction:column}
-      .tvr.compact .head{order:-1;font-size:11.5px;line-height:16px;margin-bottom:5px}.tvr.compact .head b{color:${theme.text};font-weight:800}
-      .tvr.compact .topics{display:flex;flex-direction:column;gap:4px}
-      .tvr.compact .topic{display:flex;flex-direction:column;gap:3px;min-width:0}
-      .tvr.compact .line{display:flex;align-items:baseline;gap:6px;min-width:0}
-      .tvr.compact .rlabel{flex:none;max-width:38%;font-size:10px;line-height:16px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      .tvr.compact .word{flex:1;font-size:13px;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.tvr.compact .word .mark{width:13px;height:13px;font-size:9px;margin-inline-end:4px}
-      .tvr.compact .track{height:3px}.tvr.compact .count{font-size:13px;line-height:18px}
-      .tvr.compact .review-row+.review-row{margin-top:4px}
+      .tvr.compact .head{order:-1;font-size:11.5px;line-height:16px;margin-bottom:4px}.tvr.compact .head b{color:${theme.text};font-weight:800}
+      .tvr.compact .topics{display:flex;flex-direction:column;gap:3px}
+      .tvr.compact .topic{display:grid;grid-template-columns:minmax(0,21%) minmax(0,1fr) auto;align-items:center;column-gap:8px;min-height:20px}
+      .tvr.compact .rlabel{font-size:11px;line-height:16px;font-weight:600;color:${theme.textSecondary};white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .tvr.compact .word{font-size:13px;line-height:17px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.tvr.compact .word .mark{width:13px;height:13px;font-size:9px;margin-inline-end:4px}
+      .tvr.compact .side{display:inline-flex;align-items:center;gap:6px}.tvr.compact .track{width:36px;height:5px}.tvr.compact .track.none{background:none}.tvr.compact .count{font-size:13px;line-height:18px;min-width:16px;text-align:end}
+      .tvr.compact .empty-line{grid-template-columns:minmax(0,21%) minmax(0,1fr)}.tvr.compact .review-row+.review-row{margin-top:3px}
 
       .tvr.full .evidence-line{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}.tvr.full .evidence-note{font-size:13px;line-height:18px;font-weight:650;color:${theme.text}}
       .tvr .about{display:inline-flex;align-items:center;gap:6px;border:0;background:none;padding:0 2px;min-height:44px;font:inherit;font-size:12px;font-weight:600;color:${theme.textSecondary};cursor:pointer}.tvr .info{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;border:1.5px solid currentColor;font-size:10px;font-weight:800;font-style:italic;line-height:1}

@@ -374,10 +374,12 @@ before concerns, starts supporting sections at three topics with Show all, and a
 neutral Good to know row for practical details (`summary.practical`). Search cards use
 `searchReviewSections()`: at most three highlight lines, Heads Up before supporting
 praise, opening with a `Reviews · {{count}} people · Last 6 months` line; each line is a
-small-caps section label, the word, the count and a full-width thin bar. The search
-card itself now leads with a full-width 16:9 swipeable photo gallery (up to five real
-photos, `1/N` counter and dots; a category illustration stays a single labeled image)
-with the identity text below it, replacing the 112 × 104 side thumbnail. Individual
+muted section label, the experience word and a short bar beside the count. After
+comparing Google, Apple and Yelp cards with the user and an engineer's review, the
+search card keeps the name and facts first with a substantial square photo beside
+them (about 38% of the width, `+N` badge for more photos), one Directions shortcut,
+and fewer dividers, so a full result and part of the next fit a phone screen
+(~280 px). Hero galleries and thumbnail strips were tried and rejected. Individual
 reviews keep tone-colored word chips with the `!` marker and no bars; Report or block
 is visually secondary. `/preview/review` and its hub link now
 render the real components from fictional evidence. Four copy keys
@@ -385,8 +387,8 @@ render the real components from fictional evidence. Four copy keys
 
 Checks: web TypeScript, 31 focused unit tests (including a new search-highlight
 regression), the production build, the compact-card browser suite (updated to three
-rows, the people wording, the gallery bounds, the `1/3` counter and a 480-px card
-limit) and the composer browser suite passed locally; 390-px
+rows, the people wording, the square photo bounds, the Directions-only actions and a
+310-px card limit) and the composer browser suite passed locally; 390-px
 light/dark/topic-filter captures showed no console errors or horizontal overflow.
 Matching mobile source is prepared on `preview/review-design-mobile` (mirrored
 `lib/placeReviewSummary.ts`, native `PlaceReviewGrid`, place-screen title and chip

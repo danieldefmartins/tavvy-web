@@ -127,6 +127,7 @@ export default function ReviewDesignPreview() {
         <section className="rxp-section" aria-label="How it looks on search results">
           <div className="rxp-head"><h2>On search results</h2><span className="rxp-count" style={{ color: theme.textSecondary }}>same evidence</span></div>
           <SignalCard place={CARD_PLACE} />
+          <SignalCard place={{ ...CARD_PLACE, id: 'preview-second', name: 'Bakery on Elm', subcategory: 'Bakery', distance: 2100, photos: ['/preview-bakery.jpg'] }} />
         </section>
         <p className="rxp-foot" style={{ color: theme.textSecondary }}>Preview only · fictional place and reviewers · numbers computed by the live evidence rules</p>
       </div>
