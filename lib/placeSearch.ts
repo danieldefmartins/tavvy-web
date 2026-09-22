@@ -26,8 +26,8 @@ export async function searchDatabase(intent: SearchIntent, limit: number, includ
     .filter(word => !['best', 'great', 'near', 'me'].includes(word)).map(word => word.replace(/restaurants$/, 'restaurant'));
   const request = async (fsq: boolean, exact = false) => {
     let q: any = client.from(fsq ? 'fsq_places_raw' : 'places').select(fsq
-      ? 'fsq_place_id,name,locality,region,country,latitude,longitude,fsq_category_labels'
-      : 'id,source_id,name,city,region,country,tavvy_category,tavvy_subcategory,latitude,longitude,cover_image_url,street,phone,slug');
+      ? 'fsq_place_id,name,locality,region,country,latitude,longitude,fsq_category_labels,address,tel,website'
+      : 'id,source_id,name,city,region,country,tavvy_category,tavvy_subcategory,latitude,longitude,cover_image_url,photos,street,phone,website,slug');
     q = fsq ? q.is('date_closed', null) : q.eq('status', 'active');
     q = scopeQuery(q, intent, fsq);
     if (exact) q = q.ilike('name', intent.query.replace(/[%_]/g, '\\$&'));
@@ -41,7 +41,7 @@ export async function searchDatabase(intent: SearchIntent, limit: number, includ
       name: p.name, city: fsq ? p.locality : p.city, region: p.region, country: p.country,
       latitude: p.latitude, longitude: p.longitude, category: fsq ? (Array.isArray(p.fsq_category_labels) ? p.fsq_category_labels[0] : p.fsq_category_labels)?.split('>').at(-1)?.replace(/[\[\]"]/g, '').trim() : p.tavvy_category,
       subcategory: p.tavvy_subcategory, tavvy_category: p.tavvy_category,
-      photo_url: p.cover_image_url, cover_image_url: p.cover_image_url, address: p.street, address_line1: p.street, phone: p.phone, slug: p.slug,
+      photo_url: p.cover_image_url, cover_image_url: p.cover_image_url, photos: p.photos, address: fsq ? p.address : p.street, address_line1: fsq ? p.address : p.street, phone: fsq ? p.tel : p.phone, website: p.website, slug: p.slug,
     }));
   };
   const responses = await Promise.allSettled([request(false, true), request(false), ...(includeFsq ? [request(true)] : [])]);
@@ -68,7 +68,7 @@ export async function searchAcrossProviders(query: string, limit = 50, context: 
   }
   const indexed: SearchPlace[] = responses[1].status === 'fulfilled' ? responses[1].value.places.map(p => ({
     ...p, id: canonicalPlaceId(p.id), source: canonicalPlaceId(p.id).startsWith('fsq:') ? 'fsq_raw' : 'places', source_id: p.fsq_place_id,
-    city: p.locality, category: p.subcategory || p.category,
+    city: p.locality, category: p.subcategory || p.category, phone: p.tel, address_line1: p.address,
   })) : [];
   return { places: mergeSearchResults([...canonical, ...indexed], intent, take), intent, partial: responses.some(result => result.status === 'rejected') };
 }

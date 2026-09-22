@@ -9,7 +9,7 @@ export interface ReviewSummaryTile {
   count?: number;
   note?: string;
 }
-export interface PlaceReviewSummary { status: ReviewSummaryStatus; tiles: ReviewSummaryTile[] }
+export interface PlaceReviewSummary { status: ReviewSummaryStatus; tiles: ReviewSummaryTile[]; recentReviewers?: number }
 
 /** Compact projection of the same recent, independent reports used on place details. */
 export function buildPlaceReviewSummary(evidence?: PlaceEvidence | null, category?: EvidenceSubject, status?: ReviewSummaryStatus): PlaceReviewSummary {
@@ -20,7 +20,7 @@ export function buildPlaceReviewSummary(evidence?: PlaceEvidence | null, categor
   const good = !unavailable && evidence ? secondaryGoodSignals(evidence, category)[0] : undefined;
   const vibe = !unavailable ? evidence?.vibeSignals[0] : undefined;
   const warning = !unavailable ? evidence?.warnings.find(isCurrentWarning) : undefined;
-  return { status: state, tiles: [
+  return { status: state, recentReviewers: unavailable ? undefined : evidence?.recentReviewers, tiles: [
     { key: 'main', title: 'The Main Thing', detail: core ? `${coreLabel}: ${core.label}` : coreLabel, count: core?.reports,
       note: unavailable || (evidence?.coreConcerns.length ? 'Recent concerns reported' : core ? undefined : 'More recent reviews needed') },
     { key: 'good', title: 'The Good', detail: unavailable || good?.label || 'More recent reviews needed', count: good?.reports },

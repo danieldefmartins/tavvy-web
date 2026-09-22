@@ -362,7 +362,7 @@ export async function fetchPlacesInBounds(
   if (userLocation) {
     allPlaces = allPlaces.map(place => ({
       ...place,
-      distance: calculateDistance(
+      distance: getDistanceInMeters(
         userLocation[1],
         userLocation[0],
         place.latitude,
@@ -370,7 +370,7 @@ export async function fetchPlacesInBounds(
       )
     }));
     
-    allPlaces.sort((a, b) => (a.distance || Infinity) - (b.distance || Infinity));
+    allPlaces.sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
   }
 
   const endTime = Date.now();

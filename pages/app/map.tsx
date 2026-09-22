@@ -24,6 +24,8 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 import AppLayout from '../../components/AppLayout';
 import SignalMatrix from '../../components/SignalMatrix';
 import SignalCard from '../../components/SignalCard';
+import { canonicalPlaceId, distanceKm, validCoordinates } from '../../lib/searchIntent';
+import { usePlacePreviewSummaries } from '../../hooks/usePlacePreviewSummaries';
 // Using API routes instead of direct Supabase calls for runtime env var support
 import { PlaceCard as PlaceCardType, SearchResult } from '../../lib/placeService';
 import { useTranslation } from 'next-i18next';
@@ -278,6 +280,7 @@ export default function MapScreen() {
   
   // Places data
   const [places, setPlaces] = useState<PlaceCardType[]>([]);
+  const previewSummaries = usePlacePreviewSummaries(places);
   const [loading, setLoading] = useState(true);
   const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
   
@@ -682,9 +685,10 @@ export default function MapScreen() {
           // Convert search suggestions to PlaceCardType for the map
           const searchPlaces: PlaceCardType[] = data.suggestions
             .filter((s: any) => typeof router.query.selected !== 'string' || s.id === router.query.selected)
-            .filter((s: any) => Number.isFinite(s.latitude) && Number.isFinite(s.longitude))
+            .filter((s: any) => typeof s.id === 'string' && s.id.trim() && Number.isFinite(s.latitude) && Number.isFinite(s.longitude))
             .map((s: any) => ({
-              id: s.id || `search-${Date.now()}-${Math.random()}`,
+              ...s,
+              id: s.id,
               name: s.name,
               latitude: s.latitude,
               longitude: s.longitude,
@@ -1273,7 +1277,6 @@ export default function MapScreen() {
           style={getSheetStyle()}
           onClickCapture={event => { if (performance.now() < suppressClickUntilRef.current) { event.preventDefault(); event.stopPropagation(); } }}
         >
-          <div className="search-scope"><span>{resolvedLocation}</span><button onClick={() => router.push({ pathname: '/app/search', query: router.query })}>Edit location & filters</button></div>
         {searchMessage && <p role="status" className="search-scope">{searchMessage}</p>}
         {/* Draggable Handle — drag anywhere on this header; tap to toggle */}
           <div
@@ -1309,7 +1312,7 @@ export default function MapScreen() {
 
           {/* The full header is a grab area, including the title. */}
           <div className="sheet-header" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchEnd} onMouseDown={handleMouseDown}>
-            <h2 className="sheet-title">{categoryName}</h2>
+            <div><h2 className="sheet-title">{categoryName}</h2><p style={{fontSize:12,color:theme.textSecondary,margin:'4px 0 0'}}>{resolvedLocation}</p></div>
             {selectedCategory !== 'all' && (
               <button className="close-btn" onClick={() => handleCategorySelect('all')}>
                 <IoClose size={24} />
@@ -1408,8 +1411,11 @@ export default function MapScreen() {
               places.map((place) => (
                 <SignalCard
                   key={place.id}
-                  place={place as any}
-                  onClick={() => router.push(`/app/place/${place.id}`, undefined, { locale })}
+                  place={{ ...place,
+                    distance: actualCoordinatesRef.current && validCoordinates(place) ? distanceKm({latitude:actualCoordinatesRef.current[0],longitude:actualCoordinatesRef.current[1]},place)*1000 : place.distance,
+                    distanceLabel: actualCoordinatesRef.current ? 'Straight-line distance from your location' : 'Straight-line distance from the search location',
+                    reviewSummary: (place as any).reviewSummary || previewSummaries[place.id] } as any}
+                  onClick={() => router.push(`/app/place/${encodeURIComponent(canonicalPlaceId(place.id))}`, undefined, { locale })}
                 />
               ))
             )}

@@ -1,5 +1,34 @@
 # Tavvy current engineering status
 
+## Search previews — September 21 evening, prepared release
+
+Search and map previews now put the name, specific category, address and distance before
+photos, followed by recent Tavvy experiences and available direct actions. Real place
+photos support horizontal galleries. Empty, loading and unavailable review states use
+one compact message; available reviews retain the domain-aware four-part grid and
+actual recent reviewer counts. Browse cards load the same evidence as place details and
+discard responses after their list changes. Google/Tavvy comparison screenshots supplied
+by the user informed the hierarchy and reduced header clutter.
+
+Distance remains in meters through provider adapters and place services; conversion happens
+at display time. Map/native cards use actual device coordinates when available and
+otherwise label the search-origin distance. Zero remains valid and missing/invalid
+distances stay hidden. Search projection preserves real photos, address and contact fields.
+
+Web assets contain 130 generated category illustrations across 26 groups (five each,
+approximately 8.1 MB total compressed). Their public manifest records prompts and purpose.
+Subcategory matching precedes broad categories and selection is stable per place.
+Real cover/gallery photos immediately supersede illustrations, which are display-only
+and must never be saved into business records. Native uses the web-hosted image library.
+
+Web/mobile TypeScript and six focused distance/photo/review regressions passed.
+Local Chrome checks passed for light/dark cards, true counts, all four review sections,
+compact unavailable state, gallery scrolling, phone/website links, photo replacement
+and map rendering. Map tiles were blocked in the synthetic browser fixture.
+Web deployment is pending for this batch; native source has not been rebuilt.
+Real opening hours, menu availability, accessibility and other missing business data
+are not fabricated. Full translations of the new helper copy remain release follow-up.
+
 As of September 21, 2026, morning, America/New_York.
 Read PROJECT_MEMORY.md for product decisions. The full requested release is not complete.
 

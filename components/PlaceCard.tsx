@@ -1,5 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+import SignalCard from './SignalCard';
+import { placePreviewImage } from '../lib/placePreviewImage';
 import { useThemeContext } from '../contexts/ThemeContext';
 import PlaceReviewGrid from './PlaceReviewGrid';
 import { buildPlaceReviewSummary, PlaceReviewSummary, ReviewSummaryStatus } from '../lib/placeReviewSummary';
@@ -7,8 +10,10 @@ type Signal = { bucket?: string; label?: string; tap_total?: number; count?: num
 interface PlaceCardProps { place: { id:string; name:string; city?:string; state_region?:string; address_line1?:string; address?:string; category?:string; signals?:Signal[]; topSignals?:Signal[]; photos?:string[]; photo_url?:string; cover_image_url?:string; evidenceStatus?:ReviewSummaryStatus; reviewSummary?:PlaceReviewSummary; tavvy_category?:string; subcategory?:string }; showReviewSummary?:boolean; onPress?:()=>void; showQuickActions?:boolean; compact?:boolean }
 export default function PlaceCard({place,onPress,showReviewSummary=false}:PlaceCardProps) {
  const {theme,isDark}=useThemeContext();
+ const router=useRouter();
+ if (showReviewSummary) return <SignalCard place={place} onClick={onPress || (() => { void router.push(`/app/place/${encodeURIComponent(place.id)}`); })} />;
  const area=[place.city,place.state_region].filter(Boolean).join(', ')||place.address_line1||place.address;
- const photo=place.photos?.[0]||place.photo_url||place.cover_image_url;
+ const photo=placePreviewImage(place).src;
  const signals=(place.topSignals||place.signals||[]).filter(s=>(s.count??s.tap_total??0)>0).slice(0,3);
  const summary=place.reviewSummary && (!place.evidenceStatus || place.reviewSummary.status===place.evidenceStatus) ? place.reviewSummary : buildPlaceReviewSummary(null,{category:place.tavvy_category||place.category,subcategory:place.subcategory},place.evidenceStatus||'unavailable');
  const content=<><div className="thumb">{photo?<img src={photo} alt="" loading="lazy"/>:<span aria-hidden="true">⌖</span>}</div><div className="body"><h3>{place.name}</h3><p>{[place.category,area].filter(Boolean).join(' · ')}</p>{!showReviewSummary&&(place.evidenceStatus==='loading'?<p role="status">Checking guest reports…</p>:place.evidenceStatus==='unavailable'?<p>Guest reports unavailable</p>:null)}{!showReviewSummary&&signals.length>0&&<div className="signals">{signals.map((s,i)=><span key={i} data-category={s.category}>{s.label||s.bucket}<small> {s.count??s.tap_total}</small></span>)}</div>}</div>{showReviewSummary&&<div className="review-summary-slot"><PlaceReviewGrid summary={summary}/></div>}</>;

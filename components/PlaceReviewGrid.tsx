@@ -10,10 +10,18 @@ const COLORS: Record<ReviewTileKey, [string, string, string]> = {
   vibe: ['#74209A', '#D9B6FF', 'rgba(138,5,190,.10)'],
   headsup: ['#885000', '#FFD38A', 'rgba(245,166,35,.12)'],
 };
-export default function PlaceReviewGrid({ summary }: { summary: PlaceReviewSummary }) {
+export default function PlaceReviewGrid({ summary, explain = false }: { summary: PlaceReviewSummary; explain?: boolean }) {
   const { isDark, theme } = useThemeContext();
   const copy = useReleaseCopy();
+  if (explain && summary.status !== 'ready') return <div style={{borderRadius:12,padding:12,background:theme.surface,color:theme.text}}>
+    <b style={{fontSize:13}}>{copy('Tavvy reviews')}</b>
+    <p role="status" style={{fontSize:12,lineHeight:1.5,color:theme.textSecondary,margin:'5px 0 0'}}>{copy(summary.status === 'loading' ? 'Loading recent reviews…' : summary.status === 'empty' ? 'Be the first to share your experience' : 'Recent reviews unavailable')}</p>
+  </div>;
   return <div className="review-grid" data-review-summary={summary.status} aria-label={copy("Recent reviews")}>
+    {explain && <div style={{gridColumn:'1 / -1',padding:'2px 0',color:theme.text}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',gap:8,flexWrap:'wrap'}}><b style={{fontSize:13}}>{copy('Tavvy reviews')}</b>{!!summary.recentReviewers && <span style={{fontSize:11,color:theme.textSecondary}}>{summary.recentReviewers} {copy(summary.recentReviewers === 1 ? 'recent reviewer' : 'recent reviewers')}</span>}</div>
+      <p style={{fontSize:11,lineHeight:1.5,margin:'4px 0 0',color:theme.textSecondary}}>{copy('What recent visitors experienced')}</p>
+    </div>}
     {summary.tiles.map(tile => <span className="review-tile" key={tile.key} data-review-tile={tile.key} style={{ background: COLORS[tile.key][2], borderColor: theme.border }}>
       <strong style={{ color: COLORS[tile.key][isDark ? 1 : 0] }}>{reviewSummaryCopy(tile.title, copy)}</strong>
       <span className="detail">{reviewSummaryCopy(tile.detail, copy)}</span>

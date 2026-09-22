@@ -245,9 +245,8 @@ async function fetchSearchPlaces(options: SearchOptions): Promise<SearchResult> 
 
       const places = data.hits.map((hit: any) => {
         const doc = hit.document;
-        const distance = hit.geo_distance_meters
-          ? (hit.geo_distance_meters / 1609.34)
-          : undefined;
+        const rawDistance = typeof hit.geo_distance_meters === 'object' ? hit.geo_distance_meters?.location : hit.geo_distance_meters;
+        const distance = typeof rawDistance === 'number' && Number.isFinite(rawDistance) && rawDistance >= 0 ? rawDistance : undefined;
 
         return transformTypesensePlace(doc, distance);
       });

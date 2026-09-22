@@ -1,0 +1,655 @@
+{
+  "purpose": "AI-generated category illustrations, never photos of a named place. Real place photos take priority. Display only; do not persist as business photos.",
+  "images": [
+    {
+      "file": "arts-1.webp",
+      "category": "arts",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a bright art gallery with abstract paintings. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "arts-2.webp",
+      "category": "arts",
+      "prompt": "A natural, realistic landscape editorial photograph: a gallery with abstract geometric stone sculptures of spheres and cubes, no human figures. Generic fictional place for a category illustration, no recognizable branding, no readable text, no logos, no people. Warm authentic lighting and wide composition, single coherent photograph."
+    },
+    {
+      "file": "arts-3.webp",
+      "category": "arts",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a pottery studio with clay bowls. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "arts-4.webp",
+      "category": "arts",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a theater interior with an empty stage. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "arts-5.webp",
+      "category": "arts",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: an art studio with brushes and a canvas. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "automotive-1.webp",
+      "category": "automotive",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a tidy auto repair workshop with tools. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "automotive-2.webp",
+      "category": "automotive",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: an unbranded car in a detailing bay. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "automotive-3.webp",
+      "category": "automotive",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a tire service workshop with stacked tires. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "automotive-4.webp",
+      "category": "automotive",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a clean mechanic workbench. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "automotive-5.webp",
+      "category": "automotive",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: an unbranded car being washed with foam, no people. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "bar-1.webp",
+      "category": "bar",
+      "prompt": "Natural editorial category photograph: unbranded cocktail glasses at a warm bar. Generic fictional setting, no branding or text."
+    },
+    {
+      "file": "bar-2.webp",
+      "category": "bar",
+      "prompt": "Natural editorial category photograph: beer glasses on a wooden pub counter. Generic fictional setting, no branding or text."
+    },
+    {
+      "file": "bar-3.webp",
+      "category": "bar",
+      "prompt": "Natural editorial category photograph: wine glasses at a cozy wine bar. Generic fictional setting, no branding or text."
+    },
+    {
+      "file": "bar-4.webp",
+      "category": "bar",
+      "prompt": "Natural editorial category photograph: a citrus mocktail at an elegant lounge. Generic fictional setting, no branding or text."
+    },
+    {
+      "file": "bar-5.webp",
+      "category": "bar",
+      "prompt": "Natural editorial category photograph: a welcoming bar interior with empty stools. Generic fictional setting, no branding or text."
+    },
+    {
+      "file": "beauty-1.webp",
+      "category": "beauty",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a refined hair salon with mirrors and chairs. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "beauty-2.webp",
+      "category": "beauty",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a tidy manicure workspace with tools. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "beauty-3.webp",
+      "category": "beauty",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a calm spa room with folded towels. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "beauty-4.webp",
+      "category": "beauty",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a welcoming barbershop with empty chairs. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "beauty-5.webp",
+      "category": "beauty",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a salon styling station with brushes and combs. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "cafe-1.webp",
+      "category": "cafe",
+      "prompt": "Natural editorial category photograph: cappuccino with latte art on a cafe table. Generic fictional setting, no branding or text."
+    },
+    {
+      "file": "cafe-2.webp",
+      "category": "cafe",
+      "prompt": "Natural editorial category photograph: espresso machine and cups on a cafe counter. Generic fictional setting, no branding or text."
+    },
+    {
+      "file": "cafe-3.webp",
+      "category": "cafe",
+      "prompt": "Natural editorial category photograph: croissant and black coffee by a cafe window. Generic fictional setting, no branding or text."
+    },
+    {
+      "file": "cafe-4.webp",
+      "category": "cafe",
+      "prompt": "Natural editorial category photograph: iced coffee on a bright cafe table. Generic fictional setting, no branding or text."
+    },
+    {
+      "file": "cafe-5.webp",
+      "category": "cafe",
+      "prompt": "Natural editorial category photograph: tea pot with tea and a pastry in a quiet cafe. Generic fictional setting, no branding or text."
+    },
+    {
+      "file": "city-1.webp",
+      "category": "city",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a welcoming walkable town street with trees. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "city-2.webp",
+      "category": "city",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a small city waterfront promenade. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "city-3.webp",
+      "category": "city",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a sunny neighborhood square with cafes without readable signs. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "city-4.webp",
+      "category": "city",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a pedestrian street with attractive storefronts. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "city-5.webp",
+      "category": "city",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a public plaza with benches and greenery. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "cruise_ship-1.webp",
+      "category": "cruise_ship",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: an unbranded white cruise ship at sea viewed from a distance. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "cruise_ship-2.webp",
+      "category": "cruise_ship",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: an empty cruise ship deck overlooking the ocean. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "cruise_ship-3.webp",
+      "category": "cruise_ship",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a river cruise ship on a scenic river without branding. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "cruise_ship-4.webp",
+      "category": "cruise_ship",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a comfortable cruise cabin with a sea view. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "cruise_ship-5.webp",
+      "category": "cruise_ship",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a quiet ship promenade deck in morning light. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "education-1.webp",
+      "category": "education",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a bright classroom with empty desks. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "education-2.webp",
+      "category": "education",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a welcoming library reading area. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "education-3.webp",
+      "category": "education",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a science classroom with simple equipment. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "education-4.webp",
+      "category": "education",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a music lesson room with a piano. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "education-5.webp",
+      "category": "education",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: an art learning table with pencils and paper. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "entertainment-1.webp",
+      "category": "entertainment",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: a colorful amusement park carousel. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "entertainment-2.webp",
+      "category": "entertainment",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: empty comfortable cinema seats and a blank screen. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "entertainment-3.webp",
+      "category": "entertainment",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: a lively looking but empty bowling alley. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "entertainment-4.webp",
+      "category": "entertainment",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: an outdoor amusement park with a ferris wheel. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "entertainment-5.webp",
+      "category": "entertainment",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a small live music stage before a performance. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "events-1.webp",
+      "category": "events",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a beautifully set event table without guests. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "events-2.webp",
+      "category": "events",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a bright conference room with arranged seating. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "events-3.webp",
+      "category": "events",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a garden celebration space without people. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "events-4.webp",
+      "category": "events",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: an elegant indoor event hall before guests arrive. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "events-5.webp",
+      "category": "events",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: an outdoor pavilion with simple festive lighting. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "financial-1.webp",
+      "category": "financial",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a tidy financial planning desk with a calculator and papers without readable text. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "financial-2.webp",
+      "category": "financial",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a welcoming generic bank lobby without signs. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "financial-3.webp",
+      "category": "financial",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a simple desk with a calculator and notebook. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "financial-4.webp",
+      "category": "financial",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a quiet advisory office meeting table. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "financial-5.webp",
+      "category": "financial",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a close view of a plain wallet, coins and calculator. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "fitness-1.webp",
+      "category": "fitness",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a bright modern gym with exercise equipment. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "fitness-2.webp",
+      "category": "fitness",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a calm yoga studio with rolled mats. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "fitness-3.webp",
+      "category": "fitness",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: an indoor swimming pool with lane markers. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "fitness-4.webp",
+      "category": "fitness",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a studio with stationary bicycles. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "fitness-5.webp",
+      "category": "fitness",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a neatly equipped strength training room. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "fuel-1.webp",
+      "category": "fuel",
+      "prompt": "A natural, realistic landscape editorial photograph: a clean unbranded gas station with fuel pumps in morning light. Generic fictional place for a category illustration, no recognizable branding, no readable text, no logos, no people. Warm authentic lighting and wide composition, single coherent photograph."
+    },
+    {
+      "file": "fuel-2.webp",
+      "category": "fuel",
+      "prompt": "A natural, realistic landscape editorial photograph: an unbranded fuel pump under a neat gas station canopy. Generic fictional place for a category illustration, no recognizable branding, no readable text, no logos, no people. Warm authentic lighting and wide composition, single coherent photograph."
+    },
+    {
+      "file": "fuel-3.webp",
+      "category": "fuel",
+      "prompt": "A natural, realistic landscape editorial photograph: a small roadside gas station with trees and no cars. Generic fictional place for a category illustration, no recognizable branding, no readable text, no logos, no people. Warm authentic lighting and wide composition, single coherent photograph."
+    },
+    {
+      "file": "fuel-4.webp",
+      "category": "fuel",
+      "prompt": "A natural, realistic landscape editorial photograph: a modern gas station forecourt with tidy fuel pumps. Generic fictional place for a category illustration, no recognizable branding, no readable text, no logos, no people. Warm authentic lighting and wide composition, single coherent photograph."
+    },
+    {
+      "file": "fuel-5.webp",
+      "category": "fuel",
+      "prompt": "A natural, realistic landscape editorial photograph: an unbranded fuel station at golden hour with a convenience store. Generic fictional place for a category illustration, no recognizable branding, no readable text, no logos, no people. Warm authentic lighting and wide composition, single coherent photograph."
+    },
+    {
+      "file": "general-1.webp",
+      "category": "general",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a welcoming generic storefront with plants and no readable signs. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "general-2.webp",
+      "category": "general",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a bright generic business entrance with glass doors. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "general-3.webp",
+      "category": "general",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a pleasant street corner with small businesses. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "general-4.webp",
+      "category": "general",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: an inviting commercial building courtyard. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "general-5.webp",
+      "category": "general",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a tidy neighborhood storefront on a sunny day. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "government-1.webp",
+      "category": "government",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a generic civic building entrance without names or flags. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "government-2.webp",
+      "category": "government",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a welcoming public service reception without signs. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "government-3.webp",
+      "category": "government",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: an orderly public office waiting area. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "government-4.webp",
+      "category": "government",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a civic building courtyard with benches. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "government-5.webp",
+      "category": "government",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a simple municipal building with trees. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "health-1.webp",
+      "category": "health",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a welcoming clinic reception without signs. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "health-2.webp",
+      "category": "health",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a clean dental examination room. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "health-3.webp",
+      "category": "health",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a physical therapy space with exercise tools. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "health-4.webp",
+      "category": "health",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a calm medical consultation room. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "health-5.webp",
+      "category": "health",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: an optician display of eyeglasses without brands. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "home_services-1.webp",
+      "category": "home_services",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a neat carpentry workbench and hand tools. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "home_services-2.webp",
+      "category": "home_services",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a plumber toolkit beside a clean sink. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "home_services-3.webp",
+      "category": "home_services",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: an electrician tool bag beside a wall outlet. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "home_services-4.webp",
+      "category": "home_services",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a tidy garden with gardening tools. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "home_services-5.webp",
+      "category": "home_services",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: painting supplies beside a freshly painted interior wall. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "hotel-1.webp",
+      "category": "hotel",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: a comfortable hotel bedroom in soft morning light. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "hotel-2.webp",
+      "category": "hotel",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: a welcoming hotel lobby with comfortable seating. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "hotel-3.webp",
+      "category": "hotel",
+      "prompt": "Natural editorial category photograph: a neatly made hotel bed with fresh linen. Generic fictional setting, no branding or text."
+    },
+    {
+      "file": "hotel-4.webp",
+      "category": "hotel",
+      "prompt": "Natural editorial category photograph: a cozy boutique guest room with wood furniture. Generic fictional setting, no branding or text."
+    },
+    {
+      "file": "hotel-5.webp",
+      "category": "hotel",
+      "prompt": "Natural editorial category photograph: a calm modern hotel room with a reading chair. Generic fictional setting, no branding or text."
+    },
+    {
+      "file": "outdoors-1.webp",
+      "category": "outdoors",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: a sunlit wooded walking trail. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "outdoors-2.webp",
+      "category": "outdoors",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: a peaceful lake with a walking path. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "outdoors-3.webp",
+      "category": "outdoors",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: a green city park with benches. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "outdoors-4.webp",
+      "category": "outdoors",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: a sandy beach and ocean waves. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "outdoors-5.webp",
+      "category": "outdoors",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: a meadow trail with hills in the distance. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "pets-1.webp",
+      "category": "pets",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a happy dog in a bright pet grooming space. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "pets-2.webp",
+      "category": "pets",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a friendly cat beside a carrier in a pet care room. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "pets-3.webp",
+      "category": "pets",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: neatly arranged pet supplies without brands. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "pets-4.webp",
+      "category": "pets",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a dog resting on a comfortable pet bed. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "pets-5.webp",
+      "category": "pets",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a clean pet grooming table with brushes. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "professional-1.webp",
+      "category": "professional",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a welcoming professional office meeting room. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "professional-2.webp",
+      "category": "professional",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a tidy desk with notebooks and a closed laptop. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "professional-3.webp",
+      "category": "professional",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a modern small business reception. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "professional-4.webp",
+      "category": "professional",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a bright office workspace with plants. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "professional-5.webp",
+      "category": "professional",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a comfortable consultation room with two chairs. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "religious-1.webp",
+      "category": "religious",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a peaceful church interior with wooden pews. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "religious-2.webp",
+      "category": "religious",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a sunlit mosque courtyard without people. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "religious-3.webp",
+      "category": "religious",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a calm synagogue interior without readable text. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "religious-4.webp",
+      "category": "religious",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a serene Buddhist temple garden. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "religious-5.webp",
+      "category": "religious",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a welcoming community prayer hall without symbols or people. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "restaurant-1.webp",
+      "category": "restaurant",
+      "prompt": "Natural editorial category photograph: fresh tomato pasta in a ceramic bowl. Generic fictional setting, no branding or text."
+    },
+    {
+      "file": "restaurant-2.webp",
+      "category": "restaurant",
+      "prompt": "Natural editorial category photograph: wood fired margherita pizza on a wooden table. Generic fictional setting, no branding or text."
+    },
+    {
+      "file": "restaurant-3.webp",
+      "category": "restaurant",
+      "prompt": "Natural editorial category photograph: beautiful assorted sushi on a simple ceramic platter. Generic fictional setting, no branding or text."
+    },
+    {
+      "file": "restaurant-4.webp",
+      "category": "restaurant",
+      "prompt": "Natural editorial category photograph: a gourmet burger with crisp vegetables and fries. Generic fictional setting, no branding or text."
+    },
+    {
+      "file": "restaurant-5.webp",
+      "category": "restaurant",
+      "prompt": "Natural editorial category photograph: fresh colorful tacos on a casual table. Generic fictional setting, no branding or text."
+    },
+    {
+      "file": "rv_camping-1.webp",
+      "category": "rv_camping",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: an unbranded camper parked at a wooded campsite. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "rv_camping-2.webp",
+      "category": "rv_camping",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: a peaceful campground with tents and trees. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "rv_camping-3.webp",
+      "category": "rv_camping",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: a camper van in a spacious natural campsite. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "rv_camping-4.webp",
+      "category": "rv_camping",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: a picnic table at a lakeside camping area. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "rv_camping-5.webp",
+      "category": "rv_camping",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: an unbranded motorhome on a scenic camping pitch. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "shopping-1.webp",
+      "category": "shopping",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: a welcoming small boutique interior without labels. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "shopping-2.webp",
+      "category": "shopping",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: neatly arranged home goods in a shop. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "shopping-3.webp",
+      "category": "shopping",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: fresh produce in a grocery market. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "shopping-4.webp",
+      "category": "shopping",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: a display of artisan ceramics in a small shop. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "shopping-5.webp",
+      "category": "shopping",
+      "prompt": "Create a landscape photograph for a Tavvy category illustration. Subject: a tidy bookstore with unreadable book spines. Natural editorial photography, warm realistic light, composition suitable for a wide card crop, realistic materials, authentic everyday environment, no prominent people. Generic fictional setting, no identifiable business, no text, logos, branding, watermark. One photograph, not a collage."
+    },
+    {
+      "file": "transportation-1.webp",
+      "category": "transportation",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: an unbranded passenger train at a platform. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "transportation-2.webp",
+      "category": "transportation",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a clean airport concourse without signage. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "transportation-3.webp",
+      "category": "transportation",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: an unbranded bus at a simple city stop. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "transportation-4.webp",
+      "category": "transportation",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a ferry terminal beside calm water. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    },
+    {
+      "file": "transportation-5.webp",
+      "category": "transportation",
+      "prompt": "Landscape editorial photograph for a Tavvy category illustration: a bicycle parking area on a welcoming street. Natural realistic light, beautiful wide composition, authentic everyday environment. Generic fictional place, no recognizable business. No text, logos, branding, watermark or prominent people. Single coherent photograph."
+    }
+  ]
+}
