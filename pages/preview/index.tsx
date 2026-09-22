@@ -17,6 +17,12 @@ export default function PreviewIndex() {
           </div>
         </div>
 
+        <a className="card wide" href="/preview/review">
+          <div className="ic">✦</div>
+          <div className="ct"><span className="t">Review design</span><span className="s">How a review looks · summary, experiences, search card</span></div>
+          <span className="chev">›</span>
+        </a>
+
         <a className="card wide" href="/preview/search">
           <div className="ic">🔍</div>
           <div className="ct"><span className="t">Search results</span><span className="s">Review cards · pick a favorite, tap in</span></div>
