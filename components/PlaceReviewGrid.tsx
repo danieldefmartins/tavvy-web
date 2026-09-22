@@ -35,6 +35,8 @@ export default function PlaceReviewGrid({ summary, mode = 'compact', selectedTop
   const label = summary.status === 'loading' ? 'Loading recent reviews…' : summary.status === 'empty' ? 'Be the first to share your experience' : 'Recent reviews unavailable';
   if (summary.status !== 'ready') return <div className="review-empty" role="status" style={{ color: theme.textSecondary, fontSize: 12, lineHeight: '18px', paddingBlock: compact ? 2 : 14 }}>{copy(label)}</div>;
   const toneColor: Record<Tone, string> = { positive: isDark ? '#58D9DE' : '#067A80', neutral: isDark ? '#D9B6FF' : '#74209A', concern: isDark ? '#FFD38A' : '#885000' };
+  // Accent for labels and controls: the logo's teal (text-safe shades), not the purple used for atmosphere.
+  const accent = isDark ? '#58D9DE' : '#067A80';
   const fillTint: Record<Tone, string> = { positive: isDark ? '#204b4c' : '#b6e9e8', neutral: isDark ? '#4b315f' : '#e3cef4', concern: isDark ? '#5a3c18' : '#f8dca6' };
   const trackColor = isDark ? '#29252f' : '#f1f0f4';
   const showBars = count >= BAR_MIN_PEOPLE;
@@ -44,7 +46,7 @@ export default function PlaceReviewGrid({ summary, mode = 'compact', selectedTop
   const width = (topic: ReviewTopic) => showBars ? `${Math.max(2, Math.round((topic.count / Math.max(count, 1)) * 100))}%` : '0%';
   const toneOf = (section: ReviewTileKey, topic: ReviewTopic): Tone => topic.tone === 'concern' ? 'concern' : SECTION_TONE[section] === 'neutral' && section !== 'main' ? 'neutral' : 'positive';
   const toggle = (key: string) => setExpanded(previous => previous.includes(key) ? previous.filter(item => item !== key) : [...previous, key]);
-  const labelColor = (section: ReviewTileKey) => section === 'main' ? toneColor.neutral : theme.textSecondary;
+  const labelColor = (section: ReviewTileKey) => section === 'main' ? accent : theme.textSecondary;
 
   const wordOf = (topic: ReviewTopic) => {
     const olderDate = topic.lastReportedAt ? topic.lastReportedAt.slice(0, 10) : '';
@@ -88,7 +90,7 @@ export default function PlaceReviewGrid({ summary, mode = 'compact', selectedTop
     const ordered = main ? [...section.topics.filter(topic => topic.tone !== 'concern'), ...section.topics.filter(topic => topic.tone === 'concern')] : section.topics;
     const topics = !main && !open ? ordered.slice(0, FULL_INITIAL_TOPICS) : ordered;
     return <div key={section.key} className={`review-row ${section.key}`} data-review-section={section.key}>
-      <span className="label" style={{ color: toneColor[SECTION_TONE[section.key]] }}>{!main && <span className="dot" aria-hidden="true" style={{ background: ACCENT[SECTION_TONE[section.key]] }} />}{copy(section.title)}</span>
+      <span className="label" style={{ color: main ? accent : toneColor[SECTION_TONE[section.key]] }}>{!main && <span className="dot" aria-hidden="true" style={{ background: ACCENT[SECTION_TONE[section.key]] }} />}{copy(section.title)}</span>
       <div className="rows">
         {topics.map(topic => barRow(section.key, topic, onSelect ? { onClick: () => onSelect(section.key, topic), pressed: selectedTopic === topic.label, ariaLabel: `${topic.label}, ${topic.count} ${copy('people mentioned this')}. ${copy('See experiences')}` } : {}))}
         {!topics.length && <span className="empty">{emptyText(section.key)}</span>}
@@ -116,7 +118,7 @@ export default function PlaceReviewGrid({ summary, mode = 'compact', selectedTop
       .tvr .empty,.tvr .evidence-note,.tvr .legend{font-size:11px;line-height:17px;color:${theme.textSecondary}}
       .tvr .mark{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:${ACCENT.concern};color:#17013A;font-size:9.5px;font-weight:900;line-height:1;flex:none;margin-inline-end:5px;vertical-align:-2px}
       .tvr .wrow{position:relative;isolation:isolate;display:flex;align-items:center;gap:8px;width:100%;min-height:36px;padding:6px 11px;border:0;border-radius:8px;overflow:hidden;font:inherit;color:${theme.text};text-align:start;cursor:default}
-      .tvr button.wrow{cursor:pointer}.tvr button.wrow:focus-visible{outline:3px solid ${theme.primary};outline-offset:2px}
+      .tvr button.wrow{cursor:pointer}.tvr button.wrow:focus-visible{outline:3px solid ${ACCENT.positive};outline-offset:2px}
       @media(pointer:coarse){.tvr .wrow{min-height:44px}}
       .tvr .wrow .fill{position:absolute;z-index:-1;inset-block:0;inset-inline-start:0;border-radius:8px 4px 4px 8px;pointer-events:none}
       .tvr .wlabel{flex:none;font-size:11px;line-height:1.3;font-weight:600}
@@ -138,7 +140,7 @@ export default function PlaceReviewGrid({ summary, mode = 'compact', selectedTop
       .tvr .dot{width:7px;height:7px;border-radius:50%;flex:none}
       .tvr.full .rows{display:flex;flex-direction:column;gap:5px}
       .tvr.full .wrow{min-height:44px;padding:8px 12px}.tvr.full .word{font-size:15px}.tvr.full .main .word{font-size:15.5px}
-      .tvr .more-btn{border:0;background:none;color:${toneColor.neutral};font:inherit;font-size:12px;font-weight:700;min-height:44px;cursor:pointer;text-align:start;padding:0 2px}
+      .tvr .more-btn{border:0;background:none;color:${accent};font:inherit;font-size:12px;font-weight:700;min-height:44px;cursor:pointer;text-align:start;padding:0 2px}
       .tvr .chips{display:flex;flex-wrap:wrap;gap:7px;padding:4px 0 6px}.tvr .chip{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border:1px solid;border-radius:20px;font-size:12.5px;font-weight:600}.tvr .chip b{font-weight:800;font-variant-numeric:tabular-nums}
     `}</style>
   </div>;
