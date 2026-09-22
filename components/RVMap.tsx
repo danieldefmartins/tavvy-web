@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Popup, ZoomControl, useMap } from 'react-leaflet';
 import { RVPlace, rvPlaceCategory, rvPlacePoint } from '../lib/rvCategories';
 
 /**
@@ -32,7 +32,8 @@ export default function RVMap({ places, location, layer, onSelect }: { places: R
   const [attempt, setAttempt] = useState(0);
   useEffect(() => { setTileState('loading'); const timer = setTimeout(() => setTileState(state => state === 'loading' ? 'error' : state), 15000); return () => clearTimeout(timer); }, [layer, attempt]);
   const mappable = places.filter(p => rvPlacePoint(p));
-  return <div style={{ height: '100%', width: '100%', position: 'relative' }}><MapContainer center={[39, -98]} zoom={3} style={{ height: '100%', width: '100%' }}>
+  return <div style={{ height: '100%', width: '100%', position: 'relative' }}><MapContainer center={[39, -98]} zoom={3} zoomControl={false} style={{ height: '100%', width: '100%' }}>
+    <ZoomControl position="bottomleft" />
     <TileLayer className={layer === 'dark' ? 'onthego-dark-tile' : undefined} key={`${layer}-${attempt}`} url={tiles.url} attribution={tiles.attribution} eventHandlers={{ tileload: () => setTileState('ready') }} />
     <Frame places={places} location={location} />
     {location && <CircleMarker center={location} radius={8} pathOptions={{ color: '#fff', fillColor: '#2563eb', fillOpacity: 1 }}><Popup>Your location</Popup></CircleMarker>}
