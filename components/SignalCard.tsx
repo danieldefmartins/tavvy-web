@@ -46,7 +46,9 @@ export default function SignalCard({place,onClick}:{place:SignalCardPlace;onClic
   const coordinates=Number.isFinite(place.latitude)&&Number.isFinite(place.longitude)&&Math.abs(place.latitude!)<=90&&Math.abs(place.longitude!)<=180;
   const directions=coordinates?place.latitude+','+place.longitude:address;
   const phone=place.phone?.replace(/[^+\d,;*#]/g,'');
-  return <article className="card" aria-label={place.name}>
+  // Anywhere on the card opens the place; the inner links and photo arrows stop the click from bubbling.
+  const stop=(event:React.SyntheticEvent)=>event.stopPropagation();
+  return <article className={onClick?'card clickable':'card'} aria-label={place.name} onClick={onClick} onKeyDown={onClick?(event)=>{if(event.target===event.currentTarget&&(event.key==='Enter'||event.key===' ')){event.preventDefault();onClick();}}:undefined} tabIndex={onClick?0:undefined} role={onClick?'link':undefined}>
     <header className="hero">
       <div className="track" ref={trackRef} onScroll={onScroll} role="region" aria-roledescription="carousel" aria-label={place.name+' · '+copy(isCategory?'Category illustration':'Photos')}>
         {photos.map((src,i)=><div className="slide" key={src+i} role="group" aria-roledescription="slide" aria-label={`${i+1} / ${photos.length}`}>
@@ -60,20 +62,21 @@ export default function SignalCard({place,onClick}:{place:SignalCardPlace;onClic
         {address&&<p className="address">{address}</p>}
       </button>
       {isCategory&&<span className="illustration">{copy('Illustration')}</span>}
-      {photos.length>1&&<div className="photo-nav" aria-label={copy('Photos')}>
+      {photos.length>1&&<div className="photo-nav" aria-label={copy('Photos')} onClick={stop}>
         <button type="button" className="step" aria-label="Previous photo" disabled={current===0} onClick={()=>step(-1)}><ChevronLeft size={16}/></button>
         <span className="photo-count" aria-live="polite">{current+1} / {photos.length}</span>
         <button type="button" className="step" aria-label="Next photo" disabled={current===photos.length-1} onClick={()=>step(1)}><ChevronRight size={16}/></button>
       </div>}
     </header>
-    <div className="reviews"><PlaceReviewGrid summary={summary} explain /></div>
-    <nav className="actions" aria-label={copy('Place actions')}>
+    <div className="reviews"><PlaceReviewGrid summary={summary} explain onOpen={onClick?()=>onClick():undefined} /></div>
+    <nav className="actions" aria-label={copy('Place actions')} onClick={stop}>
       {phone&&<a href={'tel:'+phone}><span className="ic"><Phone size={18}/></span>{copy('Call')}</a>}
       {directions&&<a href={'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(directions)} target="_blank" rel="noopener noreferrer"><span className="ic"><Navigation size={18}/></span>{copy('Directions')}</a>}
       {website&&<a href={website} target="_blank" rel="noopener noreferrer"><span className="ic"><Globe size={18}/></span>{copy('Website')}</a>}
       <button onClick={onClick} type="button"><span className="ic"><ArrowUpRight size={18}/></span>{copy('Details')}</button>
     </nav>
     <style jsx>{`
+.card.clickable{cursor:pointer}.card.clickable:focus-visible{outline:3px solid #8a05be;outline-offset:2px}
 .card{width:100%;overflow:hidden;background:${theme.cardBackground};color:${theme.text};border:1px solid ${theme.border};border-radius:20px;margin-bottom:12px;box-shadow:0 3px 14px ${isDark?"rgba(0,0,0,.18)":"rgba(23,1,58,.06)"}}
 button{font:inherit;cursor:pointer;color:inherit}button:focus-visible,a:focus-visible{outline:3px solid #8a05be;outline-offset:-3px}
 .hero{position:relative;height:172px;background:${theme.surface}}

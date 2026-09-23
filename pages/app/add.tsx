@@ -10,6 +10,7 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 import TabBar from '../../components/TabBar';
 import ECardAddressAutocomplete from '../../components/atlas/ECardAddressAutocomplete';
 import { useDrafts, ContentType, ContentSubtype } from '../../hooks/useDrafts';
+import { BUSINESS_CATEGORIES } from '../../lib/businessCategories';
 import { useAuth } from '../../contexts/AuthContext';
 import { EDITABLE_PLACE_FIELDS, findPlacesAtAddress, PlaceAtAddress, submitEditSuggestion } from '../../lib/addPlaceFlow';
 
@@ -78,67 +79,8 @@ const QUICK_ADD_TYPES = [
 ];
 
 // Category options for businesses - comprehensive searchable list
-const BUSINESS_CATEGORIES = [
-  // Food & Drink
-  'Restaurant', 'Cafe', 'Coffee Shop', 'Bar', 'Pub', 'Brewery', 'Winery', 'Bakery', 'Ice Cream',
-  'Fast Food', 'Food Truck', 'Juice Bar', 'Deli', 'Pizza', 'Sushi', 'BBQ', 'Seafood',
-  // Grocery & Market
-  'Grocery', 'Supermarket', 'Convenience Store', 'Farmers Market', 'Butcher', 'Fish Market',
-  // Retail & Shopping
-  'Retail', 'Shopping Mall', 'Clothing Store', 'Shoe Store', 'Jewelry', 'Electronics',
-  'Bookstore', 'Gift Shop', 'Thrift Store', 'Toy Store', 'Sporting Goods', 'Music Store',
-  'Art Supply', 'Craft Store', 'Florist', 'Antiques',
-  // Health & Medical
-  'Health & Wellness', 'Doctor', 'Dentist', 'Hospital', 'Urgent Care', 'Pharmacy',
-  'Chiropractor', 'Optometrist', 'Physical Therapy', 'Mental Health', 'Dermatologist',
-  // Beauty
-  'Beauty & Spa', 'Hair Salon', 'Barber', 'Nail Salon', 'Spa', 'Tattoo', 'Piercing',
-  'Lash & Brow', 'Skincare', 'Massage',
-  // Fitness
-  'Fitness', 'Gym', 'Yoga Studio', 'Pilates', 'CrossFit', 'Martial Arts',
-  'Dance Studio', 'Swimming Pool', 'Rock Climbing', 'Boxing',
-  // Entertainment
-  'Entertainment', 'Movie Theater', 'Bowling', 'Arcade', 'Escape Room', 'Mini Golf',
-  'Trampoline Park', 'Go Kart', 'Laser Tag', 'Water Park', 'Amusement Park', 'Zoo',
-  'Aquarium', 'Theme Park',
-  // Arts & Culture
-  'Arts & Culture', 'Museum', 'Art Gallery', 'Theater', 'Concert Venue', 'Library',
-  'Cultural Center', 'Historic Site',
-  // Nightlife
-  'Nightlife', 'Night Club', 'Lounge', 'Comedy Club', 'Karaoke', 'Wine Bar', 'Sports Bar',
-  // Services
-  'Services', 'Bank', 'ATM', 'Post Office', 'Laundromat', 'Dry Cleaner', 'Tailor',
-  'Locksmith', 'Print Shop', 'Shipping', 'Storage', 'Cleaning Service',
-  // Automotive
-  'Automotive', 'Gas Station', 'Car Wash', 'Auto Repair', 'Tire Shop', 'Car Dealership',
-  'Parking', 'Oil Change', 'Auto Parts', 'Car Rental',
-  // Home & Garden
-  'Home & Garden', 'Hardware Store', 'Nursery', 'Furniture Store', 'Home Decor',
-  'Appliance Store', 'Plumbing', 'Electrical', 'Landscaping', 'Pool Service',
-  // Professional
-  'Professional', 'Law Office', 'Accountant', 'Real Estate', 'Insurance', 'Consulting',
-  'Financial Advisor', 'Architect', 'Marketing Agency', 'IT Services',
-  // Education
-  'Education', 'School', 'University', 'Tutoring', 'Music Lessons', 'Art Classes',
-  'Driving School', 'Language School', 'Daycare', 'Preschool',
-  // Pets
-  'Pets', 'Veterinarian', 'Pet Store', 'Dog Park', 'Pet Grooming', 'Boarding', 'Dog Training',
-  // Religious
-  'Religious', 'Church', 'Mosque', 'Synagogue', 'Temple', 'Meditation Center',
-  // Outdoors & Recreation
-  'Outdoors', 'Park', 'Playground', 'Beach', 'Trail', 'Campground', 'Marina',
-  'Golf Course', 'Skate Park', 'Sports Field', 'Tennis Court', 'Basketball Court',
-  // Lodging
-  'Hotel', 'Motel', 'Hostel', 'Vacation Rental', 'Resort', 'Bed & Breakfast',
-  // Transportation
-  'Transportation', 'Bus Station', 'Train Station', 'Airport', 'Ferry', 'Bike Rental',
-  'Scooter Rental', 'Taxi Stand',
-  // Government
-  'Government', 'City Hall', 'DMV', 'Courthouse', 'Fire Station', 'Police Station',
-  'Community Center', 'Recycling Center',
-  // Other
-  'Other'
-];
+// Category options for businesses: shared list (lib/businessCategories.ts)
+
 
 export default function UniversalAddScreen() {
   const router = useRouter();
