@@ -58,3 +58,15 @@ export function cleanAddressLabel(address: Record<string, string> | undefined): 
   const tail = [region, address.postcode].filter(Boolean).join(' ');
   return [line1, city, tail].filter(Boolean).join(', ');
 }
+
+/**
+ * Nominatim often answers "62 Gorham St" with the street only. When the person typed a
+ * house number and the result has none, keep the typed number so the label stays complete.
+ */
+export function withTypedHouseNumber<T extends { address?: Record<string, string> }>(item: T, query: string): T {
+  const typed = query.match(/^\s*(\d+[a-z]?)\b/i)?.[1];
+  if (!typed || !item.address || item.address.house_number) return item;
+  const road = item.address.road || item.address.pedestrian || item.address.residential;
+  if (!road) return item;
+  return { ...item, address: { ...item.address, house_number: typed } };
+}
