@@ -1,5 +1,7 @@
+import { chainCoverFor } from './chainCovers';
+
 export interface PreviewPlace {
-  id: string; category?: string; subcategory?: string; tavvy_category?: string; tavvy_subcategory?: string;
+  id: string; name?: string | null; category?: string; subcategory?: string; tavvy_category?: string; tavvy_subcategory?: string;
   photos?: unknown; cover_image_url?: string | null; photo_url?: string | null; photo?: string | null;
 }
 const GROUPS: [string, RegExp][] = [
@@ -50,9 +52,12 @@ export function categoryImageForPlace(place: PreviewPlace): string {
 }
 export function realPlacePhotos(place: PreviewPlace): string[] {
   const photos = Array.isArray(place.photos) ? place.photos.map(photo => typeof photo === 'string' ? photo : photo?.url) : [];
-  return [...new Set([place.cover_image_url, ...photos, place.photo_url, place.photo].filter((url): url is string =>
+  const real = [...new Set([place.cover_image_url, ...photos, place.photo_url, place.photo].filter((url): url is string =>
     typeof url === 'string' && !!url.trim() && !url.includes('/images/place-categories/') && (/^https?:\/\//.test(url) || url.startsWith('/'))
   ))];
+  // National chains without their own photos get the chain's cover (a real storefront, not an illustration).
+  if (real.length === 0) { const chain = chainCoverFor(place.name); if (chain) return [chain]; }
+  return real;
 }
 export function placePreviewImage(place: PreviewPlace): { src: string; isCategory: boolean } {
   const photo = realPlacePhotos(place)[0];
