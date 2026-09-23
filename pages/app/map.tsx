@@ -32,7 +32,7 @@ import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { 
   FiArrowLeft, FiSearch, FiX, FiInfo, FiLayers, FiNavigation,
-  FiCloud, FiFilter, FiChevronDown, FiMapPin, FiArrowRight, FiRefreshCw
+  FiThermometer, FiFilter, FiChevronDown, FiMapPin, FiArrowRight, FiRefreshCw
 } from 'react-icons/fi';
 import { 
   IoRestaurant, IoCafe, IoBeer, IoCarSport, IoStorefront,
@@ -1163,7 +1163,7 @@ export default function MapScreen() {
                 setShowLegendPopup(false);
               }}
             >
-              <FiCloud size={20} />
+              <FiThermometer size={20} />
             </button>
             <button 
               className={`map-control-btn ${showLayersPopup ? 'active' : ''}`} 
@@ -1844,7 +1844,7 @@ export default function MapScreen() {
           width: 40px;
           height: 40px;
           border-radius: 50%;
-          background: rgba(0, 0, 0, 0.8);
+          background: #8A05BE; /* brand purple */
           border: none;
           display: flex;
           color: #fff;
@@ -1856,13 +1856,13 @@ export default function MapScreen() {
         }
 
         .map-control-btn:hover {
-          background: rgba(34, 211, 238, 0.9);
-          color: #000;
+          background: #00C2CB; /* brand teal */
+          color: #17013A;
         }
 
         .map-control-btn.active {
-          background: ${ACCENT_CYAN};
-          color: #000;
+          background: #00C2CB;
+          color: #17013A;
         }
 
         /* Info Button - Bottom Left */
@@ -1875,7 +1875,7 @@ export default function MapScreen() {
           width: 40px;
           height: 40px;
           border-radius: 50%;
-          background: rgba(0, 0, 0, 0.8);
+          background: #8A05BE;
           border: none;
           display: flex;
           align-items: center;
@@ -1887,13 +1887,13 @@ export default function MapScreen() {
         }
 
         .info-btn:hover {
-          background: rgba(34, 211, 238, 0.9);
-          color: #000;
+          background: #00C2CB;
+          color: #17013A;
         }
 
         .info-btn.active {
-          background: ${ACCENT_CYAN};
-          color: #000;
+          background: #00C2CB;
+          color: #17013A;
         }
 
         /* Control Popups */

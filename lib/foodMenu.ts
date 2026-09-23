@@ -22,3 +22,19 @@ export async function searchFoodMenus(options: FoodMenuSearch): Promise<FoodMenu
   if (error) throw new Error('Food Menu search is temporarily unavailable. Please try again later.');
   return data || [];
 }
+
+export interface FoodMenuPlace {
+  place_id: string; place_name: string; slug: string | null; city: string | null; state: string | null;
+  cover_image_url: string | null; dish_count: number; sample_dishes: string[]; distance_km: number | null;
+}
+/** Restaurants mode of the Food Menu tool: places with a published food menu (optionally matching a dish/place search). */
+export async function searchFoodMenuPlaces(options: FoodMenuSearch): Promise<FoodMenuPlace[]> {
+  const { data, error } = await supabase.rpc('search_food_menu_places', {
+    search_text: (options.query || '').trim().slice(0, 120),
+    location_text: (options.city || '').trim().slice(0, 120),
+    center_lat: options.latitude ?? null, center_lon: options.longitude ?? null,
+    radius_km: options.radiusKm ?? 25, page_offset: options.offset ?? 0,
+  });
+  if (error) throw new Error('Food Menu search is temporarily unavailable. Please try again later.');
+  return (data || []).map((row: FoodMenuPlace) => ({ ...row, dish_count: Number(row.dish_count) || 0, sample_dishes: row.sample_dishes || [] }));
+}

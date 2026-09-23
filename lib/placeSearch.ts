@@ -23,7 +23,7 @@ function scopeQuery(query: any, intent: SearchIntent, fsq: boolean) {
 export async function searchDatabase(intent: SearchIntent, limit: number, includeFsq = false, client: any = supabase): Promise<SearchPlace[]> {
   if (intent.needsLocation) throw new SearchLocationRequired('Allow location access or enter a city.');
   const terms = intent.query.toLowerCase().replace(/[^a-z0-9\u00c0-\u024f\s-]/gi, ' ').split(/\s+/).filter(Boolean)
-    .filter(word => !['best', 'great', 'near', 'me'].includes(word)).map(word => word.replace(/restaurants$/, 'restaurant'));
+    .filter(word => !['best', 'great', 'near', 'me'].includes(word));
   const request = async (fsq: boolean, exact = false) => {
     let q: any = client.from(fsq ? 'fsq_places_raw' : 'places').select(fsq
       ? 'fsq_place_id,name,locality,region,country,latitude,longitude,fsq_category_labels,address,tel,website'

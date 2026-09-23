@@ -110,6 +110,8 @@ export default function MenuGalleryPage() {
   const { id } = router.query;
   const isDemo = isDemoRestaurant(id);
   const placeHref = isDemo ? DEMO_HOME : `/app/place/${id}`;
+  // Back returns to the page the menu was opened from (Food Menu tool, place page, search); the place page is only the fallback for direct links.
+  const goBack = () => { if (typeof window !== 'undefined' && window.history.length > 1) router.back(); else void router.push(placeHref); };
 
   const [menu, setMenu] = useState<Menu | null>(null);
   const [categories, setCategories] = useState<MenuCategory[]>([]);
@@ -431,9 +433,9 @@ export default function MenuGalleryPage() {
               A floating bar holds back, the position and the switch to the text menu; the filters float under it. */}
           <div className="gallery-top">
             <div className="gallery-top-row">
-              <Link href={placeHref} className="gallery-icon-btn" aria-label={`Back to ${placeName || 'restaurant'}`}>
+              <button type="button" onClick={goBack} className="gallery-icon-btn" aria-label="Back">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-              </Link>
+              </button>
               <span className="gallery-position" aria-live="polite">{filteredItems.length ? `${activeIndex + 1} / ${total}` : '0 dishes'}</span>
               <Link href={`/place/${id}/menu?view=list`} className="gallery-icon-btn" aria-label="Text menu" title="Text menu">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>

@@ -21,8 +21,18 @@ export interface SearchIntent extends SearchContext {
 export function validCoordinates(value?: SearchCoordinates): value is SearchCoordinates {
   return !!value && Number.isFinite(value.latitude) && Math.abs(value.latitude) <= 90 && Number.isFinite(value.longitude) && Math.abs(value.longitude) <= 180;
 }
+/** "Hotels" / "Cafes" / "Bars" must find places tagged Hotel / Cafe / Bar: the index has no stemming and 5+ results block typo expansion. */
+export function singularizeQuery(text: string): string {
+  return text.split(/\s+/).map(word => {
+    if (word.length <= 3 || /ss$/i.test(word) || !/s$/i.test(word)) return word;
+    if (/ies$/i.test(word)) return word.replace(/ies$/i, 'y');
+    if (/(ch|sh|x|ss|z)es$/i.test(word)) return word.replace(/es$/i, '');
+    return word.replace(/s$/i, '');
+  }).join(' ');
+}
 export function resolveSearchIntent(query: string, context: SearchContext = {}): SearchIntent {
   const parsed = parseSearchQuery(query);
+  parsed.placeName = singularizeQuery(parsed.placeName);
   const coordinates = validCoordinates(context.coordinates) ? context.coordinates : undefined;
   // A named destination in the submitted query always takes priority over device coordinates.
   const named = parsed.city ? parsed : !parsed.useCurrentLocation && context.location?.trim() ? parseSearchQuery(`${parsed.placeName} in ${context.location.trim()}`) : undefined;
