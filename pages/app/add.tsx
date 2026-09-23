@@ -10,6 +10,11 @@ import { useThemeContext } from '../../contexts/ThemeContext';
 import TabBar from '../../components/TabBar';
 import ECardAddressAutocomplete from '../../components/atlas/ECardAddressAutocomplete';
 import { useDrafts, ContentType, ContentSubtype } from '../../hooks/useDrafts';
+import { useAuth } from '../../contexts/AuthContext';
+import { EDITABLE_PLACE_FIELDS, findPlacesAtAddress, PlaceAtAddress, submitEditSuggestion } from '../../lib/addPlaceFlow';
+
+// Address typed before signing in; restored after login so nobody has to start over.
+const PENDING_ADDRESS_KEY = '@tavvy_add_pending_address';
 import { supabase } from '../../lib/supabaseClient';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
@@ -23,7 +28,7 @@ import {
 } from 'react-icons/md';
 
 // Types
-type StepType = 'location' | 'business_type' | 'service_location' | 'content_type' | 'details' | 'photos' | 'review';
+type StepType = 'location' | 'existing_places' | 'suggest_changes' | 'business_type' | 'service_location' | 'content_type' | 'details' | 'photos' | 'review';
 type BusinessType = 'physical' | 'service' | 'on_the_go';
 
 interface AddressData {
@@ -157,6 +162,25 @@ export default function UniversalAddScreen() {
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
   const [isResuming, setIsResuming] = useState(false);
+  const { user } = useAuth();
+  // Duplicate check + "suggest changes" for a place that already exists at the address.
+  const [existingMatches, setExistingMatches] = useState<PlaceAtAddress[]>([]);
+  const [selectedExisting, setSelectedExisting] = useState<PlaceAtAddress | null>(null);
+  const [suggestForm, setSuggestForm] = useState<Record<string, string>>({});
+  const [suggestReason, setSuggestReason] = useState('');
+  const [suggestSending, setSuggestSending] = useState(false);
+  const [suggestError, setSuggestError] = useState('');
+  const [checkingExisting, setCheckingExisting] = useState(false);
+  const [pendingAddress, setPendingAddress] = useState<AddressData | null | undefined>(undefined);
+  useEffect(() => { try { const raw = localStorage.getItem(PENDING_ADDRESS_KEY); setPendingAddress(raw ? JSON.parse(raw) : null); } catch { setPendingAddress(null); } }, []);
+  // Back from login with a saved address: continue exactly where the person left off.
+  useEffect(() => {
+    if (!pendingAddress || isLoading) return;
+    if (!user) { setManualAddressData(pendingAddress); setShowManualAddress(true); return; }
+    try { localStorage.removeItem(PENDING_ADDRESS_KEY); } catch {}
+    const saved = pendingAddress; setPendingAddress(null);
+    void continueWithAddress(saved);
+  }, [pendingAddress, user, isLoading]);
 
   // Form State
   const [selectedBusinessType, setSelectedBusinessType] = useState<BusinessType | null>(null);
@@ -188,6 +212,8 @@ export default function UniversalAddScreen() {
   useEffect(() => {
     if (isLoading) return;
     if (hasInitialized) return;
+    if (pendingAddress === undefined) return; // still reading the saved address
+    if (pendingAddress) { setHasInitialized(true); return; }
     if (isResuming) return;
     if (pendingDraft) {
       setHasInitialized(true);
@@ -345,7 +371,7 @@ export default function UniversalAddScreen() {
     
     if (confirmed) {
       await updateDraft({ status: 'draft_type_selected', current_step: 2 }, true);
-      setCurrentStep('business_type');
+      await goAfterAddress({ latitude: currentDraft.latitude, longitude: currentDraft.longitude, street: currentDraft.address_line1, city: currentDraft.city });
     } else {
       setShowManualAddress(true);
     }
@@ -354,52 +380,64 @@ export default function UniversalAddScreen() {
   // Handle manual address save
   const handleSaveManualAddress = async () => {
     const { address1, city, state } = manualAddressData;
-    
     if (!address1.trim() || !city.trim() || !state.trim()) {
       alert('Please enter at least Address, City, and State.');
       return;
     }
-    
-    const formattedParts = [
-      manualAddressData.address1,
-      manualAddressData.address2,
-      manualAddressData.city,
-      manualAddressData.state,
-      manualAddressData.zipCode,
-      manualAddressData.country,
-    ].filter(Boolean);
-    const formatted = formattedParts.join(', ');
-    
+    await continueWithAddress(manualAddressData);
+  };
+
+  // Saves the address to the draft (or parks it and opens login), then checks for places already at that address.
+  const continueWithAddress = async (data: typeof manualAddressData) => {
+    const formatted = [data.address1, data.address2, data.city, data.state, data.zipCode, data.country].filter(Boolean).join(', ');
+    const fields = {
+      address_line1: data.address1, address_line2: data.address2 || null, city: data.city, region: data.state || null,
+      postal_code: data.zipCode || null, country: data.country || 'USA', formatted_address: formatted,
+      latitude: data.latitude ?? null, longitude: data.longitude ?? null,
+    };
     if (currentDraft) {
-      await updateDraft({
-        address_line1: manualAddressData.address1,
-        address_line2: manualAddressData.address2 || null,
-        city: manualAddressData.city,
-        region: manualAddressData.state || null,
-        postal_code: manualAddressData.zipCode || null,
-        country: manualAddressData.country || 'USA',
-        formatted_address: formatted,
-        latitude: manualAddressData.latitude ?? null,
-        longitude: manualAddressData.longitude ?? null,
-        status: 'draft_type_selected',
-        current_step: 2,
-      }, true);
+      await updateDraft({ ...fields, status: 'draft_type_selected', current_step: 2 }, true);
     } else {
-      await createDraft({
-        latitude: manualAddressData.latitude ?? null,
-        longitude: manualAddressData.longitude ?? null,
-        address_line1: manualAddressData.address1,
-        address_line2: manualAddressData.address2,
-        city: manualAddressData.city,
-        region: manualAddressData.state,
-        postal_code: manualAddressData.zipCode,
-        country: manualAddressData.country,
-        formatted_address: formatted,
-      });
+      if (!user) {
+        // Always offer a way forward: keep the address and come straight back here after signing in.
+        try { localStorage.setItem(PENDING_ADDRESS_KEY, JSON.stringify(data)); } catch {}
+        void router.push({ pathname: '/app/login', query: { returnUrl: '/app/add' } });
+        return;
+      }
+      await createDraft({ ...fields, address_line2: data.address2, region: data.state, postal_code: data.zipCode, country: data.country });
     }
-    
     setShowManualAddress(false);
-    setCurrentStep('business_type');
+    await goAfterAddress({ latitude: data.latitude, longitude: data.longitude, street: data.address1, city: data.city });
+  };
+
+  // Next step after an address: "is it one of these?" when places already exist there, otherwise the business type.
+  const goAfterAddress = async (addr: { latitude?: number | null; longitude?: number | null; street?: string | null; city?: string | null }) => {
+    setCheckingExisting(true);
+    const matches = await findPlacesAtAddress(addr);
+    setCheckingExisting(false);
+    if (matches.length > 0) { setExistingMatches(matches); setCurrentStep('existing_places'); }
+    else setCurrentStep('business_type');
+  };
+
+  const chooseExisting = (place: PlaceAtAddress) => {
+    setSelectedExisting(place);
+    setSuggestForm(Object.fromEntries(EDITABLE_PLACE_FIELDS.map(f => [f.key, ((place[f.key] as string | null) || '')])));
+    setSuggestReason(''); setSuggestError('');
+    setCurrentStep('suggest_changes');
+  };
+
+  const handleSubmitSuggestion = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedExisting) return;
+    if (!user) { void router.push({ pathname: '/app/login', query: { returnUrl: '/app/add' } }); return; }
+    setSuggestSending(true); setSuggestError('');
+    try {
+      await submitEditSuggestion({ placeId: selectedExisting.id, userId: user.id, current: selectedExisting, proposed: suggestForm, reason: suggestReason });
+      if (currentDraft) await deleteDraft();
+      alert('Thanks! Your suggested changes were sent. They will show on Tavvy after an admin approves them.');
+      void router.push(`/app/place/${selectedExisting.id}`);
+    } catch (err) { setSuggestError((err as Error).message); }
+    finally { setSuggestSending(false); }
   };
 
   // Handle business type selection
@@ -529,6 +567,8 @@ export default function UniversalAddScreen() {
 
   // Handle back navigation
   const handleBack = () => {
+    if (currentStep === 'suggest_changes') { setCurrentStep('existing_places'); return; }
+    if (currentStep === 'existing_places') { setCurrentStep('location'); return; }
     const steps = getActiveSteps();
     const stepIndex = steps.indexOf(currentStep);
     if (stepIndex > 0) {
@@ -565,13 +605,15 @@ export default function UniversalAddScreen() {
 
   // Calculate progress
   const activeSteps = getActiveSteps();
-  const stepIndex = activeSteps.indexOf(currentStep);
+  const stepIndex = Math.max(0, activeSteps.indexOf(currentStep));
   const progress = ((stepIndex + 1) / activeSteps.length) * 100;
 
   // Get step title
   const getStepTitle = () => {
     switch (currentStep) {
       case 'location': return 'Confirm Location';
+      case 'existing_places': return 'Already on Tavvy?';
+      case 'suggest_changes': return 'Suggest changes';
       case 'business_type': return 'Business Type';
       case 'service_location': return 'Service Location';
       case 'content_type': return 'What are you adding?';
@@ -610,10 +652,10 @@ export default function UniversalAddScreen() {
         {/* Content */}
         <div className="content">
           {/* Loading State */}
-          {isLoadingLocation && (
+          {(isLoadingLocation || checkingExisting) && (
             <div className="loading-container">
               <FiLoader className="spinner" size={48} color={ACCENT} />
-              <p style={{ color: subtextColor }}>Getting your location...</p>
+              <p style={{ color: subtextColor }}>{checkingExisting ? 'Checking this address on Tavvy...' : 'Getting your location...'}</p>
             </div>
           )}
 
@@ -679,6 +721,44 @@ export default function UniversalAddScreen() {
                 </button>
               </div>
             )
+          )}
+
+          {/* Existing places at this address */}
+          {currentStep === 'existing_places' && (
+            <div className="location-confirm">
+              <p style={{ color: subtextColor }}>We already have {existingMatches.length === 1 ? 'a place' : 'places'} at this address. Is yours one of these?</p>
+              <div style={{ display: 'grid', gap: 10, margin: '12px 0' }}>
+                {existingMatches.map(place => (
+                  <button key={place.id} type="button" onClick={() => chooseExisting(place)} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 14, borderRadius: 14, border: '1px solid rgba(128,128,128,0.3)', background: cardBg, color: textColor, textAlign: 'left', cursor: 'pointer', font: 'inherit' }}>
+                    {place.cover_image_url ? <img src={place.cover_image_url} alt="" style={{ width: 52, height: 52, borderRadius: 10, objectFit: 'cover' }} /> : <span style={{ width: 52, height: 52, borderRadius: 10, background: 'rgba(138,5,190,0.12)', display: 'grid', placeItems: 'center', color: '#8A05BE', fontSize: 22 }}>📍</span>}
+                    <span style={{ flex: 1, minWidth: 0 }}><strong style={{ display: 'block', fontSize: 16 }}>{place.name}</strong><span style={{ fontSize: 13, color: subtextColor }}>{[place.tavvy_category, place.street].filter(Boolean).join(' · ')}</span></span>
+                    <span aria-hidden="true" style={{ color: subtextColor }}>›</span>
+                  </button>
+                ))}
+              </div>
+              <p style={{ color: subtextColor, fontSize: 13 }}>Pick one to suggest changes to its details (an admin approves them), or continue with a new place.</p>
+              <button className="primary-btn" onClick={() => setCurrentStep('business_type')}>No, this is a new place</button>
+            </div>
+          )}
+
+          {/* Suggest changes to an existing place */}
+          {currentStep === 'suggest_changes' && selectedExisting && (
+            <form className="manual-address-form" onSubmit={handleSubmitSuggestion}>
+              <p style={{ color: subtextColor }}>Update what is wrong or missing for <strong style={{ color: textColor }}>{selectedExisting.name}</strong>. Changes go live after an admin approves them.</p>
+              {EDITABLE_PLACE_FIELDS.map(field => (
+                <label key={field.key} style={{ display: 'grid', gap: 6, marginTop: 12, color: textColor, fontSize: 13, fontWeight: 600 }}>{field.label}
+                  <input value={suggestForm[field.key] || ''} onChange={e => setSuggestForm(old => ({ ...old, [field.key]: e.target.value }))} placeholder={field.label} type={field.key === 'website' ? 'url' : field.key === 'phone' ? 'tel' : 'text'} style={{ width: '100%', boxSizing: 'border-box', padding: 12, borderRadius: 10, border: '1px solid rgba(128,128,128,0.35)', background: cardBg, color: textColor, font: 'inherit', fontSize: 15 }} />
+                </label>
+              ))}
+              <label style={{ display: 'grid', gap: 6, marginTop: 12, color: textColor, fontSize: 13, fontWeight: 600 }}>Anything the admin should know? (optional)
+                <textarea value={suggestReason} onChange={e => setSuggestReason(e.target.value)} maxLength={500} placeholder="e.g. They moved, new phone number, closed on Mondays" style={{ width: '100%', boxSizing: 'border-box', minHeight: 70, padding: 12, borderRadius: 10, border: '1px solid rgba(128,128,128,0.35)', background: cardBg, color: textColor, font: 'inherit', fontSize: 15, resize: 'vertical' }} />
+              </label>
+              {suggestError && <p role="alert" style={{ color: '#DC2626', fontSize: 13 }}>{suggestError}</p>}
+              <div className="button-row" style={{ marginTop: 24 }}>
+                <button type="button" className="secondary-btn" onClick={() => setCurrentStep('existing_places')}>Back</button>
+                <button type="submit" className="primary-btn" disabled={suggestSending}>{suggestSending ? 'Sending…' : 'Send suggestion'}</button>
+              </div>
+            </form>
           )}
 
           {/* Business Type Step */}

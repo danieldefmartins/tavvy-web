@@ -4,6 +4,7 @@
  * Matches the iOS ECardAddressAutocomplete component
  */
 
+import { cleanAddressLabel } from '../../lib/addPlaceFlow';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { FiMapPin, FiSearch, FiX, FiLoader } from 'react-icons/fi';
 
@@ -79,10 +80,12 @@ export default function ECardAddressAutocomplete({ value, onChange, isDark = fal
     setIsSearching(true);
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=5&countrycodes=us`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&addressdetails=1&limit=8&countrycodes=us&layer=address`
       );
       const data: NominatimResult[] = await response.json();
-      setSuggestions(data);
+      // Addresses only: clean labels, no business names, no duplicates.
+      const seen = new Set<string>();
+      setSuggestions((Array.isArray(data) ? data : []).map(item => ({ ...item, display_name: cleanAddressLabel((item as any).address) || '' })).filter(item => { if (!item.display_name || seen.has(item.display_name)) return false; seen.add(item.display_name); return true; }));
       setShowSuggestions(true);
     } catch (error) {
       console.error('Address search error:', error);
