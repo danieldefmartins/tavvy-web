@@ -9,6 +9,7 @@ import { useRouter } from 'next/router';
 import { useThemeContext } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import AppLayout from '../../components/AppLayout';
+import ReviewWishlistCard from '../../components/ReviewWishlistCard';
 import { useTranslation } from 'next-i18next';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { 
@@ -168,6 +169,7 @@ export default function AppsScreen() {
     <AppLayout><main className="directory">
       <header className="header"><div><img className="directory-logo" src={isDark ? '/tavvy-logo-white.png' : '/tavvy-logo-dark.png'} alt={copy("Tavvy")} width={160} height={47} /><p className="eyebrow">{copy("A LITTLE HELP FOR EVERY DAY")}</p><h1>{copy("What would you like to do?")}</h1><p className="intro">{copy("Find your next stop. Meet the right people. Make yourself at home.")}</p></div><button className={"profile"} aria-label={user ? 'Your account' : "Sign in"} onClick={() => router.push(user ? '/app/profile' : '/app/login', undefined, { locale })}><FiUser size={22} /></button></header>
       <div className={"search"}><FiSearch size={20} /><input aria-label="Search apps and tools" placeholder={copy("Search food, places, people and more")} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />{searchQuery && <button aria-label={copy("Clear search")} onClick={() => setSearchQuery('')}>{copy("Clear")}</button>}</div>
+      {!searchQuery.trim() && <ReviewWishlistCard />}
       {!searchQuery.trim() && <section className={"featured"}><div className="section-heading"><h2>{copy("A good place to start")}</h2><span>{copy("Get more out of Tavvy")}</span></div><div className="featured-scroll">{FEATURED_APPS.map(app => { const Icon = app.icon; return <Link key={app.id} href={app.href} locale={locale} className={`featured-card ${app.id}`}><div className="featured-top"><Icon size={26} /><span aria-hidden="true">↗</span></div><h3>{label(app)}</h3><p>{copy(TOOL_DETAILS[app.id].description)}</p></Link>; })}</div></section>}
       {filtered.length === 0 ? <div className="empty" role="status"><h2>{copy("No tools found")}</h2><p>{copy("Try a word like food, cards or places.")}</p><button onClick={() => setSearchQuery('')}>{copy("Show all tools")}</button></div> : TOOL_GROUPS.map(group => { const items = filtered.filter(app => TOOL_DETAILS[app.id].group === group.id); return items.length > 0 && <section className="group" key={group.id}><div className="section-heading"><div><h2>{copy(group.title)}</h2><p>{copy(group.description)}</p></div><span>{items.length} {items.length === 1 ? 'tool' : "tools"}</span></div><div className="tool-grid">{items.map(app => { const Icon = app.icon; return <Link key={app.id} href={app.href} locale={locale} className="tool"><div className={`tool-icon ${group.id}`}><Icon size={23} /></div><div><h3>{label(app)}</h3><p>{copy(TOOL_DETAILS[app.id].description)}</p></div><span className="arrow" aria-hidden="true">›</span></Link>; })}</div></section>; })}
       
