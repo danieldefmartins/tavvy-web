@@ -1337,7 +1337,15 @@ export default function MapScreen() {
 
           {/* The full header is a grab area, including the title. */}
           <div className="sheet-header" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onTouchCancel={handleTouchEnd} onMouseDown={handleMouseDown}>
-            <div><h2 className="sheet-title">{categoryName}</h2><p style={{fontSize:12,color:theme.textSecondary,margin:'4px 0 0'}}>{resolvedLocation}</p></div>
+            {/* One compact header: title, "N places · scope", and Add a place (anything that can get a review is a place). */}
+            <div className="sheet-heading">
+              <h2 className="sheet-title">{selectedCategory === 'all' ? (searchQuery ? `"${searchQuery}"` : 'Nearby places') : categoryName}</h2>
+              <p className="sheet-meta">{loading ? 'Searching…' : `${places.length} place${places.length === 1 ? '' : 's'} · ${resolvedLocation}`}</p>
+            </div>
+            <Link href="/app/add" className="add-place-btn" aria-label="Add a place" onMouseDown={e => e.stopPropagation()} onTouchStart={e => e.stopPropagation()}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+              Add a place
+            </Link>
             {selectedCategory !== 'all' && (
               <button className="close-btn" onClick={() => handleCategorySelect('all')}>
                 <IoClose size={24} />
@@ -1411,15 +1419,6 @@ export default function MapScreen() {
             </div>
           )}
 
-          {/* Places Count */}
-          {selectedCategory === 'all' && (
-            <p className="places-count">
-              {searchQuery 
-                ? `${places.length} result${places.length !== 1 ? 's' : ''} for "${searchQuery}"`
-                : `${places.length} places nearby`
-              }
-            </p>
-          )}
 
           {/* Place Cards */}
           <div className="places-list" ref={listRef}>
@@ -1430,7 +1429,7 @@ export default function MapScreen() {
               </div>
             ) : places.length === 0 ? (
               <div className="empty-state">
-                {showDemoFallback ? <Link className="demo-fallback" href={DEMO_RESTAURANT_HREF}><strong>Trattoria Tavvy</strong><span>Illustrative demo</span><span>View demo →</span></Link> : <><p>{searchMessage || `No places found · ${resolvedLocation}`}</p><p className="empty-hint">Try zooming out or searching for a specific place</p></>}
+                {showDemoFallback ? <Link className="demo-fallback" href={DEMO_RESTAURANT_HREF}><strong>Trattoria Tavvy</strong><span>Illustrative demo</span><span>View demo →</span></Link> : <><p>{searchMessage || `No places found · ${resolvedLocation}`}</p><p className="empty-hint">Try zooming out or searching for a specific place</p><Link href="/app/add" className="add-place-prompt"><span className="add-place-prompt-icon">+</span><span><strong>Missing something?</strong><small>Anything that can get a review is a place: a restaurant, a ride, even a public bathroom.</small></span></Link></>}
               </div>
             ) : (
               places.map((place) => (
@@ -2119,11 +2118,19 @@ export default function MapScreen() {
         }
         .sheet-header:active { cursor: grabbing; }
 
+        .sheet-heading { flex: 1; min-width: 0; }
+        .sheet-meta { font-size: 13px; color: ${isDark ? '#9A9AA0' : '#666'}; margin: 2px 0 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sheet-header :global(.add-place-btn) { display: inline-flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 12px 0 8px; margin-right: 8px; border: 1.5px solid #8A05BE; border-radius: 18px; color: #8A05BE; font-size: 13px; font-weight: 700; text-decoration: none; white-space: nowrap; flex-shrink: 0; }
+        .sheet-header :global(.add-place-btn:hover) { background: rgba(138,5,190,0.08); }
+        .empty-state :global(.add-place-prompt) { display: flex; align-items: center; gap: 12px; margin: 20px auto 0; max-width: 420px; padding: 14px; border-radius: 14px; border: 1px solid ${isDark ? '#3A3A3C' : '#E5E5EA'}; background: ${isDark ? '#2C2C2E' : '#fff'}; color: ${isDark ? '#fff' : '#111'}; text-decoration: none; text-align: left; }
+        .empty-state :global(.add-place-prompt) small { display: block; font-size: 13px; line-height: 1.4; color: ${isDark ? '#9A9AA0' : '#666'}; margin-top: 2px; }
+        .empty-state :global(.add-place-prompt-icon) { width: 40px; height: 40px; border-radius: 50%; background: rgba(138,5,190,0.12); color: #8A05BE; font-size: 24px; font-weight: 700; display: grid; place-items: center; flex-shrink: 0; }
         .sheet-title {
-          font-size: 24px;
+          font-size: 18px;
           font-weight: 700;
           color: ${isDark ? '#fff' : '#111'};
           margin: 0;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
 
         .close-btn {
