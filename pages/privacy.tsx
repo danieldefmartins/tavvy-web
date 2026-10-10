@@ -18,7 +18,7 @@ export default function PrivacyPolicy() {
             <img src="/tavvy-logo-white.png" alt="TavvY" style={{ height: 40, marginBottom: 24 }} />
           </Link>
           <h1>Privacy Policy</h1>
-          <p>Last Updated: January 17, 2026</p>
+          <p>Last Updated: October 9, 2026</p>
         </header>
 
         <main className="legal-content">
