@@ -1,5 +1,18 @@
 # Tavvy current engineering status
 
+## Privacy-page correction — October 9, 2026 (live)
+
+Isolated branch `fix/apple-review-privacy-20261009`, based on the verified production
+commit `1ebd65f`. Commit `ca1e89f` corrects the claim that in-app account deletion is
+unavailable: deletion is available from Settings, and Apple subscriptions must be
+managed separately. Railway deployment `1dc8d5db-93a0-44e2-9088-93e8482a84b9`
+succeeded; the corrected public privacy page was verified in Chrome. The existing
+Terms page also loaded. No full legal compliance review is claimed.
+
+The privacy page still displays its previous January update date; a follow-up date
+correction remains. The source branch is local and has not been merged or pushed.
+The original working directory’s unrelated changes were not deployed.
+
 ## Review entry and place imagery — September 22, web released; mobile source published
 
 The standard place Add a review sheet had a styled-jsx scope bug: its outer overlay
