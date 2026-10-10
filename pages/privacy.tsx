@@ -84,8 +84,11 @@ export default function PrivacyPolicy() {
           <h2>4. Your Choices</h2>
           <h3>4.1. Account Information</h3>
           <p>
-            In-app account deletion is currently unavailable. For questions about accessing, correcting,
-            or deleting your personal information, contact us at support@tavvy.com.
+            You can request account deletion from Settings in the Tavvy app by selecting Delete Account
+            and following the confirmation steps. Deleting your Tavvy account does not cancel an Apple
+            subscription; manage or cancel that subscription separately in your App Store account settings.
+            For questions about accessing, correcting, or deleting your personal information,
+            contact us at support@tavvy.com.
           </p>
 
           <h3>4.2. Location Information</h3>
