@@ -18,6 +18,12 @@ const SIGNAL_TYPE_CAT: Record<string, 'good' | 'vibe' | 'headsup'> = {
 
 const isUuid = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 
+// fsq_places_raw.fsq_category_labels -> top-level label, e.g. "Travel and Transportation"
+function fsqCategory(labels: any): string | null {
+  const rawCat = Array.isArray(labels) ? labels[0] : labels;
+  return rawCat ? String(rawCat).replace(/[\[\]']/g, '').split('>')[0].trim() || null : null;
+}
+
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 // "2026-05-29T..." or Date -> "2 days ago" style relative string
@@ -200,8 +206,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (looksFsq && !promoted) {
       const { data: f } = await supabase.from('fsq_places_raw').select('*').eq('fsq_place_id', raw).maybeSingle();
       if (f) {
-        const rawCat = Array.isArray(f.fsq_category_labels) ? f.fsq_category_labels[0] : f.fsq_category_labels;
-        const cat = rawCat ? String(rawCat).replace(/[\[\]']/g, '').split('>')[0].trim() : 'Place';
+        const cat = fsqCategory(f.fsq_category_labels) || 'Place';
         return res.status(200).json({
           place: {
             id: rawId, name: f.name, category: cat, subcategory: undefined,
@@ -222,6 +227,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { data: place, error } = await q.maybeSingle();
     if (error) return res.status(500).json({ error: error.message });
     if (!place) return res.status(404).json({ error: 'not found' });
+
+    // Promoted FSQ rows carry no tavvy_category; derive it from the raw FSQ labels.
+    let category = place.tavvy_category;
+    if (!category && place.source_type === 'fsq' && place.source_id) {
+      try {
+        const { data: f } = await supabase.from('fsq_places_raw').select('fsq_category_labels')
+          .eq('fsq_place_id', place.source_id).maybeSingle();
+        category = fsqCategory(f?.fsq_category_labels);
+      } catch { /* keep null */ }
+    }
 
     // Aggregated signals for this place, joined to the signal catalog (review_items)
     const { data: aggs } = await supabase
@@ -358,7 +373,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({
       place: {
         id: place.id, slug: place.slug, name: place.name,
-        category: place.tavvy_category, subcategory: place.tavvy_subcategory,
+        category, subcategory: place.tavvy_subcategory,
         street: place.street, city: place.city, region: place.region, country: place.country,
         phone: place.phone, whatsapp: place.whatsapp_number, website: place.website, email: place.email,
         instagram: place.instagram, tiktok: place.tiktok, youtube: place.youtube, facebook: place.facebook,
