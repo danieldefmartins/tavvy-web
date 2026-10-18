@@ -181,13 +181,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // Links across the app use several id forms: raw uuid, slug, tavvy:<uuid>, places-<uuid>, fsq-<id>, fsq:<id>
   const rawId = String(req.query.id || '');
   const isFsq = /^fsq[-:]/.test(rawId);
-  const raw = rawId.replace(/^(tavvy:|places-|fsq[-:])/, '');
+  let raw = rawId.replace(/^(tavvy:|places-|fsq[-:])/, '');
   if (!raw) return res.status(400).json({ error: 'missing id' });
 
   try {
+    const looksFsq = isFsq || (!isUuid(raw) && /^[0-9a-f]{24}$/i.test(raw));
+    // An FSQ place gets a canonical `places` row once someone reviews it
+    // (source_type='fsq', source_id=<fsq id>). Serve that row so its reviews show.
+    let promoted = false;
+    if (looksFsq) {
+      const { data: p } = await supabase.from('places').select('id')
+        .eq('source_type', 'fsq').eq('source_id', raw).limit(1).maybeSingle();
+      if (p?.id) { raw = p.id; promoted = true; }
+    }
+
     // FSQ (Foursquare) places aren't in the Tavvy `places` table — resolve them
     // from fsq_places_raw and render with no signals ("Be the first").
-    if (isFsq || (!isUuid(raw) && /^[0-9a-f]{24}$/i.test(raw))) {
+    if (looksFsq && !promoted) {
       const { data: f } = await supabase.from('fsq_places_raw').select('*').eq('fsq_place_id', raw).maybeSingle();
       if (f) {
         const rawCat = Array.isArray(f.fsq_category_labels) ? f.fsq_category_labels[0] : f.fsq_category_labels;
