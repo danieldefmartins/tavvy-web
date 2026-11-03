@@ -23,6 +23,12 @@ const SIGNAL_TYPE_CAT: Record<string, 'good' | 'vibe' | 'headsup'> = {
 
 const isUuid = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
 
+// fsq_places_raw.fsq_category_labels -> top-level label, e.g. "Travel and Transportation"
+function fsqCategory(labels: any): string | null {
+  const rawCat = Array.isArray(labels) ? labels[0] : labels;
+  return rawCat ? String(rawCat).replace(/[\[\]']/g, '').split('>')[0].trim() || null : null;
+}
+
 // "2026-05-29T..." or Date -> "2 days ago" style relative string
 function relativeTime(iso: string): string {
   const then = new Date(iso).getTime();
@@ -51,18 +57,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // Links across the app use several id forms: raw uuid, slug, tavvy:<uuid>, places-<uuid>, fsq-<id>, fsq:<id>
   const rawId = String(req.query.id || '');
   const isFsq = /^fsq[-:]/.test(rawId);
-  const raw = rawId.replace(/^(tavvy:|places-|fsq[-:])/, '');
+  let raw = rawId.replace(/^(tavvy:|places-|fsq[-:])/, '');
   if (!raw) return res.status(400).json({ error: 'missing id' });
 
   try {
-    // FSQ (Foursquare) places aren't in the Tavvy `places` table. The search
-    // index can contain places that are absent from the older raw table, so a
-    // result must remain openable from the same exact indexed identity.
-    if (isFsq || (!isUuid(raw) && /^[0-9a-f]{24}$/i.test(raw))) {
+    const looksFsq = isFsq || (!isUuid(raw) && /^[0-9a-f]{24}$/i.test(raw));
+    // An FSQ place gets a canonical `places` row once someone reviews it
+    // (source_type='fsq', source_id=<fsq id>). Serve that row so its reviews show.
+    let promoted = false;
+    if (looksFsq) {
+      const { data: p } = await supabase.from('places').select('id')
+        .eq('source_type', 'fsq').eq('source_id', raw).limit(1).maybeSingle();
+      if (p?.id) { raw = p.id; promoted = true; }
+    }
+
+    // FSQ (Foursquare) places aren't in the Tavvy `places` table — resolve them
+    // from fsq_places_raw and render with no signals ("Be the first").
+    if (looksFsq && !promoted) {
       const { data: f } = await supabase.from('fsq_places_raw').select('*').eq('fsq_place_id', raw).maybeSingle();
       if (f) {
-        const rawCat = Array.isArray(f.fsq_category_labels) ? f.fsq_category_labels[0] : f.fsq_category_labels;
-        const cat = rawCat ? String(rawCat).replace(/[\[\]']/g, '').split('>')[0].trim() : 'Place';
+        const cat = fsqCategory(f.fsq_category_labels) || 'Place';
         return res.status(200).json({
           place: {
             id: rawId, name: f.name, category: cat, subcategory: undefined,
@@ -128,6 +142,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         if (domain) deliveryLinks[provider.replace('_', '')] = url.toString();
         else socialLinks[provider] = url.toString();
       } catch { /* ignore malformed external links */ }
+    }
+
+    // Promoted FSQ rows carry no tavvy_category; derive it from the raw FSQ labels.
+    let category = place.tavvy_category;
+    if (!category && place.source_type === 'fsq' && place.source_id) {
+      try {
+        const { data: f } = await supabase.from('fsq_places_raw').select('fsq_category_labels')
+          .eq('fsq_place_id', place.source_id).maybeSingle();
+        category = fsqCategory(f?.fsq_category_labels);
+      } catch { /* keep null */ }
     }
 
     // Aggregated signals for this place, joined to the signal catalog (review_items)
@@ -239,7 +263,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({
       place: {
         id: place.id, slug: place.slug, source_type: place.source_type, name: cruiseVenue?.venue_name || place.name,
-        category: cruiseVenue?.review_category || place.tavvy_category, subcategory: cruiseVenue ? null : place.tavvy_subcategory,
+        category: cruiseVenue?.review_category || category, subcategory: cruiseVenue ? null : place.tavvy_subcategory,
         street: place.street, city: place.city, region: place.region, country: place.country,
         phone: place.phone, whatsapp: place.whatsapp_number, website: place.website, email: place.email,
         instagram: socialLinks.instagram, tiktok: socialLinks.tiktok, youtube: socialLinks.youtube, facebook: socialLinks.facebook,
