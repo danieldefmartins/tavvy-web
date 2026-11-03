@@ -13,6 +13,9 @@ module.exports = {
     '/500',
     '/*/app',
     '/*/app/**',
+    // Legal pages are English-only; the locale copies canonical to the English URL.
+    '/*/privacy',
+    '/*/terms',
   ],
   // Only index public-facing pages
   transform: async (config, path) => {

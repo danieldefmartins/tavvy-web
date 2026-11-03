@@ -9,8 +9,11 @@ export default function PrivacyPolicy() {
     <>
       <Head>
         <title>Privacy Policy | Tavvy</title>
-        <meta name="description" content="Tavvy Privacy Policy: what we collect, how we use it, text message (SMS) privacy, and how to delete your account." />
+        <meta name="description" content="Tavvy Privacy Policy: what we collect, how we use it, text message (SMS) privacy, and how to delete your account." key="description" />
               <link rel="canonical" href="https://tavvy.com/privacy" />
+        <meta property="og:url" content="https://tavvy.com/privacy" key="og:url" />
+        <meta property="og:title" content="Privacy Policy | Tavvy" key="og:title" />
+        <meta name="twitter:url" content="https://tavvy.com/privacy" key="twitter:url" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify({

@@ -40,11 +40,12 @@ export default function AboutUs() {
     <>
       <Head>
         <title>Our Story - Tavvy</title>
-        <meta name="description" content="Discover the story behind Tavvy - a platform born from love, resilience, and the belief that technology should guide, support, and care." />
-        <meta property="og:title" content="Our Story - Tavvy" />
-        <meta property="og:description" content="Tavvy exists to guide, reduce uncertainty, and help people make better decisions with confidence." />
+        <link rel="canonical" href="https://tavvy.com/about-us" />
+        <meta name="description" content="Discover the story behind Tavvy - a platform born from love, resilience, and the belief that technology should guide, support, and care." key="description" />
+        <meta property="og:title" content="Our Story - Tavvy" key="og:title" />
+        <meta property="og:description" content="Tavvy exists to guide, reduce uncertainty, and help people make better decisions with confidence." key="og:description" />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://tavvy.com/about-us" />
+        <meta property="og:url" content="https://tavvy.com/about-us" key="og:url" />
       </Head>
 
       {/* Root wrapper div: styled-jsx as a direct child of a fragment crashes in production */}

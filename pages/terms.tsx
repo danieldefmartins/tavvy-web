@@ -9,8 +9,11 @@ export default function TermsOfService() {
     <>
       <Head>
         <title>Terms of Service | Tavvy</title>
-        <meta name="description" content="TavvY Terms of Service - Rules and guidelines for using our platform." />
+        <meta name="description" content="Tavvy Terms of Service: using Tavvy, content rules, Tavvy Pros and SMS / text messaging terms." key="description" />
               <link rel="canonical" href="https://tavvy.com/terms" />
+        <meta property="og:url" content="https://tavvy.com/terms" key="og:url" />
+        <meta property="og:title" content="Terms of Service | Tavvy" key="og:title" />
+        <meta name="twitter:url" content="https://tavvy.com/terms" key="twitter:url" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify({

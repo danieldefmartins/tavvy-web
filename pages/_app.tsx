@@ -114,7 +114,7 @@ function LocaleManager() {
 
 // Static public pages that must be fully server-rendered (legal/A2P review reads the raw HTML).
 // They need no auth or theme state, so they skip the providers that render nothing until hydration.
-const STATIC_PUBLIC_ROUTES = new Set(['/privacy', '/terms']);
+const STATIC_PUBLIC_ROUTES = new Set(['/privacy', '/terms', '/about-us']);
 
 function App({ Component, pageProps }: AppProps) {
   useAppNavigationHistory();
