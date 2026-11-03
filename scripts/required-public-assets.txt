@@ -1,0 +1,9 @@
+# Files referenced from the database or outside the code (e-card photos, wallet passes, OG images).
+# The build fails if any of these is missing from public/. Add new DB-referenced files here.
+/images/ecards/aline-martins-profile.jpg
+/favicon.png
+/og-image.png
+/apple-wallet-icon.png
+/google-wallet-icon.png
+/brand/apple-wallet-icon.png
+/brand/google-wallet-icon.png

@@ -12,7 +12,8 @@
     "start": "next start -p ${PORT:-3000}",
     "lint": "next lint",
     "postbuild": "next-sitemap",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prebuild": "node scripts/check-public-assets.mjs"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
