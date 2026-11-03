@@ -8,8 +8,20 @@ export default function PrivacyPolicy() {
   return (
     <>
       <Head>
-        <title>Privacy Policy | TavvY</title>
-        <meta name="description" content="TavvY Privacy Policy - How we collect, use, and protect your data." />
+        <title>Privacy Policy | Tavvy</title>
+        <meta name="description" content="Tavvy Privacy Policy: what we collect, how we use it, text message (SMS) privacy, and how to delete your account." />
+              <link rel="canonical" href="https://tavvy.com/privacy" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@graph': [
+              { '@type': 'Organization', '@id': 'https://tavvy.com/#organization', name: 'Tavvy', url: 'https://tavvy.com/', logo: 'https://tavvy.com/favicon-source.png', email: 'support@tavvy.com', contactPoint: { '@type': 'ContactPoint', contactType: 'customer support', email: 'support@tavvy.com' } },
+              { '@type': 'MobileApplication', name: 'Tavvy', operatingSystem: 'iOS', applicationCategory: 'TravelApplication', url: 'https://tavvy.com/', publisher: { '@id': 'https://tavvy.com/#organization' } },
+              { '@type': 'BreadcrumbList', itemListElement: [ { '@type': 'ListItem', position: 1, name: 'Tavvy', item: 'https://tavvy.com/' }, { '@type': 'ListItem', position: 2, name: 'Privacy Policy', item: 'https://tavvy.com/privacy' } ] },
+            ],
+          }) }}
+        />
       </Head>
 
       <div className="legal-page">
@@ -18,12 +30,12 @@ export default function PrivacyPolicy() {
             <img src="/tavvy-logo-white.png" alt="TavvY" style={{ height: 40, marginBottom: 24 }} />
           </Link>
           <h1>Privacy Policy</h1>
-          <p>Last Updated: October 9, 2026</p>
+          <p>Last Updated: November 3, 2026</p>
         </header>
 
         <main className="legal-content">
           <p>
-            Welcome to TavvY! This Privacy Policy explains how TavvY, Inc. ("TavvY", "we", "us", or "our") 
+            Welcome to TavvY! This Privacy Policy explains how Tavvy ("Tavvy", "TavvY", "we", "us", or "our") 
             collects, uses, and discloses information about you when you use our mobile application (the "App") 
             and our related services (collectively, the "Services").
           </p>
@@ -42,6 +54,7 @@ export default function PrivacyPolicy() {
           <ul>
             <li><strong>Account Information:</strong> When you create a TavvY account, we collect your email address and password. You may also choose to provide a full name and profile picture.</li>
             <li><strong>User-Generated Content:</strong> We collect the content you create, including your reviews (taps and signals), photos, and any captions or comments you post.</li>
+            <li><strong>Phone Number:</strong> If you give us your mobile number (for example, to receive account or service text messages), we collect that number and a record of your consent.</li>
             <li><strong>Communications:</strong> If you contact us directly, we may receive additional information about you, such as your name, email address, the contents of the message and/or attachments you may send us, and any other information you may choose to provide.</li>
           </ul>
 
@@ -99,27 +112,42 @@ export default function PrivacyPolicy() {
           <h3>4.3. Cookies</h3>
           <p>We do not use cookies in our mobile application.</p>
 
-          <h2>5. Data Security</h2>
+          <h2 id="sms">5. Text Messages (SMS)</h2>
+          <p>
+            If you give us your mobile number and agree to receive text messages, Tavvy may send you account and
+            service messages, such as sign-in and verification codes, account notices, and replies to your support
+            requests. Message frequency varies. Msg &amp; data rates may apply. Reply STOP to cancel, HELP for help.
+            Consent to receive text messages is not a condition of any purchase.
+          </p>
+          <p>
+            No mobile information will be shared with third parties/affiliates for marketing/promotional purposes. Text messaging originator opt-in data and consent will not be shared with any third parties.
+          </p>
+          <p>
+            We share your mobile number only with the service providers that deliver our messages, and only so they
+            can send them. See the <a href="/terms#sms">SMS / Text Messaging Terms</a> for the full program terms.
+          </p>
+
+          <h2>6. Data Security</h2>
           <p>
             We take reasonable measures to help protect your information from loss, theft, misuse, and unauthorized 
             access, disclosure, alteration, and destruction.
           </p>
 
-          <h2>6. Children's Privacy</h2>
+          <h2>7. Children's Privacy</h2>
           <p>
             Our Services are not intended for children under the age of 13. We do not knowingly collect personal 
             information from children under 13. If we learn that we have collected personal information from a 
             child under 13, we will take steps to delete such information.
           </p>
 
-          <h2>7. Changes to this Privacy Policy</h2>
+          <h2>8. Changes to this Privacy Policy</h2>
           <p>
             We may change this Privacy Policy from time to time. If we make changes, we will notify you by revising 
             the date at the top of the policy and, in some cases, we may provide you with additional notice (such 
             as adding a statement to our homepage or sending you a notification).
           </p>
 
-          <h2>8. Contact Us</h2>
+          <h2>9. Contact Us</h2>
           <p>
             If you have any questions about this Privacy Policy, please contact us at: <a href="mailto:support@tavvy.com">support@tavvy.com</a>
           </p>

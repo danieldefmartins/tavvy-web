@@ -112,6 +112,10 @@ function LocaleManager() {
   return null;
 }
 
+// Static public pages that must be fully server-rendered (legal/A2P review reads the raw HTML).
+// They need no auth or theme state, so they skip the providers that render nothing until hydration.
+const STATIC_PUBLIC_ROUTES = new Set(['/privacy', '/terms']);
+
 function App({ Component, pageProps }: AppProps) {
   useAppNavigationHistory();
   const pageRoute = useRouter().pathname;
@@ -167,6 +171,12 @@ function App({ Component, pageProps }: AppProps) {
       </Head>
       {/* Preview tags must render before providers that wait for client hydration. */}
       {placePreview && <PlaceShareHead metadata={placePreview} />}
+      {STATIC_PUBLIC_ROUTES.has(pageRoute) ? (
+        <>
+          <LocaleManager />
+          <Component {...pageProps} />
+        </>
+      ) : (
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ProAuthProvider>
@@ -177,6 +187,7 @@ function App({ Component, pageProps }: AppProps) {
           </ProAuthProvider>
         </AuthProvider>
       </QueryClientProvider>
+      )}
     </>
   );
 }

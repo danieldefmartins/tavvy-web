@@ -8,8 +8,20 @@ export default function TermsOfService() {
   return (
     <>
       <Head>
-        <title>Terms of Service | TavvY</title>
+        <title>Terms of Service | Tavvy</title>
         <meta name="description" content="TavvY Terms of Service - Rules and guidelines for using our platform." />
+              <link rel="canonical" href="https://tavvy.com/terms" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@graph': [
+              { '@type': 'Organization', '@id': 'https://tavvy.com/#organization', name: 'Tavvy', url: 'https://tavvy.com/', logo: 'https://tavvy.com/favicon-source.png', email: 'support@tavvy.com', contactPoint: { '@type': 'ContactPoint', contactType: 'customer support', email: 'support@tavvy.com' } },
+              { '@type': 'MobileApplication', name: 'Tavvy', operatingSystem: 'iOS', applicationCategory: 'TravelApplication', url: 'https://tavvy.com/', publisher: { '@id': 'https://tavvy.com/#organization' } },
+              { '@type': 'BreadcrumbList', itemListElement: [ { '@type': 'ListItem', position: 1, name: 'Tavvy', item: 'https://tavvy.com/' }, { '@type': 'ListItem', position: 2, name: 'Terms of Service', item: 'https://tavvy.com/terms' } ] },
+            ],
+          }) }}
+        />
       </Head>
 
       <div className="legal-page">
@@ -18,13 +30,13 @@ export default function TermsOfService() {
             <img src="/tavvy-logo-white.png" alt="TavvY" style={{ height: 40, marginBottom: 24 }} />
           </Link>
           <h1>Terms of Service</h1>
-          <p>Last Updated: January 17, 2026</p>
+          <p>Last Updated: November 3, 2026</p>
         </header>
 
         <main className="legal-content">
           <p>
             Welcome to TavvY! These Terms of Service ("Terms") govern your access to and use of the TavvY mobile 
-            application and related services (collectively, the "Services") provided by TavvY, Inc. ("TavvY", "we", 
+            application and related services (collectively, the "Services") provided by Tavvy ("Tavvy", "TavvY", "we", 
             "us", or "our").
           </p>
           <p>
@@ -125,7 +137,24 @@ export default function TermsOfService() {
             revised Terms.
           </p>
 
-          <h2>9. Contact Us</h2>
+          <h2 id="sms">9. SMS / Text Messaging Terms</h2>
+          <p>
+            <strong>Program name:</strong> Tavvy Account Notifications. If you give us your mobile number and agree
+            to receive text messages, Tavvy may send you account and service messages: sign-in and verification
+            codes, account notices, customer care replies, and updates about services you requested.
+          </p>
+          <ul>
+            <li>Message frequency varies. Msg &amp; data rates may apply.</li>
+            <li>Consent to receive text messages is not a condition of any purchase.</li>
+            <li>Reply STOP to cancel, HELP for help.</li>
+            <li>For support, email <a href="mailto:support@tavvy.com">support@tavvy.com</a>.</li>
+            <li>Carriers are not liable for delayed or undelivered messages.</li>
+          </ul>
+          <p>
+            How we handle your mobile number is described in our <a href="/privacy#sms">Privacy Policy</a>.
+          </p>
+
+          <h2>10. Contact Us</h2>
           <p>
             If you have any questions about these Terms, please contact us at: <a href="mailto:support@tavvy.com">support@tavvy.com</a>
           </p>

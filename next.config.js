@@ -71,6 +71,11 @@ const nextConfig = withPWA({
         permanent: false,
       },
       {
+        source: '/privacy-policy',
+        destination: '/privacy',
+        permanent: true,
+      },
+      {
         source: '/card/:slug',
         destination: '/:slug',
         permanent: true,
